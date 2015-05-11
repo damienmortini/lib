@@ -1,0 +1,21 @@
+{
+  "name": "dlib",
+  "version": "0.0.0",
+  "description": "Toolkit for the web",
+  "repository": {
+    "type": "git",
+    "url": "https://dmmn@github.com/dmmn/dlib.git"
+  },
+  "keywords": [
+    "math",
+    "physics",
+    "3d",
+    "toolkit"
+  ],
+  "author": "Damien Mortini",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dmmn/dlib/issues"
+  },
+  "homepage": "https://github.com/dmmn/dlib"
+}

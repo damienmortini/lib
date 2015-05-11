@@ -1,0 +1,26 @@
+{
+  "name": "dlib",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dmmn/dlib",
+  "authors": [
+    "Damien Mortini"
+  ],
+  "description": "Toolkit for the web",
+  "moduleType": [
+    "es6"
+  ],
+  "keywords": [
+    "math",
+    "physics",
+    "3d",
+    "toolkit"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
