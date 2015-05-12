@@ -5,9 +5,13 @@ export default class CustomElement extends HTMLElement {
       this.createShadowRoot().appendChild(templateClone);
     }
   }
+
   attachedCallback() {}
+
   detachedCallback() {}
+
   attributeChangedCallback(attr, oldVal, newVal) {}
+
   static register(name, template) {
     document.registerElement(name, {
       prototype: Object.create(this.prototype, {
