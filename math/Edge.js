@@ -7,6 +7,10 @@ export default class Edge {
     return this;
   }
 
+  get angle() {
+    return Math.atan2(this.a.y - this.b.y, this.b.x - this.a.x);
+  }
+
   getCenter() {
     return this.getPointFromRatio(.5);
   }
