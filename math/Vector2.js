@@ -5,7 +5,11 @@ export default class Vector2 {
     return this;
   }
 
-  set (x = this.x, y = this.y) {
+  get length () {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
+
+  set (x, y) {
     this.x = x;
     this.y = y;
     return this;
@@ -21,6 +25,22 @@ export default class Vector2 {
     this.x += vector2.x;
     this.y += vector2.y;
     return this;
+  }
+
+  normalize() {
+    this.divideScalar(this.length);
+  }
+
+  divideScalar (scalar) {
+    if ( scalar !== 0 ) {
+      let invScalar = 1 / scalar;
+			this.x *= invScalar;
+			this.y *= invScalar;
+		} else {
+			this.x = 0;
+			this.y = 0;
+		}
+		return this;
   }
 
   dot (vector2) {
