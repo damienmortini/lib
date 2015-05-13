@@ -22,7 +22,7 @@ export default class SubstrateSystem {
   addBoid (x, y, velocityAngle, offsetAngle, life) {
     let boid = new Boid(x, y, velocityAngle, offsetAngle, life);
     let edge = new SubstrateEdge(new Vector2(boid.x, boid.y), new Vector2(boid.x, boid.y), boid);
-    edge.id = this.edges.length ? this.edges[this.edges.length - 1].id + 1 : 0;
+    edge.id = this.edges.length ? this.edges[this.edges.length - 1].id + 1 : 1;
     this.edges.push(edge);
     return edge;
   }
@@ -31,8 +31,11 @@ export default class SubstrateSystem {
     let polygon = new SubstratePolygon(vertices);
     polygon.id = this.polygons.length ? this.polygons[this.polygons.length - 1].id + 1 : 0;
     this.polygons.push(polygon);
-    return false;
+    this.polygonAddedCallback(polygon);
+    return polygon;
   }
+
+  polygonAddedCallback (polygon) {}
 
   update () {
     for (let i = 0; i < this.speed; i++) {
@@ -49,7 +52,7 @@ export default class SubstrateSystem {
           continue;
         }
 
-        let position = Math.floor(edge.b.x) + this.width * Math.floor(edge.b.y);
+        let position = Math.round(edge.b.x) + this.width * Math.round(edge.b.y);
 
         let pixelId = this.data[position];
         let edgeId = i + 1;
@@ -59,6 +62,10 @@ export default class SubstrateSystem {
           this.splitEdge(edge, pixelId);
         }
         else {
+          // for (let i = -2; i < 3; i++) {
+            // let position = Math.round(edge.boid.x + edge.boid.velocity.y * i * .33) + this.width * Math.round(edge.boid.y + -edge.boid.velocity.x * i * .33);
+            // this.data[position] = edgeId;
+          // }
           this.data[position] = edgeId;
         }
 
@@ -138,39 +145,44 @@ export default class SubstrateSystem {
       }
     }
 
-    let sweepPosition = Math.floor(sweepBoid.x) + this.width * Math.floor(sweepBoid.y);
-    while (this.data[Math.floor(sweepBoid.x) + this.width * Math.floor(sweepBoid.y)] === edgeId) {
+    let sweepSecurityMargin = 0;
+    while (sweepSecurityMargin < 100) {
+      for (let i = -4; i < 5; i++) {
+        let sweepPosition = Math.round(sweepBoid.x + sweepBoid.velocity.y * i * .33) + this.width * Math.round(sweepBoid.y - sweepBoid.velocity.x * i * .33);
+        if(this.data[sweepPosition] === oldEdge.id) {
+          this.data[sweepPosition] = newEdge.id;
+          sweepSecurityMargin = 0;
+        }
+      }
       sweepBoid.update();
-      this.data[sweepPosition] = this.edges.length;
-      sweepPosition = Math.floor(sweepBoid.x) + this.width * Math.floor(sweepBoid.y);
+      sweepSecurityMargin++;
     }
 
-    let nextEdge = edge.next;
-    let vertices = [new Vector2(edge.b.x, edge.b.y)];
+    if(collided) {
+      this.polygonCheck(edge);
+      this.polygonCheck(edge.twin);
+    }
+  }
+
+  polygonCheck (startEdge) {
+    let edge = startEdge;
+    let vertices = [new Vector2(edge.a.x, edge.a.y)];
     for (let i = 0; i < 100; i++) {
-      if (nextEdge.next === nextEdge.twin) {
+      if (edge.next === edge.twin) {
         break;
       }
-      vertices.push(new Vector2(nextEdge.b.x, nextEdge.b.y));
-      if (nextEdge === edge) {
+      // if (Math.abs(edge.angle - edge.next.angle) > .01) {
+      //   vertices.push(new Vector2(edge.b.x, edge.b.y));
+      // }
+      // else {
+      //   console.log(edge.angle - edge.next.angle);
+      // }
+      vertices.push(new Vector2(edge.b.x, edge.b.y));
+      edge = edge.next;
+      if (edge === startEdge) {
         this.addPolygon(vertices);
         break;
       }
-      nextEdge = nextEdge.next;
-    }
-
-    nextEdge = edge.twin.next;
-    vertices = [new Vector2(edge.twin.b.x, edge.twin.b.y)];
-    for (let i = 0; i < 100; i++) {
-      if (nextEdge.next === nextEdge.twin) {
-        break;
-      }
-      vertices.push(new Vector2(nextEdge.b.x, nextEdge.b.y));
-      if (nextEdge === edge.twin) {
-        this.addPolygon(vertices);
-        break;
-      }
-      nextEdge = nextEdge.next;
     }
   }
 }
