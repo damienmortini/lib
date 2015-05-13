@@ -1,3 +1,5 @@
+import Vector3 from "../math/Vector3";
+
 export default class SubstrateDebugRenderer {
   constructor(substrateSystem, {canvas = document.createElement("canvas"), edgesDebug = false, polygonsDebug = false}) {
     this.substrateSystem = substrateSystem;
@@ -9,6 +11,8 @@ export default class SubstrateDebugRenderer {
     this.canvas.height = this.substrateSystem.height;
     this.context = canvas.getContext("2d");
 
+    this._cachedVector3 = new Vector3();
+
     this.imageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
   }
 
@@ -19,7 +23,14 @@ export default class SubstrateDebugRenderer {
     }
     else {
       for (let i = 0; i < this.substrateSystem.data.length; i++) {
-        this.imageData.data[i * 4 + 3] = this.substrateSystem.data[i] !== 0 ? 255 : 0;
+        let id = this.substrateSystem.data[i];
+        if (id !== 0) {
+          let debugColor = this.getDebugColor(id, this._cachedVector3);
+          this.imageData.data[i * 4] = debugColor.x;
+          this.imageData.data[i * 4 + 1] = debugColor.y;
+          this.imageData.data[i * 4 + 2] = debugColor.z;
+          this.imageData.data[i * 4 + 3] = 255;
+        }
       }
       this.context.putImageData(this.imageData, 0, 0);
     }
@@ -33,7 +44,7 @@ export default class SubstrateDebugRenderer {
     for (let i = 0; i < this.substrateSystem.edges.length; i++) {
       let edge = this.substrateSystem.edges[i];
 
-      let debugColor = this.getDebugColor(edge.id);
+      let debugColor = this.getDebugColor(edge.id, this._cachedVector3);
 
       this.context.strokeStyle = `rgb(${debugColor.r}, ${debugColor.g}, ${debugColor.b})`;
 
@@ -74,7 +85,7 @@ export default class SubstrateDebugRenderer {
     for (let i = 0; i < this.substrateSystem.polygons.length; i++) {
       let polygon = this.substrateSystem.polygons[i];
 
-      let debugColor = this.getDebugColor(polygon.id);
+      let debugColor = this.getDebugColor(polygon.id, this._cachedVector3);
       this.context.fillStyle = `rgba(${debugColor.r}, ${debugColor.g}, ${debugColor.b}, .5)`;
 
       this.context.beginPath();
@@ -89,11 +100,11 @@ export default class SubstrateDebugRenderer {
     }
   }
 
-  getDebugColor (id) {
+  getDebugColor (id, outVector = new Vector3()) {
     let moduloId = id % 6;
     let r = (moduloId === 1 || moduloId === 4 || moduloId === 6) ? 255 : 0;
     let g = (moduloId === 2 || moduloId === 4 || moduloId === 5) ? 220 : 0;
     let b = (moduloId === 3 || moduloId === 5 || moduloId === 6) ? 255 : 0;
-    return {r, g, b};
+    return outVector.set(r, g, b);
   }
 }
