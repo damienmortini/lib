@@ -1,40 +1,55 @@
 import Vector2 from "../math/Vector2";
 
-export default class Particle extends Vector2 {
-  constructor(x = 0, y = 0, velocityX = 0, velocityY = 0, life = Infinity) {
-    super(x, y);
-    this.velocity = new Vector2(velocityX, velocityY);
+export default class Particle {
+  constructor(x = 0, y = 0, life = Infinity) {
+    this.position = new Vector2(x, y);
+    this.velocity = new Vector2();
     this.life = life;
     this.currentLife = this.life;
-    this.isDead = false;
+    this._isDead = false;
     return this;
   }
 
-  set (x = this.x, y = this.y, velocityX = this.velocity.x, velocityY = this.velocity.y, life = this.life) {
-    super.set(x, y);
-    this.velocity.set(velocityX, velocityY);
+  get isDead () {
+    return this._isDead;
+  }
+
+  set (x = this.x, y = this.y, life = this.life) {
+    this.position.set(x, y);
     this.life = life;
     return this;
   }
 
-  reset (x = this.x, y = this.y, velocityX = this.velocity.x, velocityY = this.velocity.y, life = this.life) {
+  reset (x = this.x, y = this.y, life = this.life) {
     this.set(...arguments);
     this.currentLife = this.life;
-    this.isDead = false;
+    this._isDead = false;
     return this;
+  }
+
+  copy (particle) {
+    this.position.copy(particle.position);
+    this.velocity.copy(particle.velocity);
+    this.life = particle.life;
+    this.currentLife = particle.currentLife;
+    this._isDead = particle.isDead;
   }
 
   kill () {
-    this.isDead = true;
+    this._isDead = true;
+  }
+
+  relive () {
+    this._isDead = false;
   }
 
   update () {
-    if (this.isDead) {
+    if (this._isDead) {
       return this;
     }
-    this.add(this.velocity);
+    this.position.add(this.velocity);
     this.currentLife--;
-    if(this.currentLife === 0) {
+    if(this.currentLife < 1) {
       this.kill();
     }
     return this;

@@ -47,6 +47,10 @@ export default class Vector2 {
     return this.x * vector2.x + this.y * vector2.y;
   }
 
+  setFromAngle (angle) {
+    this.set(Math.cos(angle), -Math.sin(angle));
+  }
+
   angleTo (vector2) {
     return Math.atan2( this.x * vector2.y - this.y * vector2.x, this.x * vector2.x + this.y * vector2.y );
   }

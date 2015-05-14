@@ -1,4 +1,4 @@
-import Boid from "./Boid";
+import Particle from "../physics/Particle";
 import Vector2 from "../math/Vector2";
 import SubstratePolygon from "./SubstratePolygon";
 import SubstrateEdge from "./SubstrateEdge";
@@ -19,11 +19,12 @@ export default class SubstrateSystem {
     this.data = new Uint32Array(this.width * this.height);
   }
 
-  addBoid (x, y, velocityAngle, offsetAngle, life) {
-    let boid = new Boid(x, y, velocityAngle, offsetAngle, life);
-    let edge = new SubstrateEdge(new Vector2(boid.x, boid.y), new Vector2(boid.x, boid.y), boid);
-    edge.id = this.edges.length ? this.edges[this.edges.length - 1].id + 1 : 1;
+  spawnEdge (x, y, velocityAngle, life) {
+    let particle = new Particle(x, y, life);
+    particle.velocity.setFromAngle(velocityAngle);
+    let edge = new SubstrateEdge(new Vector2(x, y), particle);
     this.edges.push(edge);
+    edge.id = this.edges.length;
     return edge;
   }
 
@@ -39,34 +40,32 @@ export default class SubstrateSystem {
 
   update () {
     for (let i = 0; i < this.speed; i++) {
-      for (let i = 0; i < this.edges.length; i++) {
-        let edge = this.edges[i];
+      for (let edge of this.edges) {
         if (edge.boid.isDead) {
           continue;
         }
 
-        edge.update();
+        edge.boid.update();
 
-        if (edge.boid.x < 0 || edge.boid.x > this.width || edge.boid.y < 0 || edge.boid.y > this.height) {
+        if (edge.boid.position.x <= 0 || edge.boid.position.x >= this.width || edge.boid.position.y <= 0 || edge.boid.position.y >= this.height) {
           edge.boid.kill();
           continue;
         }
 
-        let position = Math.round(edge.b.x) + this.width * Math.round(edge.b.y);
+        let position = Math.floor(edge.boid.position.x) + this.width * Math.floor(edge.boid.position.y);
 
         let pixelId = this.data[position];
-        let edgeId = i + 1;
 
-        if (pixelId && pixelId !== edgeId) {
+        if (pixelId && pixelId !== edge.id) {
           edge.boid.kill();
-          this.splitEdge(edge, pixelId);
+          this.splitEdgeWithEdge(this.getEdgeById(pixelId), edge);
         }
         else {
           // for (let i = -2; i < 3; i++) {
-            // let position = Math.round(edge.boid.x + edge.boid.velocity.y * i * .33) + this.width * Math.round(edge.boid.y + -edge.boid.velocity.x * i * .33);
-            // this.data[position] = edgeId;
+            // let position = Math.floor(edge.boid.position.x + edge.boid.velocity.y * i * .33) + this.width * Math.floor(edge.boid.position.y + -edge.boid.velocity.x * i * .33);
+            // this.data[position] = edge.id;
           // }
-          this.data[position] = edgeId;
+          this.data[position] = edge.id;
         }
 
         // Add new edge
@@ -78,33 +77,36 @@ export default class SubstrateSystem {
           else {
             velocityAngle = edge.boid.velocityAngle + this.spawnOptions.velocityAngle;
           }
-          let newEdge = this.addBoid(edge.b.x, edge.b.y, velocityAngle, 0, edge.boid.life);
-          this.splitEdge(newEdge, edgeId, true);
+          let spawnEdge = this.spawnEdge(edge.boid.position.x, edge.boid.position.y, velocityAngle, edge.boid.life);
+          this.splitEdgeWithEdge(edge, spawnEdge, true);
         }
       }
     }
   }
 
-  splitEdge (edge, edgeId) {
-    let oldEdge = this.edges[edgeId - 1];
+  getEdgeById (id) {
+    return this.edges[id - 1];
+  }
 
-    let angle = oldEdge.boid.velocity.angleTo(edge.boid.velocity);
-
+  splitEdgeWithEdge (splittedEdge, edge) {
+    let angle = splittedEdge.boid.velocity.angleTo(edge.boid.velocity);
     let isMainEdge = angle > 0;
 
-    let sweepBoid = new Boid(edge.b.x, edge.b.y, oldEdge.boid.velocityAngle, oldEdge.boid.offsetAngle);
+    let sweepBoid = new Particle(edge.b.x, edge.b.y);
+    sweepBoid.velocity.copy(splittedEdge.boid.velocity);
     sweepBoid.update();
 
-    let newEdge = this.addBoid(oldEdge.boid.x, oldEdge.boid.y, oldEdge.boid.velocityAngle, oldEdge.boid.offsetAngle, oldEdge.boid.life);
+    let newEdge = this.spawnEdge(sweepBoid.position.x, sweepBoid.position.y);
+    newEdge.boid.copy(splittedEdge.boid);
 
-    if (oldEdge.boid.isDead) {
+    if (splittedEdge.boid.isDead) {
       newEdge.boid.kill();
     }
     else {
-      oldEdge.boid.kill();
+      splittedEdge.boid.kill();
     }
-    newEdge.a.copy(sweepBoid);
-    oldEdge.b.copy(edge.b);
+
+    splittedEdge.b.copy(edge.b);
 
     // Detect if spawned or collided
     let collided = edge.boid.isDead;
@@ -113,46 +115,48 @@ export default class SubstrateSystem {
       isMainEdge = !isMainEdge;
     }
 
-    if (oldEdge.next !== oldEdge.twin) {
-      newEdge.next = oldEdge.next;
+
+    if (splittedEdge.next !== splittedEdge.twin) {
+      newEdge.next = splittedEdge.next;
       newEdge.next.twin.next.twin.next = newEdge.twin;
     }
 
     if (isMainEdge) {
-      newEdge.twin.next = oldEdge.twin;
+      newEdge.twin.next = splittedEdge.twin;
       if (collided) {
-        // console.log("main collided - " + edge.id + ' with ' + oldEdge.id);
+        console.log("main collided - " + edge.id + ' with ' + splittedEdge.id);
         edge.next = newEdge;
-        oldEdge.next = edge.twin;
+        splittedEdge.next = edge.twin;
       }
       else {
-        // console.log("main spawned - " + edge.id + ' with ' + oldEdge.id);
+        console.log("main spawned - " + edge.id + ' with ' + splittedEdge.id);
         edge.twin.next = newEdge;
-        oldEdge.next = edge;
+        splittedEdge.next = edge;
       }
     }
     else {
-      oldEdge.next = newEdge;
+      splittedEdge.next = newEdge;
       if (collided) {
-        // console.log("twin collided - " + edge.id + ' with ' + oldEdge.id);
-        edge.next = oldEdge.twin;
+        console.log("twin collided - " + edge.id + ' with ' + splittedEdge.id);
+        edge.next = splittedEdge.twin;
         newEdge.twin.next = edge.twin;
       }
       else {
-        // console.log("twin spawned - " + edge.id + ' with ' + oldEdge.id);
+        console.log("twin spawned - " + edge.id + ' with ' + splittedEdge.id);
         newEdge.twin.next = edge;
-        edge.twin.next = oldEdge.twin;
+        edge.twin.next = splittedEdge.twin;
       }
     }
 
     let sweepSecurityMargin = 0;
     while (sweepSecurityMargin < 100) {
       for (let i = -4; i < 5; i++) {
-        let sweepPosition = Math.round(sweepBoid.x + sweepBoid.velocity.y * i * .33) + this.width * Math.round(sweepBoid.y - sweepBoid.velocity.x * i * .33);
-        if(this.data[sweepPosition] === oldEdge.id) {
+        let sweepPosition = Math.floor(sweepBoid.position.x + sweepBoid.velocity.y * i * .33) + this.width * Math.floor(sweepBoid.position.y - sweepBoid.velocity.x * i * .33);
+        if(this.data[sweepPosition] === splittedEdge.id) {
           this.data[sweepPosition] = newEdge.id;
           sweepSecurityMargin = 0;
         }
+        // this.data[sweepPosition] = newEdge.id;
       }
       sweepBoid.update();
       sweepSecurityMargin++;
@@ -172,7 +176,7 @@ export default class SubstrateSystem {
         break;
       }
       // if (Math.abs(edge.angle - edge.next.angle) > .01) {
-      //   vertices.push(new Vector2(edge.b.x, edge.b.y));
+      //   vertices.push(new Vector2(edge.boid.position.x, edge.boid.position.y));
       // }
       // else {
       //   console.log(edge.angle - edge.next.angle);
