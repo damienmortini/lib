@@ -35,14 +35,23 @@ export default class Vector2 {
     this.divideScalar(this.length);
   }
 
+  addScalar (scalar) {
+    this.x += scalar;
+    this.y += scalar;
+    return this;
+  }
+
+  multiplyScalar (scalar) {
+    this.x *= scalar;
+    this.y *= scalar;
+    return this;
+  }
+
   divideScalar (scalar) {
     if ( scalar !== 0 ) {
-      let invScalar = 1 / scalar;
-			this.x *= invScalar;
-			this.y *= invScalar;
+      this.multiplyScalar(1 / scalar);
 		} else {
-			this.x = 0;
-			this.y = 0;
+			this.set(0, 0);
 		}
 		return this;
   }
