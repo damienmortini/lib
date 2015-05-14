@@ -46,7 +46,7 @@ export default class SubstrateDebugRenderer {
 
       let debugColor = this.getDebugColor(edge.id, this._cachedVector3);
 
-      this.context.strokeStyle = `rgb(${debugColor.r}, ${debugColor.g}, ${debugColor.b})`;
+      this.context.strokeStyle = `rgb(${debugColor.x}, ${debugColor.y}, ${debugColor.z})`;
 
       this.context.beginPath();
       this.context.setLineDash([]);
@@ -86,7 +86,7 @@ export default class SubstrateDebugRenderer {
       let polygon = this.substrateSystem.polygons[i];
 
       let debugColor = this.getDebugColor(polygon.id, this._cachedVector3);
-      this.context.fillStyle = `rgba(${debugColor.r}, ${debugColor.g}, ${debugColor.b}, .5)`;
+      this.context.fillStyle = `rgba(${debugColor.x}, ${debugColor.y}, ${debugColor.z}, .5)`;
 
       this.context.beginPath();
       let vertex = polygon.vertices[0];
