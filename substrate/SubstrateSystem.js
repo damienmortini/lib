@@ -149,7 +149,7 @@ export default class SubstrateSystem {
     }
 
     let sweepSecurityMargin = 0;
-    while (sweepSecurityMargin < 100) {
+    while (sweepSecurityMargin < 3) {
       for (let i = -4; i < 5; i++) {
         let sweepPosition = Math.floor(sweepBoid.position.x + sweepBoid.velocity.y * i * .33) + this.width * Math.floor(sweepBoid.position.y - sweepBoid.velocity.x * i * .33);
         if(this.data[sweepPosition] === splittedEdge.id) {
@@ -174,15 +174,11 @@ export default class SubstrateSystem {
       if (edge.next === edge.twin) {
         break;
       }
-      // if (Math.abs(edge.angle - edge.next.angle) > .01) {
-      //   vertices.push(new Vector2(edge.boid.position.x, edge.boid.position.y));
-      // }
-      // else {
-      //   console.log(edge.angle - edge.next.angle);
-      // }
-      vertices.push(new Vector2(edge.b.x, edge.b.y));
+      if (Math.abs(edge.angle - edge.next.angle) > .1) {
+        vertices.push(new Vector2(edge.b.x, edge.b.y));
+      }
       edge = edge.next;
-      if (edge === startEdge) {
+      if (edge.next === startEdge) {
         this.addPolygon(vertices);
         break;
       }
