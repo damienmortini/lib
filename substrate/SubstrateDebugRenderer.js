@@ -91,7 +91,7 @@ export default class SubstrateDebugRenderer {
       this.context.beginPath();
       let vertex = polygon.vertices[0];
       this.context.moveTo(vertex.x, vertex.y);
-      for (let i = 1; i < polygon.vertices.length - 1; i++) {
+      for (let i = 1; i < polygon.vertices.length; i++) {
         vertex = polygon.vertices[i];
         this.context.lineTo(vertex.x, vertex.y);
       }
