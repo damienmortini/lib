@@ -72,10 +72,10 @@ export default class SubstrateSystem {
         if(Math.random() < this.spawnProbabilityRatio) {
           let velocityAngle;
           if(this.spawnOptions.velocityAngle === undefined) {
-            velocityAngle = Math.pow(Math.random(), 100) * (Math.random() > 0.5 ? 1 : -1) + edge.boid.velocityAngle + Math.PI * 0.5 * (Math.random() > 0.5 ? 1 : -1);
+            velocityAngle = Math.pow(Math.random(), 100) * (Math.random() > 0.5 ? 1 : -1) + edge.boid.velocity.angle + Math.PI * 0.5 * (Math.random() > 0.5 ? 1 : -1);
           }
           else {
-            velocityAngle = edge.boid.velocityAngle + this.spawnOptions.velocityAngle;
+            velocityAngle = edge.boid.velocity.angle + this.spawnOptions.velocityAngle;
           }
           let spawnEdge = this.spawnEdge(edge.boid.position.x, edge.boid.position.y, velocityAngle, edge.boid.life);
           this.splitEdgeWithEdge(edge, spawnEdge, true);
@@ -124,12 +124,12 @@ export default class SubstrateSystem {
     if (isMainEdge) {
       newEdge.twin.next = splittedEdge.twin;
       if (collided) {
-        console.log("main collided - " + edge.id + ' with ' + splittedEdge.id);
+        // console.log("main collided - " + edge.id + ' with ' + splittedEdge.id);
         edge.next = newEdge;
         splittedEdge.next = edge.twin;
       }
       else {
-        console.log("main spawned - " + edge.id + ' with ' + splittedEdge.id);
+        // console.log("main spawned - " + edge.id + ' with ' + splittedEdge.id);
         edge.twin.next = newEdge;
         splittedEdge.next = edge;
       }
@@ -137,12 +137,12 @@ export default class SubstrateSystem {
     else {
       splittedEdge.next = newEdge;
       if (collided) {
-        console.log("twin collided - " + edge.id + ' with ' + splittedEdge.id);
+        // console.log("twin collided - " + edge.id + ' with ' + splittedEdge.id);
         edge.next = splittedEdge.twin;
         newEdge.twin.next = edge.twin;
       }
       else {
-        console.log("twin spawned - " + edge.id + ' with ' + splittedEdge.id);
+        // console.log("twin spawned - " + edge.id + ' with ' + splittedEdge.id);
         newEdge.twin.next = edge;
         edge.twin.next = splittedEdge.twin;
       }
@@ -156,7 +156,6 @@ export default class SubstrateSystem {
           this.data[sweepPosition] = newEdge.id;
           sweepSecurityMargin = 0;
         }
-        // this.data[sweepPosition] = newEdge.id;
       }
       sweepBoid.update();
       sweepSecurityMargin++;
