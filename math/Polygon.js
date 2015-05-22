@@ -6,10 +6,8 @@ export default class Polygon {
   }
 
   copy(polygon) {
-    this.vertices = [];
-    for(let vertex of polygon.vertices) {
-      this.vertices.push(new Vector2().copy(vertex));
-    }
+    this.vertices.length = 0;
+    this.vertices.push(...polygon.vertices);
     return this;
   }
 }
