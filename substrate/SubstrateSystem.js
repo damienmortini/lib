@@ -19,6 +19,14 @@ export default class SubstrateSystem {
     this.data = new Uint32Array(this.width * this.height);
   }
 
+  clear() {
+    for (var i = 0; i < this.data.length; i++) {
+      this.data[i] = 0;
+    }
+    this.edges.length = 0;
+    this.polygons.length = 0;
+  }
+
   spawnEdge (x, y, velocityAngle, life) {
     let particle = new Particle(x, y, life);
     particle.velocity.setFromAngle(velocityAngle);
@@ -114,7 +122,6 @@ export default class SubstrateSystem {
     if(collided) {
       isMainEdge = !isMainEdge;
     }
-
 
     if (splittedEdge.next !== splittedEdge.twin) {
       newEdge.next = splittedEdge.next;
