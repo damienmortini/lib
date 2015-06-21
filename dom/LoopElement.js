@@ -3,32 +3,18 @@ import CustomElement from "./CustomElement";
 export default class LoopElement extends CustomElement {
   createdCallback() {
     super.createdCallback();
+    this._updateBinded = this.update.bind(this);
   }
-
   attachedCallback() {
     this.start();
-    if(!document.hasFocus()) {
-      this.stop();
-    }
-    window.addEventListener("blur", this);
-    window.addEventListener("focus", this);
+    window.addEventListener("blur", this._stopBinded = this.stop.bind(this));
+    window.addEventListener("focus", this._startBinded = this.start.bind(this));
   }
 
   detachedCallback() {
     this.stop();
-    window.removeEventListener("blur", this);
-    window.removeEventListener("focus", this);
-  }
-
-  handleEvent (event) {
-    switch(event.type) {
-      case "focus":
-        this.start();
-        break;
-      case "blur":
-        this.stop();
-        break;
-    }
+    window.removeEventListener("blur", this._stopBinded);
+    window.removeEventListener("focus", this._startBinded);
   }
 
   start() {
@@ -41,6 +27,6 @@ export default class LoopElement extends CustomElement {
   }
 
   update() {
-    this._requestAnimationFrameId = requestAnimationFrame(this.update.bind(this));
+    this._requestAnimationFrameId = requestAnimationFrame(this._updateBinded);
   }
 }
