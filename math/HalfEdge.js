@@ -13,6 +13,10 @@ export default class HalfEdge extends TwinEdge {
   constructor(a, b) {
     super(a, b);
     this.twin = new TwinEdge(b, a);
+    this.reset();
+    return this;
+  }
+  reset() {
     this.next = this.twin;
     this.twin.next = this;
     this.twin.twin = this;

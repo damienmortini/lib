@@ -4,14 +4,24 @@ import SubstratePolygon from "./SubstratePolygon";
 import SubstrateEdge from "./SubstrateEdge";
 
 export default class SubstrateSystem {
-  constructor(width, height, {speed = 1, spawnProbabilityRatio = 0.1, spawnOptions = {}}) {
+  constructor(width, height, {speed = 1, maxEdges = Infinity, spawnProbabilityRatio = 0.1, spawnOptions = {}}) {
 
     this.edges = [];
+    this.edgesPool = [];
     this.polygons = [];
 
     this.speed = speed;
     this.spawnProbabilityRatio = spawnProbabilityRatio;
+    this.maxEdges = maxEdges;
     this.spawnOptions = spawnOptions;
+
+    this._sweepBoid = new Particle();
+
+    if (this.maxEdges < Infinity) {
+      for (let i = 0; i < this.maxEdges; i++) {
+        this.edgesPool.push(new SubstrateEdge(new Vector2(), new Particle()));
+      }
+    }
 
     this.width = width;
     this.height = height;
@@ -20,17 +30,25 @@ export default class SubstrateSystem {
   }
 
   clear() {
-    for (var i = 0; i < this.data.length; i++) {
+    for (let i = 0; i < this.data.length; i++) {
       this.data[i] = 0;
     }
-    this.edges.length = 0;
+    while(this.edges.length) {
+      let edge = this.edges.pop();
+      edge.reset();
+      this.edgesPool.push(edge);
+    }
     this.polygons.length = 0;
   }
 
   spawnEdge (x, y, velocityAngle, life) {
-    let particle = new Particle(x, y, life);
-    particle.velocity.setFromAngle(velocityAngle);
-    let edge = new SubstrateEdge(new Vector2(x, y), particle);
+    let edge = this.edgesPool.pop();
+    if(!edge) {
+      edge = new SubstrateEdge(new Vector2(), new Particle())
+    }
+    edge.a.set(x, y);
+    edge.boid.reset(x, y, life);
+    edge.boid.velocity.setFromAngle(velocityAngle);
     this.edges.push(edge);
     edge.id = this.edges.length;
     return edge;
@@ -48,7 +66,8 @@ export default class SubstrateSystem {
 
   update () {
     for (let i = 0; i < this.speed; i++) {
-      for (let edge of this.edges) {
+      for (let i = 0; i < this.edges.length; i++) {
+        let edge = this.edges[i];
         if (edge.boid.isDead) {
           continue;
         }
@@ -77,7 +96,7 @@ export default class SubstrateSystem {
         }
 
         // Add new edge
-        if(Math.random() < this.spawnProbabilityRatio) {
+        if(this.edges.length < this.maxEdges && Math.random() < this.spawnProbabilityRatio) {
           let velocityAngle;
           if(this.spawnOptions.velocityAngle === undefined) {
             velocityAngle = Math.pow(Math.random(), 100) * (Math.random() > 0.5 ? 1 : -1) + edge.boid.velocity.angle + Math.PI * 0.5 * (Math.random() > 0.5 ? 1 : -1);
@@ -100,11 +119,11 @@ export default class SubstrateSystem {
     let angle = splittedEdge.boid.velocity.angleTo(edge.boid.velocity);
     let isMainEdge = angle > 0;
 
-    let sweepBoid = new Particle(edge.b.x, edge.b.y);
-    sweepBoid.velocity.copy(splittedEdge.boid.velocity);
-    sweepBoid.update();
+    this._sweepBoid.reset(edge.b.x, edge.b.y);
+    this._sweepBoid.velocity.copy(splittedEdge.boid.velocity);
+    this._sweepBoid.update();
 
-    let newEdge = this.spawnEdge(sweepBoid.position.x, sweepBoid.position.y);
+    let newEdge = this.spawnEdge(this._sweepBoid.position.x, this._sweepBoid.position.y);
     newEdge.boid.copy(splittedEdge.boid);
 
     if (splittedEdge.boid.isDead) {
@@ -158,13 +177,13 @@ export default class SubstrateSystem {
     let sweepSecurityMargin = 0;
     while (sweepSecurityMargin < 3) {
       for (let i = -4; i < 5; i++) {
-        let sweepPosition = Math.floor(sweepBoid.position.x + sweepBoid.velocity.y * i * .33) + this.width * Math.floor(sweepBoid.position.y - sweepBoid.velocity.x * i * .33);
+        let sweepPosition = Math.floor(this._sweepBoid.position.x + this._sweepBoid.velocity.y * i * .33) + this.width * Math.floor(this._sweepBoid.position.y - this._sweepBoid.velocity.x * i * .33);
         if(this.data[sweepPosition] === splittedEdge.id) {
           this.data[sweepPosition] = newEdge.id;
           sweepSecurityMargin = 0;
         }
       }
-      sweepBoid.update();
+      this._sweepBoid.update();
       sweepSecurityMargin++;
     }
 

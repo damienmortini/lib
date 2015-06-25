@@ -13,19 +13,19 @@ export default class Vector2 {
     return Math.atan2(this.y, -this.x);
   }
 
-  set (x, y) {
+  set(x, y) {
     this.x = x;
     this.y = y;
     return this;
   }
 
-  copy (vector2) {
+  copy(vector2) {
     this.x = vector2.x;
     this.y = vector2.y;
     return this;
   }
 
-  add (vector2) {
+  add(vector2) {
     this.x += vector2.x;
     this.y += vector2.y;
     return this;
@@ -35,19 +35,19 @@ export default class Vector2 {
     this.divideScalar(this.length);
   }
 
-  addScalar (scalar) {
+  addScalar(scalar) {
     this.x += scalar;
     this.y += scalar;
     return this;
   }
 
-  multiplyScalar (scalar) {
+  multiplyScalar(scalar) {
     this.x *= scalar;
     this.y *= scalar;
     return this;
   }
 
-  divideScalar (scalar) {
+  divideScalar(scalar) {
     if ( scalar !== 0 ) {
       this.multiplyScalar(1 / scalar);
 		} else {
@@ -56,15 +56,15 @@ export default class Vector2 {
 		return this;
   }
 
-  dot (vector2) {
+  dot(vector2) {
     return this.x * vector2.x + this.y * vector2.y;
   }
 
-  setFromAngle (angle) {
+  setFromAngle(angle) {
     this.set(Math.cos(angle), -Math.sin(angle));
   }
 
-  angleTo (vector2) {
+  angleTo(vector2) {
     return Math.atan2( this.x * vector2.y - this.y * vector2.x, this.x * vector2.x + this.y * vector2.y );
   }
 }
