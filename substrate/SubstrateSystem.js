@@ -196,9 +196,13 @@ export default class SubstrateSystem {
         return;
       }
       edge = edge.next;
-      if (edge.next === startEdge) {
+      if (edge === startEdge) {
         edgesNumber = i;
       }
+    }
+
+    if (!edgesNumber) {
+      return;
     }
 
     let vertices = [new Vector2(edge.a.x, edge.a.y)];
@@ -208,6 +212,7 @@ export default class SubstrateSystem {
       }
       edge = edge.next;
     }
+
     this.addPolygon(vertices);
   }
 }
