@@ -5,8 +5,8 @@ export default class LoopElement extends CustomElement {
     super.createdCallback();
     this._updateBinded = this.update.bind(this);
   }
+
   attachedCallback() {
-    this.start();
     window.addEventListener("blur", this._stopBinded = this.stop.bind(this));
     window.addEventListener("focus", this._startBinded = this.start.bind(this));
   }
