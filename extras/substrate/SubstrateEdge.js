@@ -1,4 +1,4 @@
-import HalfEdge from "../math/HalfEdge";
+import HalfEdge from "../../math/HalfEdge";
 
 export default class SubstrateEdge extends HalfEdge {
   constructor(a, boid) {

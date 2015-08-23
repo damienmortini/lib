@@ -1,4 +1,4 @@
-import Vector3 from "../math/Vector3";
+import Vector3 from "../../math/Vector3";
 
 export default class SubstrateDebugRenderer {
   constructor(substrateSystem, {canvas = document.createElement("canvas"), edgesDebug = false, polygonsDebug = false}) {

@@ -1,5 +1,5 @@
-import Particle from "../physics/Particle";
-import Vector2 from "../math/Vector2";
+import Particle from "../../physics/Particle";
+import Vector2 from "../../math/Vector2";
 import SubstratePolygon from "./SubstratePolygon";
 import SubstrateEdge from "./SubstrateEdge";
 
