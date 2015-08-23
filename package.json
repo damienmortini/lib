@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/dmmn/dlib/issues"
   },
-  "homepage": "https://github.com/dmmn/dlib"
+  "homepage": "https://github.com/dmmn/dlib",
+  "dependencies": {
+    "gl-matrix": "^2.3.1"
+  }
 }
