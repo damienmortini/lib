@@ -4,6 +4,8 @@ float ratio;
 
 uniform float uTime;
 uniform vec2 uResolution;
+uniform mat4 uMatrixInverse;
+uniform float uShapeRatios[8];
 uniform sampler2D uTexture;
 
 float sdSphere(vec3 p, float s) {
@@ -50,70 +52,33 @@ float sdCappedCylinder( vec3 p, vec2 h )
   return min(max(d.x,d.y),0.0) + length(max(d,0.0));
 }
 
-float sdCappedCone( in vec3 p, in vec3 c )
-{
-    p.y -= c.z * .5;
-
-    vec2 q = vec2( length(p.xz), p.y );
-    vec2 v = vec2( c.z*c.y/c.x, -c.z );
-
-    vec2 w = v - q;
-
-    vec2 vv = vec2( dot(v,v), v.x*v.x );
-    vec2 qv = vec2( dot(v,w), v.x*w.x );
-
-    vec2 d = max(qv,0.0)*qv/vv;
-
-    return sqrt( dot(w,w) - max(d.x,d.y) )* sign(max(q.y*v.x-q.x*v.y,w.y));
-}
-
-mat4 matRotate( in vec3 xyz )
-{
-    vec3 si = sin(xyz);
-    vec3 co = cos(xyz);
-
-	return mat4( co.y*co.z,                co.y*si.z,               -si.y,       0.0,
-                 si.x*si.y*co.z-co.x*si.z, si.x*si.y*si.z+co.x*co.z, si.x*co.y,  0.0,
-                 co.x*si.y*co.z+si.x*si.z, co.x*si.y*si.z-si.x*co.z, co.x*co.y,  0.0,
-			     0.0,                      0.0,                      0.0,        1.0 );
-}
-
-mat4 matTranslate( float x, float y, float z )
-{
-    return mat4( 1.0, 0.0, 0.0, 0.0,
-				 0.0, 1.0, 0.0, 0.0,
-				 0.0, 0.0, 1.0, 0.0,
-				 x,   y,   z,   1.0 );
-}
-
-mat4 matInverse( in mat4 m )
-{
-	return mat4(
-        m[0][0], m[1][0], m[2][0], 0.0,
-        m[0][1], m[1][1], m[2][1], 0.0,
-        m[0][2], m[1][2], m[2][2], 0.0,
-        -dot(m[0].xyz,m[3].xyz),
-        -dot(m[1].xyz,m[3].xyz),
-        -dot(m[2].xyz,m[3].xyz),
-        1.0 );
+float smin(float a, float b, float k) {
+  float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+  return mix(b, a, h) - k * h * (1.0 - h);
 }
 
 float map(vec3 p) {
     float dist = 100.;
 
-    mat4 rotationMatrix = matRotate(vec3(0., uTime * .001, uTime * .001));
-    p = (vec4(p, 0.) * matInverse(rotationMatrix)).xyz;
+    p = (vec4(p, 0.) * uMatrixInverse).xyz;
 
-    dist = sdSphere(p, 1.);
-    dist = mix(dist, udBox(p, vec3(.5, 1., .5)), 1. - clamp(abs(1. - ratio), 0., 1.));
-    dist = mix(dist, sdTorus(p, vec2(1., .3)), 1. - clamp(abs(2. - ratio), 0., 1.));
-    dist = mix(dist, sdCappedCone(p, vec3(3., 1., 1.5)), 1. - clamp(abs(3. - ratio), 0., 1.));
-    dist = mix(dist, sdHexPrism(p, vec2(1., .3)), 1. - clamp(abs(4. - ratio), 0., 1.));
-    dist = mix(dist, sdTriPrism(p, vec2(1., .3)), 1. - clamp(abs(5. - ratio), 0., 1.));
-    dist = mix(dist, sdCapsule(p, vec3(.5), vec3(-.5), .5), 1. - clamp(abs(6. - ratio), 0., 1.));
-    dist = mix(dist, sdCappedCylinder(p, vec2(.5, 1.)), 1. - clamp(abs(7. - ratio), 0., 1.));
-    dist = mix(dist, udBox(p, vec3(.5)), 1. - clamp(abs(8. - ratio), 0., 1.));
-    // dist = mix(dist, udBox(p, vec3(.5, 1., .5)), clamp(ratio, 0., 1.));
+    dist = (
+      sdSphere(p, 1.) * uShapeRatios[0] +
+      sdTorus(p, vec2(1., .3)) * uShapeRatios[1] +
+      sdHexPrism(p, vec2(1., .3)) * uShapeRatios[2] +
+      udBox(p, vec3(.65)) * uShapeRatios[3] +
+      udBox(p, vec3(.5, 1., .5)) * uShapeRatios[4] +
+      sdTriPrism(p, vec2(1., .3)) * uShapeRatios[5] +
+      sdCapsule(p, vec3(.5), vec3(-.5), .5) * uShapeRatios[6] +
+      sdCappedCylinder(p, vec2(.5, 1.)) * uShapeRatios[7]
+    ) / (uShapeRatios[0] + uShapeRatios[1] + uShapeRatios[2] + uShapeRatios[3] + uShapeRatios[4] + uShapeRatios[5] + uShapeRatios[6] + uShapeRatios[7]);
+    // dist = mix(dist, sdTorus(p, vec2(1., .3)), uShapeRatios[1]);
+    // dist = mix(dist, sdHexPrism(p, vec2(1., .3)), uShapeRatios[2]);
+    // dist = mix(dist, udBox(p, vec3(.5)), uShapeRatios[3]);
+    // dist = mix(dist, udBox(p, vec3(.5, 1., .5)), uShapeRatios[4]);
+    // dist = mix(dist, sdTriPrism(p, vec2(1., .3)), uShapeRatios[5]);
+    // dist = mix(dist, sdCapsule(p, vec3(.5), vec3(-.5), .5), uShapeRatios[6]);
+    // dist = mix(dist, sdCappedCylinder(p, vec2(.5, 1.)), uShapeRatios[7]);
 
     return dist;
 }
