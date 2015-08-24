@@ -6,7 +6,7 @@ import GLSLView from "../../webgl/GLSLView";
 import SHADER from "./shader.glsl!text";
 
 export default class ShapeMaskView extends GLSLView {
-  constructor (canvas, image) {
+  constructor (canvas, image1) {
     super(canvas, SHADER);
 
     this.shapeRatios = new Float32Array([1, 0, 0, 0, 0, 0, 0, 0]);
@@ -14,13 +14,24 @@ export default class ShapeMaskView extends GLSLView {
     this.matrix = new Matrix4();
     this.quaternion = new Quaternion();
 
-    this.image = image;
+    if(!image1) {
+      image1 = document.createElement("canvas");
+      image1.width = 1;
+      image1.height = 1;
+    }
 
     this.texture = this.gl.createTexture();
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.image);
+
+    this.image1 = image1;
+  }
+
+  set image1 (value) {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, value);
   }
 
   update(time = 0) {
