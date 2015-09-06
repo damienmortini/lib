@@ -57,18 +57,24 @@ float smin(float a, float b, float k) {
   return mix(b, a, h) - k * h * (1.0 - h);
 }
 
+float shape1(vec3 p) {
+  p.y += cos(p.y);
+  float dist = sdSphere(p, 1.);
+  return dist;
+}
+
 float map(vec3 p) {
     float dist = 100.;
 
     p = (vec4(p, 0.) * uMatrixInverse).xyz;
 
     dist = (
-      sdSphere(p, 1.) * uShapeRatios[0] +
+      shape1(p) * uShapeRatios[0] +
       sdTorus(p, vec2(1., .3)) * uShapeRatios[1] +
-      sdHexPrism(p, vec2(1., .3)) * uShapeRatios[2] +
+      sdHexPrism(p, vec2(1., .01)) * uShapeRatios[2] +
       udBox(p, vec3(.65)) * uShapeRatios[3] +
-      udBox(p, vec3(.5, 1., .5)) * uShapeRatios[4] +
-      sdTriPrism(p, vec2(1., .3)) * uShapeRatios[5] +
+      udBox(p, vec3(.1, 1., .1)) * uShapeRatios[4] +
+      sdTriPrism(p, vec2(1., .01)) * uShapeRatios[5] +
       sdCapsule(p, vec3(.5), vec3(-.5), .5) * uShapeRatios[6] +
       sdCappedCylinder(p, vec2(.5, 1.)) * uShapeRatios[7]
     ) / (uShapeRatios[0] + uShapeRatios[1] + uShapeRatios[2] + uShapeRatios[3] + uShapeRatios[4] + uShapeRatios[5] + uShapeRatios[6] + uShapeRatios[7]);
@@ -84,7 +90,7 @@ float map(vec3 p) {
 }
 
 vec3 calcNormal (vec3 p) {
-	vec2 e = vec2(0.0001, 0.0);
+	vec2 e = vec2(0.00001, 0.0);
     return normalize(vec3( 	map(p + e.xyy) - map(p - e.xyy),
                             map(p + e.yxy) - map(p - e.yxy),
                           	map(p + e.yyx) - map(p - e.yyx)));
@@ -120,7 +126,8 @@ void main() {
 
     if (t < tmax) {
         col = vec3(1., 0., 0.);
-        col = texture2D(uTexture, uv).rgb;
+        vec3 normal = calcNormal(ro + rd * t);
+        col = texture2D(uTexture, uv + normal.xy).rgb;
         // col = mix(col, calcNormal(ro + rd * t), .1);
         // col = texture2D(iChannel0, -uv).rgb;
         // col = mix(col, texture2D(iChannel1, -uv).rgb, clamp(-ratio, 0., 1.));
