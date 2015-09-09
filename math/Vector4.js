@@ -1,4 +1,4 @@
-import vec4 from "../node_modules/gl-matrix/src/gl-matrix/vec4";
+import vec4 from "../node_modules/gl-matrix/src/gl-matrix/vec4.js";
 
 export default class Vector4 {
   constructor(x = 0, y = 0, z = 0, w = 0) {

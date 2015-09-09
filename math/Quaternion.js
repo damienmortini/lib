@@ -1,6 +1,6 @@
-import quat from "../node_modules/gl-matrix/src/gl-matrix/quat";
+import quat from "../node_modules/gl-matrix/src/gl-matrix/quat.js";
 
-import Vector4 from "./Vector4";
+import Vector4 from "./Vector4.js";
 
 export default class Matrix4 extends Vector4 {
   constructor(x = 0, y = 0, z = 0, w = 1) {

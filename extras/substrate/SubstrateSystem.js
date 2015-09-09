@@ -1,7 +1,7 @@
-import Particle from "../../physics/Particle";
-import Vector2 from "../../math/Vector2";
-import SubstratePolygon from "./SubstratePolygon";
-import SubstrateEdge from "./SubstrateEdge";
+import Particle from "../../physics/Particle.js";
+import Vector2 from "../../math/Vector2.js";
+import SubstratePolygon from "./SubstratePolygon.js";
+import SubstrateEdge from "./SubstrateEdge.js";
 
 export default class SubstrateSystem {
   constructor(width, height, {speed = 1, maxEdges = Infinity, spawnProbabilityRatio = 0.1, spawnOptions = {}}) {

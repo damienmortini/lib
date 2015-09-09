@@ -1,4 +1,4 @@
-import CustomElement from "./CustomElement";
+import CustomElement from "./CustomElement.js";
 
 export default class LoopElement extends CustomElement {
   createdCallback() {

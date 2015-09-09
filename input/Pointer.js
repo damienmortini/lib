@@ -1,4 +1,4 @@
-import Vector2 from "../math/Vector2";
+import Vector2 from "../math/Vector2.js";
 
 export default class Pointer extends Vector2 {
   constructor(domElement = document.body) {

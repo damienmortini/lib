@@ -1,7 +1,7 @@
-import Matrix4 from "../../math/Matrix4";
-import Quaternion from "../../math/Quaternion";
+import Matrix4 from "../../math/Matrix4.js";
+import Quaternion from "../../math/Quaternion.js";
 
-import GLSLView from "../../webgl/GLSLView";
+import GLSLView from "../../webgl/GLSLView.js";
 
 import SHADER from "./shader.glsl!text";
 

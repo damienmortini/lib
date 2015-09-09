@@ -1,5 +1,5 @@
-import Edge from "./Edge";
-import Vector2 from "./Vector2";
+import Edge from "./Edge.js";
+import Vector2 from "./Vector2.js";
 
 class TwinEdge extends Edge {
   constructor (a = new Vector2(), b = new Vector2()) {
