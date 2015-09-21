@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/dmmn/dlib",
   "dependencies": {
-    "gl-matrix": "^2.3.1"
+    "gl-matrix": "^2.3.1",
+    "webcomponents.js": "^0.7.2"
   }
 }
