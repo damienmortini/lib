@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Toolkit for the web",
   "registry": "npm",
+  "format": "es6",
   "main": false,
   "repository": {
     "type": "git",
