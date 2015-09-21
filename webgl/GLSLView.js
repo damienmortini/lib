@@ -1,7 +1,7 @@
 export default class GLSLView {
   constructor (canvas, fragmentShaderStr) {
     this.canvas = canvas;
-    this.gl = this.canvas.getContext("webgl");
+    this.gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
 
     let vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
     this.gl.shaderSource(vertexShader, `

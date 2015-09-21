@@ -19,7 +19,7 @@ export default class Pointer extends Vector2 {
     this._domElementBoundingRect = this.domElement.getBoundingClientRect();
   }
   onPointerMove(e) {
-    if (e instanceof TouchEvent) {
+    if (!!TouchEvent && e instanceof TouchEvent) {
       e = e.touches[0];
     }
     this.x = e.clientX - this._domElementBoundingRect.left;
