@@ -9,6 +9,7 @@ export default class LoopElement extends CustomElement {
   attachedCallback() {
     window.addEventListener("blur", this._stopBinded = this.stop.bind(this));
     window.addEventListener("focus", this._startBinded = this.start.bind(this));
+    this.start();
   }
 
   detachedCallback() {
