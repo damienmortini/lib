@@ -8,6 +8,8 @@ export default class Pointer extends Vector2 {
     this.updateDOMElementBoundingRect();
 
     this.normalized = new Vector2();
+    this.normalizedCentered = new Vector2();
+    this.normalizedCenteredFlippedY = new Vector2();
 
     Pointer._pointers.set(this.domElement, this);
 
@@ -26,6 +28,9 @@ export default class Pointer extends Vector2 {
     this.y = e.clientY - this._domElementBoundingRect.top;
     this.normalized.x = this.x / this._domElementBoundingRect.width;
     this.normalized.y = this.y / this._domElementBoundingRect.height;
+    this.normalizedCentered.x = this.normalizedCenteredFlippedY.x = this.normalized.x * 2 - 1;
+    this.normalizedCentered.y = this.normalizedCenteredFlippedY.y = this.normalized.y * 2 - 1;
+    this.normalizedCenteredFlippedY.y *= -1;
   }
   dispose() {
     this.domElement.removeEventListener("touchmove", this._onPointerMoveBinded);
