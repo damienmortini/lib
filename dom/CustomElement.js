@@ -1,5 +1,3 @@
-import "webcomponents.js";
-
 export default class CustomElement extends HTMLElement {
   createdCallback() {
     if(this.template) {
