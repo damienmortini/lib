@@ -11,11 +11,11 @@ export default class MarkerTracker {
     let height = this.drawable.height || this.drawable.videoHeight;
     let ratio = height / width;
     if (ratio < 1) {
-      this._canvas.width = 256;
-      this._canvas.height = ratio * 256;
+      this._canvas.width = 512;
+      this._canvas.height = ratio * 512;
     } else {
-      this._canvas.width = (1 / ratio) * 256;
-      this._canvas.height = 256;
+      this._canvas.width = (1 / ratio) * 512;
+      this._canvas.height = 512;
     }
 
     this._pastResults = {};
@@ -27,23 +27,27 @@ export default class MarkerTracker {
     this._detector.setContinueMode(true);
   }
 
+  copyCameraMatrix(perspectiveMatrix, near, far) {
+    this._param.copyCameraMatrix(perspectiveMatrix, near, far);
+  }
+
   applyMarkerMatrix(matrix4) {
     this._ctx.drawImage(this.drawable, 0, 0, this._canvas.width, this._canvas.height);
     this._canvas.changed = true;
     let detected = this._detector.detectMarkerLite(this._raster, 170);
     if(detected) {
       this._detector.getTransformMatrix(this._matResult);
-      matrix4.components[0] = this._matResult.m00;
-      matrix4.components[1] = -this._matResult.m10;
-      matrix4.components[2] = this._matResult.m20;
+      matrix4.components[0] = -this._matResult.m00;
+      matrix4.components[1] = this._matResult.m10;
+      matrix4.components[2] = -this._matResult.m20;
       matrix4.components[3] = 0;
-      matrix4.components[4] = this._matResult.m01;
-      matrix4.components[5] = -this._matResult.m11;
-      matrix4.components[6] = this._matResult.m21;
+      matrix4.components[4] = -this._matResult.m01;
+      matrix4.components[5] = this._matResult.m11;
+      matrix4.components[6] = -this._matResult.m21;
       matrix4.components[7] = 0;
-      matrix4.components[8] = -this._matResult.m02;
-      matrix4.components[9] = this._matResult.m12;
-      matrix4.components[10] = -this._matResult.m22;
+      matrix4.components[8] = this._matResult.m02;
+      matrix4.components[9] = -this._matResult.m12;
+      matrix4.components[10] = this._matResult.m22;
       matrix4.components[11] = 0;
       matrix4.components[12] = this._matResult.m03;
       matrix4.components[13] = -this._matResult.m13;
