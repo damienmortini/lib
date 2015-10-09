@@ -1,7 +1,7 @@
 import THREE from "THREE";
 
 export default class Shader {
-  constructor (vertexShader, fragmentShader, uniforms = {}, attributes = {}) {
+  constructor (vertexShader, fragmentShader, uniforms, attributes) {
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
@@ -23,7 +23,11 @@ export default class Shader {
       let [ , glslQualifier, glslType, variableName, lengthStr] = match;
       let length = parseInt(lengthStr);
 
-      if (this[`${glslQualifier}s`][variableName]) {
+      let glslQualifiers = this[`${glslQualifier}s`];
+      if(!glslQualifiers) {
+        glslQualifiers = this[`${glslQualifier}s`] = {};
+      }
+      if (glslQualifiers[variableName]) {
         continue;
       }
 
@@ -98,7 +102,7 @@ export default class Shader {
         value = null;
       }
 
-      this[`${glslQualifier}s`][variableName] = {type, value};
+      glslQualifiers[variableName] = {type, value};
     }
   }
 }
