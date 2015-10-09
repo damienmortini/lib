@@ -38,7 +38,7 @@ export default class Shader {
       if(/float|double/.test(glslType)) {
         if(isNaN(length)) {
           type = "f";
-          value = "0";
+          value = 0;
         }
         else {
           type = "fv1";
@@ -48,7 +48,7 @@ export default class Shader {
       else if(/int|uint/.test(glslType)) {
         if(isNaN(length)) {
           type = "i";
-          value = "0";
+          value = 0;
         }
         else {
           type = "iv1";
