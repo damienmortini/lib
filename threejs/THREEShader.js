@@ -1,6 +1,6 @@
 import THREE from "THREE";
 
-export default class Shader {
+export default class THREEShader {
   constructor (vertexShader, fragmentShader, uniforms, attributes) {
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
@@ -20,7 +20,7 @@ export default class Shader {
     let match;
 
     while((match = regExp.exec(str))) {
-      let [ , glslQualifier, glslType, variableName, lengthStr] = match;
+      let [, glslQualifier, glslType, variableName, lengthStr] = match;
       let length = parseInt(lengthStr);
 
       let glslQualifiers = this[`${glslQualifier}s`];
