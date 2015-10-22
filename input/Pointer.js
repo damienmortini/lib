@@ -1,5 +1,7 @@
 import Vector2 from "../math/Vector2.js";
 
+import Signal from "dlib/utils/Signal";
+
 export default class Pointer extends Vector2 {
   constructor(domElement = document.body) {
     super();
@@ -13,14 +15,28 @@ export default class Pointer extends Vector2 {
 
     Pointer._pointers.set(this.domElement, this);
 
+    this.onDown = new Signal();
+    this.onMove = new Signal();
+
     this._onPointerMoveBinded = this.onPointerMove.bind(this);
+    this._onPointerDownBinded = this.onPointerDown.bind(this);
+    this.domElement.addEventListener("touchdown", this._onPointerDownBinded);
+    this.domElement.addEventListener("mousedown", this._onPointerDownBinded);
     this.domElement.addEventListener("touchmove", this._onPointerMoveBinded);
     this.domElement.addEventListener("mousemove", this._onPointerMoveBinded);
   }
   updateDOMElementBoundingRect() {
     this._domElementBoundingRect = this.domElement.getBoundingClientRect();
   }
+  onPointerDown(e) {
+    this._updatePosition(e);
+    this.onDown.dispatch();
+  }
   onPointerMove(e) {
+    this._updatePosition(e);
+    this.onMove.dispatch();
+  }
+  _updatePosition(e) {
     if (!!TouchEvent && e instanceof TouchEvent) {
       e = e.touches[0];
     }
