@@ -6,7 +6,6 @@ export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
   constructor (originalShaderName, vertexShaderChunks = ["", ""], fragmentShaderChunks = ["", ""]) {
     let originalShader = THREE.ShaderLib[originalShaderName];
     let tempShader = new THREEShader(vertexShaderChunks[0] + vertexShaderChunks[1], fragmentShaderChunks[0] + fragmentShaderChunks[1]);
-    // console.log(shader.uniforms, originalShader.uniforms);
 
     super({
       uniforms: Object.assign(originalShader.uniforms, tempShader.uniforms),
