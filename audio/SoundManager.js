@@ -8,16 +8,24 @@ let muted = false;
 
 export default class SoundManager {
   static add(url, {loop = false} = {}) {
+    let split = url.split("/");
+    let name = split[split.length - 1].split(".")[0];
+    if(soundMap.get(name)) {
+      console.warn(`Sound ${name} is added twice`);
+      return;
+    }
     let sound = new Howl({
       urls: [url],
       loop: loop
     });
-    let split = url.split("/");
-    let name = split[split.length - 1].split(".")[0];
     soundMap.set(name, sound);
   }
   static play(name, {loop = undefined} = {}) {
     let sound = soundMap.get(name);
+    if(!sound) {
+      console.error(`Sound ${name} hasn't been added`);
+      return;
+    }
     if(loop !== undefined) {
       sound.loop(loop);
     }
@@ -25,6 +33,10 @@ export default class SoundManager {
       sound.mute();
     }
     sound.play();
+  }
+  static stop(name) {
+    let sound = soundMap.get(name);
+    sound.stop();
   }
   static toggleMute() {
     if(muted) {
