@@ -4,6 +4,7 @@ let soundMap = new Map();
 
 let muteLooped = /\bmutelooped\b/.test(window.location.search);
 
+let enabled = true;
 let muted = false;
 
 export default class SoundManager {
@@ -50,11 +51,14 @@ export default class SoundManager {
     Howler.mute();
   }
   static unmute() {
+    if(!enabled) {
+      return;
+    }
     muted = false;
     Howler.unmute();
   }
 }
 
 if(/\bmute\b/.test(window.location.search)) {
-  SoundManager.mute();
+  enabled = false;
 }
