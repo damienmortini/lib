@@ -61,4 +61,5 @@ export default class SoundManager {
 
 if(/\bmute\b/.test(window.location.search)) {
   enabled = false;
+  SoundManager.mute();
 }
