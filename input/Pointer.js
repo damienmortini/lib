@@ -47,7 +47,7 @@ export default class Pointer extends Vector2 {
     this.onMove.dispatch();
   }
   _updatePosition(e) {
-    if (!!TouchEvent && e instanceof TouchEvent) {
+    if (!!window.TouchEvent && e instanceof window.TouchEvent) {
       e = e.touches[0];
       if(this.type !== Pointer.TOUCH_TYPE) {
         this.type = Pointer.TOUCH_TYPE;
