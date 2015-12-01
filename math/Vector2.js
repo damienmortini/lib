@@ -51,7 +51,7 @@ export default class Vector2 {
   }
 
   normalize() {
-    this.divideScalar(this.length);
+    Vec2.normalize(this.components, this.components);
   }
 
   addScalar(scalar) {
@@ -60,10 +60,14 @@ export default class Vector2 {
     return this;
   }
 
-  multiplyScalar(scalar) {
-    this.x *= scalar;
-    this.y *= scalar;
+  scale(value) {
+    Vec2.scale(this.components, this.components, value);
     return this;
+  }
+
+  multiplyScalar(value) {
+    console.warn("Deprecated, use scale instead");
+    return this.scale(value);
   }
 
   divideScalar(scalar) {
