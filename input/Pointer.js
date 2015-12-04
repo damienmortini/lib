@@ -16,6 +16,7 @@ export default class Pointer extends Vector2 {
 
     this.velocity = new Vector2();
     this.normalized = new Vector2();
+    this.normalizedFlippedY = new Vector2();
     this.normalizedCentered = new Vector2();
     this.normalizedCenteredFlippedY = new Vector2();
 
@@ -72,8 +73,11 @@ export default class Pointer extends Vector2 {
     }
     this.x = this._position.x;
     this.y = this._position.y;
-    this.normalized.x = this.x / this._domElementBoundingRect.width;
-    this.normalized.y = this.y / this._domElementBoundingRect.height;
+
+    this.normalized.x = this.normalizedFlippedY.x = this.x / this._domElementBoundingRect.width;
+    this.normalized.y = this.normalizedFlippedY.y = this.y / this._domElementBoundingRect.height;
+    this.normalizedFlippedY.y = 1 - this.normalizedFlippedY.y;
+
     this.normalizedCentered.x = this.normalizedCenteredFlippedY.x = this.normalized.x * 2 - 1;
     this.normalizedCentered.y = this.normalizedCenteredFlippedY.y = this.normalized.y * 2 - 1;
     this.normalizedCenteredFlippedY.y *= -1;
