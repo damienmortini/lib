@@ -54,6 +54,10 @@ export default class Vector2 {
     Vec2.normalize(this.components, this.components);
   }
 
+  lerp(vector2, value) {
+    Vec2.lerp(this.components, this.components, vector2.components, value);
+  }
+
   addScalar(scalar) {
     this.x += scalar;
     this.y += scalar;
