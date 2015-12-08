@@ -24,10 +24,14 @@ export default class Pointer extends Vector2 {
 
     this.onDown = new Signal();
     this.onMove = new Signal();
+    this.onUp = new Signal();
     this.onTypeChange = new Signal();
+
+    this._preventMouseTypeChange = false;
 
     this._onPointerMoveBinded = this.onPointerMove.bind(this);
     this._onPointerDownBinded = this.onPointerDown.bind(this);
+    this._onPointerUpBinded = this.onPointerUp.bind(this);
     this._resizeBinded = this.resize.bind(this);
     this._updateBinded = this.update.bind(this);
 
@@ -38,7 +42,9 @@ export default class Pointer extends Vector2 {
     this._domElementBoundingRect = this.domElement.getBoundingClientRect();
   }
   onPointerDown(e) {
-    e.preventDefault();
+    if(e.type === "touchstart") {
+      this._preventMouseTypeChange = true;
+    }
     this._updatePosition(e);
     this.update();
     this.onDown.dispatch();
@@ -47,20 +53,29 @@ export default class Pointer extends Vector2 {
     this._updatePosition(e);
     this.onMove.dispatch();
   }
+  onPointerUp(e) {
+    if(e.type === "mouseup") {
+      this._preventMouseTypeChange = false;
+    }
+    this._updatePosition(e);
+    this.update();
+    this.onUp.dispatch();
+  }
   _updatePosition(e) {
     if (!!window.TouchEvent && e instanceof window.TouchEvent) {
-      e = e.touches[0];
+      if(e.type !== "touchend") {
+        e = e.touches[0];
+      }
       if(this.type !== Pointer.TOUCH_TYPE) {
         this.type = Pointer.TOUCH_TYPE;
         this.onTypeChange.dispatch(this.type);
       }
     } else {
-      if(this.type !== Pointer.MOUSE_TYPE) {
+      if(this.type !== Pointer.MOUSE_TYPE && e.type === "mousedown" && !this._preventMouseTypeChange) {
         this.type = Pointer.MOUSE_TYPE;
         this.onTypeChange.dispatch(this.type);
       }
     }
-
     this._position.x = e.clientX - this._domElementBoundingRect.left;
     this._position.y = e.clientY - this._domElementBoundingRect.top;
   }
@@ -89,6 +104,8 @@ export default class Pointer extends Vector2 {
     this.domElement.addEventListener("mousedown", this._onPointerDownBinded);
     this.domElement.addEventListener("touchmove", this._onPointerMoveBinded);
     this.domElement.addEventListener("mousemove", this._onPointerMoveBinded);
+    this.domElement.addEventListener("touchend", this._onPointerUpBinded);
+    this.domElement.addEventListener("mouseup", this._onPointerUpBinded);
     window.addEventListener("resize", this._resizeBinded);
     this.update();
   }
@@ -98,6 +115,8 @@ export default class Pointer extends Vector2 {
     this.domElement.removeEventListener("mousedown", this._onPointerDownBinded);
     this.domElement.removeEventListener("touchmove", this._onPointerMoveBinded);
     this.domElement.removeEventListener("mousemove", this._onPointerMoveBinded);
+    this.domElement.removeEventListener("touchend", this._onPointerUpBinded);
+    this.domElement.removeEventListener("mouseup", this._onPointerUpBinded);
     window.removeEventListener("resize", this._resizeBinded);
   }
   static get TOUCH_TYPE() {
