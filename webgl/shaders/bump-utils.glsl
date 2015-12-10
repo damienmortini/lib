@@ -12,5 +12,6 @@ vec4 bumpFromDepth(sampler2D texture, vec2 uv, float scale) {
   vec3 va = normalize(vec3(size.xy, s21 - s01));
   vec3 vb = normalize(vec3(size.yx, s12 - s10));
   vec4 bump = vec4(cross(va,vb), s11);
+  bump = bump * .5 + .5;;
   return bump;
 }
