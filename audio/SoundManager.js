@@ -39,27 +39,24 @@ export default class SoundManager {
     let sound = soundMap.get(name);
     sound.stop();
   }
-  static toggleMute() {
-    if(muted) {
-      SoundManager.unmute();
+  static set muted(value) {
+    if(value) {
+      muted = true;
+      Howler.mute();
     } else {
-      SoundManager.mute();
+      if(!enabled) {
+        return;
+      }
+      muted = false;
+      Howler.unmute();
     }
   }
-  static mute() {
-    muted = true;
-    Howler.mute();
-  }
-  static unmute() {
-    if(!enabled) {
-      return;
-    }
-    muted = false;
-    Howler.unmute();
+  static get muted() {
+    return muted;
   }
 }
 
 if(/\bmute\b/.test(window.location.search)) {
   enabled = false;
-  SoundManager.mute();
+  SoundManager.muted = true;
 }
