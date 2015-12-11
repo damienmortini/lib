@@ -1,4 +1,4 @@
-import {Howler, Howl} from "howler";
+import {Howler, Howl} from "../node_modules/howler/howler.js";
 
 let soundMap = new Map();
 
@@ -8,7 +8,7 @@ let enabled = true;
 let muted = false;
 
 export default class SoundManager {
-  static add(url, {loop = false} = {}) {
+  static add(url) {
     let split = url.split("/");
     let name = split[split.length - 1].split(".")[0];
     if(soundMap.get(name)) {
@@ -16,20 +16,19 @@ export default class SoundManager {
       return;
     }
     let sound = new Howl({
-      urls: [url],
-      loop: loop
+      urls: [url]
     });
     soundMap.set(name, sound);
   }
-  static play(name, {loop = undefined} = {}) {
+  static play(name, {loop = false} = {}) {
     let sound = soundMap.get(name);
     if(!sound) {
       console.error(`Sound ${name} hasn't been added`);
       return;
     }
-    if(loop !== undefined) {
-      sound.loop(loop);
-    }
+
+    sound.loop(loop);
+
     if(sound.loop() && muteLooped) {
       sound.mute();
     }
