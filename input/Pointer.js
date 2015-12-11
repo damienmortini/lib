@@ -42,6 +42,9 @@ export default class Pointer extends Vector2 {
     this._domElementBoundingRect = this.domElement.getBoundingClientRect();
   }
   onPointerDown(e) {
+    if(this._preventMouseTypeChange) {
+      return;
+    }
     if(e.type === "touchstart") {
       this._preventMouseTypeChange = true;
     }
@@ -50,6 +53,9 @@ export default class Pointer extends Vector2 {
     this.onDown.dispatch();
   }
   onPointerMove(e) {
+    if(e.type === "mousemove" && this._preventMouseTypeChange) {
+      return;
+    }
     this._updatePosition(e);
     this.onMove.dispatch();
   }
@@ -71,7 +77,7 @@ export default class Pointer extends Vector2 {
         this.onTypeChange.dispatch(this.type);
       }
     } else {
-      if(this.type !== Pointer.MOUSE_TYPE && e.type === "mousedown" && !this._preventMouseTypeChange) {
+      if(this.type !== Pointer.MOUSE_TYPE && e.type !== "mouseup" && !this._preventMouseTypeChange) {
         this.type = Pointer.MOUSE_TYPE;
         this.onTypeChange.dispatch(this.type);
       }
