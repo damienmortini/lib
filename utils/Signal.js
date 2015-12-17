@@ -1,3 +1,3 @@
-import Signal from "../node_modules/min-signal/min-signal.js";
+import Signal from "min-signal";
 
 export default Signal;

@@ -1,8 +1,8 @@
-import Vec2 from "../node_modules/gl-matrix/src/gl-matrix/vec2.js";
+import {vec2} from "gl-matrix";
 
 export default class Vector2 {
   constructor(x = 0, y = 0) {
-    this.components = Vec2.create();
+    this.components = vec2.create();
     this.x = x;
     this.y = y;
     return this;
@@ -51,11 +51,11 @@ export default class Vector2 {
   }
 
   normalize() {
-    Vec2.normalize(this.components, this.components);
+    vec2.normalize(this.components, this.components);
   }
 
   lerp(vector2, value) {
-    Vec2.lerp(this.components, this.components, vector2.components, value);
+    vec2.lerp(this.components, this.components, vector2.components, value);
   }
 
   addScalar(scalar) {
@@ -65,7 +65,7 @@ export default class Vector2 {
   }
 
   scale(value) {
-    Vec2.scale(this.components, this.components, value);
+    vec2.scale(this.components, this.components, value);
     return this;
   }
 

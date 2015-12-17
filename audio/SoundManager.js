@@ -1,4 +1,4 @@
-import {Howler, Howl} from "../node_modules/howler/howler.js";
+import {Howler, Howl} from "howler";
 
 let soundMap = new Map();
 

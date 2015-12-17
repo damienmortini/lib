@@ -1,4 +1,4 @@
-import quat from "../node_modules/gl-matrix/src/gl-matrix/quat.js";
+import {quat} from "gl-matrix";
 
 import Vector4 from "./Vector4.js";
 
