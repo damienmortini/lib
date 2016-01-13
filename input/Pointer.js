@@ -26,7 +26,7 @@ export default class Pointer extends Vector2 {
 
     this.domElement = domElement;
 
-    this.type = undefined;
+    this.type = Pointer.TOUCH_TYPE;
 
     this._position = new Vector2();
 
@@ -66,6 +66,7 @@ export default class Pointer extends Vector2 {
   _onPointerDown(e) {
     if(e.type === "touchstart") {
       this._preventMouseTypeChange = true;
+      this._changeType(Pointer.TOUCH_TYPE);
     }
     this.dragOffset.set(0, 0);
     this._downed = true;
@@ -74,8 +75,12 @@ export default class Pointer extends Vector2 {
     this.onDown.dispatch();
   }
   _onPointerMove(e) {
-    if(e.type === "mousemove" && this._preventMouseTypeChange) {
-      return;
+    if(e.type === "mousemove") {
+      if(this._preventMouseTypeChange) {
+        return;
+      } else {
+        this._changeType(Pointer.MOUSE_TYPE);
+      }
     }
     this._updatePosition(e);
     this.onMove.dispatch();
@@ -84,9 +89,12 @@ export default class Pointer extends Vector2 {
     this._downed = false;
     this._updatePosition(e);
     this.onUp.dispatch();
-    if(!this.dragOffset.length) {
+    if(this.dragOffset.length < 4) {
       this.onClick.dispatch();
     }
+    setTimeout(() => {
+      this._preventMouseTypeChange = false;
+    }, 100);
   }
   _updatePosition(e) {
     if (!!window.TouchEvent && e instanceof window.TouchEvent) {
@@ -95,18 +103,18 @@ export default class Pointer extends Vector2 {
       } else {
         e = e.touches[0];
       }
-      if(this.type !== Pointer.TOUCH_TYPE) {
-        this.type = Pointer.TOUCH_TYPE;
-        this.onTypeChange.dispatch(this.type);
-      }
-    } else {
-      if(this.type !== Pointer.MOUSE_TYPE && e.type !== "mouseup" && !this._preventMouseTypeChange) {
-        this.type = Pointer.MOUSE_TYPE;
-        this.onTypeChange.dispatch(this.type);
-      }
     }
     this._position.x = e.clientX - this._domElementBoundingRect.left;
     this._position.y = e.clientY - this._domElementBoundingRect.top;
+  }
+  _changeType(type) {
+    if(this.type === type) {
+      return;
+    }
+    this.type = type;
+    this.disable();
+    this.enable();
+    this.onTypeChange.dispatch(this.type);
   }
   _update() {
     this._requestAnimationFrameId = requestAnimationFrame(this._updateBinded);
@@ -132,12 +140,16 @@ export default class Pointer extends Vector2 {
   enable() {
     this.disable();
     this.resize();
+    if(this.type === Pointer.TOUCH_TYPE) {
+      this.domElement.addEventListener("touchmove", this._onPointerMoveBinded);
+      window.addEventListener("touchend", this._onPointerUpBinded);
+    }
+    else {
+      this.domElement.addEventListener("mousedown", this._onPointerDownBinded);
+      window.addEventListener("mouseup", this._onPointerUpBinded);
+    }
     this.domElement.addEventListener("touchstart", this._onPointerDownBinded);
-    this.domElement.addEventListener("mousedown", this._onPointerDownBinded);
-    this.domElement.addEventListener("touchmove", this._onPointerMoveBinded);
     this.domElement.addEventListener("mousemove", this._onPointerMoveBinded);
-    window.addEventListener("touchend", this._onPointerUpBinded);
-    window.addEventListener("mouseup", this._onPointerUpBinded);
     window.addEventListener("resize", this._resizeBinded);
     this._update();
   }
