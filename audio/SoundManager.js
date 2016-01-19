@@ -20,7 +20,7 @@ export default class SoundManager {
     });
     soundMap.set(name, sound);
   }
-  static play(name, {loop = false} = {}) {
+  static play(name, {loop = false, volume = 1} = {}) {
     let sound = soundMap.get(name);
     if(!sound) {
       console.error(`Sound ${name} hasn't been added`);
@@ -28,6 +28,7 @@ export default class SoundManager {
     }
 
     sound.loop(loop);
+    sound.volume(volume || sound.volume);
 
     if(sound.loop() && muteLooped) {
       sound.mute();
