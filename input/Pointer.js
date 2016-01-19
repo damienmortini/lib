@@ -70,10 +70,11 @@ export default class Pointer extends Vector2 {
       this._preventMouseTypeChange = true;
       this._changeType(Pointer.TOUCH_TYPE);
     }
-    this.dragOffset.set(0, 0);
     this._downed = true;
-    this._updatePosition(e);
+    this.dragOffset.set(0, 0);
     this.copy(this._position);
+    this._onPointerEvent(e);
+    this._updatePositions();
     this.onDown.dispatch();
   }
   _onPointerMove(e) {
@@ -84,12 +85,13 @@ export default class Pointer extends Vector2 {
         this._changeType(Pointer.MOUSE_TYPE);
       }
     }
-    this._updatePosition(e);
+    this._onPointerEvent(e);
     this.onMove.dispatch();
   }
   _onPointerUp(e) {
     this._downed = false;
-    this._updatePosition(e);
+    this._onPointerEvent(e);
+    this._updatePositions();
     this.onUp.dispatch();
     if(this.dragOffset.length < 4) {
       this.onClick.dispatch();
@@ -98,7 +100,7 @@ export default class Pointer extends Vector2 {
       this._preventMouseTypeChange = false;
     }, 100);
   }
-  _updatePosition(e) {
+  _onPointerEvent(e) {
     if (!!window.TouchEvent && e instanceof window.TouchEvent) {
       if(e.type === "touchend") {
         e = e.changedTouches[0];
@@ -128,6 +130,10 @@ export default class Pointer extends Vector2 {
         this.dragOffset.add(this.velocity);
       }
     }
+
+    this._updatePositions();
+  }
+  _updatePositions() {
     this.x = this._position.x;
     this.y = this._position.y;
 
