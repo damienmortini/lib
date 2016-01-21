@@ -96,9 +96,10 @@ export default class Pointer extends Vector2 {
     if(this.dragOffset.length < 4) {
       this.onClick.dispatch();
     }
-    setTimeout(() => {
+    clearTimeout(this._timeout);
+    this._timeout = setTimeout(() => {
       this._preventMouseTypeChange = false;
-    }, 100);
+    }, 2000);
   }
   _onPointerEvent(e) {
     if (!!window.TouchEvent && e instanceof window.TouchEvent) {
