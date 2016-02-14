@@ -168,7 +168,7 @@ export default class Pointer extends Vector2 {
   }
   disable() {
     cancelAnimationFrame(this._requestAnimationFrameId);
-    this.domElement.removeEventListener("touchdown", this._onPointerDownBinded);
+    this.domElement.removeEventListener("touchstart", this._onPointerDownBinded);
     this.domElement.removeEventListener("mousedown", this._onPointerDownBinded);
     this.domElement.removeEventListener("touchmove", this._onPointerMoveBinded);
     this.domElement.removeEventListener("mousemove", this._onPointerMoveBinded);
