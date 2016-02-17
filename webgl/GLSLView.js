@@ -28,7 +28,7 @@ export default class GLSLView {
     this.gl.vertexAttribPointer(aPosition, 2, this.gl.FLOAT, false, 0, 0);
   }
 
-  update () {
+  render () {
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     this.gl.clearColor(0, 0, 0, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
