@@ -1,7 +1,8 @@
+let callbacks = [];
+let scopes = [];
+
 class Ticker {
   constructor() {
-    super();
-
     this._updateBinded = this.update.bind(this);
 
     this._previousTimestamp = 0;
