@@ -37,22 +37,22 @@ export default class MarkerTracker {
     let detected = this._detector.detectMarkerLite(this._raster, 170);
     if(detected) {
       this._detector.getTransformMatrix(this._matResult);
-      matrix4.components[0] = -this._matResult.m00;
-      matrix4.components[1] = this._matResult.m10;
-      matrix4.components[2] = -this._matResult.m20;
-      matrix4.components[3] = 0;
-      matrix4.components[4] = -this._matResult.m01;
-      matrix4.components[5] = this._matResult.m11;
-      matrix4.components[6] = -this._matResult.m21;
-      matrix4.components[7] = 0;
-      matrix4.components[8] = this._matResult.m02;
-      matrix4.components[9] = -this._matResult.m12;
-      matrix4.components[10] = this._matResult.m22;
-      matrix4.components[11] = 0;
-      matrix4.components[12] = this._matResult.m03;
-      matrix4.components[13] = -this._matResult.m13;
-      matrix4.components[14] = this._matResult.m23;
-      matrix4.components[15] = 1;
+      matrix4.elements[0] = -this._matResult.m00;
+      matrix4.elements[1] = this._matResult.m10;
+      matrix4.elements[2] = -this._matResult.m20;
+      matrix4.elements[3] = 0;
+      matrix4.elements[4] = -this._matResult.m01;
+      matrix4.elements[5] = this._matResult.m11;
+      matrix4.elements[6] = -this._matResult.m21;
+      matrix4.elements[7] = 0;
+      matrix4.elements[8] = this._matResult.m02;
+      matrix4.elements[9] = -this._matResult.m12;
+      matrix4.elements[10] = this._matResult.m22;
+      matrix4.elements[11] = 0;
+      matrix4.elements[12] = this._matResult.m03;
+      matrix4.elements[13] = -this._matResult.m13;
+      matrix4.elements[14] = this._matResult.m23;
+      matrix4.elements[15] = 1;
     }
   }
 }

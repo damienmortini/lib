@@ -1,10 +1,13 @@
 {
   "name": "dlib",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "Toolkit for the web",
   "registry": "npm",
   "format": "es6",
   "main": false,
+  "scripts": {
+    "bump": "npm version patch && npm publish"
+  },
   "repository": {
     "type": "git",
     "url": "https://dmmn@github.com/dmmn/dlib.git"

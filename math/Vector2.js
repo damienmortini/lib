@@ -2,26 +2,26 @@ import {vec2} from "gl-matrix";
 
 export default class Vector2 {
   constructor(x = 0, y = 0) {
-    this.components = vec2.create();
+    this.elements = vec2.create();
     this.x = x;
     this.y = y;
     return this;
   }
 
   get x() {
-    return this.components[0];
+    return this.elements[0];
   }
 
   set x(value) {
-    this.components[0] = value;
+    this.elements[0] = value;
   }
 
   get y() {
-    return this.components[1];
+    return this.elements[1];
   }
 
   set y(value) {
-    this.components[1] = value;
+    this.elements[1] = value;
   }
 
   get length () {
@@ -51,11 +51,11 @@ export default class Vector2 {
   }
 
   normalize() {
-    vec2.normalize(this.components, this.components);
+    vec2.normalize(this.elements, this.elements);
   }
 
   lerp(vector2, value) {
-    vec2.lerp(this.components, this.components, vector2.components, value);
+    vec2.lerp(this.elements, this.elements, vector2.elements, value);
   }
 
   addScalar(scalar) {
@@ -65,7 +65,7 @@ export default class Vector2 {
   }
 
   scale(value) {
-    vec2.scale(this.components, this.components, value);
+    vec2.scale(this.elements, this.elements, value);
     return this;
   }
 

@@ -9,17 +9,17 @@ export default class Matrix4 extends Vector4 {
   }
 
   rotateX(angle) {
-    quat.rotateX(this.components, this.components, angle);
+    quat.rotateX(this.elements, this.elements, angle);
     return this;
   }
 
   rotateY(angle) {
-    quat.rotateY(this.components, this.components, angle);
+    quat.rotateY(this.elements, this.elements, angle);
     return this;
   }
 
   rotateZ(angle) {
-    quat.rotateZ(this.components, this.components, angle);
+    quat.rotateZ(this.elements, this.elements, angle);
     return this;
   }
 }

@@ -18,7 +18,7 @@ export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
     }
 
     super({
-      uniforms: Object.assign(originalShader.uniforms, tempShader.uniforms),
+      uniforms: Object.assign(THREE.UniformsUtils.clone(originalShader.uniforms), tempShader.uniforms),
       vertexShader: originalShader.vertexShader.replace(regExp, generateSubstringFromChunks(vertexShaderChunks)),
       fragmentShader: originalShader.fragmentShader.replace(regExp, generateSubstringFromChunks(fragmentShaderChunks))
     });
