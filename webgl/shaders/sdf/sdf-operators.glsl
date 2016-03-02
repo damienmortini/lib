@@ -1,3 +1,11 @@
+precision highp float;
+
+struct Voxel
+{
+  float dist;
+  vec4 material;
+};
+
 Voxel smin( Voxel voxel1, Voxel voxel2, float blendRatio )
 {
   float ratio = clamp(.5 + .5 * (voxel2.dist - voxel1.dist) / blendRatio, 0., 1.);
