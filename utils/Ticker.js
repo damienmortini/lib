@@ -1,6 +1,4 @@
-import Signal from "./Signal.js";
-
-class Ticker extends Signal {
+class Ticker {
   constructor() {
     super();
 
@@ -19,7 +17,20 @@ class Ticker extends Signal {
     this.deltaTime = timestamp - this._previousTimestamp;
     this._previousTimestamp = timestamp;
 
-    this.dispatch(time);
+    for (let [i, callback] of callbacks.entries()) {
+      callback.call(scopes[i], time);
+    }
+  }
+
+  add(callback, scope) {
+    callbacks.push(callback);
+    scopes.push(scope);
+  }
+
+  remove(callback) {
+    var index = callbacks.indexOf(callback);
+    callbacks.splice(index, 1);
+    scopes.splice(index, 1);
   }
 }
 
