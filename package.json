@@ -5,6 +5,9 @@
   "registry": "npm",
   "format": "es6",
   "main": false,
+  "scripts": {
+    "bump": "npm version patch && npm publish"
+  },
   "repository": {
     "type": "git",
     "url": "https://dmmn@github.com/dmmn/dlib.git"
