@@ -2,7 +2,7 @@ import {vec4} from "gl-matrix";
 
 export default class Vector4 {
   constructor(x = 0, y = 0, z = 0, w = 0) {
-    this.components = vec4.create();
+    this.elements = vec4.create();
     this.x = x;
     this.y = y;
     this.z = z;
@@ -11,34 +11,34 @@ export default class Vector4 {
   }
 
   get x() {
-    return this.components[0];
+    return this.elements[0];
   }
 
   set x(value) {
-    this.components[0] = value;
+    this.elements[0] = value;
   }
 
   get y() {
-    return this.components[1];
+    return this.elements[1];
   }
 
   set y(value) {
-    this.components[1] = value;
+    this.elements[1] = value;
   }
 
   get z() {
-    return this.components[2];
+    return this.elements[2];
   }
 
   set z(value) {
-    this.components[2] = value;
+    this.elements[2] = value;
   }
 
   get w() {
-    return this.components[3];
+    return this.elements[3];
   }
 
   set w(value) {
-    this.components[3] = value;
+    this.elements[3] = value;
   }
 }
