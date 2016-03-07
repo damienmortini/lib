@@ -23,6 +23,7 @@ export default class LoopElement extends CustomElement {
   }
 
   start() {
+    this.stop();
     Ticker.add(this.update, this);
   }
 

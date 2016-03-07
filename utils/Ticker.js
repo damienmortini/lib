@@ -30,6 +30,9 @@ class Ticker {
 
   remove(callback) {
     var index = callbacks.indexOf(callback);
+    if(index === -1) {
+      return;
+    }
     callbacks.splice(index, 1);
     scopes.splice(index, 1);
   }
