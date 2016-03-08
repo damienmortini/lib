@@ -1,4 +1,4 @@
-import {Howler, Howl} from "howler";
+import { Howler, Howl } from "howler";
 
 let soundMap = new Map();
 
@@ -8,10 +8,11 @@ let enabled = true;
 let muted = false;
 
 export default class SoundManager {
+
   static add(url) {
     let split = url.split("/");
     let name = split[split.length - 1].split(".")[0];
-    if(soundMap.get(name)) {
+    if (SoundManager.get(name)) {
       console.warn(`Sound ${name} is added twice`);
       return;
     }
@@ -20,9 +21,10 @@ export default class SoundManager {
     });
     soundMap.set(name, sound);
   }
+
   static play(name, {loop = false, volume = 1} = {}) {
-    let sound = soundMap.get(name);
-    if(!sound) {
+    let sound = SoundManager.get(name);
+    if (!sound) {
       console.error(`Sound ${name} hasn't been added`);
       return;
     }
@@ -30,33 +32,43 @@ export default class SoundManager {
     sound.loop(loop);
     sound.volume(volume || sound.volume);
 
-    if(sound.loop() && muteLooped) {
+    if (sound.loop() && muteLooped) {
       sound.mute();
     }
     sound.play();
   }
+
   static stop(name) {
-    let sound = soundMap.get(name);
+    let sound = SoundManager.get(name);
+    if (!sound) {
+      return;
+    }
     sound.stop();
   }
+
+  static get(name) {
+    return soundMap.get(name);
+  }
+
   static set muted(value) {
-    if(value) {
+    if (value) {
       muted = true;
       Howler.mute();
     } else {
-      if(!enabled) {
+      if (!enabled) {
         return;
       }
       muted = false;
       Howler.unmute();
     }
   }
+
   static get muted() {
     return muted;
   }
 }
 
-if(/\bmute\b/.test(window.location.search)) {
+if (/\bmute\b/.test(window.location.search)) {
   enabled = false;
   SoundManager.muted = true;
 }
