@@ -1,5 +1,5 @@
-precision highp float;
-
+export default function() {
+  return `
 vec4 pack (float depth)
 {
   const vec4 bitSh = vec4(256 * 256 * 256,
@@ -39,3 +39,4 @@ vec4 bumpFromDepth(sampler2D texture, vec2 uv, float scale) {
   bump.xyz = bump.xyz * .5 + .5;
   return bump;
 }
+`};

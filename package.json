@@ -27,6 +27,7 @@
   "dependencies": {
     "event-emitter": "^0.3.4",
     "gl-matrix": "^2.3.1",
+    "gl-shader": "^4.2.0",
     "howler": "^1.1.29",
     "min-signal": "0.0.5",
     "webcomponents.js": "^0.7.20"

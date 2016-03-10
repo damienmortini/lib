@@ -1,6 +1,10 @@
 import { mat4 } from "gl-matrix";
 
 export default class Matrix4 {
+  static get elements() {
+    return mat4;
+  }
+  
   constructor() {
     this.elements = mat4.create();
     return this;
