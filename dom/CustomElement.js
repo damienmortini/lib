@@ -1,4 +1,4 @@
-import "webcomponents.js/webcomponents-lite.js";
+import "webcomponents.js";
 
 export default class CustomElement extends HTMLElement {
   createdCallback() {
