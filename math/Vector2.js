@@ -1,6 +1,10 @@
-import {vec2} from "gl-matrix";
+import { vec2 } from "gl-matrix";
 
 export default class Vector2 {
+  static get elements() {
+    return vec2;
+  }
+
   constructor(x = 0, y = 0) {
     this.elements = vec2.create();
     this.x = x;
@@ -24,7 +28,7 @@ export default class Vector2 {
     this.elements[1] = value;
   }
 
-  get length () {
+  get length() {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
@@ -75,12 +79,12 @@ export default class Vector2 {
   }
 
   divideScalar(scalar) {
-    if ( scalar !== 0 ) {
+    if (scalar !== 0) {
       this.multiplyScalar(1 / scalar);
-		} else {
-			this.set(0, 0);
-		}
-		return this;
+    } else {
+      this.set(0, 0);
+    }
+    return this;
   }
 
   dot(vector2) {
@@ -92,6 +96,6 @@ export default class Vector2 {
   }
 
   angleTo(vector2) {
-    return Math.atan2( this.x * vector2.y - this.y * vector2.x, this.x * vector2.x + this.y * vector2.y );
+    return Math.atan2(this.x * vector2.y - this.y * vector2.x, this.x * vector2.x + this.y * vector2.y);
   }
 }

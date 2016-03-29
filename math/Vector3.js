@@ -1,9 +1,40 @@
+import { vec3 } from "gl-matrix";
+
 export default class Vector3 {
+  static get elements() {
+    return vec3;
+  }
+
   constructor(x = 0, y = 0, z = 0) {
+    this.elements = vec3.create();
     this.x = x;
     this.y = y;
     this.z = z;
     return this;
+  }
+
+  get x() {
+    return this.elements[0];
+  }
+
+  set x(value) {
+    this.elements[0] = value;
+  }
+
+  get y() {
+    return this.elements[1];
+  }
+
+  set y(value) {
+    this.elements[1] = value;
+  }
+
+  get z() {
+    return this.elements[2];
+  }
+
+  set z(value) {
+    this.elements[2] = value;
   }
 
   get length() {
