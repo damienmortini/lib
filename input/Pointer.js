@@ -75,7 +75,7 @@ export default class Pointer extends Vector2 {
     this.copy(this._position);
     this._onPointerEvent(e);
     this._updatePositions();
-    this.onDown.dispatch();
+    this.onDown.dispatch(e);
   }
   _onPointerMove(e) {
     if(e.type === "mousemove") {
@@ -86,15 +86,15 @@ export default class Pointer extends Vector2 {
       }
     }
     this._onPointerEvent(e);
-    this.onMove.dispatch();
+    this.onMove.dispatch(e);
   }
   _onPointerUp(e) {
     this._downed = false;
     this._onPointerEvent(e);
     this._updatePositions();
-    this.onUp.dispatch();
+    this.onUp.dispatch(e);
     if(this.dragOffset.length < 4) {
-      this.onClick.dispatch();
+      this.onClick.dispatch(e);
     }
     clearTimeout(this._timeout);
     this._timeout = setTimeout(() => {
