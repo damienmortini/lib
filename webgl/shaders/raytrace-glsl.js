@@ -1,4 +1,4 @@
-export default function({map}) {
+export default function({map, steps = 64}) {
 
   return `
 // STRUCTURES
@@ -50,6 +50,11 @@ Voxel min( Voxel voxel1, Voxel voxel2 )
   }
 }
 
+vec3 repeat( vec3 p, vec3 c )
+{
+    return mod(p,c)-0.5*c;
+}
+
 // METHODS
 
 ${map}
@@ -70,7 +75,7 @@ Voxel rayMarch(vec3 rayOrigin, vec3 rayDirection, float near, float far)
   float rayMarchingStep = 0.001;
   float dist = near;
 
-  for(int i = 0; i < 16; i++) {
+  for(int i = 0; i < ${steps}; i++) {
     if (rayMarchingStep < 0.001 || rayMarchingStep > far) break;
     voxel = map(rayOrigin + rayDirection * dist);
     rayMarchingStep = voxel.dist;
