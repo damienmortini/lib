@@ -4,7 +4,7 @@ export default class Matrix4 {
   static get elements() {
     return mat4;
   }
-  
+
   constructor() {
     this.elements = mat4.create();
     return this;
@@ -27,6 +27,20 @@ export default class Matrix4 {
 
   rotateZ(value, matrix4 = this) {
     mat4.rotateZ(this.elements, matrix4.elements, value);
+    return this;
+  }
+
+  multiply(matrix4a, matrix4b) {
+    if(matrix4b) {
+      mat4.multiply(this.elements, matrix4a.elements, matrix4b.elements);
+    } else {
+      mat4.multiply(this.elements, this.elements, matrix4a.elements);
+    }
+    return this;
+  }
+
+  identity() {
+    mat4.identity(this.elements);
     return this;
   }
 
