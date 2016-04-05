@@ -1,10 +1,21 @@
 import {quat} from "gl-matrix";
 
-import Vector4 from "./Vector4.js";
+export default class Quat {
+  static get elements() {
+    return quat;
+  }
 
-export default class Matrix4 extends Vector4 {
   constructor(x = 0, y = 0, z = 0, w = 1) {
-    super(x, y, z, w);
+    this.elements = quat.create();
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+    return this;
+  }
+
+  identity() {
+    quat.identity(this.elements);
     return this;
   }
 
