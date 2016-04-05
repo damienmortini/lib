@@ -1,11 +1,11 @@
-import GLShader from "./GLShader.js";
+import Shader from "./Shader.js";
 
 export default class GLSLView {
   constructor (canvas, fragmentShaderStr) {
     this.canvas = canvas;
     this.gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
 
-    this.shader = new GLShader(this.gl, `
+    this.shader = new Shader(this.gl, `
       attribute vec2 aPosition;
       void main() {
           gl_Position = vec4(aPosition, 0, 1);
