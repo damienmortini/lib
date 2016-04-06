@@ -10,6 +10,38 @@ export default class Matrix4 {
     return this;
   }
 
+  set x(value) {
+    this.elements[12] = value;
+  }
+
+  get x() {
+    return this.elements[12];
+  }
+
+  set y(value) {
+    this.elements[13] = value;
+  }
+
+  get y() {
+    return this.elements[13];
+  }
+
+  set z(value) {
+    this.elements[14] = value;
+  }
+
+  get z() {
+    return this.elements[14];
+  }
+
+  set w(value) {
+    this.elements[15] = value;
+  }
+
+  get w() {
+    return this.elements[15];
+  }
+
   translate(elements, matrix4 = this) {
     mat4.translate(this.elements, matrix4.elements, elements);
     return this;
@@ -31,7 +63,7 @@ export default class Matrix4 {
   }
 
   multiply(matrix4a, matrix4b) {
-    if(matrix4b) {
+    if (matrix4b) {
       mat4.multiply(this.elements, matrix4a.elements, matrix4b.elements);
     } else {
       mat4.multiply(this.elements, this.elements, matrix4a.elements);
