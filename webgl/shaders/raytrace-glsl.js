@@ -76,7 +76,7 @@ Voxel rayMarch(vec3 rayOrigin, vec3 rayDirection, float near, float far)
   float dist = near;
 
   for(int i = 0; i < ${steps}; i++) {
-    if (rayMarchingStep < 0.001 || rayMarchingStep > far) break;
+    if (rayMarchingStep < 0.0001 || rayMarchingStep > far) break;
     voxel = map(rayOrigin + rayDirection * dist);
     rayMarchingStep = voxel.dist;
     dist += rayMarchingStep;
