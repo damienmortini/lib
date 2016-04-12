@@ -11,7 +11,6 @@ export default class GLSLView {
           gl_Position = vec4(aPosition, 0, 1);
       }
     `, fragmentShaderStr);
-    this.program = this.shader.program;
     this.shader.bind();
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.gl.createBuffer());
