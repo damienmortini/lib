@@ -24,15 +24,14 @@ export default class FaceTracker {
     }
 
     // Compute initial positions
-    this._initialPositions = new Float32Array(pModel.shapeModel.meanShape.length * 3);
+    this._initialPositions = new Float32Array(pModel.shapeModel.meanShape.length * 2);
     for (let i = 0; i < pModel.shapeModel.meanShape.length; i++) {
       let position = pModel.shapeModel.meanShape[i];
       // Normalize values
       let x = (position[0] - 24.381567267455893) / 65.00000000000003 * 2 - 1;
       let y = -(position[1] - 25.17298033285374) / 64.61033114464396 * 2 + 1;
-      this._initialPositions[i * 3] = x;
-      this._initialPositions[i * 3 + 1] = y;
-      this._initialPositions[i * 3 + 2] = 0;
+      this._initialPositions[i * 2] = x;
+      this._initialPositions[i * 2 + 1] = y;
     }
 
     this._positions = Float32Array.from(this._initialPositions);
@@ -56,8 +55,8 @@ export default class FaceTracker {
     if (positions && this._lastComputedFrame !== this._currentFrame) {
       for (let i = 0; i < positions.length; i++) {
         let position = positions[i];
-        this._positions[i * 3] = (position[0] - this.input.width * .5) / this.input.width * 2;
-        this._positions[i * 3 + 1] = -(position[1] - this.input.height * .5) / this.input.height * 2;
+        this._positions[i * 2] = (position[0] - this.input.width * .5) / this.input.width * 2;
+        this._positions[i * 2 + 1] = -(position[1] - this.input.height * .5) / this.input.height * 2;
       }
     }
     this._lastComputedFrame = this._currentFrame;
@@ -67,9 +66,9 @@ export default class FaceTracker {
   get mapTexture() {
     this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     for (let i = 0; i < this._indices.length; i += 3) {
-      let id0 = this._indices[i] * 3;
-      let id1 = this._indices[i + 1] * 3;
-      let id2 = this._indices[i + 2] * 3;
+      let id0 = this._indices[i] * 2;
+      let id1 = this._indices[i + 1] * 2;
+      let id2 = this._indices[i + 2] * 2;
       let x0 = (this.initialPositions[id0] * .5 + .5) * this._canvas.width;
       let y0 = (-this.initialPositions[id0 + 1] * .5 + .5) * this._canvas.height;
       let x1 = (this.initialPositions[id1] * .5 + .5) * this._canvas.width;
