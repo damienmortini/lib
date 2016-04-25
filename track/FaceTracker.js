@@ -1,17 +1,36 @@
+import "auduno/clmtrackr/js/clm.js";
+import "auduno/clmtrackr/js/svmfilter_webgl.js";
+import "auduno/clmtrackr/js/svmfilter_fft.js";
+import "auduno/clmtrackr/js/mossefilter.js";
+import "auduno/clmtrackr/examples/ext_js/left_eye_filter.js";
+import "auduno/clmtrackr/examples/ext_js/right_eye_filter.js";
+import "auduno/clmtrackr/examples/ext_js/nose_filter.js";
+import "auduno/clmtrackr/examples/ext_js/numeric-1.2.6.js";
+import "auduno/clmtrackr/examples/ext_js/jsfeat-min.js";
+import "auduno/clmtrackr/examples/ext_js/frontalface.js";
+import "auduno/clmtrackr/examples/ext_js/mosse.js";
+import "auduno/clmtrackr/examples/ext_js/jsfeat_detect.js";
+import "auduno/clmtrackr/models/model_pca_20_svm.js";
+
 import Ticker from "dlib/utils/Ticker.js";
 
 export default class FaceTracker {
-  constructor(input) {
+  constructor(input, {width = input.width, height = input.height} = {}) {
     this.input = input;
+
+    this._inputCanvas = document.createElement("canvas");
+    this._inputCanvas.width = width;
+    this._inputCanvas.height = height;
+    this._inputContext = this._inputCanvas.getContext("2d");
+
+    this._mapCanvas = document.createElement("canvas");
+    this._mapCanvas.width = 512;
+    this._mapCanvas.height = 512;
+    this._context = this._mapCanvas.getContext("2d");
 
     this.tracker = new clm.tracker();
     this.tracker.init(pModel);
-    this.tracker.start(this.input);
-
-    this._canvas = document.createElement("canvas");
-    this._canvas.width = 512;
-    this._canvas.height = 512;
-    this._context = this._canvas.getContext("2d");
+    this.tracker.start(this._inputCanvas);
 
     // Compute indices
     let cells = pModel.path.vertices.concat([[44, 61, 56], [61, 60, 56], [56, 60, 57], [60, 59, 57], [57, 59, 58], [58, 59, 50]]);
@@ -36,6 +55,13 @@ export default class FaceTracker {
 
     this._positions = Float32Array.from(this._initialPositions);
 
+    // Compute uvs
+    this._uvs = Float32Array.from(this._initialPositions);;
+    for (let i = 0; i < this._uvs.length; i++) {
+      let uv = this._uvs[i] * .5 + .5;
+      this._uvs[i] = i % 2 ? 1 - uv : uv;
+    }
+
     this._lastComputedFrame = -1;
     this._currentFrame = 0;
 
@@ -50,13 +76,18 @@ export default class FaceTracker {
     return this._initialPositions;
   }
 
+  get uvs() {
+    return this._uvs;
+  }
+
   get positions() {
+    this._inputContext.drawImage(this.input, 0, 0, this._inputCanvas.width, this._inputCanvas.height);
     let positions = this.tracker.getCurrentPosition();
     if (positions && this._lastComputedFrame !== this._currentFrame) {
       for (let i = 0; i < positions.length; i++) {
         let position = positions[i];
-        this._positions[i * 2] = (position[0] - this.input.width * .5) / this.input.width * 2;
-        this._positions[i * 2 + 1] = -(position[1] - this.input.height * .5) / this.input.height * 2;
+        this._positions[i * 2] = -(position[0] - this._inputCanvas.width * .5) / this._inputCanvas.width * 2;
+        this._positions[i * 2 + 1] = -(position[1] - this._inputCanvas.height * .5) / this._inputCanvas.height * 2;
       }
     }
     this._lastComputedFrame = this._currentFrame;
@@ -64,26 +95,26 @@ export default class FaceTracker {
   }
 
   get mapTexture() {
-    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    this._context.clearRect(0, 0, this._mapCanvas.width, this._mapCanvas.height);
     for (let i = 0; i < this._indices.length; i += 3) {
       let id0 = this._indices[i] * 2;
       let id1 = this._indices[i + 1] * 2;
       let id2 = this._indices[i + 2] * 2;
-      let x0 = (this.initialPositions[id0] * .5 + .5) * this._canvas.width;
-      let y0 = (-this.initialPositions[id0 + 1] * .5 + .5) * this._canvas.height;
-      let x1 = (this.initialPositions[id1] * .5 + .5) * this._canvas.width;
-      let y1 = (-this.initialPositions[id1 + 1] * .5 + .5) * this._canvas.height;
-      let x2 = (this.initialPositions[id2] * .5 + .5) * this._canvas.width;
-      let y2 = (-this.initialPositions[id2 + 1] * .5 + .5) * this._canvas.height;
-      let u0 = (this.positions[id0] * .5 + .5) * this.input.width;
-      let v0 = (-this.positions[id0 + 1] * .5 + .5) * this.input.height;
-      let u1 = (this.positions[id1] * .5 + .5) * this.input.width;
-      let v1 = (-this.positions[id1 + 1] * .5 + .5) * this.input.height;
-      let u2 = (this.positions[id2] * .5 + .5) * this.input.width;
-      let v2 = (-this.positions[id2 + 1] * .5 + .5) * this.input.height;
+      let x0 = (this.initialPositions[id0] * .5 + .5) * this._mapCanvas.width;
+      let y0 = (-this.initialPositions[id0 + 1] * .5 + .5) * this._mapCanvas.height;
+      let x1 = (this.initialPositions[id1] * .5 + .5) * this._mapCanvas.width;
+      let y1 = (-this.initialPositions[id1 + 1] * .5 + .5) * this._mapCanvas.height;
+      let x2 = (this.initialPositions[id2] * .5 + .5) * this._mapCanvas.width;
+      let y2 = (-this.initialPositions[id2 + 1] * .5 + .5) * this._mapCanvas.height;
+      let u0 = (this.positions[id0] * .5 + .5) * this._inputCanvas.width;
+      let v0 = (-this.positions[id0 + 1] * .5 + .5) * this._inputCanvas.height;
+      let u1 = (this.positions[id1] * .5 + .5) * this._inputCanvas.width;
+      let v1 = (-this.positions[id1 + 1] * .5 + .5) * this._inputCanvas.height;
+      let u2 = (this.positions[id2] * .5 + .5) * this._inputCanvas.width;
+      let v2 = (-this.positions[id2 + 1] * .5 + .5) * this._inputCanvas.height;
       this._drawTexturedTriangle(x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2);
     }
-    return this._canvas;
+    return this._mapCanvas;
   }
 
   draw(context) {
@@ -128,7 +159,7 @@ export default class FaceTracker {
     this._context.save();
     this._context.transform(a, b, c, d, e, f);
     this._context.clip();
-    this._context.drawImage(this.input, 0, 0);
+    this._context.drawImage(this._inputCanvas, 0, 0);
     this._context.restore();
   }
 }
