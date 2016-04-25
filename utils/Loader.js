@@ -1,25 +1,25 @@
-let files = new Map();
-
 export default class Loader {
-  static loadImages(urls, options) {
+  static load(elements) {
+    if(!(elements instanceof Array)) {
+      elements = [elements];
+    }
+
     let promises = [];
-    for(let url of urls) {
-      promises.push(Loader.loadImage(url, options));
+
+    for (let element of elements) {
+      promises.push(new Promise(function(resolve, reject) {
+        let onLoad = () => {
+          element.removeEventListener("load", onLoad);
+          resolve(element);
+        };
+        if(element instanceof HTMLMediaElement) {
+          element.addEventListener("canplaythrough", onLoad);
+        } else {
+          element.addEventListener("load", onLoad);
+        };
+      }));
     }
+
     return Promise.all(promises);
-  }
-  static loadImage(url, {crossOrigin = null} = {}) {
-    let image = files.get(url);
-    if(image) {
-      return Promise.resolve(image);
-    }
-    return new Promise(function(resolve, reject) {
-      image = new Image();
-      image.crossOrigin = crossOrigin;
-      image.onload = () => {
-        resolve(image);
-      };
-      image.src = url;
-    });
   }
 }
