@@ -1,6 +1,5 @@
-import SIMPLEX_NOISE_2D from "glsl-noise/simplex/2d.glsl!text";
-import SIMPLEX_NOISE_3D from "glsl-noise/simplex/3d.glsl!text";
-import SIMPLEX_NOISE_4D from "glsl-noise/simplex/4d.glsl!text";
+// From https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+// and https://github.com/ashima/webgl-noise
 
 export default function() {
   return `
