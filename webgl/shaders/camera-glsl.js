@@ -6,7 +6,8 @@ struct Camera
   float far;
   float fov;
   float aspect;
-  mat4 modelViewMatrix;
+  mat4 worldInverseMatrix;
+  mat4 projectionMatrix;
 };
 
 Ray rayFromCamera(vec2 uv, Camera camera) {
@@ -14,10 +15,10 @@ Ray rayFromCamera(vec2 uv, Camera camera) {
 
   float fovScaleY = tan(camera.fov * .5);
 
-  vec3 vCameraForward = vec3(0.0, 0.0, -1.0) * mat3(camera.modelViewMatrix);
+  vec3 vCameraForward = vec3(0.0, 0.0, -1.0) * mat3(camera.worldInverseMatrix);
 
-  vec3 rayOrigin = -(camera.modelViewMatrix[3].xyz) * mat3(camera.modelViewMatrix);
-  vec3 rayDirection = normalize(vec3(position.x * fovScaleY * camera.aspect, position.y * fovScaleY, -1.0) * mat3(camera.modelViewMatrix));
+  vec3 rayOrigin = -(camera.worldInverseMatrix[3].xyz) * mat3(camera.worldInverseMatrix);
+  vec3 rayDirection = normalize(vec3(position.x * fovScaleY * camera.aspect, position.y * fovScaleY, -1.0) * mat3(camera.worldInverseMatrix));
 
   return Ray(rayOrigin, rayDirection);
 }

@@ -71,6 +71,11 @@ export default class Matrix4 {
     return this;
   }
 
+  perspective (fovy, aspect, near, far) {
+    mat4.perspective(this.elements, fovy, aspect, near, far);
+    return this;
+  }
+
   identity() {
     mat4.identity(this.elements);
     return this;
