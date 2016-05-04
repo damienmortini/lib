@@ -42,9 +42,7 @@ export default class Vector3 {
   }
 
   set(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    vec3.set(this.elements, x, y, z);
     return this;
   }
 
@@ -59,6 +57,11 @@ export default class Vector3 {
     this.x += vector3.x;
     this.y += vector3.y;
     this.z += vector3.z;
+    return this;
+  }
+
+  scale(value) {
+    vec3.scale(this.elements, this.elements, value);
     return this;
   }
 
@@ -82,6 +85,15 @@ export default class Vector3 {
 
   dot(vector3) {
     return this.x * vector3.x + this.y * vector3.y + this.z * vector3.z;
+  }
+
+  equals(vector3) {
+    return vec3.exactEquals(this.elements, vector3.elements);
+  }
+
+  applyMatrix4(matrix4) {
+    vec3.transformMat4(this.elements, this.elements, matrix4.elements);
+    return this;
   }
 
   angleTo(vector3) {
