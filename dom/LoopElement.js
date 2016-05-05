@@ -1,4 +1,4 @@
-import Ticker from "dlib/utils/Ticker.js";
+import Ticker from "../utils/Ticker.js";
 
 import CustomElement from "./CustomElement.js";
 

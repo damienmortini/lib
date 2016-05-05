@@ -1,6 +1,5 @@
 import Vector2 from "../math/Vector2.js";
-
-import Signal from "dlib/utils/Signal";
+import Signal from "../utils/Signal";
 
 let pointers = new Map();
 

@@ -1,6 +1,6 @@
 import THREE from "THREE";
 
-import THREEShader from "dlib/threejs/THREEShader.js";
+import THREEShader from "./THREEShader.js";
 
 export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
   constructor (originalShaderName, {vertexShaderChunks = {}, fragmentShaderChunks = {}} = {}) {
