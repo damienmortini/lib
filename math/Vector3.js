@@ -6,10 +6,7 @@ export default class Vector3 {
   }
 
   constructor(x = 0, y = 0, z = 0) {
-    this.elements = vec3.create();
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    this.elements = vec3.fromValues(x, y, z);
     return this;
   }
 
@@ -47,16 +44,17 @@ export default class Vector3 {
   }
 
   copy(vector3) {
-    this.x = vector3.x;
-    this.y = vector3.y;
-    this.z = vector3.z;
+    vec3.copy(this.elements, vector3.elements);
     return this;
   }
 
   add(vector3) {
-    this.x += vector3.x;
-    this.y += vector3.y;
-    this.z += vector3.z;
+    vec3.add(this.elements, this.elements, vector3.elements);
+    return this;
+  }
+
+  subtract(vector3) {
+    vec3.subtract(this.elements, this.elements, vector3.elements);
     return this;
   }
 
@@ -100,5 +98,9 @@ export default class Vector3 {
     // TODO: To test(from three.js)
     let theta = this.dot(vector3) / (this.length() * vector3.length());
     return Math.acos((theta < -1) ? -1 : ((theta > 1) ? 1 : theta));
+  }
+
+  clone() {
+    return new Vector3(this.x, this.y, this.z);
   }
 }

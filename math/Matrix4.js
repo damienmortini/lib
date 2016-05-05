@@ -90,6 +90,13 @@ export default class Matrix4 {
     mat4.fromQuat(this.elements, quaternion.elements);
     return this;
   }
+  
+  setPosition(vector3) {
+    this.x = vector3.x;
+    this.y = vector3.y;
+    this.z = vector3.z;
+    return this;
+  }
 
   invert(matrix4 = this) {
     mat4.invert(this.elements, matrix4.elements);
