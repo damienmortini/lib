@@ -1,9 +1,9 @@
-import Pointer from "../input/Pointer";
-import Ticker from "../utils/Ticker";
-import Matrix4 from "../math/Matrix4";
-import Vector2 from "../math/Vector2";
-import Vector3 from "../math/Vector3";
-import Quaternion from "../math/Quaternion";
+import Pointer from "../../input/Pointer";
+import Ticker from "../../utils/Ticker";
+import Matrix4 from "../../math/Matrix4";
+import Vector2 from "../../math/Vector2";
+import Vector3 from "../../math/Vector3";
+import Quaternion from "../../math/Quaternion";
 
 export default class TrackballControl {
   constructor(matrix = new Matrix4(), {domElement = document.body, distance = 0, distanceStep = 1}) {
@@ -25,6 +25,7 @@ export default class TrackballControl {
     this._positionOffset = new Vector3();
 
     domElement.addEventListener("wheel", this.onWheel.bind(this));
+
 
     Ticker.add(this.update, this);
   }
