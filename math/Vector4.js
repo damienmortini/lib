@@ -1,12 +1,9 @@
 import {vec4} from "gl-matrix";
 
-export default class Vector4 {
+export default class Vector4 extends Float32Array {
   constructor(x = 0, y = 0, z = 0, w = 0) {
-    this.elements = vec4.create();
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.w = w;
+    super(4);
+    this.set(x, y, z, w);
     return this;
   }
 
@@ -40,5 +37,10 @@ export default class Vector4 {
 
   set w(value) {
     this.elements[3] = value;
+  }
+
+  set(x, y, z, w) {
+    vec4.set(this, x, y, z, w);
+    return this;
   }
 }

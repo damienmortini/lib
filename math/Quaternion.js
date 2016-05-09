@@ -1,36 +1,34 @@
 import {quat} from "gl-matrix";
 
-export default class Quat {
-  static get elements() {
-    return quat;
-  }
-
+export default class Quat extends Float32Array {
   constructor(x = 0, y = 0, z = 0, w = 1) {
-    this.elements = quat.create();
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.w = w;
+    super(4);
+    this.set(x, y, z, w);
     return this;
   }
 
   identity() {
-    quat.identity(this.elements);
+    quat.identity(this);
+    return this;
+  }
+
+  set(x, y, z, w) {
+    quat.set(this, x, y, z, w);
     return this;
   }
 
   rotateX(angle) {
-    quat.rotateX(this.elements, this.elements, angle);
+    quat.rotateX(this, this, angle);
     return this;
   }
 
   rotateY(angle) {
-    quat.rotateY(this.elements, this.elements, angle);
+    quat.rotateY(this, this, angle);
     return this;
   }
 
   rotateZ(angle) {
-    quat.rotateZ(this.elements, this.elements, angle);
+    quat.rotateZ(this, this, angle);
     return this;
   }
 }

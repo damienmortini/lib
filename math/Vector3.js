@@ -1,37 +1,34 @@
 import { vec3 } from "gl-matrix";
 
-export default class Vector3 {
-  static get elements() {
-    return vec3;
-  }
-
+export default class Vector3 extends Float32Array {
   constructor(x = 0, y = 0, z = 0) {
-    this.elements = vec3.fromValues(x, y, z);
+    super(3);
+    this.set(x, y, z);
     return this;
   }
 
   get x() {
-    return this.elements[0];
+    return this[0];
   }
 
   set x(value) {
-    this.elements[0] = value;
+    this[0] = value;
   }
 
   get y() {
-    return this.elements[1];
+    return this[1];
   }
 
   set y(value) {
-    this.elements[1] = value;
+    this[1] = value;
   }
 
   get z() {
-    return this.elements[2];
+    return this[2];
   }
 
   set z(value) {
-    this.elements[2] = value;
+    this[2] = value;
   }
 
   get length() {
@@ -39,27 +36,27 @@ export default class Vector3 {
   }
 
   set(x, y, z) {
-    vec3.set(this.elements, x, y, z);
+    vec3.set(this, x, y, z);
     return this;
   }
 
   copy(vector3) {
-    vec3.copy(this.elements, vector3.elements);
+    vec3.copy(this, vector3);
     return this;
   }
 
   add(vector3) {
-    vec3.add(this.elements, this.elements, vector3.elements);
+    vec3.add(this, this, vector3);
     return this;
   }
 
   subtract(vector3) {
-    vec3.subtract(this.elements, this.elements, vector3.elements);
+    vec3.subtract(this, this, vector3);
     return this;
   }
 
   scale(value) {
-    vec3.scale(this.elements, this.elements, value);
+    vec3.scale(this, this, value);
     return this;
   }
 
@@ -86,11 +83,11 @@ export default class Vector3 {
   }
 
   equals(vector3) {
-    return vec3.exactEquals(this.elements, vector3.elements);
+    return vec3.exactEquals(this, vector3);
   }
 
   applyMatrix4(matrix4) {
-    vec3.transformMat4(this.elements, this.elements, matrix4.elements);
+    vec3.transformMat4(this, this, matrix4);
     return this;
   }
 
