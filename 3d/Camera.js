@@ -9,6 +9,7 @@ export default class Camera {
 
     this.matrix = new Matrix4();
     this._projectionMatrix = new Matrix4();
+    this._inverseMatrix = new Matrix4();
 
     this._updateProjectionMatrix();
   }
@@ -51,6 +52,10 @@ export default class Camera {
 
   get projectionMatrix() {
     return this._projectionMatrix;
+  }
+
+  get inverseMatrix() {
+    return this._inverseMatrix.invert(this.matrix);
   }
 
   _updateProjectionMatrix() {
