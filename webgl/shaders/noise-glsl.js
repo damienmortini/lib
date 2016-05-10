@@ -82,6 +82,13 @@ vec4 grad4(float j, vec4 ip)
   return p;
 }
 
+// Hash
+
+vec2 hash( vec2 p ){
+    p = vec2( dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));
+    return fract(sin(p)*43758.5453);
+}
+
 // RAND
 
 float rand(float n){return fract(sin(n) * 43758.5453123);}
@@ -821,6 +828,58 @@ float simplexNoise(vec4 v)
   return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))
                + dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;
 
+}
+
+// VORONOI
+
+#define OCTAVES         1       // 7
+#define SWITCH_TIME     60.0   // seconds
+
+float voronoiNoise( in vec2 x, float time ){
+    float t = time/SWITCH_TIME;
+    float function          = mod(t,4.0);
+    bool  multiply_by_F1    = mod(t,8.0)  >= 4.0;
+    bool  inverse               = mod(t,16.0) >= 8.0;
+    float distance_type = mod(t/16.0,4.0);
+
+    vec2 n = floor( x );
+    vec2 f = fract( x );
+
+    float F1 = 8.0;
+    float F2 = 8.0;
+
+    for( int j=-1; j<=1; j++ )
+        for( int i=-1; i<=1; i++ ){
+            vec2 g = vec2(i,j);
+            vec2 o = hash( n + g );
+
+            o = 0.5 + 0.41*sin( time + 6.2831*o );
+            vec2 r = g - f + o;
+
+        float d =   distance_type < 1.0 ? dot(r,r)  :               // euclidean^2
+                    distance_type < 2.0 ? sqrt(dot(r,r)) :          // euclidean
+                    distance_type < 3.0 ? abs(r.x) + abs(r.y) :     // manhattan
+                    distance_type < 4.0 ? max(abs(r.x), abs(r.y)) : // chebyshev
+                    0.0;
+
+        if( d<F1 ) {
+            F2 = F1;
+            F1 = d;
+        } else if( d<F2 ) {
+            F2 = d;
+        }
+    }
+
+    float c = function < 1.0 ? F1 :
+              function < 2.0 ? F2 :
+              function < 3.0 ? F2-F1 :
+              function < 4.0 ? (F1+F2)/2.0 :
+              0.0;
+
+    if( multiply_by_F1 )    c *= F1;
+    if( inverse )           c = 1.0 - c;
+
+    return c;
 }
 
 // FBM
