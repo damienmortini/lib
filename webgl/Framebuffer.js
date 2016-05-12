@@ -1,43 +1,77 @@
 import createFBO from "gl-fbo";
 
+import Texture2D from "./Texture2D.js";
+
 export default class Framebuffer {
-  constructor(gl, width, height, options) {
-    this.stackglFramebuffer = createFBO(gl, [width, height], options);
+  constructor(gl, width, height, {useFloat = false, colorsNumber = 1, depth = true, stencil = false} = {}) {
+    let options = {
+      float: useFloat,
+      color: colorsNumber,
+      depth,
+      stencil
+    };
+    this._stackglFramebuffer = createFBO(gl, [width, height], options);
+
+    for (let i = 0; i < this._stackglFramebuffer.color.length; i++) {
+      let color = this._stackglFramebuffer.color[i];
+      let texture = new Texture2D(gl, color.width, color.height, color.format, color.type);
+      texture._stackglTexture2D.handle = color.handle;
+      texture.magFilter = color.magFilter;
+      texture.minFilter = color.minFilter;
+      texture.mipSamples = color.mipSamples;
+      this._stackglFramebuffer.color[i] = texture;
+    }
   }
 
-  get width() {
-    return this.stackglFramebuffer.shape[0];
-  }
-
-  set width(value) {
-    this.stackglFramebuffer.shape = [value, this.height];
-  }
-
-  get height() {
-    return this.stackglFramebuffer.shape[1];
-  }
-
-  set height(value) {
-    this.stackglFramebuffer.shape = [this.width, value];
-  }
-
-  get colors() {
-    return this.stackglFramebuffer.color;
-  }
-
-  get depth() {
-    return this.stackglFramebuffer.depth;
+  get gl() {
+    return this.stackglTexture2D.gl;
   }
 
   get webGLFramebuffer() {
-    return this.stackglFramebuffer.handle;
+    return this._stackglFramebuffer.handle;
+  }
+
+  get width() {
+    return this._stackglFramebuffer.shape[0];
+  }
+
+  set width(value) {
+    this._stackglFramebuffer.shape = [value, this.height];
+    for (let color of this.colors) {
+      color.width = value;
+    }
+    if(this.depth) {
+      this.depth = value;
+    }
+  }
+
+  get height() {
+    return this._stackglFramebuffer.shape[1];
+  }
+
+  set height(value) {
+    this._stackglFramebuffer.shape = [this.width, value];
+    for (let color of this.colors) {
+      color.width = value;
+    }
+    if(this.depth) {
+      this.depth = value;
+    }
+  }
+
+  get colors() {
+    return this._stackglFramebuffer.color;
+  }
+
+  get depth() {
+    return this._stackglFramebuffer.depth;
   }
 
   bind() {
-    this.stackglFramebuffer.bind();
+    this._stackglFramebuffer.bind();
   }
 
   dispose() {
-    this.stackglFramebuffer.dispose();
+    this._stackglFramebuffer.dispose();
   }
 };
