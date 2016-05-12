@@ -4,7 +4,7 @@ import GLTextureCube from "gl-texture-cube";
 export default class TextureCube extends GLTextureCube {
   constructor(gl, sources, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
     let tmpSources = sources;
-    let useFramebuffers = sources[0].handle && sources[0].handle instanceof WebGLFramebuffer;
+    let useFramebuffers = sources[0] instanceof Framebuffer;
 
     if(useFramebuffers) {
       let tmpCanvas = document.createElement("canvas");
