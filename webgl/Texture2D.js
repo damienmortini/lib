@@ -41,6 +41,10 @@ export default class Texture2D {
     this._stackglTexture2D.shape = [this.width, value];
   }
 
+  set wrap(value) {
+    this._stackglTexture2D.wrap = [value, value];
+  }
+
   get wrapS() {
     return this._stackglTexture2D.wrap[0];
   }

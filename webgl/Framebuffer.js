@@ -3,10 +3,10 @@ import createFBO from "gl-fbo";
 import Texture2D from "./Texture2D.js";
 
 export default class Framebuffer {
-  constructor(gl, width, height, {useFloat = false, colorsNumber = 1, depth = true, stencil = false} = {}) {
+  constructor(gl, width, height, {useFloat = false, buffersNumber = 1, depth = true, stencil = false} = {}) {
     let options = {
       float: useFloat,
-      color: colorsNumber,
+      color: buffersNumber,
       depth,
       stencil
     };
