@@ -4,8 +4,8 @@ export default function() {
   return `
 struct Light
 {
-  vec3 position;
   vec3 color;
+  vec3 direction;
 };
 
 float G1V ( float dotNV, float k ) {
@@ -43,38 +43,36 @@ float GGX(vec3 N, vec3 V, vec3 L, float roughness, float F0) {
 
 vec3 computePBRLighting (
   Light light,
-  vec3 position,
   Ray ray,
   vec3 normal,
   vec3 albedo,
   float metalness,
   float roughness,
-  sampler2D texture,
-  sampler2D textureBlured
+  samplerCube texture,
+  samplerCube textureBlured
 ) {
 
   // material
   float fresnel_pow = 1.5;
   vec3 color_mod = vec3(1.0);
-  light.color *= textureCube(texture,vec3(1.0,0.0,0.0)).xyz * 1.2;
+  light.color *= textureCube(texture, vec3(1.0,0.0,0.0)).xyz * 1.2;
 
   // IBL
-  vec3 ibl_diffuse = textureCube(textureBlured, normal);
-  vec3 ibl_reflection = textureCube(textureBlured, reflect(ray.direction,normal));
+  vec3 ibl_diffuse = textureCube(textureBlured, normal).xyz;
+  vec3 ibl_reflection = textureCube(textureBlured, reflect(ray.direction, normal)).xyz;
 
   // fresnel
   float fresnel = max(1.0 - dot(normal, -ray.direction), 0.0);
   fresnel = pow(fresnel, fresnel_pow);
 
   // reflection
-  vec3 refl = textureCube(texture,reflect(ray.direction,normal)).xyz;
+  vec3 refl = textureCube(texture, reflect(ray.direction,normal)).xyz;
   refl = mix(refl,ibl_reflection,(1.0-fresnel)*roughness);
   refl = mix(refl,ibl_reflection,roughness);
 
   // specular
-  vec3 lightDirection = normalize(light.position - position);
   float power = 1.0 / max(roughness * 0.4,0.01);
-  vec3 spec = light.color * GGX(normal, -ray.direction, lightDirection, roughness * 0.7, 0.2);
+  vec3 spec = light.color * GGX(normal, -ray.direction, light.direction, roughness * 0.7, 0.2);
   refl -= spec;
 
   // diffuse
