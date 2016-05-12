@@ -1,4 +1,12 @@
-export default function({map, steps = 64}) {
+export default function({
+  map = `
+    Voxel map(vec3 p) {
+      Voxel voxel = Voxel(0., vec4(0.));
+      return voxel;
+    }
+  `,
+  steps = 64
+} = {}) {
 
   return `
 // STRUCTURES
