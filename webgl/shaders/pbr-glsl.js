@@ -64,7 +64,7 @@ vec3 computePBRLighting (
   light.color *= textureCube(reflectionTexture, vec3(1.0,0.0,0.0)).xyz * 1.2;
 
   // IBL
-  vec3 ibl_diffuse = textureCube(reflectionTexture, normalize(normal * vec3(rand(position.x * 2. - 1.), rand(position.y * 2. - 1.), rand(position.z * 2. - 1.)) * .5)).xyz;
+  vec3 ibl_diffuse = textureCube(reflectionTexture, normalize(normal + vec3(rand(position.x * 2. - 1.), rand(position.y * 2. - 1.), rand(position.z * 2. - 1.)) * .5)).xyz;
   float blurRatio = (ibl_diffuse.r + ibl_diffuse.g + ibl_diffuse.b) / 3.;
   ibl_diffuse = ibl_diffuse * blurRatio + (1. - blurRatio);
   vec3 ibl_reflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + vec3(rand(position.x * 2. - 1.), rand(position.y * 2. - 1.), rand(position.z * 2. - 1.)) * .5)).xyz;
@@ -82,7 +82,7 @@ vec3 computePBRLighting (
 
   // specular
   float power = 1.0 / max(roughness * 0.4,0.01);
-  vec3 spec = light.color * GGX(normal, -ray.direction, light.direction, roughness * 0.7, 0.2);
+  vec3 spec = light.color * GGX(normal, -ray.direction, -light.direction, roughness * 0.7, 0.2);
   refl -= spec;
 
   // diffuse
