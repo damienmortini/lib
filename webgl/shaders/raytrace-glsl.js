@@ -4,8 +4,7 @@ export default function({
       Voxel voxel = Voxel(0., vec4(0.));
       return voxel;
     }
-  `,
-  steps = 64
+  `
 } = {}) {
 
   return `
@@ -86,15 +85,15 @@ vec3 normalFromPosition(vec3 p) {
   ));
 }
 
-Voxel rayMarch(vec3 rayOrigin, vec3 rayDirection, float near, float far)
+Voxel rayMarch(vec3 rayOrigin, vec3 rayDirection, float near, float far, int steps)
 {
   Voxel voxel;
 
   float rayMarchingStep = 0.001;
   float distance = near;
 
-  for(int i = 0; i < ${steps}; i++) {
-    if (rayMarchingStep < 0.0001 || rayMarchingStep > far) break;
+  for(int i = 0; i < 128; i++) {
+    if (i == steps || rayMarchingStep < 0.0001 || rayMarchingStep > far) break;
     voxel = map(rayOrigin + rayDirection * distance);
     rayMarchingStep = voxel.distance;
     distance += rayMarchingStep;
@@ -105,9 +104,9 @@ Voxel rayMarch(vec3 rayOrigin, vec3 rayDirection, float near, float far)
 }
 
 
-Voxel rayMarchFromCamera(vec2 position, Camera camera) {
+Voxel rayMarchFromCamera(vec2 position, Camera camera, int steps) {
   Ray ray = rayFromCamera(position, camera);
-  Voxel voxel = rayMarch(ray.origin, ray.direction, camera.near, camera.far);
+  Voxel voxel = rayMarch(ray.origin, ray.direction, camera.near, camera.far, steps);
   return voxel;
 }
 
