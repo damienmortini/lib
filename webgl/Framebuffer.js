@@ -32,31 +32,31 @@ export default class Framebuffer {
   }
 
   get width() {
-    return this._stackglFramebuffer.shape[0];
+    return this._stackglFramebuffer.width;
   }
 
   set width(value) {
-    this._stackglFramebuffer.shape = [value, this.height];
     for (let color of this.colors) {
       color.width = value;
     }
     if(this.depth) {
-      this.depth = value;
+      this.depth.width = value;
     }
+    this._stackglFramebuffer.shape = [value, this.height];
   }
 
   get height() {
-    return this._stackglFramebuffer.shape[1];
+    return this._stackglFramebuffer.height;
   }
 
   set height(value) {
-    this._stackglFramebuffer.shape = [this.width, value];
     for (let color of this.colors) {
-      color.width = value;
+      color.height = value;
     }
     if(this.depth) {
-      this.depth = value;
+      this.depth.height = value;
     }
+    this._stackglFramebuffer.shape = [this.width, value];
   }
 
   get colors() {
