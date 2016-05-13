@@ -86,8 +86,8 @@ export default class Texture2D {
   }
 
 
-  bind() {
-    this._stackglTexture2D.bind();
+  bind(textureUnit) {
+    this._stackglTexture2D.bind(textureUnit);
   }
 
   dispose() {
