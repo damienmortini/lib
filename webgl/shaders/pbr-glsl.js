@@ -60,7 +60,6 @@ vec3 computePBRLighting (
 
   // material
   float fresnel_pow = 1.5;
-  vec3 color_mod = vec3(1.0);
   light.color *= textureCube(reflectionTexture, vec3(1.0,0.0,0.0)).xyz * 1.2;
 
   // IBL
@@ -82,14 +81,14 @@ vec3 computePBRLighting (
 
   // specular
   float power = 1.0 / max(roughness * 0.4,0.01);
-  vec3 spec = light.color * GGX(normal, -ray.direction, -light.direction, roughness * 0.7, 0.2);
+  vec3 spec = light.color * GGX(normal, -ray.direction, -light.direction, roughness, 0.2);
   refl -= spec;
 
   // diffuse
   vec3 diff = ibl_diffuse * albedo;
-  diff = mix(diff * color_mod, refl, fresnel);
+  diff = mix(diff, refl, fresnel * (1. - roughness));
 
-  vec3 color = mix(diff, refl * color_mod, metalness) + spec;
+  vec3 color = mix(diff, refl, metalness) + spec;
   return color;
 }
 `};
