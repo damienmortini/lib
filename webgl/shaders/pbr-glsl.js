@@ -59,16 +59,19 @@ vec3 computePBRLighting (
 ) {
 
   // material
-  float fresnel_pow = 1.5;
+  float fresnel_pow = 2.5;
   light.color *= textureCube(reflectionTexture, vec3(1.0,0.0,0.0)).xyz * 1.2;
 
   // IBL
-  vec3 ibl_diffuse = textureCube(reflectionTexture, normalize(normal + vec3(rand(position.x * 2. - 1.), rand(position.y * 2. - 1.), rand(position.z * 2. - 1.)) * .5)).xyz;
-  float blurRatio = (ibl_diffuse.r + ibl_diffuse.g + ibl_diffuse.b) / 3.;
-  ibl_diffuse = ibl_diffuse * blurRatio + (1. - blurRatio);
-  vec3 ibl_reflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + vec3(rand(position.x * 2. - 1.), rand(position.y * 2. - 1.), rand(position.z * 2. - 1.)) * .5)).xyz;
-  blurRatio = (ibl_reflection.r + ibl_reflection.g + ibl_reflection.b) / 3.;
-  ibl_reflection = ibl_reflection * blurRatio + (1. - blurRatio);
+  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * (.2 * roughness);
+  vec3 diffuseRayDirection = normalize(normal + randomRay);
+  vec3 reflectionRayDirection = normalize(reflect(ray.direction, normal) + randomRay);
+  vec3 ibl_diffuse = textureCube(reflectionTexture, diffuseRayDirection).xyz;
+  // float blurRatio = (ibl_diffuse.r + ibl_diffuse.g + ibl_diffuse.b) / 3.;
+  // ibl_diffuse = ibl_diffuse * blurRatio + (1. - blurRatio);
+  vec3 ibl_reflection = textureCube(reflectionTexture, reflectionRayDirection).xyz;
+  // blurRatio = (ibl_reflection.r + ibl_reflection.g + ibl_reflection.b) / 3.;
+  // ibl_reflection = ibl_reflection * blurRatio + (1. - blurRatio);
 
   // fresnel
   float fresnel = max(1.0 - dot(normal, -ray.direction), 0.0);
@@ -76,19 +79,18 @@ vec3 computePBRLighting (
 
   // reflection
   vec3 refl = textureCube(reflectionTexture, reflect(ray.direction,normal)).xyz;
-  refl = mix(refl, ibl_reflection, (1.0-fresnel)*roughness);
   refl = mix(refl, ibl_reflection, roughness);
 
   // specular
-  float power = 1.0 / max(roughness * 0.4,0.01);
-  vec3 spec = light.color * GGX(normal, -ray.direction, -light.direction, roughness, 0.2);
-  refl -= spec;
+  vec3 spec = light.color * GGX(normal, -ray.direction, -light.direction, roughness, .2);
+  // refl -= spec;
 
   // diffuse
-  vec3 diff = ibl_diffuse * albedo;
+  vec3 diff = albedo;
   diff = mix(diff, refl, fresnel * (1. - roughness));
 
-  vec3 color = mix(diff, refl, metalness) + spec;
+  vec3 color = mix(diff, refl, metalness * (1. - roughness));
+  //  + spec;
   return color;
 }
 `};
