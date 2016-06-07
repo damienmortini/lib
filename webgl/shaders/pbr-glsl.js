@@ -59,38 +59,27 @@ vec3 computePBRLighting (
 ) {
 
   // material
-  float fresnel_pow = 2.5;
   light.color *= textureCube(reflectionTexture, vec3(1.0,0.0,0.0)).xyz * 1.2;
 
   // IBL
-  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * (.2 * roughness);
-  vec3 diffuseRayDirection = normalize(normal + randomRay);
-  vec3 reflectionRayDirection = normalize(reflect(ray.direction, normal) + randomRay);
-  vec3 ibl_diffuse = textureCube(reflectionTexture, diffuseRayDirection).xyz;
-  // float blurRatio = (ibl_diffuse.r + ibl_diffuse.g + ibl_diffuse.b) / 3.;
-  // ibl_diffuse = ibl_diffuse * blurRatio + (1. - blurRatio);
-  vec3 ibl_reflection = textureCube(reflectionTexture, reflectionRayDirection).xyz;
-  // blurRatio = (ibl_reflection.r + ibl_reflection.g + ibl_reflection.b) / 3.;
-  // ibl_reflection = ibl_reflection * blurRatio + (1. - blurRatio);
+  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * .25;
+  vec3 iblDiffuse = textureCube(reflectionTexture, normalize(normal + randomRay)).xyz;
+  vec3 iblReflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + randomRay * roughness)).xyz;
 
   // fresnel
   float fresnel = max(1.0 - dot(normal, -ray.direction), 0.0);
-  fresnel = pow(fresnel, fresnel_pow);
-
-  // reflection
-  vec3 refl = textureCube(reflectionTexture, reflect(ray.direction,normal)).xyz;
-  refl = mix(refl, ibl_reflection, roughness);
-
-  // specular
-  vec3 spec = light.color * GGX(normal, -ray.direction, -light.direction, roughness, .2);
-  // refl -= spec;
+  fresnel = pow(fresnel, 1.5);
 
   // diffuse
-  vec3 diff = albedo;
-  diff = mix(diff, refl, fresnel * (1. - roughness));
+  vec3 diffuse = mix(albedo, iblDiffuse, metalness);
+  diffuse = mix(diffuse, iblReflection, fresnel * (1. - roughness));
 
-  vec3 color = mix(diff, refl, metalness * (1. - roughness));
-  //  + spec;
+  vec3 color = mix(diffuse, iblReflection, metalness);
+
+  // specular
+  vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, roughness * .95 + .05, .2);
+  color += specular;
+
   return color;
 }
 `};
