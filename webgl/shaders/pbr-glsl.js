@@ -66,16 +66,15 @@ vec3 computePBRLighting (
   samplerCube reflectionTexture
 ) {
   // IBL
-  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * .3;
-  vec3 iblDiffuse = textureCube(reflectionTexture, normalize(normal + randomRay)).xyz;
-  vec3 iblReflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + randomRay * roughness)).xyz;
+  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * .4;
+  vec3 reflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + randomRay * roughness)).xyz;
 
   // fresnel
   float fresnel = max(1. - dot(mix(normal, -ray.direction, roughness), -ray.direction), metalness);
 
   // diffuse
-  vec3 color = mix(albedo, iblDiffuse, metalness);
-  color = mix(color, iblReflection, fresnel);
+  vec3 color = mix(albedo, reflection, metalness);
+  color = mix(color, reflection, fresnel);
 
   // specular
   vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, roughness, reflectance);
