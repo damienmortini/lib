@@ -2,25 +2,22 @@
 // PBR from from https://www.shadertoy.com/view/XsfXWX
 
 export default function({
-  map = `
-  vec3 metalRayPick(vec3 p) {
-    return vec3(0.);
-  }
+  reflectionFromRay = `
+    return vec3(1.);
   `
 } = {}) {
   return `
 #define PI 3.1415926535897932384626433832795
 
-struct Light
-{
-  vec3 color;
-  vec3 direction;
-};
-
 float G1V(float dotNV, float k)
 {
   return 1. / (dotNV * (1. - k) + k);
 }
+
+vec3 reflectionFromRay(Ray ray) {
+  ${reflectionFromRay}
+}
+
 
 float GGX(vec3 N, vec3 V, vec3 L, float roughness, float F0)
 {
@@ -62,15 +59,14 @@ vec3 computePBRLighting (
   vec3 albedo,
   float metalness,
   float roughness,
-  float reflectance,
-  samplerCube reflectionTexture
+  float reflectance
 ) {
-  // IBL
-  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * .4;
-  vec3 reflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + randomRay * roughness)).xyz;
-
   // fresnel
   float fresnel = max(1. - dot(mix(normal, -ray.direction, roughness), -ray.direction), metalness);
+
+  // reflection
+  vec3 roughnessRandomVector = normalize(vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.)) * roughness;
+  vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .35)));
 
   // diffuse
   vec3 color = mix(albedo, reflection, metalness);
