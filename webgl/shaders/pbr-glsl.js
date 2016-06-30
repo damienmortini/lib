@@ -19,37 +19,39 @@ struct Light
 
 float G1V(float dotNV, float k)
 {
-    return 1. / (dotNV * (1. - k) + k);
+  return 1. / (dotNV * (1. - k) + k);
 }
 
 float GGX(vec3 N, vec3 V, vec3 L, float roughness, float F0)
 {
-    float alpha = roughness * roughness;
+  roughness = .01 + roughness * .99;
 
-    vec3 H = normalize(V + L);
+  float alpha = roughness * roughness;
 
-    float dotNL = clamp(dot(N, L), 0., 1.);
-    float dotNV = clamp(dot(N, V), 0., 1.);
-    float dotNH = clamp(dot(N, H), 0., 1.);
-    float dotLH = clamp(dot(L, H), 0., 1.);
+  vec3 H = normalize(V + L);
 
-    float F, D, vis;
+  float dotNL = clamp(dot(N, L), 0., 1.);
+  float dotNV = clamp(dot(N, V), 0., 1.);
+  float dotNH = clamp(dot(N, H), 0., 1.);
+  float dotLH = clamp(dot(L, H), 0., 1.);
 
-    // D
-    float alphaSqr = alpha * alpha;
-    float denom = dotNH * dotNH * (alphaSqr - 1.) + 1.;
-    D = alphaSqr / (PI * denom * denom);
+  float F, D, vis;
 
-    // F
-    float dotLH5 = pow(1. - dotLH, 5.);
-    F = F0 + (1. - F0) * dotLH5;
+  // D
+  float alphaSqr = alpha * alpha;
+  float denom = dotNH * dotNH * (alphaSqr - 1.) + 1.;
+  D = alphaSqr / (PI * denom * denom);
 
-    // V
-    float k = alpha / 2.;
-    vis = G1V(dotNL, k) * G1V(dotNV, k);
+  // F
+  float dotLH5 = pow(1. - dotLH, 5.);
+  F = F0 + (1. - F0) * dotLH5;
 
-    float specular = dotNL * D * F * vis;
-    return specular;
+  // V
+  float k = alpha / 2.;
+  vis = G1V(dotNL, k) * G1V(dotNV, k);
+
+  float specular = dotNL * D * F * vis;
+  return specular;
 }
 
 vec3 computePBRLighting (
@@ -60,29 +62,23 @@ vec3 computePBRLighting (
   vec3 albedo,
   float metalness,
   float roughness,
+  float reflectance,
   samplerCube reflectionTexture
 ) {
-
-  // material
-  light.color *= textureCube(reflectionTexture, vec3(1.,0.,0.)).xyz * 1.2;
-
   // IBL
-  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * .25;
+  vec3 randomRay = vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.) * .3;
   vec3 iblDiffuse = textureCube(reflectionTexture, normalize(normal + randomRay)).xyz;
   vec3 iblReflection = textureCube(reflectionTexture, normalize(reflect(ray.direction, normal) + randomRay * roughness)).xyz;
 
   // fresnel
-  float fresnel = max(1. - dot(normal, -ray.direction), 0.);
-  fresnel = pow(fresnel, 1.5);
+  float fresnel = max(1. - dot(mix(normal, -ray.direction, roughness), -ray.direction), metalness);
 
   // diffuse
-  vec3 diffuse = mix(albedo, iblDiffuse, metalness);
-  diffuse = mix(diffuse, iblReflection, fresnel * (1. - roughness));
-
-  vec3 color = mix(diffuse, iblReflection, metalness);
+  vec3 color = mix(albedo, iblDiffuse, metalness);
+  color = mix(color, iblReflection, fresnel);
 
   // specular
-  vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, roughness * .95 + .05, .2);
+  vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, roughness, reflectance);
   color += specular;
 
   return color;
