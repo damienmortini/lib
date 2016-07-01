@@ -93,12 +93,13 @@ Voxel rayMarch(Ray ray, float near, float far, int steps)
   float distance = near;
 
   for(int i = 0; i < 128; i++) {
-    if (i == steps || rayMarchingStep < 0.0001 || rayMarchingStep > far) break;
+    if (i == steps || rayMarchingStep < 0.0001 || distance > far) break;
     voxel = map(ray.origin + ray.direction * distance);
     rayMarchingStep = voxel.distance;
     distance += rayMarchingStep;
-    voxel.distance = distance;
   }
+
+  voxel.distance = distance;
 
   return voxel;
 }
