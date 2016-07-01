@@ -9,15 +9,18 @@ export default function({
   return `
 #define PI 3.1415926535897932384626433832795
 
+struct PhysicallyBasedMaterial
+{
+  vec3 albedo;
+  float metalness;
+  float roughness;
+  float reflectance;
+};
+
 float G1V(float dotNV, float k)
 {
   return 1. / (dotNV * (1. - k) + k);
 }
-
-vec3 reflectionFromRay(Ray ray) {
-  ${reflectionFromRay}
-}
-
 
 float GGX(vec3 N, vec3 V, vec3 L, float roughness, float F0)
 {
@@ -51,29 +54,47 @@ float GGX(vec3 N, vec3 V, vec3 L, float roughness, float F0)
   return specular;
 }
 
-vec3 computePBRLighting (
-  Light light,
+vec3 computeGGXLighting (
   Ray ray,
+  Light light,
+  vec3 normal,
+  PhysicallyBasedMaterial material
+) {
+  vec3 color = material.albedo;
+
+  vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, material.roughness, material.reflectance);
+  color += specular;
+
+  return color;
+}
+
+vec3 reflectionFromRay(
+  Ray ray,
+  Light light
+) {
+  ${reflectionFromRay}
+}
+
+vec3 computePBRLighting (
+  Ray ray,
+  Light light,
   vec3 position,
   vec3 normal,
-  vec3 albedo,
-  float metalness,
-  float roughness,
-  float reflectance
+  PhysicallyBasedMaterial material
 ) {
   // fresnel
-  float fresnel = max(1. - dot(mix(normal, -ray.direction, roughness), -ray.direction), metalness);
+  float fresnel = max(1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction), material.metalness);
 
   // reflection
-  vec3 roughnessRandomVector = normalize(vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.)) * roughness;
-  vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)));
+  vec3 roughnessRandomVector = normalize(vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.)) * material.roughness;
+  vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)), light);
 
   // diffuse
-  vec3 color = mix(albedo, reflection, metalness);
+  vec3 color = mix(material.albedo, reflection, material.metalness);
   color = mix(color, reflection, fresnel);
 
   // specular
-  vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, roughness, reflectance);
+  vec3 specular = light.color * GGX(normal, -ray.direction, -light.direction, material.roughness, material.reflectance);
   color += specular;
 
   return color;
