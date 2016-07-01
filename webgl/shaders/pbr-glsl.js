@@ -66,7 +66,7 @@ vec3 computePBRLighting (
 
   // reflection
   vec3 roughnessRandomVector = normalize(vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.)) * roughness;
-  vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .35)));
+  vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)));
 
   // diffuse
   vec3 color = mix(albedo, reflection, metalness);
