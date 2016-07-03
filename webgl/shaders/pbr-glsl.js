@@ -103,6 +103,7 @@ export default class PBR {
       // diffuse
       vec3 color = mix(material.albedo, reflection, material.metalness);
       color = mix(color, reflection, fresnel);
+      color *= light.color;
 
       // specular
       vec3 specular = light.color * ggx(normal, -ray.direction, -light.direction, material.roughness, material.reflectance);
