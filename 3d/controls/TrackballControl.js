@@ -26,7 +26,7 @@ export default class TrackballControl {
 
     domElement.addEventListener("wheel", this.onWheel.bind(this));
 
-    Ticker.add(this.update, this);
+    Ticker.add(this.update.bind(this));
   }
 
   onWheel(e) {

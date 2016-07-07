@@ -1,5 +1,4 @@
-let callbacks = [];
-let scopes = [];
+const callbacks = [];
 
 class Ticker {
   constructor() {
@@ -12,29 +11,30 @@ class Ticker {
   }
 
   update(time) {
-    this._requestAnimationFrameId = requestAnimationFrame(this._updateBinded);
+    this._requestAnimationFrameID = requestAnimationFrame(this._updateBinded);
 
     let timestamp = window.performance ? window.performance.now() : Date.now();
     this.deltaTime = timestamp - this._previousTimestamp;
     this._previousTimestamp = timestamp;
 
-    for (let [i, callback] of callbacks.entries()) {
-      callback.call(scopes[i], time);
+    for (let callback of callbacks) {
+      callback();
     }
   }
 
-  add(callback, scope) {
+  add(callback) {
+    this.remove(callbacks.indexOf(callback));
+
     callbacks.push(callback);
-    scopes.push(scope);
+
+    return callbacks.length - 1;
   }
 
-  remove(callback) {
-    var index = callbacks.indexOf(callback);
-    if(index === -1) {
+  remove(id) {
+    if(id < 0) {
       return;
     }
-    callbacks.splice(index, 1);
-    scopes.splice(index, 1);
+    callbacks.splice(id, 1);
   }
 }
 

@@ -24,11 +24,11 @@ export default class LoopElement extends CustomElement {
 
   start() {
     this.stop();
-    Ticker.add(this.update, this);
+    this._tickerID = Ticker.add(this.update.bind(this));
   }
 
   stop() {
-    Ticker.remove(this.update, this);
+    Ticker.remove(this._tickerID);
   }
 
   update() {}
