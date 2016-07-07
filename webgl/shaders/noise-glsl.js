@@ -5,8 +5,6 @@ export default function() {
   return `
 #define PI 3.1415926535897932384626433832795
 
-#define NUM_OCTAVES 5
-
 // Mod 289
 
 float mod289(float x) {
@@ -919,6 +917,8 @@ float voronoiNoise( in vec2 x, float time ){
 ██      ██   ██ ██  ██  ██
 ██      ██████  ██      ██
 */
+
+#define NUM_OCTAVES 5
 
 float fbm(float x) {
     float v = 0.0;
