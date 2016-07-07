@@ -30,7 +30,7 @@ class Ticker {
     return callbacks.length - 1;
   }
 
-  remove(id) {
+  remove(id = -1) {
     if(id < 0) {
       return;
     }
