@@ -7,17 +7,9 @@ import Matrix4 from "../math/Matrix4.js";
 import Vector3 from "../math/Vector3.js";
 import Quaternion from "../math/Quaternion.js";
 
-const BONE_PREFIXES = [
-  "carp",
-  "mcp",
-  "pip",
-  "dip"
-];
-
 class Hand {
   constructor() {
     this._bones = new Array(5).fill().map(value => new Array(4).fill().map(value => new Quaternion()));
-    this._boneMatrices = new Array(5).fill().map(value => new Array(4).fill().map(value => new Matrix4()));
 
     this._position = new Vector3();
     this._rotation = new Quaternion();
@@ -68,22 +60,11 @@ class Hand {
 
         let basis = pointableData.bones[i].basis;
 
-        // Global
-        let position = pointableData[`${BONE_PREFIXES[i]}Position`];
-        this._boneMatrices[pointableData.type][i].set(
-          basis[0][0], basis[0][1], basis[0][2], 0,
-          basis[1][0], basis[1][1], basis[1][2], 0,
-          basis[2][0], basis[2][1], basis[2][2], 0,
-          position[0] * .02, (position[1] - 100) * .02, position[2] * .02, 1
-        );
-
-        // Local
         this._matrix3.fromBasis(basis[0], basis[1], basis[2]);
 
         bone.fromMatrix3(this._matrix3);
 
         this._quaternion.invert();
-
         bone.multiply(this._quaternion, bone);
 
         this._quaternion.invert();
