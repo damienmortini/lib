@@ -55,6 +55,16 @@ export default class Vector3 extends Float32Array {
     return this;
   }
 
+  negate(vector3 = this) {
+    vec3.negate(this, vector3);
+    return this;
+  }
+
+  cross(vector3a, vector3b) {
+    vec3.cross(this, vector3a, vector3b);
+    return this;
+  }
+
   scale(value) {
     vec3.scale(this, this, value);
     return this;

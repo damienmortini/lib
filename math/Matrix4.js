@@ -39,8 +39,13 @@ export default class Matrix4 extends Float32Array {
     return this[15];
   }
 
-  translate(elements, matrix4 = this) {
-    mat4.translate(this, matrix4, elements);
+  set(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) {
+    mat4.set(this, m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33);
+    return this;
+  }
+
+  translate(vector3, matrix4 = this) {
+    mat4.translate(this, matrix4, vector3);
     return this;
   }
 
@@ -56,6 +61,11 @@ export default class Matrix4 extends Float32Array {
 
   rotateZ(value, matrix4 = this) {
     mat4.rotateZ(this, matrix4, value);
+    return this;
+  }
+
+  scale(vector3, matrix4 = this) {
+    mat4.scale(this, matrix4, vector3);
     return this;
   }
 
