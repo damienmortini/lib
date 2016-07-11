@@ -9,7 +9,7 @@ import Quaternion from "../math/Quaternion.js";
 
 class Hand {
   constructor() {
-    this._bones = new Array(5).fill().map(value => new Array(4).fill().map(value => new Quaternion()));
+    this._bones = new Array(5).fill().map(value => new Array(3).fill().map(value => new Quaternion()));
 
     this._position = new Vector3();
     this._rotation = new Quaternion();
@@ -55,10 +55,10 @@ class Hand {
 
       this._quaternion.copy(this.rotation);
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         let bone = this.bones[pointableData.type][i];
 
-        let basis = pointableData.bones[i].basis;
+        let basis = pointableData.bones[i + 1].basis;
 
         this._matrix3.fromBasis(basis[0], basis[1], basis[2]);
 
