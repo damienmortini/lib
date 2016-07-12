@@ -1,4 +1,4 @@
-import THREE from "THREE";
+import THREE from "three";
 
 export default class THREEShader {
   constructor (vertexShader, fragmentShader, uniforms, attributes) {

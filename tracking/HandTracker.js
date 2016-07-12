@@ -39,7 +39,7 @@ class Hand {
   }
 
   update(handData, pointablesData) {
-    this.position.set(handData.stabilizedPalmPosition[0], handData.stabilizedPalmPosition[1], handData.stabilizedPalmPosition[2]);
+    this.position.set(handData.palmPosition[0], handData.palmPosition[1], handData.palmPosition[2]);
 
     this._vector3A.copy(handData.direction);
     this._vector3A.negate();
