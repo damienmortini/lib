@@ -10,6 +10,8 @@ export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
     let originalShader = THREE.ShaderLib[originalShaderName];
     let tempShader = new THREEShader(vertexShaderHooks.prefix, fragmentShaderHooks.prefix);
 
+    options.uniforms = Object.assign(THREE.UniformsUtils.clone(originalShader.uniforms), tempShader.uniforms, options.uniforms);
+
     var regExp = /([\s\S]*?\bvoid\b +\bmain\b[\s\S]*?{)([\s\S]*)}/m;
 
     let generateSubstringFromHooks = (hooks) => {
@@ -20,11 +22,10 @@ export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
     delete options.fragmentShaderHooks;
 
     super(Object.assign({
-      uniforms: Object.assign(THREE.UniformsUtils.clone(originalShader.uniforms), tempShader.uniforms),
       vertexShader: originalShader.vertexShader.replace(regExp, generateSubstringFromHooks(vertexShaderHooks)),
       fragmentShader: originalShader.fragmentShader.replace(regExp, generateSubstringFromHooks(fragmentShaderHooks))
     }, options));
 
-    this.lights = /lambert|phong/.test(originalShaderName);
+    this.lights = /lambert|phong|standard/.test(originalShaderName);
   }
 }
