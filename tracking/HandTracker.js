@@ -7,12 +7,41 @@ import Matrix4 from "../math/Matrix4.js";
 import Vector3 from "../math/Vector3.js";
 import Quaternion from "../math/Quaternion.js";
 
+const BONE_PREFIXES = [
+  "carp",
+  "mcp",
+  "pip",
+  "dip"
+];
+
+class Bone {
+  constructor() {
+    this.position = new Vector3();
+    this.rotation = new Quaternion();
+    this.globalPosition = new Vector3();
+    this.globalRotation = new Quaternion();
+  }
+}
+
 class Hand {
-  constructor(handData) {
+  constructor(handData, {positionScale = 1} = {}) {
     this.type = handData.type;
     this.id = handData.id;
 
-    this._bones = new Array(5).fill().map(value => new Array(3).fill().map(value => new Quaternion()));
+    this._positionScale = positionScale;
+
+    this._bones = new Map([
+      ["arm", new Bone()],
+      ["wrist", new Bone()]
+    ]);
+
+    for (let [i, fingerName] of HandTracker.FINGER_NAMES.entries()) {
+      let l = fingerName === HandTracker.THUMB ? 3 : 4;
+      for (let j = 0; j < l; j++) {
+        let bone = new Bone();
+        this._bones.set(`${fingerName}${j}`, bone);
+      }
+    }
 
     this._position = new Vector3();
     this._rotation = new Quaternion();
@@ -38,6 +67,16 @@ class Hand {
     return this._bones;
   }
 
+  _setRotationFromBasis(rotation, basis) {
+    this._vector3A.copy(basis[0]);
+    if(this.type === "left") {
+      this._vector3A.negate();
+    }
+    this._matrix3.fromBasis(this._vector3A, basis[1], basis[2]);
+
+    rotation.fromMatrix3(this._matrix3);
+  }
+
   update(handData, pointablesData) {
     this.position.set(handData.palmPosition[0], handData.palmPosition[1], handData.palmPosition[2]);
 
@@ -51,6 +90,23 @@ class Hand {
 
     this.rotation.fromMatrix3(this._matrix3);
 
+    // wrist
+    let wristBone = this.bones.get("wrist");
+    wristBone.globalPosition.copy(handData.wrist);
+    // wristBone.position.copy(wristBone.globalPosition).subtract(this.position);
+    wristBone.globalRotation.copy(this.rotation);
+    wristBone.rotation.copy(this.rotation);
+
+    // arm
+    let armBone = this.bones.get("arm");
+    armBone.globalPosition.copy(handData.elbow);
+    this._setRotationFromBasis(armBone.globalRotation, handData.armBasis);
+    // armBone.position.copy(armBone.globalPosition).subtract(wristBone.position);
+    armBone.position.copy(handData.elbow);
+    armBone.rotation.copy(armBone.globalRotation);
+    // this._quaternion.copy(this.rotation).invert();
+    // armBone.rotation.copy(armBone.globalRotation).multiply(this._quaternion);
+
     for (let pointableData of pointablesData) {
       if (pointableData.handId !== handData.id) {
         continue;
@@ -58,38 +114,82 @@ class Hand {
 
       this._quaternion.copy(this.rotation);
 
-      for (let i = 0; i < 3; i++) {
-        let bone = this.bones[pointableData.type][i];
+      for (let i = 0; i < 4; i++) {
+        let dataBoneIndex = i;
 
-        let basis = pointableData.bones[i + 1].basis;
-
-        this._vector3A.copy(basis[0]);
-        if(this.type === "left") {
-          this._vector3A.negate();
+        if(!pointableData.type) {
+          if(i === 3) {
+            continue;
+          }
+          dataBoneIndex++;
         }
-        this._matrix3.fromBasis(this._vector3A, basis[1], basis[2]);
 
-        bone.fromMatrix3(this._matrix3);
+        let bone = this.bones.get(`${HandTracker.FINGER_NAMES[pointableData.type]}${i}`);
+        let basis = pointableData.bones[dataBoneIndex].basis;
+
+        bone.globalPosition.copy(pointableData[`${BONE_PREFIXES[dataBoneIndex]}Position`]);
+
+        this._setRotationFromBasis(bone.globalRotation, basis);
 
         this._quaternion.invert();
-        bone.multiply(this._quaternion, bone);
+        bone.rotation.multiply(this._quaternion, bone.globalRotation);
 
-        this._quaternion.invert();
-        this._quaternion.multiply(bone);
+        this._quaternion.copy(bone.globalRotation);
       }
+    }
+
+    for (let bone of this.bones.values()) {
+      bone.position.scale(this._positionScale);
+      bone.globalPosition.scale(this._positionScale);
     }
   }
 }
 
-class HandTracker {
-  constructor() {
+export default class HandTracker {
+  static get THUMB() {
+    return "thumb"
+  }
+
+  static get INDEX() {
+    return "index"
+  }
+
+  static get MIDDLE() {
+    return "middle"
+  }
+
+  static get RING() {
+    return "ring"
+  }
+
+  static get PINKY() {
+    return "pinky"
+  }
+
+  static get FINGER_NAMES() {
+    return [
+      HandTracker.THUMB,
+      HandTracker.INDEX,
+      HandTracker.MIDDLE,
+      HandTracker.RING,
+      HandTracker.PINKY
+    ]
+  }
+
+  constructor({
+    hmd = false,
+    background = false,
+    positionScale = 1
+  } = {}) {
       let controller = new leapjs.Controller({
-        host: "127.0.0.1"
+        host: "127.0.0.1",
+        optimizeHMD: hmd,
+        background
       });
 
       this._hands = new Map();
 
-      this.frame = null;
+      this._positionScale = positionScale;
 
       this.onHandAdd = new Signal();
       this.onHandRemove = new Signal();
@@ -104,16 +204,14 @@ class HandTracker {
   }
 
   onFrame(frame) {
-    this.frame = frame.data;
-
-    if(!this.frame) {
+    if(!frame.data) {
       return;
     }
 
-    for(let handData of this.frame.hands) {
+    for(let handData of frame.data.hands) {
       let hand = this._hands.get(handData.id);
       if(!hand) {
-        hand = new Hand(handData);
+        hand = new Hand(handData, {positionScale: this._positionScale});
         this._hands.set(handData.id, hand);
         this.onHandAdd.dispatch(hand);
       }
@@ -122,7 +220,7 @@ class HandTracker {
 
     for (let hand of this.hands.values()) {
       let remove = true;
-      for (let handData of this.frame.hands) {
+      for (let handData of frame.data.hands) {
         if(hand.id === handData.id) {
           remove = false;
         }
@@ -134,9 +232,6 @@ class HandTracker {
     }
   }
 }
-
-export default new HandTracker();
-
 
 // this.fingerBonesHelper = [];
 // for (let i = 0; i < 5; i++) {
