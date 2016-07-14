@@ -90,22 +90,20 @@ class Hand {
 
     this.rotation.fromMatrix3(this._matrix3);
 
-    // wrist
-    let wristBone = this.bones.get("wrist");
-    wristBone.globalPosition.copy(handData.wrist);
-    // wristBone.position.copy(wristBone.globalPosition).subtract(this.position);
-    wristBone.globalRotation.copy(this.rotation);
-    wristBone.rotation.copy(this.rotation);
-
     // arm
     let armBone = this.bones.get("arm");
     armBone.globalPosition.copy(handData.elbow);
     this._setRotationFromBasis(armBone.globalRotation, handData.armBasis);
-    // armBone.position.copy(armBone.globalPosition).subtract(wristBone.position);
-    armBone.position.copy(handData.elbow);
+    armBone.position.copy(this.position).add(handData.elbow);
     armBone.rotation.copy(armBone.globalRotation);
-    // this._quaternion.copy(this.rotation).invert();
-    // armBone.rotation.copy(armBone.globalRotation).multiply(this._quaternion);
+
+    // wrist
+    let wristBone = this.bones.get("wrist");
+    wristBone.globalPosition.copy(handData.wrist);
+    wristBone.globalRotation.copy(this.rotation);
+    this._quaternion.copy(armBone.globalRotation);
+    this._quaternion.invert();
+    wristBone.rotation.multiply(this._quaternion, wristBone.globalRotation);
 
     for (let pointableData of pointablesData) {
       if (pointableData.handId !== handData.id) {
@@ -164,6 +162,14 @@ export default class HandTracker {
 
   static get PINKY() {
     return "pinky"
+  }
+
+  static get LEFT() {
+    return "left"
+  }
+
+  static get RIGHT() {
+    return "right"
   }
 
   static get FINGER_NAMES() {
