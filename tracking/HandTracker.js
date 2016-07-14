@@ -7,6 +7,13 @@ import Matrix4 from "../math/Matrix4.js";
 import Vector3 from "../math/Vector3.js";
 import Quaternion from "../math/Quaternion.js";
 
+const POSE_ROTATIONS = new Map([["arm",[0.0926913321018219,0.3053490221500397,-0.017239512875676155,0.9475616216659546]],["wrist",[0.03710794821381569,0.028223423287272453,-0.04135271534323692,0.9980563521385193]],["thumb0",[0.02040507271885872,0.3115042448043823,0.5274629592895508,0.79014652967453]],["thumb1",[-0.027378182858228683,0.27906230092048645,0.5453220009803772,0.7899355888366699]],["thumb2",[0.1263851374387741,0.3795504868030548,0.4808257520198822,0.780239999294281]],["index0",[-0.03344293311238289,0.11473120748996735,-0.02962813340127468,0.9923912882804871]],["index1",[-0.10567563772201538,0.06956322491168976,-0.0231220293790102,0.991694986820221]],["index2",[-0.1320752650499344,0.07015474885702133,-0.0212593674659729,0.988525390625]],["index3",[-0.1521591991186142,0.0705728605389595,-0.019827699288725853,0.9856337904930115]],["middle0",[-0.03993868827819824,0.04314754530787468,-0.11250335723161697,0.9919103980064392]],["middle1",[-0.11390332877635956,-0.02363399602472782,-0.11102284491062164,0.9869861006736755]],["middle2",[-0.14237332344055176,-0.02041628398001194,-0.11165937036275864,0.9832828640937805]],["middle3",[-0.1640862077474594,-0.017941679805517197,-0.11208360642194748,0.9798935055732727]],["ring0",[-0.03660893440246582,-0.03369523212313652,-0.14624859392642975,0.9879958033561707]],["ring1",[-0.10531647503376007,-0.053472504019737244,-0.14890576899051666,0.9817718863487244]],["ring2",[-0.13192689418792725,-0.04941089078783989,-0.15030251443386078,0.9785515069961548]],["ring3",[-0.1522718071937561,-0.04627085104584694,-0.15129853785037994,0.9755926132202148]],["pinky0",[-0.0036756149493157864,-0.10289819538593292,-0.22150446474552155,0.9697084426879883]],["pinky1",[-0.06244660168886185,-0.14137904345989227,-0.2282661646604538,0.9612528085708618]],["pinky2",[-0.08293642103672028,-0.1364777684211731,-0.23123009502887726,0.9597020149230957]],["pinky3",[-0.09880337119102478,-0.1326335221529007,-0.2334562987089157,0.9581985473632812]]]);
+
+const POSE_ROTATIONS_INVERT = new Map();
+for (let [key, value] of POSE_ROTATIONS) {
+  POSE_ROTATIONS_INVERT.set(key, new Quaternion().copy(value).invert());
+}
+
 const BONE_PREFIXES = [
   "carp",
   "mcp",
@@ -52,7 +59,8 @@ class Hand {
 
     this._matrix3 = new Matrix3();
 
-    this._quaternion = new Quaternion();
+    this._quaternionA = new Quaternion();
+    this._quaternionB = new Quaternion();
   }
 
   get position() {
@@ -69,7 +77,7 @@ class Hand {
 
   _setRotationFromBasis(rotation, basis) {
     this._vector3A.copy(basis[0]);
-    if(this.type === "left") {
+    if(this.type === HandTracker.LEFT) {
       this._vector3A.negate();
     }
     this._matrix3.fromBasis(this._vector3A, basis[1], basis[2]);
@@ -101,16 +109,16 @@ class Hand {
     let wristBone = this.bones.get("wrist");
     wristBone.globalPosition.copy(handData.wrist);
     wristBone.globalRotation.copy(this.rotation);
-    this._quaternion.copy(armBone.globalRotation);
-    this._quaternion.invert();
-    wristBone.rotation.multiply(this._quaternion, wristBone.globalRotation);
+    this._quaternionA.copy(armBone.globalRotation);
+    this._quaternionA.invert();
+    wristBone.rotation.multiply(this._quaternionA, wristBone.globalRotation);
 
     for (let pointableData of pointablesData) {
       if (pointableData.handId !== handData.id) {
         continue;
       }
 
-      this._quaternion.copy(this.rotation);
+      this._quaternionA.copy(wristBone.globalRotation);
 
       for (let i = 0; i < 4; i++) {
         let dataBoneIndex = i;
@@ -122,17 +130,26 @@ class Hand {
           dataBoneIndex++;
         }
 
-        let bone = this.bones.get(`${HandTracker.FINGER_NAMES[pointableData.type]}${i}`);
+        let boneName = `${HandTracker.FINGER_NAMES[pointableData.type]}${i}`;
+        let bone = this.bones.get(boneName);
         let basis = pointableData.bones[dataBoneIndex].basis;
 
         bone.globalPosition.copy(pointableData[`${BONE_PREFIXES[dataBoneIndex]}Position`]);
 
         this._setRotationFromBasis(bone.globalRotation, basis);
 
-        this._quaternion.invert();
-        bone.rotation.multiply(this._quaternion, bone.globalRotation);
+        this._quaternionB.copy(POSE_ROTATIONS_INVERT.get(boneName));
+        if(this.type === HandTracker.LEFT) {
+          this._quaternionB.y *= -1;
+          this._quaternionB.z *= -1;
+        }
+        this._quaternionB.multiply(bone.globalRotation, this._quaternionB);
 
-        this._quaternion.copy(bone.globalRotation);
+        this._quaternionA.invert();
+
+        bone.rotation.multiply(this._quaternionA, this._quaternionB);
+
+        this._quaternionA.copy(this._quaternionB);
       }
     }
 
@@ -238,32 +255,3 @@ export default class HandTracker {
     }
   }
 }
-
-// this.fingerBonesHelper = [];
-// for (let i = 0; i < 5; i++) {
-//   let bones = [];
-//   let bonesGlobal = [];
-//
-//   let currentBone;
-//
-//   for (let j = 0; j < 3; j++) {
-//
-//     let bone = new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .3), new THREE.MeshNormalMaterial());
-//     bone.geometry.translate(0, 0, -.15);
-//
-//     if(currentBone) {
-//       currentBone.add(bone);
-//       bone.position.z = -.3;
-//     } else {
-//       // this.add(bone);
-//       bone.position.y = .1;
-//       bone.position.z = -.2;
-//       bone.position.x = i * .3 - .75;
-//     }
-//
-//     currentBone = bone;
-//     bones[j] = bone;
-//   }
-//
-//   this.fingerBonesHelper[i] = bones;
-// }
