@@ -159,6 +159,8 @@ class Hand {
       bone.globalPosition.scale(this._positionScale);
     }
 
+    this.position.scale(this._positionScale);
+
     // let poseRotations = [];
     // for (let [key, bone] of this.bones) {
     //   poseRotations.push([key, [bone.globalRotation.x, bone.globalRotation.y, bone.globalRotation.z, bone.globalRotation.w]]);
