@@ -1,5 +1,19 @@
 import ControlKit from "controlkit";
 
+// STYLES
+
+document.styleSheets[0].insertRule(`
+  #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .label {
+    width: 50% !important;
+  }
+`, 0);
+
+document.styleSheets[0].insertRule(`
+  #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .wrap {
+    width: 50% !important;
+  }
+`, 0);
+
 // UTILS
 
 function componentToHex(c) {
@@ -51,7 +65,12 @@ class GUI {
     let value = PROPERTIES.get(internalKey);
     if(!value) {
       if(type === "color") {
-        value = rgbToHex(object[key].r, object[key].g, object[key].b).replace("#", "");
+        let color = object[key];
+        value = rgbToHex(
+          color.r !== undefined ? color.r : color.x !== undefined ? color.x : color[0],
+          color.g !== undefined ? color.g : color.y !== undefined ? color.y : color[1],
+          color.b !== undefined ? color.b : color.z !== undefined ? color.z : color[2]
+        ).replace("#", "");
       } else {
         value = object[key];
       }
@@ -63,7 +82,7 @@ class GUI {
       controlkitPanel = this._controlKit.addPanel({
         fixed: false,
         label: panel,
-        width: 250
+        width: 200
       });
       CONTROLKIT_PANELS.set(panel, controlkitPanel);
     }
@@ -101,7 +120,17 @@ class GUI {
       let objectData = OBJECTS_DATA.get(key);
 
       if(type === "color") {
-        Object.assign(objectData.object[objectData.key], hexToRgb(value));
+        let color = objectData.object[objectData.key];
+        let colorValue = hexToRgb(value);
+
+        if(color.r !== undefined) {
+          Object.assign(color, colorValue);
+        } else if (color.x !== undefined) {
+          [color.x, color.y, color.z] = [colorValue.r, colorValue.g, colorValue.b];
+        } else {
+          [color[0], color[1], color[2]] = [colorValue.r, colorValue.g, colorValue.b];
+        }
+
         value = value.replace("#", "");
       } else {
         objectData.object[objectData.key] = value;
