@@ -45,7 +45,11 @@ const PROPERTIES = new Map();
 
   let matches;
   while (matches = regExp.exec(window.location.hash)) {
-    PROPERTIES.set(matches[1].replace("gui-", ""), matches[2]);
+    let value = matches[2];
+    try {
+      value = JSON.parse(value);
+    } catch (e) {}
+    PROPERTIES.set(matches[1].replace("gui-", ""), value);
   }
 })();
 
@@ -54,16 +58,22 @@ class GUI {
     this._controlKit = new ControlKit();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "Main"}) {
+  add(object, key, {type = typeof object[key], label = key, panel = "Main", reload = false}) {
     let internalKey = `${label.toLowerCase().replace(/[^\w-]/g, "")}`;
 
     OBJECTS_DATA.set(internalKey, {
       object,
-      key
+      key,
+      reload
     });
 
     let value = PROPERTIES.get(internalKey);
-    if(!value) {
+    if(value) {
+      if(type !== "color") {
+        object[key] = value;
+      }
+    }
+    else {
       if(type === "color") {
         let color = object[key];
         value = rgbToHex(
@@ -87,7 +97,7 @@ class GUI {
       CONTROLKIT_PANELS.set(panel, controlkitPanel);
     }
 
-    let onChange = (value) => {
+    let onChange = (value = object[key]) => {
       this._updateValue(internalKey, value, type);
     }
 
@@ -102,9 +112,17 @@ class GUI {
           colorMode: "hex"
         });
         break;
+      case "boolean":
+        controlkitPanel.addCheckbox(object, key, {
+          onChange,
+          label
+        });
+        break;
     }
 
     onChange(value);
+
+    return object[key];
   }
 
   _updateValue(key, value, type) {
