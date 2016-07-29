@@ -34,24 +34,32 @@ function hexToRgb(hex) {
   } : null;
 }
 
+function colorFromHex(color, hex) {
+  let colorValue = hexToRgb(hex);
+
+  if(color.r !== undefined) {
+    Object.assign(color, colorValue);
+  } else if (color.x !== undefined) {
+    [color.x, color.y, color.z] = [colorValue.r, colorValue.g, colorValue.b];
+  } else {
+    [color[0], color[1], color[2]] = [colorValue.r, colorValue.g, colorValue.b];
+  }
+
+  return color;
+}
+
+function colorToHex(color) {
+  return rgbToHex(
+    color.r !== undefined ? color.r : color.x !== undefined ? color.x : color[0],
+    color.g !== undefined ? color.g : color.y !== undefined ? color.y : color[1],
+    color.b !== undefined ? color.b : color.z !== undefined ? color.z : color[2]
+  ).replace("#", "");
+}
+
 // GUI
 
 const CONTROLKIT_PANELS = new Map();
 const OBJECTS_DATA = new Map();
-const PROPERTIES = new Map();
-
-(function() {
-  const regExp = /[#&]([\w_-]+)=?([\w_-]*)/g;
-
-  let matches;
-  while (matches = regExp.exec(window.location.hash)) {
-    let value = matches[2];
-    try {
-      value = JSON.parse(value);
-    } catch (e) {}
-    PROPERTIES.set(matches[1].replace("gui-", ""), value);
-  }
-})();
 
 class GUI {
   constructor() {
@@ -67,23 +75,44 @@ class GUI {
       reload
     });
 
-    let value = PROPERTIES.get(internalKey);
-    if(value) {
-      if(type !== "color") {
+
+
+    // Test if property is in URL
+
+    // const regExp = /[#&]([\w_-]+)=?([\w_-]*)/g;
+    // let matches;
+    // while (matches = regExp.exec(window.location.hash)) {
+    //   let value = matches[2];
+    //   try {
+    //     let newValue = JSON.parse(value);
+    //     value = newValue !== Infinity ? newValue : value;
+    //   } catch (e) {}
+    // }
+
+    let value;
+
+    let regExp = new RegExp(`[#&]gui-${internalKey}=?([\\w_-]*)`, "g");
+    let matches = regExp.exec(window.location.hash);
+
+    if(matches) {
+      switch (type) {
+        case "boolean":
+          value = matches[1] === "true";
+          break;
+        case "number":
+          value = parseFloat(matches[1]);
+          break
+        default:
+          value = matches[1];
+      }
+      if(type === "color") {
+        colorFromHex(object[key], value);
+      } else {
         object[key] = value;
       }
     }
     else {
-      if(type === "color") {
-        let color = object[key];
-        value = rgbToHex(
-          color.r !== undefined ? color.r : color.x !== undefined ? color.x : color[0],
-          color.g !== undefined ? color.g : color.y !== undefined ? color.y : color[1],
-          color.b !== undefined ? color.b : color.z !== undefined ? color.z : color[2]
-        ).replace("#", "");
-      } else {
-        value = object[key];
-      }
+      value = type === "color" ? colorToHex(object[key]) : object[key];
     }
 
     let controlkitPanel = CONTROLKIT_PANELS.get(panel);
@@ -98,7 +127,7 @@ class GUI {
     }
 
     let onChange = (value = object[key]) => {
-      this._updateValue(internalKey, value, type);
+      this._changeValue(internalKey, value, type);
     }
 
     switch (type) {
@@ -120,44 +149,32 @@ class GUI {
         break;
     }
 
-    onChange(value);
-
     return object[key];
   }
 
-  _updateValue(key, value, type) {
-    let regExp = new RegExp(`([#&]gui-${key}=?)([\\w_-]*)`, "g");
+  _changeValue(key, value, type) {
+    let objectData = OBJECTS_DATA.get(key);
 
+    if(type === "color") {
+      colorFromHex(objectData.object[objectData.key], value);
+      value = value.replace("#", "");
+    } else {
+      objectData.object[objectData.key] = value;
+    }
+
+    let regExp = new RegExp(`([#&]gui-${key}=?)([\\w_-]*)`, "g");
     let matches = regExp.exec(window.location.hash);
 
     if(!matches) {
       let prefix = window.location.hash ? "&" : "#";
       window.location.hash += `${prefix}gui-${key}=${value}`;
     } else {
-
-      let objectData = OBJECTS_DATA.get(key);
-
-      if(type === "color") {
-        let color = objectData.object[objectData.key];
-        let colorValue = hexToRgb(value);
-
-        if(color.r !== undefined) {
-          Object.assign(color, colorValue);
-        } else if (color.x !== undefined) {
-          [color.x, color.y, color.z] = [colorValue.r, colorValue.g, colorValue.b];
-        } else {
-          [color[0], color[1], color[2]] = [colorValue.r, colorValue.g, colorValue.b];
-        }
-
-        value = value.replace("#", "");
-      } else {
-        objectData.object[objectData.key] = value;
-      }
-
       window.location.hash = window.location.hash.replace(matches[0], matches[0].replace(regExp, `$1${value}`));
     }
 
-    PROPERTIES.set(key, value);
+    if(objectData.reload) {
+      window.location.reload();
+    }
   }
 }
 
