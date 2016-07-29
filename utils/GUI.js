@@ -75,20 +75,6 @@ class GUI {
       reload
     });
 
-
-
-    // Test if property is in URL
-
-    // const regExp = /[#&]([\w_-]+)=?([\w_-]*)/g;
-    // let matches;
-    // while (matches = regExp.exec(window.location.hash)) {
-    //   let value = matches[2];
-    //   try {
-    //     let newValue = JSON.parse(value);
-    //     value = newValue !== Infinity ? newValue : value;
-    //   } catch (e) {}
-    // }
-
     let value;
 
     let regExp = new RegExp(`[#&]gui-${internalKey}=?([\\w_-]*)`, "g");
