@@ -3,31 +3,31 @@ import Ticker from "../utils/Ticker.js";
 import CustomElement from "./CustomElement.js";
 
 export default class LoopElement extends CustomElement {
-  createdCallback({autostart = true} = {}) {
+  createdCallback({autoplay = true} = {}) {
     super.createdCallback();
-    this._autostart = autostart;
+    this._autoplay = autoplay;
   }
 
   attachedCallback() {
-    window.addEventListener("blur", this._stopBinded = this.stop.bind(this));
-    window.addEventListener("focus", this._startBinded = this.start.bind(this));
-    if(this._autostart) {
-      this.start();
+    window.addEventListener("blur", this._pauseBinded = this.pause.bind(this));
+    window.addEventListener("focus", this._playBinded = this.play.bind(this));
+    if(this._autoplay) {
+      this.play();
     }
   }
 
   detachedCallback() {
-    this.stop();
-    window.removeEventListener("blur", this._stopBinded);
-    window.removeEventListener("focus", this._startBinded);
+    this.pause();
+    window.removeEventListener("blur", this._pauseBinded);
+    window.removeEventListener("focus", this._playBinded);
   }
 
-  start() {
-    this.stop();
+  play() {
+    this.pause();
     this._tickerID = Ticker.add(this.update.bind(this));
   }
 
-  stop() {
+  pause() {
     Ticker.remove(this._tickerID);
   }
 
