@@ -2,13 +2,16 @@ import ControlKit from "controlkit";
 
 // STYLES
 
-document.styleSheets[0].insertRule(`
+let style = document.createElement("style");
+document.head.appendChild(style);
+
+style.sheet.insertRule(`
   #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .label {
     width: 50% !important;
   }
 `, 0);
 
-document.styleSheets[0].insertRule(`
+style.sheet.insertRule(`
   #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .wrap {
     width: 50% !important;
   }
@@ -56,9 +59,18 @@ function colorToHex(color) {
   ).replace("#", "");
 }
 
+function normalizeString(string) {
+  return `${string.toLowerCase().replace(/[^\w-]/g, "")}`;
+}
+
 // GUI
 
-const CONTROLKIT_PANELS = new Map();
+let positionOffset = 0;
+const COMPONENT_METHOD_NAMES = new Map([
+  ["boolean", "addCheckbox"],
+  ["string", "addStringInput"]
+]);
+const CONTAINERS = new Map();
 const OBJECTS_DATA = new Map();
 
 class GUI {
@@ -66,8 +78,8 @@ class GUI {
     this._controlKit = new ControlKit();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "Main", reload = false}) {
-    let internalKey = `${label.toLowerCase().replace(/[^\w-]/g, "")}`;
+  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options}) {
+    let internalKey = normalizeString(label);
 
     OBJECTS_DATA.set(internalKey, {
       object,
@@ -101,15 +113,50 @@ class GUI {
       value = type === "color" ? colorToHex(object[key]) : object[key];
     }
 
-    let controlkitPanel = CONTROLKIT_PANELS.get(panel);
+    let panelKey = normalizeString(panel);
+    let groupKey = normalizeString(group);
+    let subGroupKey = normalizeString(subGroup);
 
-    if(!controlkitPanel) {
-      controlkitPanel = this._controlKit.addPanel({
-        fixed: false,
-        label: panel,
-        width: 200
-      });
-      CONTROLKIT_PANELS.set(panel, controlkitPanel);
+    let containerKey = panelKey + "_" + groupKey + "_" + subGroupKey;
+
+
+    let container = CONTAINERS.get(containerKey);
+
+    if(!container) {
+      let parent;
+      containerKey = panelKey;
+      container = CONTAINERS.get(containerKey);
+      if(!container) {
+        container = this._controlKit.addPanel({
+          fixed: false,
+          label: panel,
+          width: 200,
+          align: "left",
+          position: [positionOffset, 0]
+        });
+        positionOffset += 200;
+        CONTAINERS.set(containerKey, container);
+      }
+
+      parent = container;
+      containerKey += "_" + groupKey;
+      container = CONTAINERS.get(containerKey);
+      if(!container) {
+        container = parent.addGroup({
+          label: group
+        });
+        CONTAINERS.set(containerKey, container);
+      }
+
+      parent = container;
+      containerKey += "_" + subGroupKey;
+      container = CONTAINERS.get(containerKey);
+      if(!container) {
+        container = parent.addSubGroup({
+          label: subGroup
+        });
+        CONTAINERS.set(containerKey, container);
+      }
     }
 
     let onChange = (value = object[key]) => {
@@ -121,18 +168,29 @@ class GUI {
         let color = {
           value: `#${value}`
         };
-        controlkitPanel.addColor(color, "value", {
+        container.addColor(color, "value", {
           onChange,
           label,
           colorMode: "hex"
         });
         break;
-      case "boolean":
-        controlkitPanel.addCheckbox(object, key, {
-          onChange,
+      case "select":
+        let obj = {
+          options,
+          selection: value || options[0]
+        };
+        container.addSelect(obj, "options", {
+          onChange: function(index) {
+            onChange(options[index]);
+          },
           label
         });
         break;
+      default:
+        container[COMPONENT_METHOD_NAMES.get(type)](object, key, {
+          onChange,
+          label
+        });
     }
 
     return object[key];
