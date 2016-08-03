@@ -56,7 +56,7 @@ function colorToHex(color) {
     color.r !== undefined ? color.r : color.x !== undefined ? color.x : color[0],
     color.g !== undefined ? color.g : color.y !== undefined ? color.y : color[1],
     color.b !== undefined ? color.b : color.z !== undefined ? color.z : color[2]
-  ).replace("#", "");
+  );
 }
 
 function normalizeString(string) {
@@ -71,7 +71,6 @@ function urlHashRegExpFromKey(key) {
 
 let positionOffset = 0;
 const CONTAINERS = new Map();
-const OBJECTS_DATA = new Map();
 
 class GUI {
   constructor() {
@@ -80,12 +79,6 @@ class GUI {
 
   add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options} = {}) {
     let internalKey = normalizeString(label);
-
-    OBJECTS_DATA.set(internalKey, {
-      object,
-      key,
-      reload
-    });
 
     let panelKey = normalizeString(panel);
     let groupKey = normalizeString(group);
@@ -132,7 +125,11 @@ class GUI {
     }
 
     let onChange = (value = object[key]) => {
-      this._changeValue(internalKey, value, type);
+      this._changeURLValue(internalKey, value);
+
+      if (reload) {
+        window.location.reload();
+      }
     }
 
     let regExp = urlHashRegExpFromKey(internalKey);
@@ -140,7 +137,7 @@ class GUI {
 
     switch (type) {
       case "boolean":
-        object[key] = matches ? matches[2] : object[key];
+        object[key] = matches ? JSON.parse(matches[2]) : object[key];
         container.addCheckbox(object, key, {
           onChange,
           label
@@ -156,23 +153,22 @@ class GUI {
       case "color":
         let color = {};
         if(matches) {
-          color.value = matches[2];
-          colorFromHex(object[key], `#${color.value}`);
+          color.value = `#${matches[2]}`;
+          colorFromHex(object[key], color.value);
         } else {
           color.value = colorToHex(object[key]);
         }
         container.addColor(color, "value", {
           onChange: function(value) {
-            colorFromHex(objectData.object[objectData.key], value);
-            value = value.replace("#", "");
-            onChange(value);
+            colorFromHex(object[key], value);
+            onChange(value.replace("#", ""));
           },
           label,
           colorMode: "hex"
         });
         break;
       case "select":
-        object[key] = matches ? matches[2] : options[0];
+        object[key] = matches ? matches[2] : object[key];
         container.addSelect({
           options,
           selection: object[key]
@@ -186,14 +182,20 @@ class GUI {
       case "xy":
         let xy = {};
         if(object[key].x) {
-          xy.value = [object[key].x, object[key].y];
+          if(matches) {
+            xy.value = JSON.parse(matches[2]);
+            [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
+          } else {
+            xy.value = [object[key].x, object[key].y];
+          }
         } else {
+          object[key] = matches ? JSON.parse(matches[2]) : object[key];
           xy.value = object[key];
         }
         container.addPad(xy, "value", {
           onChange: function() {
             if(object[key].x) {
-              [object[key].x, object[key].y] = [xy.value.x, xy.value.y];
+              [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
             }
             onChange(JSON.stringify(xy.value));
           },
@@ -205,23 +207,14 @@ class GUI {
     return object[key];
   }
 
-  _changeValue(key, value, type) {
-    let objectData = OBJECTS_DATA.get(key);
-
-    objectData.object[objectData.key] = value;
-
+  _changeURLValue(key, value) {
     let regExp = urlHashRegExpFromKey(key);
     let matches = regExp.exec(window.location.hash);
-
     if (!matches) {
       let prefix = window.location.hash ? "&" : "#";
       window.location.hash += `${prefix}gui-${key}=${value}`;
     } else {
       window.location.hash = window.location.hash.replace(matches[0], matches[0].replace(regExp, `$1${value}`));
-    }
-
-    if (objectData.reload) {
-      window.location.reload();
     }
   }
 }
