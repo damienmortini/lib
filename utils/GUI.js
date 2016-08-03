@@ -40,7 +40,7 @@ function hexToRgb(hex) {
 function colorFromHex(color, hex) {
   let colorValue = hexToRgb(hex);
 
-  if(color.r !== undefined) {
+  if (color.r !== undefined) {
     Object.assign(color, colorValue);
   } else if (color.x !== undefined) {
     [color.x, color.y, color.z] = [colorValue.r, colorValue.g, colorValue.b];
@@ -63,6 +63,10 @@ function normalizeString(string) {
   return `${string.toLowerCase().replace(/[^\w-]/g, "")}`;
 }
 
+function urlHashRegExpFromKey(key) {
+  return new RegExp(`([#&]gui-${key}=)([^=&#?]*)`, "g");
+}
+
 // GUI
 
 let positionOffset = 0;
@@ -78,7 +82,7 @@ class GUI {
     this._controlKit = new ControlKit();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options}) {
+  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options} = {}) {
     let internalKey = normalizeString(label);
 
     OBJECTS_DATA.set(internalKey, {
@@ -89,27 +93,26 @@ class GUI {
 
     let value;
 
-    let regExp = new RegExp(`[#&]gui-${internalKey}=?([\\w_-]*)`, "g");
+    let regExp = urlHashRegExpFromKey(internalKey);
     let matches = regExp.exec(window.location.hash);
 
-    if(matches) {
+    if (matches) {
       switch (type) {
         case "boolean":
-          value = matches[1] === "true";
+          value = matches[2] === "true";
           break;
         case "number":
-          value = parseFloat(matches[1]);
+          value = parseFloat(matches[2]);
           break
         default:
-          value = matches[1];
+          value = matches[2];
       }
-      if(type === "color") {
+      if (type === "color") {
         colorFromHex(object[key], value);
       } else {
         object[key] = value;
       }
-    }
-    else {
+    } else {
       value = type === "color" ? colorToHex(object[key]) : object[key];
     }
 
@@ -118,15 +121,13 @@ class GUI {
     let subGroupKey = normalizeString(subGroup);
 
     let containerKey = panelKey + "_" + groupKey + "_" + subGroupKey;
-
-
     let container = CONTAINERS.get(containerKey);
 
-    if(!container) {
+    if (!container) {
       let parent;
       containerKey = panelKey;
       container = CONTAINERS.get(containerKey);
-      if(!container) {
+      if (!container) {
         container = this._controlKit.addPanel({
           fixed: false,
           label: panel,
@@ -141,7 +142,7 @@ class GUI {
       parent = container;
       containerKey += "_" + groupKey;
       container = CONTAINERS.get(containerKey);
-      if(!container) {
+      if (!container) {
         container = parent.addGroup({
           label: group
         });
@@ -151,7 +152,7 @@ class GUI {
       parent = container;
       containerKey += "_" + subGroupKey;
       container = CONTAINERS.get(containerKey);
-      if(!container) {
+      if (!container) {
         container = parent.addSubGroup({
           label: subGroup
         });
@@ -175,13 +176,32 @@ class GUI {
         });
         break;
       case "select":
-        let obj = {
+        container.addSelect({
           options,
           selection: value || options[0]
-        };
-        container.addSelect(obj, "options", {
+        }, "options", {
           onChange: function(index) {
             onChange(options[index]);
+          },
+          label
+        });
+        break;
+      case "number":
+          // ["number", "addNumberInput"],
+        break;
+      case "xy":
+        let xy = {};
+        if(object[key].x) {
+          xy.value = [object[key].x, object[key].y];
+        } else {
+          xy.value = object[key];
+        }
+        container.addPad(xy, "value", {
+          onChange: function() {
+            if(object[key].x) {
+              [object[key].x, object[key].y] = [xy.value.x, xy.value.y];
+            }
+            onChange(JSON.stringify(xy.value));
           },
           label
         });
@@ -199,24 +219,24 @@ class GUI {
   _changeValue(key, value, type) {
     let objectData = OBJECTS_DATA.get(key);
 
-    if(type === "color") {
+    if (type === "color") {
       colorFromHex(objectData.object[objectData.key], value);
       value = value.replace("#", "");
     } else {
       objectData.object[objectData.key] = value;
     }
 
-    let regExp = new RegExp(`([#&]gui-${key}=?)([\\w_-]*)`, "g");
+    let regExp = urlHashRegExpFromKey(key);
     let matches = regExp.exec(window.location.hash);
 
-    if(!matches) {
+    if (!matches) {
       let prefix = window.location.hash ? "&" : "#";
       window.location.hash += `${prefix}gui-${key}=${value}`;
     } else {
       window.location.hash = window.location.hash.replace(matches[0], matches[0].replace(regExp, `$1${value}`));
     }
 
-    if(objectData.reload) {
+    if (objectData.reload) {
       window.location.reload();
     }
   }
