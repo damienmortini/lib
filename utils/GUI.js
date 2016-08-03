@@ -70,10 +70,6 @@ function urlHashRegExpFromKey(key) {
 // GUI
 
 let positionOffset = 0;
-const COMPONENT_METHOD_NAMES = new Map([
-  ["boolean", "addCheckbox"],
-  ["string", "addStringInput"]
-]);
 const CONTAINERS = new Map();
 const OBJECTS_DATA = new Map();
 
@@ -90,31 +86,6 @@ class GUI {
       key,
       reload
     });
-
-    let value;
-
-    let regExp = urlHashRegExpFromKey(internalKey);
-    let matches = regExp.exec(window.location.hash);
-
-    if (matches) {
-      switch (type) {
-        case "boolean":
-          value = matches[2] === "true";
-          break;
-        case "number":
-          value = parseFloat(matches[2]);
-          break
-        default:
-          value = matches[2];
-      }
-      if (type === "color") {
-        colorFromHex(object[key], value);
-      } else {
-        object[key] = value;
-      }
-    } else {
-      value = type === "color" ? colorToHex(object[key]) : object[key];
-    }
 
     let panelKey = normalizeString(panel);
     let groupKey = normalizeString(group);
@@ -164,30 +135,53 @@ class GUI {
       this._changeValue(internalKey, value, type);
     }
 
+    let regExp = urlHashRegExpFromKey(internalKey);
+    let matches = regExp.exec(window.location.hash);
+
     switch (type) {
-      case "color":
-        let color = {
-          value: `#${value}`
-        };
-        container.addColor(color, "value", {
+      case "boolean":
+        object[key] = matches ? matches[2] : object[key];
+        container.addCheckbox(object, key, {
           onChange,
+          label
+        });
+        break;
+      case "number":
+        object[key] = matches ? matches[2] : object[key];
+        container.addNumberInput(object, key, {
+          onChange,
+          label
+        });
+        break;
+      case "color":
+        let color = {};
+        if(matches) {
+          color.value = matches[2];
+          colorFromHex(object[key], `#${color.value}`);
+        } else {
+          color.value = colorToHex(object[key]);
+        }
+        container.addColor(color, "value", {
+          onChange: function(value) {
+            colorFromHex(objectData.object[objectData.key], value);
+            value = value.replace("#", "");
+            onChange(value);
+          },
           label,
           colorMode: "hex"
         });
         break;
       case "select":
+        object[key] = matches ? matches[2] : options[0];
         container.addSelect({
           options,
-          selection: value || options[0]
+          selection: object[key]
         }, "options", {
           onChange: function(index) {
             onChange(options[index]);
           },
           label
         });
-        break;
-      case "number":
-          // ["number", "addNumberInput"],
         break;
       case "xy":
         let xy = {};
@@ -206,11 +200,6 @@ class GUI {
           label
         });
         break;
-      default:
-        container[COMPONENT_METHOD_NAMES.get(type)](object, key, {
-          onChange,
-          label
-        });
     }
 
     return object[key];
@@ -219,12 +208,7 @@ class GUI {
   _changeValue(key, value, type) {
     let objectData = OBJECTS_DATA.get(key);
 
-    if (type === "color") {
-      colorFromHex(objectData.object[objectData.key], value);
-      value = value.replace("#", "");
-    } else {
-      objectData.object[objectData.key] = value;
-    }
+    objectData.object[objectData.key] = value;
 
     let regExp = urlHashRegExpFromKey(key);
     let matches = regExp.exec(window.location.hash);
