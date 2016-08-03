@@ -7,13 +7,19 @@ document.head.appendChild(style);
 
 style.sheet.insertRule(`
   #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .label {
-    width: 50% !important;
+    width: 40% !important;
   }
 `, 0);
 
 style.sheet.insertRule(`
   #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .wrap {
-    width: 50% !important;
+    width: 60% !important;
+  }
+`, 0);
+
+style.sheet.insertRule(`
+  #controlKit .panel .wrap-slider {
+    width: 60% !important;
   }
 `, 0);
 
@@ -77,7 +83,7 @@ class GUI {
     this._controlKit = new ControlKit();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options, onChange} = {}) {
+  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options, range, onChange} = {}) {
     let internalKey = normalizeString(label);
 
     let panelKey = normalizeString(panel);
@@ -95,11 +101,11 @@ class GUI {
         container = this._controlKit.addPanel({
           fixed: false,
           label: panel,
-          width: 200,
+          width: 240,
           align: "left",
           position: [positionOffset, 0]
         });
-        positionOffset += 200;
+        positionOffset += 240;
         CONTAINERS.set(containerKey, container);
       }
 
@@ -178,7 +184,22 @@ class GUI {
           selection: object[key]
         }, "options", {
           onChange: function(index) {
-            changeValue(options[index]);
+            object[key] = options[index];
+            changeValue(object[key]);
+          },
+          label
+        });
+        break;
+      case "slider":
+        object[key] = matches ? matches[2] : object[key];
+        let slider = {
+          value: object[key],
+          range
+        };
+        container.addSlider(slider, "value", "range", {
+          onChange: function(value) {
+            object[key] = slider.value;
+            changeValue(slider.value);
           },
           label
         });
