@@ -77,7 +77,7 @@ class GUI {
     this._controlKit = new ControlKit();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options} = {}) {
+  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options, onChange} = {}) {
     let internalKey = normalizeString(label);
 
     let panelKey = normalizeString(panel);
@@ -124,8 +124,12 @@ class GUI {
       }
     }
 
-    let onChange = (value = object[key]) => {
+    let changeValue = (value = object[key]) => {
       this._changeURLValue(internalKey, value);
+
+      if(onChange) {
+        onChange(object[key]);
+      }
 
       if (reload) {
         window.location.reload();
@@ -139,14 +143,14 @@ class GUI {
       case "boolean":
         object[key] = matches ? JSON.parse(matches[2]) : object[key];
         container.addCheckbox(object, key, {
-          onChange,
+          onChange: changeValue,
           label
         });
         break;
       case "number":
         object[key] = matches ? matches[2] : object[key];
         container.addNumberInput(object, key, {
-          onChange,
+          onChange: changeValue,
           label
         });
         break;
@@ -161,7 +165,7 @@ class GUI {
         container.addColor(color, "value", {
           onChange: function(value) {
             colorFromHex(object[key], value);
-            onChange(value.replace("#", ""));
+            changeValue(value.replace("#", ""));
           },
           label,
           colorMode: "hex"
@@ -174,14 +178,14 @@ class GUI {
           selection: object[key]
         }, "options", {
           onChange: function(index) {
-            onChange(options[index]);
+            changeValue(options[index]);
           },
           label
         });
         break;
       case "xy":
         let xy = {};
-        if(object[key].x) {
+        if(object[key].x !== undefined) {
           if(matches) {
             xy.value = JSON.parse(matches[2]);
             [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
@@ -197,11 +201,15 @@ class GUI {
             if(object[key].x) {
               [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
             }
-            onChange(JSON.stringify(xy.value));
+            changeValue(JSON.stringify(xy.value));
           },
           label
         });
         break;
+    }
+
+    if(onChange) {
+      onChange(object[key]);
     }
 
     return object[key];
