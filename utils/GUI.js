@@ -23,6 +23,14 @@ style.sheet.insertRule(`
   }
 `, 0);
 
+style.sheet.insertRule(`
+  #controlKit .options ul {
+    max-height: 300px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+  }
+`, 0);
+
 // UTILS
 
 function componentToHex(c) {
@@ -154,7 +162,7 @@ class GUI {
         });
         break;
       case "number":
-        object[key] = matches ? matches[2] : object[key];
+        object[key] = matches ? JSON.parse(matches[2]) : object[key];
         container.addNumberInput(object, key, {
           onChange: changeValue,
           label
@@ -191,10 +199,10 @@ class GUI {
         });
         break;
       case "slider":
-        object[key] = matches ? matches[2] : object[key];
+        object[key] = matches ? JSON.parse(matches[2]) : object[key];
         let slider = {
           value: object[key],
-          range
+          range: range || [0, 1]
         };
         container.addSlider(slider, "value", "range", {
           onChange: function(value) {
