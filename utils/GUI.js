@@ -78,68 +78,116 @@ function normalizeString(string) {
 }
 
 function urlHashRegExpFromKey(key) {
-  return new RegExp(`([#&]gui-${key}=)([^=&#?]*)`, "g");
+  return new RegExp(`([#&]gui/${key}=)([^=&#?]*)`, "g");
 }
 
 // GUI
 
+const GUI_REG_EXP = /([#&]gui=)({.*})([&?]*)/;
+
+let DATA;
+(function() {
+  let matches = GUI_REG_EXP.exec(window.location.hash);
+  DATA = matches ? JSON.parse(matches[2]) : {};
+})();
+
+const CONTROL_KIT_CONTAINERS = new Map();
+
 let positionOffset = 0;
-const CONTAINERS = new Map();
+
+class GUIComponent {
+  constructor(object, key, controlKitComponent) {
+    this._object = object;
+    this._key = key;
+    this._controlKitComponent = controlKitComponent;
+  }
+  get object() {
+    return this._object;
+  }
+  get key() {
+    return this._key;
+  }
+  get value() {
+    return this.object[this.key];
+  }
+  get controlKitComponent() {
+    return this._controlKitComponent;
+  }
+  remove() {
+    this.controlKitComponent.disable();
+    this.controlKitComponent._node._element.remove();
+  }
+}
 
 class GUI {
   constructor() {
     this._controlKit = new ControlKit();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "", group = "", subGroup = "", reload = false, options, range, onChange} = {}) {
-    let internalKey = normalizeString(label);
+  add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "", reload = false, options, range, onChange} = {}) {
+    let labelKey = normalizeString(label);
 
     let panelKey = normalizeString(panel);
+    let controlKitPanel = CONTROL_KIT_CONTAINERS.get(panelKey);
+    if(!controlKitPanel) {
+      controlKitPanel = this._controlKit.addPanel({
+        fixed: false,
+        label: panel,
+        width: 240,
+        align: "left",
+        position: [positionOffset, 0]
+      });
+      CONTROL_KIT_CONTAINERS.set(panelKey, controlKitPanel);
+      positionOffset += 240;
+    }
+
     let groupKey = normalizeString(group);
-    let subGroupKey = normalizeString(subGroup);
-
-    let containerKey = panelKey + "_" + groupKey + "_" + subGroupKey;
-    let container = CONTAINERS.get(containerKey);
-
-    if (!container) {
-      let parent;
-      containerKey = panelKey;
-      container = CONTAINERS.get(containerKey);
-      if (!container) {
-        container = this._controlKit.addPanel({
-          fixed: false,
-          label: panel,
-          width: 240,
-          align: "left",
-          position: [positionOffset, 0]
-        });
-        positionOffset += 240;
-        CONTAINERS.set(containerKey, container);
-      }
-
-      parent = container;
-      containerKey += "_" + groupKey;
-      container = CONTAINERS.get(containerKey);
-      if (!container) {
-        container = parent.addGroup({
+    let controlKitGroup = CONTROL_KIT_CONTAINERS.get(`${panelKey}/`);
+    if(groupKey) {
+      controlKitGroup = CONTROL_KIT_CONTAINERS.get(`${panelKey}/${groupKey}`);
+      if(!controlKitGroup) {
+        controlKitPanel.addGroup({
           label: group
         });
-        CONTAINERS.set(containerKey, container);
-      }
-
-      parent = container;
-      containerKey += "_" + subGroupKey;
-      container = CONTAINERS.get(containerKey);
-      if (!container) {
-        container = parent.addSubGroup({
-          label: subGroup
-        });
-        CONTAINERS.set(containerKey, container);
+        controlKitGroup = controlKitPanel._groups[controlKitPanel._groups.length - 1];
+        CONTROL_KIT_CONTAINERS.set(`${panelKey}/${groupKey}`, controlKitGroup);
       }
     }
 
-    let changeValue = (value = object[key]) => {
-      this._changeURLValue(internalKey, value);
+    if(controlKitGroup) {
+      controlKitPanel._groups.push(controlKitPanel._groups.splice(controlKitPanel._groups.indexOf(controlKitGroup), 1)[0]);
+    }
+
+    let savedValue;
+
+    if (groupKey && DATA[panelKey] && DATA[panelKey][groupKey]) {
+      savedValue = DATA[panelKey][groupKey][labelKey];
+    } else if (DATA[panelKey]) {
+      savedValue = DATA[panelKey][labelKey];
+    }
+
+    let changeValueData = (value = object[key]) => {
+      let containerData = DATA[panelKey];
+      if(!containerData) {
+        containerData = DATA[panelKey] = {};
+      }
+      if(group) {
+        let groupData = containerData[groupKey];
+        if(!groupData) {
+          groupData = {};
+          containerData[groupKey] = groupData;
+        }
+        containerData = groupData;
+      }
+
+      containerData[labelKey] = value;
+
+      if(GUI_REG_EXP.test(window.location.hash)) {
+        window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${JSON.stringify(DATA)}$3`);
+      } else {
+        let prefix = window.location.hash ? "&" : "#";
+        window.location.hash += `${prefix}gui=${JSON.stringify(DATA)}`;
+      }
 
       if(onChange) {
         onChange(object[key]);
@@ -150,64 +198,61 @@ class GUI {
       }
     }
 
-    let regExp = urlHashRegExpFromKey(internalKey);
-    let matches = regExp.exec(window.location.hash);
-
     switch (type) {
       case "boolean":
-        object[key] = matches ? JSON.parse(matches[2]) : object[key];
-        container.addCheckbox(object, key, {
-          onChange: changeValue,
+        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        controlKitPanel.addCheckbox(object, key, {
+          onChange: changeValueData,
           label
         });
         break;
       case "number":
-        object[key] = matches ? JSON.parse(matches[2]) : object[key];
-        container.addNumberInput(object, key, {
-          onChange: changeValue,
+        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        controlKitPanel.addNumberInput(object, key, {
+          onChange: changeValueData,
           label
         });
         break;
       case "color":
         let color = {};
-        if(matches) {
-          color.value = `#${matches[2]}`;
+        if(savedValue !== undefined) {
+          color.value = `#${savedValue}`;
           colorFromHex(object[key], color.value);
         } else {
           color.value = colorToHex(object[key]);
         }
-        container.addColor(color, "value", {
+        controlKitPanel.addColor(color, "value", {
           onChange: function(value) {
             colorFromHex(object[key], value);
-            changeValue(value.replace("#", ""));
+            changeValueData(value.replace("#", ""));
           },
           label,
           colorMode: "hex"
         });
         break;
       case "select":
-        object[key] = matches ? matches[2] : object[key];
-        container.addSelect({
+        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        controlKitPanel.addSelect({
           options,
           selection: object[key]
         }, "options", {
           onChange: function(index) {
             object[key] = options[index];
-            changeValue(object[key]);
+            changeValueData(object[key]);
           },
           label
         });
         break;
       case "slider":
-        object[key] = matches ? JSON.parse(matches[2]) : object[key];
+        object[key] = savedValue === undefined ?  object[key] : savedValue;
         let slider = {
           value: object[key],
           range: range || [0, 1]
         };
-        container.addSlider(slider, "value", "range", {
+        controlKitPanel.addSlider(slider, "value", "range", {
           onChange: function(value) {
             object[key] = slider.value;
-            changeValue(slider.value);
+            changeValueData(slider.value);
           },
           label
         });
@@ -216,32 +261,41 @@ class GUI {
         let xy = {};
         if(object[key].x !== undefined) {
           if(matches) {
-            xy.value = JSON.parse(matches[2]);
+            xy.value = savedValue;
             [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
           } else {
             xy.value = [object[key].x, object[key].y];
           }
         } else {
-          object[key] = matches ? JSON.parse(matches[2]) : object[key];
+          object[key] = savedValue === undefined ?  object[key] : savedValue;
           xy.value = object[key];
         }
-        container.addPad(xy, "value", {
+        controlKitPanel.addPad(xy, "value", {
           onChange: function() {
             if(object[key].x) {
               [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
             }
-            changeValue(JSON.stringify(xy.value));
+            changeValueData(xy.value);
           },
           label
         });
         break;
     }
 
+    if(!CONTROL_KIT_CONTAINERS.get(`${panelKey}/`)) {
+      CONTROL_KIT_CONTAINERS.set(`${panelKey}/`, controlKitPanel._groups[0]);
+    }
+
     if(onChange) {
       onChange(object[key]);
     }
 
-    return object[key];
+    if(!controlKitGroup) {
+      controlKitGroup = controlKitPanel._groups[controlKitPanel._groups.length - 1];
+    }
+    let controlKitComponent = controlKitGroup._components[controlKitGroup._components.length - 1];
+
+    return new GUIComponent(object, key, controlKitComponent);
   }
 
   _changeURLValue(key, value) {
