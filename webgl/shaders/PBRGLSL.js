@@ -1,7 +1,7 @@
 // GGX from from http://www.filmicworlds.com/images/ggx-opt/optimized-ggx.hlsl
 // PBR from from https://www.shadertoy.com/view/XsfXWX
 
-export default class PBR {
+export default class PBRGLSL {
   static PhysicallyBasedMaterial() {
     return `
     struct PhysicallyBasedMaterial
