@@ -29,7 +29,7 @@ export default class BlurGLSL {
     return `
       varying vec2 blurTextureCoordinates[15];
 
-      vec4 blur(sampler2D texture, vec2 uv) {
+      vec4 blur(sampler2D texture) {
         vec4 result = vec4(0.0);
         result += texture2D(texture, blurTextureCoordinates[0])*0.0044299121055113265;
         result += texture2D(texture, blurTextureCoordinates[1])*0.00895781211794;
