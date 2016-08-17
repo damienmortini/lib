@@ -81,6 +81,8 @@ function urlHashRegExpFromKey(key) {
   return new RegExp(`([#&]gui/${key}=)([^=&#?]*)`, "g");
 }
 
+const COMPONENTS = [];
+
 // GUI
 
 const GUI_REG_EXP = /([#&]gui=)({.*})([&?]*)/;
@@ -96,7 +98,8 @@ const CONTROL_KIT_CONTAINERS = new Map();
 let positionOffset = 0;
 
 class GUIComponent {
-  constructor(object, key, controlKitComponent) {
+  constructor(object, key, type, controlKitComponent) {
+    this._type = type;
     this._object = object;
     this._key = key;
     this._controlKitComponent = controlKitComponent;
@@ -110,6 +113,9 @@ class GUIComponent {
   get value() {
     return this.object[this.key];
   }
+  get type() {
+    return this._type;
+  }
   get controlKitComponent() {
     return this._controlKitComponent;
   }
@@ -122,6 +128,21 @@ class GUIComponent {
 class GUI {
   constructor() {
     this._controlKit = new ControlKit();
+  }
+
+  update() {
+    for (let component of COMPONENTS) {
+      switch (component.type) {
+        case "color":
+          component.controlKitComponent._obj._value = component.controlKitComponent._value = colorToHex(component.object[component.key]);
+          component.controlKitComponent._updateColor();
+          break;
+      }
+    }
+
+    requestAnimationFrame(() => {
+      this._controlKit.update();
+    });
   }
 
   add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "", reload = false, options, range, onChange} = {}) {
@@ -295,7 +316,9 @@ class GUI {
     }
     let controlKitComponent = controlKitGroup._components[controlKitGroup._components.length - 1];
 
-    return new GUIComponent(object, key, controlKitComponent);
+    let component = new GUIComponent(object, key, type, controlKitComponent);
+    COMPONENTS.push(component)
+    return component;
   }
 
   _changeURLValue(key, value) {
