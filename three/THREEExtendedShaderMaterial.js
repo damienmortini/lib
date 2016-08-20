@@ -26,6 +26,12 @@ export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
       fragmentShader: originalShader.fragmentShader.replace(regExp, generateSubstringFromHooks(fragmentShaderHooks))
     }, options));
 
+    for (let key of ["bumpMap", "displacementMap", "emissiveMap", "envMap", "lightMap", "map", "metalnessMap", "normalMap", "roughnessMap", "specularMap"]) {
+      if(this.uniforms[key]) {
+        this[key] = this.uniforms[key].value;
+      }
+    }
+
     this.lights = /lambert|phong|standard/.test(originalShaderName);
   }
 }
