@@ -145,6 +145,14 @@ class GUI {
     });
   }
 
+  open(panel, group) {
+    CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : "")).enable();
+  }
+
+  close(panel, group) {
+    CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : "")).disable();
+  }
+
   add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "", reload = false, options, range, onChange} = {}) {
     let labelKey = normalizeString(label);
 
