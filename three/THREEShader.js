@@ -1,7 +1,13 @@
-import THREE from "three";
+import { Vector2 as THREEVector2 } from "three/src/math/Vector2.js";
+import { Vector3 as THREEVector3 } from "three/src/math/Vector3.js";
+import { Vector4 as THREEVector4 } from "three/src/math/Vector4.js";
+import { Matrix3 as THREEMatrix3 } from "three/src/math/Matrix3.js";
+import { Matrix4 as THREEMatrix4 } from "three/src/math/Matrix4.js";
+import { Texture as THREETexture } from "three/src/textures/Texture.js";
+import { CubeTexture as THREECubeTexture } from "three/src/textures/CubeTexture.js";
 
 export default class THREEShader {
-  constructor (vertexShader, fragmentShader, uniforms, attributes) {
+  constructor({vertexShader, fragmentShader, uniforms, attributes}) {
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
@@ -13,96 +19,87 @@ export default class THREEShader {
   /**
    * Parse shader strings to extract uniforms and attributes
    */
-  parseQualifiers () {
-    let str = `${this.vertexShader}\n${this.fragmentShader}`;
+  parseQualifiers({constructors} = {}) {
+
+    constructors = Object.assign({
+        Vector2: THREEVector2,
+        Vector3: THREEVector3,
+        Vector4: THREEVector4,
+        Matrix3: THREEMatrix3,
+        Matrix4: THREEMatrix4,
+        TextureCube: THREECubeTexture,
+        Texture2D: THREETexture
+      , constructors});
+
+    let str = `
+      ${this.vertexShader}
+      ${this.fragmentShader}
+    `;
+
     let regExp = /(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/g;
 
     let match;
 
-    while((match = regExp.exec(str))) {
+    while ((match = regExp.exec(str))) {
       let [, glslQualifier, glslType, variableName, lengthStr] = match;
       let length = parseInt(lengthStr);
 
       let glslQualifiers = this[`${glslQualifier}s`];
-      if(!glslQualifiers) {
+      if (!glslQualifiers) {
         glslQualifiers = this[`${glslQualifier}s`] = {};
       }
       if (glslQualifiers[variableName]) {
         continue;
       }
 
-      let type;
       let value;
       let typeMatch;
 
-      if(/float|double/.test(glslType)) {
-        if(isNaN(length)) {
-          type = "f";
+      if (/float|double/.test(glslType)) {
+        if (isNaN(length)) {
           value = 0;
-        }
-        else {
-          type = "fv1";
+        } else {
           value = new Array(length).fill(0);
         }
-      }
-      else if(/int|uint/.test(glslType)) {
-        if(isNaN(length)) {
-          type = "i";
+      } else if (/int|uint/.test(glslType)) {
+        if (isNaN(length)) {
           value = 0;
-        }
-        else {
-          type = "iv1";
+        } else {
           value = new Array(length).fill(0);
         }
-      }
-      else if(/sampler2D/.test(glslType)) {
-        if(isNaN(length)) {
-          type = "t";
-          value = new THREE.Texture();
+      } else if (/sampler2D/.test(glslType)) {
+        if (isNaN(length)) {
+          value = new constructors.Texture2D();
+        } else {
+          value = new Array(length).fill().map(value => new constructors.Texture2D());
         }
-        else {
-          type = "tv";
-          value = new Array(length).fill().map(v => new THREE.Texture());
+      } else if (/samplerCube/.test(glslType)) {
+        if (isNaN(length)) {
+          value = new constructors.TextureCube();
+        } else {
+          value = new Array(length).fill().map(value => new constructors.TextureCube());
         }
-      }
-      else if(/samplerCube/.test(glslType)) {
-        if(isNaN(length)) {
-          type = "t";
-          value = new THREE.CubeTexture();
-        }
-        else {
-          type = "tv";
-          value = new Array(length).fill().map(v => new THREE.CubeTexture());
-        }
-      }
-      else if((typeMatch = /(.?)vec(\d)/.exec(glslType))) {
+      } else if( (typeMatch = /(.?)vec(\d)/.exec(glslType)) ) {
         let vectorLength = typeMatch[2];
-        if(isNaN(length)) {
-          type = `v${vectorLength}`;
-          value = new THREE[`Vector${vectorLength}`]();
+        if (isNaN(length)) {
+          value = new constructors[`Vector${vectorLength}`]();
+        } else {
+          value = new Array(length).fill().map(value => new constructors[`Vector${vectorLength}`]());
         }
-        else {
-          type = `v${vectorLength}v`;
-          value = new Array(length).fill().map(v => new THREE[`Vector${vectorLength}`]());
-        }
-      }
-      else if((typeMatch = /mat(\d)/.exec(glslType))) {
+      } else if( (typeMatch = /mat(\d)/.exec(glslType)) ) {
         let matrixLength = typeMatch[1];
-        if(isNaN(length)) {
-          type = `m${matrixLength}`;
-          value = new THREE[`Matrix${matrixLength}`]();
+        if (isNaN(length)) {
+          value = new constructors[`Matrix${matrixLength}`]();
+        } else {
+          value = new Array(length).fill().map(value => new constructors[`Matrix${matrixLength}`]());
         }
-        else {
-          type = `m${matrixLength}v`;
-          value = new Array(length).fill().map(v => new THREE[`Matrix${matrixLength}`]());
-        }
-      }
-      else {
-        type = glslType;
+      } else {
         value = null;
       }
 
-      glslQualifiers[variableName] = {type, value};
+      glslQualifiers[variableName] = {
+        value
+      };
     }
   }
 }

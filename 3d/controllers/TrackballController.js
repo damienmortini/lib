@@ -6,12 +6,24 @@ import Vector3 from "../../math/Vector3";
 import Quaternion from "../../math/Quaternion";
 
 export default class TrackballControl {
-  constructor(matrix = new Matrix4(), {domElement = document.body, distance = 0, distanceStep = 1}) {
+  constructor(matrix = new Matrix4(), {
+    domElement = document.body,
+    distance = 0,
+    distanceStep = 1,
+    invertRotation = true,
+    rotationEaseRatio = .05,
+    zoomEaseRatio = .1
+  } = {}) {
     this.matrix = matrix;
+
     this.distance = distance;
     this.distanceStep = distanceStep;
+    this.invertRotation = invertRotation;
+    this.rotationEaseRatio = rotationEaseRatio;
+    this.zoomEaseRatio = zoomEaseRatio;
 
     this._pointer = Pointer.get(domElement);
+    this._nextDistance = this.distance;
 
     this._cachedQuaternion = new Quaternion();
     this._cachedMatrix = new Matrix4();
@@ -31,16 +43,18 @@ export default class TrackballControl {
 
   onWheel(e) {
     if(e.deltaY > 0) {
-      this.distance += this.distanceStep;
+      this._nextDistance += this.distanceStep;
     } else {
-      this.distance -= this.distanceStep;
+      this._nextDistance -= this.distanceStep;
     }
-    this.distance = Math.max(this.distance, 0);
+    this._nextDistance = Math.max(this._nextDistance, 0);
   }
 
   update() {
     this._cachedMatrix.identity();
     this._cachedQuaternion.identity();
+
+    this.distance += (this._nextDistance - this.distance) * this.zoomEaseRatio;
 
     this._position.set(this.matrix.x, this.matrix.y, this.matrix.z).subtract(this._positionOffset);
 
@@ -52,10 +66,10 @@ export default class TrackballControl {
       this._velocity.copy(this._pointer.velocity).scale(.002);
     }
 
-    this._velocity.lerp(this._velocityOrigin, .1);
+    this._velocity.lerp(this._velocityOrigin, this.rotationEaseRatio);
 
-    this._cachedQuaternion.rotateY(this._velocity.x);
-    this._cachedQuaternion.rotateX(this._velocity.y);
+    this._cachedQuaternion.rotateY(this.invertRotation ? -this._velocity.x : this._velocity.x);
+    this._cachedQuaternion.rotateX(this.invertRotation ? -this._velocity.y : this._velocity.y);
 
     this._cachedMatrix.fromQuaternion(this._cachedQuaternion);
 
