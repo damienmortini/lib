@@ -1,7 +1,7 @@
 // from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
 
 export default class ColorGLSL {
-  static hsv() {
+  static hsvConversion() {
     return `
       vec3 rgbToHSV(vec3 c)
       {

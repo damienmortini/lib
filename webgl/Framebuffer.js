@@ -24,7 +24,7 @@ export default class Framebuffer {
   }
 
   get gl() {
-    return this.stackglTexture2D.gl;
+    return this._stackglFramebuffer.gl;
   }
 
   get webGLFramebuffer() {

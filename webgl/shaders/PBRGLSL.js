@@ -97,7 +97,7 @@ export default class PBRGLSL {
       float fresnel = max(1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction), material.metalness);
 
       // reflection
-      vec3 roughnessRandomVector = normalize(vec3(rand(position.x) * 2. - 1., rand(position.y) * 2. - 1., rand(position.z) * 2. - 1.)) * material.roughness;
+      vec3 roughnessRandomVector = normalize(vec3(random(position.x) * 2. - 1., random(position.y) * 2. - 1., random(position.z) * 2. - 1.)) * material.roughness;
       vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)), light);
 
       // diffuse
