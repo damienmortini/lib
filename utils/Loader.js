@@ -1,24 +1,59 @@
+const PROMISES = new Set();
+
 export default class Loader {
-  static load(elements) {
-    if(!(elements instanceof Array)) {
-      elements = [elements];
+  static get onLoad() {
+    return Promise.all(PROMISES);
+  }
+
+  static get promises() {
+    return PROMISES;
+  }
+
+  static load(values) {
+    if(!(values instanceof Array)) {
+      values = [values];
     }
 
     let promises = [];
 
-    for (let element of elements) {
+    for (let value of values) {
       promises.push(new Promise(function(resolve, reject) {
         let onLoad = () => {
-          element.removeEventListener("load", onLoad);
-          resolve(element);
+          PROMISES.delete(promise);
+          value.removeEventListener("load", onLoad);
+          value.removeEventListener("canplaythrough", onLoad);
+          resolve(value);
         };
-        if(element instanceof HTMLMediaElement) {
-          element.addEventListener("canplaythrough", onLoad);
+
+        if(typeof value === "string") {
+          let tagName;
+          if(/\.(png|jpg|gif)$/.test(value)) {
+            tagName = "img";
+          } else if(/\.(mp4|webm)$/.test(value)) {
+            tagName = "video";
+          } else if(/\.(mp3|ogg)$/.test(value)) {
+            tagName = "audio";
+          }
+          if(tag) {
+            let element = document.createElement(tagName);
+            element.src = value;
+            value = element;
+          }
+        }
+
+        if(value instanceof HTMLMediaElement) {
+          if(value instanceof HTMLMediaElement) {
+            value.addEventListener("canplaythrough", onLoad);
+          } else {
+            value.addEventListener("load", onLoad);
+          };
         } else {
-          element.addEventListener("load", onLoad);
-        };
+          // TODO: fetch
+        }
       }));
     }
+
+    PROMISES.add(promises);
 
     return Promise.all(promises);
   }
