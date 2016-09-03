@@ -7,7 +7,16 @@ import { Texture as THREETexture } from "three/src/textures/Texture.js";
 import { CubeTexture as THREECubeTexture } from "three/src/textures/CubeTexture.js";
 
 export default class THREEShader {
-  constructor({vertexShader, fragmentShader, uniforms, attributes}) {
+  constructor({vertexShader = `
+    void main() {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+    }
+  `, fragmentShader = `
+    void main() {
+      gl_FragColor = vec4(1.);
+    }
+  `, uniforms = {}, attributes = {}}) {
+
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
@@ -19,9 +28,9 @@ export default class THREEShader {
   /**
    * Parse shader strings to extract uniforms and attributes
    */
-  parseQualifiers({constructors} = {}) {
+  parseQualifiers({classes} = {}) {
 
-    constructors = Object.assign({
+    classes = Object.assign({
         Vector2: THREEVector2,
         Vector3: THREEVector3,
         Vector4: THREEVector4,
@@ -29,7 +38,7 @@ export default class THREEShader {
         Matrix4: THREEMatrix4,
         TextureCube: THREECubeTexture,
         Texture2D: THREETexture
-      , constructors});
+      , classes});
 
     let str = `
       ${this.vertexShader}
@@ -69,29 +78,29 @@ export default class THREEShader {
         }
       } else if (/sampler2D/.test(glslType)) {
         if (isNaN(length)) {
-          value = new constructors.Texture2D();
+          value = new classes.Texture2D();
         } else {
-          value = new Array(length).fill().map(value => new constructors.Texture2D());
+          value = new Array(length).fill().map(value => new classes.Texture2D());
         }
       } else if (/samplerCube/.test(glslType)) {
         if (isNaN(length)) {
-          value = new constructors.TextureCube();
+          value = new classes.TextureCube();
         } else {
-          value = new Array(length).fill().map(value => new constructors.TextureCube());
+          value = new Array(length).fill().map(value => new classes.TextureCube());
         }
       } else if( (typeMatch = /(.?)vec(\d)/.exec(glslType)) ) {
         let vectorLength = typeMatch[2];
         if (isNaN(length)) {
-          value = new constructors[`Vector${vectorLength}`]();
+          value = new classes[`Vector${vectorLength}`]();
         } else {
-          value = new Array(length).fill().map(value => new constructors[`Vector${vectorLength}`]());
+          value = new Array(length).fill().map(value => new classes[`Vector${vectorLength}`]());
         }
       } else if( (typeMatch = /mat(\d)/.exec(glslType)) ) {
         let matrixLength = typeMatch[1];
         if (isNaN(length)) {
-          value = new constructors[`Matrix${matrixLength}`]();
+          value = new classes[`Matrix${matrixLength}`]();
         } else {
-          value = new Array(length).fill().map(value => new constructors[`Matrix${matrixLength}`]());
+          value = new Array(length).fill().map(value => new classes[`Matrix${matrixLength}`]());
         }
       } else {
         value = null;

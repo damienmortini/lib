@@ -3,12 +3,12 @@ import THREE from "three";
 import THREEShader from "./THREEShader.js";
 
 export default class THREEExtendedShaderMaterial extends THREE.ShaderMaterial {
-  constructor ({originalShaderName, vertexShaderHooks, fragmentShaderHooks} = {}) {
-    let vertexShaderHooks = Object.assign({prefix: "", main: "", suffix: ""}, vertexShaderHooks);
-    let fragmentShaderHooks = Object.assign({prefix: "", main: "", suffix: ""}, fragmentShaderHooks);
+  constructor ({originalShaderName = "", vertexShaderHooks, fragmentShaderHooks, uniforms = {}} = {}) {
+    vertexShaderHooks = Object.assign({prefix: "", main: "", suffix: ""}, vertexShaderHooks);
+    fragmentShaderHooks = Object.assign({prefix: "", main: "", suffix: ""}, fragmentShaderHooks);
 
-    let originalShader = THREE.ShaderLib[originalShaderName];
-    let tempShader = new THREEShader(vertexShaderHooks.prefix, fragmentShaderHooks.prefix);
+    let originalShader = THREE.ShaderLib[originalShaderName] || {};
+    let tempShader = new THREEShader({vertexShader: vertexShaderHooks.prefix, fragmentShader: fragmentShaderHooks.prefix});
 
     uniforms = Object.assign(THREE.UniformsUtils.clone(originalShader.uniforms), tempShader.uniforms, uniforms);
 
