@@ -242,6 +242,13 @@ class GUI {
           label
         });
         break;
+      case "string":
+        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        controlKitPanel.addStringInput(object, key, {
+          onChange: changeValueData,
+          label
+        });
+        break;
       case "color":
         let color = {};
         if(savedValue !== undefined) {
