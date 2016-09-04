@@ -209,12 +209,13 @@ export default class HandTracker {
   }
 
   constructor({
+    host = "localhost",
     hmd = false,
     background = false,
     positionScale = 1
   } = {}) {
       let controller = new leapjs.Controller({
-        host: "127.0.0.1",
+        host: host,
         optimizeHMD: hmd,
         background
       });
