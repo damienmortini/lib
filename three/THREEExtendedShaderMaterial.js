@@ -6,7 +6,7 @@ import THREEShader from "./THREEShader.js";
 
 export default class THREEExtendedShaderMaterial extends ShaderMaterial {
   constructor (options = {}) {
-    let originalShaderName = options.originalShaderName || "basic";
+    let originalShaderName = options.originalShaderName || "";
     delete options.originalShaderName;
     let vertexShaderHooks = Object.assign({prefix: "", main: "", suffix: ""}, options.vertexShaderHooks);
     delete options.vertexShaderHooks;
