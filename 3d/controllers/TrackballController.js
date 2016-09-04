@@ -9,17 +9,17 @@ export default class TrackballControl {
   constructor(matrix = new Matrix4(), {
     domElement = document.body,
     distance = 0,
-    distanceStep = 1,
     invertRotation = true,
-    rotationEaseRatio = .05,
+    rotationEaseRatio = .03,
+    zoomStep = 1,
     zoomEaseRatio = .1
   } = {}) {
     this.matrix = matrix;
 
     this.distance = distance;
-    this.distanceStep = distanceStep;
     this.invertRotation = invertRotation;
     this.rotationEaseRatio = rotationEaseRatio;
+    this.zoomStep = zoomStep;
     this.zoomEaseRatio = zoomEaseRatio;
 
     this._pointer = Pointer.get(domElement);
@@ -43,9 +43,9 @@ export default class TrackballControl {
 
   onWheel(e) {
     if(e.deltaY > 0) {
-      this._nextDistance += this.distanceStep;
+      this._nextDistance += this.zoomStep;
     } else {
-      this._nextDistance -= this.distanceStep;
+      this._nextDistance -= this.zoomStep;
     }
     this._nextDistance = Math.max(this._nextDistance, 0);
   }
