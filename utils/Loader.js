@@ -18,11 +18,15 @@ export default class Loader {
 
     for (let value of values) {
       promises.push(new Promise(function(resolve, reject) {
-        let onLoad = () => {
-          PROMISES.delete(promise);
-          value.removeEventListener("load", onLoad);
-          value.removeEventListener("canplaythrough", onLoad);
-          resolve(value);
+        let onLoad = (response) => {
+          PROMISES.delete(promises);
+          if(value instanceof HTMLMediaElement) {
+            value.removeEventListener("load", onLoad);
+            value.removeEventListener("canplaythrough", onLoad);
+            resolve(value);
+          } else {
+            resolve(response);
+          }
         };
 
         if(typeof value === "string") {
@@ -34,7 +38,7 @@ export default class Loader {
           } else if(/\.(mp3|ogg)$/.test(value)) {
             tagName = "audio";
           }
-          if(tag) {
+          if(tagName) {
             let element = document.createElement(tagName);
             element.src = value;
             value = element;
@@ -48,13 +52,15 @@ export default class Loader {
             value.addEventListener("load", onLoad);
           };
         } else {
-          // TODO: fetch
+          fetch(value).then((response) => {
+            return response.text();
+          }).then(onLoad);
         }
       }));
     }
 
     PROMISES.add(promises);
 
-    return Promise.all(promises);
+    return promises.length > 1 ? Promise.all(promises) : promises[0];
   }
 }
