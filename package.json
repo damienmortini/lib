@@ -26,7 +26,6 @@
   "homepage": "https://github.com/dmmn/dlib",
   "dependencies": {
     "controlkit": "^0.1.9",
-    "event-emitter": "^0.3.4",
     "gl-buffer": "^2.1.2",
     "gl-fbo": "^2.0.5",
     "gl-matrix": "^2.3.2",

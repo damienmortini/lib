@@ -17,8 +17,8 @@ class Ticker {
     this.deltaTime = timestamp - this._previousTimestamp;
     this._previousTimestamp = timestamp;
 
-    for (let callback of callbacks) {
-      callback();
+    for (let i = 0; i < callbacks.length; i++) {
+      callbacks[i]();
     }
   }
 

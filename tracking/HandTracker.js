@@ -133,7 +133,7 @@ class Hand {
 
         let boneName = `${HandTracker.FINGER_NAMES[pointableData.type]}${i}`;
         let bone = this.bones.get(boneName);
-        let basis = pointableData.bones[dataBoneIndex].basis;
+        let basis = pointableData.bases[dataBoneIndex];
 
         bone.globalPosition.copy(pointableData[`${BONE_PREFIXES[dataBoneIndex]}Position`]);
 
@@ -212,48 +212,78 @@ export default class HandTracker {
     host = "localhost",
     hmd = false,
     background = false,
-    positionScale = 1
+    positionScale = 1,
+    workerPath = "./tracking/handTrackerWorker.js"
   } = {}) {
-      let controller = new leapjs.Controller({
-        host: host,
-        optimizeHMD: hmd,
-        background
-      });
+    this._hmd = hmd;
+    this.data = null;
+    this.e = null;
 
-      this._hands = new Map();
+    let webSocket = new WebSocket(`ws://${host}:6437/v6.json`);
 
-      this._positionScale = positionScale;
+    webSocket.addEventListener("open", (e) => {
+      webSocket.send(JSON.stringify({background}));
+      webSocket.send(JSON.stringify({enableGestures: false}));
+      webSocket.send(JSON.stringify({optimizeHMD: hmd}));
+    });
 
-      this.onHandAdd = new Signal();
-      this.onHandRemove = new Signal();
+    this.worker = new Worker(workerPath);
+    this.worker.onmessage = (e) => {
+      this.data = e.data;
+      this.updateData();
+    }
 
-      controller.on("frame", this.onFrame.bind(this));
+    webSocket.addEventListener("message", (e) => {
+      this.e = e;
+    });
 
-      controller.connect();
+    this._hands = new Map();
+
+    this._positionScale = positionScale;
+
+    this.onHandAdd = new Signal();
+    this.onHandRemove = new Signal();
   }
 
   get hands() {
     return this._hands;
   }
 
-  onFrame(frame) {
-    if(!frame.data) {
+  get hmd() {
+    return this._hmd;
+  }
+
+  update() {
+    if(!this.e) {
+      return;
+    }
+    this.worker.postMessage(this.e.data);
+  }
+
+  updateData() {
+    if(!this.data) {
       return;
     }
 
-    for(let handData of frame.data.hands) {
+    let data = this.data;
+
+    if(!data.hands) {
+      return;
+    }
+
+    for(let handData of data.hands) {
       let hand = this._hands.get(handData.id);
       if(!hand) {
         hand = new Hand(handData, {positionScale: this._positionScale});
         this._hands.set(handData.id, hand);
         this.onHandAdd.dispatch(hand);
       }
-      hand.update(handData, frame.pointables);
+      hand.update(handData, data.pointables);
     }
 
     for (let hand of this.hands.values()) {
       let remove = true;
-      for (let handData of frame.data.hands) {
+      for (let handData of data.hands) {
         if(hand.id === handData.id) {
           remove = false;
         }
