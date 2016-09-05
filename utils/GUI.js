@@ -85,12 +85,19 @@ const COMPONENTS = [];
 
 // GUI
 
-const GUI_REG_EXP = /([#&]gui=)({.*})([&?]*)/;
+const GUI_REG_EXP = /([#&]gui=)((%7B|{).*(%7D|}))([&?]*)/;
 
-let DATA;
+let DATA = {};
 (function() {
   let matches = GUI_REG_EXP.exec(window.location.hash);
-  DATA = matches ? JSON.parse(matches[2]) : {};
+  if(matches) {
+    let string = matches[2];
+    string = string.replace(/%7B/g, "{");
+    string = string.replace(/%7D/g, "}");
+    string = string.replace(/%22/g, "\"");
+    window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${string}$5`);
+    DATA = JSON.parse(string);
+  }
 })();
 
 const CONTROL_KIT_CONTAINERS = new Map();
@@ -212,7 +219,7 @@ class GUI {
       containerData[labelKey] = value;
 
       if(GUI_REG_EXP.test(window.location.hash)) {
-        window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${JSON.stringify(DATA)}$3`);
+        window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${JSON.stringify(DATA)}$5`);
       } else {
         let prefix = window.location.hash ? "&" : "#";
         window.location.hash += `${prefix}gui=${JSON.stringify(DATA)}`;
