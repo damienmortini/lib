@@ -16,12 +16,12 @@ export default class THREEStereoRenderer {
     this.renderer.setSize(width, height);
   }
 
-  render(scene, renderTarget) {
+  render(scene, camera, renderTarget) {
     scene.updateMatrixWorld();
 
-    if (scene.camera.parent === null) scene.camera.updateMatrixWorld();
+    if (camera.parent === null) camera.updateMatrixWorld();
 
-    this._stereoCamera.update(scene.camera);
+    this._stereoCamera.update(camera);
 
     var size = this.renderer.getSize();
 
