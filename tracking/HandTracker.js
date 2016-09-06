@@ -1,5 +1,3 @@
-import leapjs from "leapjs";
-
 import Signal from "../utils/Signal.js";
 
 import Matrix3 from "../math/Matrix3.js";
@@ -213,29 +211,35 @@ export default class HandTracker {
     hmd = false,
     background = false,
     positionScale = 1,
-    workerPath = "./tracking/handTrackerWorker.js"
+    workerBasePath,
+    autoUpdate = true
   } = {}) {
-    this._hmd = hmd;
-    this.data = null;
+    this._stringData = null;
     this.e = null;
 
-    let webSocket = new WebSocket(`ws://${host}:6437/v6.json`);
+    this.onUpdate = new Signal();
 
-    webSocket.addEventListener("open", (e) => {
-      webSocket.send(JSON.stringify({background}));
-      webSocket.send(JSON.stringify({enableGestures: false}));
-      webSocket.send(JSON.stringify({optimizeHMD: hmd}));
+    this._webSocket = new WebSocket(`ws://${host}:6437/v6.json`);
+
+    this._webSocket.addEventListener("open", (e) => {
+      this._webSocket.send(JSON.stringify({enableGestures: false}));
+      this.hmd = hmd;
+      this.background = background;
     });
 
-    this.worker = new Worker(workerPath);
-    this.worker.onmessage = (e) => {
-      this.data = e.data;
-      this.updateData();
+    this._webSocket.addEventListener("message", (e) => {
+      this._stringData = e.data;
+      if(autoUpdate) {
+        this.update();
+      }
+    });
+
+    if(workerBasePath) {
+      this.worker = new Worker(`${workerBasePath}handTrackerWorker.js`);
+      this.worker.onmessage = (e) => {
+        this.updateData(e.data);
+      }
     }
-
-    webSocket.addEventListener("message", (e) => {
-      this.e = e;
-    });
 
     this._hands = new Map();
 
@@ -249,25 +253,34 @@ export default class HandTracker {
     return this._hands;
   }
 
+  set background(value) {
+    this._webSocket.send(JSON.stringify({background: value}));
+  }
+
+  set hmd(value) {
+    this._hmd = value;
+    this._webSocket.send(JSON.stringify({optimizeHMD: this._hmd}));
+  }
+
   get hmd() {
     return this._hmd;
   }
 
   update() {
-    if(!this.e) {
+    if(!this._stringData) {
       return;
     }
-    this.worker.postMessage(this.e.data);
+    if(this.worker) {
+      this.worker.postMessage(this._stringData);
+    } else {
+      this.updateData(JSON.parse(this._stringData));
+    }
+
+    this.onUpdate.dispatch();
   }
 
-  updateData() {
-    if(!this.data) {
-      return;
-    }
-
-    let data = this.data;
-
-    if(!data.hands) {
+  updateData(data) {
+    if(!data || !data.hands) {
       return;
     }
 
