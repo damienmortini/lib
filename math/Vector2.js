@@ -28,7 +28,7 @@ export default class Vector2 {
     this.elements[1] = value;
   }
 
-  get length() {
+  get size() {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 

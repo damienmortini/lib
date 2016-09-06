@@ -31,10 +31,6 @@ export default class Vector3 extends Float32Array {
     this[2] = value;
   }
 
-  get length() {
-    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-  }
-
   set(x, y, z) {
     vec3.set(this, x, y, z);
     return this;
@@ -48,6 +44,10 @@ export default class Vector3 extends Float32Array {
   add(vector3) {
     vec3.add(this, this, vector3);
     return this;
+  }
+
+  size() {
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
 
   subtract(vector3) {
@@ -71,7 +71,7 @@ export default class Vector3 extends Float32Array {
   }
 
   normalize() {
-    this.divideScalar(this.length);
+    this.divideScalar(this.size);
   }
 
   divideScalar(scalar) {
@@ -103,7 +103,7 @@ export default class Vector3 extends Float32Array {
 
   angleTo(vector3) {
     // TODO: To test(from three.js)
-    let theta = this.dot(vector3) / (this.length() * vector3.length());
+    let theta = this.dot(vector3) / (this.size * vector3.size);
     return Math.acos((theta < -1) ? -1 : ((theta > 1) ? 1 : theta));
   }
 
