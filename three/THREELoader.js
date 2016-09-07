@@ -1,4 +1,9 @@
-import THREE from "three";
+import {
+  TextureLoader,
+  ObjectLoader,
+} from "three";
+
+import "three/examples/js/loaders/ColladaLoader.js";
 
 import Loader from "../utils/Loader.js";
 
@@ -9,13 +14,14 @@ export default class THREELoader {
     let loader;
 
     if(/\.(png|jpg)$/.test(value)) {
-      loader = new THREE.TextureLoader();
+      loader = new TextureLoader();
+    }
+    else if(/\.(dae)$/.test(value)) {
+      loader = new THREE.ColladaLoader();
     }
     else if(/\.(json)$/.test(value)) {
-      loader = new THREE.ObjectLoader();
+      loader = new ObjectLoader();
     }
-
-    let value;
 
     let promise = new Promise((resolve) => {
       value = loader.load(value, (data) => {
@@ -26,6 +32,6 @@ export default class THREELoader {
 
     PROMISES.add(promise);
 
-    return loader instanceof THREE.TextureLoader ? value : promise;
+    return loader instanceof TextureLoader ? value : promise;
   }
 }
