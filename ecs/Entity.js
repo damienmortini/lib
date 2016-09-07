@@ -1,4 +1,3 @@
-let lastUID = 0;
 let entitiesSet = new Set();
 let componentEntities = new Map();
 
@@ -15,8 +14,8 @@ export default class Entity {
     return entities;
   }
 
-  constructor() {
-    this._UID = lastUID++;
+  constructor({name = ""} = {}) {
+    this._name = name;
 
     this._components = new Map();
     this._componentsSaved = new Map();
@@ -26,8 +25,8 @@ export default class Entity {
     entitiesSet.add(this);
   }
 
-  get UID() {
-    return this._UID;
+  get name() {
+    return this._name;
   }
 
   addComponent(ComponentClass, ...args) {
