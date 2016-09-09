@@ -15,12 +15,21 @@ export default class THREEShader {
     void main() {
       gl_FragColor = vec4(1.);
     }
-  `, uniforms = {}, attributes = {}}) {
+  `, uniforms = {}, attributes = {}} = {}) {
 
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
     this.attributes = attributes;
+
+    for (let key in this.uniforms) {
+      let uniform = this.uniforms[key];
+      if(typeof uniform !== "object" || !uniform.value) {
+        this.uniforms[key] = {
+          value: uniform
+        }
+      }
+    }
 
     this.parseQualifiers();
   }
