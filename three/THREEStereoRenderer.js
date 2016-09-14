@@ -23,7 +23,7 @@ export default class THREEStereoRenderer {
 
     this._stereoCamera.update(camera);
 
-    var size = this.renderer.getSize();
+    let size = this.renderer.getSize();
 
     this.renderer.clear();
 
