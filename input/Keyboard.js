@@ -21,19 +21,22 @@ export default class Keyboard {
   static get SPACE() {
     return 32;
   }
+  static get SHIFT() {
+    return 16;
+  }
   static get onKeyDown() {
     return onKeyDown;
   }
   static get onKeyUp() {
     return onKeyUp;
   }
-  static isKeyDown(keyCode) {
+  static hasKeyDown(keyCode) {
     return keysDown.has(keyCode);
   }
 }
 
 window.addEventListener("keydown", (e) => {
-  if(!Keyboard.isKeyDown(e.keyCode)) {
+  if(!Keyboard.hasKeyDown(e.keyCode)) {
     onKeyDown.dispatch(e.keyCode);
   }
   keysDown.add(e.keyCode);

@@ -4,6 +4,7 @@ import {
 } from "three";
 
 import "three/examples/js/loaders/ColladaLoader.js";
+import "three/examples/js/loaders/OBJLoader.js";
 
 import Loader from "../utils/Loader.js";
 
@@ -18,6 +19,9 @@ export default class THREELoader {
     }
     else if(/\.(dae)$/.test(value)) {
       loader = new THREE.ColladaLoader();
+    }
+    else if(/\.(obj)$/.test(value)) {
+      loader = new THREE.OBJLoader();
     }
     else if(/\.(json)$/.test(value)) {
       loader = new ObjectLoader();

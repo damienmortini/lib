@@ -1,4 +1,5 @@
 import ControlKit from "controlkit";
+import Keyboard from "../input/Keyboard.js";
 
 // STYLES
 
@@ -152,12 +153,16 @@ class GUI {
     });
   }
 
-  open(panel, group) {
-    CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : "")).enable();
+  open(panel = "main", group) {
+    let container = CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : ""));
+    container._enabled = true;
+    container._updateAppearance();
   }
 
-  close(panel, group) {
-    CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : "")).disable();
+  close(panel = "main", group) {
+    let container = CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : ""));
+    container._enabled = false;
+    container._updateAppearance();
   }
 
   add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "", reload = false, options, range, onChange} = {}) {
@@ -230,7 +235,13 @@ class GUI {
       }
 
       if (reload) {
-        window.location.reload();
+        if(Keyboard.hasKeyDown(Keyboard.SHIFT)) {
+          Keyboard.onKeyUp.addOnce(() => {
+            window.location.reload();
+          }, this);
+        } else {
+          window.location.reload();
+        }
       }
     }
 
