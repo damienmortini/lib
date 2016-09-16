@@ -267,6 +267,9 @@ class GUI {
           label
         });
         break;
+      case "function":
+        controlKitPanel.addButton(label, object[key]);
+        break;
       case "color":
         let color = {};
         if(savedValue !== undefined) {
