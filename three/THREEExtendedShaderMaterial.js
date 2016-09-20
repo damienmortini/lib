@@ -1,5 +1,3 @@
-import THREE from "three";
-
 import { ShaderMaterial, ShaderLib, UniformsUtils } from "three";
 
 import THREEShader from "./THREEShader.js";
