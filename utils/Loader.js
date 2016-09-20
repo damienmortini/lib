@@ -20,7 +20,7 @@ export default class Loader {
       promises.push(new Promise(function(resolve, reject) {
         let onLoad = (response) => {
           PROMISES.delete(promises);
-          if(value instanceof HTMLMediaElement) {
+          if(value instanceof HTMLElement) {
             value.removeEventListener("load", onLoad);
             value.removeEventListener("canplaythrough", onLoad);
             resolve(value);
@@ -45,7 +45,7 @@ export default class Loader {
           }
         }
 
-        if(value instanceof HTMLMediaElement) {
+        if(value instanceof HTMLElement) {
           if(value instanceof HTMLMediaElement) {
             value.addEventListener("canplaythrough", onLoad);
           } else {
