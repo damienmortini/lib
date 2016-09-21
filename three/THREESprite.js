@@ -38,6 +38,10 @@ export default class Sprite extends Object3D {
     }
   }
 
+  set material(value) {
+    this.mesh.material = value;
+  }
+
   get material() {
     return this.mesh.material;
   }
