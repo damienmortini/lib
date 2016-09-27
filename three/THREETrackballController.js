@@ -5,9 +5,9 @@ import TrackballController from "../3d/controllers/TrackballController.js";
 import Matrix4 from "../math/Matrix4.js";
 
 export default class THREETrackballController extends TrackballController {
-  constructor(object3D = new Object3D(), {domElement, distance, distanceStep} = {}) {
+  constructor(object3D = new Object3D(), options) {
     object3D.updateMatrix();
-    super(new Matrix4(object3D.matrix.elements), {domElement, distance, distanceStep});
+    super(new Matrix4(object3D.matrix.elements), options);
     this._matrix4 = new THREEMatrix4();
     this.object3D = object3D;
   }

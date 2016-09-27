@@ -100,7 +100,7 @@ class Hand {
     let armBone = this.bones.get("arm");
     armBone.globalPosition.copy(handData.elbow);
     this._setRotationFromBasis(armBone.globalRotation, handData.armBasis);
-    armBone.position.copy(this.position).add(handData.elbow);
+    armBone.position.copy(handData.elbow);
     armBone.rotation.copy(armBone.globalRotation);
 
     // wrist
