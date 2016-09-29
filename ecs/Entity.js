@@ -29,6 +29,14 @@ export default class Entity {
     return this._name;
   }
 
+  getComponent(ComponentClass) {
+    return this._components.get(ComponentClass);
+  }
+
+  hasComponent(ComponentClass) {
+    return this._components.has(ComponentClass);
+  }
+
   addComponent(ComponentClass, ...args) {
     let component = this._componentsSaved.get(ComponentClass) || this.getComponent(ComponentClass);
     if (component && !args.length) {
@@ -39,15 +47,8 @@ export default class Entity {
     this._components.set(ComponentClass, component);
     let entities = Entity.getEntities(ComponentClass);
     entities.add(this);
+    component.onAdd.dispatch();
     return component;
-  }
-
-  getComponent(ComponentClass) {
-    return this._components.get(ComponentClass);
-  }
-
-  hasComponent(ComponentClass) {
-    return this._components.has(ComponentClass);
   }
 
   removeComponent(ComponentClass) {
@@ -58,6 +59,7 @@ export default class Entity {
     this._componentsSaved.set(ComponentClass, component);
     this._components.delete(ComponentClass);
     Entity.getEntities(ComponentClass).delete(this);
+    component.onRemove.dispatch();
     return component;
   }
 
