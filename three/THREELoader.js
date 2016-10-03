@@ -11,6 +11,10 @@ import Loader from "../utils/Loader.js";
 let PROMISES = Loader.promises;
 
 export default class THREELoader {
+  static get onLoad() {
+    return Loader.onLoad;
+  }
+  
   static load(value) {
     let loader;
 
