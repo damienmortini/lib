@@ -1,32 +1,51 @@
 let entitiesSet = new Set();
+let entitiesSetActive = new Set();
 let componentEntities = new Map();
+let componentEntitiesActive = new Map();
 
 export default class Entity {
-  static getEntities(ComponentClass) {
+  static getEntities(ComponentClass, {
+    onlyActive = false
+  } = {}) {
     if (!ComponentClass) {
-      return entitiesSet;
+      return onlyActive ? entitiesSetActive : entitiesSet;
     }
-    let entities = componentEntities.get(ComponentClass);
+    let entities = (onlyActive ? componentEntitiesActive : componentEntities).get(ComponentClass);
     if (!entities) {
       entities = new Set();
-      componentEntities.set(ComponentClass, entities);
+      (onlyActive ? componentEntitiesActive : componentEntities).set(ComponentClass, entities);
     }
     return entities;
   }
 
-  constructor({name = ""} = {}) {
+  constructor({name = this.constructor.name} = {}) {
     this._name = name;
 
     this._components = new Map();
     this._componentsSaved = new Map();
 
-    this.active = true;
+    this._active = true;
 
     entitiesSet.add(this);
   }
 
   get name() {
     return this._name;
+  }
+
+  set active(value) {
+    this._active = value;
+    for (let ComponentClass of this._components.keys()) {
+      if(this._active) {
+        Entity.getEntities(ComponentClass, {onlyActive : true}).add(this);
+      } else {
+        Entity.getEntities(ComponentClass, {onlyActive : true}).delete(this);
+      }
+    }
+  }
+
+  get active() {
+    return this._active;
   }
 
   getComponent(ComponentClass) {
@@ -45,8 +64,10 @@ export default class Entity {
       component = new ComponentClass(this, ...args);
     }
     this._components.set(ComponentClass, component);
-    let entities = Entity.getEntities(ComponentClass);
-    entities.add(this);
+    Entity.getEntities(ComponentClass).add(this);
+    if(this.active) {
+      Entity.getEntities(ComponentClass, {onlyActive: true}).add(this);
+    }
     component.onAdd.dispatch();
     return component;
   }
@@ -59,6 +80,7 @@ export default class Entity {
     this._componentsSaved.set(ComponentClass, component);
     this._components.delete(ComponentClass);
     Entity.getEntities(ComponentClass).delete(this);
+    Entity.getEntities(ComponentClass, {onlyActive: true}).delete(this);
     component.onRemove.dispatch();
     return component;
   }
