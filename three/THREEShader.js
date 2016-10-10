@@ -54,7 +54,7 @@ export default class THREEShader {
       ${this.fragmentShader}
     `;
 
-    let regExp = /(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/g;
+    let regExp = /^\s*(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
 
     let match;
 
