@@ -165,7 +165,9 @@ class GUI {
     container._updateAppearance();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "Main", reload = false, options, range, onChange} = {}) {
+  add(object, key, {type, label = key, panel = "Main", group = "Main", reload = false, options, range, onChange} = {}) {
+    type = type || (options ? "select" : typeof object[key]);
+
     let labelKey = normalizeString(label);
 
     let panelKey = normalizeString(panel);
