@@ -165,7 +165,7 @@ class GUI {
     container._updateAppearance();
   }
 
-  add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "", reload = false, options, range, onChange} = {}) {
+  add(object, key, {type = typeof object[key], label = key, panel = "Main", group = "Main", reload = false, options, range, onChange} = {}) {
     let labelKey = normalizeString(label);
 
     let panelKey = normalizeString(panel);
@@ -184,15 +184,13 @@ class GUI {
 
     let groupKey = normalizeString(group);
     let controlKitGroup = CONTROL_KIT_CONTAINERS.get(`${panelKey}/`);
-    if(groupKey) {
-      controlKitGroup = CONTROL_KIT_CONTAINERS.get(`${panelKey}/${groupKey}`);
-      if(!controlKitGroup) {
-        controlKitPanel.addGroup({
-          label: group
-        });
-        controlKitGroup = controlKitPanel._groups[controlKitPanel._groups.length - 1];
-        CONTROL_KIT_CONTAINERS.set(`${panelKey}/${groupKey}`, controlKitGroup);
-      }
+    controlKitGroup = CONTROL_KIT_CONTAINERS.get(`${panelKey}/${groupKey}`);
+    if(!controlKitGroup) {
+      controlKitPanel.addGroup({
+        label: group
+      });
+      controlKitGroup = controlKitPanel._groups[controlKitPanel._groups.length - 1];
+      CONTROL_KIT_CONTAINERS.set(`${panelKey}/${groupKey}`, controlKitGroup);
     }
 
     if(controlKitGroup) {
