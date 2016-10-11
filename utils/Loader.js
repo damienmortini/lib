@@ -1,3 +1,5 @@
+import "whatwg-fetch";
+
 const PROMISES = new Map();
 
 export default class Loader {
