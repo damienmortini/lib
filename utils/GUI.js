@@ -203,7 +203,7 @@ class GUI {
 
     if (groupKey && DATA[panelKey] && DATA[panelKey][groupKey]) {
       savedValue = DATA[panelKey][groupKey][labelKey];
-    } else if (DATA[panelKey]) {
+    } else if (!groupKey && DATA[panelKey]) {
       savedValue = DATA[panelKey][labelKey];
     }
 
