@@ -1,8 +1,8 @@
-const PROMISES = new Set();
+const PROMISES = new Map();
 
 export default class Loader {
   static get onLoad() {
-    return Promise.all(PROMISES);
+    return Promise.all(PROMISES.values());
   }
 
   static get promises() {
@@ -17,9 +17,9 @@ export default class Loader {
     let promises = [];
 
     for (let value of values) {
-      promises.push(new Promise(function(resolve, reject) {
+      let promise = PROMISES.get(value) || new Promise(function(resolve, reject) {
         let onLoad = (response) => {
-          PROMISES.delete(promises);
+          PROMISES.delete(value);
           if(value instanceof HTMLElement) {
             value.removeEventListener("load", onLoad);
             value.removeEventListener("canplaythrough", onLoad);
@@ -56,10 +56,10 @@ export default class Loader {
             return response.text();
           }).then(onLoad);
         }
-      }));
+      });
+      promises.push(promise);
+      PROMISES.set(value, promise);
     }
-
-    PROMISES.add(promises);
 
     return promises.length > 1 ? Promise.all(promises) : promises[0];
   }

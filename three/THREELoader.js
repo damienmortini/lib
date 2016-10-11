@@ -14,7 +14,7 @@ export default class THREELoader {
   static get onLoad() {
     return Loader.onLoad;
   }
-  
+
   static load(value) {
     let loader;
 
@@ -33,12 +33,12 @@ export default class THREELoader {
 
     let promise = new Promise((resolve) => {
       value = loader.load(value, (data) => {
-        PROMISES.delete(promise);
+        PROMISES.delete(value);
         resolve(data);
       });
     });
 
-    PROMISES.add(promise);
+    PROMISES.set(value, promise);
 
     return loader instanceof TextureLoader ? value : promise;
   }
