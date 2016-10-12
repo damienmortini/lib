@@ -16,14 +16,14 @@ export default class TrackballControl {
   } = {}) {
     this.matrix = matrix;
 
-    this.distance = distance;
+    this._distance = distance;
     this.invertRotation = invertRotation;
     this.rotationEaseRatio = rotationEaseRatio;
     this.zoomStep = zoomStep;
     this.zoomEaseRatio = zoomEaseRatio;
 
     this._pointer = Pointer.get(domElement);
-    this._nextDistance = this.distance;
+    this._nextDistance = this._distance;
 
     this._cachedQuaternion = new Quaternion();
     this._cachedMatrix = new Matrix4();
@@ -41,6 +41,14 @@ export default class TrackballControl {
     Ticker.add(this.update.bind(this));
   }
 
+  set distance(value) {
+    this._distance = this._nextDistance = value;
+  }
+
+  get distance() {
+    return this._distance;
+  }
+
   onWheel(e) {
     if(e.deltaY > 0) {
       this._nextDistance += this.zoomStep;
@@ -54,7 +62,7 @@ export default class TrackballControl {
     this._cachedMatrix.identity();
     this._cachedQuaternion.identity();
 
-    this.distance += (this._nextDistance - this.distance) * this.zoomEaseRatio;
+    this._distance += (this._nextDistance - this._distance) * this.zoomEaseRatio;
 
     this._position.set(this.matrix.x, this.matrix.y, this.matrix.z).subtract(this._positionOffset);
 
@@ -77,7 +85,7 @@ export default class TrackballControl {
 
     this._positionOffset.set(0, 0, 1);
     this._positionOffset.applyMatrix4(this.matrix);
-    this._positionOffset.scale(this.distance);
+    this._positionOffset.scale(this._distance);
 
     this._cachedVector3.copy(this._position).add(this._positionOffset);
 
