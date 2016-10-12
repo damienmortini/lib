@@ -317,7 +317,7 @@ class GUI {
       case "xy":
         let xy = {};
         if(object[key].x !== undefined) {
-          if(matches) {
+          if(savedValue) {
             xy.value = savedValue;
             [object[key].x, object[key].y] = [xy.value[0], xy.value[1]];
           } else {
