@@ -1,6 +1,7 @@
 import {
   TextureLoader,
   ObjectLoader,
+  Mesh,
 } from "three";
 
 import "three/examples/js/loaders/ColladaLoader.js";
@@ -10,6 +11,29 @@ import Loader from "../utils/Loader.js";
 
 let PROMISES = Loader.promises;
 
+function fixColladaLoaderData(data) {
+  let meshContainers = [];
+  data.scene.traverse((object3D) => {
+    if(object3D.children[0] instanceof Mesh) {
+      meshContainers.push(object3D);
+    }
+    [object3D.position.y, object3D.position.z] = [object3D.position.z, -object3D.position.y];
+    [object3D.rotation.y, object3D.rotation.z] = [object3D.rotation.z, -object3D.rotation.y];
+    [object3D.scale.y, object3D.scale.z] = [object3D.scale.z, object3D.scale.y];
+  });
+  for (let object3D of meshContainers) {
+    let mesh = object3D.children[0];
+    object3D.remove(mesh);
+    mesh.name = object3D.name;
+    mesh.position.copy(object3D.position);
+    mesh.rotation.copy(object3D.rotation);
+    mesh.scale.copy(object3D.scale);
+    mesh.geometry.rotateX(-Math.PI * .5);
+    object3D.parent.add(mesh);
+    object3D.parent.remove(object3D);
+  }
+}
+
 export default class THREELoader {
   static get onLoad() {
     return Loader.onLoad;
@@ -17,6 +41,7 @@ export default class THREELoader {
 
   static load(value) {
     let loader;
+    let texture;
 
     if(/\.(png|jpg)$/.test(value)) {
       loader = new TextureLoader();
@@ -32,14 +57,17 @@ export default class THREELoader {
     }
 
     let promise = new Promise((resolve) => {
-      value = loader.load(value, (data) => {
+      texture = loader.load(value, (data) => {
         PROMISES.delete(value);
+        if(/\.(dae)$/.test(value)) {
+          fixColladaLoaderData(data);
+        }
         resolve(data);
       });
     });
 
     PROMISES.set(value, promise);
 
-    return loader instanceof TextureLoader ? value : promise;
+    return loader instanceof TextureLoader ? texture : promise;
   }
 }
