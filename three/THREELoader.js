@@ -11,15 +11,17 @@ import Loader from "../utils/Loader.js";
 
 let PROMISES = Loader.promises;
 
-function fixColladaLoaderData(data) {
+function fixColladaLoaderData(data, {scale}) {
   let meshContainers = [];
   data.scene.traverse((object3D) => {
     if(object3D.children[0] instanceof Mesh) {
       meshContainers.push(object3D);
     }
     [object3D.position.y, object3D.position.z] = [object3D.position.z, -object3D.position.y];
+    object3D.position.multiplyScalar(scale);
     [object3D.rotation.y, object3D.rotation.z] = [object3D.rotation.z, -object3D.rotation.y];
     [object3D.scale.y, object3D.scale.z] = [object3D.scale.z, object3D.scale.y];
+    object3D.scale.multiplyScalar(scale);
   });
   for (let object3D of meshContainers) {
     let mesh = object3D.children[0];
@@ -39,7 +41,7 @@ export default class THREELoader {
     return Loader.onLoad;
   }
 
-  static load(value) {
+  static load(value, {scale = 1} = {}) {
     let loader;
     let texture;
 
@@ -60,7 +62,7 @@ export default class THREELoader {
       texture = loader.load(value, (data) => {
         PROMISES.delete(value);
         if(/\.(dae)$/.test(value)) {
-          fixColladaLoaderData(data);
+          fixColladaLoaderData(data, {scale});
         }
         resolve(data);
       });
