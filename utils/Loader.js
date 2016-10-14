@@ -55,7 +55,7 @@ export default class Loader {
           };
         } else {
           fetch(value).then((response) => {
-            return response.text();
+            return response[/\.(json)$/.test(value) ? "json" : "text"]();
           }).then(onLoad);
         }
       });
