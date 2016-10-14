@@ -21,7 +21,6 @@ function fixColladaLoaderData(data, {scale}) {
     object3D.position.multiplyScalar(scale);
     [object3D.rotation.y, object3D.rotation.z] = [object3D.rotation.z, -object3D.rotation.y];
     [object3D.scale.y, object3D.scale.z] = [object3D.scale.z, object3D.scale.y];
-    object3D.scale.multiplyScalar(scale);
   });
   for (let object3D of meshContainers) {
     let mesh = object3D.children[0];
@@ -31,6 +30,7 @@ function fixColladaLoaderData(data, {scale}) {
     mesh.rotation.copy(object3D.rotation);
     mesh.scale.copy(object3D.scale);
     mesh.geometry.rotateX(-Math.PI * .5);
+    mesh.geometry.scale(scale, scale, scale);
     object3D.parent.add(mesh);
     object3D.parent.remove(object3D);
   }
