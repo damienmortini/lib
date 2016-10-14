@@ -1,12 +1,15 @@
-import { Object3D, Mesh, PlaneGeometry, MeshBasicMaterial, Texture, DoubleSide, LinearFilter } from "three";
+import { Object3D, Mesh, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "three";
+
+import THREEExtendedShaderMaterial from "./THREEExtendedShaderMaterial.js";
 
 let CACHED_IMAGES = new Map();
 
 export default class Sprite extends Object3D {
-  constructor(image, data = null, frame = null) {
+  constructor(image, {data, frame, scale = 1} = {}) {
     super();
 
     this.data = data;
+    this._scale = scale;
 
     // Optimise images decoding
     let canvas = CACHED_IMAGES.get(image);
@@ -20,13 +23,16 @@ export default class Sprite extends Object3D {
       CACHED_IMAGES.set(image, canvas);
     }
 
-    this.mesh = new Mesh(new PlaneGeometry(1, 1), new MeshBasicMaterial({
-      map: new Texture(canvas),
+    this.mesh = new Mesh(new PlaneGeometry(1, 1), new THREEExtendedShaderMaterial({
+      type: "basic",
       transparent: true,
-      side: DoubleSide
+      side: DoubleSide,
+      uniforms: {
+        map: new Texture(canvas)
+      }
     }));
-    this.mesh.scale.x = canvas.width;
-    this.mesh.scale.y = canvas.height;
+    this.mesh.scale.x = canvas.width * this._scale;
+    this.mesh.scale.y = canvas.height * this._scale;
     this.mesh.material.map.minFilter = LinearFilter;
     this.mesh.material.map.generateMipmaps = false;
     this.mesh.material.map.needsUpdate = true;
@@ -40,6 +46,7 @@ export default class Sprite extends Object3D {
 
   set material(value) {
     this.mesh.material = value;
+    this.frame = this.frame;
   }
 
   get material() {
@@ -47,21 +54,26 @@ export default class Sprite extends Object3D {
   }
 
   set frame(value) {
+    if(!this.data) {
+      return;
+    }
+
     this._frame = value;
 
     let texture = this.mesh.material.map;
+    let offsetRepeat = this.mesh.material.offsetRepeat;
     let frameData = this.data.frames[this._frame];
 
-    texture.repeat.x = (frameData.rotated ? frameData.frame.h : frameData.frame.w) / texture.image.width;
-    texture.repeat.y = (frameData.rotated ? frameData.frame.w : frameData.frame.h) / texture.image.height;
+    offsetRepeat.z = (frameData.rotated ? frameData.frame.h : frameData.frame.w) / texture.image.width;
+    offsetRepeat.w = (frameData.rotated ? frameData.frame.w : frameData.frame.h) / texture.image.height;
 
-    texture.offset.x = frameData.frame.x / texture.image.width;
-    texture.offset.y = 1. - frameData.frame.y / texture.image.height - texture.repeat.y;
+    offsetRepeat.x = frameData.frame.x / texture.image.width;
+    offsetRepeat.y = 1. - frameData.frame.y / texture.image.height - offsetRepeat.w;
 
     let scale = 1 / this.data.meta.scale;
 
-    this.mesh.scale.x = (frameData.rotated ? frameData.frame.h : frameData.frame.w) * scale;
-    this.mesh.scale.y = (frameData.rotated ? frameData.frame.w : frameData.frame.h) * scale;
+    this.mesh.scale.x = (frameData.rotated ? frameData.frame.h : frameData.frame.w) * scale * this._scale;
+    this.mesh.scale.y = (frameData.rotated ? frameData.frame.w : frameData.frame.h) * scale * this._scale;
 
     this.mesh.position.x = (-(frameData.sourceSize.w - frameData.frame.w) * .5 + frameData.spriteSourceSize.x + frameData.sourceSize.w * (.5 - frameData.pivot.x)) * scale;
     this.mesh.position.y = ((frameData.sourceSize.h - frameData.frame.h) * .5 - frameData.spriteSourceSize.y - frameData.sourceSize.h * (.5 - frameData.pivot.y)) * scale;
