@@ -75,8 +75,9 @@ export default class Sprite extends Object3D {
     this.mesh.scale.x = (frameData.rotated ? frameData.frame.h : frameData.frame.w) * scale * this._scale;
     this.mesh.scale.y = (frameData.rotated ? frameData.frame.w : frameData.frame.h) * scale * this._scale;
 
-    this.mesh.position.x = (-(frameData.sourceSize.w - frameData.frame.w) * .5 + frameData.spriteSourceSize.x + frameData.sourceSize.w * (.5 - frameData.pivot.x)) * scale;
-    this.mesh.position.y = ((frameData.sourceSize.h - frameData.frame.h) * .5 - frameData.spriteSourceSize.y - frameData.sourceSize.h * (.5 - frameData.pivot.y)) * scale;
+    // TODO : fix pivot
+    // this.mesh.position.x = (-(frameData.sourceSize.w - frameData.frame.w) * .5 + frameData.spriteSourceSize.x + frameData.sourceSize.w * (.5 - frameData.pivot.x)) * scale;
+    // this.mesh.position.y = ((frameData.sourceSize.h - frameData.frame.h) * .5 - frameData.spriteSourceSize.y - frameData.sourceSize.h * (.5 - frameData.pivot.y)) * scale;
 
     this.mesh.rotation.z = frameData.rotated ? Math.PI * .5 : 0;
   }
