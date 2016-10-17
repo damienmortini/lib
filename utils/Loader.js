@@ -1,6 +1,7 @@
 import "whatwg-fetch";
 
 const PROMISES = new Map();
+const OBJECTS = new Map();
 
 export default class Loader {
   static get onLoad() {
@@ -9,6 +10,10 @@ export default class Loader {
 
   static get promises() {
     return PROMISES;
+  }
+
+  static get(value) {
+    return OBJECTS.get(value);
   }
 
   static load(values) {
@@ -20,13 +25,16 @@ export default class Loader {
 
     for (let value of values) {
       let promise = PROMISES.get(value) || new Promise(function(resolve, reject) {
+
         let onLoad = (response) => {
           PROMISES.delete(value);
           if(value instanceof HTMLElement) {
             value.removeEventListener("load", onLoad);
             value.removeEventListener("canplaythrough", onLoad);
+            OBJECTS.set(value.getAttribute("src"), value);
             resolve(value);
           } else {
+            OBJECTS.set(value, response);
             resolve(response);
           }
         };
@@ -59,6 +67,7 @@ export default class Loader {
           }).then(onLoad);
         }
       });
+
       promises.push(promise);
       PROMISES.set(value, promise);
     }
