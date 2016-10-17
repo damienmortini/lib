@@ -4,6 +4,8 @@ export default class Component {
   constructor(entity, {require = []} = {}) {
     this.entity = entity;
 
+    this.active = true;
+
     this.onAdd = new Signal();
     this.onRemove = new Signal();
 
