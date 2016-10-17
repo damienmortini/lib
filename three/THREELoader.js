@@ -1,6 +1,6 @@
 import {
-  TextureLoader,
   Texture,
+  RGBFormat,
   ObjectLoader,
   Mesh,
 } from "three";
@@ -10,13 +10,7 @@ import "three/examples/js/loaders/OBJLoader.js";
 
 import Loader from "../utils/Loader.js";
 
-let PROMISES = Loader.promises;
-
 function fixLoaderData(data, {scale}) {
-  if(data instanceof Texture) {
-    return;
-  }
-
   let isCollada = !!data.dae;
 
   let meshes = [];
@@ -48,39 +42,41 @@ function fixLoaderData(data, {scale}) {
   }
 }
 
-export default class THREELoader {
-  static get onLoad() {
-    return Loader.onLoad;
-  }
-
+export default class THREELoader extends Loader {
   static load(value, {scale = 1} = {}) {
-    let loader;
     let texture;
 
     if(/\.(png|jpg)$/.test(value)) {
-      loader = new TextureLoader();
-    }
-    else if(/\.(dae)$/.test(value)) {
-      loader = new THREE.ColladaLoader();
-      loader.options.convertUpAxis = true;
-    }
-    else if(/\.(obj)$/.test(value)) {
-      loader = new THREE.OBJLoader();
-    }
-    else if(/\.(json)$/.test(value)) {
-      loader = new ObjectLoader();
+      texture = new Texture();
+      if(/\.(jpg)$/.test(value)) {
+        texture.format = RGBFormat;
+      }
     }
 
-    let promise = new Promise((resolve) => {
-      texture = loader.load(value, (data) => {
-        fixLoaderData(data, {scale});
-        PROMISES.delete(value);
-        resolve(data);
-      });
+    let promise = super.load(value).then((data) => {
+      if(texture) {
+        texture.image = data;
+        texture.needsUpdate = true;
+      }
+      else if(/\.(dae)$/.test(value)) {
+        let loader = new THREE.ColladaLoader();
+        loader.options.convertUpAxis = true;
+        let object = loader.parse(data);
+        fixLoaderData(object, {scale});
+        return object;
+      }
+      else if(/\.(obj)$/.test(value)) {
+        let object = new THREE.OBJLoader().parse(data);
+        fixLoaderData(object, {scale});
+        return object;
+      }
+      else if(/\.(json)$/.test(value)) {
+        let object = new ObjectLoader().parse(data);
+        fixLoaderData(object, {scale});
+        return object;
+      }
     });
 
-    PROMISES.set(value, promise);
-
-    return loader instanceof TextureLoader ? texture : promise;
+    return texture || promise;
   }
 }
