@@ -10,6 +10,8 @@ export default class THREEText extends Object3D {
     textAlign = "start",
     shadowColor = "rgba(0, 0, 0 ,0)",
     shadowBlur = 0,
+    shadowOffsetX = 0,
+    shadowOffsetY = 0,
     scale = 1
   } = {}) {
     super();
@@ -29,6 +31,8 @@ export default class THREEText extends Object3D {
     this.textAlign = textAlign;
     this.shadowColor = shadowColor;
     this.shadowBlur = shadowBlur;
+    this.shadowOffsetX = shadowOffsetX;
+    this.shadowOffsetY = shadowOffsetY;
 
     this._mesh = new Mesh(new PlaneGeometry(1, 1), new THREEExtendedShaderMaterial({
       type: "basic",
@@ -46,8 +50,12 @@ export default class THREEText extends Object3D {
     if(!this._mesh) {
       return;
     }
-    let width = this._context.measureText(this.textContent).width + this.shadowBlur * 2;
-    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + this.shadowBlur * 2;
+
+    let offsetX = (Math.abs(this.shadowOffsetX) + this.shadowBlur) * (this.shadowOffsetX < 0 ? -1 : 1);
+    let offsetY = (Math.abs(this.shadowOffsetY) + this.shadowBlur) * (this.shadowOffsetY < 0 ? -1 : 1);
+
+    let width = this._context.measureText(this.textContent).width + Math.abs(offsetX);
+    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + Math.abs(offsetY);
     if(this._canvas.width !== width || this._canvas.height !== height) {
       this._canvas.width = width;
       this._canvas.height = height;
@@ -56,18 +64,23 @@ export default class THREEText extends Object3D {
       this._context.fillStyle = this.fillStyle;
       this._context.shadowColor = this.shadowColor;
       this._context.shadowBlur = this.shadowBlur;
+      this._context.shadowOffsetX = this.shadowOffsetX;
+      this._context.shadowOffsetY = this.shadowOffsetY;
       this._context.textBaseline = "ideographic";
     }
+
+    this._mesh.position.y = -offsetY * .5 * this._scale;
+
     if(this.textAlign === "start" || this.textAlign === "left") {
-      this._mesh.position.x = (this._canvas.width * .5 - this.shadowBlur) * this._scale;
+      this._mesh.position.x = (this._canvas.width * .5 + Math.min(0, offsetX)) * this._scale;
     } else if (this.textAlign === "end" || this.textAlign === "right") {
-      this._mesh.position.x = (-this._canvas.width * .5 + this.shadowBlur) * this._scale;
+      this._mesh.position.x = (-this._canvas.width * .5 + Math.max(0, offsetX)) * this._scale;
     } else {
-      this._mesh.position.x = 0;
+      this._mesh.position.x = offsetX * .5 * this._scale;
     }
     this._mesh.scale.x = this._canvas.width * this._scale;
     this._mesh.scale.y = this._canvas.height * this._scale;
-    this._context.fillText(this._textContent, this.shadowBlur, this._canvas.height - this.shadowBlur);
+    this._context.fillText(this._textContent, offsetX < 0 ? Math.abs(offsetX) : 0, this._canvas.height - (offsetY > 0 ? Math.abs(offsetY) : 0));
     this._texture.needsUpdate = true;
   }
 
@@ -123,5 +136,23 @@ export default class THREEText extends Object3D {
 
   get shadowBlur() {
     return this._shadowBlur;
+  }
+
+  set shadowOffsetX(value) {
+    this._context.shadowOffsetX = this._shadowOffsetX = value;
+    this._update();
+  }
+
+  get shadowOffsetX() {
+    return this._shadowOffsetX;
+  }
+
+  set shadowOffsetY(value) {
+    this._context.shadowOffsetY = this._shadowOffsetY = value;
+    this._update();
+  }
+
+  get shadowOffsetY() {
+    return this._shadowOffsetY;
   }
 }
