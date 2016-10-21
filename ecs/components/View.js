@@ -2,19 +2,18 @@ import Component from "dlib/ecs/Component.js";
 
 export default class View extends Component {
   constructor(entity, view, {
-    onHide = (resolve) => resolve(),
-    onShow = (resolve) => resolve()
+    visibilityExecutor = (resolve) => resolve()
   } = {}) {
     super(entity);
 
-    this.onShow = onShow;
-    this.onHide = onHide;
+    this.visibilityExecutor = visibilityExecutor;
 
     this._view = view;
 
-    this._visibilityAnimationPromise = null;
+    this.visibilityPromise = null;
 
     this._children = new Set();
+
     this._visible = true;
   }
 
@@ -27,16 +26,16 @@ export default class View extends Component {
 
     let promises = [];
 
-    promises.push(new Promise(this._visible ? this.onShow : this.onHide));
+    promises.push(new Promise(this.visibilityExecutor));
 
     for (let child of this._children) {
       child.visible = this._visible;
-      promises.push(child._visibilityAnimationPromise);
+      promises.push(child.visibilityPromise);
     }
 
-    this._visibilityAnimationPromise = Promise.all(promises).then(() => {
+    this.visibilityPromise = Promise.all(promises).then(() => {
       this._view.visible = this._visible;
-      this._visibilityAnimationPromise = null;
+      this.visibilityPromise = null;
     });
   }
 
