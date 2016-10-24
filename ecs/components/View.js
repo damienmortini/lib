@@ -26,7 +26,9 @@ export default class View extends Component {
 
     let promises = [];
 
-    promises.push(new Promise(this.visibilityExecutor));
+    promises.push(new Promise((resolve) => {
+      this.visibilityExecutor(resolve, this);
+    }));
 
     for (let child of this._children) {
       child.visible = this._visible;

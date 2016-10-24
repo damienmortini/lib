@@ -84,6 +84,10 @@ export default class THREEText extends Object3D {
     this._texture.needsUpdate = true;
   }
 
+  get material() {
+    return this._mesh.material;
+  }
+
   set textContent(value) {
     this._textContent = value;
     this._update();
