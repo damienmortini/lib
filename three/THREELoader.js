@@ -10,6 +10,8 @@ import "three/examples/js/loaders/OBJLoader.js";
 
 import Loader from "../utils/Loader.js";
 
+let CACHED_IMAGES = new Map();
+
 function fixLoaderData(data, {scale}) {
   let isCollada = !!data.dae;
 
@@ -55,7 +57,16 @@ export default class THREELoader extends Loader {
 
     let promise = super.load(value).then((data) => {
       if(texture) {
-        texture.image = data;
+        let canvas = CACHED_IMAGES.get(data);
+        if(!canvas) {
+          canvas = document.createElement("canvas");
+          canvas.width = data.width * scale;
+          canvas.height = data.height * scale;
+          let context = canvas.getContext("2d");
+          context.drawImage(data, 0, 0, canvas.width, canvas.height);
+          CACHED_IMAGES.set(data, canvas);
+        }
+        texture.image = canvas;
         texture.needsUpdate = true;
       }
       else if(/\.(dae)$/.test(value)) {
