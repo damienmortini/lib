@@ -51,9 +51,21 @@ export default class Loader {
             fontFace.load().then(onLoad);
             document.fonts.add(fontFace);
           } else {
-            fetch(value).then((response) => {
+            fetch(value)
+            .catch((err) => {
+              return new Promise(function(resolve, reject) {
+                let xhr = new XMLHttpRequest();
+                xhr.onload = () => {
+                  resolve(new Response(xhr.responseText, {status: xhr.status}));
+                }
+                xhr.open("GET", value);
+                xhr.send(null);
+              });
+            })
+            .then((response) => {
               return response[/\.(json)$/.test(value) ? "json" : "text"]();
-            }).then(onLoad);
+            })
+            .then(onLoad);
           }
           if(tagName) {
             let element = document.createElement(tagName);
