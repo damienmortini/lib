@@ -24,12 +24,16 @@ export default class Loader {
     let promises = [];
 
     for (let value of values) {
+      if(!value) {
+        continue;
+      }
+      
       let promise = PROMISES.get(value) || new Promise(function(resolve, reject) {
         if(Loader.get(value)) {
           resolve(Loader.get(value));
           return;
         }
-        
+
         let onLoad = (response) => {
           PROMISES.delete(value);
           if(value instanceof HTMLElement) {
