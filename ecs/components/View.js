@@ -15,10 +15,13 @@ export default class View extends Component {
     this._children = new Set();
 
     this._visible = true;
+
+    this._selfVisible = true;
   }
 
   set visible(value) {
     this._visible = value;
+    this._selfVisible = value;
 
     if(this._visible) {
       this._view.visible = true;
@@ -31,7 +34,9 @@ export default class View extends Component {
     }));
 
     for (let child of this._children) {
-      child.visible = this._visible;
+      let childSelfVisible = child._selfVisible;
+      child.visible = this._visible && child._selfVisible;
+      child._selfVisible = childSelfVisible;
       promises.push(child.visibilityPromise);
     }
 
