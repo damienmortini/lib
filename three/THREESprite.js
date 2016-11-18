@@ -1,4 +1,4 @@
-import { Object3D, Mesh, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "three";
+import { Object3D, Mesh, Color, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "three";
 
 import THREEExtendedShaderMaterial from "./THREEExtendedShaderMaterial.js";
 
@@ -28,6 +28,7 @@ export default class Sprite extends Object3D {
       transparent: true,
       side: DoubleSide,
       uniforms: {
+        diffuse: new Color(0xffffff),
         map: new Texture(canvas)
       }
     }));
