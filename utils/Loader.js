@@ -27,22 +27,23 @@ export default class Loader {
       if(!value) {
         continue;
       }
-      
+
       let promise = PROMISES.get(value) || new Promise(function(resolve, reject) {
         if(Loader.get(value)) {
           resolve(Loader.get(value));
           return;
         }
 
+        let element = value instanceof HTMLElement ? value : null;
+
         let onLoad = (response) => {
           PROMISES.delete(value);
-          if(value instanceof HTMLElement) {
-            value.removeEventListener("load", onLoad);
-            value.removeEventListener("canplaythrough", onLoad);
-            OBJECTS.set(value.getAttribute("src"), value);
-            resolve(value);
+          OBJECTS.set(value, response);
+          if(element) {
+            element.removeEventListener("load", onLoad);
+            element.removeEventListener("canplaythrough", onLoad);
+            resolve(element);
           } else {
-            OBJECTS.set(value, response);
             resolve(response);
           }
         };
@@ -77,18 +78,25 @@ export default class Loader {
             .then(onLoad);
           }
           if(tagName) {
-            let element = document.createElement(tagName);
-            element.src = value;
-            value = element;
+            element = document.createElement(tagName);
           }
         }
 
-        if(value instanceof HTMLElement) {
-          if(value instanceof HTMLMediaElement) {
-            value.addEventListener("canplaythrough", onLoad);
+        if(element) {
+          if(element instanceof HTMLMediaElement) {
+            element.addEventListener("canplaythrough", onLoad);
           } else {
-            value.addEventListener("load", onLoad);
-          };
+            element.addEventListener("load", onLoad);
+          }
+
+          element.src = element.src || value;
+
+          if(element instanceof HTMLMediaElement) {
+            element.play();
+            if(!element.autoplay) {
+              element.pause();
+            }
+          }
         }
       });
 
