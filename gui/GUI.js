@@ -1,10 +1,34 @@
 import ControlKit from "controlkit";
 import Keyboard from "../input/Keyboard.js";
+import GUIInput from "./GUIInput.js";
+
+const GROUPS = new Map();
+
+let staticGUI;
 
 // STYLES
 
 let style = document.createElement("style");
 document.head.appendChild(style);
+style.sheet.insertRule(`
+  dlib-gui {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    background: grey;
+    padding: 5px;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-gui dlib-guiinput {
+    margin: 5px 0;
+  }
+`, 0);
+
+
+
 
 style.sheet.insertRule(`
   #controlKit .panel .group-list .group .sub-group-list .sub-group .wrap .label {
@@ -105,36 +129,37 @@ const CONTROL_KIT_CONTAINERS = new Map();
 
 let positionOffset = 0;
 
-class GUIComponent {
-  constructor(object, key, type, controlKitComponent) {
-    this._type = type;
-    this._object = object;
-    this._key = key;
-    this._controlKitComponent = controlKitComponent;
-  }
-  get object() {
-    return this._object;
-  }
-  get key() {
-    return this._key;
-  }
-  get value() {
-    return this.object[this.key];
-  }
-  get type() {
-    return this._type;
-  }
-  get controlKitComponent() {
-    return this._controlKitComponent;
-  }
-  remove() {
-    this.controlKitComponent.disable();
-    this.controlKitComponent._node._element.remove();
-  }
-}
+// class GUIComponent {
+//   constructor(object, key, type, controlKitComponent) {
+//     this._type = type;
+//     this._object = object;
+//     this._key = key;
+//     this._controlKitComponent = controlKitComponent;
+//   }
+//   get object() {
+//     return this._object;
+//   }
+//   get key() {
+//     return this._key;
+//   }
+//   get value() {
+//     return this.object[this.key];
+//   }
+//   get type() {
+//     return this._type;
+//   }
+//   get controlKitComponent() {
+//     return this._controlKitComponent;
+//   }
+//   remove() {
+//     this.controlKitComponent.disable();
+//     this.controlKitComponent._node._element.remove();
+//   }
+// }
 
-class GUI {
+export default class GUI extends HTMLElement {
   constructor() {
+    super();
     this._controlKit = new ControlKit();
   }
 
@@ -165,8 +190,62 @@ class GUI {
     container._updateAppearance();
   }
 
-  add(object, key, {type, label = key, panel = "Main", group = "Main", reload = false, options, range, onChange} = {}) {
-    type = type || (options ? "select" : typeof object[key]);
+  static add(...params) {
+    if(!staticGUI) {
+      staticGUI = document.createElement("dlib-gui");
+      document.body.appendChild(staticGUI);
+    }
+    staticGUI.add(...params);
+  }
+
+  add(object, key, {type, label = key, panel = "Main", group = "", reload = false, options, max, min, step, onChange} = {}) {
+
+    // TODO: fix function label
+    console.log(label);
+
+    type = type || (options ? "select" : "");
+
+    if(!type) {
+      switch (typeof object[key]) {
+        case "boolean":
+          type = "checkbox";
+          break;
+        case "string":
+          type = "text";
+          break;
+        case "function":
+          type = "button";
+          break;
+        default:
+          type = typeof object[key];
+      }
+    }
+
+    let container = GROUPS.get(group) || this;
+    let input = document.createElement("dlib-guiinput");
+    input.object = object;
+    input.key = key;
+    input.label = label;
+    input.type = type;
+    if(min) {
+      input.min = min;
+    }
+    if(max) {
+      input.max = max;
+    }
+    if(step) {
+      input.step = step;
+    }
+    container.appendChild(input);
+
+    input.addEventListener("input", (e) => {
+      console.log(e.target.value);
+    });
+
+
+
+
+    return;
 
     let labelKey = normalizeString(label);
 
@@ -247,21 +326,21 @@ class GUI {
 
     switch (type) {
       case "boolean":
-        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        object[key] = savedValue === undefined ? object[key] : savedValue;
         controlKitPanel.addCheckbox(object, key, {
           onChange: changeValueData,
           label
         });
         break;
       case "number":
-        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        object[key] = savedValue === undefined ? object[key] : savedValue;
         controlKitPanel.addNumberInput(object, key, {
           onChange: changeValueData,
           label
         });
         break;
       case "string":
-        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        object[key] = savedValue === undefined ? object[key] : savedValue;
         controlKitPanel.addStringInput(object, key, {
           onChange: changeValueData,
           label
@@ -288,7 +367,7 @@ class GUI {
         });
         break;
       case "select":
-        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        object[key] = savedValue === undefined ? object[key] : savedValue;
         controlKitPanel.addSelect({
           options,
           selection: object[key]
@@ -301,7 +380,7 @@ class GUI {
         });
         break;
       case "slider":
-        object[key] = savedValue === undefined ?  object[key] : savedValue;
+        object[key] = savedValue === undefined ? object[key] : savedValue;
         let slider = {
           value: object[key],
           range: range || [0, 1]
@@ -324,7 +403,7 @@ class GUI {
             xy.value = [object[key].x, object[key].y];
           }
         } else {
-          object[key] = savedValue === undefined ?  object[key] : savedValue;
+          object[key] = savedValue === undefined ? object[key] : savedValue;
           xy.value = object[key];
         }
         controlKitPanel.addPad(xy, "value", {
@@ -352,9 +431,9 @@ class GUI {
     }
     let controlKitComponent = controlKitGroup._components[controlKitGroup._components.length - 1];
 
-    let component = new GUIComponent(object, key, type, controlKitComponent);
-    COMPONENTS.push(component)
-    return component;
+    // let component = new GUIComponent(object, key, type, controlKitComponent);
+    // COMPONENTS.push(component)
+    // return component;
   }
 
   _changeURLValue(key, value) {
@@ -369,4 +448,4 @@ class GUI {
   }
 }
 
-export default new GUI();
+window.customElements.define("dlib-gui", GUI);
