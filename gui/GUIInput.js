@@ -1,16 +1,99 @@
+let style = document.createElement("style");
+document.head.appendChild(style);
+style.sheet.insertRule(`
+  dlib-guiinput {
+    display: flex;
+    position: relative;
+    color: white;
+    font-family: monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput label, dlib-guiinput input, dlib-guiinput select {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 0 5px;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput label {
+    flex: 1;
+    min-width: 20%;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput input, dlib-guiinput select {
+    flex: 5;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput input:focus, dlib-guiinput select:focus {
+    outline: none;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput input.range {
+    flex: 2;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput input.color {
+    flex: 3;
+  }
+`, 0);
+
+
 export default class GUIInput extends HTMLElement {
   constructor () {
     super();
 
-    this.object = null;
-    this.key = "";
-
-    this._inputs = null;
-
+    this._object = null;
+    this._key = "";
     this._type = "";
     this._label = "";
 
+    this._inputs = [];
+    this._options = [];
+
     this._onChangeBinded = this._onChange.bind(this);
+  }
+
+  set value(value) {
+    this.object[this.key] = value;
+    this.update();
+  }
+
+  get value() {
+    return this.object[this.key];
+  }
+
+  set object(value) {
+    this._object = value;
+    this._updateHTML();
+  }
+
+  get object() {
+    return this._object;
+  }
+
+  set key(value) {
+    this._key = value;
+    this._updateHTML();
+  }
+
+  get key() {
+    return this._key;
   }
 
   set type(value) {
@@ -24,6 +107,7 @@ export default class GUIInput extends HTMLElement {
 
   set label(value) {
     this._label = value;
+    this._updateHTML();
   }
 
   get label() {
@@ -60,124 +144,82 @@ export default class GUIInput extends HTMLElement {
     this._inputs[0].max;
   }
 
+  set options(value) {
+    this._options = value;
+    if(!this._inputs[0] || this._inputs[0].tagName !== "SELECT") {
+      return;
+    }
+    this._inputs[0].options.length = 0;
+    for (let option of this._options) {
+      let optionElement = document.createElement("option");
+      optionElement.value = option;
+      optionElement.innerText = option;
+      optionElement.selected = option === this.value;
+      this._inputs[0].appendChild(optionElement);
+    }
+  }
+
+  get options() {
+    return this._options;
+  }
+
   update() {
+    if(this.type === "button") {
+      return;
+    }
     for (let input of this._inputs) {
-      input.value = this.object[this.key];
+      input[input.type === "checkbox" ? "checked" : "value"] = this.value;
     }
   }
 
   _onChange(e) {
     let value;
 
-    if(e.target.type === "checkbox") {
-      value = e.target.checked;
-    } else if(e.target.type === "button") {
-      this.object[this.key]();
+    if(this.type === "checkbox") {
+      this.value = e.target.checked;
+    } else if(this.type === "button") {
+      this.value();
+    } else if(this.type === "color") {
+      if(e.type === "change") {
+        this.value = e.target.value;
+      }
     } else {
-      value = e.target.value;
+      this.value = e.target.value;
     }
-    this.object[this.key] = value;
-
-    this.update();
   }
 
   _updateHTML() {
-    if(!this.object || !this.key || !this.label) {
-      console.error("While waiting for ShadowDOM to be cross-browsers, object, key and label need to be defined before type.");
+    if(!this.object || !this.key || !this.label || !this.type) {
+      return;
+    }
+
+    // TODO: Update with ShadowDOM when cross-browser
+
+    this.innerHTML = `
+      <label title="${this.label}"><span>${this.label}</span></label>
+      ${this.type === "select" ? "<select></select>" : `<input type="${this.type}"/>`}
+      ${this.type === "range" ? "<input class=\"range\" type=\"number\"/>" : ""}
+      ${this.type === "color" ? "<input class=\"color\" type=\"text\"/>" : ""}
+    `;
+
+    this._inputs = [...this.querySelectorAll("input, select")];
+
+    if(this.type === "range") {
+      let nextDecimal = Math.pow(10, Math.abs(parseInt(this.value)).toString().length);
+      this.max = this.max || !this.value ? 1 : nextDecimal;
+      this.min = this.min || this.value >= 0 ? 0 : -nextDecimal;
+      this.step = this.step || .01;
+    } else if(this.type === "button") {
+      this._inputs[0].value = this.label;
+    } else if(this.type === "select") {
+      this.options = this.options;
     }
 
     this.removeEventListener("input", this._onChangeBinded);
     this.removeEventListener("change", this._onChangeBinded);
     this.removeEventListener("click", this._onChangeBinded);
-
-    this.innerHTML = `
-      <style>
-        dlib-guiinput {
-          display: flex;
-          position: relative;
-          color: white;
-          font-family: monospace;
-          font-size: 12px;
-          text-transform: uppercase;
-        }
-
-        dlib-guiinput label, dlib-guiinput input {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-          margin: 0 5px;
-        }
-
-        dlib-guiinput label {
-          flex: 1;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          min-width: 20%;
-        }
-
-        dlib-guiinput input {
-          flex: 5;
-        }
-
-        dlib-guiinput input:nth-of-type(2) {
-          flex: 1.25;
-        }
-
-        dlib-guiinput input[type=range] {
-          -webkit-appearance: none;
-          background: transparent;
-        }
-
-        dlib-guiinput input[type=range]:focus {
-          outline: none;
-        }
-
-        dlib-guiinput input[type=range]::-webkit-slider-runnable-track {
-          -webkit-appearance: none;
-          height: 4px;
-          background: black;
-        }
-
-        dlib-guiinput input[type=range]::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          background: blue;
-          width: 12px;
-          height: 12px;
-          margin-top: -4px;
-          cursor: ew-resize;
-        }
-
-        dlib-guiinput input[type=checkbox] {
-          margin-left: 2px;
-        }
-      </style>
-
-      <label title="${this.label}">${this.label}</label>
-      ${this.type === "select" ? "<select></select>" : `<input type="${this.type}"/>`}
-
-      ${this.type === "range" ? "<input type=\"text\"/>" : ""}
-    `;
-
-    this._inputs = [...this.querySelectorAll("input")];
-
-    if(this.type === "range") {
-      let nextDecimal = Math.pow(10, Math.abs(parseInt(this.object[this.key])).toString().length);
-      this.max = !this.object[this.key] ? 1 : nextDecimal;
-      this.min = this.object[this.key] >= 0 ? 0 : -nextDecimal;
-      this.step = .01;
-    } else if(this.type === "select") {
-      for (let option of options) {
-        let optionElement = document.createElement("option");
-        // TODO: finish this
-        // optionElement
-        this._inputs[0].appendChild(optionElement);
-      }
-    }
-
     if(this.type === "button") {
       this.addEventListener("click", this._onChangeBinded);
-      this._inputs[0].value = this.label;
     } else {
       this.addEventListener("input", this._onChangeBinded);
       this.addEventListener("change", this._onChangeBinded);
