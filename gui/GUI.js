@@ -1,9 +1,5 @@
-import ControlKit from "controlkit";
 import Keyboard from "../input/Keyboard.js";
 import GUIInput from "./GUIInput.js";
-
-const GROUPS = new Map();
-const INPUTS = [];
 
 let staticGUI;
 
@@ -19,11 +15,18 @@ style.sheet.insertRule(`
     left: 0;
     width: 200px;
     padding: 5px;
+    color: white;
+    font-family: monospace;
   }
 `, 0);
 style.sheet.insertRule(`
   dlib-gui dlib-guiinput {
     margin: 5px 0;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-gui details summary:focus {
+    outline: none;
   }
 `, 0);
 
@@ -84,8 +87,6 @@ function urlHashRegExpFromKey(key) {
   return new RegExp(`([#&]gui/${key}=)([^=&#?]*)`, "g");
 }
 
-const COMPONENTS = [];
-
 // GUI
 
 const GUI_REG_EXP = /([#&]gui=)((%7B|{).*(%7D|}))([&?]*)/;
@@ -103,77 +104,46 @@ let DATA = {};
   }
 })();
 
-const CONTROL_KIT_CONTAINERS = new Map();
-
-let positionOffset = 0;
-
-// class GUIComponent {
-//   constructor(object, key, type, controlKitComponent) {
-//     this._type = type;
-//     this._object = object;
-//     this._key = key;
-//     this._controlKitComponent = controlKitComponent;
-//   }
-//   get object() {
-//     return this._object;
-//   }
-//   get key() {
-//     return this._key;
-//   }
-//   get value() {
-//     return this.object[this.key];
-//   }
-//   get type() {
-//     return this._type;
-//   }
-//   get controlKitComponent() {
-//     return this._controlKitComponent;
-//   }
-//   remove() {
-//     this.controlKitComponent.disable();
-//     this.controlKitComponent._node._element.remove();
-//   }
-// }
-
 export default class GUI extends HTMLElement {
-  constructor() {
-    super();
-    this._controlKit = new ControlKit();
-  }
-
-  update() {
-    for (let component of COMPONENTS) {
-      switch (component.type) {
-        case "color":
-          component.controlKitComponent._obj._value = component.controlKitComponent._value = colorToHex(component.object[component.key]);
-          component.controlKitComponent._updateColor();
-          break;
-      }
-    }
-
-    requestAnimationFrame(() => {
-      this._controlKit.update();
-    });
-  }
-
-  open(panel = "main", group) {
-    let container = CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : ""));
-    container._enabled = true;
-    container._updateAppearance();
-  }
-
-  close(panel = "main", group) {
-    let container = CONTROL_KIT_CONTAINERS.get(normalizeString(panel) + (group ? "/" + normalizeString(group) : ""));
-    container._enabled = false;
-    container._updateAppearance();
-  }
-
   static add(...params) {
     if(!staticGUI) {
       staticGUI = document.createElement("dlib-gui");
       document.body.appendChild(staticGUI);
     }
     staticGUI.add(...params);
+  }
+
+  static set open(value) {
+    staticGUI.open = value;
+  }
+
+  static get open() {
+    return staticGUI.open;
+  }
+
+  constructor() {
+    super();
+
+    this._groups = new Map();
+    this._inputs = [];
+
+    this._container = document.createElement("details");
+    this._container.innerHTML = "<summary>GUI</summary>";
+    this.open = true;
+  }
+
+  update() {
+    for (let input of this._inputs) {
+      input.update();
+    }
+  }
+
+  set open(value) {
+    this._container.open = value;
+  }
+
+  get open() {
+    return this._container.open;
   }
 
   add(object, key, {type, label = key, group = "", reload = false, onChange = () => {}, options, max, min, step} = {}) {
@@ -204,7 +174,10 @@ export default class GUI extends HTMLElement {
     }
     let value = SAVED_VALUE || (type === "color" ? colorToHex(object[key]) : object[key]);
 
-    let container = GROUPS.get(group) || this;
+    if(!this._container.parentNode) {
+      this.appendChild(this._container);
+    }
+    let container = this._groups.get(group) || this._container;
     let input = document.createElement("dlib-guiinput");
     input.object = type === "color" ? {value: "#000000"} : object;
     input.key = type === "color" ? "value" : key;
@@ -276,7 +249,7 @@ export default class GUI extends HTMLElement {
 
     onChange(object[key]);
 
-    INPUTS.push(input);
+    this._inputs.push(input);
 
     return input;
   }
