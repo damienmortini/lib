@@ -49,7 +49,7 @@ style.sheet.insertRule(`
 `, 0);
 style.sheet.insertRule(`
   dlib-guiinput input.color {
-    flex: 3;
+    flex: 3.5;
   }
 `, 0);
 
