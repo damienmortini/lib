@@ -37,7 +37,7 @@ export default class THREEShader extends Shader {
 
     for (let key in this.uniforms) {
       let uniform = this.uniforms[key];
-      if(typeof uniform !== "object" || !uniform.value) {
+      if(typeof uniform !== "object" || uniform.value === undefined) {
         this.uniforms[key] = {
           value: uniform
         }
