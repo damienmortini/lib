@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/dmmn/dlib",
   "dependencies": {
+    "@webcomponents/custom-elements": "^1.0.0-alpha.3",
     "controlkit": "^0.1.9",
     "gl-buffer": "^2.1.2",
     "gl-fbo": "^2.0.5",

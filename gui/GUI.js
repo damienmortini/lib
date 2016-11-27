@@ -1,3 +1,5 @@
+import "@webcomponents/custom-elements";
+
 import Keyboard from "../input/Keyboard.js";
 import GUIInput from "./GUIInput.js";
 
