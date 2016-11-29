@@ -16,6 +16,8 @@ export default class TrackballControl {
   } = {}) {
     this.matrix = matrix;
 
+    this.disabled = false;
+
     this._distance = distance;
     this.invertRotation = invertRotation;
     this.rotationEaseRatio = rotationEaseRatio;
@@ -39,6 +41,8 @@ export default class TrackballControl {
     domElement.addEventListener("wheel", this.onWheel.bind(this));
 
     Ticker.add(this.update.bind(this));
+
+    this.update();
   }
 
   set distance(value) {
@@ -59,6 +63,10 @@ export default class TrackballControl {
   }
 
   update() {
+    if(this.disabled) {
+      return;
+    }
+
     this._cachedMatrix.identity();
     this._cachedQuaternion.identity();
 
