@@ -53,7 +53,7 @@ function hexToRgb(hex) {
 }
 
 function colorFromHex(color, hex) {
-  if(typeof color === "string") {
+  if (typeof color === "string") {
     return hex;
   }
 
@@ -71,7 +71,7 @@ function colorFromHex(color, hex) {
 }
 
 function colorToHex(color) {
-  if(typeof color === "string") {
+  if (typeof color === "string") {
     return color;
   }
   return rgbToHex(
@@ -96,7 +96,7 @@ const GUI_REG_EXP = /([#&]gui=)((%7B|{).*(%7D|}))([&?]*)/;
 let DATA = {};
 (function() {
   let matches = GUI_REG_EXP.exec(window.location.hash);
-  if(matches) {
+  if (matches) {
     let string = matches[2];
     string = string.replace(/%7B/g, "{");
     string = string.replace(/%7D/g, "}");
@@ -108,11 +108,18 @@ let DATA = {};
 
 export default class GUI extends HTMLElement {
   static add(...params) {
-    if(!staticGUI) {
-      staticGUI = document.createElement("dlib-gui");
+    if (!staticGUI.parentNode) {
       document.body.appendChild(staticGUI);
     }
     staticGUI.add(...params);
+  }
+
+  static set visible(value) {
+    staticGUI.visible = value;
+  }
+
+  static get visible() {
+    return staticGUI.visible;
   }
 
   static set open(value) {
@@ -134,6 +141,14 @@ export default class GUI extends HTMLElement {
     this.open = true;
   }
 
+  set visible(value) {
+    this.style.visibility = value ? "visible" : "hidden";
+  }
+
+  get visible() {
+    return this.style.visibility === "visible";
+  }
+
   update() {
     for (let input of this._inputs) {
       input.update();
@@ -148,11 +163,12 @@ export default class GUI extends HTMLElement {
     return this._container.open;
   }
 
-  add(object, key, {type, label = key, group = "", reload = false, onChange = () => {}, options, max, min, step} = {}) {
+  add(object, key, {type, label = key, group = "", reload = false, onChange = () => {
+      }, options, max, min, step} = {}) {
 
     type = type || (options ? "select" : "");
 
-    if(!type) {
+    if (!type) {
       switch (typeof object[key]) {
         case "boolean":
           type = "checkbox";
@@ -171,30 +187,32 @@ export default class GUI extends HTMLElement {
     let labelKey = normalizeString(label);
     let groupKey = normalizeString(group);
     const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][labelKey] : DATA[labelKey];
-    if(type === "color" && SAVED_VALUE) {
+    if (type === "color" && SAVED_VALUE) {
       object[key] = colorFromHex(object[key], SAVED_VALUE);
     }
-    let value = SAVED_VALUE || (type === "color" ? colorToHex(object[key]) : object[key]);
+    let value = SAVED_VALUE !== undefined ? SAVED_VALUE : (type === "color" ? colorToHex(object[key]) : object[key]);
 
-    if(!this._container.parentNode) {
+    if (!this._container.parentNode) {
       this.appendChild(this._container);
     }
     let container = this._groups.get(group) || this._container;
     let input = document.createElement("dlib-guiinput");
-    input.object = type === "color" ? {value: "#000000"} : object;
+    input.object = type === "color" ? {
+      value: "#000000"
+    } : object;
     input.key = type === "color" ? "value" : key;
     input.label = label;
     input.value = value;
-    if(min) {
+    if (min) {
       input.min = min;
     }
-    if(max) {
+    if (max) {
       input.max = max;
     }
-    if(step) {
+    if (step) {
       input.step = step;
     }
-    if(options) {
+    if (options) {
       input.options = options;
     }
     input.type = type;
@@ -205,7 +223,7 @@ export default class GUI extends HTMLElement {
         return;
       }
 
-      if(Keyboard.hasKeyDown(Keyboard.SHIFT)) {
+      if (Keyboard.hasKeyDown(Keyboard.SHIFT)) {
         Keyboard.onKeyUp.addOnce(() => {
           window.location.reload();
         }, this);
@@ -214,10 +232,10 @@ export default class GUI extends HTMLElement {
       }
     }
 
-    if(type === "button") {
+    if (type === "button") {
       input.addEventListener("click", reloadWindow);
     } else {
-      if(type !== "color") {
+      if (type !== "color" && type !== "text") {
         input.addEventListener("input", () => {
           onChange(input.value);
         });
@@ -226,14 +244,14 @@ export default class GUI extends HTMLElement {
       let timeoutId = -1;
       input.addEventListener("change", () => {
         let containerData = groupKey ? DATA[groupKey] : DATA;
-        if(!containerData) {
+        if (!containerData) {
           containerData = DATA[groupKey] = {};
         }
         containerData[labelKey] = input.value;
 
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-          if(GUI_REG_EXP.test(window.location.hash)) {
+          if (GUI_REG_EXP.test(window.location.hash)) {
             window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${JSON.stringify(DATA)}$5`);
           } else {
             let prefix = window.location.hash ? "&" : "#";
@@ -241,8 +259,10 @@ export default class GUI extends HTMLElement {
           }
         }, 100);
 
-        if(type === "color") {
+        if (type === "color") {
           onChange(colorFromHex(object[key], input.value));
+        } else if (type === "text") {
+          onChange(input.value);
         }
 
         reloadWindow();
@@ -258,3 +278,4 @@ export default class GUI extends HTMLElement {
 }
 
 window.customElements.define("dlib-gui", GUI);
+staticGUI = document.createElement("dlib-gui");
