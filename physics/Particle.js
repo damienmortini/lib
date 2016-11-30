@@ -1,29 +1,23 @@
-import Vector2 from "../math/Vector2.js";
+import Vector3 from "../math/Vector3.js";
 
 export default class Particle {
-  constructor(x = 0, y = 0, life = Infinity) {
-    this.position = new Vector2(x, y);
-    this.velocity = new Vector2();
-    this.life = life;
-    this.currentLife = this.life;
-    this._isDead = false;
+  constructor({x = 0, y = 0, z = 0, life = Infinity} = {}) {
+    this.position = new Vector3();
+    this.velocity = new Vector3();
+    this.reset({x, y, z, life});
     return this;
   }
 
-  get isDead () {
-    return this._isDead;
-  }
-
-  set (x = this.x, y = this.y, life = this.life) {
-    this.position.set(x, y);
+  set ({x = this.x, y = this.y, z = this.z, life = this.life} = {}) {
+    this.position.set(x, y, z);
     this.life = life;
     return this;
   }
 
-  reset (x = this.x, y = this.y, life = this.life) {
-    this.set(...arguments);
+  reset ({x, y, z, life} = {}) {
+    this.set({x, y, z, life});
     this.currentLife = this.life;
-    this._isDead = false;
+    this.dead = false;
     return this;
   }
 
@@ -32,25 +26,17 @@ export default class Particle {
     this.velocity.copy(particle.velocity);
     this.life = particle.life;
     this.currentLife = particle.currentLife;
-    this._isDead = particle.isDead;
-  }
-
-  kill () {
-    this._isDead = true;
-  }
-
-  relive () {
-    this._isDead = false;
+    this.dead = particle.dead;
   }
 
   update () {
-    if (this._isDead) {
+    if (this.dead) {
       return this;
     }
     this.position.add(this.velocity);
     this.currentLife--;
     if(this.currentLife < 1) {
-      this.kill();
+      this.dead = true;
     }
     return this;
   }
