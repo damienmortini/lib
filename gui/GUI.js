@@ -27,6 +27,16 @@ style.sheet.insertRule(`
   }
 `, 0);
 style.sheet.insertRule(`
+  dlib-gui details details {
+    margin-left: 10px;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-gui details summary {
+    cursor: pointer;
+  }
+`, 0);
+style.sheet.insertRule(`
   dlib-gui details summary:focus {
     outline: none;
   }
@@ -111,7 +121,11 @@ export default class GUI extends HTMLElement {
     if (!staticGUI.parentNode) {
       document.body.appendChild(staticGUI);
     }
-    staticGUI.add(...params);
+    return staticGUI.add(...params);
+  }
+
+  static get element() {
+    return staticGUI;
   }
 
   static set visible(value) {
@@ -195,7 +209,16 @@ export default class GUI extends HTMLElement {
     if (!this._container.parentNode) {
       this.appendChild(this._container);
     }
-    let container = this._groups.get(group) || this._container;
+    let container = this._container;
+    if(groupKey) {
+      container = this._groups.get(groupKey);
+      if(!container) {
+        container = document.createElement("details");
+        container.innerHTML = `<summary>${group}</summary>`;
+        this._groups.set(groupKey, container);
+        this._container.appendChild(container);
+      }
+    }
     let input = document.createElement("dlib-guiinput");
     input.object = type === "color" ? {
       value: "#000000"

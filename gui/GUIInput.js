@@ -9,7 +9,6 @@ style.sheet.insertRule(`
     color: white;
     font-family: monospace;
     font-size: 12px;
-    text-transform: uppercase;
   }
 `, 0);
 style.sheet.insertRule(`
