@@ -169,7 +169,10 @@ export default class GUIInput extends HTMLElement {
       return;
     }
     for (let input of this._inputs) {
-      input[input.type === "checkbox" ? "checked" : "value"] = this.value;
+      let key = input.type === "checkbox" ? "checked" : "value";
+      if(this.value !== input[key]) {
+        input[key] = this.value;
+      }
     }
   }
 
