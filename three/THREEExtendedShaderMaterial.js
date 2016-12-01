@@ -18,7 +18,6 @@ export default class THREEExtendedShaderMaterial extends ShaderMaterial {
       fragmentShader: ShaderLib[type].fragmentShader,
       uniforms: UniformsUtils.clone(ShaderLib[type].uniforms)
     } : {});
-    shader.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
 
     super(Object.assign({
       fragmentShader: shader.fragmentShader,
@@ -26,13 +25,26 @@ export default class THREEExtendedShaderMaterial extends ShaderMaterial {
       uniforms: shader.uniforms
     }, options));
 
-    for (let key in this.uniforms) {
+    this.shader = shader;
+    this.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
+
+    this.lights = /lambert|phong|standard/.test(type);
+  }
+
+  add({vertexShaderChunks, fragmentShaderChunks, uniforms}) {
+    this.shader.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
+
+    this.fragmentShader = this.shader.fragmentShader;
+    this.vertexShader = this.shader.vertexShader;
+
+    for (let key in this.shader.uniforms) {
       Object.defineProperty(this, key, {
+        configurable: true,
         get: function() { return this.uniforms[key].value },
         set: function(value) { this.uniforms[key].value = value }
       });
     }
 
-    this.lights = /lambert|phong|standard/.test(type);
+    this.needsUpdate = true;
   }
 }
