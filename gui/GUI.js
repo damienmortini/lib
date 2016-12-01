@@ -19,6 +19,8 @@ style.sheet.insertRule(`
     padding: 5px;
     color: white;
     font-family: monospace;
+    max-height: 100%;
+    overflow: scroll;
   }
 `, 0);
 style.sheet.insertRule(`
