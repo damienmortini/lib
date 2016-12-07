@@ -9,10 +9,11 @@ style.sheet.insertRule(`
     color: white;
     font-family: monospace;
     font-size: 12px;
+    align-items: center;
   }
 `, 0);
 style.sheet.insertRule(`
-  dlib-guiinput label, dlib-guiinput input, dlib-guiinput select {
+  dlib-guiinput label, dlib-guiinput input, dlib-guiinput select, dlib-gui textarea {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -34,12 +35,12 @@ style.sheet.insertRule(`
   }
 `, 0);
 style.sheet.insertRule(`
-  dlib-guiinput input, dlib-guiinput select {
+  dlib-guiinput input, dlib-guiinput select, dlib-gui textarea {
     flex: 5;
   }
 `, 0);
 style.sheet.insertRule(`
-  dlib-guiinput input:focus, dlib-guiinput select:focus {
+  dlib-guiinput input:focus, dlib-guiinput select:focus, dlib-guiinput textarea:focus {
     outline: none;
   }
 `, 0);
@@ -168,11 +169,18 @@ export default class GUIInput extends HTMLElement {
     if(this.type === "button") {
       return;
     }
+    let changed = false;
     for (let input of this._inputs) {
       let key = input.type === "checkbox" ? "checked" : "value";
-      if(this.value !== input[key]) {
-        input[key] = this.value;
+      let value = input.tagName === "SELECT" ? this.value.toString() : this.value;
+      if(value !== input[key]) {
+        input[key] = value;
+        changed = true;
       }
+    }
+
+    if(changed) {
+      this.dispatchEvent(new Event("change"));
     }
   }
 
@@ -201,12 +209,12 @@ export default class GUIInput extends HTMLElement {
 
     this.innerHTML = `
       <label title="${this.label}"><span>${this.label}</span></label>
-      ${this.type === "select" ? "<select></select>" : `<input type="${this.type}"/>`}
+      ${this.type === "select" ? "<select></select>" : (this.type === "text" ? `<textarea rows="1"></textarea>` : `<input type="${this.type}"/>`)}
       ${this.type === "range" ? "<input class=\"range\" type=\"number\"/>" : ""}
       ${this.type === "color" ? "<input class=\"color\" type=\"text\"/>" : ""}
     `;
 
-    this._inputs = [...this.querySelectorAll("input, select")];
+    this._inputs = [...this.querySelectorAll("input, select, textarea")];
 
     if(this.type === "range") {
       let nextDecimal = Math.pow(10, Math.abs(parseInt(this.value)).toString().length);

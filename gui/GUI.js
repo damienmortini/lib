@@ -30,7 +30,7 @@ style.sheet.insertRule(`
 `, 0);
 style.sheet.insertRule(`
   dlib-gui details details {
-    margin-left: 10px;
+    margin: 10px;
   }
 `, 0);
 style.sheet.insertRule(`
