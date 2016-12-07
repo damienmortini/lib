@@ -3,6 +3,8 @@ import {
   RGBFormat,
   ObjectLoader,
   Mesh,
+  Line,
+  LineSegments,
 } from "three";
 
 import "three/examples/js/loaders/ColladaLoader.js";
@@ -10,7 +12,7 @@ import "three/examples/js/loaders/OBJLoader.js";
 
 import Loader from "../utils/Loader.js";
 
-let CACHED_IMAGES = new Map();
+let CACHED_CANVAS = new Map();
 
 function fixLoaderData(data, {scale}) {
   let isCollada = !!data.dae;
@@ -22,7 +24,7 @@ function fixLoaderData(data, {scale}) {
   }
 
   data.traverse((object3D) => {
-    if(object3D instanceof Mesh) {
+    if(object3D instanceof Mesh || object3D instanceof Line || object3D instanceof LineSegments) {
       meshes.push(object3D);
     }
     object3D.position.multiplyScalar(scale);
@@ -48,25 +50,31 @@ export default class THREELoader extends Loader {
   static load(value, {scale = 1} = {}) {
     let texture;
 
-    if(/\.(png|jpg)$/.test(value)) {
+    if(/\.(png|jpg|mp4)$/.test(value)) {
       texture = new Texture();
-      if(/\.(jpg)$/.test(value)) {
+      if(/\.(jpg|mp4)$/.test(value)) {
         texture.format = RGBFormat;
       }
     }
 
     let promise = super.load(value).then((data) => {
-      if(texture) {
-        let canvas = CACHED_IMAGES.get(data);
+      if(/\.(png|jpg)$/.test(value)) {
+        let canvas = CACHED_CANVAS.get(data);
         if(!canvas) {
           canvas = document.createElement("canvas");
           canvas.width = data.width * scale;
           canvas.height = data.height * scale;
           let context = canvas.getContext("2d");
           context.drawImage(data, 0, 0, canvas.width, canvas.height);
-          CACHED_IMAGES.set(data, canvas);
+          CACHED_CANVAS.set(data, canvas);
         }
         texture.image = canvas;
+        texture.needsUpdate = true;
+      }
+      else if(/\.(mp4)$/.test(value)) {
+        texture.image = data;
+        texture.image.loop = true;
+        texture.image.play();
         texture.needsUpdate = true;
       }
       else if(/\.(dae)$/.test(value)) {
