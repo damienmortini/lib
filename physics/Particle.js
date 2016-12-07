@@ -1,27 +1,56 @@
+import Vector2 from "../math/Vector2.js";
 import Vector3 from "../math/Vector3.js";
 
 export default class Particle {
-  constructor({x = 0, y = 0, z = 0, life = Infinity} = {}) {
-    this.position = new Vector3();
-    this.velocity = new Vector3();
-    this.reset({x, y, z, life});
+  constructor(position = new Vector3(), {life = Infinity} = {}) {
+    this.position = position;
+    this.velocity = this.position instanceof Vector2 ? new Vector2() : new Vector3();
+    this.life = life;
+    this.reset();
     return this;
   }
 
-  set ({x = this.x, y = this.y, z = this.z, life = this.life} = {}) {
-    this.position.set(x, y, z);
+  get x() {
+    return this.position.x;
+  }
+
+  set x(value) {
+    this.position.x = value;
+  }
+
+  get y() {
+    return this.position.y;
+  }
+
+  set y(value) {
+    this.position.y = value;
+  }
+
+  get z() {
+    return this.position.z;
+  }
+
+  set z(value) {
+    this.position.z = value;
+  }
+
+  set({position = this.position, life = this.life} = {}) {
+    this.position.copy(position);
     this.life = life;
     return this;
   }
 
-  reset ({x, y, z, life} = {}) {
-    this.set({x, y, z, life});
+  reset({position, life} = {}) {
+    this.set({
+      position,
+      life
+    });
     this.currentLife = this.life;
     this.dead = false;
     return this;
   }
 
-  copy (particle) {
+  copy(particle) {
     this.position.copy(particle.position);
     this.velocity.copy(particle.velocity);
     this.life = particle.life;
@@ -29,13 +58,13 @@ export default class Particle {
     this.dead = particle.dead;
   }
 
-  update () {
+  update() {
     if (this.dead) {
       return this;
     }
     this.position.add(this.velocity);
     this.currentLife--;
-    if(this.currentLife < 1) {
+    if (this.currentLife < 1) {
       this.dead = true;
     }
     return this;
