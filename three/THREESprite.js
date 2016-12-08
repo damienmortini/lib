@@ -8,19 +8,20 @@ export default class Sprite extends Object3D {
   constructor(image, {data, frame, scale = 1} = {}) {
     super();
 
-    this.data = data;
+    this._data = data;
+    this._image = image;
     this._scale = scale;
 
     // Optimise images decoding
-    let canvas = CACHED_IMAGES.get(image);
+    let canvas = CACHED_IMAGES.get(this.image);
 
     if(!canvas) {
       canvas = document.createElement("canvas");
-      canvas.width = image.width;
-      canvas.height = image.height;
+      canvas.width = this.image.width;
+      canvas.height = this.image.height;
       let context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0);
-      CACHED_IMAGES.set(image, canvas);
+      context.drawImage(this.image, 0, 0);
+      CACHED_IMAGES.set(this.image, canvas);
     }
 
     this.mesh = new Mesh(new PlaneGeometry(1, 1), new THREEExtendedShaderMaterial({
@@ -45,6 +46,14 @@ export default class Sprite extends Object3D {
     }
   }
 
+  get image() {
+    return this._image;
+  }
+
+  get data() {
+    return this._data;
+  }
+
   set material(value) {
     this.mesh.material = value;
     this.frame = this.frame;
@@ -61,15 +70,14 @@ export default class Sprite extends Object3D {
 
     this._frame = value;
 
-    let texture = this.mesh.material.map;
     let offsetRepeat = this.mesh.material.offsetRepeat;
     let frameData = this.data.frames[this._frame];
 
-    offsetRepeat.z = (frameData.rotated ? frameData.frame.h : frameData.frame.w) / texture.image.width;
-    offsetRepeat.w = (frameData.rotated ? frameData.frame.w : frameData.frame.h) / texture.image.height;
+    offsetRepeat.z = (frameData.rotated ? frameData.frame.h : frameData.frame.w) / this.image.width;
+    offsetRepeat.w = (frameData.rotated ? frameData.frame.w : frameData.frame.h) / this.image.height;
 
-    offsetRepeat.x = frameData.frame.x / texture.image.width;
-    offsetRepeat.y = 1. - frameData.frame.y / texture.image.height - offsetRepeat.w;
+    offsetRepeat.x = frameData.frame.x / this.image.width;
+    offsetRepeat.y = 1. - frameData.frame.y / this.image.height - offsetRepeat.w;
 
     let scale = 1 / parseFloat(this.data.meta.scale);
 
