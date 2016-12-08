@@ -13,8 +13,8 @@ export default class Shader {
       return new RegExp(`(${regExpString})`);
     }
 
-    for (let [type, chunk] of chunks) {
-      switch (type) {
+    for (let [key, chunk] of chunks) {
+      switch (key) {
         case "start":
             shader = `${chunk}\n${shader}`;
           break;
@@ -24,15 +24,8 @@ export default class Shader {
         case "main":
             shader = shader.replace(/(\bvoid\b +\bmain\b[\s\S]*?{\s*)/, `$1\n${chunk}\n`);
           break;
-        case "before":
-          shader = shader.replace(regExpFromKey(key), `\n${chunk}\n$1`);
-          break;
-        case "after":
-          shader = shader.replace(regExpFromKey(key), `$1\n${chunk}\n`);
-          break;
-        case "replace":
-          shader = shader.replace(regExpFromKey(key), `\n${chunk}\n`);
-          break;
+        default:
+          shader = shader.replace(key, chunk)
       }
     }
 
