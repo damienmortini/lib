@@ -94,7 +94,11 @@ export default class Loader {
           if(element instanceof HTMLMediaElement) {
             element.play();
             if(!element.autoplay) {
-              element.pause();
+              let pauseElement = function() {
+                element.pause();
+                element.removeEventListener("playing", pauseElement);
+              }
+              element.addEventListener("playing", pauseElement);
             }
           }
         }
