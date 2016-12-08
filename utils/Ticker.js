@@ -6,6 +6,7 @@ class Ticker {
 
     this._previousTimestamp = 0;
     this.deltaTime = 0;
+    this.timeScale = 1;
 
     this.update();
   }
@@ -15,6 +16,7 @@ class Ticker {
 
     let timestamp = window.performance ? window.performance.now() : Date.now();
     this.deltaTime = timestamp - this._previousTimestamp;
+    this.timeScale = this.deltaTime / 16.67;
     this._previousTimestamp = timestamp;
 
     for (let i = 0; i < callbacks.length; i++) {
