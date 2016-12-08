@@ -181,6 +181,10 @@ export default class GUI extends HTMLElement {
 
   add(object, key, {type, label = key, group = "", reload = false, onChange = () => {
       }, options, max, min, step} = {}) {
+    if(object[key] === null || object[key] === undefined) {
+      console.error(`GUI: ${label} must be defined.`);
+      return;
+    }
 
     type = type || (options ? "select" : "");
 
