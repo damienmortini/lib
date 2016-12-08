@@ -24,25 +24,33 @@ export default class Keyboard {
   static get SHIFT() {
     return 16;
   }
-  static get onKeyDown() {
-    return onKeyDown;
-  }
-  static get onKeyUp() {
-    return onKeyUp;
-  }
   static hasKeyDown(keyCode) {
     return keysDown.has(keyCode);
+  }
+  static addEventListener(type, listener) {
+    if(type === "keydown") {
+      onKeyDown.add(listener);
+    } else if(type === "keyup") {
+      onKeyUp.add(listener);
+    }
+  }
+  static removeEventListener(type, listener) {
+    if(type === "keydown") {
+      onKeyDown.remove(listener);
+    } else if(type === "keyup") {
+      onKeyUp.remove(listener);
+    }
   }
 }
 
 window.addEventListener("keydown", (e) => {
   if(!Keyboard.hasKeyDown(e.keyCode)) {
-    onKeyDown.dispatch(e.keyCode);
+    onKeyDown.dispatch(e);
   }
   keysDown.add(e.keyCode);
 });
 
 window.addEventListener("keyup", (e) => {
   keysDown.delete(e.keyCode);
-  onKeyUp.dispatch(e.keyCode);
+  onKeyUp.dispatch(e);
 });
