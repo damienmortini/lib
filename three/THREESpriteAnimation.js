@@ -1,39 +1,44 @@
-import THREE from "THREE";
-import Signal from "signals";
 
 import THREESprite from "./THREESprite.js";
 
-import Ticker from "../utils/Ticker";
+import Signal from "dlib/utils/Signal";
+import Ticker from "dlib/utils/Ticker";
 
 let SPRITESHEETS = new Map();
 
 export default class THREESpriteAnimation extends THREESprite {
   constructor(image, data, animation, {
     startFrame = 0,
-    speed = .5,
+    speed = 1,
+    fps = 25,
     loop = true,
-    reverse = false
+    reverse = false,
+    scale = 1,
+    autoplay = true
   } = {}) {
 
     let animations = SPRITESHEETS.get(data);
-
     if(!animations) {
       animations = new Map();
       for (let key in data.frames) {
-        let match = /(.*?)([0-9]+)$/.exec(key);
+        let match = /(.*?)([0-9]+)[$\.]/.exec(key);
         let animationName = match[1];
-        if(!animations.has(animationName)) {
-          animations.set(animationName, []);
-        }
         let frames = animations.get(animationName);
+        if(!frames) {
+          frames = [];
+          animations.set(animationName, frames);
+        }
         let position = parseInt(match[2]);
         frames[position - 1] = key;
       }
-
       SPRITESHEETS.set(data, animations);
     }
 
-    super(image, data, animations.get(animation)[0]);
+    super(image, {
+      data,
+      frame: animations.get(animation)[0],
+      scale
+    });
 
     this._progress = 0;
     this._animations = animations;
@@ -41,11 +46,14 @@ export default class THREESpriteAnimation extends THREESprite {
     this.loop = loop;
     this.reverse = reverse;
     this.speed = speed;
+    this.fps = fps;
     this.animation = animation;
 
     this.onAnimationComplete = new Signal();
 
-    this.play();
+    if(autoplay) {
+      this.play();
+    }
   }
 
   set animation(value) {
@@ -62,11 +70,11 @@ export default class THREESpriteAnimation extends THREESprite {
   }
 
   play() {
-    Ticker.add(this.update, this, "game");
+    Ticker.add(this._updateBinded = this.update.bind(this));
   }
 
   stop() {
-    Ticker.remove(this.update, this, "game");
+    Ticker.remove(this._updateBinded);
   }
 
   set progress(value) {
@@ -91,7 +99,7 @@ export default class THREESpriteAnimation extends THREESprite {
 
   update() {
     let frames = this._animations.get(this.animation);
-    this.progress += (this.speed * Ticker.timeScale / frames.length) * (this.reverse ? -1 : 1);
+    this.progress += (this.speed * (this.fps / 60) * Ticker.timeScale / frames.length) * (this.reverse ? -1 : 1);
     this.frame = frames[Math.round(this._progress * (frames.length - 1))];
   }
 }
