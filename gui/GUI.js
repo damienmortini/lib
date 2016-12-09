@@ -112,7 +112,7 @@ let DATA = {};
     let string = matches[2];
     string = string.replace(/%7B/g, "{");
     string = string.replace(/%7D/g, "}");
-    string = string.replace(/%22/g, "\"");
+    string = string.replace(/%22|”|%E2%80%9D/g, "\"");
     window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${string}$5`);
     DATA = JSON.parse(string);
   }
