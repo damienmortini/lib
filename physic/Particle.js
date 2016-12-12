@@ -2,9 +2,13 @@ import Vector2 from "../math/Vector2.js";
 import Vector3 from "../math/Vector3.js";
 
 export default class Particle {
-  constructor(position = new Vector3(), {life = Infinity} = {}) {
+  constructor({
+    position = new Vector3(),
+    velocity = position instanceof Vector2 ? new Vector2() : new Vector3(),
+    life = Infinity
+  } = {}) {
     this.position = position;
-    this.velocity = this.position instanceof Vector2 ? new Vector2() : new Vector3();
+    this.velocity = velocity;
     this.life = life;
     this.reset();
     return this;
