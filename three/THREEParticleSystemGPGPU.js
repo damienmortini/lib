@@ -20,6 +20,8 @@ import {
 
 import THREEExtendedShaderMaterial from "./THREEExtendedShaderMaterial.js";
 
+const MAX_WIDTH = 2048;
+
 export default class THREEParticleSystemGPGPU {
   constructor(particles, renderer, {
     uniforms = {},
@@ -30,7 +32,10 @@ export default class THREEParticleSystemGPGPU {
 
     this._renderer = renderer;
 
-    let data = new Float32Array(particles.length * 2 * 4);
+    this._width = Math.min(particles.length * 2, MAX_WIDTH);
+    this._height = Math.ceil(particles.length * 2 / MAX_WIDTH);
+
+    let data = new Float32Array(this._width * this._height * 4);
     for (let [i, particle] of particles.entries()) {
       data[i * 8] = particle.x;
       data[i * 8 + 1] = particle.y;
@@ -40,11 +45,20 @@ export default class THREEParticleSystemGPGPU {
       data[i * 8 + 5] = particle.velocity.y;
       data[i * 8 + 6] = particle.velocity.z;
     }
-
-    this._width = Math.min(particles.length * 2, 2048);
-    this._height = Math.min(Math.floor(particles.length * 2 / 2048), 2048);
     let dataTexture = new DataTexture(data, this._width, this._height, RGBAFormat, FloatType);
     dataTexture.needsUpdate = true;
+
+    if(debug) {
+      this._debugRenderer = new WebGLRenderer();
+      document.body.appendChild(this._debugRenderer.domElement);
+      this._debugRenderer.setSize(this._width, this._height, false);
+      this._debugRenderer.domElement.style.position = "absolute";
+      this._debugRenderer.domElement.style.bottom = "0";
+      this._debugRenderer.domElement.style.left = "0";
+      this._debugRenderer.domElement.style.width = "100%";
+      this._debugRenderer.domElement.style.height = "25%";
+      this._debugRenderer.domElement.style.imageRendering = "pixelated";
+    }
 
     this.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     this.scene = new Scene();
@@ -58,7 +72,9 @@ export default class THREEParticleSystemGPGPU {
       type: FloatType
     });
     this._webglRenderTargetIn.texture.generateMipmaps = false;
+    this._webglRenderTargetIn.texture._in = true;
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
+    this._webglRenderTargetOut.texture._out = true;
 
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEExtendedShaderMaterial({
       uniforms: {
@@ -80,12 +96,12 @@ export default class THREEParticleSystemGPGPU {
           varying vec2 vUv;
         `],
         ["main", `
-          float dataPosition = floor(vUv.x * dataTextureSize.x);
-          float offset = mod(dataPosition, 2.);
-          float dataPositionHead = dataPosition - offset;
+          vec2 dataPosition = floor(vUv * dataTextureSize);
+          float offset = mod(dataPosition.x, 2.);
+          dataPosition.x -= offset;
 
-          vec4 dataChunk1 = texture2D(dataTexture, vec2(dataPositionHead / (dataTextureSize.x - 1.), 0.));
-          vec4 dataChunk2 = texture2D(dataTexture, vec2((dataPositionHead + 1.) / (dataTextureSize.x - 1.), 0.));
+          vec4 dataChunk1 = texture2D(dataTexture, dataPosition / dataTextureSize);
+          vec4 dataChunk2 = texture2D(dataTexture, vec2(dataPosition.x + 1., dataPosition.y) / dataTextureSize);
 
           vec3 position = dataChunk1.xyz;
           float life = dataChunk1.w;
@@ -104,12 +120,23 @@ export default class THREEParticleSystemGPGPU {
     this.update();
   }
 
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
+  }
+
   get dataTexture() {
     return this._quad.material.dataTexture;
   }
 
   update() {
     this._renderer.render(this.scene, this.camera, this._webglRenderTargetOut);
+    if(this._debugRenderer) {
+      this._debugRenderer.render(this.scene, this.camera);
+    }
     [this._webglRenderTargetIn, this._webglRenderTargetOut] = [this._webglRenderTargetOut, this._webglRenderTargetIn];
     this._quad.material.dataTexture = this._webglRenderTargetIn.texture;
   }
