@@ -7,7 +7,7 @@ import Texture2D from "./Texture2D.js";
 import TextureCube from "./TextureCube.js";
 
 export default class Shader {
-  static add(shader = "void main() {}", chunks) {
+  static add(string = "void main() {}", chunks) {
     function regExpFromKey(key) {
       let regExpString = key instanceof RegExp ? key.source : key.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
       return new RegExp(`(${regExpString})`);
@@ -16,20 +16,20 @@ export default class Shader {
     for (let [key, chunk] of chunks) {
       switch (key) {
         case "start":
-            shader = `${chunk}\n${shader}`;
+          string = `${chunk}\n${string}`;
           break;
         case "end":
-            shader = shader.replace(/(}\s*$)/, `\n${chunk}\n$1`);
+          string = string.replace(/(}\s*$)/, `\n${chunk}\n$1`);
           break;
         case "main":
-            shader = shader.replace(/(\bvoid\b +\bmain\b[\s\S]*?{\s*)/, `$1\n${chunk}\n`);
+          string = string.replace(/(\bvoid\b +\bmain\b[\s\S]*?{\s*)/, `$1\n${chunk}\n`);
           break;
         default:
-          shader = shader.replace(key, chunk)
+          string = string.replace(key, chunk)
       }
     }
 
-    return shader;
+    return string;
   }
 
   constructor({vertexShader = `
