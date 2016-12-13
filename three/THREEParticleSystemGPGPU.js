@@ -25,8 +25,7 @@ const MAX_WIDTH = 2048;
 export default class THREEParticleSystemGPGPU {
   constructor(particles, renderer, {
     uniforms = {},
-    vertexShaderChunks = new Map(),
-    fragmentShaderChunks = new Map(),
+    fragmentShaderChunks = [],
     debug = false
   } = {}) {
 
@@ -77,19 +76,20 @@ export default class THREEParticleSystemGPGPU {
     this._webglRenderTargetOut.texture._out = true;
 
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEExtendedShaderMaterial({
-      uniforms: {
+      uniforms: Object.assign({
         dataTextureSize: new Vector2(dataTexture.image.width, dataTexture.image.height),
         dataTexture: dataTexture
-      },
-      vertexShaderChunks: new Map([
+      }, uniforms),
+      vertexShaderChunks: [
         ["start",
           `varying vec2 vUv;`
         ],
         ["main",
           `vUv = uv;`
         ]
-      ]),
-      fragmentShaderChunks: new Map([
+      ],
+      fragmentShaderChunks: [
+        ...fragmentShaderChunks,
         ["start", `
           uniform sampler2D dataTexture;
           uniform vec2 dataTextureSize;
@@ -106,18 +106,21 @@ export default class THREEParticleSystemGPGPU {
           vec3 position = dataChunk1.xyz;
           float life = dataChunk1.w;
           vec3 velocity = dataChunk2.xyz;
-
-          position += velocity;
-          life -= 1.;
         `],
         ["end", `
+          position += velocity;
+          life -= 1.;
           gl_FragColor = mix(vec4(position, life), vec4(velocity, 0.), offset);
         `]
-      ])
+      ]
     }));
     this.scene.add(this._quad);
 
     this.update();
+  }
+
+  get material() {
+    return this._quad.material;
   }
 
   get width() {
