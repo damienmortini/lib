@@ -204,10 +204,10 @@ export default class GUI extends HTMLElement {
     return this._container.open;
   }
 
-  add(object, key, {type, label = key, group = "", reload = false, remote = false, client = remote, onChange = () => {
+  add(object, key, {type, label = key, id = label, group = "", reload = false, remote = false, client = remote, onChange = () => {
       }, options, max, min, step} = {}) {
     if(object[key] === null || object[key] === undefined) {
-      console.error(`GUI: ${label} must be defined.`);
+      console.error(`GUI: ${id} must be defined.`);
       return;
     }
 
@@ -229,10 +229,10 @@ export default class GUI extends HTMLElement {
       }
     }
 
-    let labelKey = normalizeString(label);
+    let idKey = normalizeString(id);
     let groupKey = normalizeString(group);
-    let id = `${groupKey ? `${groupKey}/` : ""}${labelKey}`;
-    const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][labelKey] : DATA[labelKey];
+    let uid = `${groupKey ? `${groupKey}/` : ""}${idKey}`;
+    const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][idKey] : DATA[idKey];
     if (type === "color" && SAVED_VALUE) {
       object[key] = colorFromHex(object[key], SAVED_VALUE);
     }
@@ -278,7 +278,7 @@ export default class GUI extends HTMLElement {
       onChange(value);
 
       if(remote && this._webSocket.readyState === WebSocket.OPEN) {
-        this._webSocket.send(JSON.stringify({id, value}));
+        this._webSocket.send(JSON.stringify({uid, value}));
       }
 
       if (!reload) {
@@ -310,7 +310,7 @@ export default class GUI extends HTMLElement {
         if (!containerData) {
           containerData = DATA[groupKey] = {};
         }
-        containerData[labelKey] = input.value;
+        containerData[idKey] = input.value;
 
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
@@ -332,7 +332,7 @@ export default class GUI extends HTMLElement {
 
     onValueChange(object[key]);
 
-    this._inputs.set(id, input);
+    this._inputs.set(uid, input);
 
     return input;
   }

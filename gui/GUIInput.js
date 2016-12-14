@@ -201,7 +201,7 @@ export default class GUIInput extends HTMLElement {
   }
 
   _updateHTML() {
-    if(!this.object || !this.key || !this.label || !this.type) {
+    if(!this.object || !this.key || !this.type) {
       return;
     }
 
