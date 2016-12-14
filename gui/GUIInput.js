@@ -172,7 +172,7 @@ export default class GUIInput extends HTMLElement {
     let changed = false;
     for (let input of this._inputs) {
       let key = input.type === "checkbox" ? "checked" : "value";
-      let value = input.tagName === "SELECT" ? this.value.toString() : this.value;
+      let value = input.type !== "checkbox" ? this.value.toString() : this.value;
       if(value !== input[key]) {
         input[key] = value;
         changed = true;
@@ -187,11 +187,11 @@ export default class GUIInput extends HTMLElement {
   _onChange(e) {
     let value;
 
-    if(this.type === "checkbox") {
+    if(e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
       this.value = e.target.checked;
-    } else if(this.type === "button") {
+    } else if(e.target.type === "button") {
       this.value();
-    } else if(this.type === "color") {
+    } else if(e.target.type === "color") {
       if(e.type === "change") {
         this.value = e.target.value;
       }

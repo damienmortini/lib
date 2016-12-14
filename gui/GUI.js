@@ -146,15 +146,40 @@ export default class GUI extends HTMLElement {
     return staticGUI.open;
   }
 
+  static set webSocketUrl(value) {
+    staticGUI.webSocketUrl = value;
+  }
+
   constructor() {
     super();
 
     this._groups = new Map();
-    this._inputs = [];
+    this._inputs = new Map();
 
     this._container = document.createElement("details");
     this._container.innerHTML = "<summary>GUI</summary>";
     this.open = true;
+
+    this.webSocketUrl = `${location.protocol.replace(/^http/, "ws")}/${location.hostname}:8080`;
+  }
+
+  set webSocketUrl(value) {
+    if(this._webSocket) {
+      this._webSocket.removeEventListener("message", this._onWebSocketMessage);
+    }
+    this._webSocket = new WebSocket(value);
+    this._onWebSocketMessage = (e) => {
+      let data = JSON.parse(e.data);
+      let input = this._inputs.get(data.id);
+      if(input._client) {
+        if(input.type === "button") {
+          input.value();
+        } else {
+          input.value = data.value;
+        }
+      }
+    }
+    this._webSocket.addEventListener("message", this._onWebSocketMessage);
   }
 
   set visible(value) {
@@ -166,7 +191,7 @@ export default class GUI extends HTMLElement {
   }
 
   update() {
-    for (let input of this._inputs) {
+    for (let input of this._inputs.values()) {
       input.update();
     }
   }
@@ -179,7 +204,7 @@ export default class GUI extends HTMLElement {
     return this._container.open;
   }
 
-  add(object, key, {type, label = key, group = "", reload = false, onChange = () => {
+  add(object, key, {type, label = key, group = "", reload = false, remote = false, client = remote, onChange = () => {
       }, options, max, min, step} = {}) {
     if(object[key] === null || object[key] === undefined) {
       console.error(`GUI: ${label} must be defined.`);
@@ -206,6 +231,7 @@ export default class GUI extends HTMLElement {
 
     let labelKey = normalizeString(label);
     let groupKey = normalizeString(group);
+    let id = `${groupKey ? `${groupKey}/` : ""}${labelKey}`;
     const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][labelKey] : DATA[labelKey];
     if (type === "color" && SAVED_VALUE) {
       object[key] = colorFromHex(object[key], SAVED_VALUE);
@@ -232,6 +258,7 @@ export default class GUI extends HTMLElement {
     input.key = type === "color" ? "value" : key;
     input.label = label;
     input.value = value;
+    input._client = client;
     if (min) {
       input.min = min;
     }
@@ -247,26 +274,33 @@ export default class GUI extends HTMLElement {
     input.type = type;
     container.appendChild(input);
 
-    const reloadWindow = () => {
+    const onValueChange = (value) => {
+      onChange(value);
+
+      if(remote && this._webSocket.readyState === WebSocket.OPEN) {
+        this._webSocket.send(JSON.stringify({id, value}));
+      }
+
       if (!reload) {
         return;
       }
 
       if (Keyboard.hasKeyDown(Keyboard.SHIFT)) {
-        Keyboard.onKeyUp.addOnce(() => {
+        Keyboard.addEventListener("keyup", function reloadLocation() {
+          Keyboard.removeEventListener("keyup", reloadLocation);
           window.location.reload();
-        }, this);
+        });
       } else {
         window.location.reload();
       }
     }
 
     if (type === "button") {
-      input.addEventListener("click", reloadWindow);
+      input.addEventListener("click", onValueChange);
     } else {
       if (type !== "color" && type !== "text") {
         input.addEventListener("input", () => {
-          onChange(input.value);
+          onValueChange(input.value);
         });
       }
 
@@ -289,18 +323,16 @@ export default class GUI extends HTMLElement {
         }, 100);
 
         if (type === "color") {
-          onChange(colorFromHex(object[key], input.value));
+          onValueChange(colorFromHex(object[key], input.value));
         } else if (type === "text") {
-          onChange(input.value);
+          onValueChange(input.value);
         }
-
-        reloadWindow();
       });
     }
 
-    onChange(object[key]);
+    onValueChange(object[key]);
 
-    this._inputs.push(input);
+    this._inputs.set(id, input);
 
     return input;
   }
