@@ -15,8 +15,8 @@ class Ticker {
     this._requestAnimationFrameID = requestAnimationFrame(this._updateBinded);
 
     let timestamp = window.performance ? window.performance.now() : Date.now();
-    this.deltaTime = timestamp - this._previousTimestamp;
-    this.timeScale = this.deltaTime / 16.67;
+    this.deltaTime = (timestamp - this._previousTimestamp) * .001;
+    this.timeScale = this.deltaTime / .0166666667;
     this._previousTimestamp = timestamp;
 
     for (let i = 0; i < callbacks.length; i++) {
