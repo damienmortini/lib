@@ -119,10 +119,16 @@ let DATA = {};
 })();
 
 export default class GUI extends HTMLElement {
-  static add(...params) {
-    if (!staticGUI.parentNode) {
-      document.body.appendChild(staticGUI);
+  static _addStatic() {
+    if (staticGUI) {
+      return;
     }
+    staticGUI = document.createElement("dlib-gui");
+    document.body.appendChild(staticGUI);
+  }
+
+  static add(...params) {
+    GUI._addStatic();
     return staticGUI.add(...params);
   }
 
@@ -131,6 +137,7 @@ export default class GUI extends HTMLElement {
   }
 
   static set visible(value) {
+    GUI._addStatic();
     staticGUI.visible = value;
   }
 
@@ -139,6 +146,7 @@ export default class GUI extends HTMLElement {
   }
 
   static set open(value) {
+    GUI._addStatic();
     staticGUI.open = value;
   }
 
@@ -147,6 +155,7 @@ export default class GUI extends HTMLElement {
   }
 
   static set webSocketUrl(value) {
+    GUI._addStatic();
     staticGUI.webSocketUrl = value;
   }
 
@@ -160,7 +169,7 @@ export default class GUI extends HTMLElement {
     this._container.innerHTML = "<summary>GUI</summary>";
     this.open = true;
 
-    this.webSocketUrl = `${location.protocol.replace(/^http/, "ws")}/${location.hostname}:8080`;
+    this.webSocketUrl = `${location.protocol.replace(/^http/, "ws")}//${location.hostname}:8080`;
   }
 
   set webSocketUrl(value) {
@@ -339,4 +348,3 @@ export default class GUI extends HTMLElement {
 }
 
 window.customElements.define("dlib-gui", GUI);
-staticGUI = document.createElement("dlib-gui");
