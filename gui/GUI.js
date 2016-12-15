@@ -179,7 +179,7 @@ export default class GUI extends HTMLElement {
     this._webSocket = new WebSocket(value);
     this._onWebSocketMessage = (e) => {
       let data = JSON.parse(e.data);
-      let input = this._inputs.get(data.id);
+      let input = this._inputs.get(data.uid);
       if(input._client) {
         if(input.type === "button") {
           input.value();
@@ -333,7 +333,7 @@ export default class GUI extends HTMLElement {
 
         if (type === "color") {
           onValueChange(colorFromHex(object[key], input.value));
-        } else if (type === "text") {
+        } else if (type === "text" || type === "checkbox") {
           onValueChange(input.value);
         }
       });
