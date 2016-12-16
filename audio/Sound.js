@@ -16,9 +16,9 @@ export default class Sound {
     return muted;
   }
 
-  static add(src) {
-    let split = src.split("/");
-    let name = split[split.length - 1].split(".")[0];
+  static add(src, {
+    name = /([^\\\/]*)\..*$/.exec(src)[1]
+  } = {}) {
     if (Sound.get(name)) {
       console.warn(`Sound ${name} already added`);
       return;
@@ -32,52 +32,84 @@ export default class Sound {
     return sounds.get(name);
   }
 
-  constructor(src) {
-    this.audio = document.createElement("audio");
-    this.audio.src = src;
+  constructor(src, {
+    amplification = 1
+  } = {}) {
+    this._audio = document.createElement("audio");
+    this._audio.src = src;
 
-    this._muted = false;
+    this.amplification = amplification;
+
+    this.volume = 1;
+    this.muted = muted;
+  }
+  
+  get src() {
+    return this._audio.src;
+  }
+
+  set src(value) {
+    this._audio.src = value;
   }
 
   get muted() {
-    return this.audio.muted;
+    return this._audio.muted;
   }
 
   set muted(value) {
     if(!muted && !loopMuted) {
       this._muted = value;
     }
-    this.audio.muted = value;
+    this._audio.muted = this._muted;
   }
 
   get loop() {
-    return this.audio.loop;
+    return this._audio.loop;
   }
 
   set loop(value) {
     this.muted = value && loopMuted ? true : this._muted;
-    this.audio.loop = value;
+    this._audio.loop = value;
+  }
+
+  get currentTime() {
+    return this._audio.currentTime;
+  }
+
+  set currentTime(value) {
+    this._audio.currentTime = value;
   }
 
   get volume() {
-    return this.audio.volume;
+    return this._volume;
   }
 
   set volume(value) {
-    this.audio.volume = value;
+    this._volume = value;
+    this._audio.volume = this._volume * this.amplification;
   }
 
   play() {
-    this.audio.play();
+    this._audio.play();
   }
 
   stop() {
-    this.audio.currentTime = 0;
+    this.currentTime = 0;
     this.pause();
   }
 
   pause() {
-    this.audio.pause();
+    this._audio.pause();
+  }
+
+  cloneNode() {
+    let sound = new Sound(this.src);
+    sound.volume = this.volume;
+    sound.muted = this.muted;
+    sound.loop = this.loop;
+    sound.currentTime = this.currentTime;
+
+    return sound;
   }
 }
 
