@@ -9,10 +9,11 @@ export default class SoundMatrix extends Map {
 
     this.bpm = bpm;
     this._beats = beats;
+    
+    this.position = 0;
 
     this._clips = new Set();
     this._time = 0;
-    this._tickId = 0;
 
     this._clones = new Map();
 
@@ -78,16 +79,16 @@ export default class SoundMatrix extends Map {
 
     this._time += Ticker.deltaTime;
 
-    let tickId = Math.floor(this._time / (60 / this.bpm)) % this._beats;
+    let position = Math.floor(this._time / (60 / this.bpm)) % this._beats;
 
     for (let [sound, array] of this) {
       if(this._clips.has(sound)) {
-        if(!tickId) {
+        if(!position) {
           sound.play();
         }
-        sound.volume += ((array[tickId] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
-      } else if (array[tickId] && this._tickId !== tickId) {
-        let clone = this._clones.get(sound)[this._tickId];
+        sound.volume += ((array[position] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
+      } else if (array[position] && this.position !== position) {
+        let clone = this._clones.get(sound)[this.position];
         clone.volume = sound.volume;
         clone.muted = sound.muted;
         clone.currentTime = 0;
@@ -95,6 +96,6 @@ export default class SoundMatrix extends Map {
       }
     }
 
-    this._tickId = tickId;
+    this.position = position;
   }
 }
