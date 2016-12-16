@@ -219,7 +219,7 @@ export default class HandTracker {
 
     this.onUpdate = new Signal();
 
-    this._webSocket = new WebSocket(`ws://${host}:6437/v6.json`);
+    this._webSocket = new WebSocket(`wss://${host}:6437/v6.json`);
 
     this._webSocket.addEventListener("open", (e) => {
       this._webSocket.send(JSON.stringify({enableGestures: false}));

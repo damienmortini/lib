@@ -169,7 +169,7 @@ export default class GUI extends HTMLElement {
     this._container.innerHTML = "<summary>GUI</summary>";
     this.open = true;
 
-    this.webSocketUrl = `${location.protocol.replace(/^http/, "ws")}//${location.hostname}:8080`;
+    this.webSocketUrl = `wss://${location.hostname}:8080`;
   }
 
   set webSocketUrl(value) {
