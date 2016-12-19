@@ -11,6 +11,43 @@ import SoundMatrix from "../audio/SoundMatrix.js";
       left: 0;
       top: 0;
     }
+
+    dlib-soundmatrix *:focus {
+      outline: none;
+    }
+
+    dlib-soundmatrix input[type="button"] {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    dlib-soundmatrix input[type="checkbox"] {
+      -webkit-appearance: none;
+      border: 1px solid black;
+      width: 12px;
+      height: 12px;
+      vertical-align: middle;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    dlib-soundmatrix input[type="checkbox"]::before {
+      content: "";
+      display: block;
+      width: 8px;
+      height: 8px;
+      margin: 1px;
+      border-radius: 1px;
+      background: black;
+      transition: transform .2s;
+      transition-timing-function: ease-in-out;
+      transform: scale(0);
+    }
+
+    dlib-soundmatrix input[type="checkbox"]:checked::before {
+      transform: scale(1);
+    }
   `;
   document.head.appendChild(style);
 })();
@@ -36,7 +73,7 @@ export default class SoundMatrixElement extends LoopElement {
 
         let empty = document.createElement("input")
         empty.type = "button";
-        empty.value = "x";
+        empty.value = "✖";
         empty.onclick = () => {
           for (let i = 0; i < array.length; i++) {
             array[i] = 0;
