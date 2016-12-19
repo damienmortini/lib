@@ -74,7 +74,7 @@ export default class THREESpriteAnimation extends THREESprite {
   }
 
   stop() {
-    Ticker.remove(this._updateBinded);
+    Ticker.delete(this._updateBinded);
   }
 
   set progress(value) {

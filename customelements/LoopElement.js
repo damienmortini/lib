@@ -30,7 +30,7 @@ export default class LoopElement extends HTMLElement {
   }
 
   pause() {
-    Ticker.remove(this._updateBinded);
+    Ticker.delete(this._updateBinded);
   }
 
   update() {}
