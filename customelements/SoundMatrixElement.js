@@ -23,40 +23,56 @@ import SoundMatrix from "../audio/SoundMatrix.js";
     }
 
     dlib-soundmatrix .pad {
+      box-sizing: border-box;
+      position: relative;
       -webkit-appearance: none;
-      border: 1px solid black;
       width: 12px;
       height: 12px;
-      vertical-align: middle;
       border-radius: 2px;
+      vertical-align: middle;
       cursor: pointer;
       transition-duration: .1s;
+      border: 1px solid;
+      will-change: transform;
     }
 
-    dlib-soundmatrix .pad.highlight::before {
-      transform: scale(.2);
+    dlib-soundmatrix .pad.highlight::after {
+      transform: scale(.4);
     }
 
     dlib-soundmatrix .pad.highlight:checked::before {
-      transform: scale(1.2);
+      transform: scale(1);
     }
 
-    dlib-soundmatrix .pad::before {
+    dlib-soundmatrix .pad::before, dlib-soundmatrix .pad::after {
       content: "";
+      will-change: transform;
+      position: absolute;
       display: block;
-      width: 8px;
-      height: 8px;
-      margin: 1px;
-      // border-radius: 1px;
-      background: black;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
       transition-property: transform;
       transition-timing-function: ease-in-out;
+      transition-duration: .1s;
+    }
+
+    dlib-soundmatrix .pad::after {
+      background: black;
+      border-radius: 2px;
       transform: scale(0);
     }
 
+    dlib-soundmatrix .pad::before {
+      transform: scale(0);
+      border-radius: 1px;
+      background: black;
+    }
+
     dlib-soundmatrix .pad:checked::before {
-      transition-duration: .1s;
-      transform: scale(1);
+      transform: scale(.8);
     }
   `;
   document.head.appendChild(style);

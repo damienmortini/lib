@@ -4,7 +4,8 @@ import Ticker from "dlib/utils/Ticker.js";
 export default class SoundMatrix extends Map {
   constructor({
     beats = 8,
-    bpm = 240
+    bpm = 240,
+    autoplay = false
   } = {}) {
     super();
 
@@ -14,13 +15,17 @@ export default class SoundMatrix extends Map {
     this.beat = 0;
 
     this._clips = new Set();
-    this._time = 0;
+    this._currentTime = 0;
 
     this._clones = new Map();
 
     this._paused = true;
 
     this.onBeat = new Signal();
+
+    if(autoplay) {
+      this.play();
+    }
   }
 
   get beats() {
@@ -49,32 +54,28 @@ export default class SoundMatrix extends Map {
   }
 
   play() {
-    this._paused = false;
+    Ticker.add(this._updateBinded = this._update.bind(this));
   }
 
   stop() {
     this.pause();
-    this._time = 0;
+    this._currentTime = 0;
     for (let sound of this.keys()) {
       sound.stop();
     }
   }
 
   pause() {
-    this._paused = true;
+    Ticker.delete(this._updateBinded);
     for (let sound of this.keys()) {
       sound.pause();
     }
   }
 
-  update() {
-    if(this._paused) {
-      return;
-    }
+  _update() {
+    this._currentTime += Ticker.deltaTime;
 
-    this._time += Ticker.deltaTime;
-
-    let beat = Math.floor(this._time / (60 / this.bpm)) % this._beats;
+    let beat = Math.floor(this._currentTime / (60 / this.bpm)) % this._beats;
 
     if(this.beat !== beat) {
       for (let [sound, array] of this) {

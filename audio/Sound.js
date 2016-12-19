@@ -1,14 +1,14 @@
-let sounds = new Map();
-
-let loopMuted = /\loopmuted\b/.test(window.location.search);
+let sounds = new Set();
+let soundsMap = new Map();
 
 let muted = false;
+let loopMuted = false;
 
 export default class Sound {
   static set muted(value) {
     muted = value;
     for (let sound of sounds) {
-      sound.muted = value ? true : sound._muted;
+      sound.muted = sound.muted;
     }
   }
 
@@ -16,26 +16,33 @@ export default class Sound {
     return muted;
   }
 
-  static add(src, {
-    name = /([^\\\/]*)\..*$/.exec(src)[1]
-  } = {}) {
-    if (Sound.get(name)) {
-      console.warn(`Sound ${name} already added`);
-      return;
+  static set loopMuted(value) {
+    loopMuted = value;
+    for (let sound of sounds) {
+      sound.muted = sound.muted;
     }
+  }
+
+  static get loopMuted() {
+    return loopMuted;
+  }
+
+  static add(src) {
     let sound = new Sound(src);
-    sound.muted = muted ? true : sound._muted;
-    sounds.set(name, sound);
     return sound;
   }
 
   static get(name) {
-    return sounds.get(name);
+    return soundsMap.get(name);
   }
 
   constructor(src, {
+    name = /([^\\\/]*)\..*$/.exec(src)[1],
     amplification = 1
   } = {}) {
+    sounds.add(this);
+    soundsMap.set(name, this);
+
     this._audio = document.createElement("audio");
     this._audio.src = src;
 
@@ -58,10 +65,8 @@ export default class Sound {
   }
 
   set muted(value) {
-    if(!muted && !loopMuted) {
-      this._muted = value;
-    }
-    this._audio.muted = this._muted;
+    this._muted = value;
+    this._audio.muted = muted || loopMuted && this.loop ? true : value;
   }
 
   get loop() {
@@ -69,7 +74,7 @@ export default class Sound {
   }
 
   set loop(value) {
-    this.muted = value && loopMuted ? true : this._muted;
+    this.muted = this.muted;
     this._audio.loop = value;
   }
 
@@ -114,6 +119,5 @@ export default class Sound {
   }
 }
 
-if (/\bmuted\b/.test(window.location.search)) {
-  Sound.muted = true;
-}
+Sound.muted = /\bmuted\b/.test(window.location.search);
+Sound.loopMuted = /\bloopmuted\b/.test(window.location.search);
