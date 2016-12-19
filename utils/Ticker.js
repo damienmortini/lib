@@ -1,8 +1,8 @@
-const callbacks = [];
-
 class Ticker {
   constructor() {
     this._updateBinded = this.update.bind(this);
+
+    this.callbacks = new Set();
 
     this._previousTimestamp = 0;
     this.deltaTime = 0;
@@ -12,31 +12,24 @@ class Ticker {
   }
 
   update(time) {
-    this._requestAnimationFrameID = requestAnimationFrame(this._updateBinded);
+    requestAnimationFrame(this._updateBinded);
 
     let timestamp = window.performance ? window.performance.now() : Date.now();
     this.deltaTime = (timestamp - this._previousTimestamp) * .001;
     this.timeScale = this.deltaTime / .0166666667;
     this._previousTimestamp = timestamp;
 
-    for (let i = 0; i < callbacks.length; i++) {
-      callbacks[i]();
+    for (let callback of this.callbacks) {
+      callback(time);
     }
   }
 
   add(callback) {
-    this.remove(callbacks.indexOf(callback));
-
-    callbacks.push(callback);
-
-    return callbacks.length - 1;
+    this.callbacks.add(callback);
   }
 
-  remove(id = -1) {
-    if(id < 0) {
-      return;
-    }
-    callbacks.splice(id, 1);
+  remove(callback) {
+    this.callbacks.delete(callback);
   }
 }
 

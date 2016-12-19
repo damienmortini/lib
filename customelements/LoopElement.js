@@ -26,13 +26,14 @@ export default class LoopElement extends HTMLElement {
   }
 
   play() {
-    this.pause();
-    this._tickerID = Ticker.add(this.update.bind(this));
+    Ticker.add(this._updateBinded = this._updateBinded || this.update.bind(this));
   }
 
   pause() {
-    Ticker.remove(this._tickerID);
+    Ticker.remove(this._updateBinded);
   }
 
   update() {}
 }
+
+window.customElements.define("dlib-loop", LoopElement);
