@@ -175,7 +175,7 @@ export default class Pointer extends Vector2 {
     this.domElement.addEventListener("touchstart", this._onPointerDownBinded);
     this.domElement.addEventListener("mousemove", this._onPointerMoveBinded);
     window.addEventListener("resize", this._resizeBinded);
-    Ticker.add(this._updateBinded = this._update.bind(this));
+    Ticker.add(this._updateBinded = this._updateBinded || this._update.bind(this));
   }
 
   disable() {

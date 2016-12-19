@@ -54,7 +54,7 @@ export default class SoundMatrix extends Map {
   }
 
   play() {
-    Ticker.add(this._updateBinded = this._update.bind(this));
+    Ticker.add(this._updateBinded = this._updateBinded || this._update.bind(this));
   }
 
   stop() {

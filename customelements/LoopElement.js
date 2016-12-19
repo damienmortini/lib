@@ -27,10 +27,12 @@ export default class LoopElement extends HTMLElement {
 
   play() {
     Ticker.add(this._updateBinded = this._updateBinded || this.update.bind(this));
+    this.dispatchEvent(new Event("playing"));
   }
 
   pause() {
     Ticker.delete(this._updateBinded);
+    this.dispatchEvent(new Event("pause"));
   }
 
   update() {}

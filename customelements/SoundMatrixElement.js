@@ -6,73 +6,8 @@ import SoundMatrix from "../audio/SoundMatrix.js";
 (function() {
   let style = document.createElement("style");
   style.textContent = `
-    dlib-soundmatrix {
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-
     dlib-soundmatrix *:focus {
       outline: none;
-    }
-
-    dlib-soundmatrix input[type="button"] {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-    }
-
-    dlib-soundmatrix .pad {
-      box-sizing: border-box;
-      position: relative;
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-      vertical-align: middle;
-      cursor: pointer;
-      transition-duration: .1s;
-      border: 1px solid;
-      will-change: transform;
-    }
-
-    dlib-soundmatrix .pad.highlight::after {
-      transform: scale(.4);
-    }
-
-    dlib-soundmatrix .pad.highlight:checked::before {
-      transform: scale(1);
-    }
-
-    dlib-soundmatrix .pad::before, dlib-soundmatrix .pad::after {
-      content: "";
-      will-change: transform;
-      position: absolute;
-      display: block;
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      transition-property: transform;
-      transition-timing-function: ease-in-out;
-      transition-duration: .1s;
-    }
-
-    dlib-soundmatrix .pad::after {
-      background: black;
-      border-radius: 2px;
-      transform: scale(0);
-    }
-
-    dlib-soundmatrix .pad::before {
-      transform: scale(0);
-      border-radius: 1px;
-      background: black;
-    }
-
-    dlib-soundmatrix .pad:checked::before {
-      transform: scale(.8);
     }
   `;
   document.head.appendChild(style);
@@ -115,7 +50,7 @@ export default class SoundMatrixElement extends LoopElement {
 
       if(!pads) {
         let row = document.createElement("div");
-        row.classList.add(".row");
+        row.classList.add("row");
 
         let empty = document.createElement("input")
         empty.type = "button";
@@ -125,7 +60,7 @@ export default class SoundMatrixElement extends LoopElement {
             array[i] = 0;
           }
         }
-        row.appendChild(empty);
+        // row.appendChild(empty);
 
         pads = [];
         for (let i = 0; i < this.soundMatrix.beats; i++) {

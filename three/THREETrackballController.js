@@ -10,8 +10,6 @@ export default class THREETrackballController extends TrackballController {
     super(new Matrix4(object3D.matrix.elements), options);
     this._matrix4 = new THREEMatrix4();
     this.object3D = object3D;
-
-    this.update();
   }
 
   update() {

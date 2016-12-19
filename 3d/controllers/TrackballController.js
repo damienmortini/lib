@@ -10,9 +10,10 @@ export default class TrackballControl {
     domElement = document.body,
     distance = 0,
     invertRotation = true,
-    rotationEaseRatio = .03,
+    rotationEaseRatio = .04,
     zoomStep = 1,
-    zoomEaseRatio = .1
+    zoomEaseRatio = .1,
+    autoupdate = true
   } = {}) {
     this.matrix = matrix;
 
@@ -39,10 +40,6 @@ export default class TrackballControl {
     this._positionOffset = new Vector3();
 
     domElement.addEventListener("wheel", this.onWheel.bind(this));
-
-    Ticker.add(this.update.bind(this));
-
-    this.update();
   }
 
   set distance(value) {
@@ -79,7 +76,7 @@ export default class TrackballControl {
     this.matrix.z = 0;
 
     if(this._pointer.downed) {
-      this._velocity.copy(this._pointer.velocity).scale(.002);
+      this._velocity.copy(this._pointer.velocity).scale(.003);
     }
 
     this._velocity.lerp(this._velocityOrigin, this.rotationEaseRatio);

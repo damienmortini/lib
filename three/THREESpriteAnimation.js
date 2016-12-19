@@ -70,7 +70,7 @@ export default class THREESpriteAnimation extends THREESprite {
   }
 
   play() {
-    Ticker.add(this._updateBinded = this.update.bind(this));
+    Ticker.add(this._updateBinded = this._updateBinded || this.update.bind(this));
   }
 
   stop() {
