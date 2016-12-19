@@ -33,7 +33,6 @@
     "gl-shader": "^4.2.0",
     "gl-texture-cube": "^1.0.1",
     "gl-texture2d": "^2.0.10",
-    "min-signal": "^0.0.6",
     "whatwg-fetch": "^1.0.0",
     "ws": "^1.1.1"
   }

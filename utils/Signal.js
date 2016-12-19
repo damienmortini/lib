@@ -1,3 +1,11 @@
-import Signal from "min-signal";
+export default class Signal extends Set {
+  constructor() {
+    super();
+  }
 
-export default Signal;
+  dispatch(value) {
+    for (let callback of this) {
+      callback(value);
+    }
+  }
+}

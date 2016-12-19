@@ -1,8 +1,10 @@
-class Ticker {
-  constructor() {
-    this._updateBinded = this.update.bind(this);
+import Signal from "./Signal.js";
 
-    this.callbacks = new Set();
+class Ticker extends Signal {
+  constructor() {
+    super();
+    
+    this._updateBinded = this.update.bind(this);
 
     this._previousTimestamp = 0;
     this.deltaTime = 0;
@@ -19,17 +21,7 @@ class Ticker {
     this.timeScale = this.deltaTime / .0166666667;
     this._previousTimestamp = timestamp;
 
-    for (let callback of this.callbacks) {
-      callback(time);
-    }
-  }
-
-  add(callback) {
-    this.callbacks.add(callback);
-  }
-
-  remove(callback) {
-    this.callbacks.delete(callback);
+    this.dispatch(time);
   }
 }
 
