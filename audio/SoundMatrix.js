@@ -9,7 +9,7 @@ export default class SoundMatrix extends Map {
 
     this.bpm = bpm;
     this._beats = beats;
-    
+
     this.position = 0;
 
     this._clips = new Set();
@@ -20,37 +20,29 @@ export default class SoundMatrix extends Map {
     this._paused = true;
   }
 
-  _addSound(sound, {clip = false} = {}) {
-    super.set(sound, new Float32Array(this._beats).fill(0));
-    if(clip) {
-      this._clips.add(sound);
-    } else {
-      for (let i = 0; i < this._beats; i++) {
-        this._clones.set(sound, new Array(this._beats).fill().map(() => {
-          let clone = sound.cloneNode();
-          clone.loop = false;
-          return clone;
-        }));
-      }
-    }
+  get beats() {
+    return this._beats;
   }
 
   set(sound, array, {clip} = {}) {
     if(!this.get(sound)) {
-      this._addSound(sound, {clip});
+      if(clip) {
+        this._clips.add(sound);
+      } else {
+        for (let i = 0; i < this._beats; i++) {
+          this._clones.set(sound, new Array(this._beats).fill().map(() => {
+            let clone = sound.cloneNode();
+            clone.loop = false;
+            return clone;
+          }));
+        }
+      }
+      super.set(sound, new Float32Array(this._beats).fill(0));
     }
     let soundArray = this.get(sound);
     for (let i = 0; i < soundArray.length; i++) {
       soundArray[i] = array[i] || false;
     }
-  }
-
-  get(sound, {clip} = {}) {
-    let array = super.get(sound);
-    if(!array) {
-      this._addSound(sound, {clip});
-    }
-    return array;
   }
 
   play() {
@@ -82,12 +74,13 @@ export default class SoundMatrix extends Map {
     let position = Math.floor(this._time / (60 / this.bpm)) % this._beats;
 
     for (let [sound, array] of this) {
-      if(this._clips.has(sound)) {
+      if(this.position !== position && this._clips.has(sound)) {
         if(!position) {
           sound.play();
         }
-        sound.volume += ((array[position] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
-      } else if (array[position] && this.position !== position) {
+        // sound.volume += ((array[position] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
+        sound.muted = !array[position];
+      } else if (this.position !== position && array[position]) {
         let clone = this._clones.get(sound)[this.position];
         clone.volume = sound.volume;
         clone.muted = sound.muted;
