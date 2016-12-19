@@ -26,6 +26,7 @@ export default class Sound {
     let sound = new Sound(src);
     sound.muted = muted ? true : sound._muted;
     sounds.set(name, sound);
+    return sound;
   }
 
   static get(name) {
@@ -43,7 +44,7 @@ export default class Sound {
     this.volume = 1;
     this.muted = muted;
   }
-  
+
   get src() {
     return this._audio.src;
   }

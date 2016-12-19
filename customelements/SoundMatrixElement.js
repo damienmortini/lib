@@ -22,7 +22,7 @@ import SoundMatrix from "../audio/SoundMatrix.js";
       cursor: pointer;
     }
 
-    dlib-soundmatrix input[type="checkbox"] {
+    dlib-soundmatrix .pad {
       -webkit-appearance: none;
       border: 1px solid black;
       width: 12px;
@@ -30,22 +30,32 @@ import SoundMatrix from "../audio/SoundMatrix.js";
       vertical-align: middle;
       border-radius: 2px;
       cursor: pointer;
+      transition-duration: .1s;
     }
 
-    dlib-soundmatrix input[type="checkbox"]::before {
+    dlib-soundmatrix .pad.highlight::before {
+      transform: scale(.2);
+    }
+
+    dlib-soundmatrix .pad.highlight:checked::before {
+      transform: scale(1.2);
+    }
+
+    dlib-soundmatrix .pad::before {
       content: "";
       display: block;
       width: 8px;
       height: 8px;
       margin: 1px;
-      border-radius: 1px;
+      // border-radius: 1px;
       background: black;
-      transition: transform .2s;
+      transition-property: transform;
       transition-timing-function: ease-in-out;
       transform: scale(0);
     }
 
-    dlib-soundmatrix input[type="checkbox"]:checked::before {
+    dlib-soundmatrix .pad:checked::before {
+      transition-duration: .1s;
       transform: scale(1);
     }
   `;
@@ -59,6 +69,26 @@ export default class SoundMatrixElement extends LoopElement {
     this.soundMatrix = soundMatrix;
 
     this._padsMatrix = new Map();
+  }
+
+  set soundMatrix(value) {
+    if(this._soundMatrix) {
+      this._soundMatrix.onBeat.delete(this._onBeatBinded);
+    }
+    this._soundMatrix = value;
+    this._soundMatrix.onBeat.add(this._onBeatBinded = this._onBeat.bind(this));
+  }
+
+  get soundMatrix() {
+    return this._soundMatrix;
+  }
+
+  _onBeat(beat) {
+    for (let pads of this._padsMatrix.values()) {
+      for (let [i, pad] of pads.entries()) {
+        pad.classList.toggle("highlight", i === beat);
+      }
+    }
   }
 
   update() {
@@ -85,6 +115,7 @@ export default class SoundMatrixElement extends LoopElement {
         for (let i = 0; i < this.soundMatrix.beats; i++) {
           let pad = document.createElement("input")
           pad.type = "checkbox";
+          pad.classList.add("pad");
           pad.onchange = () => {
             array[i] = pad.checked ? 1 : 0;
           }

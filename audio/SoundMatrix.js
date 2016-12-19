@@ -1,3 +1,4 @@
+import Signal from "dlib/utils/Signal.js";
 import Ticker from "dlib/utils/Ticker.js";
 
 export default class SoundMatrix extends Map {
@@ -10,7 +11,7 @@ export default class SoundMatrix extends Map {
     this.bpm = bpm;
     this._beats = beats;
 
-    this.position = 0;
+    this.beat = 0;
 
     this._clips = new Set();
     this._time = 0;
@@ -18,6 +19,8 @@ export default class SoundMatrix extends Map {
     this._clones = new Map();
 
     this._paused = true;
+
+    this.onBeat = new Signal();
   }
 
   get beats() {
@@ -71,24 +74,28 @@ export default class SoundMatrix extends Map {
 
     this._time += Ticker.deltaTime;
 
-    let position = Math.floor(this._time / (60 / this.bpm)) % this._beats;
+    let beat = Math.floor(this._time / (60 / this.bpm)) % this._beats;
 
-    for (let [sound, array] of this) {
-      if(this.position !== position && this._clips.has(sound)) {
-        if(!position) {
-          sound.play();
+    if(this.beat !== beat) {
+      for (let [sound, array] of this) {
+        if(this._clips.has(sound)) {
+          if(!beat) {
+            sound.play();
+          }
+          // sound.volume += ((array[beat] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
+          sound.muted = !array[beat];
+        } else if (array[beat]) {
+          let clone = this._clones.get(sound)[this.beat];
+          clone.volume = sound.volume;
+          clone.muted = sound.muted;
+          clone.currentTime = 0;
+          clone.play();
         }
-        // sound.volume += ((array[position] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
-        sound.muted = !array[position];
-      } else if (this.position !== position && array[position]) {
-        let clone = this._clones.get(sound)[this.position];
-        clone.volume = sound.volume;
-        clone.muted = sound.muted;
-        clone.currentTime = 0;
-        clone.play();
       }
+
+      this.onBeat.dispatch(beat);
     }
 
-    this.position = position;
+    this.beat = beat;
   }
 }
