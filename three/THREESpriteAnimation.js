@@ -40,6 +40,8 @@ export default class THREESpriteAnimation extends THREESprite {
       scale
     });
 
+    this.onAnimationEnd = new Signal();
+
     this._progress = 0;
     this._animations = animations;
 
@@ -48,8 +50,6 @@ export default class THREESpriteAnimation extends THREESprite {
     this.speed = speed;
     this.fps = fps;
     this.animation = animation;
-
-    this.onAnimationComplete = new Signal();
 
     if(autoplay) {
       this.play();
@@ -88,7 +88,7 @@ export default class THREESpriteAnimation extends THREESprite {
     } else {
       this._progress = Math.min(Math.max(this._progress, 0), 1);
       if(previousProgress !== this._progress && (this._progress === 1 && !this.reverse || this._progress === 0 && this.reverse)) {
-        this.onAnimationComplete.dispatch();
+        this.onAnimationEnd.dispatch();
       }
     }
   }
