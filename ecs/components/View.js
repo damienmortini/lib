@@ -22,6 +22,11 @@ export default class View extends Component {
 
   set visible(value) {
     this._selfVisible = value;
+
+    if(value === this._visible) {
+      return;
+    }
+
     this._visible = this._parent ? this._parent.visible && value : value;
 
     if(this._visible) {
