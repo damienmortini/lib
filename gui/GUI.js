@@ -192,7 +192,7 @@ export default class GUI extends HTMLElement {
   }
 
   set visible(value) {
-    this.style.visibility = value ? "visible" : "hidden";
+    this.style.display = value ? "" : "none";
   }
 
   get visible() {
