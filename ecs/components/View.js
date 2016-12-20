@@ -1,7 +1,8 @@
-import Component from "dlib/ecs/Component.js";
+import Component from "../Component.js";
 
 export default class View extends Component {
   constructor(entity, view, {
+    visible = true,
     visibilityExecutor = (resolve) => resolve()
   } = {}) {
     super(entity);
@@ -15,9 +16,8 @@ export default class View extends Component {
     this._parent = null;
     this._children = new Set();
 
-    this._visible = true;
-
-    this._selfVisible = true;
+    this.visible = visible;
+    this._view.visible = visible;
   }
 
   set visible(value) {

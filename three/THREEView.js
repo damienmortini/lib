@@ -5,9 +5,10 @@ import View from "dlib/ecs/components/View.js";
 export default class THREEView extends View {
   constructor(entity, {
     view = new Object3D(),
-    visibilityExecutor = (resolve) => resolve()
+    visible,
+    visibilityExecutor
   } = {}) {
-    super(entity, view, {visibilityExecutor});
+    super(entity, view, {visible, visibilityExecutor});
   }
 
   get position() {
