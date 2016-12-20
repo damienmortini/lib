@@ -40,6 +40,8 @@ export default class TrackballControl {
     this._positionOffset = new Vector3();
 
     domElement.addEventListener("wheel", this.onWheel.bind(this));
+
+    this.update();
   }
 
   set distance(value) {
