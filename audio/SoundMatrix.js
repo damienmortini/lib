@@ -37,13 +37,11 @@ export default class SoundMatrix extends Map {
       if(clip) {
         this._clips.add(sound);
       } else {
-        for (let i = 0; i < this._beats; i++) {
-          this._clones.set(sound, new Array(this._beats).fill().map(() => {
-            let clone = sound.cloneNode();
-            clone.loop = false;
-            return clone;
-          }));
-        }
+        this._clones.set(sound, new Array(this._beats).fill().map(() => {
+          let clone = sound.cloneNode();
+          clone.loop = false;
+          return clone;
+        }));
       }
       super.set(sound, new Float32Array(this._beats).fill(0));
     }
@@ -81,6 +79,7 @@ export default class SoundMatrix extends Map {
       for (let [sound, array] of this) {
         if(this._clips.has(sound)) {
           if(!beat) {
+            sound.currentTime = 0;
             sound.play();
           }
           // sound.volume += ((array[beat] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
