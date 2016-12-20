@@ -37,7 +37,11 @@ export default class SoundMatrixElement extends LoopElement {
   _onBeat(beat) {
     for (let pads of this._padsMatrix.values()) {
       for (let [i, pad] of pads.entries()) {
-        pad.classList.toggle("highlight", i === beat);
+        if(i !== beat && pad.classList.contains("highlight")) {
+          pad.classList.remove("highlight");
+        } else if(i === beat && !pad.classList.contains("highlight")) {
+          pad.classList.add("highlight");
+        }
       }
     }
   }

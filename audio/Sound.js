@@ -3,6 +3,29 @@ let soundsMap = new Map();
 
 let muted = false;
 let loopMuted = false;
+let initialized = true;
+
+const MOBILE = /mobi/.test(window.navigator.userAgent.toLowerCase());
+
+if(MOBILE) {
+  initialized = false;
+
+  let onTouchStart = () => {
+    window.removeEventListener("touchstart", onTouchStart);
+    for (let sound of sounds) {
+      sound._audio.play();
+      if(!sound._audio.autoplay) {
+        let pauseElement = function() {
+          sound._audio.pause();
+          sound._audio.removeEventListener("playing", pauseElement);
+        }
+        sound._audio.addEventListener("playing", pauseElement);
+      }
+    }
+    initialized = true;
+  };
+  window.addEventListener("touchstart", onTouchStart);
+}
 
 export default class Sound {
   static set muted(value) {
@@ -43,7 +66,9 @@ export default class Sound {
     this.name = name;
 
     sounds.add(this);
-    soundsMap.set(this.name, this);
+    if(this.name) {
+      soundsMap.set(this.name, this);
+    }
 
     this._audio = document.createElement("audio");
     this._audio.src = src;
@@ -98,6 +123,9 @@ export default class Sound {
   }
 
   play() {
+    if(!initialized) {
+      return;
+    }
     this._audio.play();
   }
 
@@ -111,7 +139,9 @@ export default class Sound {
   }
 
   cloneNode() {
-    let sound = new Sound(this.src);
+    let sound = new Sound(this.src, {
+      name: null
+    });
     sound.volume = this.volume;
     sound.muted = this.muted;
     sound.loop = this.loop;
