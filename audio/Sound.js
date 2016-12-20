@@ -40,8 +40,10 @@ export default class Sound {
     name = /([^\\\/]*)\..*$/.exec(src)[1],
     amplification = 1
   } = {}) {
+    this.name = name;
+
     sounds.add(this);
-    soundsMap.set(name, this);
+    soundsMap.set(this.name, this);
 
     this._audio = document.createElement("audio");
     this._audio.src = src;
@@ -61,7 +63,7 @@ export default class Sound {
   }
 
   get muted() {
-    return this._audio.muted;
+    return this._muted;
   }
 
   set muted(value) {
