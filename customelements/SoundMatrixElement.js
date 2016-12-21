@@ -64,7 +64,7 @@ export default class SoundMatrixElement extends LoopElement {
             array[i] = 0;
           }
         }
-        // row.appendChild(empty);
+        row.appendChild(empty);
 
         pads = [];
         for (let i = 0; i < this.soundMatrix.beats; i++) {
