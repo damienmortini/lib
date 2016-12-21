@@ -110,11 +110,9 @@ let DATA = {};
   let matches = GUI_REG_EXP.exec(window.location.hash);
   if (matches) {
     let string = matches[2];
-    string = string.replace(/%7B/g, "{");
-    string = string.replace(/%7D/g, "}");
-    string = string.replace(/%22|”|%E2%80%9D/g, "\"");
+    string = string.replace(/”|%E2%80%9D/g, "%22");
     window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${string}$5`);
-    DATA = JSON.parse(string);
+    DATA = JSON.parse(decodeURI(string));
   }
 })();
 
@@ -134,6 +132,10 @@ export default class GUI extends HTMLElement {
 
   static get element() {
     return staticGUI;
+  }
+
+  static get data() {
+    return DATA;
   }
 
   static set visible(value) {
@@ -324,10 +326,10 @@ export default class GUI extends HTMLElement {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
           if (GUI_REG_EXP.test(window.location.hash)) {
-            window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${JSON.stringify(DATA)}$5`);
+            window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${encodeURI(JSON.stringify(DATA))}$5`);
           } else {
             let prefix = window.location.hash ? "&" : "#";
-            window.location.hash += `${prefix}gui=${JSON.stringify(DATA)}`;
+            window.location.hash += `${prefix}gui=${encodeURI(JSON.stringify(DATA))}`;
           }
         }, 100);
 
