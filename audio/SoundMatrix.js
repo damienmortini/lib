@@ -37,7 +37,7 @@ export default class SoundMatrix extends Map {
       if(clip) {
         this._clips.add(sound);
       } else {
-        this._clones.set(sound, new Array(this._beats).fill().map(() => {
+        this._clones.set(sound, new Array(Math.min(this.beats, 4)).fill().map(() => {
           let clone = sound.cloneNode();
           clone.loop = false;
           return clone;
@@ -52,7 +52,8 @@ export default class SoundMatrix extends Map {
   }
 
   play() {
-    Ticker.add(this._updateBinded = this._updateBinded || this._update.bind(this));
+    clearInterval(this._intervalId);
+    this._intervalId = setInterval(this._updateBinded = this._updateBinded || this._update.bind(this), 60000 / this.bpm);
   }
 
   stop() {
@@ -64,38 +65,31 @@ export default class SoundMatrix extends Map {
   }
 
   pause() {
-    Ticker.delete(this._updateBinded);
+    clearInterval(this._intervalId);
     for (let sound of this.keys()) {
       sound.pause();
     }
   }
 
   _update() {
-    this._currentTime += Ticker.deltaTime;
+    this.beat = (this.beat + 1) % this._beats;
 
-    let beat = Math.floor(this._currentTime / (60 / this.bpm)) % this._beats;
-
-    if(this.beat !== beat) {
-      for (let [sound, array] of this) {
-        if(this._clips.has(sound)) {
-          if(!beat) {
-            sound.currentTime = 0;
-            sound.play();
-          }
-          // sound.volume += ((array[beat] ? 1 : 0) - sound.volume) * .5 * this.bpm / 240;
-          sound.muted = !array[beat];
-        } else if (array[beat]) {
-          let clone = this._clones.get(sound)[this.beat];
-          clone.volume = sound.volume;
-          clone.muted = sound.muted;
-          clone.currentTime = 0;
-          clone.play();
+    for (let [sound, array] of this) {
+      if(this._clips.has(sound)) {
+        if(!this.beat) {
+          sound.currentTime = 0;
+          sound.play();
         }
+        sound.muted = !array[this.beat];
+      } else if (array[this.beat]) {
+        let clone = this._clones.get(sound)[this.beat % this._clones.get(sound).length];
+        clone.volume = sound.volume;
+        clone.muted = sound.muted;
+        clone.currentTime = 0;
+        clone.play();
       }
-
-      this.onBeat.dispatch(beat);
     }
 
-    this.beat = beat;
+    this.onBeat.dispatch(this.beat);
   }
 }
