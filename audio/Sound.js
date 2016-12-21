@@ -10,8 +10,8 @@ const MOBILE = /mobi/.test(window.navigator.userAgent.toLowerCase());
 if(MOBILE) {
   initialized = false;
 
-  let onTouchStart = () => {
-    window.removeEventListener("touchstart", onTouchStart);
+  let onTouchEnd = () => {
+    window.removeEventListener("touchend", onTouchEnd);
     for (let sound of sounds) {
       sound._audio.play();
       if(!sound._audio.autoplay) {
@@ -24,7 +24,7 @@ if(MOBILE) {
     }
     initialized = true;
   };
-  window.addEventListener("touchstart", onTouchStart);
+  window.addEventListener("touchend", onTouchEnd);
 }
 
 export default class Sound {
@@ -63,6 +63,8 @@ export default class Sound {
     name = /([^\\\/]*)\..*$/.exec(src)[1],
     amplification = 1,
     volume = 1,
+    loop = false,
+    autoplay = false
   } = {}) {
     this.name = name;
 
@@ -76,6 +78,8 @@ export default class Sound {
 
     this.amplification = amplification;
     this.volume = volume;
+    this.loop = loop;
+    this.autoplay = autoplay;
 
     this.muted = muted;
   }
@@ -116,6 +120,14 @@ export default class Sound {
 
   set currentTime(value) {
     this._audio.currentTime = value;
+  }
+
+  get autoplay() {
+    return this._audio.autoplay;
+  }
+
+  set autoplay(value) {
+    this._audio.autoplay = value;
   }
 
   get duration() {
