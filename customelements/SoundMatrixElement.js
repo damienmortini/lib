@@ -68,7 +68,12 @@ export default class SoundMatrixElement extends LoopElement {
 
         pads = [];
         for (let i = 0; i < this.soundMatrix.beats; i++) {
-          let pad = document.createElement("input")
+          let pad = document.createElement("input");
+          pad.onkeyup = (e) => {
+            if(e.keyCode === 32) {
+              e.preventDefault();
+            }
+          }
           pad.type = "checkbox";
           pad.classList.add("pad");
           pad.onchange = () => {

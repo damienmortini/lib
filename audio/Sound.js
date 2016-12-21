@@ -61,7 +61,8 @@ export default class Sound {
 
   constructor(src, {
     name = /([^\\\/]*)\..*$/.exec(src)[1],
-    amplification = 1
+    amplification = 1,
+    volume = 1,
   } = {}) {
     this.name = name;
 
@@ -74,8 +75,8 @@ export default class Sound {
     this._audio.src = src;
 
     this.amplification = amplification;
+    this.volume = volume;
 
-    this.volume = 1;
     this.muted = muted;
   }
 
@@ -96,6 +97,10 @@ export default class Sound {
     this._audio.muted = muted || loopMuted && this.loop ? true : value;
   }
 
+  get paused() {
+    return this._audio.paused;
+  }
+
   get loop() {
     return this._audio.loop;
   }
@@ -111,6 +116,14 @@ export default class Sound {
 
   set currentTime(value) {
     this._audio.currentTime = value;
+  }
+
+  get duration() {
+    return this._audio.duration;
+  }
+
+  set duration(value) {
+    this._audio.duration = value;
   }
 
   get volume() {
@@ -140,9 +153,10 @@ export default class Sound {
 
   cloneNode() {
     let sound = new Sound(this.src, {
-      name: null
+      name: null,
+      volume: this.volume,
+      amplification: this.amplification,
     });
-    sound.volume = this.volume;
     sound.muted = this.muted;
     sound.loop = this.loop;
     sound.currentTime = this.currentTime;
