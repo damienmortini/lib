@@ -45,6 +45,6 @@ export default class THREEExtendedShaderMaterial extends ShaderMaterial {
       });
     }
 
-    this.needsUpdate = true;
+    this.update();
   }
 }
