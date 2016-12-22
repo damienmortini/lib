@@ -31,8 +31,14 @@ export default class THREEParticleSystemGPGPU {
 
     this._renderer = renderer;
 
+    let powerOfTwoCeil = (value) => {
+      return Math.pow(2, Math.ceil(Math.log(value)/Math.log(2)));
+    }
+
     this._width = Math.min(particles.length * 2, MAX_WIDTH);
+    this._width = powerOfTwoCeil(this._width);
     this._height = Math.ceil(particles.length * 2 / MAX_WIDTH);
+    this._height = powerOfTwoCeil(this._height);
 
     let data = new Float32Array(this._width * this._height * 4);
     for (let [i, particle] of particles.entries()) {
@@ -43,6 +49,7 @@ export default class THREEParticleSystemGPGPU {
       data[i * 8 + 4] = particle.velocity.x;
       data[i * 8 + 5] = particle.velocity.y;
       data[i * 8 + 6] = particle.velocity.z;
+      data[i * 8 + 7] = i;
     }
     let dataTexture = new DataTexture(data, this._width, this._height, RGBAFormat, FloatType);
     dataTexture.needsUpdate = true;
@@ -106,6 +113,7 @@ export default class THREEParticleSystemGPGPU {
           vec3 position = dataChunk1.xyz;
           float life = dataChunk1.w;
           vec3 velocity = dataChunk2.xyz;
+          float id = dataChunk2.w;
         `],
         ["end", `
           position += velocity;
