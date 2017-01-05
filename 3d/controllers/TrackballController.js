@@ -5,7 +5,7 @@ import Vector2 from "../../math/Vector2";
 import Vector3 from "../../math/Vector3";
 import Quaternion from "../../math/Quaternion";
 
-export default class TrackballControl {
+export default class TrackballController {
   constructor(matrix = new Matrix4(), {
     domElement = document.body,
     distance = 0,

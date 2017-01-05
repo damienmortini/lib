@@ -1,7 +1,7 @@
 import Matrix4 from "dlib/math/Matrix4";
 
 export default class Camera {
-  constructor({ near = 0, far = 1000, aspect = 1, fov = Math.PI / 2 } = {}) {
+  constructor({near = 0, far = 1000, aspect = 1, fov =Math.PI / 2} = {}) {
     this._near = near;
     this._far = far;
     this._aspect = aspect;
@@ -59,11 +59,6 @@ export default class Camera {
   }
 
   _updateProjectionMatrix() {
-    this._projectionMatrix.perspective(
-      this.fov,
-      this.aspect,
-      this.near,
-      this.far
-    );
+    this._projectionMatrix.fromPerspective(this);
   }
 }

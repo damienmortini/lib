@@ -87,11 +87,6 @@ export default class Matrix4 extends Float32Array {
     return this;
   }
 
-  perspective(fovy, aspect, near, far) {
-    mat4.perspective(this, fovy, aspect, near, far);
-    return this;
-  }
-
   identity() {
     mat4.identity(this);
     return this;
@@ -99,6 +94,11 @@ export default class Matrix4 extends Float32Array {
 
   copy(matrix4) {
     mat4.copy(this, matrix4);
+    return this;
+  }
+
+  fromPerspective({fov, aspect, near, far} = {}) {
+    mat4.perspective(this, fov, aspect, near, far);
     return this;
   }
 
