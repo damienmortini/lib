@@ -1,15 +1,14 @@
 import Shader from "./Shader.js";
 
 export default class WebGLShader extends Shader {
-  constructor({vertexShader, fragmentShader, uniforms, attributes, gl} = {}) {
-    super({vertexShader: "", fragmentShader: "", uniforms, attributes});
+  constructor({gl, vertexShader, fragmentShader, uniforms, attributes, add} = {}) {
+    super({vertexShader, fragmentShader, uniforms, attributes, add});
 
     this.gl = gl;
-
     this.program = this.gl.createProgram();
 
-    this.vertexShader = vertexShader;
-    this.fragmentShader = fragmentShader;
+    this.vertexShader = this.vertexShader;
+    this.fragmentShader = this.fragmentShader;
 
     this.gl.linkProgram(this.program);
 

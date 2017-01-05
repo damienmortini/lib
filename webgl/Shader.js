@@ -40,25 +40,28 @@ export default class Shader {
     void main() {
       gl_FragColor = vec4(1.);
     }
-  `, uniforms = {}, attributes = {}} = {}) {
+  `, uniforms = {}, attributes = {}, add = []} = {}) {
 
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
     this.attributes = attributes;
+
+    for (let shaderData of add) {
+      this.add(shaderData);
+    }
   }
 
-  add({vertexShaderChunks = new Map(), fragmentShaderChunks = new Map(), uniforms = {}, attributes = {}} = {}) {
+  add({vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = {}, attributes = {}} = {}) {
     Object.assign(this.uniforms, uniforms);
     Object.assign(this.attributes, attributes);
-    this.vertexShader = this.fragmentShader = null;
     this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
   }
 
   set vertexShader(value) {
     this._vertexShader = value;
-    this._parseQualifiers();
+    this._parseQualifiers(this._vertexShader);
   }
 
   get vertexShader() {
@@ -67,7 +70,7 @@ export default class Shader {
 
   set fragmentShader(value) {
     this._fragmentShader = value;
-    this._parseQualifiers();
+    this._parseQualifiers(this._fragmentShader);
   }
 
   get fragmentShader() {
@@ -77,11 +80,7 @@ export default class Shader {
   /**
    * Parse shader strings to extract uniforms and attributes
    */
-  _parseQualifiers({classes} = {}) {
-    if(!this.vertexShader || !this.fragmentShader) {
-      return;
-    }
-
+  _parseQualifiers(string, {classes} = {}) {
     classes = Object.assign({
         Vector2,
         Vector3,
@@ -92,16 +91,11 @@ export default class Shader {
         Texture2D
       }, classes);
 
-    let str = `
-      ${this.vertexShader}
-      ${this.fragmentShader}
-    `;
-
     let regExp = /^\s*(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
 
     let match;
 
-    while ((match = regExp.exec(str))) {
+    while ((match = regExp.exec(string))) {
       let [, glslQualifier, glslType, variableName, lengthStr] = match;
       let length = parseInt(lengthStr);
 
