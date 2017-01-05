@@ -46,22 +46,42 @@ export default class Shader {
     this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
     this.attributes = attributes;
-
-    this.parseQualifiers();
   }
 
   add({vertexShaderChunks = new Map(), fragmentShaderChunks = new Map(), uniforms = {}, attributes = {}} = {}) {
-    this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
-    this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
     Object.assign(this.uniforms, uniforms);
     Object.assign(this.attributes, attributes);
-    this.parseQualifiers();
+    this.vertexShader = this.fragmentShader = null;
+    this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
+    this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
+  }
+
+  set vertexShader(value) {
+    this._vertexShader = value;
+    this._parseQualifiers();
+  }
+
+  get vertexShader() {
+    return this._vertexShader;
+  }
+
+  set fragmentShader(value) {
+    this._fragmentShader = value;
+    this._parseQualifiers();
+  }
+
+  get fragmentShader() {
+    return this._fragmentShader;
   }
 
   /**
    * Parse shader strings to extract uniforms and attributes
    */
-  parseQualifiers({classes} = {}) {
+  _parseQualifiers({classes} = {}) {
+    if(!this.vertexShader || !this.fragmentShader) {
+      return;
+    }
+
     classes = Object.assign({
         Vector2,
         Vector3,
