@@ -22,8 +22,8 @@ export default class THREEShader extends Shader {
     super({vertexShader, fragmentShader, uniforms});
   }
 
-  parseQualifiers() {
-    super.parseQualifiers({
+  _parseQualifiers(string) {
+    super._parseQualifiers(string, {
       classes: {
         Vector2: THREEVector2,
         Vector3: THREEVector3,

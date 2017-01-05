@@ -9,9 +9,9 @@ export default class Component {
     this.onAdd = new Signal();
     this.onRemove = new Signal();
 
-    for (let required of require) {
-      if(!this.entity.hasComponent(required)) {
-        console.error(this.entity + " needs component " + required);
+    for (let component of require) {
+      if(!this.entity.hasComponent(component)) {
+        console.error(this.entity + " needs component " + component);
       }
     }
   }
