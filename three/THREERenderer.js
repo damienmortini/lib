@@ -1,4 +1,4 @@
-import { WebGLRenderer, Scene, OrthographicCamera, PerspectiveCamera, MeshBasicMaterial, BoxGeometry, MeshNormalMaterial, Mesh, PlaneBufferGeometry, RGBFormat, NearestFilter, DepthTexture, UnsignedShortType } from "three";
+import { WebGLRenderer, WebGLRenderTarget, Scene, OrthographicCamera, Mesh, PlaneBufferGeometry, RGBFormat, NearestFilter, DepthTexture, UnsignedShortType } from "three";
 
 import THREEShader from "dlib/three/THREEShader.js";
 import AntialiasGLSL from "dlib/shaders/AntialiasGLSL.js";
