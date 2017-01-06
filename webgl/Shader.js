@@ -42,10 +42,10 @@ export default class Shader {
     }
   `, uniforms = {}, attributes = {}, add = []} = {}) {
 
-    this.vertexShader = vertexShader;
-    this.fragmentShader = fragmentShader;
     this.uniforms = uniforms;
     this.attributes = attributes;
+    this.vertexShader = vertexShader;
+    this.fragmentShader = fragmentShader;
 
     for (let shaderData of add) {
       this.add(shaderData);
