@@ -9,7 +9,7 @@ export default class THREERenderer extends WebGLRenderer {
 
     this.filters = [];
 
-    this.renderTargetIn = new THREE.WebGLRenderTarget(this.domElement.width, this.domElement.height, {
+    this.renderTargetIn = new WebGLRenderTarget(this.domElement.width, this.domElement.height, {
       format: RGBFormat,
       minFilter: NearestFilter,
       magFilter: NearestFilter,
