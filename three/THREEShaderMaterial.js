@@ -37,7 +37,8 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     this.fragmentShader = this._shader.fragmentShader;
     this.vertexShader = this._shader.vertexShader;
 
-    for (let key in this._shader.uniforms) {
+    for (let name in this._shader.uniforms) {
+      let key = name; // Firefox fix
       Object.defineProperty(this, key, {
         configurable: true,
         get: function() { return this.uniforms[key].value },
