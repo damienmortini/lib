@@ -85,7 +85,8 @@ export default class THREELine extends Mesh {
   }
 
   update() {
-    for (let [i, point] of this.points.entries()) {
+    for (let i = 0; i < this.points.length; i++) {
+      let point = this.points[i];
       if(i === this.points.length - 1) {
         continue;
       }
