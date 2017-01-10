@@ -3,8 +3,7 @@ import { Mesh, BufferAttribute, CylinderBufferGeometry, Vector3 } from "three";
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 export default class THREELine extends Mesh {
-  constructor({
-    points,
+  constructor(points, {
     material = new THREEShaderMaterial(),
     detail = 3,
     thickness = .1
