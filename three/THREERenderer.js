@@ -1,4 +1,4 @@
-import { WebGLRenderer, WebGLRenderTarget, Scene, OrthographicCamera, Mesh, PlaneBufferGeometry, RGBFormat, NearestFilter, DepthTexture, UnsignedShortType } from "three";
+import { WebGLRenderer, WebGLRenderTarget, Scene, OrthographicCamera, Mesh, PlaneBufferGeometry, RGBAFormat, LinearFilter, DepthTexture, UnsignedShortType } from "three";
 
 import THREEShader from "dlib/three/THREEShader.js";
 import AntialiasGLSL from "dlib/shaders/AntialiasGLSL.js";
@@ -10,24 +10,27 @@ export default class THREERenderer extends WebGLRenderer {
     this.filters = [];
 
     this.renderTargetIn = new WebGLRenderTarget(this.domElement.width, this.domElement.height, {
-      format: RGBFormat,
-      minFilter: NearestFilter,
-      magFilter: NearestFilter,
-      stencilBuffer: false,
-      depthBuffer: true
+      format: RGBAFormat,
+      minFilter: LinearFilter,
+      magFilter: LinearFilter,
+      stencilBuffer: false
     });
     this.renderTargetIn.texture.generateMipmaps = false;
-    this.renderTargetIn.depthTexture = new DepthTexture();
-    this.renderTargetIn.depthTexture.type = UnsignedShortType;
 
     this.renderTargetOut = this.renderTargetIn.clone();
     this.renderTargetOut.texture.generateMipmaps = false;
-    this.renderTargetOut.depthTexture = new DepthTexture();
-    this.renderTargetOut.depthTexture.type = UnsignedShortType;
+
+    if(this.context.getExtension("WEBGL_depth_texture")) {
+      this.renderTargetIn.depthTexture = new DepthTexture();
+      this.renderTargetIn.depthTexture.type = UnsignedShortType;
+      this.renderTargetOut.depthTexture = new DepthTexture();
+      this.renderTargetOut.depthTexture.type = UnsignedShortType;
+    }
 
     this.scene = new Scene();
-    this.scene.camera = new OrthographicCamera(-1, 1, 1, -1, -1, 1);
+    this.scene.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2));
+    this._quad.frustumCulled = false;
     this.scene.add(this._quad);
 
     // Fix to make WebGLRenderer.render extendable
@@ -37,11 +40,11 @@ export default class THREERenderer extends WebGLRenderer {
 
   applyFilter(filter, renderTarget) {
     this._quad.material = filter;
-    if (filter.uniforms.texture) {
-      filter.uniforms.texture.value = this.renderTargetIn.texture;
+    if (filter.texture) {
+      filter.texture = this.renderTargetIn.texture;
     }
-    if (filter.uniforms.depthTexture) {
-      filter.uniforms.depthTexture.value = this.renderTargetIn.depthTexture;
+    if (filter.depthTexture && this.renderTargetIn.depthTexture) {
+      filter.depthTexture = this.renderTargetIn.depthTexture;
     }
     this._render(this.scene, this.scene.camera, renderTarget);
     [this.renderTargetIn, this.renderTargetOut] = [this.renderTargetOut, this.renderTargetIn];
