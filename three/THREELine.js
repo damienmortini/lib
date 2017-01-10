@@ -1,27 +1,20 @@
-import { Mesh, Geometry, BufferAttribute, CylinderBufferGeometry, Vector3, Matrix4, Quaternion, AxisHelper } from "three";
+import { Mesh, BufferAttribute, CylinderBufferGeometry, Vector3 } from "three";
 
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
-
-const LEFT = new Vector3(-1, 0, 0);
-
-const DEBUG = false;
 
 export default class THREELine extends Mesh {
   constructor({
     points,
-    material = new THREEShaderMaterial({type : "normal"}),
+    material = new THREEShaderMaterial(),
     detail = 3,
     thickness = .1
   } = {}) {
     super(new CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1), material);
 
-    // material.wireframe = true;
-
     this.points = points;
     this.frustumCulled = false;
 
     this._vector3 = new Vector3();
-    this._matrix4 = new Matrix4();
     this._tangent = new Vector3();
     this._normal = new Vector3();
     this._binormal = new Vector3();
@@ -34,67 +27,60 @@ export default class THREELine extends Mesh {
       ids[i] = positions[i * 3 + 1] + offsetY;
     }
 
-    this.geometry.addAttribute("id", new BufferAttribute(ids, 1));
+    this.geometry.addAttribute("linePointId", new BufferAttribute(ids, 1));
 
     material.add({
       uniforms: {
-        positions: this.points,
-        thickness
+        linePositions: this.points,
+        lineThickness: thickness
       },
       vertexShaderChunks: [
         ["start", `
-          uniform float thickness;
-          uniform vec3 positions[${this.points.length}];
-          uniform vec3 normals[${this.points.length}];
+          uniform float lineThickness;
+          uniform vec3 linePositions[${this.points.length}];
+          uniform vec3 lineNormals[${this.points.length}];
 
-          attribute float id;
+          attribute float linePointId;
         `],
         ["main", `
-          vec3 position = position;
-          vec3 offset = position;
+          vec3 linePositionOffset = position;
 
-          position = positions[int(id)];
+          vec3 position = linePositions[int(linePointId)];
+          vec3 normal = lineNormals[int(linePointId)];
 
-          vec3 direction = normalize(mix(position - positions[int(id) - 1], positions[int(id) + 1] - position, step(1., ${this.points.length - 1}. - id)));
+          vec3 lineDirection = normalize(mix(position - linePositions[int(linePointId) - 1], linePositions[int(linePointId) + 1] - position, step(1., ${this.points.length - 1}. - linePointId)));
 
-          vec3 normal = normals[int(id)];
+          normal = normal * linePositionOffset.x + cross(normal, lineDirection) * linePositionOffset.z;
 
-          vec3 binormal = cross(normal, direction);
-
-          normal = normal * offset.x + binormal * offset.z;
-          // normal = normalize(normal);
-
-          // normal = normals[int(id)];
-
-          position += normal * thickness;
+          position += normal * lineThickness;
         `]
       ]
     });
 
-    if(DEBUG) {
-      this._axisHelpers = [];
-      for (let i = 0; i < this.points.length - 1; i++) {
-        let axisHelper = new AxisHelper(.2);
-        axisHelper.matrixAutoUpdate = false;
-        this.add(axisHelper);
-        this._axisHelpers.push(axisHelper);
-      }
-    }
-
     this.update();
+  }
+
+  set thickness(value) {
+    this.material.lineThickness = value;
+  }
+
+  get thickness() {
+    return this.material.lineThickness;
   }
 
   update() {
     for (let i = 0; i < this.points.length; i++) {
-      let point = this.points[i];
       if(i === this.points.length - 1) {
         continue;
       }
 
-      this._tangent.copy(this.points[i + 1]).sub(point).normalize();
+      let point = this.points[i];
+      let nextPoint = this.points[i + 1];
+
+      this._tangent.copy(nextPoint).sub(point).normalize();
 
       if (i === 0) {
-        this._vector3.copy(this.points[i + 1]).add(point);
+        this._vector3.copy(point).add(nextPoint);
         this._vector3.normalize();
         [this._vector3.x, this._vector3.y, this._vector3.z] = [this._vector3.z, this._vector3.x, this._vector3.y];
         this._normal.crossVectors(this._tangent, this._vector3).normalize();
@@ -104,33 +90,9 @@ export default class THREELine extends Mesh {
 
       this._binormal.crossVectors(this._normal, this._tangent).normalize();
 
-      this.material.normals[i].copy(this._normal);
+      this.material.lineNormals[i].copy(this._normal);
       if (i === this.points.length - 2) {
-        this.material.normals[i + 1].copy(this._normal);
-      }
-
-      if(DEBUG) {
-        this._axisHelpers[i].matrix.set(
-          this._normal.x,
-          this._tangent.x,
-          this._binormal.x,
-          point.x,
-
-          this._normal.y,
-          this._tangent.y,
-          this._binormal.y,
-          point.y,
-
-          this._normal.z,
-          this._tangent.z,
-          this._binormal.z,
-          point.z,
-
-          0,
-          0,
-          0,
-          1
-        );
+        this.material.lineNormals[i + 1].copy(this._normal);
       }
     }
   }
