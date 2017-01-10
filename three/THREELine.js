@@ -1,25 +1,28 @@
-import { Mesh, Geometry, BufferAttribute, CylinderBufferGeometry, Vector3, Matrix4, Quaternion } from "three";
+import { Mesh, Geometry, BufferAttribute, CylinderBufferGeometry, Vector3, Matrix4, Quaternion, AxisHelper } from "three";
 
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 const LEFT = new Vector3(-1, 0, 0);
 
+const DEBUG = true;
+
 export default class THREELine extends Mesh {
   constructor({
     points,
-    material = new THREEShaderMaterial(),
+    material = new THREEShaderMaterial({type: "normal"}),
     detail = 3,
     thickness = .1
   } = {}) {
     super(new CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1), material);
 
-    material.wireframe = true;
+    // material.wireframe = true;
 
     this.points = points;
     this.frustumCulled = false;
 
-    this._direction = new Vector3();
+    this._tangent = new Vector3();
     this._quaternion = new Quaternion();
+    this._vector3 = new Vector3();
     this._normal = new Vector3();
     this._binormal = new Vector3();
     this._previousNormal = new Vector3();
@@ -31,9 +34,6 @@ export default class THREELine extends Mesh {
     let offsetY = (points.length - 1) / 2;
     for (let i = 0; i < verticesNumber; i++) {
       ids[i] = positions[i * 3 + 1] + offsetY;
-      positions[i * 3] = 0;
-      positions[i * 3 + 1] = 0;
-      positions[i * 3 + 2] = 0;
     }
 
     this.geometry.addAttribute("id", new BufferAttribute(ids, 1));
@@ -47,7 +47,8 @@ export default class THREELine extends Mesh {
         ["start", `
           uniform float thickness;
           uniform vec3 positions[${this.points.length}];
-          uniform vec4 rotations[${this.points.length}];
+          uniform vec3 binormals[${this.points.length}];
+          uniform vec3 normals[${this.points.length}];
 
           attribute float id;
 
@@ -81,58 +82,109 @@ export default class THREELine extends Mesh {
             return m;
           }
 
-          vec3 rotate_vector( vec4 quat, vec3 vec ) {
-            return vec + 2.0 * cross( cross( vec, quat.xyz ) + quat.w * vec, quat.xyz );
+          vec3 rotate_vector( vec4 q, vec3 vec ) {
+
+            float x = vec.x, y = vec.y, z = vec.z;
+        		float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
+
+        		// calculate quat * vector
+
+        		float ix =  qw * x + qy * z - qz * y;
+        		float iy =  qw * y + qz * x - qx * z;
+        		float iz =  qw * z + qx * y - qy * x;
+        		float iw = - qx * x - qy * y - qz * z;
+
+        		// calculate result * inverse quat
+
+        		vec.x = ix * qw + iw * - qx + iy * - qz - iz * - qy;
+        		vec.y = iy * qw + iw * - qy + iz * - qx - ix * - qz;
+        		vec.z = iz * qw + iw * - qz + ix * - qy - iy * - qx;
+
+            return vec;
+            // return vec + 2.0 * cross( cross( vec, quat.xyz ) + quat.w * vec, quat.xyz );
           }
         `],
         ["main", `
-          vec3 position = position;
-          position += normal * thickness;
+          /// GLSL only
+
+          // vec3 offset = vec3(position.x, 0., position.z);
+          // vec3 position = positions[int(id)];
+          // vec3 nextPosition = positions[int(id + 1.)];
+          // vec3 ref = normalize(positions[1] - positions[0]);
+          // ref = ref.zxy;
+          // vec3 T = normalize(nextPosition - position);
+          // vec3 B = normalize(cross(T, ref));
+          // vec3 N = normalize(cross(B, T));
+          // vec3 normal = B * offset.x + N * offset.z;
+          // position = position + normal * thickness;
+
+          /// GLSL only
 
           // mat3 rotationMatrix = matrixFromEuler(rotations[int(id)]);
           // position *= rotationMatrix;
 
-          position = rotate_vector(rotations[int(id)], position);
 
-          position += positions[int(id)];
+          vec3 position = position;
+          vec3 offset = vec3(position.x, 0., position.z);
+          vec3 normal = binormals[int(id)] * offset.x + normals[int(id)] * offset.z;
+          // normal.y = 0.;
+          position = positions[int(id)] + normal * thickness;
+
+          // position = offset * thickness;
+
+          // position = rotate_vector(rotations[int(id)], position);
+
+          // position += positions[int(id)];
         `]
       ]
     });
+
+    if(DEBUG) {
+      this._axisHelpers = [];
+      for (let i = 0; i < this.points.length - 1; i++) {
+        let axisHelper = new AxisHelper(1);
+        this.add(axisHelper);
+        this._axisHelpers.push(axisHelper);
+      }
+    }
 
     this.update();
   }
 
   update() {
     for (let [i, point] of this.points.entries()) {
-      if(i === 0) {
+      if(i === this.points.length - 1) {
         continue;
       }
 
-      this._direction.copy(point).sub(this.points[i - 1]).normalize();
+      this._tangent.copy(this.points[i + 1]).sub(point).normalize();
 
-      if (i === 1) {
-        this._binormal.crossVectors(LEFT, this._direction).normalize();
+      if (i === 0) {
+        this._vector3.copy(this.points[i + 1]).add(point);
+        this._vector3.normalize();
+        [this._vector3.x, this._vector3.y, this._vector3.z] = [this._vector3.z, this._vector3.x, this._vector3.y];
+        this._binormal.crossVectors(this._tangent, this._vector3).normalize();
       } else {
-        this._binormal.crossVectors(this._previousNormal, this._direction).normalize();
+        this._binormal.crossVectors(this._tangent, this._previousNormal).normalize();
       }
 
-      this._normal.crossVectors(this._direction, this._binormal).normalize();
+      this._normal.crossVectors(this._binormal, this._tangent).normalize();
 
       this._matrix4.set(
-        this._normal.x,
-        this._direction.x,
         this._binormal.x,
-        0,
+        this._tangent.x,
+        this._normal.x,
+        point.x,
 
-        this._normal.y,
-        this._direction.y,
         this._binormal.y,
-        0,
+        this._tangent.y,
+        this._normal.y,
+        point.y,
 
-        this._normal.z,
-        this._direction.z,
         this._binormal.z,
-        0,
+        this._tangent.z,
+        this._normal.z,
+        point.z,
 
         0,
         0,
@@ -140,41 +192,18 @@ export default class THREELine extends Mesh {
         1
       );
 
-      // this._matrix4.set(
-      //   1,
-      //   0,
-      //   0,
-      //   0,
-      //
-      //   0,
-      //   1,
-      //   0,
-      //   0,
-      //
-      //   0,
-      //   0,
-      //   1,
-      //   0,
-      //
-      //   0,
-      //   0,
-      //   0,
-      //   1
-      // );
-
       this._quaternion.setFromRotationMatrix(this._matrix4);
-      this._quaternion.normalize();
-      // this._quaternion.z *= -1;
 
-      // this._euler = new Euler(Math.PI * .5, 0, 0);
-      // this._euler = new Euler(0, 0, 0);
+      this.material.normals[i] = this._normal;
+      this.material.binormals[i] = this._binormal;
+      if (i === this.points.length - 2) {
+        this.material.normals[i + 1] = this._normal;
+        this.material.binormals[i + 1] = this._binormal;
+      }
 
-      // this._quaternion = new Quaternion();
-      // this._quaternion.setFromEuler(new Euler(0, 0, Math.PI * .25));
-
-      this.material.rotations[i] = this._quaternion;
-      if (i === 1) {
-        this.material.rotations[i - 1] = this._quaternion;
+      if(DEBUG) {
+        this._axisHelpers[i].matrixAutoUpdate = false;
+        this._axisHelpers[i].matrix.copy(this._matrix4);
       }
 
       this._previousNormal.copy(this._normal);

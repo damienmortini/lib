@@ -74,6 +74,11 @@ export default class Quaternion extends Float32Array {
     return this;
   }
 
+  normalize(quaternion = this) {
+    quat.normalize(this, this);
+    return this;
+  }
+
   multiply(quaternionA, quaternionB) {
     if (quaternionB) {
       quat.multiply(this, quaternionA, quaternionB);
