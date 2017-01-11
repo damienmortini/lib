@@ -78,9 +78,7 @@ export default class THREEParticleSystemGPGPU {
       type: FloatType
     });
     this._webglRenderTargetIn.texture.generateMipmaps = false;
-    this._webglRenderTargetIn.texture._in = true;
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
-    this._webglRenderTargetOut.texture._out = true;
 
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEExtendedShaderMaterial({
       uniforms: Object.assign({
