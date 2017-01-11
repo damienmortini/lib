@@ -46,7 +46,12 @@ style.sheet.insertRule(`
 `, 0);
 style.sheet.insertRule(`
   dlib-guiinput input.range {
-    flex: 2;
+    flex: 1.5;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput input[type="range"] {
+    flex: 3.5;
   }
 `, 0);
 style.sheet.insertRule(`
@@ -230,8 +235,8 @@ export default class GUIInput extends HTMLElement {
 
     if(this.type === "range") {
       let nextDecimal = Math.pow(10, Math.abs(parseInt(this.value)).toString().length);
-      this.max = this.max !== undefined ? this.max : (this.value < 0 ? 0 : (Math.abs(this.value) < 1 ? 1 : nextDecimal));
-      this.min = this.min !== undefined ? this.min : (this.value >= 0 ? 0 : (Math.abs(this.value) < 1 ? -1 : -nextDecimal));
+      this.max = this.max !== Infinity ? this.max : (this.value < 0 ? 0 : (Math.abs(this.value) < 1 ? 1 : nextDecimal));
+      this.min = this.min || (this.value >= 0 ? 0 : (Math.abs(this.value) < 1 ? -1 : -nextDecimal));
       this.step = this.step || .01;
     } else if(this.type === "button") {
       this._inputs[0].value = this.label;
