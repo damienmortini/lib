@@ -67,6 +67,8 @@ export default class GUIInput extends HTMLElement {
 
     this._inputs = [];
     this._options = [];
+    this._min = 0;
+    this._max = Infinity;
 
     this._onChangeBinded = this._onChange.bind(this);
   }
@@ -175,7 +177,9 @@ export default class GUIInput extends HTMLElement {
     let changed = false;
     for (let input of this._inputs) {
       let key = input.type === "checkbox" ? "checked" : "value";
-      let value = input.type !== "checkbox" ? this.value.toString() : this.value;
+      let value = this.value;
+      value = input.type === "range" ? Math.min(Math.max(value, this.min), this.max) : value;
+      value = input.type !== "checkbox" ? value.toString() : value;
       if(value !== input[key]) {
         input[key] = value;
         changed = true;
@@ -192,7 +196,10 @@ export default class GUIInput extends HTMLElement {
 
     if(e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
       this.value = e.target.checked;
-    } else if(e.target.type === "range") {
+    } else if(e.target.type === "range" || e.target.type === "number") {
+      if(e.target.value === "" || isNaN(e.target.value)) {
+        return;
+      }
       this.value = parseFloat(e.target.value);
     } else if(e.target.type === "button") {
       this.value();
