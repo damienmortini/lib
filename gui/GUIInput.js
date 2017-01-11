@@ -117,33 +117,36 @@ export default class GUIInput extends HTMLElement {
   }
 
   set step(value) {
+    this._step = value;
     for (let input of this._inputs) {
-      input.step = value;
+      input.step = this._step;
     }
   }
 
   get step() {
-    this._inputs[0].step;
+    return this._step;
   }
 
   set min(value) {
+    this._min = value;
     for (let input of this._inputs) {
-      input.min = value;
+      input.min = this._min;
     }
   }
 
   get min() {
-    this._inputs[0].min;
+    return this._min;
   }
 
   set max(value) {
+    this._max = value;
     for (let input of this._inputs) {
-      input.max = value;
+      input.max = this._max;
     }
   }
 
   get max() {
-    this._inputs[0].max;
+    return this._max;
   }
 
   set options(value) {
@@ -189,6 +192,8 @@ export default class GUIInput extends HTMLElement {
 
     if(e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
       this.value = e.target.checked;
+    } else if(e.target.type === "range") {
+      this.value = parseFloat(e.target.value);
     } else if(e.target.type === "button") {
       this.value();
     } else if(e.target.type === "color") {
@@ -218,8 +223,8 @@ export default class GUIInput extends HTMLElement {
 
     if(this.type === "range") {
       let nextDecimal = Math.pow(10, Math.abs(parseInt(this.value)).toString().length);
-      this.max = this.max || !this.value ? 1 : nextDecimal;
-      this.min = this.min || this.value >= 0 ? 0 : -nextDecimal;
+      this.max = this.max !== undefined ? this.max : (this.value < 0 ? 0 : (Math.abs(this.value) < 1 ? 1 : nextDecimal));
+      this.min = this.min !== undefined ? this.min : (this.value >= 0 ? 0 : (Math.abs(this.value) < 1 ? -1 : -nextDecimal));
       this.step = this.step || .01;
     } else if(this.type === "button") {
       this._inputs[0].value = this.label;
