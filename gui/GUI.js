@@ -20,7 +20,8 @@ style.sheet.insertRule(`
     color: white;
     font-family: monospace;
     max-height: 100%;
-    overflow: scroll;
+    box-sizing: border-box;
+    overflow: auto;
   }
 `, 0);
 style.sheet.insertRule(`
