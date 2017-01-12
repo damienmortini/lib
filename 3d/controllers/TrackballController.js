@@ -1,5 +1,4 @@
 import Pointer from "../../input/Pointer.js";
-import Ticker from "../../utils/Ticker.js";
 import Matrix4 from "../../math/Matrix4.js";
 import Vector2 from "../../math/Vector2.js";
 import Vector3 from "../../math/Vector3.js";

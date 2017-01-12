@@ -1,11 +1,3 @@
-import Vector2 from "dlib/math/Vector2.js";
-import Vector3 from "dlib/math/Vector3.js";
-import Vector4 from "dlib/math/Vector4.js";
-import Matrix3 from "dlib/math/Matrix3.js";
-import Matrix4 from "dlib/math/Matrix4.js";
-import Texture2D from "./Texture2D.js";
-import TextureCube from "./TextureCube.js";
-
 export default class Shader {
   static add(string = "void main() {}", chunks) {
     function regExpFromKey(key) {
@@ -80,16 +72,16 @@ export default class Shader {
   /**
    * Parse shader strings to extract uniforms and attributes
    */
-  _parseQualifiers(string, {classes} = {}) {
-    classes = Object.assign({
-        Vector2,
-        Vector3,
-        Vector4,
-        Matrix3,
-        Matrix4,
-        TextureCube,
-        Texture2D
-      }, classes);
+  _parseQualifiers(string, {
+    Vector2 = function() { return new Float32Array(2) },
+    Vector3 = function() { return new Float32Array(3) },
+    Vector4 = function() { return new Float32Array(4) },
+    Matrix3 = function() { return new Float32Array(9) },
+    Matrix4 = function() { return new Float32Array(16) },
+    Texture2D = function() {},
+    TextureCube = function() {}
+  } = {}) {
+    let classes = arguments[1];
 
     let regExp = /^\s*(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
 
