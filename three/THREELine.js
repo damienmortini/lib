@@ -47,7 +47,8 @@ export default class THREELine extends Mesh {
           vec3 position = linePositions[int(linePointId)];
           vec3 normal = lineNormals[int(linePointId)];
 
-          vec3 lineDirection = normalize(mix(position - linePositions[int(linePointId) - 1], linePositions[int(linePointId) + 1] - position, step(1., ${this.points.length - 1}. - linePointId)));
+          vec3 lineDirection = normalize(linePositions[int(linePointId) + 1] - position);
+          lineDirection = mix(normalize(position - linePositions[int(linePointId) - 1]), lineDirection, length(lineDirection));
 
           normal = normal * linePositionOffset.x + cross(normal, lineDirection) * linePositionOffset.z;
 
@@ -76,11 +77,16 @@ export default class THREELine extends Mesh {
       let point = this.points[i];
       let nextPoint = this.points[i + 1];
 
-      this._tangent.copy(nextPoint).sub(point).normalize();
+      this._vector3.copy(nextPoint).sub(point).normalize();
+      if(this._vector3.lengthSq()) {
+        this._tangent.copy(this._vector3);
+      }
+      if(!this._tangent.lengthSq()) {
+        this._tangent.set(0, 1, 0);
+      }
 
       if (i === 0) {
-        this._vector3.copy(point).add(nextPoint);
-        this._vector3.normalize();
+        this._vector3.copy(this._tangent);
         [this._vector3.x, this._vector3.y, this._vector3.z] = [this._vector3.z, this._vector3.x, this._vector3.y];
         this._normal.crossVectors(this._tangent, this._vector3).normalize();
       } else {
