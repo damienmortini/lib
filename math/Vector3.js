@@ -46,8 +46,12 @@ export default class Vector3 extends Float32Array {
     return this;
   }
 
-  size() {
-    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+  get size() {
+    return vec3.length(this);
+  }
+
+  get squaredSize() {
+    return vec3.squaredLength(this);
   }
 
   subtract(vector3) {
@@ -71,25 +75,11 @@ export default class Vector3 extends Float32Array {
   }
 
   normalize() {
-    this.divideScalar(this.size);
-  }
-
-  divideScalar(scalar) {
-    if (scalar !== 0) {
-      let invScalar = 1 / scalar;
-      this.x *= invScalar;
-      this.y *= invScalar;
-      this.z *= invScalar;
-    } else {
-      this.x = 0;
-      this.y = 0;
-      this.z = 0;
-    }
-    return this;
+    vec3.normalize(this, this);
   }
 
   dot(vector3) {
-    return this.x * vector3.x + this.y * vector3.y + this.z * vector3.z;
+    return vec3.dot(this, vector3);
   }
 
   equals(vector3) {
@@ -101,10 +91,8 @@ export default class Vector3 extends Float32Array {
     return this;
   }
 
-  angleTo(vector3) {
-    // TODO: To test(from three.js)
-    let theta = this.dot(vector3) / (this.size * vector3.size);
-    return Math.acos((theta < -1) ? -1 : ((theta > 1) ? 1 : theta));
+  angle(vector3) {
+    return vec3.angle(this, vector3);
   }
 
   clone() {

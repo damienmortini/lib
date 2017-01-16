@@ -8,35 +8,35 @@ export default class Vector4 extends Float32Array {
   }
 
   get x() {
-    return this.elements[0];
+    return this[0];
   }
 
   set x(value) {
-    this.elements[0] = value;
+    this[0] = value;
   }
 
   get y() {
-    return this.elements[1];
+    return this[1];
   }
 
   set y(value) {
-    this.elements[1] = value;
+    this[1] = value;
   }
 
   get z() {
-    return this.elements[2];
+    return this[2];
   }
 
   set z(value) {
-    this.elements[2] = value;
+    this[2] = value;
   }
 
   get w() {
-    return this.elements[3];
+    return this[3];
   }
 
   set w(value) {
-    this.elements[3] = value;
+    this[3] = value;
   }
 
   set(x, y, z, w) {

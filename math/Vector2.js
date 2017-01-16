@@ -1,101 +1,102 @@
 import { vec2 } from "gl-matrix";
 
-export default class Vector2 {
-  static get elements() {
-    return vec2;
-  }
-
+export default class Vector2 extends Float32Array {
   constructor(x = 0, y = 0) {
-    this.elements = vec2.create();
-    this.x = x;
-    this.y = y;
+    super(2);
+    this.set(x, y);
     return this;
   }
 
   get x() {
-    return this.elements[0];
+    return this[0];
   }
 
   set x(value) {
-    this.elements[0] = value;
+    this[0] = value;
   }
 
   get y() {
-    return this.elements[1];
+    return this[1];
   }
 
   set y(value) {
-    this.elements[1] = value;
-  }
-
-  get size() {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
-  }
-
-  get angle() {
-    return Math.atan2(this.y, -this.x);
+    this[1] = value;
   }
 
   set(x, y) {
-    this.x = x;
-    this.y = y;
+    vec2.set(this, x, y);
     return this;
   }
 
   copy(vector2) {
-    this.x = vector2.x;
-    this.y = vector2.y;
+    vec2.copy(this, vector2);
     return this;
   }
 
   add(vector2) {
-    this.x += vector2.x;
-    this.y += vector2.y;
+    vec2.add(this, this, vector2);
     return this;
   }
 
-  normalize() {
-    vec2.normalize(this.elements, this.elements);
+  get size() {
+    return vec2.length(this);
   }
 
-  lerp(vector2, value) {
-    vec2.lerp(this.elements, this.elements, vector2.elements, value);
+  get squaredSize() {
+    return vec2.squaredLength(this);
   }
 
-  addScalar(scalar) {
-    this.x += scalar;
-    this.y += scalar;
+  subtract(vector2) {
+    vec2.subtract(this, this, vector2);
+    return this;
+  }
+
+  negate(vector2 = this) {
+    vec2.negate(this, vector2);
+    return this;
+  }
+
+  cross(vector2a, vector2b) {
+    vec2.cross(this, vector2a, vector2b);
     return this;
   }
 
   scale(value) {
-    vec2.scale(this.elements, this.elements, value);
+    vec2.scale(this, this, value);
     return this;
   }
 
-  multiplyScalar(value) {
-    console.warn("Deprecated, use scale instead");
-    return this.scale(value);
-  }
-
-  divideScalar(scalar) {
-    if (scalar !== 0) {
-      this.multiplyScalar(1 / scalar);
-    } else {
-      this.set(0, 0);
-    }
-    return this;
+  normalize() {
+    vec2.normalize(this, this);
   }
 
   dot(vector2) {
-    return this.x * vector2.x + this.y * vector2.y;
+    return vec2.dot(this, vector2);
   }
 
-  setFromAngle(angle) {
-    this.set(Math.cos(angle), -Math.sin(angle));
+  equals(vector2) {
+    return vec2.exactEquals(this, vector2);
   }
 
-  angleTo(vector2) {
-    return Math.atan2(this.x * vector2.y - this.y * vector2.x, this.x * vector2.x + this.y * vector2.y);
+  applyMatrix3(matrix3) {
+    vec2.transformMat3(this, this, matrix3);
+    return this;
+  }
+
+  applyMatrix4(matrix4) {
+    vec2.transformMat4(this, this, matrix4);
+    return this;
+  }
+
+  angle(vector2) {
+    return vec2.angle(this, vector2);
+  }
+
+  lerp(vector2, value) {
+    vec2.lerp(this, this, vector2, value);
+  }
+
+  clone() {
+    return new Vector3(this.x, this.y, this.z);
   }
 }
