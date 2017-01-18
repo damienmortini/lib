@@ -1,6 +1,6 @@
 import { Object3D, Mesh, Color, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "three";
 
-import THREEExtendedShaderMaterial from "./THREEExtendedShaderMaterial.js";
+import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 let CACHED_IMAGES = new Map();
 
@@ -24,7 +24,7 @@ export default class Sprite extends Object3D {
       CACHED_IMAGES.set(this.image, canvas);
     }
 
-    this.mesh = new Mesh(new PlaneGeometry(1, 1), new THREEExtendedShaderMaterial({
+    this.mesh = new Mesh(new PlaneGeometry(1, 1), new THREEShaderMaterial({
       type: "basic",
       transparent: true,
       side: DoubleSide,

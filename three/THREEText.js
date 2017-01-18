@@ -1,6 +1,6 @@
 import { Mesh, PlaneGeometry, Texture, Object3D } from "three";
 
-import THREEExtendedShaderMaterial from "dlib/three/THREEExtendedShaderMaterial.js";
+import THREEShaderMaterial from "dlib/three/THREEShaderMaterial.js";
 
 export default class THREEText extends Object3D {
   constructor({
@@ -34,7 +34,7 @@ export default class THREEText extends Object3D {
     this.shadowOffsetX = shadowOffsetX;
     this.shadowOffsetY = shadowOffsetY;
 
-    this._mesh = new Mesh(new PlaneGeometry(1, 1), new THREEExtendedShaderMaterial({
+    this._mesh = new Mesh(new PlaneGeometry(1, 1), new THREEShaderMaterial({
       type: "basic",
       transparent: true,
       uniforms: {

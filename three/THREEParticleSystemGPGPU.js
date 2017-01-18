@@ -18,7 +18,7 @@ import {
   NearestFilter
 } from "three";
 
-import THREEExtendedShaderMaterial from "./THREEExtendedShaderMaterial.js";
+import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 const MAX_WIDTH = 2048;
 
@@ -80,7 +80,7 @@ export default class THREEParticleSystemGPGPU {
     this._webglRenderTargetIn.texture.generateMipmaps = false;
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
 
-    this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEExtendedShaderMaterial({
+    this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEShaderMaterial({
       uniforms: Object.assign({
         dataTextureSize: new Vector2(dataTexture.image.width, dataTexture.image.height),
         dataTexture: dataTexture

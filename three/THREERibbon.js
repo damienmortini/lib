@@ -1,6 +1,6 @@
 import THREE from "three";
 
-import THREEExtendedShaderMaterial from "./THREEExtendedShaderMaterial.js";
+import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 const POINTS_NUMBER = 1000;
 
@@ -36,7 +36,7 @@ export default class Ribbon extends THREE.Mesh {
 
     geometry.addAttribute("ribbonId", new THREE.BufferAttribute(idsArray, 1));
 
-    material = new THREEExtendedShaderMaterial("normal", {
+    material = new THREEShaderMaterial("normal", {
       vertexShaderHooks: {
         prefix: `
           #define POINTS_NUMBER ${POINTS_NUMBER}.0
