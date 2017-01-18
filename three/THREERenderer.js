@@ -1,8 +1,5 @@
 import { WebGLRenderer, WebGLRenderTarget, Scene, OrthographicCamera, Mesh, PlaneBufferGeometry, RGBAFormat, LinearFilter, DepthTexture, UnsignedShortType } from "three";
 
-import THREEShader from "dlib/three/THREEShader.js";
-import AntialiasGLSL from "dlib/shaders/AntialiasGLSL.js";
-
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {
     super(options);
@@ -40,11 +37,11 @@ export default class THREERenderer extends WebGLRenderer {
 
   applyFilter(filter, renderTarget) {
     this._quad.material = filter;
-    if (filter.texture) {
-      filter.texture = this.renderTargetIn.texture;
+    if (filter.renderTargetTexture) {
+      filter.renderTargetTexture = this.renderTargetIn.texture;
     }
-    if (filter.depthTexture && this.renderTargetIn.depthTexture) {
-      filter.depthTexture = this.renderTargetIn.depthTexture;
+    if (filter.renderTargetDepthTexture && this.renderTargetIn.depthTexture) {
+      filter.renderTargetDepthTexture = this.renderTargetIn.depthTexture;
     }
     this._render(this.scene, this.scene.camera, renderTarget);
     [this.renderTargetIn, this.renderTargetOut] = [this.renderTargetOut, this.renderTargetIn];
@@ -56,18 +53,26 @@ export default class THREERenderer extends WebGLRenderer {
     this.renderTargetOut.setSize(width, height);
   }
 
-  render(scene, renderTarget) {
-    if(!renderTarget && this.filters.length) {
-      this._render(scene, scene.camera, this.renderTargetIn);
-      for (let [i, filter] of this.filters.entries()) {
-        this.applyFilter(filter, i < this.filters.length - 1 ? this.renderTargetOut : undefined);
+  render({scene, filters = this.filters, renderTarget, viewport, scissor = viewport} = {}) {
+    if(viewport || scissor) {
+      if(viewport) {
+        this.setViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
       }
-      this._render(this.scene, this.scene.camera);
+      this.setScissor(scissor[0], scissor[1], scissor[2], scissor[3]);
+      this.setScissorTest(true);
     } else {
-      this._render(scene, scene.camera, renderTarget);
-      if(renderTarget === this.renderTargetOut) {
-        [this.renderTargetIn, this.renderTargetOut] = [this.renderTargetOut, this.renderTargetIn];
-      }
+      this.setScissor(0, 0, this.domElement.width, this.domElement.height);
+      this.setViewport(0, 0, this.domElement.width, this.domElement.height);
+      this.setScissorTest(false);
+    }
+    if(scene) {
+      this._render(scene, scene.camera, filters.length ? this.renderTargetIn : renderTarget);
+    }
+    for (let [i, filter] of filters.entries()) {
+      this.applyFilter(filter, i < filters.length - 1 ? this.renderTargetOut : renderTarget);
+    }
+    if(renderTarget === this.renderTargetOut) {
+      [this.renderTargetIn, this.renderTargetOut] = [this.renderTargetOut, this.renderTargetIn];
     }
   }
 }
