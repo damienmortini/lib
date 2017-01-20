@@ -12,6 +12,8 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     delete options.fragmentShaderChunks;
     let uniforms = options.uniforms;
     delete options.uniforms;
+    let add = options.add || [];
+    delete options.add;
 
     let shader = new THREEShader({
       vertexShader: options.vertexShader || (type ? ShaderLib[type].vertexShader : undefined),
@@ -27,6 +29,10 @@ export default class THREEShaderMaterial extends ShaderMaterial {
 
     this._shader = shader;
     this.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
+
+    for (let shaderData of add) {
+      this.add(shaderData);
+    }
 
     this.lights = /lambert|phong|standard/.test(type);
   }

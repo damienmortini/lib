@@ -11,12 +11,13 @@ export default class THREEShader extends Shader {
     void main() {
       gl_FragColor = vec4(1.);
     }
-  `, uniforms = {}} = {}) {
+  `, uniforms, add} = {}) {
 
     super({
       vertexShader,
       fragmentShader,
-      uniforms
+      uniforms,
+      add
     });
   }
 
