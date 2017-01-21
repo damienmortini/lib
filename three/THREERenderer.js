@@ -53,7 +53,7 @@ export default class THREERenderer extends WebGLRenderer {
     this.renderTargetOut.setSize(width, height);
   }
 
-  render({scene, filters = this.filters, renderTarget, viewport, scissor = viewport} = {}) {
+  render({scene, camera, filters = this.filters, renderTarget, viewport, scissor = viewport} = {}) {
     if(viewport || scissor) {
       if(viewport) {
         this.setViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -66,7 +66,8 @@ export default class THREERenderer extends WebGLRenderer {
       this.setScissorTest(false);
     }
     if(scene) {
-      this._render(scene, scene.camera, filters.length ? this.renderTargetIn : renderTarget);
+      camera = camera || scene.camera;
+      this._render(scene, camera, filters.length ? this.renderTargetIn : renderTarget);
     }
     for (let [i, filter] of filters.entries()) {
       this.applyFilter(filter, i < filters.length - 1 ? this.renderTargetOut : renderTarget);
