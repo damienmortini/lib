@@ -1,5 +1,6 @@
 import "@webcomponents/custom-elements";
 
+import WebSocket from "../utils/WebSocket.js";
 import Keyboard from "../input/Keyboard.js";
 import GUIInput from "./GUIInput.js";
 
@@ -157,29 +158,37 @@ export default class GUI extends HTMLElement {
     return staticGUI.open;
   }
 
-  static set webSocketUrl(value) {
+  static set serverUrl(value) {
     GUI._addStatic();
-    staticGUI.webSocketUrl = value;
+    staticGUI.serverUrl = value;
   }
 
-  constructor() {
+  constructor({serverUrl} = {}) {
     super();
+
+    this.serverUrl = serverUrl;
 
     this._groups = new Map();
     this._inputs = new Map();
 
     this._container = document.createElement("details");
     this._container.innerHTML = "<summary>GUI</summary>";
-    this.open = true;
 
-    this.webSocketUrl = `wss://${location.hostname}:8080`;
+    this.open = true;
   }
 
-  set webSocketUrl(value) {
+  set serverUrl(value) {
+    this._serverUrl = value;
+
     if(this._webSocket) {
       this._webSocket.removeEventListener("message", this._onWebSocketMessage);
+      this._webSocket.close();
+      this._webSocket = null;
     }
-    this._webSocket = new WebSocket(value);
+    if(!this._serverUrl) {
+      return;
+    }
+    this._webSocket = new WebSocket(this._serverUrl);
     this._onWebSocketMessage = (e) => {
       let data = JSON.parse(e.data);
       let input = this._inputs.get(data.uid);
@@ -192,6 +201,10 @@ export default class GUI extends HTMLElement {
       }
     }
     this._webSocket.addEventListener("message", this._onWebSocketMessage);
+  }
+
+  get serverUrl() {
+    return this._serverUrl;
   }
 
   set visible(value) {
@@ -221,6 +234,10 @@ export default class GUI extends HTMLElement {
     if(object[key] === null || object[key] === undefined) {
       console.error(`GUI: ${id} must be defined.`);
       return;
+    }
+
+    if(remote && !this.serverUrl) {
+      this._serverUrl = `wss://${location.hostname}:80`;
     }
 
     type = type || (options ? "select" : "");
@@ -287,62 +304,63 @@ export default class GUI extends HTMLElement {
     container.appendChild(input);
 
     const onValueChange = (value) => {
-      onChange(value);
+      let containerData = groupKey ? DATA[groupKey] : DATA;
+      if (!containerData) {
+        containerData = DATA[groupKey] = {};
+      }
+      containerData[idKey] = input.value;
 
-      if(remote && this._webSocket.readyState === WebSocket.OPEN) {
+      if (GUI_REG_EXP.test(window.location.hash)) {
+        window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${encodeURI(JSON.stringify(DATA))}$5`);
+      } else {
+        let prefix = window.location.hash ? "&" : "#";
+        window.location.hash += `${prefix}gui=${encodeURI(JSON.stringify(DATA))}`;
+      }
+
+      if(remote && this._webSocket) {
         this._webSocket.send(JSON.stringify({uid, value}));
       }
 
-      if (!reload) {
-        return;
+      if (reload) {
+        if (Keyboard.hasKeyDown(Keyboard.SHIFT)) {
+          Keyboard.addEventListener("keyup", function reloadLocation() {
+            Keyboard.removeEventListener("keyup", reloadLocation);
+            window.location.reload();
+          });
+        } else {
+          window.location.reload();
+        }
       }
 
-      if (Keyboard.hasKeyDown(Keyboard.SHIFT)) {
-        Keyboard.addEventListener("keyup", function reloadLocation() {
-          Keyboard.removeEventListener("keyup", reloadLocation);
-          window.location.reload();
-        });
-      } else {
-        window.location.reload();
-      }
+      onChange(value);
     }
+
+
+    // TODO: Clean here
 
     if (type === "button") {
       input.addEventListener("click", onValueChange);
     } else {
-      if (type !== "color" && type !== "text") {
-        input.addEventListener("input", () => {
-          onValueChange(input.value);
+
+      let animationFrameId = -1;
+      const onValueChangeTmp = () => {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(() => {
+          if (type === "color") {
+            onValueChange(colorFromHex(object[key], input.value));
+          } else {
+            onValueChange(input.value);
+          }
         });
       }
 
-      let timeoutId = -1;
-      input.addEventListener("change", () => {
-        let containerData = groupKey ? DATA[groupKey] : DATA;
-        if (!containerData) {
-          containerData = DATA[groupKey] = {};
-        }
-        containerData[idKey] = input.value;
-
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          if (GUI_REG_EXP.test(window.location.hash)) {
-            window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${encodeURI(JSON.stringify(DATA))}$5`);
-          } else {
-            let prefix = window.location.hash ? "&" : "#";
-            window.location.hash += `${prefix}gui=${encodeURI(JSON.stringify(DATA))}`;
-          }
-        }, 100);
-
-        if (type === "color") {
-          onValueChange(colorFromHex(object[key], input.value));
-        } else if (type === "text" || type === "checkbox") {
-          onValueChange(input.value);
-        }
-      });
+      if (type !== "text") {
+        input.addEventListener("input", onValueChangeTmp);
+      }
+      input.addEventListener("change", onValueChangeTmp);
     }
 
-    onValueChange(object[key]);
+    // onValueChange(object[key]);
 
     this._inputs.set(uid, input);
 
