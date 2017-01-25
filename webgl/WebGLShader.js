@@ -9,8 +9,8 @@ import TextureCube from "./TextureCube.js";
 import Shader from "dlib/3d/Shader.js";
 
 export default class WebGLShader extends Shader {
-  constructor({gl, vertexShader, fragmentShader, uniforms, attributes, add} = {}) {
-    super({vertexShader, fragmentShader, uniforms, attributes, add});
+  constructor({gl, vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders} = {}) {
+    super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
 
     this.gl = gl;
     this.program = this.gl.createProgram();
@@ -30,19 +30,11 @@ export default class WebGLShader extends Shader {
     }
   }
 
-  get vertexShader() {
-    return super.vertexShader;
-  }
-
   set fragmentShader(value) {
     super.fragmentShader = value;
     if(this.gl) {
       this._updateShader(this.gl.FRAGMENT_SHADER, this.fragmentShader);
     }
-  }
-
-  get fragmentShader() {
-    return super.fragmentShader;
   }
 
   use() {

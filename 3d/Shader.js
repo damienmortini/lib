@@ -32,15 +32,17 @@ export default class Shader {
     void main() {
       gl_FragColor = vec4(1.);
     }
-  `, uniforms = {}, attributes = {}, add = []} = {}) {
+  `, uniforms = {}, attributes = {}, vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
 
     this.uniforms = uniforms;
     this.attributes = attributes;
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
+    this._vertexShaderChunks = vertexShaderChunks;
+    this._fragmentShaderChunks = fragmentShaderChunks;
 
-    for (let shaderData of add) {
-      this.add(shaderData);
+    for (let shader of shaders) {
+      this.add(shader);
     }
   }
 
@@ -48,7 +50,9 @@ export default class Shader {
     Object.assign(this.uniforms, uniforms);
     Object.assign(this.attributes, attributes);
     this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
+    this._vertexShaderChunks.push(...vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
+    this._fragmentShaderChunks.push(...fragmentShaderChunks);
   }
 
   set vertexShader(value) {
@@ -69,6 +73,14 @@ export default class Shader {
     return this._fragmentShader;
   }
 
+  get vertexShaderChunks() {
+    return this._vertexShaderChunks;
+  }
+
+  get fragmentShaderChunks() {
+    return this._fragmentShaderChunks;
+  }
+
   /**
    * Parse shader strings to extract uniforms and attributes
    */
@@ -81,7 +93,15 @@ export default class Shader {
     Texture2D = function() {},
     TextureCube = function() {}
   } = {}) {
-    let classes = arguments[1];
+    let classes = {
+      Vector2,
+      Vector3,
+      Vector4,
+      Matrix3,
+      Matrix4,
+      Texture2D,
+      TextureCube
+    };
 
     let regExp = /^\s*(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
 

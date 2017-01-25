@@ -5,15 +5,22 @@ import THREEShader from "./THREEShader.js";
 export default class THREEShaderMaterial extends ShaderMaterial {
   constructor (options = {}) {
     let type = options.type || "";
-    delete options.type;
     let vertexShaderChunks = options.vertexShaderChunks;
-    delete options.vertexShaderChunks;
     let fragmentShaderChunks = options.fragmentShaderChunks;
-    delete options.fragmentShaderChunks;
     let uniforms = options.uniforms;
+    let shaders = options.shaders || [];
+
+    options = Object.assign({}, options);
+    delete options.type;
+    delete options.vertexShaderChunks;
+    delete options._vertexShaderChunks;
+    delete options._vertexShader;
+    delete options.fragmentShaderChunks;
+    delete options._fragmentShaderChunks;
+    delete options._fragmentShader;
     delete options.uniforms;
-    let add = options.add || [];
-    delete options.add;
+    delete options.attributes;
+    delete options.shaders;
 
     let shader = new THREEShader({
       vertexShader: options.vertexShader || (type ? ShaderLib[type].vertexShader : undefined),
@@ -30,8 +37,8 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     this._shader = shader;
     this.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
 
-    for (let shaderData of add) {
-      this.add(shaderData);
+    for (let shader of shaders) {
+      this.add(shader);
     }
 
     this.lights = /lambert|phong|standard/.test(type);
@@ -52,6 +59,6 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       });
     }
 
-    this.update();
+    this.needsUpdate = true;
   }
 }

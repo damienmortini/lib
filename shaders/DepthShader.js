@@ -1,4 +1,4 @@
-export default class DepthGLSL {
+export default class DepthShader {
   static packing() {
     return `
       vec4 pack (float depth)
