@@ -85,13 +85,13 @@ export default class Shader {
    * Parse shader strings to extract uniforms and attributes
    */
   _parseQualifiers(string, {
-    Vector2 = function() { return new Float32Array(2) },
-    Vector3 = function() { return new Float32Array(3) },
-    Vector4 = function() { return new Float32Array(4) },
-    Matrix3 = function() { return new Float32Array(9) },
-    Matrix4 = function() { return new Float32Array(16) },
-    Texture2D = function() {},
-    TextureCube = function() {}
+    Vector2: Vector2 = function() { return new Float32Array(2) },
+    Vector3: Vector3 = function() { return new Float32Array(3) },
+    Vector4: Vector4 = function() { return new Float32Array(4) },
+    Matrix3: Matrix3 = function() { return new Float32Array(9) },
+    Matrix4: Matrix4 = function() { return new Float32Array(16) },
+    Texture2D: Texture2D = function() {},
+    TextureCube: TextureCube = function() {}
   } = {}) {
     let classes = {
       Vector2,
