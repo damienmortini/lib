@@ -2,7 +2,7 @@ import { WebGLRenderer, WebGLRenderTarget, Scene, OrthographicCamera, Mesh, Plan
 
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {
-    super(options);
+    super(Object.assign({antialias: true}, options));
 
     this.filters = [];
     this._renderTargets = new Map();
