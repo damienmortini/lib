@@ -60,6 +60,9 @@ export default class THREERenderer extends WebGLRenderer {
   }
 
   render({scene, camera, filters = this.filters, renderTarget, viewport, scissor = viewport} = {}) {
+    if(arguments.length > 1) {
+      this._render(...arguments);
+    }
     let renderTargets = this._renderTargets.get(renderTarget || this);
     if(!renderTargets) {
       renderTargets = {
