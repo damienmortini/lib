@@ -9,17 +9,18 @@ import {
 
 import "three/examples/js/loaders/ColladaLoader.js";
 import "three/examples/js/loaders/OBJLoader.js";
+import "three/examples/js/loaders/GLTFLoader.js";
 
 import Loader from "../utils/Loader.js";
 
 let CACHED_CANVAS = new Map();
 
 function fixLoaderData(data, {scale}) {
-  let isCollada = !!data.dae;
+  let needsProcess = !!data.scene;
 
   let meshes = [];
 
-  if(isCollada) {
+  if(needsProcess) {
     data = data.scene;
   }
 
@@ -28,12 +29,15 @@ function fixLoaderData(data, {scale}) {
       meshes.push(object3D);
     }
     object3D.position.multiplyScalar(scale);
+    object3D.matrixAutoUpdate = true;
   });
 
   for (let mesh of meshes) {
-    mesh.geometry.scale(scale, scale, scale);
+    if(scale !== 1) {
+      mesh.geometry.scale(scale, scale, scale);
+    }
 
-    if(isCollada) {
+    if(mesh.parent.children.length === 1) {
       let object3D = mesh.parent;
       object3D.remove(mesh);
       mesh.name = object3D.name;
@@ -89,12 +93,24 @@ export default class THREELoader extends Loader {
         fixLoaderData(object, {scale});
         return object;
       }
+      else if(/\.(gltf)$/.test(value)) {
+        return new Promise((resolve) => {
+          new THREE.GLTFLoader().parse(JSON.parse(data), (object) => {
+            fixLoaderData(object, {scale});
+            resolve(object);
+          }, /(.*[\/\\]).*$/.exec(value)[1]);
+        });
+      }
       else if(/\.(json)$/.test(value)) {
         let object = new ObjectLoader().parse(data);
         fixLoaderData(object, {scale});
         return object;
       }
     });
+
+    if(!texture) {
+      super.promises.set(value, promise);
+    }
 
     return texture || promise;
   }
