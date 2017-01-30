@@ -57,7 +57,7 @@ export default class Loader {
           } else if(/\.(mp3|ogg)$/.test(value)) {
             tagName = "audio";
           } else if(/\.(woff|woff2)$/.test(value)) {
-            let fontFace = new FontFace(/([^\/]*)\.(woff|woff2)$/.exec(value)[1], `url(${value})`);
+            let fontFace = new FontFace(/([^\/]*)\.(woff|woff2)$/.exec(value)[1], `url("${value}")`);
             fontFace.load().then(onLoad);
             document.fonts.add(fontFace);
           } else {
