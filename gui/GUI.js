@@ -170,6 +170,7 @@ export default class GUI extends HTMLElement {
 
     this._groups = new Map();
     this._inputs = new Map();
+    this._uids = new Set();
 
     this._container = document.createElement("details");
     this._container.innerHTML = "<summary>GUI</summary>";
@@ -236,6 +237,17 @@ export default class GUI extends HTMLElement {
       return;
     }
 
+    let idKey = normalizeString(id);
+    let groupKey = normalizeString(group);
+    let uid = groupKey ? `${groupKey}/${idKey}` : idKey;
+
+    if(this._uids.has(uid)) {
+      console.error(`GUI: An input with id ${id} already exist in the group ${group}`);
+      return;
+    }
+
+    this._uids.add(uid);
+
     if(remote && !this.serverUrl) {
       this._serverUrl = `wss://${location.hostname}:80`;
     }
@@ -258,9 +270,6 @@ export default class GUI extends HTMLElement {
       }
     }
 
-    let idKey = normalizeString(id);
-    let groupKey = normalizeString(group);
-    let uid = `${groupKey ? `${groupKey}/` : ""}${idKey}`;
     const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][idKey] : DATA[idKey];
     if (type === "color" && SAVED_VALUE) {
       object[key] = colorFromHex(object[key], SAVED_VALUE);
