@@ -60,6 +60,9 @@ style.sheet.insertRule(`
   }
 `, 0);
 
+const roundToStep = (number, step) => {
+  return (Math.round(number * (1 / step)) / (1 / step));
+}
 
 export default class GUIInput extends HTMLElement {
   constructor () {
@@ -72,6 +75,7 @@ export default class GUIInput extends HTMLElement {
 
     this._inputs = [];
     this._options = [];
+    this._step = 0.01;
     this._min = 0;
     this._max = Infinity;
 
@@ -128,6 +132,8 @@ export default class GUIInput extends HTMLElement {
     for (let input of this._inputs) {
       input.step = this._step;
     }
+    this.min = this.min;
+    this.max = this.max;
   }
 
   get step() {
@@ -135,7 +141,7 @@ export default class GUIInput extends HTMLElement {
   }
 
   set min(value) {
-    this._min = value;
+    this._min = roundToStep(value, this.step);
     for (let input of this._inputs) {
       input.min = this._min;
     }
@@ -146,7 +152,7 @@ export default class GUIInput extends HTMLElement {
   }
 
   set max(value) {
-    this._max = value;
+    this._max = roundToStep(value, this.step);
     for (let input of this._inputs) {
       input.max = this._max;
     }
@@ -237,12 +243,13 @@ export default class GUIInput extends HTMLElement {
       let nextDecimal = Math.pow(10, Math.abs(parseInt(this.value)).toString().length);
       this.max = this.max !== Infinity ? this.max : (this.value < 0 ? 0 : (Math.abs(this.value) < 1 ? 1 : nextDecimal));
       this.min = this.min || (this.value >= 0 ? 0 : (Math.abs(this.value) < 1 ? -1 : -nextDecimal));
-      this.step = this.step || .01;
     } else if(this.type === "button") {
       this._inputs[0].value = this.label;
     } else if(this.type === "select") {
       this.options = this.options;
     }
+
+    this.step = this.step;
 
     this.removeEventListener("input", this._onChangeBinded);
     this.removeEventListener("change", this._onChangeBinded);
