@@ -12,7 +12,12 @@ export default class THREEText extends Object3D {
     shadowBlur = 0,
     shadowOffsetX = 0,
     shadowOffsetY = 0,
-    scale = 1
+    scale = 1,
+    geometry = new PlaneGeometry(1, 1),
+    material = new THREEShaderMaterial({
+      type: "basic",
+      transparent: true
+    })
   } = {}) {
     super();
 
@@ -34,13 +39,9 @@ export default class THREEText extends Object3D {
     this.shadowOffsetX = shadowOffsetX;
     this.shadowOffsetY = shadowOffsetY;
 
-    this._mesh = new Mesh(new PlaneGeometry(1, 1), new THREEShaderMaterial({
-      type: "basic",
-      transparent: true,
-      uniforms: {
-        map: this._texture
-      }
-    }));
+    material.map = this._texture;
+
+    this._mesh = new Mesh(geometry, material);
     this.add(this._mesh);
 
     this._update();
@@ -51,11 +52,11 @@ export default class THREEText extends Object3D {
       return;
     }
 
-    let offsetX = (Math.abs(this.shadowOffsetX) + this.shadowBlur) * (this.shadowOffsetX < 0 ? -1 : 1);
-    let offsetY = (Math.abs(this.shadowOffsetY) + this.shadowBlur) * (this.shadowOffsetY < 0 ? -1 : 1);
+    let offsetX = this.shadowOffsetX - this.shadowBlur;
+    let offsetY = this.shadowOffsetY - this.shadowBlur;
 
-    let width = this._context.measureText(this.textContent).width + Math.abs(offsetX);
-    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + Math.abs(offsetY);
+    let width = this._context.measureText(this.textContent).width + this.shadowBlur * 2 + Math.abs(this.shadowOffsetX);
+    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + this.shadowBlur * 2 + Math.abs(this.shadowOffsetY);
     if(this._canvas.width !== width || this._canvas.height !== height) {
       this._canvas.width = width;
       this._canvas.height = height;
