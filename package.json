@@ -1,6 +1,6 @@
 {
   "name": "dlib",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Toolkit for the web",
   "registry": "npm",
   "format": "es6",
