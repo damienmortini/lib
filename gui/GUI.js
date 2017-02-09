@@ -369,7 +369,7 @@ export default class GUI extends HTMLElement {
       input.addEventListener("change", onValueChangeTmp);
     }
 
-    // onValueChange(object[key]);
+    onChange(object[key]);
 
     this._inputs.set(uid, input);
 
