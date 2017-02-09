@@ -29,6 +29,11 @@ export default class THREEText extends Object3D {
     this._texture = new Texture(this._canvas);
     this._texture.generateMipmaps = false;
     this._texture.minFilter = THREE.LinearFilter;
+    
+    material.map = this._texture;
+
+    this._mesh = new Mesh(geometry, material);
+    this.add(this._mesh);
 
     this.textContent = textContent;
     this.font = font;
@@ -38,11 +43,6 @@ export default class THREEText extends Object3D {
     this.shadowBlur = shadowBlur;
     this.shadowOffsetX = shadowOffsetX;
     this.shadowOffsetY = shadowOffsetY;
-
-    material.map = this._texture;
-
-    this._mesh = new Mesh(geometry, material);
-    this.add(this._mesh);
 
     this._update();
   }
