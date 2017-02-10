@@ -36,9 +36,9 @@ export default class Keyboard {
   }
   static removeEventListener(type, listener) {
     if(type === "keydown") {
-      onKeyDown.remove(listener);
+      onKeyDown.delete(listener);
     } else if(type === "keyup") {
-      onKeyUp.remove(listener);
+      onKeyUp.delete(listener);
     }
   }
 }
