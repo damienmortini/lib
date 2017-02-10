@@ -10,11 +10,18 @@ style.sheet.insertRule(`
     font-family: monospace;
     font-size: 12px;
     align-items: center;
+    height: 20px;
+  }
+`, 0);
+style.sheet.insertRule(`
+  dlib-guiinput * {
+    outline: none;
   }
 `, 0);
 style.sheet.insertRule(`
   dlib-guiinput label, dlib-guiinput input, dlib-guiinput select, dlib-gui textarea {
     display: flex;
+    font-family: inherit;
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -35,18 +42,26 @@ style.sheet.insertRule(`
   }
 `, 0);
 style.sheet.insertRule(`
+  dlib-guiinput button.clear {
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-appearance: none;
+    border: none;
+    font-size: 1em;
+    padding: 0 5px;
+    box-sizing: border-box;
+    background: transparent;
+    color: inherit;
+  }
+`, 0);
+style.sheet.insertRule(`
   dlib-guiinput input, dlib-guiinput select, dlib-gui textarea {
     flex: 5;
   }
 `, 0);
 style.sheet.insertRule(`
-  dlib-guiinput input:focus, dlib-guiinput select:focus, dlib-guiinput textarea:focus {
-    outline: none;
-  }
-`, 0);
-style.sheet.insertRule(`
   dlib-guiinput input.range {
-    flex: 1.5;
+    flex: 2;
   }
 `, 0);
 style.sheet.insertRule(`
@@ -79,7 +94,10 @@ export default class GUIInput extends HTMLElement {
     this._min = 0;
     this._max = Infinity;
 
+    this._initialValue = undefined;
+
     this._onChangeBinded = this._onChange.bind(this);
+    this._onClearBinded = this._onClear.bind(this);
   }
 
   set value(value) {
@@ -223,9 +241,24 @@ export default class GUIInput extends HTMLElement {
     }
   }
 
+  _onClear() {
+    this.value = this._initialValue;
+  }
+
   _updateHTML() {
     if(!this.object || !this.key || !this.type) {
       return;
+    }
+
+    if(this._initialValue === undefined) {
+      this._initialValue = this.value;
+    }
+
+    this.removeEventListener("input", this._onChangeBinded);
+    this.removeEventListener("change", this._onChangeBinded);
+    this.removeEventListener("click", this._onChangeBinded);
+    if(this.querySelector(".clear")) {
+      this.querySelector(".clear").removeEventListener("click", this._onClearBinded);
     }
 
     // TODO: Update with ShadowDOM when cross-browser
@@ -235,6 +268,7 @@ export default class GUIInput extends HTMLElement {
       ${this.type === "select" ? "<select></select>" : (this.type === "text" ? `<textarea rows="1"></textarea>` : `<input type="${this.type}"/>`)}
       ${this.type === "range" ? "<input class=\"range\" type=\"number\"/>" : ""}
       ${this.type === "color" ? "<input class=\"color\" type=\"text\"/>" : ""}
+      <button class="clear">✕</button>
     `;
 
     this._inputs = [...this.querySelectorAll("input, select, textarea")];
@@ -251,9 +285,7 @@ export default class GUIInput extends HTMLElement {
 
     this.step = this.step;
 
-    this.removeEventListener("input", this._onChangeBinded);
-    this.removeEventListener("change", this._onChangeBinded);
-    this.removeEventListener("click", this._onChangeBinded);
+    this.querySelector(".clear").addEventListener("click", this._onClearBinded);
     if(this.type === "button") {
       this.addEventListener("click", this._onChangeBinded);
     } else {

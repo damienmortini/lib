@@ -270,12 +270,6 @@ export default class GUI extends HTMLElement {
       }
     }
 
-    const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][idKey] : DATA[idKey];
-    if (type === "color" && SAVED_VALUE) {
-      object[key] = colorFromHex(object[key], SAVED_VALUE);
-    }
-    let value = SAVED_VALUE !== undefined ? SAVED_VALUE : (type === "color" ? colorToHex(object[key]) : object[key]);
-
     if (!this._container.parentNode) {
       this.appendChild(this._container);
     }
@@ -295,7 +289,7 @@ export default class GUI extends HTMLElement {
     } : object;
     input.key = type === "color" ? "value" : key;
     input.label = label;
-    input.value = value;
+    input.value = (type === "color" ? colorToHex(object[key]) : object[key]);
     input._client = client;
     if (min) {
       input.min = min;
@@ -311,6 +305,14 @@ export default class GUI extends HTMLElement {
     }
     input.type = type;
     container.appendChild(input);
+
+    const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][idKey] : DATA[idKey];
+    if(SAVED_VALUE !== undefined) {
+      input.value = SAVED_VALUE;
+      if (type === "color") {
+        object[key] = colorFromHex(object[key], SAVED_VALUE);
+      }
+    }
 
     const onValueChange = (value) => {
       let containerData = groupKey ? DATA[groupKey] : DATA;
