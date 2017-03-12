@@ -36,7 +36,7 @@ export default class ViewElement extends HTMLElement {
     let element = this;
     while (element.parentNode) {
       if (element.parentNode instanceof ViewElement) {
-        this._view.add(node._view);
+        element.parentNode._view.add(this._view);
         break;
       }
       element = element.parentNode;
