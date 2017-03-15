@@ -35,9 +35,7 @@ export default class View {
       this.visibilityExecutor(resolve, this);
     }));
 
-    this.visibilityPromise = Promise.all(promises).then(() => {
-      this.visibilityPromise = null;
-    });
+    this.visibilityPromise = Promise.all(promises);
   }
 
   get visible() {
