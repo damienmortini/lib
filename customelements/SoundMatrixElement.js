@@ -3,7 +3,7 @@ import "@webcomponents/custom-elements";
 import LoopElement from "./LoopElement.js";
 import SoundMatrix from "../audio/SoundMatrix.js";
 
-(function() {
+(() => {
   let style = document.createElement("style");
   style.textContent = `
     dlib-soundmatrix *:focus {
