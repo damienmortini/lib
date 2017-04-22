@@ -1,7 +1,7 @@
 import Camera from "dlib/3d/Camera.js";
 import CameraGLSL from "dlib/shaders/CameraGLSL.js";
 
-export default class WebGLCamera extends Camera {
+export default class GLCamera extends Camera {
   static get vertexShaderChunks() {
     return [["start", CameraGLSL.structure()]];
   }

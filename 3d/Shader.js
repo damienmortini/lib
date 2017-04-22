@@ -26,20 +26,21 @@ export default class Shader {
 
   constructor({vertexShader = `
     void main() {
-      gl_Position = vec4(0.);
+      gl_Position = vec4(0., 0., 0., 1.);
     }
   `, fragmentShader = `
     void main() {
       gl_FragColor = vec4(1.);
     }
   `, uniforms = {}, attributes = {}, vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
-
     this.uniforms = uniforms;
     this.attributes = attributes;
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
-    this._vertexShaderChunks = vertexShaderChunks;
-    this._fragmentShaderChunks = fragmentShaderChunks;
+    this._vertexShaderChunks = [];
+    this._fragmentShaderChunks = [];
+
+    this.add({vertexShaderChunks, fragmentShaderChunks});
 
     for (let shader of shaders) {
       this.add(shader);

@@ -8,19 +8,17 @@ import TextureCube from "./TextureCube.js";
 
 import Shader from "dlib/3d/Shader.js";
 
-export default class WebGLShader extends Shader {
+export default class GLProgram extends Shader {
   constructor({gl, vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders} = {}) {
     super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
 
     this.gl = gl;
-    this.program = this.gl.createProgram();
+    this._program = this.gl.createProgram();
 
     this.vertexShader = this.vertexShader;
     this.fragmentShader = this.fragmentShader;
 
-    this.gl.linkProgram(this.program);
-
-    this.use();
+    this.gl.linkProgram(this._program);
   }
 
   set vertexShader(value) {
@@ -30,6 +28,10 @@ export default class WebGLShader extends Shader {
     }
   }
 
+  get vertexShader() {
+    return super.vertexShader;
+  }
+
   set fragmentShader(value) {
     super.fragmentShader = value;
     if(this.gl) {
@@ -37,8 +39,19 @@ export default class WebGLShader extends Shader {
     }
   }
 
+  get fragmentShader() {
+    return super.fragmentShader;
+  }
+
+  addAttributePointer({buffer, name, size, type = this.gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
+    let location = this.gl.getAttribLocation(this._program, "position");
+    console.log(location);
+    this.gl.enableVertexAttribArray(location);
+    this.gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+  }
+
   use() {
-    this.gl.useProgram(this.program);
+    this.gl.useProgram(this._program);
   }
 
   _updateShader(type, source) {
@@ -57,7 +70,7 @@ export default class WebGLShader extends Shader {
       console.error(`${error}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
     }
 
-    this.gl.attachShader(this.program, shader);
+    this.gl.attachShader(this._program, shader);
   }
 
   _parseQualifiers(string) {
