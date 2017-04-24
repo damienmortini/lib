@@ -18,9 +18,11 @@ export default class GLProgram extends Shader {
 
     class Attributes extends Map {
       set (name , {location = gl.getAttribLocation(program, name), buffer, size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0}) {
+        buffer.bind();
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
         super.set(name, {buffer, size, type, normalized, stride, offset});
+        buffer.unbind();
       }
     }
 

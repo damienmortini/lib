@@ -74,7 +74,7 @@ export default class Matrix4 extends Float32Array {
   }
 
   scale(vector3, matrix4 = this) {
-    mat4.scale(this, matrix4, vector3);
+    mat4.scale(this, matrix4, typeof vector3 === "number" ? [vector3, vector3, vector3] : vector3);
     return this;
   }
 
@@ -97,8 +97,8 @@ export default class Matrix4 extends Float32Array {
     return this;
   }
 
-  fromPerspective({fov, aspect, near, far} = {}) {
-    mat4.perspective(this, fov, aspect, near, far);
+  fromPerspective({fov, aspectRatio, near, far} = {}) {
+    mat4.perspective(this, fov, aspectRatio, near, far);
     return this;
   }
 

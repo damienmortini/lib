@@ -1,10 +1,10 @@
 import Matrix4 from "dlib/math/Matrix4";
 
 export default class Camera {
-  constructor({near = 0, far = 100, aspect = 1, fov = Math.PI / 2} = {}) {
+  constructor({near = 0, far = 100, aspectRatio = 1, fov = Math.PI / 3} = {}) {
     this._near = near;
     this._far = far;
-    this._aspect = aspect;
+    this._aspectRatio = aspectRatio;
     this._fov = fov;
 
     this.transform = new Matrix4();
@@ -42,13 +42,13 @@ export default class Camera {
     return this._fov;
   }
 
-  set aspect(value) {
-    this._aspect = value;
+  set aspectRatio(value) {
+    this._aspectRatio = value;
     this._updateProjectionMatrix();
   }
 
-  get aspect() {
-    return this._aspect;
+  get aspectRatio() {
+    return this._aspectRatio;
   }
 
   get projectionMatrix() {
