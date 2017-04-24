@@ -33,7 +33,7 @@ export default class GLProgram extends Shader {
           uniformLocations.set(name, location);
         }
         let value = values[0];
-        if(value.length === undefined) {
+        if(value.length === undefined && values.length > 1) {
           value = self.uniforms.get(name);
           value.set(...values);
         }
