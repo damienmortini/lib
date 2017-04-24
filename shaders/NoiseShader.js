@@ -182,7 +182,7 @@ export default class NoiseGLSL {
         vec2 fade_xy = fade(Pf.xy);
         vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
         float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
-        return 2.3 * n_xy;
+        return 2.3 * n_xy * .5 + .5;
       }
 
       float perlinNoise(vec3 P)
@@ -251,7 +251,7 @@ export default class NoiseGLSL {
         vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
         vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
         float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
-        return 2.2 * n_xyz;
+        return 2.2 * n_xyz * .5 + .5;
       }
 
       float perlinNoise(vec4 P)
@@ -385,7 +385,7 @@ export default class NoiseGLSL {
         vec4 n_zw = mix(n_0w, n_1w, fade_xyzw.z);
         vec2 n_yzw = mix(n_zw.xy, n_zw.zw, fade_xyzw.y);
         float n_xyzw = mix(n_yzw.x, n_yzw.y, fade_xyzw.x);
-        return 2.2 * n_xyzw;
+        return 2.2 * n_xyzw * .5 + .5;
       }
 
       float perlinNoise(vec2 P, vec2 rep)
@@ -425,7 +425,7 @@ export default class NoiseGLSL {
         vec2 fade_xy = fade(Pf.xy);
         vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
         float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
-        return 2.3 * n_xy;
+        return 2.3 * n_xy * .5 + .5;
       }
 
       float perlinNoise(vec3 P, vec3 rep)
@@ -494,7 +494,7 @@ export default class NoiseGLSL {
         vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
         vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
         float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
-        return 2.2 * n_xyz;
+        return 2.2 * n_xyz * .5 + .5;
       }
 
       float perlinNoise(vec4 P, vec4 rep)
@@ -628,13 +628,15 @@ export default class NoiseGLSL {
         vec4 n_zw = mix(n_0w, n_1w, fade_xyzw.z);
         vec2 n_yzw = mix(n_zw.xy, n_zw.zw, fade_xyzw.y);
         float n_xyzw = mix(n_yzw.x, n_yzw.y, fade_xyzw.x);
-        return 2.2 * n_xyzw;
+        return 2.2 * n_xyzw * .5 + .5;
       }
     `;
   }
 
   static simplexNoise() {
     return `
+      ${COMMON}
+
       float simplexNoise(vec2 v)
       {
         const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
