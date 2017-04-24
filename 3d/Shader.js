@@ -32,24 +32,22 @@ export default class Shader {
     void main() {
       gl_FragColor = vec4(1.);
     }
-  `, uniforms = {}, attributes = {}, vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
-    this.uniforms = uniforms;
-    this.attributes = attributes;
+  `, uniforms = [], vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
+    this.uniforms = new Map();
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this._vertexShaderChunks = [];
     this._fragmentShaderChunks = [];
 
-    this.add({vertexShaderChunks, fragmentShaderChunks});
+    this.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
 
     for (let shader of shaders) {
       this.add(shader);
     }
   }
 
-  add({vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = {}, attributes = {}} = {}) {
-    Object.assign(this.uniforms, uniforms);
-    Object.assign(this.attributes, attributes);
+  add({vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = []} = {}) {
+    this.uniforms = new Map([...this.uniforms, ...uniforms]);
     this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
     this._vertexShaderChunks.push(...vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
@@ -58,7 +56,7 @@ export default class Shader {
 
   set vertexShader(value) {
     this._vertexShader = value;
-    this._parseQualifiers(this._vertexShader);
+    this._parseUniforms(this._vertexShader);
   }
 
   get vertexShader() {
@@ -67,7 +65,7 @@ export default class Shader {
 
   set fragmentShader(value) {
     this._fragmentShader = value;
-    this._parseQualifiers(this._fragmentShader);
+    this._parseUniforms(this._fragmentShader);
   }
 
   get fragmentShader() {
@@ -83,9 +81,9 @@ export default class Shader {
   }
 
   /**
-   * Parse shader strings to extract uniforms and attributes
+   * Parse shader strings to extract uniforms
    */
-  _parseQualifiers(string, {
+  _parseUniforms(string, {
     Vector2: Vector2 = function() { return new Float32Array(2) },
     Vector3: Vector3 = function() { return new Float32Array(3) },
     Vector4: Vector4 = function() { return new Float32Array(4) },
@@ -104,19 +102,15 @@ export default class Shader {
       TextureCube
     };
 
-    let regExp = /^\s*(uniform|attribute) (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
+    let regExp = /^\s*uniform (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
 
     let match;
 
     while ((match = regExp.exec(string))) {
-      let [, glslQualifier, glslType, variableName, lengthStr] = match;
+      let [, glslType, variableName, lengthStr] = match;
       let length = parseInt(lengthStr);
 
-      let glslQualifiers = this[`${glslQualifier}s`];
-      if (!glslQualifiers) {
-        glslQualifiers = this[`${glslQualifier}s`] = {};
-      }
-      if (glslQualifiers[variableName]) {
+      if (this.uniforms.has(variableName)) {
         continue;
       }
 
@@ -165,7 +159,7 @@ export default class Shader {
         value = null;
       }
 
-      glslQualifiers[variableName] = value;
+      this.uniforms.set(variableName, value);
     }
   }
 }
