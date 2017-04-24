@@ -1,5 +1,7 @@
 import vec3 from "gl-matrix/src/gl-matrix/vec3.js";
 
+import { hexToRGB } from "./Math.js";
+
 export default class Vector3 extends Float32Array {
   constructor(x = 0, y = 0, z = 0) {
     super(3);
@@ -97,5 +99,10 @@ export default class Vector3 extends Float32Array {
 
   clone() {
     return new Vector3(this.x, this.y, this.z);
+  }
+
+  fromHex(hex) {
+    this.copy(hexToRGB(hex));
+    return this;
   }
 }
