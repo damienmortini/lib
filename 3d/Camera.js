@@ -7,8 +7,9 @@ export default class Camera {
     this._aspect = aspect;
     this._fov = fov;
 
-    this.matrix = new Matrix4();
+    this.transform = new Matrix4();
     this._projectionMatrix = new Matrix4();
+    this._projectionViewMatrix = new Matrix4();
     this._inverseMatrix = new Matrix4();
 
     this._updateProjectionMatrix();
@@ -55,7 +56,11 @@ export default class Camera {
   }
 
   get inverseMatrix() {
-    return this._inverseMatrix.invert(this.matrix);
+    return this._inverseMatrix.invert(this.transform);
+  }
+
+  get projectionViewMatrix() {
+    return this._projectionViewMatrix.copy(this.projectionMatrix).multiply(this.inverseMatrix);
   }
 
   _updateProjectionMatrix() {
