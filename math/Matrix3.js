@@ -1,4 +1,4 @@
-import { mat3 } from "gl-matrix";
+import mat3 from "gl-matrix/src/gl-matrix/mat3.js";
 
 export default class Matrix3 extends Float32Array {
   constructor() {

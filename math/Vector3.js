@@ -1,4 +1,4 @@
-import { vec3 } from "gl-matrix";
+import vec3 from "gl-matrix/src/gl-matrix/vec3.js";
 
 export default class Vector3 extends Float32Array {
   constructor(x = 0, y = 0, z = 0) {

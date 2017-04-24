@@ -1,4 +1,4 @@
-import {quat} from "gl-matrix";
+import quat from "gl-matrix/src/gl-matrix/quat.js";
 
 export default class Quaternion extends Float32Array {
   constructor(x = 0, y = 0, z = 0, w = 1) {

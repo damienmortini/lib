@@ -1,4 +1,4 @@
-import {vec4} from "gl-matrix";
+import vec4 from "gl-matrix/src/gl-matrix/vec4.js";
 
 export default class Vector4 extends Float32Array {
   constructor(x = 0, y = 0, z = 0, w = 0) {
