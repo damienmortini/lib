@@ -12,13 +12,55 @@ export default class GLProgram extends Shader {
   constructor({gl, vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders} = {}) {
     super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
 
+    let program = gl.createProgram();
+
+    self = this;
+
+    class Attributes extends Map {
+      set (name , {location = gl.getAttribLocation(program, name), buffer, size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0}) {
+        gl.enableVertexAttribArray(location);
+        gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+        super.set(name, {buffer, size, type, normalized, stride, offset});
+      }
+    }
+
+    let uniformLocations = new Map();
+    class Uniforms extends Map {
+      set (name , ...values) {
+        let location = uniformLocations.get(name);
+        if(!location) {
+          location = gl.getUniformLocation(program, name);
+          uniformLocations.set(name, location);
+        }
+        let value = values[0];
+        if(value.length === undefined) {
+          value = self.uniforms.get(name);
+          value.set(...values);
+        }
+        if(value.length <= 4) {
+          gl[`uniform${value.length}fv`](location, value);
+        }
+        else if(value.length === 9) {
+          gl.uniformMatrix3fv(location, false, value);
+        }
+        else if(value.length === 16) {
+          gl.uniformMatrix4fv(location, false, value);
+        }
+        super.set(name, value);
+      }
+    }
+    
     this.gl = gl;
-    this._program = this.gl.createProgram();
+    this._program = program;
 
     this.vertexShader = this.vertexShader;
     this.fragmentShader = this.fragmentShader;
 
     this.gl.linkProgram(this._program);
+    this.use();
+
+    this.attributes = new Attributes();
+    this.uniforms = new Uniforms([...this.uniforms]);
   }
 
   set vertexShader(value) {
@@ -42,14 +84,7 @@ export default class GLProgram extends Shader {
   get fragmentShader() {
     return super.fragmentShader;
   }
-
-  addAttributePointer({buffer, name, size, type = this.gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
-    let location = this.gl.getAttribLocation(this._program, "position");
-    console.log(location);
-    this.gl.enableVertexAttribArray(location);
-    this.gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
-  }
-
+  
   use() {
     this.gl.useProgram(this._program);
   }
