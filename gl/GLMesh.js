@@ -38,7 +38,7 @@ export default class GLMesh {
     this.indexBuffer.bind();
   }
 
-  draw () {
-    this.gl.drawElements(this.gl.TRIANGLES, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
+  draw ({mode = this.gl.TRIANGLES} = {}) {
+    this.gl.drawElements(mode, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
   }
 };

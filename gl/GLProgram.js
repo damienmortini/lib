@@ -35,12 +35,16 @@ export default class GLProgram extends Shader {
           uniformLocations.set(name, location);
         }
         let value = values[0];
-        if(value.length === undefined && values.length > 1) {
-          value = self.uniforms.get(name);
-          value.set(...values);
+        if(value.length === undefined) {
+          if(values.length > 1) {
+            value = self.uniforms.get(name);
+            value.set(...values);
+          } else {
+            value = values;
+          }
         }
         if(value.length <= 4) {
-          gl[`uniform${value.length}fv`](location, value);
+          gl[`uniform${value.length || 1}fv`](location, value);
         }
         else if(value.length === 9) {
           gl.uniformMatrix3fv(location, false, value);
