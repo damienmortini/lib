@@ -7,7 +7,6 @@ export default class GLMesh {
     this.attributes = new Map();
 
     this._indices = indices;
-    this._vertices = vertices;
 
     this.attributes.set("position", {
       buffer: new GLBuffer({

@@ -1,29 +1,48 @@
-import GridMesh from "grid-mesh";
-
 export default class PlaneMesh {
   constructor({width = 1, height = 1, columns = 1, rows = 1} = {}) {
-    let gridMesh = new GridMesh(columns - 1, rows - 1, [-width * .5, -height * .5], [width / (columns - 1), 0], [0, height / (rows - 1)]);
+    let xSegments = columns + 1;
+    let ySegments = rows + 1;
 
-    this.vertices = new Float32Array(gridMesh.positions.length * 3);
-    this.uvs = new Float32Array(gridMesh.positions.length * 2);
+    let verticesNumber = xSegments * ySegments;
 
-    for (let i = 0; i < gridMesh.positions.length; i++) {
-      let x = gridMesh.positions[i][0];
-      let y = gridMesh.positions[i][1];
+    this.vertices = new Float32Array(verticesNumber * 3);
+    this.uvs = new Float32Array(verticesNumber * 2);
 
-      this.vertices[i * 3] = x;
-      this.vertices[i * 3 + 1] = y;
+    for (let j = 0; j < ySegments; j++) {
+      let v = 1 - j / rows;
+      let y = j / rows * height - height * .5;
 
-      this.uvs[i * 2] = x / width + .5;
-      this.uvs[i * 2 + 1] = y / height + .5;
+      for (let i = 0; i < xSegments; i++) {
+        let u = i / columns;
+
+        let offset = j * xSegments + i;
+
+        this.vertices[offset * 3] = u * width - width * .5;
+        this.vertices[offset * 3 + 1] = y;
+
+        this.uvs[offset * 2] = u;
+        this.uvs[offset * 2 + 1] = v;
+      }
     }
 
-    this.indices = new Uint16Array(gridMesh.cells.length * 3);
+    this.indices = new Uint16Array(columns * rows * 6);
     
-    for (let i = 0; i < gridMesh.cells.length; i++) {
-      this.indices[i * 3] = gridMesh.cells[i][0];
-      this.indices[i * 3 + 1] = gridMesh.cells[i][1];
-      this.indices[i * 3 + 2] = gridMesh.cells[i][2];
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < columns; i++) {
+        var a = i + xSegments * j;
+        var b = i + xSegments * (j + 1);
+        var c = (i + 1) + xSegments * (j + 1);
+        var d = (i + 1) + xSegments * j;
+
+        let offset = j * rows + i;
+
+        this.indices[offset * 6] = a;
+        this.indices[offset * 6 + 1] = b;
+        this.indices[offset * 6 + 2] = d;
+        this.indices[offset * 6 + 3] = b;
+        this.indices[offset * 6 + 4] = c;
+        this.indices[offset * 6 + 5] = d;
+      }
     }
   }
 }
