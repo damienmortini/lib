@@ -3,6 +3,11 @@ import "whatwg-fetch";
 const PROMISES = new Map();
 const OBJECTS = new Map();
 
+const TYPE_MAP = new Map([
+  ["json", ["json"]],
+  ["binary", ["bin"]]
+]);
+
 export default class Loader {
   static get onLoad() {
     return Promise.all(PROMISES.values());
@@ -12,12 +17,18 @@ export default class Loader {
     return PROMISES;
   }
 
+  static get typeMap() {
+    return TYPE_MAP;
+  }
+
   static get(value) {
     return OBJECTS.get(value);
   }
 
   static load(values) {
-    if(!(values instanceof Array)) {
+    const returnArray = values instanceof Array;
+    
+    if(!returnArray) {
       values = [values];
     }
 
@@ -49,6 +60,8 @@ export default class Loader {
         };
 
         if(typeof value === "string") {
+          let extension = /[\\/](.*)\.(.*)$/.exec(value)[2];
+
           let tagName;
           if(/\.(png|jpg|gif)$/.test(value)) {
             tagName = "img";
@@ -73,7 +86,15 @@ export default class Loader {
               });
             })
             .then((response) => {
-              return response[/\.(json)$/.test(value) ? "json" : "text"]();
+              let method;
+              if(Loader.typeMap.get("json").includes(extension)) {
+                method = "json";
+              } else if(Loader.typeMap.get("binary").includes(extension)) {
+                method = "arrayBuffer";
+              } else {
+                method = "text";
+              }
+              return response[method]();
             })
             .then(onLoad);
           }
@@ -108,6 +129,6 @@ export default class Loader {
       PROMISES.set(value, promise);
     }
 
-    return promises.length > 1 ? Promise.all(promises) : promises[0];
+    return returnArray ? Promise.all(promises) : promises[0];
   }
 }
