@@ -18,6 +18,12 @@ export default class GLProgram extends Shader {
 
     class Attributes extends Map {
       set (name , {location = gl.getAttribLocation(program, name), buffer, size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0}) {
+        if(name instanceof Map) {
+          for (let [key, value] of name) {
+            this.set(key, value);
+          }
+          return;
+        }
         buffer.bind();
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
@@ -114,8 +120,8 @@ export default class GLProgram extends Shader {
     this.gl.attachShader(this._program, shader);
   }
 
-  _parseQualifiers(string) {
-    super._parseQualifiers(string, {
+  _parseUniforms(string) {
+    super._parseUniforms(string, {
       Vector2,
       Vector3,
       Vector4,

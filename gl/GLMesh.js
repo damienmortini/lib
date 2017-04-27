@@ -1,43 +1,86 @@
 import GLBuffer from "./GLBuffer.js";
 
 export default class GLMesh {
-  constructor({gl, vertices = new Float32Array(), uvs = new Float32Array(), indices = new Uint16Array} = {}) {
+  constructor({gl, positions, uvs, normals, indices} = {}) {
     this.gl = gl;
 
     this.attributes = new Map();
 
     this._indices = indices;
 
-    this.attributes.set("position", {
-      buffer: new GLBuffer({
-        gl: this.gl, 
-        data: vertices
-      }),
-      size: 3
-    });
+    this._binded = false;
 
-    this.attributes.set("uv", {
-      buffer: new GLBuffer({
+    if(positions) {
+      this.attributes.set("position", {
+        buffer: new GLBuffer({
+          gl: this.gl, 
+          data: positions
+        }),
+        size: 3
+      });
+    }
+
+    if(normals) {
+      this.attributes.set("normal", {
+        buffer: new GLBuffer({
+          gl: this.gl, 
+          data: normals
+        }),
+        size: 3
+      });
+    }
+
+    if(uvs) {
+      this.attributes.set("uv", {
+        buffer: new GLBuffer({
+          gl: this.gl,
+          data: uvs
+        }),
+        size: 2
+      });
+    }
+
+    if(this._indices) {
+      this.indexBuffer = new GLBuffer({
         gl: this.gl,
-        data: uvs
-      }),
-      size: 2
-    });
-
-    this.indexBuffer = new GLBuffer({
-      gl: this.gl,
-      data: indices,
-      target: this.gl.ELEMENT_ARRAY_BUFFER
-    });
+        data: this._indices,
+        target: this.gl.ELEMENT_ARRAY_BUFFER
+      });
+    }
   }
 
   bind() {
-    this.attributes.get("position").buffer.bind();
-    this.attributes.get("uv").buffer.bind();
-    this.indexBuffer.bind();
+    if(this._binded) {
+      return;
+    }
+    for (let attribute of this.attributes.values()) {
+      attribute.buffer.bind();
+    }
+    if(this._indices) {
+      this.indexBuffer.bind();
+    }
+    this._binded = true;
   }
 
-  draw ({mode = this.gl.TRIANGLES} = {}) {
-    this.gl.drawElements(mode, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
+  unbind() {
+    if(!this._binded) {
+      return;
+    }
+    for (let attribute of this.attributes.values()) {
+      attribute.buffer.unbind();
+    }
+    if(this._indices) {
+      this.indexBuffer.unbind();
+    }
+    this._binded = false;
+  }
+
+  draw ({mode = this.gl.TRIANGLES, count = this.attributes.get("position").buffer.data.length / 3} = {}) {
+    this.bind();
+    if(this._indices) {
+      this.gl.drawElements(mode, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
+    } else {
+      this.gl.drawArrays(mode, 0, count);
+    }
   }
 };

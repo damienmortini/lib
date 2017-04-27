@@ -6,15 +6,16 @@ export default class GLTFLoader extends Loader {
 
     let path = /([\\/]?.*[\\/])/.exec(value)[1];
     let buffers = new Map();
+    let meshes = new Map();
     let gltfData;
     
     return Loader.load(value)
     .then((data) => {
       gltfData = data;
       let bufferURLs = [];
-      for(let bufferKey in gltfData.buffers) {
-        buffers.set(bufferKey, null);
-        bufferURLs.push(`${path}/${gltfData.buffers[bufferKey].uri}`);
+      for(let key in gltfData.buffers) {
+        buffers.set(key, null);
+        bufferURLs.push(`${path}/${gltfData.buffers[key].uri}`);
       }
 
       return Loader.load(bufferURLs);
@@ -25,6 +26,18 @@ export default class GLTFLoader extends Loader {
         buffers.set(key, data[i]);
         i++;
       }
+      
+      for (let key in gltfData.meshes) {
+        let mesh = {
+          primitives: []
+        };
+        for (let primitive of primitives) {
+          mesh
+        }
+        console.log(mesh);
+      }
+
+      console.log(gltfData);
       return {
         data: gltfData,
         buffers

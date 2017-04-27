@@ -21,8 +21,8 @@ export default class THREEShader extends Shader {
     });
   }
 
-  _parseQualifiers(string) {
-    super._parseQualifiers(string, {
+  _parseUniforms(string) {
+    super._parseUniforms(string, {
       Vector2: THREEVector2,
       Vector3: THREEVector3,
       Vector4: THREEVector4,

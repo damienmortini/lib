@@ -5,7 +5,8 @@ export default class PlaneMesh {
 
     let verticesNumber = xSegments * ySegments;
 
-    this.vertices = new Float32Array(verticesNumber * 3);
+    this.positions = new Float32Array(verticesNumber * 3);
+    this.normals = new Float32Array(verticesNumber * 3);
     this.uvs = new Float32Array(verticesNumber * 2);
 
     for (let j = 0; j < ySegments; j++) {
@@ -17,8 +18,10 @@ export default class PlaneMesh {
 
         let offset = j * xSegments + i;
 
-        this.vertices[offset * 3] = u * width - width * .5;
-        this.vertices[offset * 3 + 1] = y;
+        this.positions[offset * 3] = u * width - width * .5;
+        this.positions[offset * 3 + 1] = y;
+
+        this.normals[offset * 3 + 2] = 1;
 
         this.uvs[offset * 2] = u;
         this.uvs[offset * 2 + 1] = v;

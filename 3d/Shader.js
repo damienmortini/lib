@@ -87,8 +87,8 @@ export default class Shader {
     Vector2: Vector2 = function() { return new Float32Array(2) },
     Vector3: Vector3 = function() { return new Float32Array(3) },
     Vector4: Vector4 = function() { return new Float32Array(4) },
-    Matrix3: Matrix3 = function() { return new Float32Array(9) },
-    Matrix4: Matrix4 = function() { return new Float32Array(16) },
+    Matrix3: Matrix3 = function() { return new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]) },
+    Matrix4: Matrix4 = function() { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) },
     Texture2D: Texture2D = function() {},
     TextureCube: TextureCube = function() {}
   } = {}) {
