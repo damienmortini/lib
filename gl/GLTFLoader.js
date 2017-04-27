@@ -7,41 +7,48 @@ export default class GLTFLoader extends Loader {
     let path = /([\\/]?.*[\\/])/.exec(value)[1];
     let buffers = new Map();
     let meshes = new Map();
-    let gltfData;
+    let rawData;
     
     return Loader.load(value)
     .then((data) => {
-      gltfData = data;
+      rawData = data;
       let bufferURLs = [];
-      for(let key in gltfData.buffers) {
+      for(let key in rawData.buffers) {
         buffers.set(key, null);
-        bufferURLs.push(`${path}/${gltfData.buffers[key].uri}`);
+        bufferURLs.push(`${path}/${rawData.buffers[key].uri}`);
       }
 
       return Loader.load(bufferURLs);
     })
-    .then((data) => {
+    .then((buffersData) => {
       let i = 0;
       for (let key of buffers.keys()) {
-        buffers.set(key, data[i]);
+        buffers.set(key, buffersData[i]);
         i++;
       }
-      
-      for (let key in gltfData.meshes) {
-        let mesh = {
-          primitives: []
-        };
-        for (let primitive of primitives) {
-          mesh
-        }
-        console.log(mesh);
+
+      let data = JSON.parse(JSON.stringify(rawData));
+      data.raw = rawData;
+
+      for (let key in data.bufferViews) {
+        data.bufferViews[key].buffer = buffers.get(data.bufferViews[key].buffer);
       }
 
-      console.log(gltfData);
-      return {
-        data: gltfData,
-        buffers
+      for (let key in data.accessors) {
+        data.accessors[key].bufferView = data.bufferViews[data.accessors[key].bufferView];
       }
+
+      for (let key in data.meshes) {
+        let mesh = data.meshes[key];
+        for (let primitive of mesh.primitives) {
+          primitive.indices = data.accessors[primitive.indices];
+          for (let key in primitive.attributes) {
+            primitive.attributes[key] = data.accessors[primitive.attributes[key]];
+          }
+        }
+      }
+
+      return data;
     });
   }
 }

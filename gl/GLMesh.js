@@ -16,6 +16,7 @@ export default class GLMesh {
           gl: this.gl, 
           data: positions
         }),
+        count: positions.length / 3,
         size: 3
       });
     }
@@ -26,6 +27,7 @@ export default class GLMesh {
           gl: this.gl, 
           data: normals
         }),
+        count: normals.length / 3,
         size: 3
       });
     }
@@ -36,6 +38,7 @@ export default class GLMesh {
           gl: this.gl,
           data: uvs
         }),
+        count: uvs.length / 2,
         size: 2
       });
     }
@@ -75,7 +78,7 @@ export default class GLMesh {
     this._binded = false;
   }
 
-  draw ({mode = this.gl.TRIANGLES, count = this.attributes.get("position").buffer.data.length / 3} = {}) {
+  draw ({mode = this.gl.TRIANGLES, count = this.attributes.get("position").count} = {}) {
     this.bind();
     if(this._indices) {
       this.gl.drawElements(mode, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
