@@ -5,8 +5,7 @@ export default class GLTFLoader extends Loader {
     GLTFLoader.typeMap.get("json").push("gltf");
 
     let path = /([\\/]?.*[\\/])/.exec(value)[1];
-    let buffers = new Map();
-    let meshes = new Map();
+    let objectMap = new Map();
     let rawData;
     
     return Loader.load(value)
@@ -14,7 +13,7 @@ export default class GLTFLoader extends Loader {
       rawData = data;
       let bufferURLs = [];
       for(let key in rawData.buffers) {
-        buffers.set(key, null);
+        objectMap.set(key, null);
         bufferURLs.push(`${path}/${rawData.buffers[key].uri}`);
       }
 
@@ -22,31 +21,46 @@ export default class GLTFLoader extends Loader {
     })
     .then((buffersData) => {
       let i = 0;
-      for (let key of buffers.keys()) {
-        buffers.set(key, buffersData[i]);
+      for (let key of objectMap.keys()) {
+        objectMap.set(key, buffersData[i]);
         i++;
       }
 
       let data = JSON.parse(JSON.stringify(rawData));
       data.raw = rawData;
 
-      for (let key in data.bufferViews) {
-        data.bufferViews[key].buffer = buffers.get(data.bufferViews[key].buffer);
+      let typeKeys = [
+        "accessors",
+        "bufferViews",
+        "meshes",
+        "materials", 
+        "nodes",
+        "scenes"
+      ];
+
+      for (let typeKey in data) {
+        if(!typeKeys.includes(typeKey)) {
+          continue;
+        }
+        for(let objectKey in data[typeKey]) {
+          objectMap.set(objectKey, data[typeKey][objectKey]);
+        }
       }
 
-      for (let key in data.accessors) {
-        data.accessors[key].bufferView = data.bufferViews[data.accessors[key].bufferView];
-      }
-
-      for (let key in data.meshes) {
-        let mesh = data.meshes[key];
-        for (let primitive of mesh.primitives) {
-          primitive.indices = data.accessors[primitive.indices];
-          for (let key in primitive.attributes) {
-            primitive.attributes[key] = data.accessors[primitive.attributes[key]];
+      function traverse(object) {
+        for (let key in object) {
+          if(typeof object[key] === "string") {
+            let data = objectMap.get(object[key]);
+            if(data) {
+              object[key] = data;
+            }
+          } else if(object[key] && typeof object[key] === "object") {
+            traverse(object[key]);
           }
         }
       }
+
+      traverse(data);
 
       return data;
     });
