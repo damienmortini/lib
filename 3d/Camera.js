@@ -1,7 +1,7 @@
 import Matrix4 from "dlib/math/Matrix4.js";
 
 export default class Camera {
-  constructor({near = 0, far = 100, aspectRatio = 1, fov = Math.PI / 3} = {}) {
+  constructor({near = 0.01, far = 1000, aspectRatio = 1, fov = Math.PI / 3} = {}) {
     this._near = near;
     this._far = far;
     this._aspectRatio = aspectRatio;
