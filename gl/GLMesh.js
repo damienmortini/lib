@@ -6,8 +6,6 @@ export default class GLMesh {
 
     this.attributes = new Map();
 
-    this._binded = false;
-
     this.indices = {
       buffer: null,
       offset: 0,
@@ -65,29 +63,21 @@ export default class GLMesh {
   }
 
   bind() {
-    if(this._binded) {
-      return;
-    }
     for (let attribute of this.attributes.values()) {
       attribute.buffer.bind();
     }
     if(this.indices.buffer) {
       this.indices.buffer.bind();
     }
-    this._binded = true;
   }
 
   unbind() {
-    if(!this._binded) {
-      return;
-    }
     for (let attribute of this.attributes.values()) {
       attribute.buffer.unbind();
     }
     if(this.indices.buffer) {
       this.indices.buffer.unbind();
     }
-    this._binded = false;
   }
 
   draw ({
@@ -95,9 +85,6 @@ export default class GLMesh {
     count = this.indices.buffer ? this.indices.count : this.attributes.get("position").count, 
     offset = this.indices.offset
   } = {}) {
-
-    this.bind();
-
     if(this.indices.buffer) {
       this.gl.drawElements(mode, count, this.gl.UNSIGNED_SHORT, offset);
     } else {
