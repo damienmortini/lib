@@ -5,7 +5,8 @@ import Vector3 from "../../math/Vector3.js";
 import Quaternion from "../../math/Quaternion.js";
 
 export default class TrackballController {
-  constructor(matrix = new Matrix4(), {
+  constructor({
+    matrix = new Matrix4(), 
     domElement = document.body,
     distance = 0,
     invertRotation = true,

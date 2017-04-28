@@ -1,4 +1,4 @@
-export default class GLBuffer {
+export default class GLTexture {
   constructor({gl, image, color = [1, 1, 1, 1], generateMipmap = false} = {}) {
     this.gl = gl;
     this._texture = this.gl.createTexture();

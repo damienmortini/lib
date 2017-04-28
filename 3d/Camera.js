@@ -1,4 +1,4 @@
-import Matrix4 from "dlib/math/Matrix4";
+import Matrix4 from "dlib/math/Matrix4.js";
 
 export default class Camera {
   constructor({near = 0, far = 100, aspectRatio = 1, fov = Math.PI / 3} = {}) {
