@@ -6,9 +6,13 @@ export default class GLMesh {
 
     this.attributes = new Map();
 
-    this._indices = indices;
-
     this._binded = false;
+
+    this.indices = {
+      buffer: null,
+      offset: 0,
+      count: 0
+    };
 
     if(positions) {
       this.attributes.set("position", {
@@ -43,12 +47,20 @@ export default class GLMesh {
       });
     }
 
-    if(this._indices) {
-      this.indexBuffer = new GLBuffer({
+    if(indices) {
+      this.setIndicesData({data: indices});
+    }
+  }
+
+  setIndicesData({data, offset = 0, count = 0} = {}) {
+    this.indices = {
+      buffer: new GLBuffer({
         gl: this.gl,
-        data: this._indices,
+        data,
         target: this.gl.ELEMENT_ARRAY_BUFFER
-      });
+      }),
+      offset,
+      count
     }
   }
 
@@ -59,8 +71,8 @@ export default class GLMesh {
     for (let attribute of this.attributes.values()) {
       attribute.buffer.bind();
     }
-    if(this._indices) {
-      this.indexBuffer.bind();
+    if(this.indices.buffer) {
+      this.indices.buffer.bind();
     }
     this._binded = true;
   }
@@ -72,16 +84,22 @@ export default class GLMesh {
     for (let attribute of this.attributes.values()) {
       attribute.buffer.unbind();
     }
-    if(this._indices) {
-      this.indexBuffer.unbind();
+    if(this.indices.buffer) {
+      this.indices.buffer.unbind();
     }
     this._binded = false;
   }
 
-  draw ({mode = this.gl.TRIANGLES, count = this.attributes.get("position").count} = {}) {
+  draw ({
+    mode = this.gl.TRIANGLES, 
+    count = this.indices.buffer ? this.indices.count : this.attributes.get("position").count, 
+    offset = this.indices.offset
+  } = {}) {
+
     this.bind();
-    if(this._indices) {
-      this.gl.drawElements(mode, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
+
+    if(this.indices.buffer) {
+      this.gl.drawElements(mode, count, this.gl.UNSIGNED_SHORT, offset);
     } else {
       this.gl.drawArrays(mode, 0, count);
     }
