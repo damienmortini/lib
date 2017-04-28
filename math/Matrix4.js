@@ -1,13 +1,8 @@
 import mat4 from "gl-matrix/src/gl-matrix/mat4.js";
 
 export default class Matrix4 extends Float32Array {
-  constructor(array) {
-    super(16);
-    if(array) {
-      this.copy(array);
-    } else {
-      this.identity();
-    }
+  constructor(array = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {
+    super(array);
     return this;
   }
 

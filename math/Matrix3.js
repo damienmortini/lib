@@ -1,9 +1,8 @@
 import mat3 from "gl-matrix/src/gl-matrix/mat3.js";
 
 export default class Matrix3 extends Float32Array {
-  constructor() {
-    super(9);
-    mat3.identity(this);
+  constructor(array = [1, 0, 0, 0, 1, 0, 0, 0, 1]) {
+    super(array);
     return this;
   }
 
