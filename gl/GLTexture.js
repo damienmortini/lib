@@ -14,7 +14,8 @@ export default class GLTexture {
     this.gl.generateMipmap(this.gl.TEXTURE_2D);
   }
 
-  bind() {
+  bind({unit = 0} = {}) {
+    this.gl.activeTexture(this.gl[`TEXTURE${unit}`]);
     this.gl.bindTexture(this.gl.TEXTURE_2D, this._texture);
   }
 
