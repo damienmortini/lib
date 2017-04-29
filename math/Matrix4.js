@@ -106,9 +106,9 @@ export default class Matrix4 extends Float32Array {
   }
 
   setPosition(vector3) {
-    this.x = vector3.x;
-    this.y = vector3.y;
-    this.z = vector3.z;
+    this.x = vector3[0];
+    this.y = vector3[1];
+    this.z = vector3[2];
     return this;
   }
 
