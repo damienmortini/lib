@@ -17,4 +17,8 @@ export default class GLTexture {
   bind() {
     this.gl.bindTexture(this.gl.TEXTURE_2D, this._texture);
   }
+
+  unbind() {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+  }
 };

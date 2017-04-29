@@ -34,6 +34,8 @@ export default class Shader {
     }
   `, uniforms = [], vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
     this.uniforms = new Map();
+    this._uniformTypes = new Map();
+
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this._vertexShaderChunks = [];
@@ -116,6 +118,8 @@ export default class Shader {
 
       let value;
       let typeMatch;
+
+      this._uniformTypes.set(variableName, glslType);
 
       if (/float|double/.test(glslType)) {
         if (isNaN(length)) {

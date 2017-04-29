@@ -15,30 +15,41 @@ export default class GLProgram extends Shader {
 
     self = this;
 
+    let attributesLocations = new Map();
     class Attributes extends Map {
-      set (name , {location, buffer, size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
+      set (name , {location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
         if(name instanceof Map) {
           for (let [key, value] of name) {
             this.set(key, value);
           }
           return;
         }
-        location = location || gl.getAttribLocation(program, name);
-        buffer.bind();
+        if(!location) {
+          location = gl.getAttribLocation(program, name);
+          if(location === -1) {
+            console.warn(`Attribute "${name}" is missing or never used`)
+          }
+          attributesLocations.set(name, location);
+        }
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
-        super.set(name, {buffer, size, type, normalized, stride, offset});
-        buffer.unbind();
+        super.set(name, {size, type, normalized, stride, offset});
       }
     }
 
     let uniformLocations = new Map();
+    let uniformTypes = new Map();
     class Uniforms extends Map {
       set (name , ...values) {
         let location = uniformLocations.get(name);
         if(!location) {
           location = gl.getUniformLocation(program, name);
           uniformLocations.set(name, location);
+        }
+        let type = uniformTypes.get(name);
+        if(!type) {
+          type = /int|ivec|sampler2D|samplerCube/.test(self._uniformTypes.get(name)) ? "iv" : "fv";
+          uniformTypes.set(name, type);
         }
         let value = values[0];
         if(value.length === undefined) {
@@ -50,7 +61,7 @@ export default class GLProgram extends Shader {
           }
         }
         if(value.length <= 4) {
-          gl[`uniform${value.length || 1}fv`](location, value);
+          gl[`uniform${value.length || 1}${type}`](location, value);
         }
         else if(value.length === 9) {
           gl.uniformMatrix3fv(location, false, value);

@@ -2,11 +2,11 @@ import Loader from"dlib/utils/Loader.js";
 
 export default class GLTFLoader extends Loader {
   static load(value) {
-    GLTFLoader.typeMap.get("json").push("gltf");
-
     let path = /([\\/]?.*[\\/])/.exec(value)[1];
     let objectMap = new Map();
     let rawData;
+
+    GLTFLoader.typeMap.get("json").push("gltf");
     
     return Loader.load(value)
     .then((data) => {
@@ -34,6 +34,7 @@ export default class GLTFLoader extends Loader {
         "bufferViews",
         "meshes",
         "materials", 
+        "cameras",
         "nodes",
         "scenes"
       ];
