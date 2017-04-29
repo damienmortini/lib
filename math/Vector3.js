@@ -3,9 +3,8 @@ import vec3 from "gl-matrix/src/gl-matrix/vec3.js";
 import { hexToRGB } from "./Math.js";
 
 export default class Vector3 extends Float32Array {
-  constructor(x = 0, y = 0, z = 0) {
-    super(3);
-    this.set(x, y, z);
+  constructor(array = [0, 0, 0]) {
+    super(array);
     return this;
   }
 
@@ -78,6 +77,7 @@ export default class Vector3 extends Float32Array {
 
   normalize() {
     vec3.normalize(this, this);
+    return this;
   }
 
   dot(vector3) {
