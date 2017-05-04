@@ -35,7 +35,7 @@ export default class TrackballController {
     this._velocity = new Vector2();
     this._velocityOrigin = new Vector2();
 
-    this._position = new Vector3(this.matrix.x, this.matrix.y, this.matrix.z);
+    this._position = new Vector3([this.matrix.x, this.matrix.y, this.matrix.z]);
     this._positionPrevious = this._position.clone();
     this._positionOffset = new Vector3();
 
