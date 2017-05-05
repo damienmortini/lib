@@ -6,12 +6,6 @@ export default class GLMesh {
 
     this.attributes = new Map();
 
-    this.indices = {
-      buffer: null,
-      offset: 0,
-      count: 0
-    };
-
     if(positions) {
       this.attributes.set("position", {
         buffer: new GLBuffer({
@@ -46,7 +40,10 @@ export default class GLMesh {
     }
 
     if(indices) {
-      this.setIndicesData({data: indices});
+      this.setIndicesData({
+        data: indices,
+        count: indices.length
+      });
     }
   }
 

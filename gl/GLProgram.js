@@ -17,13 +17,14 @@ export default class GLProgram extends Shader {
 
     let attributesLocations = new Map();
     class Attributes extends Map {
-      set (name , {location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
+      set (name , {buffer, location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
         if(name instanceof Map) {
           for (let [key, value] of name) {
             this.set(key, value);
           }
           return;
         }
+        buffer.bind();
         if(!location) {
           location = gl.getAttribLocation(program, name);
           if(location === -1) {
@@ -33,7 +34,7 @@ export default class GLProgram extends Shader {
         }
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
-        super.set(name, {size, type, normalized, stride, offset});
+        super.set(name, {buffer, size, type, normalized, stride, offset});
       }
     }
 
