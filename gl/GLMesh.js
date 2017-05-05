@@ -63,6 +63,7 @@ export default class GLMesh {
     for (let attribute of this.attributes.values()) {
       attribute.buffer.bind();
     }
+
     if(this.indices.buffer) {
       this.indices.buffer.bind();
     }
@@ -72,6 +73,7 @@ export default class GLMesh {
     for (let attribute of this.attributes.values()) {
       attribute.buffer.unbind();
     }
+    
     if(this.indices.buffer) {
       this.indices.buffer.unbind();
     }
@@ -79,13 +81,15 @@ export default class GLMesh {
 
   draw ({
     mode = this.gl.TRIANGLES, 
-    count = this.indices.buffer ? this.indices.count : this.attributes.get("position").count, 
-    offset = this.indices.offset
+    elements = !!this.indices.buffer,
+    count = elements ? this.indices.count : this.attributes.get("position").count, 
+    offset = this.indices.offset,
+    first = 0
   } = {}) {
-    if(this.indices.buffer) {
-      this.gl.drawElements(mode, count, this.gl.UNSIGNED_SHORT, offset);
+    if(elements) {
+      this.gl.drawElements(mode, count, this.gl.UNSIGNED_INT, offset);
     } else {
-      this.gl.drawArrays(mode, 0, count);
+      this.gl.drawArrays(mode, first, count);
     }
   }
 };

@@ -34,6 +34,7 @@ export default class GLProgram extends Shader {
         }
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+        buffer.unbind();
         super.set(name, {buffer, size, type, normalized, stride, offset});
       }
     }
