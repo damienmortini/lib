@@ -14,7 +14,7 @@ export default class GLTFLoader extends Loader {
       let bufferURLs = [];
       for(let key in rawData.buffers) {
         objectMap.set(key, null);
-        bufferURLs.push(`${path}/${rawData.buffers[key].uri}`);
+        bufferURLs.push(`${path}${rawData.buffers[key].uri}`);
       }
 
       return Loader.load(bufferURLs);
