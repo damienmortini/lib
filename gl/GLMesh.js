@@ -4,6 +4,8 @@ export default class GLMesh {
   constructor({gl, positions, uvs, normals, indices} = {}) {
     this.gl = gl;
 
+    this.gl.getExtension("OES_element_index_uint");
+
     this.attributes = new Map();
 
     if(positions) {
@@ -87,7 +89,8 @@ export default class GLMesh {
     first = 0
   } = {}) {
     if(elements) {
-      this.gl.drawElements(mode, count, this.gl.UNSIGNED_INT, offset);
+      let type = count > 65535 ? this.gl.UNSIGNED_INT : this.gl.UNSIGNED_SHORT;
+      this.gl.drawElements(mode, count, type, offset);
     } else {
       this.gl.drawArrays(mode, first, count);
     }
