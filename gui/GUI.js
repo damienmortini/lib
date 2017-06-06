@@ -1,5 +1,3 @@
-import "@webcomponents/custom-elements";
-
 import WebSocket from "../utils/WebSocket.js";
 import Keyboard from "../input/Keyboard.js";
 import GUIInput from "./GUIInput.js";

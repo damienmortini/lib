@@ -1,5 +1,3 @@
-import "@webcomponents/custom-elements";
-
 import View from "../abstract/View.js";
 
 export default class ViewElement extends HTMLElement {

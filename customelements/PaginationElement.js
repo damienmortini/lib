@@ -1,5 +1,3 @@
-import "@webcomponents/custom-elements";
-
 let _lastPaginationElementId = 0;
 
 (() => {

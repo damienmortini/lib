@@ -1,5 +1,3 @@
-import "@webcomponents/custom-elements";
-
 import LoopElement from "./LoopElement.js";
 import SoundMatrix from "../audio/SoundMatrix.js";
 

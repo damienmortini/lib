@@ -1,5 +1,3 @@
-import "whatwg-fetch";
-
 const PROMISES = new Map();
 const OBJECTS = new Map();
 

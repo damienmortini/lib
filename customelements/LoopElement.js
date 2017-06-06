@@ -1,5 +1,3 @@
-import "@webcomponents/custom-elements";
-
 import Ticker from "../utils/Ticker.js";
 
 export default class LoopElement extends HTMLElement {
