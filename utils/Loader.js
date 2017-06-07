@@ -51,10 +51,8 @@ export default class Loader {
           if(element) {
             element.removeEventListener("load", onLoad);
             element.removeEventListener("canplaythrough", onLoad);
-            resolve(element);
-          } else {
-            resolve(response);
           }
+          resolve(response);
         };
 
         if(typeof value === "string") {
@@ -74,10 +72,11 @@ export default class Loader {
           } else {
             fetch(value)
             .catch((err) => {
+              console.warn(`Fetch error, using XMLHttpRequest instead:\n${err}`);
               return new Promise(function(resolve, reject) {
                 let xhr = new XMLHttpRequest();
                 xhr.onload = () => {
-                  resolve(new Response(xhr.responseText, {status: xhr.status}));
+                  resolve(new Response(xhr.response, {status: xhr.status}));
                 }
                 xhr.open("GET", value);
                 xhr.send(null);
@@ -102,10 +101,14 @@ export default class Loader {
         }
 
         if(element) {
+          let onElementLoad = (e) => {
+            onLoad(e.target);
+          }
+
           if(element instanceof HTMLMediaElement) {
-            element.addEventListener("canplaythrough", onLoad);
+            element.addEventListener("canplaythrough", onElementLoad);
           } else {
-            element.addEventListener("load", onLoad);
+            element.addEventListener("load", onElementLoad);
           }
 
           element.src = element.src || value;
