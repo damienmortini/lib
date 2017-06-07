@@ -12,7 +12,6 @@ export default class THREEShader extends Shader {
       gl_FragColor = vec4(1.);
     }
   `, uniforms, shaders} = {}) {
-
     super({
       vertexShader,
       fragmentShader,
@@ -21,7 +20,22 @@ export default class THREEShader extends Shader {
     });
   }
 
+  add({vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = []} = {}) {
+    if(!(uniforms instanceof Array || uniforms instanceof Map)) {
+      uniforms = Object.entries(uniforms);
+    }
+    if(!(this.uniforms instanceof Array || this.uniforms instanceof Map)) {
+      this.uniforms = Object.entries(this.uniforms);
+    }
+    super.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
+  }
+
   _parseUniforms(string) {
+    if(!(this.uniforms instanceof Map)) {
+      this.uniforms = new Map(Object.entries(this.uniforms));
+    }
+    
+
     super._parseUniforms(string, {
       Vector2: THREEVector2,
       Vector3: THREEVector3,
@@ -32,13 +46,15 @@ export default class THREEShader extends Shader {
       Texture2D: THREETexture
     });
 
-    for (let key in this.uniforms) {
-      let uniform = this.uniforms[key];
-      if (typeof uniform !== "object" || uniform.value === undefined) {
-        this.uniforms[key] = {
-          value: uniform
-        }
-      }
+
+    let uniformsObject = {};
+
+    for (let [key, uniform] of this.uniforms) {
+      uniformsObject[key] = {
+        value: uniform.value === undefined ? uniform : uniform.value
+      };
     }
+
+    this.uniforms = uniformsObject;
   }
 }

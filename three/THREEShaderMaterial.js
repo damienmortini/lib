@@ -52,10 +52,15 @@ export default class THREEShaderMaterial extends ShaderMaterial {
 
     for (let name in this._shader.uniforms) {
       let key = name; // Firefox fix
+      this.uniforms[key] = this._shader.uniforms[key];
       Object.defineProperty(this, key, {
         configurable: true,
-        get: function() { return this.uniforms[key].value },
-        set: function(value) { this.uniforms[key].value = value }
+        get: function() { 
+          return this.uniforms[key].value;
+        },
+        set: function(value) {
+          this.uniforms[key].value = value;
+        }
       });
     }
 
