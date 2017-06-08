@@ -28,7 +28,7 @@ style.sheet.insertRule(`
 style.sheet.insertRule(`
   dlib-guiinput label {
     flex: 1;
-    min-width: 20%;
+    min-width: 25%;
   }
 `, 0);
 style.sheet.insertRule(`

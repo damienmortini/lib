@@ -152,6 +152,10 @@ export default class GUI extends HTMLElement {
     staticGUI.open = value;
   }
 
+  static get groups() {
+    return staticGUI.groups;
+  }
+
   static get open() {
     return staticGUI.open;
   }
@@ -166,7 +170,7 @@ export default class GUI extends HTMLElement {
 
     this.serverUrl = serverUrl;
 
-    this._groups = new Map();
+    this.groups = new Map();
     this._inputs = new Map();
     this._uids = new Set();
 
@@ -272,12 +276,12 @@ export default class GUI extends HTMLElement {
       this.appendChild(this._container);
     }
     let container = this._container;
-    if(groupKey) {
-      container = this._groups.get(groupKey);
+    if(group) {
+      container = this.groups.get(group);
       if(!container) {
         container = document.createElement("details");
         container.innerHTML = `<summary>${group}</summary>`;
-        this._groups.set(groupKey, container);
+        this.groups.set(group, container);
         this._container.appendChild(container);
       }
     }
