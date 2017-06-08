@@ -13,7 +13,7 @@ TEXTURE.needsUpdate = true;
 let DATA_OFFSET = 0;
 
 export default class Ribbon extends THREE.Mesh {
-  constructor(geometry = new THREE.CylinderBufferGeometry(1, 1, 1000, 6, 999) , material = new THREE.MeshBasicMaterial()) {
+  constructor(geometry = new THREE.CylinderBufferGeometry(1, 1, 1000, 6, 999), material = new THREE.MeshBasicMaterial()) {
     let positionsArray = geometry.getAttribute("position").array;
 
     let idsArray = new Float32Array(positionsArray.length / 3);
@@ -124,70 +124,25 @@ export default class Ribbon extends THREE.Mesh {
     this._previousPosition = new THREE.Vector3();
     this._previousBinormal = new THREE.Vector3();
 
-    // let uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.phong.uniforms);
-    // Object.assign(uniforms, {
-    //   offsetID: {
-    //     type: "f",
-    //     value: 0
-    //   },
-    //   color: {
-    //     type: "c",
-    //     value: new THREE.Color(color)
-    //   },
-    //   tipColor: {
-    //     type: "c",
-    //     value: new THREE.Color(tipColor)
-    //   },
-    //   scale: {
-    //     type: "f",
-    //     value: 1
-    //   },
-    //   emissiveIntensity: {
-    //     type: "f",
-    //     value: 0
-    //   },
-    //   data: {
-    //     type: "t",
-    //     value: TEXTURE
-    //   },
-    //   dataOffset: {
-    //     type: "f",
-    //     value: DATA_OFFSET
-    //   }
-    // });
-
-    // let material = new THREE.ShaderMaterial({
-    //   uniforms: uniforms,
-    //   vertexShader: ShaderUtils.replaceThreeChunks(VERTEX_SHADER),
-    //   fragmentShader: ShaderUtils.replaceThreeChunks(FRAGMENT_SHADER)
-    // });
-
-    // this = new THREE.Mesh(geometry, material);
-    // this.material.lights = true;
-    // this.material.transparent = true;
-    //
-    // this.add(this);
-
     DATA_OFFSET += POINTS_NUMBER;
 
     this.frustumCulled = false;
   }
 
-  update(position) {
-
+  update() {
     let dataOffset = this.material.uniforms.dataOffset.value * 8;
 
-    this._direction.copy(position).sub(this._previousPosition).normalize();
+    this._direction.copy(this.position).sub(this._previousPosition).normalize();
 
-    if(!this._direction.length()) {
+    if (!this._direction.length()) {
       return;
     }
 
     if (this._time === 0) {
       for (let i = 0; i < POINTS_NUMBER * 8; i += 8) {
-        TEXTURE.image.data[i + dataOffset] = position.x;
-        TEXTURE.image.data[i + 1 + dataOffset] = position.y;
-        TEXTURE.image.data[i + 2 + dataOffset] = position.z;
+        TEXTURE.image.data[i + dataOffset] = this.position.x;
+        TEXTURE.image.data[i + 1 + dataOffset] = this.position.y;
+        TEXTURE.image.data[i + 2 + dataOffset] = this.position.z;
       }
       this._normal.crossVectors(this._direction, new THREE.Vector3(1, 0, 0)).normalize();
     } else {
@@ -222,7 +177,7 @@ export default class Ribbon extends THREE.Mesh {
 
     this._time += .1;
 
-    let positionDifference = this._vector3Cached1.copy(position).sub(this._previousPosition);
+    let positionDifference = this._vector3Cached1.copy(this.position).sub(this._previousPosition);
 
     for (let i = 0; i < POINTS_NUMBER * 8; i += 8) {
       let offset = dataOffset + i;
@@ -248,8 +203,6 @@ export default class Ribbon extends THREE.Mesh {
     TEXTURE.needsUpdate = true;
 
     this._previousBinormal.copy(this._binormal);
-    this._previousPosition.copy(position);
-
-    this.position.copy(position);
+    this._previousPosition.copy(this.position);
   }
 }

@@ -3,12 +3,14 @@ import { Mesh, BufferAttribute, CylinderBufferGeometry, Vector3 } from "three";
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 export default class THREELine extends Mesh {
-  constructor(points, {
+  constructor({
+    points = [new Vector3(0, -1, 0), new Vector3(0, 1, 0)],
     material = new THREEShaderMaterial(),
     detail = 3,
-    thickness = .1
+    thickness = .1,
+    geometry = new CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1)
   } = {}) {
-    super(new CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1), material);
+    super(geometry, material);
 
     this.points = points;
     this.frustumCulled = false;
@@ -29,10 +31,10 @@ export default class THREELine extends Mesh {
     this.geometry.addAttribute("linePointId", new BufferAttribute(ids, 1));
 
     material.add({
-      uniforms: {
-        linePositions: this.points,
-        lineThickness: thickness
-      },
+      uniforms: [
+        ["linePositions", this.points],
+        ["lineThickness", thickness]
+      ],
       vertexShaderChunks: [
         ["start", `
           uniform float lineThickness;
@@ -68,7 +70,9 @@ export default class THREELine extends Mesh {
     return this.material.lineThickness;
   }
 
-  update() {
+  update({
+    refNormal
+  } = {}) {
     for (let i = 0; i < this.points.length; i++) {
       if(i === this.points.length - 1) {
         continue;
@@ -77,18 +81,20 @@ export default class THREELine extends Mesh {
       let point = this.points[i];
       let nextPoint = this.points[i + 1];
 
-      this._vector3.copy(nextPoint).sub(point).normalize();
-      if(this._vector3.lengthSq()) {
-        this._tangent.copy(this._vector3);
-      }
+      this._tangent.copy(nextPoint).sub(point);
       if(!this._tangent.lengthSq()) {
         this._tangent.set(0, 1, 0);
       }
+      this._tangent.normalize();
 
       if (i === 0) {
-        this._vector3.copy(this._tangent);
-        [this._vector3.x, this._vector3.y, this._vector3.z] = [this._vector3.z, this._vector3.x, this._vector3.y];
-        this._normal.crossVectors(this._tangent, this._vector3).normalize();
+        if(refNormal) {
+          this._normal.copy(refNormal);
+        } else {
+          this._vector3.copy(this._tangent);
+          [this._vector3.x, this._vector3.y, this._vector3.z] = [this._vector3.z, this._vector3.x, this._vector3.y];
+          this._normal.crossVectors(this._tangent, this._vector3).normalize();
+        }
       } else {
         this._normal.crossVectors(this._tangent, this._binormal).normalize();
       }

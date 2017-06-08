@@ -4,7 +4,6 @@ style.sheet.insertRule(`
   dlib-guiinput {
     display: flex;
     position: relative;
-    color: white;
     font-family: monospace;
     font-size: 12px;
     align-items: center;
