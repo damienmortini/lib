@@ -22,7 +22,6 @@ export default class Entity {
     this._name = name;
 
     this._components = new Map();
-    this._componentsSaved = new Map();
 
     this._active = true;
 
@@ -57,18 +56,13 @@ export default class Entity {
   }
 
   addComponent(ComponentClass, ...args) {
-    let component = this._componentsSaved.get(ComponentClass) || this.getComponent(ComponentClass);
-    if (component && !args.length) {
-      this._componentsSaved.delete(ComponentClass);
-    } else {
-      component = new ComponentClass(this, ...args);
-    }
+    let component = new ComponentClass(this, ...args);
     this._components.set(ComponentClass, component);
     Entity.getEntities(ComponentClass).add(this);
     if(this.active) {
       Entity.getEntities(ComponentClass, {onlyActive: true}).add(this);
     }
-    component.onAdd.dispatch();
+    component.onAdd.dispatch({component});
     return component;
   }
 
@@ -77,11 +71,10 @@ export default class Entity {
     if (!component) {
       return;
     }
-    this._componentsSaved.set(ComponentClass, component);
     this._components.delete(ComponentClass);
     Entity.getEntities(ComponentClass).delete(this);
     Entity.getEntities(ComponentClass, {onlyActive: true}).delete(this);
-    component.onRemove.dispatch();
+    component.onRemove.dispatch({component});
     return component;
   }
 
