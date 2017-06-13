@@ -62,6 +62,7 @@ export default class Entity {
     if(this.active) {
       Entity.getEntities(ComponentClass, {onlyActive: true}).add(this);
     }
+    ComponentClass.onAdd.dispatch({component});
     component.onAdd.dispatch({component});
     return component;
   }
@@ -74,6 +75,7 @@ export default class Entity {
     this._components.delete(ComponentClass);
     Entity.getEntities(ComponentClass).delete(this);
     Entity.getEntities(ComponentClass, {onlyActive: true}).delete(this);
+    ComponentClass.onRemove.dispatch({component});
     component.onRemove.dispatch({component});
     return component;
   }

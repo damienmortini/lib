@@ -1,6 +1,27 @@
 import Signal from "../utils/Signal.js";
 
+const STATIC_ON_ADD_MAP = new Map();
+const STATIC_ON_REMOVE_MAP = new Map();
+
 export default class Component {
+  static get onAdd() {
+    let signal = STATIC_ON_ADD_MAP.get(this);
+    if(!signal) {
+      signal = new Signal();
+      STATIC_ON_ADD_MAP.set(this, signal);
+    }
+    return signal;
+  }
+  
+  static get onRemove() {
+    let signal = STATIC_ON_REMOVE_MAP.get(this);
+    if(!signal) {
+      signal = new Signal();
+      STATIC_ON_REMOVE_MAP.set(this, signal);
+    }
+    return signal;
+  }
+
   constructor(entity, {require = []} = {}) {
     this.entity = entity;
 
