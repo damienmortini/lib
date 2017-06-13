@@ -56,6 +56,7 @@ export default class Entity {
   }
 
   addComponent(ComponentClass, ...args) {
+    this.removeComponent(ComponentClass);
     let component = new ComponentClass(this, ...args);
     this._components.set(ComponentClass, component);
     Entity.getEntities(ComponentClass).add(this);
@@ -85,6 +86,12 @@ export default class Entity {
       this.addComponent(ComponentClass, ...args)
     } else {
       this.removeComponent(ComponentClass)
+    }
+  }
+
+  destroy() {
+    for (let ComponentClass of this._components.keys()) {
+      this.removeComponent(ComponentClass);
     }
   }
 }
