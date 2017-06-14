@@ -12,6 +12,7 @@ style.sheet.insertRule(`
   dlib-gui {
     display: block;
     position: absolute;
+    resize: horizontal;
     top: 0;
     left: 0;
     width: 250px;
