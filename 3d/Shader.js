@@ -85,24 +85,16 @@ export default class Shader {
   /**
    * Parse shader strings to extract uniforms
    */
-  _parseUniforms(string, {
-    Vector2: Vector2 = function() { return new Float32Array(2) },
-    Vector3: Vector3 = function() { return new Float32Array(3) },
-    Vector4: Vector4 = function() { return new Float32Array(4) },
-    Matrix3: Matrix3 = function() { return new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]) },
-    Matrix4: Matrix4 = function() { return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) },
-    Texture2D: Texture2D = function() {},
-    TextureCube: TextureCube = function() {}
-  } = {}) {
-    let classes = {
-      Vector2,
-      Vector3,
-      Vector4,
-      Matrix3,
-      Matrix4,
-      Texture2D,
-      TextureCube
-    };
+  _parseUniforms(string, classes) {
+    classes = Object.assign({
+      Vector2: new Float32Array(2),
+      Vector3: new Float32Array(3),
+      Vector4: new Float32Array(4),
+      Matrix3: new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]),
+      Matrix4: new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+      Texture2D: class Texture2D {},
+      TextureCube: class TextureCube {}
+    }, classes);
 
     let regExp = /^\s*uniform (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
 
