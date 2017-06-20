@@ -1,5 +1,9 @@
 import { Mesh, BufferAttribute, CylinderBufferGeometry, Vector3 } from "three";
 
+import DVector3 from "../math/Vector3.js";
+
+import FrenetSerretFrame from "../math/FrenetSerretFrame.js";
+
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
 export default class THREELine extends Mesh {
@@ -13,6 +17,8 @@ export default class THREELine extends Mesh {
     super(geometry, material);
 
     this.points = points;
+    this._pointsArray = new Array(this.points.length).fill().map(() => new DVector3());
+    this._normalsArray = new Array(this.points.length).fill().map(() => new DVector3());
     this.frustumCulled = false;
 
     this._vector3 = new Vector3();
@@ -62,6 +68,14 @@ export default class THREELine extends Mesh {
     this.update();
   }
 
+  set normals(value) {
+    this.material.lineNormals = value;
+  }
+
+  get normals() {
+    return this.material.lineNormals;
+  }
+
   set thickness(value) {
     this.material.lineThickness = value;
   }
@@ -70,41 +84,31 @@ export default class THREELine extends Mesh {
     return this.material.lineThickness;
   }
 
-  update({
-    refNormal
-  } = {}) {
+  update() {
     for (let i = 0; i < this.points.length; i++) {
-      if(i === this.points.length - 1) {
-        continue;
-      }
+      const point = this.points[i];
+      const pointArray = this._pointsArray[i];
+      pointArray.x = point.x;
+      pointArray.y = point.y;
+      pointArray.z = point.z;
+      const normal = this.normals[i];
+      const normalArray = this._normalsArray[i];
+      normalArray.x = normal.x;
+      normalArray.y = normal.y;
+      normalArray.z = normal.z;
+    }
 
-      let point = this.points[i];
-      let nextPoint = this.points[i + 1];
+    FrenetSerretFrame.compute({
+      points: this._pointsArray,
+      normals: this._normalsArray
+    });
 
-      this._tangent.copy(nextPoint).sub(point);
-      if(!this._tangent.lengthSq()) {
-        this._tangent.set(0, 1, 0);
-      }
-      this._tangent.normalize();
-
-      if (i === 0) {
-        if(refNormal) {
-          this._normal.copy(refNormal);
-        } else {
-          this._vector3.copy(this._tangent);
-          [this._vector3.x, this._vector3.y, this._vector3.z] = [this._vector3.z, this._vector3.x, this._vector3.y];
-          this._normal.crossVectors(this._tangent, this._vector3).normalize();
-        }
-      } else {
-        this._normal.crossVectors(this._tangent, this._binormal).normalize();
-      }
-
-      this._binormal.crossVectors(this._normal, this._tangent).normalize();
-
-      this.material.lineNormals[i].copy(this._normal);
-      if (i === this.points.length - 2) {
-        this.material.lineNormals[i + 1].copy(this._normal);
-      }
+    for (let i = 0; i < this.points.length; i++) {
+      const normal = this.normals[i];
+      const normalArray = this._normalsArray[i];
+      normal.x = normalArray.x;
+      normal.y = normalArray.y;
+      normal.z = normalArray.z;
     }
   }
 }
