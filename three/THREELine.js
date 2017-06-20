@@ -17,8 +17,11 @@ export default class THREELine extends Mesh {
     super(geometry, material);
 
     this.points = points;
+    this.normals = new Array(this.points.length).fill().map(() => new Vector3());
+
     this._pointsArray = new Array(this.points.length).fill().map(() => new DVector3());
     this._normalsArray = new Array(this.points.length).fill().map(() => new DVector3());
+
     this.frustumCulled = false;
 
     this._vector3 = new Vector3();
@@ -39,7 +42,8 @@ export default class THREELine extends Mesh {
     material.add({
       uniforms: [
         ["linePositions", this.points],
-        ["lineThickness", thickness]
+        ["lineThickness", thickness],
+        ["lineNormals", new Float32Array(100 * 3)]
       ],
       vertexShaderChunks: [
         ["start", `
@@ -68,20 +72,12 @@ export default class THREELine extends Mesh {
     this.update();
   }
 
-  set normals(value) {
-    this.material.lineNormals = value;
-  }
-
-  get normals() {
-    return this.material.lineNormals;
-  }
-
   set thickness(value) {
-    this.material.lineThickness = value;
+    this.material.uniforms.lineThickness.value = value;
   }
 
   get thickness() {
-    return this.material.lineThickness;
+    return this.material.uniforms.lineThickness.value;
   }
 
   update() {
@@ -103,12 +99,16 @@ export default class THREELine extends Mesh {
       normals: this._normalsArray
     });
 
+    const uniformNormals = this.material.uniforms.lineNormals.value;
     for (let i = 0; i < this.points.length; i++) {
       const normal = this.normals[i];
       const normalArray = this._normalsArray[i];
       normal.x = normalArray.x;
       normal.y = normalArray.y;
       normal.z = normalArray.z;
+      uniformNormals[i * 3] = normal.x;
+      uniformNormals[i * 3 + 1] = normal.y;
+      uniformNormals[i * 3 + 2] = normal.z;
     }
   }
 }

@@ -11,12 +11,8 @@ export default class FrenetSerretFrame {
     normals = new Array(points.length).fill().map(() => new Vector3())
   }) {
     for (let i = 0; i < points.length; i++) {
-      if (i === points.length - 1) {
-        continue;
-      }
-
-      let previousPoint = i === 0 ? points[0] : points[i - 1];
-      let nextPoint = points[i + 1];
+      let previousPoint = i === 0 ? points[i] : points[i - 1];
+      let nextPoint = i === points.length - 1 ? points[i] : points[i + 1];
 
       tangent.copy(nextPoint).subtract(previousPoint);
       if (!tangent.size) {
@@ -37,11 +33,8 @@ export default class FrenetSerretFrame {
       }
 
       binormal.cross(normal, tangent).normalize();
-
+      
       normals[i].copy(normal);
-      if (i === points.length - 2) {
-        normals[i + 1].copy(normal);
-      }
     }
   }
 }
