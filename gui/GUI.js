@@ -161,6 +161,10 @@ export default class GUI extends HTMLElement {
     return staticGUI.open;
   }
 
+  static get update() {
+    return staticGUI.update;
+  }
+
   static set serverUrl(value) {
     GUI._addStatic();
     staticGUI.serverUrl = value;
