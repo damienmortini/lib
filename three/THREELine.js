@@ -84,14 +84,14 @@ export default class THREELine extends Mesh {
     for (let i = 0; i < this.points.length; i++) {
       const point = this.points[i];
       const pointArray = this._pointsArray[i];
-      pointArray.x = point.x;
-      pointArray.y = point.y;
-      pointArray.z = point.z;
+      pointArray[0] = point.x;
+      pointArray[1] = point.y;
+      pointArray[2] = point.z;
       const normal = this.normals[i];
       const normalArray = this._normalsArray[i];
-      normalArray.x = normal.x;
-      normalArray.y = normal.y;
-      normalArray.z = normal.z;
+      normalArray[0] = normal.x;
+      normalArray[1] = normal.y;
+      normalArray[2] = normal.z;
     }
 
     FrenetSerretFrame.compute({
@@ -103,9 +103,9 @@ export default class THREELine extends Mesh {
     for (let i = 0; i < this.points.length; i++) {
       const normal = this.normals[i];
       const normalArray = this._normalsArray[i];
-      normal.x = normalArray.x;
-      normal.y = normalArray.y;
-      normal.z = normalArray.z;
+      normal.x = normalArray[0];
+      normal.y = normalArray[1];
+      normal.z = normalArray[2];
       uniformNormals[i * 3] = normal.x;
       uniformNormals[i * 3 + 1] = normal.y;
       uniformNormals[i * 3 + 2] = normal.z;
