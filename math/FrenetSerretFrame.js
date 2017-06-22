@@ -20,7 +20,6 @@ export default class FrenetSerretFrame {
         tangent.set(0, 1, 0);
       }
       tangent.normalize();
-
       
       if (i === 0) {
         if (pointNormal[0] + pointNormal[1] + pointNormal[2]) {
