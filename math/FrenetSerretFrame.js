@@ -36,7 +36,6 @@ export default class FrenetSerretFrame {
 
       binormal.cross(normal, tangent);
       
-      // pointNormal.copy(normal);
       pointNormal[0] = normal[0];
       pointNormal[1] = normal[1];
       pointNormal[2] = normal[2];
