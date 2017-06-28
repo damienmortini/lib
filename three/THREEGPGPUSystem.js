@@ -76,8 +76,9 @@ export default class THREEGPGPUSystem {
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEShaderMaterial({
       uniforms: new Map([
         ["dataTextureSize", new Vector2(dataTexture.image.width, dataTexture.image.height)],
-        ["dataTexture", dataTexture]
-      ], ...uniforms),
+        ["dataTexture", dataTexture],
+        ...uniforms
+      ]),
       vertexShaderChunks: [
         ["start",
           `varying vec2 vUv;`
