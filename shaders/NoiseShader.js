@@ -1,95 +1,95 @@
 // From https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 // and https://github.com/ashima/webgl-noise
 
-const COMMON = `
-  // Mod 289
-
-  float mod289(float x) {
-    return x - floor(x * (1.0 / 289.0)) * 289.0;
-  }
-
-  vec2 mod289(vec2 x) {
-    return x - floor(x * (1.0 / 289.0)) * 289.0;
-  }
-
-  vec3 mod289(vec3 x) {
-    return x - floor(x * (1.0 / 289.0)) * 289.0;
-  }
-
-  vec4 mod289(vec4 x)
-  {
-    return x - floor(x * (1.0 / 289.0)) * 289.0;
-  }
-
-  // Permute
-
-  float permute(float x) {
-    return mod289(((x*34.0)+1.0)*x);
-  }
-
-  vec3 permute(vec3 x) {
-    return mod289(((x*34.0)+1.0)*x);
-  }
-
-  vec4 permute(vec4 x)
-  {
-    return mod289(((x*34.0)+1.0)*x);
-  }
-
-  // Taylor Inv Sqrt
-
-  float taylorInvSqrt(float r)
-  {
-    return 1.79284291400159 - 0.85373472095314 * r;
-  }
-
-  vec4 taylorInvSqrt(vec4 r)
-  {
-    return 1.79284291400159 - 0.85373472095314 * r;
-  }
-
-  // Fade
-
-  vec2 fade(vec2 t) {
-    return t*t*t*(t*(t*6.0-15.0)+10.0);
-  }
-
-  vec3 fade(vec3 t) {
-    return t*t*t*(t*(t*6.0-15.0)+10.0);
-  }
-
-  vec4 fade(vec4 t) {
-    return t*t*t*(t*(t*6.0-15.0)+10.0);
-  }
-
-  // Grad 4
-
-  vec4 grad4(float j, vec4 ip)
-    {
-    const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);
-    vec4 p,s;
-
-    p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;
-    p.w = 1.5 - dot(abs(p.xyz), ones.xyz);
-    s = vec4(lessThan(p, vec4(0.0)));
-    p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;
-
-    return p;
-  }
-
-  // Hash
-
-  vec2 hash( vec2 p ){
-      p = vec2( dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));
-      return fract(sin(p)*43758.5453);
-  }
-`;
-
 export default class NoiseGLSL {
+  static common() {
+    return `
+      // Mod 289
+
+      float mod289(float x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
+      }
+
+      vec2 mod289(vec2 x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
+      }
+
+      vec3 mod289(vec3 x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
+      }
+
+      vec4 mod289(vec4 x)
+      {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
+      }
+
+      // Permute
+
+      float permute(float x) {
+        return mod289(((x*34.0)+1.0)*x);
+      }
+
+      vec3 permute(vec3 x) {
+        return mod289(((x*34.0)+1.0)*x);
+      }
+
+      vec4 permute(vec4 x)
+      {
+        return mod289(((x*34.0)+1.0)*x);
+      }
+
+      // Taylor Inv Sqrt
+
+      float taylorInvSqrt(float r)
+      {
+        return 1.79284291400159 - 0.85373472095314 * r;
+      }
+
+      vec4 taylorInvSqrt(vec4 r)
+      {
+        return 1.79284291400159 - 0.85373472095314 * r;
+      }
+
+      // Fade
+
+      vec2 fade(vec2 t) {
+        return t*t*t*(t*(t*6.0-15.0)+10.0);
+      }
+
+      vec3 fade(vec3 t) {
+        return t*t*t*(t*(t*6.0-15.0)+10.0);
+      }
+
+      vec4 fade(vec4 t) {
+        return t*t*t*(t*(t*6.0-15.0)+10.0);
+      }
+
+      // Grad 4
+
+      vec4 grad4(float j, vec4 ip)
+        {
+        const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);
+        vec4 p,s;
+
+        p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;
+        p.w = 1.5 - dot(abs(p.xyz), ones.xyz);
+        s = vec4(lessThan(p, vec4(0.0)));
+        p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;
+
+        return p;
+      }
+
+      // Hash
+
+      vec2 hash( vec2 p ){
+          p = vec2( dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));
+          return fract(sin(p)*43758.5453);
+      }
+    `;
+  }
+  
   static random() {
     return `
-      ${COMMON}
-
       float random(float n){return fract(sin(n) * 43758.5453123);}
       float random(vec2 co){return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);}
       float random(vec2 co, float l) {return random(vec2(random(co), l));}
@@ -99,8 +99,6 @@ export default class NoiseGLSL {
 
   static noise() {
     return `
-      ${NoiseGLSL.random()}
-
       float noise(float p){
         float fl = floor(p);
         float fc = fract(p);
@@ -144,8 +142,6 @@ export default class NoiseGLSL {
 
   static perlinNoise() {
     return `
-      ${COMMON}
-
       float perlinNoise(vec2 P)
       {
         vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
@@ -635,8 +631,6 @@ export default class NoiseGLSL {
 
   static simplexNoise() {
     return `
-      ${COMMON}
-
       float simplexNoise(vec2 v)
       {
         const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
@@ -852,8 +846,6 @@ export default class NoiseGLSL {
 
   static curlNoise() {
     return `
-      ${NoiseGLSL.simplexNoise()}
-
       vec3 curlNoise( vec3 p ){
         const float e = .1;
         vec3 dx = vec3( e   , 0.0 , 0.0 );
@@ -879,8 +871,6 @@ export default class NoiseGLSL {
 
   static voronoiNoise() {
     return `
-      ${COMMON}
-
       #define OCTAVES         1       // 7
       #define SWITCH_TIME     60.0   // seconds
 
@@ -935,8 +925,6 @@ export default class NoiseGLSL {
 
   static fbm() {
     return `
-      ${NoiseGLSL.noise()}
-
       #define NUM_OCTAVES 5
 
       float fbm(float x) {
