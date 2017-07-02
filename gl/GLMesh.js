@@ -1,63 +1,54 @@
 import GLBuffer from "./GLBuffer.js";
 
 export default class GLMesh {
-  constructor({gl, positions, uvs, normals, indices} = {}) {
+  constructor({gl, positionData, normalData, uvData, indiceData} = {}) {
     this.gl = gl;
 
     this.gl.getExtension("OES_element_index_uint");
 
     this.attributes = new Map();
 
-    if(positions) {
+    if(positionData) {
       this.attributes.set("position", {
         buffer: new GLBuffer({
           gl: this.gl, 
-          data: positions
+          data: positionData
         }),
-        count: positions.length / 3,
+        count: positionData.length / 3,
         size: 3
       });
     }
 
-    if(normals) {
+    if(normalData) {
       this.attributes.set("normal", {
         buffer: new GLBuffer({
           gl: this.gl, 
-          data: normals
+          data: normalData
         }),
-        count: normals.length / 3,
+        count: normalData.length / 3,
         size: 3
       });
     }
 
-    if(uvs) {
+    if(uvData) {
       this.attributes.set("uv", {
         buffer: new GLBuffer({
           gl: this.gl,
-          data: uvs
+          data: uvData
         }),
-        count: uvs.length / 2,
+        count: uvData.length / 2,
         size: 2
       });
     }
 
-    if(indices) {
-      this.setIndicesData({
-        data: indices,
-        count: indices.length
-      });
-    }
-  }
-
-  setIndicesData({data, offset = 0, count = 0} = {}) {
     this.indices = {
       buffer: new GLBuffer({
         gl: this.gl,
-        data,
+        data: indiceData,
         target: this.gl.ELEMENT_ARRAY_BUFFER
       }),
-      offset,
-      count
+      offset: 0,
+      count: indiceData ? indiceData.length : 0
     }
   }
 
@@ -83,7 +74,7 @@ export default class GLMesh {
 
   draw ({
     mode = this.gl.TRIANGLES, 
-    elements = !!this.indices.buffer,
+    elements = !!(this.indices.buffer.data.length || this.indices.buffer.data.byteLength),
     count = elements ? this.indices.count : this.attributes.get("position").count, 
     offset = this.indices.offset,
     first = 0
