@@ -2,9 +2,10 @@ import GLBuffer from "./GLBuffer.js";
 import GLMesh from "./GLMesh.js";
 
 export default class GLTFMesh extends GLMesh {
-  constructor({gl, data} = {}) {
+  constructor({gl, data, attributes} = {}) {
     super({
-      gl
+      gl,
+      attributes
     });
 
     let positionAttributeData = data.primitives[0].attributes["POSITION"];
@@ -15,9 +16,8 @@ export default class GLTFMesh extends GLMesh {
       }),
       size: 3,
       count: positionAttributeData.count,
-      offset: positionAttributeData.bufferView.byteOffset + positionAttributeData.byteOffset,
-      stride: positionAttributeData.byteStride,
-      target: positionAttributeData.target
+      offset: positionAttributeData.bufferView.byteOffset,
+      target: positionAttributeData.bufferView.target
     });
 
     let normalAttributeData = data.primitives[0].attributes["NORMAL"];
@@ -28,28 +28,29 @@ export default class GLTFMesh extends GLMesh {
       }),
       size: 3,
       count: normalAttributeData.count,
-      offset: normalAttributeData.bufferView.byteOffset + normalAttributeData.byteOffset,
-      stride: normalAttributeData.byteStride,
-      target: normalAttributeData.target
+      offset: normalAttributeData.bufferView.byteOffset,
+      target: normalAttributeData.bufferView.target
     });
 
     let uvAttributeData = data.primitives[0].attributes["TEXCOORD_0"];
-    this.attributes.set("uv", {
-      buffer: new GLBuffer({
-        gl: this.gl,
-        data: uvAttributeData.bufferView.buffer
-      }),
-      size: 2,
-      count: uvAttributeData.count,
-      offset: uvAttributeData.bufferView.byteOffset + uvAttributeData.byteOffset,
-      stride: uvAttributeData.byteStride,
-      target: uvAttributeData.target
-    });
+    if(uvAttributeData) {
+      this.attributes.set("uv", {
+        buffer: new GLBuffer({
+          gl: this.gl,
+          data: uvAttributeData.bufferView.buffer
+        }),
+        size: 2,
+        count: uvAttributeData.count,
+        offset: uvAttributeData.bufferView.byteOffset,
+        target: uvAttributeData.bufferView.target
+      });
+    }
 
     let indices = data.primitives[0].indices;
 
     this.indices.buffer.data = indices.bufferView.buffer;
     this.indices.offset = indices.bufferView.byteOffset;
+    // this.indices.type = indices.componentType;
     this.indices.count = indices.count;
   }
 }

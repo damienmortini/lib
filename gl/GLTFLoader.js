@@ -8,62 +8,41 @@ export default class GLTFLoader extends Loader {
 
     GLTFLoader.typeMap.get("json").push("gltf");
     
-    return Loader.load(value)
+    let promise = Loader.load(value)
     .then((data) => {
       rawData = data;
-      let bufferURLs = [];
-      for(let key in rawData.buffers) {
-        objectMap.set(key, null);
-        bufferURLs.push(`${path}${rawData.buffers[key].uri}`);
-      }
-
-      return Loader.load(bufferURLs);
+      return Loader.load(rawData.buffers.map(value => `${path}${value.uri}`));
     })
-    .then((buffersData) => {
-      let i = 0;
-      for (let key of objectMap.keys()) {
-        objectMap.set(key, buffersData[i]);
-        i++;
-      }
-
-      let data = JSON.parse(JSON.stringify(rawData));
+    .then((buffers) => {
+      const data = JSON.parse(JSON.stringify(rawData));
       data.raw = rawData;
 
-      let typeKeys = [
-        "accessors",
-        "bufferViews",
-        "meshes",
-        "materials", 
-        "cameras",
-        "nodes",
-        "scenes"
-      ];
-
-      for (let typeKey in data) {
-        if(!typeKeys.includes(typeKey)) {
-          continue;
-        }
-        for(let objectKey in data[typeKey]) {
-          objectMap.set(objectKey, data[typeKey][objectKey]);
-        }
+      for (let node of data.nodes) {
+        node.mesh = data.meshes[node.mesh];
       }
 
-      function traverse(object) {
-        for (let key in object) {
-          if(typeof object[key] === "string") {
-            let data = objectMap.get(object[key]);
-            if(data) {
-              object[key] = data;
-            }
-          } else if(object[key] && typeof object[key] === "object") {
-            traverse(object[key]);
+      for (let bufferView of data.bufferViews) {
+        bufferView.buffer = buffers[bufferView.buffer];
+      }
+
+      for (let accessor of data.accessors) {
+        accessor.bufferView = data.bufferViews[accessor.bufferView];
+      }
+
+      for (let mesh of data.meshes) {
+        for (let primitive of mesh.primitives) {
+          for (let key in primitive.attributes) {
+            primitive.attributes[key] = data.accessors[primitive.attributes[key]];
           }
+          primitive.indices = data.accessors[primitive.indices];
         }
       }
-
-      traverse(data);
 
       return data;
     });
+
+    Loader.promises.set(value, promise);
+
+    return promise;
   }
 }
