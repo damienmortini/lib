@@ -1,44 +1,19 @@
 import GLBuffer from "./GLBuffer.js";
 
 export default class GLMesh {
-  constructor({gl, positionData, normalData, uvData, indiceData} = {}) {
+  constructor({gl, attributes, indiceData} = {}) {
     this.gl = gl;
 
     this.gl.getExtension("OES_element_index_uint");
 
-    this.attributes = new Map();
+    this.attributes = new Map(attributes);
 
-    if(positionData) {
-      this.attributes.set("position", {
-        buffer: new GLBuffer({
-          gl: this.gl, 
-          data: positionData
-        }),
-        count: positionData.length / 3,
-        size: 3
+    for (let [name, attribute] of this.attributes) {
+      attribute.buffer = new GLBuffer({
+        gl: this.gl, 
+        data: attribute.data
       });
-    }
-
-    if(normalData) {
-      this.attributes.set("normal", {
-        buffer: new GLBuffer({
-          gl: this.gl, 
-          data: normalData
-        }),
-        count: normalData.length / 3,
-        size: 3
-      });
-    }
-
-    if(uvData) {
-      this.attributes.set("uv", {
-        buffer: new GLBuffer({
-          gl: this.gl,
-          data: uvData
-        }),
-        count: uvData.length / 2,
-        size: 2
-      });
+      attribute.count = attribute.count || attribute.data.length / attribute.size;
     }
 
     this.indices = {
@@ -77,13 +52,22 @@ export default class GLMesh {
     elements = !!(this.indices.buffer.data.length || this.indices.buffer.data.byteLength),
     count = elements ? this.indices.count : this.attributes.get("position").count, 
     offset = this.indices.offset,
-    first = 0
+    first = 0,
+    instanceCount
   } = {}) {
     if(elements) {
       let type = count > 65535 ? this.gl.UNSIGNED_INT : this.gl.UNSIGNED_SHORT;
-      this.gl.drawElements(mode, count, type, offset);
+      if(instanceCount !== undefined) {
+        this.gl.drawElementsInstanced(mode, count, type, offset, instanceCount);
+      } else {
+        this.gl.drawElements(mode, count, type, offset);
+      }
     } else {
-      this.gl.drawArrays(mode, first, count);
+      if(instanceCount !== undefined) {
+        this.gl.drawArraysInstanced(mode, first, count, instanceCount);
+      } else {
+        this.gl.drawArrays(mode, first, count);
+      }
     }
   }
 };

@@ -8,16 +8,24 @@ import GLTexture from "./GLTexture.js";
 import Shader from "dlib/3d/Shader.js";
 
 export default class GLProgram extends Shader {
-  constructor({gl, vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders} = {}) {
+  constructor({gl,
+    vertexShader = undefined,
+    fragmentShader = undefined,
+    uniforms = undefined,
+    attributes = undefined,
+    vertexShaderChunks = undefined,
+    fragmentShaderChunks = undefined,
+    shaders = undefined
+  } = {}) {
     super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
 
-    let program = gl.createProgram();
+    const program = gl.createProgram();
 
-    self = this;
+    const self = this;
 
-    let attributesLocations = new Map();
+    const attributesLocations = new Map();
     class Attributes extends Map {
-      set (name , {buffer, location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0} = {}) {
+      set (name , {buffer, location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor} = {}) {
         if(name instanceof Map) {
           for (let [key, value] of name) {
             this.set(key, value);
@@ -34,13 +42,16 @@ export default class GLProgram extends Shader {
         }
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+        if(divisor !== undefined) {
+          gl.vertexAttribDivisor(location, divisor);
+        }
         buffer.unbind();
         super.set(name, {buffer, size, type, normalized, stride, offset});
       }
     }
 
-    let uniformLocations = new Map();
-    let uniformTypes = new Map();
+    const uniformLocations = new Map();
+    const uniformTypes = new Map();
     class Uniforms extends Map {
       set (name , ...values) {
         let location = uniformLocations.get(name);
@@ -119,14 +130,14 @@ export default class GLProgram extends Shader {
       return;
     }
 
-    let shader = this.gl.createShader(type);
+    const shader = this.gl.createShader(type);
     this.gl.shaderSource(shader, source);
     this.gl.compileShader(shader);
 
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      let error = this.gl.getShaderInfoLog(shader);
-      let lineNumber = parseFloat(/ERROR: 0:(\d+):/.exec(error)[1]);
-      let shaderLines = source.split("\n");
+      const error = this.gl.getShaderInfoLog(shader);
+      const lineNumber = parseFloat(/ERROR: 0:(\d+):/.exec(error)[1]);
+      const shaderLines = source.split("\n");
       console.error(`${error}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
     }
 
