@@ -57,12 +57,11 @@ export default class THREELine extends Mesh {
           vec3 linePositionOffset = position;
 
           vec3 position = linePositions[int(linePointId)];
-          vec3 normal = lineNormals[int(linePointId)];
-
           vec3 lineDirection = normalize(linePositions[int(linePointId) + 1] - position);
           lineDirection = mix(normalize(position - linePositions[int(linePointId) - 1]), lineDirection, length(lineDirection));
+          vec3 lineNormal = lineNormals[int(linePointId)];
 
-          normal = normal * linePositionOffset.x + cross(normal, lineDirection) * linePositionOffset.z;
+          vec3 normal = lineNormal * linePositionOffset.x + cross(lineNormal, lineDirection) * linePositionOffset.z;
 
           position += normal * lineThickness;
         `]
