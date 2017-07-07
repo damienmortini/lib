@@ -46,45 +46,45 @@ export default class THREERibbon extends THREELine {
       return;
     }
 
-    const length = this.points.length;
-    const uniformNormals = this.material.uniforms.lineNormals.value;
+    // const length = this.points.length;
+    // const uniformNormals = this.material.uniforms.lineNormals.value;
 
-    for (let i = 0; i < length - 1; i++) {
-      let normal = this.normals[i];
-      this.points[i].copy(this.points[i + 1]);
-      normal.copy(this.normals[i + 1]);
-      uniformNormals[i * 3] = normal.x;
-      uniformNormals[i * 3 + 1] = normal.y;
-      uniformNormals[i * 3 + 2] = normal.z;
-    }
+    // for (let i = 0; i < length - 1; i++) {
+    //   let normal = this.normals[i];
+    //   this.points[i].copy(this.points[i + 1]);
+    //   normal.copy(this.normals[i + 1]);
+    //   uniformNormals[i * 3] = normal.x;
+    //   uniformNormals[i * 3 + 1] = normal.y;
+    //   uniformNormals[i * 3 + 2] = normal.z;
+    // }
 
-    for (let i = 0; i < COMPUTATION_POINTS_NUMBER; i++) {
-      this._pointsTmp[i].copy(this.points[length - COMPUTATION_POINTS_NUMBER + i]);
-      this._normalsTmp[i].copy(this.normals[length - COMPUTATION_POINTS_NUMBER + i]);
-    }
+    // for (let i = 0; i < COMPUTATION_POINTS_NUMBER; i++) {
+    //   this._pointsTmp[i].copy(this.points[length - COMPUTATION_POINTS_NUMBER + i]);
+    //   this._normalsTmp[i].copy(this.normals[length - COMPUTATION_POINTS_NUMBER + i]);
+    // }
 
-    const pointsSave = this.points;
-    const normalsSave = this.normals;
-    const uniformNormalsSave = this.material.uniforms.lineNormals.value;
+    // const pointsSave = this.points;
+    // const normalsSave = this.normals;
+    // const uniformNormalsSave = this.material.uniforms.lineNormals.value;
 
-    this.points = this._pointsTmp;
-    this.normals = this._normalsTmp;
-    this.material.uniforms.lineNormals.value = this._uniformNormalsTmp;
+    // this.points = this._pointsTmp;
+    // this.normals = this._normalsTmp;
+    // this.material.uniforms.lineNormals.value = this._uniformNormalsTmp;
 
-    super.update();
+    // super.update();
 
-    for (let i = 0; i < COMPUTATION_POINTS_NUMBER; i++) {
-      let j = length - COMPUTATION_POINTS_NUMBER + i;
-      let normal = normalsSave[j];
-      pointsSave[j].copy(this.points[i]);
-      normal.copy(this.normals[i]);
-      uniformNormalsSave[j * 3] = normal.x;
-      uniformNormalsSave[j * 3 + 1] = normal.y;
-      uniformNormalsSave[j * 3 + 2] = normal.z;
-    }
+    // for (let i = 0; i < COMPUTATION_POINTS_NUMBER; i++) {
+    //   let j = length - COMPUTATION_POINTS_NUMBER + i;
+    //   let normal = normalsSave[j];
+    //   pointsSave[j].copy(this.points[i]);
+    //   normal.copy(this.normals[i]);
+    //   uniformNormalsSave[j * 3] = normal.x;
+    //   uniformNormalsSave[j * 3 + 1] = normal.y;
+    //   uniformNormalsSave[j * 3 + 2] = normal.z;
+    // }
 
-    this.points = pointsSave;
-    this.normals = normalsSave;
-    this.material.uniforms.lineNormals.value = uniformNormalsSave;
+    // this.points = pointsSave;
+    // this.normals = normalsSave;
+    // this.material.uniforms.lineNormals.value = uniformNormalsSave;
   }
 }

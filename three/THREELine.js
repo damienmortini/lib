@@ -16,6 +16,9 @@ export default class THREELine extends Mesh {
   } = {}) {
     super(geometry, material);
 
+    this.userData.thickness = thickness;
+    this.userData._lineNormals = new Float32Array(100 * 3);
+
     this.points = points;
     this.normals = new Array(this.points.length).fill().map(() => new Vector3());
 
@@ -39,58 +42,77 @@ export default class THREELine extends Mesh {
 
     this.geometry.addAttribute("linePointId", new BufferAttribute(ids, 1));
 
-    material.add({
-      uniforms: [
-        ["linePositions", this.points],
-        ["lineThickness", thickness],
-        ["lineNormals", new Float32Array(100 * 3)]
-      ],
-      vertexShaderChunks: [
-        ["start", `
-          uniform float lineThickness;
-          uniform vec3 linePositions[${this.points.length}];
-          uniform vec3 lineNormals[${this.points.length}];
+    if(!material.linePositions) {
+      material.add({
+        uniforms: [
+          ["linePositions", this.points],
+          ["lineThickness", this.userData.thickness],
+          ["lineNormals", this.userData._lineNormals]
+        ],
+        vertexShaderChunks: [
+          ["start", `
+            uniform float lineThickness;
+            uniform vec3 linePositions[${this.points.length}];
+            uniform vec3 lineNormals[${this.points.length}];
 
-          attribute float linePointId;
-        `],
-        ["main", `
-          vec3 linePositionOffset = position;
+            attribute float linePointId;
+          `],
+          ["main", `
+            vec3 linePositionOffset = position;
 
-          vec3 position = linePositions[int(linePointId)];
-          vec3 lineDirection = normalize(linePositions[int(linePointId) + 1] - position);
-          lineDirection = mix(normalize(position - linePositions[int(linePointId) - 1]), lineDirection, length(lineDirection));
-          vec3 lineNormal = lineNormals[int(linePointId)];
+            vec3 position = linePositions[int(linePointId)];
+            vec3 lineDirection = normalize(linePositions[int(linePointId) + 1] - position);
+            lineDirection = mix(normalize(position - linePositions[int(linePointId) - 1]), lineDirection, length(lineDirection));
+            vec3 lineNormal = lineNormals[int(linePointId)];
 
-          vec3 normal = lineNormal * linePositionOffset.x + cross(lineNormal, lineDirection) * linePositionOffset.z;
+            vec3 normal = lineNormal * linePositionOffset.x + cross(lineNormal, lineDirection) * linePositionOffset.z;
 
-          position += normal * lineThickness;
-        `]
-      ]
-    });
+            position += normal * lineThickness;
+          `]
+        ]
+      });
+    }
 
     this.update();
   }
 
+  onBeforeRender(renderer, scene, camera, geometry, material, group) {
+    const threeProgram = renderer.properties.get(material).program;
+    if(!threeProgram) {
+      return;
+    }
+    const gl = renderer.getContext();
+    const uniforms = threeProgram.getUniforms();
+
+    gl.useProgram(threeProgram.program);
+    uniforms.setValue(gl, "lineThickness", this.userData.thickness);
+    uniforms.setValue(gl, "lineNormals", this.userData._lineNormals);
+    uniforms.setValue(gl, "linePositions", this.points);
+    // this.material.uniforms.lineThickness.value = this.userData.thickness;
+    // this.material.uniforms.lineNormals.value = this.userData._lineNormals;
+    // this.material.uniforms.linePositions.value = this.points;
+  }
+
   set thickness(value) {
-    this.material.uniforms.lineThickness.value = value;
+    this.userData.thickness = value;
   }
 
   get thickness() {
-    return this.material.uniforms.lineThickness.value;
+    return this.userData.thickness;
   }
 
   update() {
     for (let i = 0; i < this.points.length; i++) {
       const point = this.points[i];
       const pointArray = this._pointsArray[i];
-      pointArray[0] = point.x;
-      pointArray[1] = point.y;
-      pointArray[2] = point.z;
+      pointArray.x = point.x;
+      pointArray.y = point.y;
+      pointArray.z = point.z;
       const normal = this.normals[i];
       const normalArray = this._normalsArray[i];
-      normalArray[0] = normal.x;
-      normalArray[1] = normal.y;
-      normalArray[2] = normal.z;
+      normalArray.x = normal.x;
+      normalArray.y = normal.y;
+      normalArray.z = normal.z;
     }
 
     FrenetSerretFrame.compute({
@@ -98,7 +120,7 @@ export default class THREELine extends Mesh {
       normals: this._normalsArray
     });
 
-    const uniformNormals = this.material.uniforms.lineNormals.value;
+    const uniformNormals = this.userData._lineNormals;
     for (let i = 0; i < this.points.length; i++) {
       const normal = this.normals[i];
       const normalArray = this._normalsArray[i];
