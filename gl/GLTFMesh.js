@@ -50,7 +50,7 @@ export default class GLTFMesh extends GLMesh {
 
     this.indices.buffer.data = indices.bufferView.buffer;
     this.indices.offset = indices.bufferView.byteOffset;
-    // this.indices.type = indices.componentType;
+    this.indices.type = indices.componentType;
     this.indices.count = indices.count;
   }
 }

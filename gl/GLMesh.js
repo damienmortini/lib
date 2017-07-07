@@ -52,7 +52,7 @@ export default class GLMesh {
     elements = !!(this.indices.buffer.data.length || this.indices.buffer.data.byteLength),
     count = elements ? this.indices.count : this.attributes.get("position").count, 
     offset = this.indices.offset,
-    type = this.indices.type || count > 65535 ? this.gl.UNSIGNED_INT : this.gl.UNSIGNED_SHORT,
+    type = this.indices.type || (count > 256 ? (count > 65535 ? this.gl.UNSIGNED_INT : this.gl.UNSIGNED_SHORT) : this.gl.UNSIGNED_BYTE),
     first = 0,
     instanceCount
   } = {}) {
