@@ -11,8 +11,10 @@ export default class TrackballController {
     distance = 0,
     invertRotation = true,
     rotationEaseRatio = .04,
-    zoomStep = 1.,
+    zoomSpeed = 1,
     zoomEaseRatio = .1,
+    minDistance = 0,
+    maxDistance = Infinity,
     autoupdate = true
   } = {}) {
     this.matrix = matrix;
@@ -22,7 +24,9 @@ export default class TrackballController {
     this._distance = distance;
     this.invertRotation = invertRotation;
     this.rotationEaseRatio = rotationEaseRatio;
-    this.zoomStep = zoomStep;
+    this.maxDistance = maxDistance;
+    this.minDistance = minDistance;
+    this.zoomSpeed = zoomSpeed;
     this.zoomEaseRatio = zoomEaseRatio;
 
     this._pointer = Pointer.get(domElement);
@@ -54,9 +58,11 @@ export default class TrackballController {
 
   onWheel(e) {
     if(e.deltaY > 0) {
-      this._nextDistance += this.zoomStep;
+      this._nextDistance /= Math.pow(.9, this.zoomSpeed);
+      this._nextDistance = Math.min(this._nextDistance, this.maxDistance);
     } else {
-      this._nextDistance -= this.zoomStep;
+      this._nextDistance *= Math.pow(.9, this.zoomSpeed);
+      this._nextDistance = Math.max(this._nextDistance, this.minDistance);
     }
     this._nextDistance = Math.max(this._nextDistance, 0);
   }
