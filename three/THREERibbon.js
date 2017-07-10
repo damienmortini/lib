@@ -1,14 +1,10 @@
 import {
-  Color,
   Vector3
 } from "three";
 
 import THREELine from "./THREELine.js";
-import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
-import DVector3 from "../math/Vector3.js";
-
-const COMPUTATION_POINTS_NUMBER = 3;
+import FrenetSerretFrame from "../math/FrenetSerretFrame.js";
 
 export default class THREERibbon extends THREELine {
   constructor({
@@ -25,18 +21,8 @@ export default class THREERibbon extends THREELine {
       geometry,
       material
     });
-    
-    this._pointsTmp = new Array(COMPUTATION_POINTS_NUMBER).fill().map(() => new Vector3());
-    this._pointsArray = new Array(COMPUTATION_POINTS_NUMBER).fill().map(() => new DVector3());
 
-    this._normalsTmp = new Array(COMPUTATION_POINTS_NUMBER).fill().map(() => new Vector3());
-    this._normalsArray = new Array(COMPUTATION_POINTS_NUMBER).fill().map(() => new DVector3());
-
-    this._uniformNormalsTmp = new Float32Array(COMPUTATION_POINTS_NUMBER * 3);
-  }
-
-  get head() {
-    return this.points[this.points.length - 1];
+    this.head = new Vector3();
   }
 
   update() {
@@ -46,45 +32,18 @@ export default class THREERibbon extends THREELine {
       return;
     }
 
-    // const length = this.points.length;
-    // const uniformNormals = this.material.uniforms.lineNormals.value;
+    this.userData._linePositions.copyWithin(0, 3);
+    this.userData._lineNormals.copyWithin(0, 3);
 
-    // for (let i = 0; i < length - 1; i++) {
-    //   let normal = this.normals[i];
-    //   this.points[i].copy(this.points[i + 1]);
-    //   normal.copy(this.normals[i + 1]);
-    //   uniformNormals[i * 3] = normal.x;
-    //   uniformNormals[i * 3 + 1] = normal.y;
-    //   uniformNormals[i * 3 + 2] = normal.z;
-    // }
+    const headId = this.points.length - 1;
+    this.userData._linePositions[headId * 3] = this.head.x;
+    this.userData._linePositions[headId * 3 + 1] = this.head.y;
+    this.userData._linePositions[headId * 3 + 2] = this.head.z;
 
-    // for (let i = 0; i < COMPUTATION_POINTS_NUMBER; i++) {
-    //   this._pointsTmp[i].copy(this.points[length - COMPUTATION_POINTS_NUMBER + i]);
-    //   this._normalsTmp[i].copy(this.normals[length - COMPUTATION_POINTS_NUMBER + i]);
-    // }
-
-    // const pointsSave = this.points;
-    // const normalsSave = this.normals;
-    // const uniformNormalsSave = this.material.uniforms.lineNormals.value;
-
-    // this.points = this._pointsTmp;
-    // this.normals = this._normalsTmp;
-    // this.material.uniforms.lineNormals.value = this._uniformNormalsTmp;
-
-    // super.update();
-
-    // for (let i = 0; i < COMPUTATION_POINTS_NUMBER; i++) {
-    //   let j = length - COMPUTATION_POINTS_NUMBER + i;
-    //   let normal = normalsSave[j];
-    //   pointsSave[j].copy(this.points[i]);
-    //   normal.copy(this.normals[i]);
-    //   uniformNormalsSave[j * 3] = normal.x;
-    //   uniformNormalsSave[j * 3 + 1] = normal.y;
-    //   uniformNormalsSave[j * 3 + 2] = normal.z;
-    // }
-
-    // this.points = pointsSave;
-    // this.normals = normalsSave;
-    // this.material.uniforms.lineNormals.value = uniformNormalsSave;
+    FrenetSerretFrame.compute({
+      positions: this.userData._linePositions,
+      normals: this.userData._lineNormals,
+      range: [headId - 3, headId]
+    });
   }
 }

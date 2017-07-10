@@ -16,21 +16,13 @@ export default class THREELine extends Mesh {
   } = {}) {
     super(geometry, material);
 
-    this.userData.thickness = thickness;
-    this.userData._lineNormals = new Float32Array(100 * 3);
-
     this.points = points;
-    this.normals = new Array(this.points.length).fill().map(() => new Vector3());
 
-    this._pointsArray = new Array(this.points.length).fill().map(() => new DVector3());
-    this._normalsArray = new Array(this.points.length).fill().map(() => new DVector3());
+    this.userData._thickness = thickness;
+    this.userData._lineNormals = new Float32Array(this.points.length * 3);
+    this.userData._linePositions = new Float32Array(this.points.length * 3);
 
     this.frustumCulled = false;
-
-    this._vector3 = new Vector3();
-    this._tangent = new Vector3();
-    this._normal = new Vector3();
-    this._binormal = new Vector3();
 
     let positions = this.geometry.getAttribute("position").array;
     let verticesNumber = positions.length / 3;
@@ -45,8 +37,8 @@ export default class THREELine extends Mesh {
     if(!material.linePositions) {
       material.add({
         uniforms: [
-          ["linePositions", this.points],
-          ["lineThickness", this.userData.thickness],
+          ["linePositions", this.userData._linePositions],
+          ["lineThickness", this.userData._thickness],
           ["lineNormals", this.userData._lineNormals]
         ],
         vertexShaderChunks: [
@@ -85,51 +77,34 @@ export default class THREELine extends Mesh {
     const uniforms = threeProgram.getUniforms();
 
     gl.useProgram(threeProgram.program);
-    uniforms.setValue(gl, "lineThickness", this.userData.thickness);
+    uniforms.setValue(gl, "lineThickness", this.userData._thickness);
     uniforms.setValue(gl, "lineNormals", this.userData._lineNormals);
-    uniforms.setValue(gl, "linePositions", this.points);
-    // this.material.uniforms.lineThickness.value = this.userData.thickness;
-    // this.material.uniforms.lineNormals.value = this.userData._lineNormals;
-    // this.material.uniforms.linePositions.value = this.points;
+    uniforms.setValue(gl, "linePositions", this.userData._linePositions);
   }
 
   set thickness(value) {
-    this.userData.thickness = value;
+    this.userData._thickness = value;
   }
 
   get thickness() {
-    return this.userData.thickness;
+    return this.userData._thickness;
   }
 
-  update() {
-    for (let i = 0; i < this.points.length; i++) {
+  update({
+    range = [0, this.points.length - 1]
+  } = {}) {
+    const end = range[1];
+    for (let i = range[0]; i <= end; i++) {
       const point = this.points[i];
-      const pointArray = this._pointsArray[i];
-      pointArray.x = point.x;
-      pointArray.y = point.y;
-      pointArray.z = point.z;
-      const normal = this.normals[i];
-      const normalArray = this._normalsArray[i];
-      normalArray.x = normal.x;
-      normalArray.y = normal.y;
-      normalArray.z = normal.z;
+      this.userData._linePositions[i * 3] = point.x;
+      this.userData._linePositions[i * 3 + 1] = point.y;
+      this.userData._linePositions[i * 3 + 2] = point.z;
     }
 
     FrenetSerretFrame.compute({
-      points: this._pointsArray,
-      normals: this._normalsArray
+      positions: this.userData._linePositions,
+      normals: this.userData._lineNormals,
+      range
     });
-
-    const uniformNormals = this.userData._lineNormals;
-    for (let i = 0; i < this.points.length; i++) {
-      const normal = this.normals[i];
-      const normalArray = this._normalsArray[i];
-      normal.x = normalArray[0];
-      normal.y = normalArray[1];
-      normal.z = normalArray[2];
-      uniformNormals[i * 3] = normal.x;
-      uniformNormals[i * 3 + 1] = normal.y;
-      uniformNormals[i * 3 + 2] = normal.z;
-    }
   }
 }
