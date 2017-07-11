@@ -57,14 +57,8 @@ export default class TrackballController {
   }
 
   onWheel(e) {
-    if(e.deltaY > 0) {
-      this._nextDistance /= Math.pow(.9, this.zoomSpeed);
-      this._nextDistance = Math.min(this._nextDistance, this.maxDistance);
-    } else {
-      this._nextDistance *= Math.pow(.9, this.zoomSpeed);
-      this._nextDistance = Math.max(this._nextDistance, this.minDistance);
-    }
-    this._nextDistance = Math.max(this._nextDistance, 0);
+    this._nextDistance += e.deltaY * this.zoomSpeed;
+    this._nextDistance = Math.max(Math.min(this._nextDistance, this.maxDistance), this.minDistance);
   }
 
   update() {
