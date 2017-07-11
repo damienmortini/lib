@@ -9,20 +9,16 @@ import {
 
 import "three/examples/js/loaders/ColladaLoader.js";
 import "three/examples/js/loaders/OBJLoader.js";
-import "three/examples/js/loaders/GLTFLoader.js";
+import "three/examples/js/loaders/GLTF2Loader.js";
 
 import Loader from "../utils/Loader.js";
 
 let CACHED_CANVAS = new Map();
 
 function fixLoaderData(data, {scale}) {
-  let needsProcess = !!data.scene;
+  data = data.scene || data;
 
   let meshes = [];
-
-  if(needsProcess) {
-    data = data.scene;
-  }
 
   data.traverse((object3D) => {
     if(object3D instanceof Mesh || object3D instanceof Line || object3D instanceof LineSegments) {
@@ -49,6 +45,8 @@ function fixLoaderData(data, {scale}) {
     }
   }
 }
+
+Loader.typeMap.get("binary").add("glb");
 
 export default class THREELoader extends Loader {
   static load(value, {scale = 1} = {}) {
@@ -93,9 +91,9 @@ export default class THREELoader extends Loader {
         fixLoaderData(object, {scale});
         return object;
       }
-      else if(/\.(gltf)$/.test(value)) {
+      else if(/\.(gltf|glb)$/.test(value)) {
         return new Promise((resolve) => {
-          new THREE.GLTFLoader().parse(JSON.parse(data), (object) => {
+          new THREE.GLTF2Loader().parse(data instanceof ArrayBuffer ? data : JSON.parse(data), (object) => {
             fixLoaderData(object, {scale});
             resolve(object);
           }, /(.*[\/\\]).*$/.exec(value)[1]);

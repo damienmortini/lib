@@ -2,8 +2,9 @@ const PROMISES = new Map();
 const OBJECTS = new Map();
 
 const TYPE_MAP = new Map([
-  ["json", ["json"]],
-  ["binary", ["bin"]]
+  ["text", new Set(["txt", "html", "css", "js"])],
+  ["json", new Set(["json"])],
+  ["binary", new Set(["bin"])]
 ]);
 
 export default class Loader {
@@ -84,12 +85,14 @@ export default class Loader {
             })
             .then((response) => {
               let method;
-              if(Loader.typeMap.get("json").includes(extension)) {
+              if(Loader.typeMap.get("json").has(extension)) {
                 method = "json";
-              } else if(Loader.typeMap.get("binary").includes(extension)) {
+              } else if(Loader.typeMap.get("binary").has(extension)) {
                 method = "arrayBuffer";
-              } else {
+              } else if(Loader.typeMap.get("text").has(extension)) {
                 method = "text";
+              } else {
+                method = "blob";
               }
               return response[method]();
             })
