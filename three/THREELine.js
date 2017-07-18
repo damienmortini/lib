@@ -50,16 +50,16 @@ export default class THREELine extends Mesh {
             attribute float linePointId;
           `],
           ["main", `
-            vec3 linePositionOffset = position;
+            vec3 position = position;
 
-            vec3 position = linePositions[int(linePointId)];
-            vec3 lineDirection = normalize(linePositions[int(linePointId) + 1] - position);
-            lineDirection = mix(normalize(position - linePositions[int(linePointId) - 1]), lineDirection, length(lineDirection));
+            vec3 linePosition = linePositions[int(linePointId)];
+            vec3 lineDirection = normalize(linePositions[int(linePointId) + 1] - linePosition);
+            lineDirection = mix(normalize(linePosition - linePositions[int(linePointId) - 1]), lineDirection, length(lineDirection));
             vec3 lineNormal = lineNormals[int(linePointId)];
 
-            vec3 normal = lineNormal * linePositionOffset.x + cross(lineNormal, lineDirection) * linePositionOffset.z;
+            vec3 normal = lineNormal * position.x + cross(lineNormal, lineDirection) * position.z;
 
-            position += normal * lineThickness;
+            position = linePosition + normal * lineThickness;
           `]
         ]
       });
