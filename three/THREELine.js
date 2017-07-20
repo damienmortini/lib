@@ -36,11 +36,6 @@ export default class THREELine extends Mesh {
 
     if(!material.linePositions) {
       material.add({
-        uniforms: [
-          ["linePositions", this.userData._linePositions],
-          ["lineThickness", this.userData._thickness],
-          ["lineNormals", this.userData._lineNormals]
-        ],
         vertexShaderChunks: [
           ["start", `
             uniform float lineThickness;
@@ -75,10 +70,16 @@ export default class THREELine extends Mesh {
   }
 
   onBeforeRender(renderer, scene, camera, geometry, material, group) {
+    this.material.lineThickness = this.userData._thickness;
+    this.material.lineNormals = this.userData._lineNormals;
+    this.material.linePositions = this.userData._linePositions;
+
     const threeProgram = renderer.properties.get(material).program;
+
     if(!threeProgram) {
       return;
     }
+
     const gl = renderer.getContext();
     const uniforms = threeProgram.getUniforms();
 
