@@ -22,7 +22,7 @@ export default class THREERibbon extends THREELine {
       material
     });
 
-    this.head = new Vector3();
+    this.head = points[this.points.length - 1].clone();
   }
 
   update() {
