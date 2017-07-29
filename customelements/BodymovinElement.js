@@ -14,6 +14,9 @@ export default class BodymovinElement extends HTMLElement {
   constructor() {
     super();
     this.renderer = "svg";
+    this.loop = false;
+    this.direction = 1;
+    this.speed = 1;
   }
 
   get src() {
@@ -34,15 +37,57 @@ export default class BodymovinElement extends HTMLElement {
       if(this._segments) {
         this.segments = this._segments;
       }
+      this.loop = this._loop;
+      this.direction = this._direction;
+      this.speed = this._speed;
     });
     this.animation.addEventListener("loopComplete", () => {
       this.dispatchEvent(new Event("ended"));
     });
+    this.animation.addEventListener("complete", () => {
+      this.dispatchEvent(new Event("ended"));
+    });
+  }
+
+  set loop(value) {
+    this._loop = value;
+    if(this.animation) {
+      this.animation.loop = value;
+    }
+  }
+
+  get loop() {
+    return this._loop;
+  }
+
+  set direction(value) {
+    this._direction = value;
+    if(this.animation) {
+      this.animation.setDirection(value);
+    }
+  }
+
+  get direction() {
+    return this._direction;
+  }
+
+  set speed(value) {
+    this._speed = value;
+    if(this.animation) {
+      this.animation.setSpeed(value);
+      this.animation.play();
+    }
+  }
+
+  get speed() {
+    return this._speed;
   }
 
   set segments(value) {
     this._segments = value;
-    this.animation.playSegments(this._segments, true);
+    if(this.animation) {
+      this.animation.playSegments(this._segments, true);
+    }
   }
 
   get segments() {
