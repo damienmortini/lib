@@ -9,6 +9,7 @@ import GLTexture from "../gl/GLTexture.js";
   style.textContent = `
     dlib-webglvideo {
       display: block;
+      position: relative;
     }
   `;
   document.head.appendChild(style);
@@ -20,13 +21,15 @@ export default class WebGLVideoElement extends LoopElement {
       autoplay: false
     });
 
+    this._resizeBinded = this.resize.bind(this);
+
     this._video = document.createElement("video");
+    this._video.setAttribute("playsinline", "true");
     this._canvas = document.createElement("canvas");
+    this._canvas.style.width = "100%";
     this.appendChild(this._canvas);
-    this.appendChild(this._video);
-    this._video.loop = true;
     this.gl = this._canvas.getContext("webgl", {
-      alpha: false
+      premultipliedAlpha: false
     });
 
     this._mesh = new GLMesh({
@@ -92,13 +95,31 @@ export default class WebGLVideoElement extends LoopElement {
     this.src = this.getAttribute("src");
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener("resize", this._resizeBinded);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("resize", this._resizeBinded);
+  }
+
   update() {
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this._videoTexture.source = this._video;
     this._mesh.draw({
       mode: this.gl.TRIANGLE_STRIP,
       count: 4
     });
+  }
+
+  resize() {
+    this._canvas.style.height = `${this._canvas.offsetWidth * this._video.videoHeight / this._video.videoWidth}px`;
+    this._canvas.width = Math.min(this._video.videoWidth, this.offsetWidth * window.devicePixelRatio);
+    this._canvas.height = Math.min(this._video.videoHeight, this.offsetHeight * window.devicePixelRatio);
   }
 
   get src() {
@@ -110,9 +131,9 @@ export default class WebGLVideoElement extends LoopElement {
 
     const resizeCanvas = () => {
       this._video.removeEventListener("loadedmetadata", resizeCanvas);
+      this.resize();
 
-      this._canvas.width = Math.min(this._video.videoWidth, this.offsetWidth);
-      this._canvas.height = Math.min(this._video.videoHeight, this.offsetHeight);
+
       //tmp
       this._video.play();
       this.play();
