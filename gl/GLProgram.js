@@ -18,6 +18,8 @@ export default class GLProgram extends Shader {
   } = {}) {
     super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
 
+    this._attachedShaders = new Map();
+
     const program = gl.createProgram();
 
     const self = this;
@@ -91,7 +93,6 @@ export default class GLProgram extends Shader {
     this.vertexShader = this.vertexShader;
     this.fragmentShader = this.fragmentShader;
 
-    this.gl.linkProgram(this._program);
     this.use();
 
     this.attributes = new Attributes();
@@ -140,7 +141,15 @@ export default class GLProgram extends Shader {
       console.error(`${error}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
     }
 
+    const attachedShader = this._attachedShaders.get(type);
+    if(attachedShader) {
+      this.gl.detachShader(this._program, attachedShader);
+      this.gl.deleteShader(attachedShader);
+    }
+    this._attachedShaders.set(type, shader);
     this.gl.attachShader(this._program, shader);
+
+    this.gl.linkProgram(this._program);
   }
 
   _parseUniforms(string) {
