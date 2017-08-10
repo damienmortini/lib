@@ -1,5 +1,5 @@
-import Camera from "dlib/3d/Camera.js";
-import CameraGLSL from "dlib/shaders/CameraGLSL.js";
+import Camera from "../3d/Camera.js";
+import CameraGLSL from "../shaders/CameraGLSL.js";
 
 export default class GLCamera extends Camera {
   static get vertexShaderChunks() {

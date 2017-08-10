@@ -2,7 +2,7 @@ const PROMISES = new Map();
 const OBJECTS = new Map();
 
 const TYPE_MAP = new Map([
-  ["text", new Set(["txt", "html", "css", "js"])],
+  ["text", new Set(["txt", "html", "css", "js", "svg"])],
   ["json", new Set(["json"])],
   ["binary", new Set(["bin"])]
 ]);

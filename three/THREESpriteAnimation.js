@@ -1,8 +1,8 @@
 
 import THREESprite from "./THREESprite.js";
 
-import Signal from "dlib/utils/Signal";
-import Ticker from "dlib/utils/Ticker";
+import Signal from "../utils/Signal";
+import Ticker from "../utils/Ticker";
 
 let SPRITESHEETS = new Map();
 

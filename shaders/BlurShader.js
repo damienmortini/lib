@@ -1,6 +1,6 @@
 // From https://github.com/Jam3/glsl-fast-gaussian-blur
 
-import Shader from "dlib/3d/Shader.js";
+import Shader from "../3d/Shader.js";
 
 export default class BlurShader extends Shader {
   static computeBlurTextureCoordinates() {

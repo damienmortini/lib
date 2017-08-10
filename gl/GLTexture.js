@@ -1,7 +1,7 @@
 export default class GLTexture {
   constructor({
     gl, 
-    image, 
+    source = undefined, 
     color = [1, 1, 1, 1], 
     minFilter = gl.NEAREST_MIPMAP_LINEAR, 
     magFilter = gl.LINEAR, 
@@ -11,11 +11,11 @@ export default class GLTexture {
   } = {}) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
-    this.bind();
-    if(image) {
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA,this.gl.UNSIGNED_BYTE, image);
+    
+    if(source) {
+      this.source = source;
     } else {
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([color[0] * 255, color[1] * 255, color[2] * 255, color[3] * 255]));
+      this.color = color;
     }
 
     this._minFilter = this.gl.NEAREST_MIPMAP_LINEAR;
@@ -31,6 +31,16 @@ export default class GLTexture {
 
   generateMipmap() {
     this.gl.generateMipmap(this.gl.TEXTURE_2D);
+  }
+
+  set source(value) {
+    this.bind();
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, value);
+  }
+
+  set color(value) {
+    this.bind();
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([value[0] * 255, value[1] * 255, value[2] * 255, value[3] * 255]));
   }
 
   set minFilter(value) {

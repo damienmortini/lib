@@ -1,5 +1,5 @@
-import Signal from "dlib/utils/Signal.js";
-import Ticker from "dlib/utils/Ticker.js";
+import Signal from "../utils/Signal.js";
+import Ticker from "../utils/Ticker.js";
 
 export default class SoundMatrix extends Map {
   constructor({

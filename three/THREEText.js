@@ -1,6 +1,6 @@
 import { Mesh, PlaneGeometry, Texture, Object3D } from "three";
 
-import THREEShaderMaterial from "dlib/three/THREEShaderMaterial.js";
+import THREEShaderMaterial from "../three/THREEShaderMaterial.js";
 
 export default class THREEText extends Object3D {
   constructor({

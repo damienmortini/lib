@@ -8,7 +8,7 @@ import {
   CubeTexture
 } from "three";
 
-import Shader from "dlib/3d/Shader.js";
+import Shader from "../3d/Shader.js";
 
 export default class THREEShader extends Shader {
   constructor({ vertexShader = `

@@ -1,11 +1,10 @@
-import Vector2 from "dlib/math/Vector2.js";
-import Vector3 from "dlib/math/Vector3.js";
-import Vector4 from "dlib/math/Vector4.js";
-import Matrix3 from "dlib/math/Matrix3.js";
-import Matrix4 from "dlib/math/Matrix4.js";
+import Vector2 from "../math/Vector2.js";
+import Vector3 from "../math/Vector3.js";
+import Vector4 from "../math/Vector4.js";
+import Matrix3 from "../math/Matrix3.js";
+import Matrix4 from "../math/Matrix4.js";
+import Shader from "../3d/Shader.js";
 import GLTexture from "./GLTexture.js";
-
-import Shader from "dlib/3d/Shader.js";
 
 export default class GLProgram extends Shader {
   constructor({gl,
