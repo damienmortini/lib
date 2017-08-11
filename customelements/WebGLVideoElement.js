@@ -132,14 +132,34 @@ export default class WebGLVideoElement extends LoopElement {
     const resizeCanvas = () => {
       this._video.removeEventListener("loadedmetadata", resizeCanvas);
       this.resize();
-
-
-      //tmp
-      this._video.play();
-      this.play();
     }
 
     this._video.addEventListener("loadedmetadata", resizeCanvas);
+
+    this._video.addEventListener("playing", () => {
+      super.play();
+    });
+
+    this._video.addEventListener("pause", () => {
+      super.pause();
+    });
+  }
+
+  play() {
+    this._video.play();
+  }
+
+  pause() {
+    this._video.pause();
+  }
+
+  set currentTime(value) {
+    this._video.currentTime = value;
+    this.update();
+  }
+
+  get currentTime() {
+    return this._video.currentTime;
   }
 
   set loop(value) {
@@ -148,6 +168,10 @@ export default class WebGLVideoElement extends LoopElement {
 
   get loop() {
     return this._video.loop;
+  }
+
+  get duration() {
+    return this._video.duration;
   }
 }
 
