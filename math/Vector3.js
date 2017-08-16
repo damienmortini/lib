@@ -1,4 +1,4 @@
-import vec3 from "gl-matrix/src/gl-matrix/vec3.js";
+import * as vec3 from "gl-matrix/src/gl-matrix/vec3.js";
 
 import { hexToRGB } from "./Math.js";
 
