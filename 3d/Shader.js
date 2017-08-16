@@ -49,13 +49,13 @@ export default class Shader {
   }
 
   add({vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = []} = {}) {
-    for (let [key, value] of uniforms) {
-      this.uniforms.set(key, value);
-    }
     this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
     this._vertexShaderChunks.push(...vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
     this._fragmentShaderChunks.push(...fragmentShaderChunks);
+    for (let [key, value] of uniforms) {
+      this.uniforms.set(key, value);
+    }
   }
 
   set vertexShader(value) {
