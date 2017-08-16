@@ -16,9 +16,14 @@ import Loader from "../utils/Loader.js";
 
 window.customElements.define("dlib-spriteanimation", class SpriteAnimationElement extends LoopElement {
   constructor() {
-    super();
+    super({
+      autoplay: false
+    });
+
+    this._autoplay = this.hasAttribute("autoplay");
 
     this._resizeBinded = this.resize.bind(this);
+    this._scale = 1;
 
     this._sprite = document.createElement("div");
     this._sprite.style.position = "absolute";
@@ -59,16 +64,16 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
 
   update() {
     this._sprite.style.backgroundPosition = `left ${-this._spriteAnimation.x}px top ${-this._spriteAnimation.y}px`;
-    this._sprite.style.backgroundPosition = `left ${-this._spriteAnimation.x}px top ${-this._spriteAnimation.y}px`;
     this._sprite.style.width = `${this._spriteAnimation.width}px`;
     this._sprite.style.height = `${this._spriteAnimation.height}px`;
     this._sprite.style.top = "50%";
     this._sprite.style.left = "50%";
-    this._sprite.style.transform = `translate(-50%, -50%) translate(${this._spriteAnimation.offsetX}px, ${this._spriteAnimation.offsetY}px) rotate(${this._spriteAnimation.rotated ? -90 : 0}deg)`;
+    this._sprite.style.transform = `translate(-50%, -50%) translate(${this._spriteAnimation.offsetX * this._scale}px, ${this._spriteAnimation.offsetY * this._scale}px) rotate(${this._spriteAnimation.rotated ? -90 : 0}deg) scale(${this._scale})`;
   }
 
   resize() {
-    
+    this._scale = Math.min(this.offsetWidth / this._spriteAnimation.sourceWidth, this.offsetHeight / this._spriteAnimation.sourceHeight);
+    this.update();
   }
 
   get fps() {
@@ -97,6 +102,7 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
     Loader.load(this._src).then((data) => {
       this._spriteAnimation.data = data;
       this._sprite.style.backgroundImage = `url(${/(.*[\/\\]).*$/.exec(this._src)[1]}${data.meta.image})`;
+      this.resize();
       this.update();
     });
   }
