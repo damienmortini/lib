@@ -3,8 +3,12 @@ import Ticker from "../utils/Ticker.js";
 export default class LoopElement extends HTMLElement {
   constructor({autoplay = true, background = false} = {}) {
     super();
-    this._autoplay = autoplay;
-    this._background = background;
+    this._autoplay = autoplay || this.hasAttribute("autoplay");
+    this._background = background || this.hasAttribute("background");
+
+    this.paused = true;
+
+    this._updateBinded = this.update.bind(this);
   }
 
   connectedCallback() {
@@ -24,11 +28,13 @@ export default class LoopElement extends HTMLElement {
   }
 
   play() {
-    Ticker.add(this._updateBinded = this._updateBinded || this.update.bind(this));
+    this.paused = false;
+    Ticker.add(this._updateBinded);
     this.dispatchEvent(new Event("playing"));
   }
 
   pause() {
+    this.paused = true;
     Ticker.delete(this._updateBinded);
     this.dispatchEvent(new Event("pause"));
   }
