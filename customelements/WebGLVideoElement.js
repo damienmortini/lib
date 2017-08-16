@@ -18,7 +18,8 @@ import GLTexture from "../gl/GLTexture.js";
 export default class WebGLVideoElement extends LoopElement {
   constructor() {
     super({
-      autoplay: false
+      autoplay: false,
+      background: true
     });
 
     this._resizeBinded = this.resize.bind(this);
@@ -101,6 +102,7 @@ export default class WebGLVideoElement extends LoopElement {
   }
 
   disconnectedCallback() {
+    this.gl.getExtension("WEBGL_lose_context").loseContext();
     super.disconnectedCallback();
     window.removeEventListener("resize", this._resizeBinded);
   }
@@ -117,9 +119,8 @@ export default class WebGLVideoElement extends LoopElement {
   }
 
   resize() {
-    this._canvas.style.height = `${this._canvas.offsetWidth * this._video.videoHeight / this._video.videoWidth}px`;
-    this._canvas.width = Math.min(this._video.videoWidth, this.offsetWidth * window.devicePixelRatio);
-    this._canvas.height = Math.min(this._video.videoHeight, this.offsetHeight * window.devicePixelRatio);
+    this._canvas.width = this._video.videoWidth;
+    this._canvas.height = this._video.videoHeight;
   }
 
   get src() {
@@ -153,6 +154,14 @@ export default class WebGLVideoElement extends LoopElement {
     this._video.pause();
   }
 
+  addEventListener() {
+    this._video.addEventListener(...arguments);
+  }
+
+  removeEventListener() {
+    this._video.removeEventListener(...arguments);
+  }
+
   set currentTime(value) {
     this._video.currentTime = value;
     this.update();
@@ -168,6 +177,18 @@ export default class WebGLVideoElement extends LoopElement {
 
   get loop() {
     return this._video.loop;
+  }
+
+  set autoplay(value) {
+    this._video.autoplay = value;
+  }
+
+  get autoplay() {
+    return this._video.autoplay;
+  }
+
+  get readyState() {
+    return this._video.readyState;
   }
 
   get duration() {
