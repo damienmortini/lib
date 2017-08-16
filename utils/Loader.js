@@ -44,45 +44,32 @@ export default class Loader {
           return;
         }
 
-        let element = value instanceof HTMLElement ? value : null;
-
         let onLoad = (response) => {
           PROMISES.delete(value);
           OBJECTS.set(value, response);
-          if(element) {
-            element.removeEventListener("load", onLoad);
-            element.removeEventListener("canplaythrough", onLoad);
-          }
           resolve(response);
         };
 
+        let element;
+        
         if(typeof value === "string") {
           let extension = /[\\/](.*)\.(.*)$/.exec(value)[2];
 
-          let tagName;
           if(/\.(png|jpg|gif)$/.test(value)) {
-            tagName = "img";
+            element = document.createElement("img");
+            element.src = value;
           } else if(/\.(mp4|webm)$/.test(value)) {
-            tagName = "video";
+            element = document.createElement("video");
+            element.src = value;
           } else if(/\.(mp3|ogg)$/.test(value)) {
-            tagName = "audio";
+            element = document.createElement("audio");
+            element.src = value;
           } else if(/\.(woff|woff2)$/.test(value)) {
             let fontFace = new FontFace(/([^\/]*)\.(woff|woff2)$/.exec(value)[1], `url("${value}")`);
             fontFace.load().then(onLoad);
             document.fonts.add(fontFace);
           } else {
             fetch(value)
-            .catch((err) => {
-              console.warn(`Fetch error, using XMLHttpRequest instead:\n${err}`);
-              return new Promise(function(resolve, reject) {
-                let xhr = new XMLHttpRequest();
-                xhr.onload = () => {
-                  resolve(new Response(xhr.response, {status: xhr.status}));
-                }
-                xhr.open("GET", value);
-                xhr.send(null);
-              });
-            })
             .then((response) => {
               let method;
               if(Loader.typeMap.get("json").has(extension)) {
@@ -98,34 +85,37 @@ export default class Loader {
             })
             .then(onLoad);
           }
-          if(tagName) {
-            element = document.createElement(tagName);
-          }
+        }
+
+        if(value instanceof HTMLElement) {
+          element = value;
         }
 
         if(element) {
-          let onElementLoad = (e) => {
-            onLoad(e.target);
-          }
-
-          if(element instanceof HTMLMediaElement) {
-            element.addEventListener("canplaythrough", onElementLoad);
-          } else {
-            element.addEventListener("load", onElementLoad);
-          }
-
-          element.src = element.src || value;
-
-          if(element instanceof HTMLMediaElement) {
-            element.play();
-            if(!element.autoplay) {
-              let pauseElement = function() {
-                element.pause();
-                element.removeEventListener("playing", pauseElement);
-              }
-              element.addEventListener("playing", pauseElement);
+          fetch(element.src)
+          .then((response) => {
+            return response.blob();
+          })
+          .then(() => {
+            const loaded = () => {
+              element.removeEventListener("canplaythrough", loaded);
+              element.removeEventListener("load", loaded);
+              onLoad(element);
             }
-          }
+            if(element.play) {
+              element.addEventListener("canplaythrough", loaded);
+              element.play();
+              if(!element.autoplay) {
+                let pauseElement = function() {
+                  element.pause();
+                  element.removeEventListener("playing", pauseElement);
+                }
+                element.addEventListener("playing", pauseElement);
+              }
+            } else {
+              element.addEventListener("load", loaded);
+            }
+          });
         }
       });
 
