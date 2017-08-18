@@ -76,8 +76,21 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
     this.update();
   }
 
+  get duration() {
+    return this._spriteAnimation.duration;
+  }
+
+  get currentTime() {
+    return this._spriteAnimation.currentTime;
+  }
+
+  set currentTime(value) {
+    this._spriteAnimation.currentTime = value;
+    this.update();
+  }
+
   get fps() {
-    return this._spriteAnimation.fps
+    return this._spriteAnimation.fps;
   }
 
   set fps(value) {
@@ -90,6 +103,14 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
 
   set loop(value) {
     this._spriteAnimation.loop = value;
+  }
+
+  get playbackRate() {
+    return this._spriteAnimation.playbackRate
+  }
+
+  set playbackRate(value) {
+    this._spriteAnimation.playbackRate = value;
   }
 
   get src() {
