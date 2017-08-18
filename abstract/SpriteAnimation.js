@@ -109,6 +109,8 @@ export default class SpriteAnimation {
     }
     this._animation = value;
 
+    this._frames = this._animations.get(this._animation)
+
     this.update();
   }
 
@@ -128,15 +130,17 @@ export default class SpriteAnimation {
     if(this._currentTime === value) {
       return;
     }
-    let previousTime = this._currentTime;
-    this._currentTime = value;
     if(this.loop) {
-      this._currentTime = ((this._currentTime % 1) + 1) % 1;
+      value = ((value % 1) + 1) % 1;
     } else {
-      this._currentTime = Math.min(Math.max(this._currentTime, 0), 1);
-      if(previousTime !== this._currentTime && (this._currentTime === 1 && this.playbackRate >= 0 || this._currentTime === 0 && this.playbackRate < 0)) {
+      value = Math.min(Math.max(value, 0), 1);
+      if(this._currentTime !== value && (value === 1 && this.playbackRate >= 0 || value === 0 && this.playbackRate < 0)) {
         this.onEnd.dispatch();
       }
+    }
+    if(this._currentTime !== value) {
+      this._currentTime = value;
+      this._sprite.frame = this._frames[Math.round(this._currentTime * (this._frames.length - 1))];
     }
   }
 
@@ -144,12 +148,14 @@ export default class SpriteAnimation {
     return this._currentTime;
   }
 
+  get duration() {
+    return this._frames.length / this.fps;
+  }
+
   update() {
     if(!this._animations) {
       return;
     }
-    let frames = this._animations.get(this.animation);
-    this.currentTime += this.playbackRate * (this.fps / 60) * Ticker.timeScale / frames.length;
-    this._sprite.frame = frames[Math.round(this._currentTime * (frames.length - 1))];
+    this.currentTime += this.playbackRate * (this.fps / 60) * Ticker.timeScale / this._frames.length;
   }
 }
