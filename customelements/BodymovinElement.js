@@ -14,9 +14,11 @@ export default class BodymovinElement extends HTMLElement {
   constructor() {
     super();
     this.renderer = "svg";
-    this.loop = false;
-    this.direction = 1;
-    this.speed = 1;
+    this.loop = this.hasAttribute("loop");
+    this.autoplay = this.hasAttribute("autoplay");
+    this.playbackRate = 1;
+
+    this.src = this.getAttribute("src");
   }
 
   get src() {
@@ -31,6 +33,7 @@ export default class BodymovinElement extends HTMLElement {
     this.animation = bodymovin.loadAnimation({
       container: this,
       renderer: this.renderer,
+      autoplay: this.autoplay,
       path: this._src
     });
     this.animation.addEventListener("DOMLoaded", () => {
@@ -38,8 +41,8 @@ export default class BodymovinElement extends HTMLElement {
         this.segments = this._segments;
       }
       this.loop = this._loop;
-      this.direction = this._direction;
-      this.speed = this._speed;
+      this.playbackRate = this._playbackRate;
+      this.playbackRate = this._playbackRate;
     });
     this.animation.addEventListener("loopComplete", () => {
       this.dispatchEvent(new Event("ended"));
@@ -47,6 +50,14 @@ export default class BodymovinElement extends HTMLElement {
     this.animation.addEventListener("complete", () => {
       this.dispatchEvent(new Event("ended"));
     });
+  }
+
+  play() {
+    this.animation.play();
+  }
+
+  pause() {
+    this.animation.pause();
   }
 
   set loop(value) {
@@ -60,27 +71,44 @@ export default class BodymovinElement extends HTMLElement {
     return this._loop;
   }
 
-  set direction(value) {
-    this._direction = value;
+  get paused() {
+    return this.animation.isPaused;
+  }
+
+  set currentTime(value) {
+    this._currentTime = value;
+    if(this.paused) {
+      this.animation.goToAndStop(this._currentTime, false);
+    } else {
+      this.animation.goToAndPlay(this._currentTime, false);
+    }
+  }
+
+  get currentTime() {
+    return this._currentTime;
+  }
+
+  set frameRate(value) {
+    this._frameRate = value;
     if(this.animation) {
+      this.animation.frameRate = value;
+    }
+  }
+
+  get frameRate() {
+    return this._frameRate;
+  }
+
+  set playbackRate(value) {
+    this._playbackRate = value;
+    if(this.animation) {
+      this.animation.setSpeed(Math.abs(value));
       this.animation.setDirection(value);
     }
   }
 
-  get direction() {
-    return this._direction;
-  }
-
-  set speed(value) {
-    this._speed = value;
-    if(this.animation) {
-      this.animation.setSpeed(value);
-      this.animation.play();
-    }
-  }
-
-  get speed() {
-    return this._speed;
+  get playbackRate() {
+    return this._playbackRate;
   }
 
   set segments(value) {
