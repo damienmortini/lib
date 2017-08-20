@@ -35,7 +35,7 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
 
     this._spriteAnimation = new SpriteAnimation({
       loop: this.hasAttribute("loop"),
-      fps: this.hasAttribute("fps") ? parseFloat(this.getAttribute("fps")) : undefined,
+      frameRate: this.hasAttribute("framerate") ? parseFloat(this.getAttribute("framerate")) : undefined,
       autoplay: this._autoplay
     });
 
@@ -89,12 +89,12 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
     this.update();
   }
 
-  get fps() {
-    return this._spriteAnimation.fps;
+  get frameRate() {
+    return this._spriteAnimation.frameRate;
   }
 
-  set fps(value) {
-    this._spriteAnimation.fps = value;
+  set frameRate(value) {
+    this._spriteAnimation.frameRate = value;
   }
 
   get loop() {

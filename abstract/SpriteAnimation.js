@@ -9,7 +9,7 @@ export default class SpriteAnimation {
     data, 
     animation, 
     playbackRate = 1,
-    fps = 25,
+    frameRate = 25,
     loop = false,
     autoplay = false
   } = {}) {
@@ -21,7 +21,7 @@ export default class SpriteAnimation {
 
     this.loop = loop;
     this.playbackRate = playbackRate;
-    this.fps = fps;
+    this.frameRate = frameRate;
     this.data = data;
     this.animation = animation;
 
@@ -149,13 +149,13 @@ export default class SpriteAnimation {
   }
 
   get duration() {
-    return this._frames.length / this.fps;
+    return this._frames.length / this.frameRate;
   }
 
   update() {
     if(!this._animations) {
       return;
     }
-    this.currentTime += this.playbackRate * (this.fps / 60) * Ticker.timeScale / this._frames.length;
+    this.currentTime += this.playbackRate * (this.frameRate / 60) * Ticker.timeScale / this._frames.length;
   }
 }
