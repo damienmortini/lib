@@ -57,13 +57,10 @@ export default class Loader {
 
           if(/\.(png|jpg|gif)$/.test(value)) {
             element = document.createElement("img");
-            element.src = value;
           } else if(/\.(mp4|webm)$/.test(value)) {
             element = document.createElement("video");
-            element.src = value;
           } else if(/\.(mp3|ogg)$/.test(value)) {
             element = document.createElement("audio");
-            element.src = value;
           } else if(/\.(woff|woff2)$/.test(value)) {
             let fontFace = new FontFace(/([^\/]*)\.(woff|woff2)$/.exec(value)[1], `url("${value}")`);
             fontFace.load().then(onLoad);
@@ -92,7 +89,8 @@ export default class Loader {
         }
 
         if(element) {
-          fetch(element.src)
+          const src = element.src || value;
+          fetch(src)
           .then((response) => {
             return response.blob();
           })
@@ -115,6 +113,7 @@ export default class Loader {
             } else {
               element.addEventListener("load", loaded);
             }
+            element.src = src;
           });
         }
       });
