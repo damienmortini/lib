@@ -40,7 +40,9 @@ export default class ViewElement extends HTMLElement {
       element = element.parentNode;
     }
 
-    this.visible = true;
+    requestAnimationFrame(() => {
+      this.visible = true;
+    });
   }
 
   disconnectedCallback() {
