@@ -3,6 +3,8 @@ import SpriteAnimation from "../abstract/SpriteAnimation.js";
 import Ticker from "../utils/Ticker.js";
 import Loader from "../utils/Loader.js";
 
+const CACHED_DATA_URL = new Map();
+
 (() => {
   let style = document.createElement("style");
   style.textContent = `
@@ -122,9 +124,28 @@ window.customElements.define("dlib-spriteanimation", class SpriteAnimationElemen
 
     Loader.load(this._src).then((data) => {
       this._spriteAnimation.data = data;
-      this._sprite.style.backgroundImage = `url(${/(.*[\/\\]).*$/.exec(this._src)[1]}${data.meta.image})`;
+      return Loader.load(`${/(.*[\/\\]).*$/.exec(this._src)[1]}${data.meta.image}`);
+    })
+    .then((image) => {
+      // Optimise images decoding
+      let dataUrl = CACHED_DATA_URL.get(image);
+
+      if(!dataUrl) {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        let context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0);
+        dataUrl = canvas.toDataURL();
+        CACHED_DATA_URL.set(image, dataUrl);
+      }
+
+      this._sprite.style.backgroundImage = `url(${dataUrl})`;
+
       this.resize();
       this.update();
+
+      this.dispatchEvent(new Event("load"));
     });
   }
 });
