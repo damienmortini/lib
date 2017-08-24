@@ -41,7 +41,7 @@ export default class ViewElement extends HTMLElement {
     }
 
     requestAnimationFrame(() => {
-      this.visible = true;
+      this.visible = this.getAttribute("visible") !== "false";
     });
   }
 
