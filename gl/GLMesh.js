@@ -15,15 +15,18 @@ export default class GLMesh {
       });
       attribute.count = attribute.count || attribute.data.length / attribute.size;
     }
-
-    this.indices = {
-      buffer: new GLBuffer({
-        gl: this.gl,
-        data: indiceData,
-        target: this.gl.ELEMENT_ARRAY_BUFFER
-      }),
-      offset: 0,
-      count: indiceData ? indiceData.length : 0
+    
+    if(indiceData) {
+      this.indices = {
+        buffer: new GLBuffer({
+          gl: this.gl,
+          data: indiceData,
+          target: this.gl.ELEMENT_ARRAY_BUFFER
+        }),
+        type: (indiceData instanceof Uint8Array ? this.gl.UNSIGNED_BYTE : (indiceData instanceof Uint16Array ? this.gl.UNSIGNED_SHORT : this.gl.UNSIGNED_INT)),
+        offset: 0,
+        count: indiceData ? indiceData.length : 0
+      }
     }
   }
 
@@ -31,8 +34,8 @@ export default class GLMesh {
     for (let attribute of this.attributes.values()) {
       attribute.buffer.bind();
     }
-
-    if(this.indices.buffer) {
+    
+    if(this.indices) {
       this.indices.buffer.bind();
     }
   }
@@ -41,18 +44,18 @@ export default class GLMesh {
     for (let attribute of this.attributes.values()) {
       attribute.buffer.unbind();
     }
-    
-    if(this.indices.buffer) {
+
+    if(this.indices) {
       this.indices.buffer.unbind();
     }
   }
 
   draw ({
     mode = this.gl.TRIANGLES, 
-    elements = !!(this.indices.buffer.data.length || this.indices.buffer.data.byteLength),
+    elements = !!this.indices,
     count = elements ? this.indices.count : this.attributes.get("position").count, 
-    offset = this.indices.offset,
-    type = this.indices.type || (count > 256 ? (count > 65535 ? this.gl.UNSIGNED_INT : this.gl.UNSIGNED_SHORT) : this.gl.UNSIGNED_BYTE),
+    offset = this.indices ? this.indices.offset : 0,
+    type = this.indices ? this.indices.type : null,
     first = 0,
     instanceCount
   } = {}) {

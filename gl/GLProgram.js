@@ -46,7 +46,6 @@ export default class GLProgram extends Shader {
         if(divisor !== undefined) {
           gl.vertexAttribDivisor(location, divisor);
         }
-        buffer.unbind();
         super.set(name, {buffer, size, type, normalized, stride, offset});
       }
     }

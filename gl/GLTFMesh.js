@@ -47,10 +47,18 @@ export default class GLTFMesh extends GLMesh {
     }
 
     let indices = data.primitives[0].indices;
-
-    this.indices.buffer.data = indices.bufferView.buffer;
-    this.indices.offset = indices.bufferView.byteOffset;
-    this.indices.type = indices.componentType;
-    this.indices.count = indices.count;
+    
+    if(indices) {
+      this.indices = {
+        buffer: new GLBuffer({
+          gl: this.gl,
+          data: indices.bufferView.buffer,
+          target: this.gl.ELEMENT_ARRAY_BUFFER
+        }),
+        type: indices.componentType,
+        offset: indices.bufferView.byteOffset,
+        count: indices.count
+      }
+    }
   }
 }
