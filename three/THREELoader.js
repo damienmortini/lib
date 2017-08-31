@@ -9,7 +9,7 @@ import {
 
 import "three/examples/js/loaders/ColladaLoader.js";
 import "three/examples/js/loaders/OBJLoader.js";
-import "three/examples/js/loaders/GLTF2Loader.js";
+import "three/examples/js/loaders/GLTFLoader.js";
 
 import Loader from "../utils/Loader.js";
 
@@ -46,6 +46,7 @@ function fixLoaderData(data, {scale}) {
   }
 }
 
+Loader.typeMap.get("binary").add("gltf");
 Loader.typeMap.get("binary").add("glb");
 
 export default class THREELoader extends Loader {
@@ -93,10 +94,10 @@ export default class THREELoader extends Loader {
       }
       else if(/\.(gltf|glb)$/.test(value)) {
         return new Promise((resolve) => {
-          new THREE.GLTF2Loader().parse(data instanceof ArrayBuffer ? data : JSON.parse(data), (object) => {
+          new THREE.GLTFLoader().parse(data, /(.*[\/\\]).*$/.exec(value)[1], (object) => {
             fixLoaderData(object, {scale});
             resolve(object);
-          }, /(.*[\/\\]).*$/.exec(value)[1]);
+          });
         });
       }
       else if(/\.(json)$/.test(value)) {
