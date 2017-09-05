@@ -15,7 +15,8 @@ style.sheet.insertRule(`
     resize: horizontal;
     top: 0;
     left: 0;
-    width: 250px;
+    width: 300px;
+    max-width: 100%;
     padding: 5px;
     color: white;
     font-family: monospace;
