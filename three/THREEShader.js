@@ -30,20 +30,31 @@ export default class THREEShader extends Shader {
 
   add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = [] } = {}) {
     if (!(uniforms instanceof Array || uniforms instanceof Map)) {
-      uniforms = Object.entries(uniforms);
+      const uniformObject = uniforms;
+      uniforms = new Map();
+      for (let key in uniformObject) {
+        uniforms.set(key, uniformObject[key].value !== undefined ? uniformObject[key].value : uniformObject[key]); 
+      }
     }
     if (!(this.uniforms instanceof Array || this.uniforms instanceof Map)) {
-      this.uniforms = Object.entries(this.uniforms);
+      const uniformObject = this.uniforms;
+      this.uniforms = new Map();
+      for (let key in uniformObject) {
+        this.uniforms.set(key, uniformObject[key].value !== undefined ? uniformObject[key].value : uniformObject[key]); 
+      }
     }
     super.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
+    
+    const uniformsObject = {};
+    for (let [key, uniform] of this.uniforms) {
+      uniformsObject[key] = {
+        value: uniform
+      };
+    }
+    this.uniforms = uniformsObject;
   }
 
   _parseUniforms(string) {
-    if (!(this.uniforms instanceof Map)) {
-      this.uniforms = new Map(Object.entries(this.uniforms));
-    }
-
-
     super._parseUniforms(string, {
       Vector2,
       Vector3,
@@ -53,16 +64,5 @@ export default class THREEShader extends Shader {
       TextureCube: CubeTexture,
       Texture2D: Texture
     });
-
-
-    let uniformsObject = {};
-
-    for (let [key, uniform] of this.uniforms) {
-      uniformsObject[key] = {
-        value: uniform.value === undefined ? uniform : uniform.value
-      };
-    }
-
-    this.uniforms = uniformsObject;
   }
 }
