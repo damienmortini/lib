@@ -95,7 +95,6 @@ export default class THREELoader extends Loader {
       else if(/\.(gltf|glb)$/.test(value)) {
         return new Promise((resolve) => {
           new THREE.GLTFLoader().parse(data, /(.*[\/\\]).*$/.exec(value)[1], (object) => {
-            fixLoaderData(object, {scale});
             resolve(object);
           });
         });
