@@ -373,7 +373,7 @@ export default class GUI extends HTMLElement {
         });
       }
 
-      if (type !== "text") {
+      if (type !== "text" && type !== "number") {
         input.addEventListener("input", onValueChangeTmp);
       }
       input.addEventListener("change", onValueChangeTmp);

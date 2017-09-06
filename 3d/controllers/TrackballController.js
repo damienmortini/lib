@@ -11,7 +11,7 @@ export default class TrackballController {
     distance = 0,
     invertRotation = true,
     rotationEaseRatio = .04,
-    zoomSpeed = 1,
+    zoomSpeed = .1,
     zoomEaseRatio = .1,
     minDistance = 0,
     maxDistance = Infinity,
