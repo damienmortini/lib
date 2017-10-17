@@ -90,19 +90,17 @@ export default class Loader {
 
         if(element) {
           const src = element.src || value;
-          fetch(src)
-          .then((response) => {
-            return response.blob();
-          })
-          .then(() => {
-            const loaded = () => {
-              element.removeEventListener("canplaythrough", loaded);
-              element.removeEventListener("load", loaded);
-              onLoad(element);
-            }
-            if(element.play) {
+          const loaded = () => {
+            element.removeEventListener("canplaythrough", loaded);
+            element.removeEventListener("load", loaded);
+            onLoad(element);
+          }
+          if(element.play) {
+            fetch(src)
+            .then(() => {
               element.addEventListener("canplaythrough", loaded);
               element.play();
+              // TODO: Check if this is still needed
               if(!element.autoplay) {
                 let pauseElement = function() {
                   element.pause();
@@ -110,11 +108,11 @@ export default class Loader {
                 }
                 element.addEventListener("playing", pauseElement);
               }
-            } else {
-              element.addEventListener("load", loaded);
-            }
-            element.src = src;
-          });
+            });
+          } else {
+            element.addEventListener("load", loaded);
+          }
+          element.src = src;
         }
       });
 
