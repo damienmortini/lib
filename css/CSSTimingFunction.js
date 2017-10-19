@@ -1,23 +1,23 @@
 export default class CSSTimingFunction {
   static all() {
     return `
-      ${CSSTimingFunction.quad}
-      ${CSSTimingFunction.cubic}
-      ${CSSTimingFunction.quart}
-      ${CSSTimingFunction.quint}
-      ${CSSTimingFunction.sine}
-      ${CSSTimingFunction.expo}
-      ${CSSTimingFunction.circ}
-      ${CSSTimingFunction.back}
+      ${CSSTimingFunction.quad()}
+      ${CSSTimingFunction.cubic()}
+      ${CSSTimingFunction.quart()}
+      ${CSSTimingFunction.quint()}
+      ${CSSTimingFunction.sine()}
+      ${CSSTimingFunction.expo()}
+      ${CSSTimingFunction.circ()}
+      ${CSSTimingFunction.back()}
     `;
   }
 
   static quad() {
     return `
-      --ease-in-quad: ${CSSTimingFunction.easeInQuad};
-      --ease-out-quad: ${CSSTimingFunction.easeOutQuad};
-      --ease-in-out-quad: ${CSSTimingFunction.easeInOutQuad};
-    `
+      --ease-in-quad: ${CSSTimingFunction.easeInQuad()};
+      --ease-out-quad: ${CSSTimingFunction.easeOutQuad()};
+      --ease-in-out-quad: ${CSSTimingFunction.easeInOutQuad()};
+    `;
   }
 
   static easeInQuad() {
@@ -34,9 +34,9 @@ export default class CSSTimingFunction {
 
   static cubic() {
     return `
-      --ease-in-cubic: ${CSSTimingFunction.easeInCubic};
-      --ease-out-cubic: ${CSSTimingFunction.easeOutCubic};
-      --ease-in-out-cubic: ${CSSTimingFunction.easeInOutCubic};
+      --ease-in-cubic: ${CSSTimingFunction.easeInCubic()};
+      --ease-out-cubic: ${CSSTimingFunction.easeOutCubic()};
+      --ease-in-out-cubic: ${CSSTimingFunction.easeInOutCubic()};
     `;
   }
 
@@ -54,9 +54,9 @@ export default class CSSTimingFunction {
 
   static quart() {
     return `
-      --ease-in-quart: ${CSSTimingFunction.easeInQuart};
-      --ease-out-quart: ${CSSTimingFunction.easeOutQuart};
-      --ease-in-out-quart: ${CSSTimingFunction.easeInOutQuart};
+      --ease-in-quart: ${CSSTimingFunction.easeInQuart()};
+      --ease-out-quart: ${CSSTimingFunction.easeOutQuart()};
+      --ease-in-out-quart: ${CSSTimingFunction.easeInOutQuart()};
     `;
   }
 
@@ -74,9 +74,9 @@ export default class CSSTimingFunction {
 
   static quint() {
     return `
-      --ease-in-quint: ${CSSTimingFunction.easeInQuint};
-      --ease-out-quint: ${CSSTimingFunction.easeOutQuint};
-      --ease-in-out-quint: ${CSSTimingFunction.easeInOutQuint};
+      --ease-in-quint: ${CSSTimingFunction.easeInQuint()};
+      --ease-out-quint: ${CSSTimingFunction.easeOutQuint()};
+      --ease-in-out-quint: ${CSSTimingFunction.easeInOutQuint()};
     `;
   }
 
@@ -94,9 +94,9 @@ export default class CSSTimingFunction {
 
   static sine() {
     return `
-      --ease-in-sine: ${CSSTimingFunction.easeInSine};
-      --ease-out-sine: ${CSSTimingFunction.easeOutSine};
-      --ease-in-out-sine: ${CSSTimingFunction.easeInOutSine};
+      --ease-in-sine: ${CSSTimingFunction.easeInSine()};
+      --ease-out-sine: ${CSSTimingFunction.easeOutSine()};
+      --ease-in-out-sine: ${CSSTimingFunction.easeInOutSine()};
     `;
   }
 
@@ -114,9 +114,9 @@ export default class CSSTimingFunction {
 
   static expo() {
     return `
-      --ease-in-expo: ${CSSTimingFunction.easeInExpo};
-      --ease-out-expo: ${CSSTimingFunction.easeOutExpo};
-      --ease-in-out-expo: ${CSSTimingFunction.easeInOutExpo};
+      --ease-in-expo: ${CSSTimingFunction.easeInExpo()};
+      --ease-out-expo: ${CSSTimingFunction.easeOutExpo()};
+      --ease-in-out-expo: ${CSSTimingFunction.easeInOutExpo()};
     `;
   }
 
@@ -134,9 +134,9 @@ export default class CSSTimingFunction {
 
   static circ() {
     return `
-      --ease-in-circ: ${CSSTimingFunction.easeInCirc};
-      --ease-out-circ: ${CSSTimingFunction.easeOutCirc};
-      --ease-in-out-circ: ${CSSTimingFunction.easeInOutCirc};
+      --ease-in-circ: ${CSSTimingFunction.easeInCirc()};
+      --ease-out-circ: ${CSSTimingFunction.easeOutCirc()};
+      --ease-in-out-circ: ${CSSTimingFunction.easeInOutCirc()};
     `;
   }
 
@@ -154,9 +154,9 @@ export default class CSSTimingFunction {
 
   static back() {
     return `
-      --ease-in-back: ${CSSTimingFunction.easeInBack};
-      --ease-out-back: ${CSSTimingFunction.easeOutBack};
-      --ease-in-out-back: ${CSSTimingFunction.easeInOutBack};
+      --ease-in-back: ${CSSTimingFunction.easeInBack()};
+      --ease-out-back: ${CSSTimingFunction.easeOutBack()};
+      --ease-in-out-back: ${CSSTimingFunction.easeInOutBack()};
     `;
   }
 
