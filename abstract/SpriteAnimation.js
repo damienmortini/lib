@@ -109,9 +109,9 @@ export default class SpriteAnimation {
     }
     this._animation = value;
 
-    this._frames = this._animations.get(this._animation)
+    this._frames = this._animations.get(this._animation);
 
-    this.update();
+    this._sprite.frame = this._frames[Math.round(this._currentTime * (this._frames.length - 1))];
   }
 
   get animation() {
