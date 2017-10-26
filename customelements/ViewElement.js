@@ -1,11 +1,10 @@
 import View from "../abstract/View.js";
 
 export default class ViewElement extends HTMLElement {
-  constructor({visibilityExecutor} = {}) {
+  constructor() {
     super();
 
     this._view = new View({
-      visibilityExecutor,
       visible: false
     });
   }
@@ -16,14 +15,6 @@ export default class ViewElement extends HTMLElement {
 
   set visible(value) {
     this._view.visible = value;
-  }
-
-  get visibilityExecutor() {
-    return this._view.visibilityExecutor;
-  }
-
-  set visibilityExecutor(value) {
-    this._view.visibilityExecutor = value;
   }
 
   get visibilityPromise() {
@@ -40,9 +31,9 @@ export default class ViewElement extends HTMLElement {
       element = element.parentNode;
     }
 
-    requestAnimationFrame(() => {
-      this.visible = this.getAttribute("visible") !== "false";
-    });
+    this._view.visibilityExecutor = this.visibilityExecutor.bind(this);
+
+    this.visible = this.getAttribute("visible") !== "false";
   }
 
   disconnectedCallback() {
@@ -51,6 +42,10 @@ export default class ViewElement extends HTMLElement {
     if (this._view.parent) {
       this._view.parent.remove(this);
     }
+  }
+
+  visibilityExecutor(resolve, view) {
+    resolve();
   }
 }
 
