@@ -62,6 +62,17 @@ export default class WebGLVideoElement extends WebGLImageElement {
     this._data.pause();
   }
 
+  set src(value) {
+    this._data.src = value;
+
+    const resizeCanvas = () => {
+      this._data.removeEventListener("loadedmetadata", resizeCanvas);
+      this.resize();
+    }
+
+    this._data.addEventListener("loadedmetadata", resizeCanvas);
+  }
+
   set currentTime(value) {
     this._data.currentTime = value;
     this.update();

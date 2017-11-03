@@ -127,11 +127,11 @@ export default class WebGLImageElement extends HTMLElement {
     this._data.src = value;
 
     const resizeCanvas = () => {
-      this._data.removeEventListener("loadedmetadata", resizeCanvas);
+      this._data.removeEventListener("load", resizeCanvas);
       this.resize();
     }
 
-    this._data.addEventListener("loadedmetadata", resizeCanvas);
+    this._data.addEventListener("load", resizeCanvas);
   }
 
   addEventListener() {
