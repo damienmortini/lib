@@ -1,4 +1,4 @@
-import LoopElement from "./LoopElement.js";
+import WebGLImageElement from "./WebGLImageElement.js";
 import Ticker from "../utils/Ticker.js";
 import GLMesh from "../gl/GLMesh.js";
 import GLProgram from "../gl/GLProgram.js";
@@ -15,184 +15,84 @@ import GLTexture from "../gl/GLTexture.js";
   document.head.appendChild(style);
 })();
 
-export default class WebGLVideoElement extends LoopElement {
+export default class WebGLVideoElement extends WebGLImageElement {
   constructor() {
     super({
-      autoplay: false,
-      background: true
+      tagName: "video"
     });
 
-    this._resizeBinded = this.resize.bind(this);
+    this._data.setAttribute("playsinline", "true");
 
-    this._video = document.createElement("video");
-    this._video.setAttribute("playsinline", "true");
-    this._canvas = document.createElement("canvas");
-    this._canvas.style.width = "100%";
-    this.appendChild(this._canvas);
-    this.gl = this._canvas.getContext("webgl", {
-      premultipliedAlpha: false
-    });
-
-    this._mesh = new GLMesh({
-      gl: this.gl,
-      attributes: [
-        ["position", {
-          data: new Float32Array([
-            -1, -1,
-            -1, 1,
-            1, -1,
-            1, 1
-          ]),
-          size: 2
-        }],
-        ["uv", {
-          data: new Float32Array([
-            0, 1,
-            0, 0,
-            1, 1,
-            1, 0
-          ]),
-          size: 2
-        }]
-      ]
-    });
-
-    this._videoTexture = new GLTexture({
-      gl: this.gl
-    });
-    this._videoTexture.minFilter = this.gl.LINEAR;
-    this._videoTexture.wrapS = this._videoTexture.wrapT = this.gl.CLAMP_TO_EDGE;
-
-    this.program = new GLProgram({
-      gl: this.gl,
-      uniforms: [
-        ["video", this._videoTexture]
-      ],
-      vertexShader: `
-        attribute vec2 position;
-        attribute vec2 uv;
-        varying vec2 vUv;
-
-        void main() {
-          gl_Position = vec4(position, 0., 1.);
-          vUv = uv;
-        }
-      `,
-      fragmentShader: `
-        precision highp float;
-
-        uniform sampler2D video;
-        varying vec2 vUv;
-
-        void main() {
-          gl_FragColor = texture2D(video, vUv);
-        }
-      `
-    });
-    this.program.use();
-
-    this.program.attributes.set(this._mesh.attributes);
-
-    this.src = this.getAttribute("src");
+    this._updateBinded = this.update.bind(this);
+    this._playTickerBinded = this._playTicker.bind(this);
+    this._pauseTickerBinded = this._pauseTicker.bind(this);
   }
-
+  
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener("resize", this._resizeBinded);
+    this._data.addEventListener("playing", this._playTickerBinded);
+    this._data.addEventListener("pause", this._pauseTickerBinded);
   }
 
   disconnectedCallback() {
-    this.gl.getExtension("WEBGL_lose_context").loseContext();
-    super.disconnectedCallback();
-    window.removeEventListener("resize", this._resizeBinded);
-  }
-
-  update() {
-    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-    this.gl.clearColor(0, 0, 0, 1);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    this._videoTexture.source = this._video;
-    this._mesh.draw({
-      mode: this.gl.TRIANGLE_STRIP,
-      count: 4
-    });
+    this._data.removeEventListener("playing", this._playTickerBinded);
+    this._data.removeEventListener("pause", this._pauseTickerBinded);
+    super.connectedCallback();
   }
 
   resize() {
-    this._canvas.width = this._video.videoWidth;
-    this._canvas.height = this._video.videoHeight;
+    this._canvas.width = this._data.videoWidth;
+    this._canvas.height = this._data.videoHeight;
+    this.update();
   }
 
-  get src() {
-    return this._video.src;
+  _playTicker() {
+    Ticker.add(this._updateBinded);
   }
 
-  set src(value) {
-    this._video.src = value;
-
-    const resizeCanvas = () => {
-      this._video.removeEventListener("loadedmetadata", resizeCanvas);
-      this.resize();
-    }
-
-    this._video.addEventListener("loadedmetadata", resizeCanvas);
-
-    this._video.addEventListener("playing", () => {
-      super.play();
-    });
-
-    this._video.addEventListener("pause", () => {
-      super.pause();
-    });
+  _pauseTicker() {
+    Ticker.delete(this._updateBinded);
   }
 
   play() {
-    this._video.play();
+    this._data.play();
   }
 
   pause() {
-    this._video.pause();
-  }
-
-  addEventListener() {
-    this._video.addEventListener(...arguments);
-  }
-
-  removeEventListener() {
-    this._video.removeEventListener(...arguments);
+    this._data.pause();
   }
 
   set currentTime(value) {
-    this._video.currentTime = value;
+    this._data.currentTime = value;
     this.update();
   }
 
   get currentTime() {
-    return this._video.currentTime;
+    return this._data.currentTime;
   }
 
   set loop(value) {
-    this._video.loop = value;
+    this._data.loop = value;
   }
 
   get loop() {
-    return this._video.loop;
+    return this._data.loop;
   }
 
   set autoplay(value) {
-    this._video.autoplay = value;
+    this._data.autoplay = value;
   }
 
   get autoplay() {
-    return this._video.autoplay;
+    return this._data.autoplay;
   }
 
   get readyState() {
-    return this._video.readyState;
+    return this._data.readyState;
   }
 
   get duration() {
-    return this._video.duration;
+    return this._data.duration;
   }
 }
 

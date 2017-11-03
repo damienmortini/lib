@@ -1,7 +1,7 @@
 export default class GLTexture {
   constructor({
     gl, 
-    source = undefined, 
+    data = undefined, 
     color = [1, 1, 1, 1], 
     minFilter = gl.NEAREST_MIPMAP_LINEAR, 
     magFilter = gl.LINEAR, 
@@ -12,8 +12,8 @@ export default class GLTexture {
     this.gl = gl;
     this._texture = this.gl.createTexture();
     
-    if(source) {
-      this.source = source;
+    if(data) {
+      this.data = data;
     } else {
       this.color = color;
     }
@@ -33,7 +33,7 @@ export default class GLTexture {
     this.gl.generateMipmap(this.gl.TEXTURE_2D);
   }
 
-  set source(value) {
+  set data(value) {
     this.bind();
     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, value);
   }
