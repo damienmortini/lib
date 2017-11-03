@@ -83,6 +83,7 @@ export default class WebGLImageElement extends HTMLElement {
 
         void main() {
           gl_FragColor = texture2D(data, vUv);
+          gl_FragColor.rgb *= gl_FragColor.a;
         }
       `
     });
@@ -114,8 +115,8 @@ export default class WebGLImageElement extends HTMLElement {
   }
 
   resize() {
-    this._canvas.width = this._data.width;
-    this._canvas.height = this._data.height;
+    this._canvas.width = this.offsetWidth * window.devicePixelRatio;
+    this._canvas.height = this.offsetHeight * window.devicePixelRatio;
     this.update();
   }
 

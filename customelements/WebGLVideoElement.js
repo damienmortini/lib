@@ -40,12 +40,6 @@ export default class WebGLVideoElement extends WebGLImageElement {
     super.connectedCallback();
   }
 
-  resize() {
-    this._canvas.width = this._data.videoWidth;
-    this._canvas.height = this._data.videoHeight;
-    this.update();
-  }
-
   _playTicker() {
     Ticker.add(this._updateBinded);
   }
