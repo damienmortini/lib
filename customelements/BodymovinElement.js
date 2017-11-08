@@ -35,7 +35,11 @@ export default class BodymovinElement extends HTMLElement {
     if(this.animation) {
       this.animation.destroy();
     }
-    Loader.load(this._src).then((data) => {
+    const loaderPromise = this._loaderPromise = Loader.load(this._src);
+    loaderPromise.then((data) => {
+      if(loaderPromise !== this._loaderPromise) {
+        return;
+      }
       this.animation = bodymovin.loadAnimation({
         container: this,
         renderer: this.renderer,
