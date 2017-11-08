@@ -40,11 +40,11 @@ export default class PlaneMesh {
         let offset = j * rows + i;
 
         this.indices[offset * 6] = a;
-        this.indices[offset * 6 + 1] = b;
-        this.indices[offset * 6 + 2] = d;
+        this.indices[offset * 6 + 1] = d;
+        this.indices[offset * 6 + 2] = b;
         this.indices[offset * 6 + 3] = b;
-        this.indices[offset * 6 + 4] = c;
-        this.indices[offset * 6 + 5] = d;
+        this.indices[offset * 6 + 4] = d;
+        this.indices[offset * 6 + 5] = c;
       }
     }
   }
