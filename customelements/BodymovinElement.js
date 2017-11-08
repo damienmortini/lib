@@ -1,4 +1,5 @@
 import bodymovin from "bodymovin";
+import Loader from "../utils/Loader.js";
 
 (() => {
   let style = document.createElement("style");
@@ -17,6 +18,7 @@ export default class BodymovinElement extends HTMLElement {
     this.loop = this.hasAttribute("loop");
     this.autoplay = this.hasAttribute("autoplay");
     this.playbackRate = 1;
+    this.currentTime = 0;
 
     this.src = this.getAttribute("src");
   }
@@ -26,29 +28,35 @@ export default class BodymovinElement extends HTMLElement {
   }
 
   set src(value) {
+    if(value === this._src || !value) {
+      return;
+    }
     this._src = value;
     if(this.animation) {
       this.animation.destroy();
     }
-    this.animation = bodymovin.loadAnimation({
-      container: this,
-      renderer: this.renderer,
-      autoplay: this.autoplay,
-      path: this._src
-    });
-    this.animation.addEventListener("DOMLoaded", () => {
-      if(this._segments) {
-        this.segments = this._segments;
-      }
-      this.loop = this._loop;
-      this.playbackRate = this._playbackRate;
-      this.playbackRate = this._playbackRate;
-    });
-    this.animation.addEventListener("loopComplete", () => {
-      this.dispatchEvent(new Event("ended"));
-    });
-    this.animation.addEventListener("complete", () => {
-      this.dispatchEvent(new Event("ended"));
+    Loader.load(this._src).then((data) => {
+      this.animation = bodymovin.loadAnimation({
+        container: this,
+        renderer: this.renderer,
+        autoplay: this.autoplay,
+        animationData: data
+      });
+      this.animation.addEventListener("DOMLoaded", () => {
+        if(this._segments) {
+          this.segments = this._segments;
+        }
+        this.loop = this._loop;
+        this.frameRate = this._frameRate === undefined ? this.animation.frameRate : this._frameRate;
+        this.currentTime = this._currentTime;
+        this.playbackRate = this._playbackRate;
+      });
+      this.animation.addEventListener("loopComplete", () => {
+        this.dispatchEvent(new Event("ended"));
+      });
+      this.animation.addEventListener("complete", () => {
+        this.dispatchEvent(new Event("ended"));
+      });
     });
   }
 
@@ -77,10 +85,8 @@ export default class BodymovinElement extends HTMLElement {
 
   set currentTime(value) {
     this._currentTime = value;
-    if(this.paused) {
-      this.animation.goToAndStop(this._currentTime, false);
-    } else {
-      this.animation.goToAndPlay(this._currentTime, false);
+    if(this.animation) {
+      this.animation[this.paused ? "goToAndStop" : "goToAndPlay"](this._currentTime, false);
     }
   }
 
