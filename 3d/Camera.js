@@ -8,16 +8,16 @@ export default class Camera {
     this._fov = fov;
 
     this.transform = new Matrix4();
-    this._projectionMatrix = new Matrix4();
-    this._projectionViewMatrix = new Matrix4();
-    this._inverseMatrix = new Matrix4();
+    this._inverseTransform = new Matrix4();
+    this._projection = new Matrix4();
+    this._projectionView = new Matrix4();
 
-    this._updateProjectionMatrix();
+    this._updateProjection();
   }
 
   set near(value) {
     this._near = value;
-    this._updateProjectionMatrix();
+    this._updateProjection();
   }
 
   get near() {
@@ -26,7 +26,7 @@ export default class Camera {
 
   set far(value) {
     this._far = value;
-    this._updateProjectionMatrix();
+    this._updateProjection();
   }
 
   get far() {
@@ -35,7 +35,7 @@ export default class Camera {
 
   set fov(value) {
     this._fov = value;
-    this._updateProjectionMatrix();
+    this._updateProjection();
   }
 
   get fov() {
@@ -44,26 +44,26 @@ export default class Camera {
 
   set aspectRatio(value) {
     this._aspectRatio = value;
-    this._updateProjectionMatrix();
+    this._updateProjection();
   }
 
   get aspectRatio() {
     return this._aspectRatio;
   }
 
-  get projectionMatrix() {
-    return this._projectionMatrix;
+  get inverseTransform() {
+    return this._inverseTransform.invert(this.transform);
   }
 
-  get inverseMatrix() {
-    return this._inverseMatrix.invert(this.transform);
+  get projection() {
+    return this._projection;
   }
 
-  get projectionViewMatrix() {
-    return this._projectionViewMatrix.copy(this.projectionMatrix).multiply(this.inverseMatrix);
+  get projectionView() {
+    return this._projectionView.copy(this.projection).multiply(this.inverseTransform);
   }
 
-  _updateProjectionMatrix() {
-    this._projectionMatrix.fromPerspective(this);
+  _updateProjection() {
+    this._projection.fromPerspective(this);
   }
 }

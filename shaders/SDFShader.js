@@ -1,4 +1,72 @@
-export default class RaytraceGLSL {
+export default class SDFShader {
+  static Voxel() {
+    return `
+      struct Voxel
+      {
+        vec4 coord;
+        vec4 material;
+      };
+    `
+  }
+
+  static sdfBox() {
+    return `
+      Voxel sdfBox(vec3 position, vec3 box, vec4 material) {
+        return Voxel(vec4(position, length(max(abs(position) - box, 0.0))), material);
+      }
+    `;
+  }
+
+  static sdfSphere() {
+    return `
+      Voxel sdfSphere(vec3 position, float radius, vec4 material) {
+        return Voxel(vec4(position, length(position) - radius), material);
+      }
+    `;
+  }
+
+  static smoothMin() {
+    return `
+      Voxel smoothMin(Voxel voxel1, Voxel voxel2, float blendRatio) {
+        float ratio = clamp(.5 + .5 * (voxel2.coord.w - voxel1.coord.w) / blendRatio, 0., 1.);
+    
+        vec4 coord = mix(voxel2.coord, voxel1.coord, ratio) - blendRatio * ratio * (1. - ratio);
+        vec4 material = mix(voxel2.material, voxel1.material, ratio);
+    
+        return Voxel(coord, material);
+      }
+    `;
+  }
+
+  static min() {
+    return `
+      Voxel min(Voxel voxel1, Voxel voxel2) {
+        if(voxel1.coord.w < voxel2.coord.w) {
+          return voxel1;
+        }
+        else {
+          return voxel2;
+        }
+      }
+    `;
+  }
+
+  static repeat() {
+    return `
+      float repeat(float p, float c) {
+        return mod(p,c) - 0.5 * c;
+      }
+
+      vec2 repeat(vec2 p, vec2 c) {
+        return mod(p,c) - 0.5 * c;
+      }
+
+      vec3 repeat(vec3 p, vec3 c) {
+        return mod(p,c) - 0.5 * c;
+      }
+    `;
+  }
+
   static rayMarch({
     map = `
       Voxel voxel = Voxel(0., vec4(0.));
@@ -6,82 +74,16 @@ export default class RaytraceGLSL {
     `
   } = {}) {
     return `
-      // STRUCTURES
-
-      struct Voxel
-      {
-        float distance;
-        vec4 material;
-      };
-
-      // PRIMITIVES
-
-      float box( vec3 p, vec3 b )
-      {
-        return length(max(abs(p)-b,0.0));
-      }
-
-      float sphere( vec3 p, float s )
-      {
-        return length(p)-s;
-      }
-
-      float infinitePlane( vec3 p )
-      {
-        return p.y;
-      }
-
-      // OPERATORS
-
-      Voxel smin( Voxel voxel1, Voxel voxel2, float blendRatio )
-      {
-        float ratio = clamp(.5 + .5 * (voxel2.distance - voxel1.distance) / blendRatio, 0., 1.);
-
-        float distance = mix(voxel2.distance, voxel1.distance, ratio) - blendRatio * ratio * (1. - ratio);
-        vec4 material = mix(voxel2.material, voxel1.material, ratio);
-
-        return Voxel(distance, material);
-      }
-
-      Voxel min( Voxel voxel1, Voxel voxel2 )
-      {
-        if(voxel1.distance - voxel2.distance < 0.) {
-          return voxel1;
-        }
-        else {
-          return voxel2;
-        }
-      }
-
-      // REPEAT
-
-      float repeat( float p, float c )
-      {
-        return mod(p,c)-0.5*c;
-      }
-
-      vec2 repeat( vec2 p, vec2 c )
-      {
-        return mod(p,c)-0.5*c;
-      }
-
-      vec3 repeat( vec3 p, vec3 c )
-      {
-        return mod(p,c)-0.5*c;
-      }
-
-      // METHODS
-
-      Voxel map(vec3 p) {
+      Voxel map(vec3 position) {
         ${map}
       }
 
-      vec3 normalFromPosition(vec3 p) {
+      vec3 normalFromPosition(vec3 position) {
         vec2 e = vec2(.01, 0.0);
         return normalize(vec3(
-          map(p + e.xyy).distance - map(p - e.xyy).distance,
-          map(p + e.yxy).distance - map(p - e.yxy).distance,
-          map(p + e.yyx).distance - map(p - e.yyx).distance
+          map(position + e.xyy).coord.w - map(position - e.xyy).coord.w,
+          map(position + e.yxy).coord.w - map(position - e.yxy).coord.w,
+          map(position + e.yyx).coord.w - map(position - e.yyx).coord.w
         ));
       }
 
@@ -89,17 +91,17 @@ export default class RaytraceGLSL {
       {
         Voxel voxel;
 
-        float rayMarchingStep = 0.001;
+        float rayMarchingStep = far;
         float distance = near;
 
         for(int i = 0; i < 128; i++) {
           if (i == steps || rayMarchingStep < 0.0001 || distance > far) break;
           voxel = map(ray.origin + ray.direction * distance);
-          rayMarchingStep = voxel.distance;
+          rayMarchingStep = voxel.coord.w;
           distance += rayMarchingStep;
         }
 
-        voxel.distance = distance;
+        voxel.coord.w = distance;
 
         return voxel;
       }
@@ -146,9 +148,9 @@ export default class RaytraceGLSL {
 //     lastHeight = height;
 //     lastY = p.y;
 //
-//     // rayMarchingStep = voxel.distance;
+//     // rayMarchingStep = voxel.coord.w;
 //     // distance += rayMarchingStep;
-//     // voxel.distance = distance;
+//     // voxel.coord.w = distance;
 //   }
 //
 //   // vec3 normal = calcNormal(rayOrigin + rayDirection * distance);

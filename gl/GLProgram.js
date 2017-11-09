@@ -65,6 +65,9 @@ export default class GLProgram extends Shader {
           uniformTypes.set(name, type);
         }
         let value = values[0];
+        if(value === undefined) {
+          return;
+        }
         if(value.length === undefined) {
           if(values.length > 1) {
             value = self.uniforms.get(name);

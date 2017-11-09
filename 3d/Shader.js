@@ -154,7 +154,7 @@ export default class Shader {
           value = new Array(length).fill().map(value => new classes[`Matrix${matrixLength}`]());
         }
       } else {
-        value = null;
+        value = undefined;
       }
 
       this.uniforms.set(variableName, value);

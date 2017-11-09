@@ -24,7 +24,7 @@ export default class PlaneMesh {
         this.normals[offset * 3 + 2] = 1;
 
         this.uvs[offset * 2] = u;
-        this.uvs[offset * 2 + 1] = v;
+        this.uvs[offset * 2 + 1] = 1 - v;
       }
     }
 
