@@ -6,7 +6,7 @@ export default class GLTFLoader extends Loader {
     let objectMap = new Map();
     let rawData;
 
-    GLTFLoader.typeMap.get("json").push("gltf");
+    GLTFLoader.typeMap.get("json").add("gltf");
     
     let promise = Loader.load(value)
     .then((data) => {
