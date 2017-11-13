@@ -71,7 +71,8 @@ export default class SDFShader {
     map = `
       Voxel voxel = Voxel(0., vec4(0.));
       return voxel;
-    `
+    `,
+    maxSteps = 128
   } = {}) {
     return `
       Voxel map(vec3 position) {
@@ -94,7 +95,7 @@ export default class SDFShader {
         float rayMarchingStep = far;
         float distance = near;
 
-        for(int i = 0; i < 128; i++) {
+        for(int i = 0; i < ${maxSteps}; i++) {
           if (i == steps || rayMarchingStep < 0.0001 || distance > far) break;
           voxel = map(ray.origin + ray.direction * distance);
           rayMarchingStep = voxel.coord.w;
@@ -102,6 +103,7 @@ export default class SDFShader {
         }
 
         voxel.coord.w = distance;
+        voxel = min(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
 
         return voxel;
       }
