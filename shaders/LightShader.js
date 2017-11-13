@@ -1,5 +1,5 @@
-export default class LightGLSL {
-  static structure() {
+export default class LightShader {
+  static Light() {
     return `
       struct Light
       {
