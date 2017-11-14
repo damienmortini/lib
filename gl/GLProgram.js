@@ -53,22 +53,25 @@ export default class GLProgram extends Shader {
     const uniformLocations = new Map();
     const uniformTypes = new Map();
     class Uniforms extends Map {
-      set (name , ...values) {
-        let location = uniformLocations.get(name);
-        if(!location) {
-          location = gl.getUniformLocation(program, name);
-          uniformLocations.set(name, location);
-        }
-        let type = uniformTypes.get(name);
-        if(!type) {
-          type = /int|ivec|sampler2D|samplerCube/.test(self._uniformTypes.get(name)) ? "iv" : "fv";
-          uniformTypes.set(name, type);
-        }
+      set (name, ...values) {
         let value = values[0];
         if(value === undefined) {
           return;
         }
+
+        let location = uniformLocations.get(name);
+        if(location === undefined) {
+          location = gl.getUniformLocation(program, name);
+          uniformLocations.set(name, location);
+        }
+        
         if(value.length === undefined) {
+          if(value instanceof Object) {
+            for (let key in value) {
+              self.uniforms.set(`${name}.${key}`, value[key]);
+            }
+            return;
+          }
           if(values.length > 1) {
             value = self.uniforms.get(name);
             value.set(...values);
@@ -76,6 +79,17 @@ export default class GLProgram extends Shader {
             value = values;
           }
         }
+
+        if(location === null) {
+          return;
+        }
+
+        let type = uniformTypes.get(name);
+        if(!type) {
+          type = /int|ivec|sampler2D|samplerCube/.test(self._uniformTypes.get(name)) ? "iv" : "fv";
+          uniformTypes.set(name, type);
+        }
+
         if(value.length <= 4) {
           gl[`uniform${value.length || 1}${type}`](location, value);
         }
@@ -85,6 +99,7 @@ export default class GLProgram extends Shader {
         else if(value.length === 16) {
           gl.uniformMatrix4fv(location, false, value);
         }
+
         super.set(name, value);
       }
     }
