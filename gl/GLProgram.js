@@ -18,11 +18,13 @@ export default class GLProgram extends Shader {
   } = {}) {
     super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
 
+    this.gl = gl;
+    this._program = gl.createProgram();
     this._attachedShaders = new Map();
 
-    const program = gl.createProgram();
 
     const self = this;
+    const program = this._program;
 
     const attributesLocations = new Map();
     class Attributes extends Map {
@@ -78,6 +80,13 @@ export default class GLProgram extends Shader {
           } else {
             value = values;
           }
+        } else if(value[0] instanceof Object) {
+          for (let i = 0; i < value.length; i++) {
+            for (let key in value[i]) {
+              self.uniforms.set(`${name}[${i}].${key}`, value[i][key]);
+            }
+          }
+          return;
         }
 
         if(location === null) {
@@ -103,9 +112,6 @@ export default class GLProgram extends Shader {
         super.set(name, value);
       }
     }
-    
-    this.gl = gl;
-    this._program = program;
 
     this.vertexShader = this.vertexShader;
     this.fragmentShader = this.fragmentShader;
