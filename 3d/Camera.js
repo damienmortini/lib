@@ -1,7 +1,7 @@
 import Matrix4 from "../math/Matrix4.js";
 
 export default class Camera {
-  constructor({near = 0.01, far = 1000, aspectRatio = 1, fov = Math.PI / 3} = {}) {
+  constructor({ near = 0.01, far = 1000, aspectRatio = 1, fov = Math.PI / 3 } = {}) {
     this._near = near;
     this._far = far;
     this._aspectRatio = aspectRatio;
@@ -67,3 +67,11 @@ export default class Camera {
     this._projection.fromPerspective(this);
   }
 }
+
+Object.defineProperty(Camera.prototype, "near", { enumerable: true });
+Object.defineProperty(Camera.prototype, "far", { enumerable: true });
+Object.defineProperty(Camera.prototype, "fov", { enumerable: true });
+Object.defineProperty(Camera.prototype, "aspectRatio", { enumerable: true });
+Object.defineProperty(Camera.prototype, "inverseTransform", { enumerable: true });
+Object.defineProperty(Camera.prototype, "projection", { enumerable: true });
+Object.defineProperty(Camera.prototype, "projectionView", { enumerable: true });
