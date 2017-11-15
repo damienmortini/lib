@@ -17,6 +17,14 @@ export default class SDFShader {
     `;
   }
 
+  static sdfEllipsoid() {
+    return `
+      Voxel sdfEllipsoid(vec3 position, vec3 box, vec4 material) {
+        return Voxel(vec4(position, (length(position / box) - 1.0) * min(min(box.x, box.y), box.z)), material);
+      }
+    `;
+  }
+
   static sdfSphere() {
     return `
       Voxel sdfSphere(vec3 position, float radius, vec4 material) {
@@ -40,15 +48,25 @@ export default class SDFShader {
 
   static min() {
     return `
-      Voxel min(Voxel voxel1, Voxel voxel2) {
-        if(voxel1.coord.w < voxel2.coord.w) {
-          return voxel1;
-        }
-        else {
-          return voxel2;
-        }
+    Voxel min(Voxel voxel1, Voxel voxel2) {
+      if(voxel1.coord.w < voxel2.coord.w) {
+        return voxel1;
       }
+      else {
+        return voxel2;
+      }
+    }
     `;
+  }
+  
+  static substraction() {
+    return `
+      Voxel substraction(Voxel voxel1, Voxel voxel2)
+      {
+        voxel1.coord.w = max(-voxel2.coord.w, voxel1.coord.w);
+        return voxel1;
+      }
+    `
   }
 
   static repeat() {
