@@ -54,7 +54,7 @@ function componentToHex(c) {
 }
 
 function rgbToHex(r, g, b) {
-  return "#" + componentToHex(r * 255) + componentToHex(g * 255) + componentToHex(b * 255);
+  return "#" + componentToHex(Math.floor(r * 255)) + componentToHex(Math.floor(g * 255)) + componentToHex(Math.floor(b * 255));
 }
 
 function hexToRgb(hex) {
