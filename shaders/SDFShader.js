@@ -97,8 +97,8 @@ export default class SDFShader {
         ${map}
       }
 
-      vec3 normalFromPosition(vec3 position) {
-        vec2 e = vec2(.01, 0.0);
+      vec3 normalFromPosition(vec3 position, float step) {
+        vec2 e = vec2(step, 0.0);
         return normalize(vec3(
           map(position + e.xyy).coord.w - map(position - e.xyy).coord.w,
           map(position + e.yxy).coord.w - map(position - e.yxy).coord.w,
