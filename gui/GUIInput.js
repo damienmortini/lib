@@ -223,10 +223,10 @@ export default class GUIInput extends HTMLElement {
     if(e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
       this.value = e.target.checked;
     } else if(e.target.type === "range" || e.target.type === "number") {
-      if(e.target.value === "" || isNaN(e.target.value)) {
+      if(e.target.valueAsNumber === undefined) {
         return;
       }
-      this.value = parseFloat(e.target.value);
+      this.value = e.target.valueAsNumber;
     } else if(e.target.type === "button") {
       this.value();
     } else if(e.target.type === "color") {
