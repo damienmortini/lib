@@ -57,7 +57,7 @@ export default class GLMesh {
     offset = this.indices ? this.indices.offset : 0,
     type = this.indices ? this.indices.type : null,
     first = 0,
-    instanceCount
+    instanceCount = undefined
   } = {}) {
     if(elements) {
       if(instanceCount !== undefined) {

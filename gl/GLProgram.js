@@ -22,7 +22,6 @@ export default class GLProgram extends Shader {
     this._program = gl.createProgram();
     this._attachedShaders = new Map();
 
-
     const self = this;
     const program = this._program;
 
@@ -60,7 +59,7 @@ export default class GLProgram extends Shader {
         if(value === undefined) {
           return;
         }
-
+        
         let location = uniformLocations.get(name);
         if(location === undefined) {
           location = gl.getUniformLocation(program, name);
@@ -88,7 +87,7 @@ export default class GLProgram extends Shader {
           }
           return;
         }
-
+        
         if(location === null) {
           return;
         }
@@ -151,6 +150,22 @@ export default class GLProgram extends Shader {
   _updateShader(type, source) {
     if(!source) {
       return;
+    }
+
+    if(this.gl instanceof WebGLRenderingContext) {
+      source = source.replace(/#version.*?\n/g, "");
+      if(type === this.gl.VERTEX_SHADER) {
+        source = source.replace(/\bin\b/g, "attribute");
+        source = source.replace(/\bout\b/g, "varying");
+      } else {
+        source = source.replace(/\bin\b/g, "varying");
+        const results = /out vec4 (.*?);/.exec(source);
+        if(results) {
+          const fragColorName = results[1];
+          source = source.replace(/out.*?;/, "");
+          source = source.replace(new RegExp(`\\b${fragColorName}\\b`, "g"), "gl_FragColor");
+        }
+      }
     }
 
     const shader = this.gl.createShader(type);
