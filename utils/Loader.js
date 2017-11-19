@@ -38,7 +38,12 @@ export default class Loader {
         continue;
       }
 
-      let promise = PROMISES.get(value) || new Promise(function(resolve, reject) {
+      let promise = new Promise(function(resolve, reject) {
+        if(PROMISES.get(value)) {
+          PROMISES.get(value).then(resolve);
+          return;
+        }
+        
         if(Loader.get(value)) {
           resolve(Loader.get(value));
           return;
