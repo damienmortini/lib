@@ -8,7 +8,7 @@ export default class Shader {
     for (let [key, chunk] of chunks) {
       switch (key) {
         case "start":
-          string = `${chunk}\n${string}`;
+          string = string.replace(/(#version .*?)\n([\s\S]*)/, `$1\n${chunk}\n$2`);
           break;
         case "end":
           string = string.replace(/(}\s*$)/, `\n${chunk}\n$1`);
@@ -24,13 +24,17 @@ export default class Shader {
     return string;
   }
 
-  constructor({vertexShader = `
+  constructor({vertexShader = `#version 300 es
     void main() {
       gl_Position = vec4(0., 0., 0., 1.);
     }
-  `, fragmentShader = `
+  `, fragmentShader = `#version 300 es
+    precision highp float;
+
+    out vec4 fragColor;
+
     void main() {
-      gl_FragColor = vec4(1.);
+      fragColor = vec4(1.);
     }
   `, uniforms = [], vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
     this.uniforms = new Map();
