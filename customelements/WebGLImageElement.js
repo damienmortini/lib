@@ -2,16 +2,14 @@ import GLMesh from "../gl/GLMesh.js";
 import GLProgram from "../gl/GLProgram.js";
 import GLTexture from "../gl/GLTexture.js";
 
-(() => {
-  let style = document.createElement("style");
-  style.textContent = `
-    dlib-webglimage {
-      display: block;
-      position: relative;
-    }
-  `;
-  document.head.appendChild(style);
-})();
+let style = document.createElement("style");
+style.textContent = `
+  dlib-webglimage {
+    display: block;
+    position: relative;
+  }
+`;
+document.head.appendChild(style);
 
 export default class WebGLImageElement extends HTMLElement {
   constructor({
@@ -65,25 +63,29 @@ export default class WebGLImageElement extends HTMLElement {
       uniforms: [
         ["data", this._texture]
       ],
-      vertexShader: `
-        attribute vec2 position;
-        attribute vec2 uv;
-        varying vec2 vUv;
+      vertexShader: `#version 300 es
+        in vec2 position;
+        in vec2 uv;
+
+        out vec2 vUv;
 
         void main() {
           gl_Position = vec4(position, 0., 1.);
           vUv = uv;
         }
       `,
-      fragmentShader: `
+      fragmentShader: `#version 300 es
         precision highp float;
 
         uniform sampler2D data;
-        varying vec2 vUv;
+
+        in vec2 vUv;
+
+        out vec4 fragColor;
 
         void main() {
-          gl_FragColor = texture2D(data, vUv);
-          gl_FragColor.rgb *= gl_FragColor.a;
+          fragColor = texture2D(data, vUv);
+          fragColor.rgb *= gl_FragColor.a;
         }
       `
     });
@@ -91,7 +93,9 @@ export default class WebGLImageElement extends HTMLElement {
 
     this.program.attributes.set(this._mesh.attributes);
 
-    this.src = this.getAttribute("src");
+    if(this.hasAttribute("src")) {
+      this.src = this.getAttribute("src");
+    }
   }
 
   connectedCallback() {
