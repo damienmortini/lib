@@ -33,9 +33,9 @@ export default class SDFShader {
     `;
   }
 
-  static smoothMin() {
+  static sdfSmoothMin() {
     return `
-      Voxel smoothMin(Voxel voxel1, Voxel voxel2, float blendRatio) {
+      Voxel sdfSmoothMin(Voxel voxel1, Voxel voxel2, float blendRatio) {
         float ratio = clamp(.5 + .5 * (voxel2.coord.w - voxel1.coord.w) / blendRatio, 0., 1.);
     
         vec4 coord = mix(voxel2.coord, voxel1.coord, ratio) - blendRatio * ratio * (1. - ratio);
@@ -46,9 +46,9 @@ export default class SDFShader {
     `;
   }
 
-  static min() {
+  static sdfMin() {
     return `
-    Voxel min(Voxel voxel1, Voxel voxel2) {
+    Voxel sdfMin(Voxel voxel1, Voxel voxel2) {
       if(voxel1.coord.w < voxel2.coord.w) {
         return voxel1;
       }
@@ -58,10 +58,19 @@ export default class SDFShader {
     }
     `;
   }
-  
-  static substraction() {
+
+  static sdfTransform() {
     return `
-      Voxel substraction(Voxel voxel1, Voxel voxel2)
+    vec3 sdfTransform(vec3 position, mat4 transform) {
+      position = inverse(transform) * position;
+      return position;
+    }
+    `;
+  }
+  
+  static sdfSubstraction() {
+    return `
+      Voxel sdfSubstraction(Voxel voxel1, Voxel voxel2)
       {
         voxel1.coord.w = max(-voxel2.coord.w, voxel1.coord.w);
         return voxel1;
@@ -69,17 +78,17 @@ export default class SDFShader {
     `
   }
 
-  static repeat() {
+  static sdfRepeat() {
     return `
-      float repeat(float p, float c) {
+      float sdfRepeat(float p, float c) {
         return mod(p,c) - 0.5 * c;
       }
 
-      vec2 repeat(vec2 p, vec2 c) {
+      vec2 sdfRepeat(vec2 p, vec2 c) {
         return mod(p,c) - 0.5 * c;
       }
 
-      vec3 repeat(vec3 p, vec3 c) {
+      vec3 sdfRepeat(vec3 p, vec3 c) {
         return mod(p,c) - 0.5 * c;
       }
     `;
@@ -121,7 +130,7 @@ export default class SDFShader {
         }
 
         voxel.coord.w = distance;
-        voxel = min(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
+        voxel = sdfMin(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
 
         return voxel;
       }
