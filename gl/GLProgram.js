@@ -25,6 +25,13 @@ export default class GLProgram extends Shader {
     const self = this;
     const program = this._program;
 
+    if(this.gl.SHADING_LANGUAGE_VERSION === 35724) {
+      const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
+      this._vertexAttribDivisor = instancedArraysExtension ? instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension) : function() {};
+    } else {
+      this._vertexAttribDivisor = this.gl._vertexAttribDivisor.bind(this.gl);
+    }
+
     const attributesLocations = new Map();
     class Attributes extends Map {
       set (name , {buffer, location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor} = {}) {
@@ -45,7 +52,7 @@ export default class GLProgram extends Shader {
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
         if(divisor !== undefined) {
-          gl.vertexAttribDivisor(location, divisor);
+          self._vertexAttribDivisor(location, divisor);
         }
         super.set(name, {buffer, size, type, normalized, stride, offset});
       }
@@ -152,7 +159,7 @@ export default class GLProgram extends Shader {
       return;
     }
 
-    if(this.gl instanceof WebGLRenderingContext) {
+    if(this.gl.SHADING_LANGUAGE_VERSION === 35724) {
       source = source.replace(/#version.*?\n/g, "");
       if(type === this.gl.VERTEX_SHADER) {
         source = source.replace(/\bin\b/g, "attribute");
@@ -174,9 +181,14 @@ export default class GLProgram extends Shader {
 
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
       const error = this.gl.getShaderInfoLog(shader);
-      const lineNumber = parseFloat(/ERROR: 0:(\d+):/.exec(error)[1]);
-      const shaderLines = source.split("\n");
-      console.error(`${error}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
+      const lineNumberResults = /ERROR: 0:(\d+):/.exec(error);
+      if (lineNumberResults) {
+        const lineNumber = parseFloat(lineNumberResults[1]);
+        const shaderLines = source.split("\n");
+        console.error(`${error}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
+      } else {
+        console.error(error);
+      }
     }
 
     const attachedShader = this._attachedShaders.get(type);

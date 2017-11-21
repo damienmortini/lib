@@ -4,7 +4,15 @@ export default class GLMesh {
   constructor({gl, attributes, indiceData} = {}) {
     this.gl = gl;
 
-    this.gl.getExtension("OES_element_index_uint");
+    if(this.gl.SHADING_LANGUAGE_VERSION === 35724) {
+      this.gl.getExtension("OES_element_index_uint");
+      const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
+      this._drawElementsInstanced = instancedArraysExtension ? instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension) : function() {};
+      this._drawArraysInstanced = instancedArraysExtension ? instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension) : function() {};
+    } else {
+      this._drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl);
+      this._drawArraysInstanced = this.gl.drawArraysInstance.bind(this.gl);
+    }
 
     this.attributes = new Map(attributes);
 
@@ -61,13 +69,13 @@ export default class GLMesh {
   } = {}) {
     if(elements) {
       if(instanceCount !== undefined) {
-        this.gl.drawElementsInstanced(mode, count, type, offset, instanceCount);
+        this._drawElementsInstanced(mode, count, type, offset, instanceCount);
       } else {
         this.gl.drawElements(mode, count, type, offset);
       }
     } else {
       if(instanceCount !== undefined) {
-        this.gl.drawArraysInstanced(mode, first, count, instanceCount);
+        this._drawArraysInstanced(mode, first, count, instanceCount);
       } else {
         this.gl.drawArrays(mode, first, count);
       }
