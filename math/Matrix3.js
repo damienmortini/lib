@@ -17,7 +17,7 @@ export default class Matrix3 extends Float32Array {
   }
 
   rotate(value, matrix3 = this) {
-    mat3.rotateX(this, matrix3, value);
+    mat3.rotate(this, matrix3, value);
     return this;
   }
 
