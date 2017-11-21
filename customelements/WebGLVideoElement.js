@@ -4,16 +4,14 @@ import GLMesh from "../gl/GLMesh.js";
 import GLProgram from "../gl/GLProgram.js";
 import GLTexture from "../gl/GLTexture.js";
 
-(() => {
-  let style = document.createElement("style");
-  style.textContent = `
-    dlib-webglvideo {
-      display: block;
-      position: relative;
-    }
-  `;
-  document.head.appendChild(style);
-})();
+let style = document.createElement("style");
+style.textContent = `
+  dlib-webglvideo {
+    display: block;
+    position: relative;
+  }
+`;
+document.head.appendChild(style);
 
 export default class WebGLVideoElement extends WebGLImageElement {
   constructor() {
@@ -43,7 +41,7 @@ export default class WebGLVideoElement extends WebGLImageElement {
   _playTicker() {
     Ticker.add(this._updateBinded);
   }
-
+  
   _pauseTicker() {
     Ticker.delete(this._updateBinded);
   }
@@ -58,6 +56,17 @@ export default class WebGLVideoElement extends WebGLImageElement {
 
   set src(value) {
     this._data.src = value;
+
+    const resizeCanvas = () => {
+      this._data.removeEventListener("loadedmetadata", resizeCanvas);
+      this.resize();
+    }
+
+    this._data.addEventListener("loadedmetadata", resizeCanvas);
+  }
+
+  set srcObject(value) {
+    this._data.srcObject = value;
 
     const resizeCanvas = () => {
       this._data.removeEventListener("loadedmetadata", resizeCanvas);
