@@ -25,11 +25,12 @@ export default class GLProgram extends Shader {
     const self = this;
     const program = this._program;
 
-    if(this.gl.SHADING_LANGUAGE_VERSION === 35724) {
-      const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
-      this._vertexAttribDivisor = instancedArraysExtension ? instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension) : function() {};
-    } else {
-      this._vertexAttribDivisor = this.gl._vertexAttribDivisor.bind(this.gl);
+    this._vertexAttribDivisor = function() {};
+    const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
+    if(instancedArraysExtension) {
+      this._vertexAttribDivisor = instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension);
+    } else if(this.gl.vertexAttribDivisor) {
+      this._vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl);
     }
 
     const attributesLocations = new Map();
@@ -199,7 +200,9 @@ export default class GLProgram extends Shader {
     this._attachedShaders.set(type, shader);
     this.gl.attachShader(this._program, shader);
 
-    this.gl.linkProgram(this._program);
+    if(this.gl.getAttachedShaders(this._program).length === 2) {
+      this.gl.linkProgram(this._program);
+    }
   }
 
   _parseUniforms(string) {

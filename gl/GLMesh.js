@@ -4,14 +4,17 @@ export default class GLMesh {
   constructor({gl, attributes, indiceData} = {}) {
     this.gl = gl;
 
-    if(this.gl.SHADING_LANGUAGE_VERSION === 35724) {
-      this.gl.getExtension("OES_element_index_uint");
-      const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
-      this._drawElementsInstanced = instancedArraysExtension ? instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension) : function() {};
-      this._drawArraysInstanced = instancedArraysExtension ? instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension) : function() {};
-    } else {
+    this.gl.getExtension("OES_element_index_uint");
+
+    this._drawElementsInstanced = function() {};
+    this._drawArraysInstanced = function() {};
+    const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
+    if(instancedArraysExtension) {
+      this._drawElementsInstanced = instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension);
+      this._drawArraysInstanced = instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension);
+    } else if(this.gl.drawElementsInstanced) {
       this._drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl);
-      this._drawArraysInstanced = this.gl.drawArraysInstance.bind(this.gl);
+      this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl);
     }
 
     this.attributes = new Map(attributes);
