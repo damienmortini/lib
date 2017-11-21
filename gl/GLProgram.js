@@ -160,7 +160,7 @@ export default class GLProgram extends Shader {
       return;
     }
 
-    if(this.gl.SHADING_LANGUAGE_VERSION === 35724) {
+    if(!(this.gl instanceof WebGL2RenderingContext)) {
       source = source.replace(/#version.*?\n/g, "");
       if(type === this.gl.VERTEX_SHADER) {
         source = source.replace(/\bin\b/g, "attribute");
