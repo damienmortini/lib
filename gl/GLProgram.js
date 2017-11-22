@@ -162,6 +162,7 @@ export default class GLProgram extends Shader {
 
     if(!(this.gl instanceof WebGL2RenderingContext)) {
       source = source.replace(/#version.*?\n/g, "");
+      source = source.replace(/\btexture\b/g, "texture2D");
       if(type === this.gl.VERTEX_SHADER) {
         source = source.replace(/\bin\b/g, "attribute");
         source = source.replace(/\bout\b/g, "varying");
@@ -180,16 +181,20 @@ export default class GLProgram extends Shader {
     this.gl.shaderSource(shader, source);
     this.gl.compileShader(shader);
 
+    const shaderInfoLog = this.gl.getShaderInfoLog(shader);
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      const error = this.gl.getShaderInfoLog(shader);
-      const lineNumberResults = /ERROR: 0:(\d+):/.exec(error);
+      const lineNumberResults = /ERROR: 0:(\d+):/.exec(shaderInfoLog);
       if (lineNumberResults) {
         const lineNumber = parseFloat(lineNumberResults[1]);
         const shaderLines = source.split("\n");
-        console.error(`${error}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
+        console.error(`${shaderInfoLog}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
       } else {
-        console.error(error);
+        console.error(shaderInfoLog);
       }
+      this.gl.deleteShader(shader);
+      return;
+    } else if(shaderInfoLog) {
+      console.warn(shaderInfoLog);
     }
 
     const attachedShader = this._attachedShaders.get(type);
@@ -197,11 +202,23 @@ export default class GLProgram extends Shader {
       this.gl.detachShader(this._program, attachedShader);
       this.gl.deleteShader(attachedShader);
     }
-    this._attachedShaders.set(type, shader);
-    this.gl.attachShader(this._program, shader);
 
-    if(this.gl.getAttachedShaders(this._program).length === 2) {
+    this.gl.attachShader(this._program, shader);
+    this.gl.deleteShader(shader);
+    this._attachedShaders.set(type, shader);
+    
+    if(this._attachedShaders.size === 2) {
       this.gl.linkProgram(this._program);
+      const programInfoLog = this.gl.getProgramInfoLog(this._program);
+      if (!this.gl.getProgramParameter(this._program, this.gl.LINK_STATUS)) {
+        console.error(programInfoLog);
+      } else if(programInfoLog) {
+        console.warn(programInfoLog);
+      }
+      for (let [type, attachedShader] of this._attachedShaders) {
+        this.gl.detachShader(this._program, attachedShader);
+        this._attachedShaders.delete(type);
+      }
     }
   }
 
