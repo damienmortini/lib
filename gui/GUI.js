@@ -238,9 +238,11 @@ export default class GUI extends HTMLElement {
     return this._container.open;
   }
 
-  add(object, key, {type, label = key, id = label, group = "", reload = false, remote = false, client = remote, onChange = () => {
-      }, options, max, min, step} = {}) {
-    if(object[key] === null || object[key] === undefined) {
+  add(object, key, {type, label = key, id = label, group = "", reload = false, remote = false, client = remote, onChange = (value) => {}, options, max, min, step} = {}) {
+    
+    const INITIAL_VALUE = type === "color" ? colorToHex(object[key]) : object[key];
+    
+    if(INITIAL_VALUE === null || INITIAL_VALUE === undefined) {
       console.error(`GUI: ${id} must be defined.`);
       return;
     }
@@ -263,7 +265,7 @@ export default class GUI extends HTMLElement {
     type = type || (options ? "select" : "");
 
     if (!type) {
-      switch (typeof object[key]) {
+      switch (typeof INITIAL_VALUE) {
         case "boolean":
           type = "checkbox";
           break;
@@ -274,7 +276,7 @@ export default class GUI extends HTMLElement {
           type = "button";
           break;
         default:
-          type = typeof object[key];
+          type = typeof INITIAL_VALUE;
       }
     }
 
@@ -286,6 +288,7 @@ export default class GUI extends HTMLElement {
       container = this.groups.get(group);
       if(!container) {
         container = document.createElement("details");
+        container.open = true;
         container.innerHTML = `<summary>${group}</summary>`;
         this.groups.set(group, container);
         this._container.appendChild(container);
@@ -297,7 +300,7 @@ export default class GUI extends HTMLElement {
     } : object;
     input.key = type === "color" ? "value" : key;
     input.label = label;
-    input.value = (type === "color" ? colorToHex(object[key]) : object[key]);
+    input.value = INITIAL_VALUE;
     input._client = client;
     if (min) {
       input.min = min;
@@ -327,10 +330,20 @@ export default class GUI extends HTMLElement {
       if (!containerData) {
         containerData = DATA[groupKey] = {};
       }
-      containerData[idKey] = input.value;
+      if(input.value !== INITIAL_VALUE) {
+        containerData[idKey] = input.value;
+      } else {
+        delete containerData[idKey];
+        if(groupKey && !Object.keys(containerData).length) {
+          delete DATA[groupKey];
+        }
+      }
 
       if (GUI_REG_EXP.test(window.location.hash)) {
-        window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${encodeURI(JSON.stringify(DATA))}$5`);
+        window.location.hash = window.location.hash.replace(
+          GUI_REG_EXP, 
+          Object.keys(DATA).length ? `$1${encodeURI(JSON.stringify(DATA))}$5` : ""
+        );
       } else {
         let prefix = window.location.hash ? "&" : "#";
         window.location.hash += `${prefix}gui=${encodeURI(JSON.stringify(DATA))}`;
@@ -360,7 +373,6 @@ export default class GUI extends HTMLElement {
     if (type === "button") {
       input.addEventListener("click", onValueChange);
     } else {
-
       let animationFrameId = -1;
       const onValueChangeTmp = () => {
         cancelAnimationFrame(animationFrameId);
