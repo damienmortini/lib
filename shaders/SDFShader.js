@@ -108,10 +108,11 @@ export default class SDFShader {
 
       vec3 normalFromPosition(vec3 position, float step) {
         vec2 e = vec2(step, 0.0);
+        float stepInverse = 1. / step; // for mobile precision
         return normalize(vec3(
-          map(position + e.xyy).coord.w - map(position - e.xyy).coord.w,
-          map(position + e.yxy).coord.w - map(position - e.yxy).coord.w,
-          map(position + e.yyx).coord.w - map(position - e.yyx).coord.w
+          map(position + e.xyy).coord.w * stepInverse - map(position - e.xyy).coord.w * stepInverse,
+          map(position + e.yxy).coord.w * stepInverse - map(position - e.yxy).coord.w * stepInverse,
+          map(position + e.yyx).coord.w * stepInverse - map(position - e.yyx).coord.w * stepInverse
         ));
       }
 
