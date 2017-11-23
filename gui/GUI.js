@@ -115,6 +115,7 @@ let DATA = {};
     string = string.replace(/”|%E2%80%9D/g, "%22");
     window.location.hash = window.location.hash.replace(GUI_REG_EXP, `$1${string}$5`);
     DATA = JSON.parse(decodeURI(string));
+    console.log("GUI data:", DATA);
   }
 })();
 
