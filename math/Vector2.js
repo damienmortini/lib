@@ -88,15 +88,11 @@ export default class Vector2 extends Float32Array {
     return this;
   }
 
-  angle(vector2) {
-    return vec2.angle(this, vector2);
-  }
-
   lerp(vector2, value) {
     vec2.lerp(this, this, vector2, value);
   }
 
   clone() {
-    return new Vector3(this.x, this.y, this.z);
+    return new Vector2(this.x, this.y);
   }
 }
