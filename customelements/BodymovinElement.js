@@ -1,15 +1,13 @@
 import bodymovin from "bodymovin";
 import Loader from "../utils/Loader.js";
 
-(() => {
-  let style = document.createElement("style");
-  style.textContent = `
-    dlib-bodymovin {
-      display: block;
-    }
-  `;
-  document.head.appendChild(style);
-})();
+const style = document.createElement("style");
+style.textContent = `
+  dlib-bodymovin {
+    display: block;
+  }
+`;
+document.head.appendChild(style);
 
 export default class BodymovinElement extends HTMLElement {
   constructor() {

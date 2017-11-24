@@ -24,7 +24,7 @@ export default class WebGLImageElement extends HTMLElement {
     this._canvas.style.width = "100%";
     this._canvas.style.height = "100%";
     this.appendChild(this._canvas);
-    this.gl = this._canvas.getContext("webgl", {
+    this.gl = this._canvas.getContext(WebGL2RenderingContext ? "webgl2" : "webgl", {
       premultipliedAlpha: false
     });
 
@@ -84,8 +84,8 @@ export default class WebGLImageElement extends HTMLElement {
         out vec4 fragColor;
 
         void main() {
-          fragColor = texture2D(data, vUv);
-          fragColor.rgb *= gl_FragColor.a;
+          fragColor = texture(data, vUv);
+          fragColor.rgb *= fragColor.a;
         }
       `
     });
