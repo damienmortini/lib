@@ -61,7 +61,7 @@ export default class WebGLImageElement extends HTMLElement {
     this.program = new GLProgram({
       gl: this.gl,
       uniforms: [
-        ["data", this._texture]
+        ["data", 0]
       ],
       vertexShader: `#version 300 es
         in vec2 position;
@@ -108,10 +108,17 @@ export default class WebGLImageElement extends HTMLElement {
   }
 
   update() {
-    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+    this._texture.data = this._data;
+    this.draw();
+  }
+  
+  draw({
+    width = this._canvas.width,
+    height = this._canvas.height,
+  } = {}) {
+    this.gl.viewport(0, 0, width, height);
     this.gl.clearColor(0, 0, 0, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    this._texture.data = this._data;
     this._mesh.draw({
       mode: this.gl.TRIANGLE_STRIP,
       count: 4
