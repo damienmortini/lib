@@ -123,6 +123,8 @@ export default class SDFShader {
         float rayMarchingStep = far;
         float distance = near;
 
+        // TODO: Remove use of maxsteps and just use step when WebGL2 is broadly supported
+        
         for(int i = 0; i < ${maxSteps}; i++) {
           if (i == steps || rayMarchingStep < 0.0001 || distance > far) break;
           voxel = map(ray.origin + ray.direction * distance);
