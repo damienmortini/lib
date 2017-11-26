@@ -23,7 +23,6 @@ export default class GLProgram extends Shader {
     this._attachedShaders = new Map();
 
     const self = this;
-    const program = this._program;
 
     this._vertexAttribDivisor = function() {};
     const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
@@ -44,7 +43,7 @@ export default class GLProgram extends Shader {
         }
         buffer.bind();
         if(!location) {
-          location = gl.getAttribLocation(program, name);
+          location = gl.getAttribLocation(self._program, name);
           if(location === -1) {
             console.warn(`Attribute "${name}" is missing or never used`)
           }
@@ -59,8 +58,8 @@ export default class GLProgram extends Shader {
       }
     }
 
-    const uniformLocations = new Map();
-    const uniformTypes = new Map();
+    this._uniformLocations = new Map();
+    this._uniformTypes = new Map();
     class Uniforms extends Map {
       set (name, ...values) {
         let value = values[0];
@@ -68,10 +67,10 @@ export default class GLProgram extends Shader {
           return;
         }
         
-        let location = uniformLocations.get(name);
+        let location = self._uniformLocations.get(name);
         if(location === undefined) {
-          location = gl.getUniformLocation(program, name);
-          uniformLocations.set(name, location);
+          location = gl.getUniformLocation(self._program, name);
+          self._uniformLocations.set(name, location);
         }
         
         if(value.length === undefined) {
@@ -99,11 +98,11 @@ export default class GLProgram extends Shader {
         if(location === null) {
           return;
         }
-
-        let type = uniformTypes.get(name);
+        
+        let type = self._uniformTypes.get(name);
         if(!type) {
-          type = /int|ivec|sampler2D|samplerCube/.test(self._uniformTypes.get(name)) ? "iv" : "fv";
-          uniformTypes.set(name, type);
+          type = /int|ivec|sampler2D|samplerCube/.test(self._glslUniformTypes.get(name)) ? "iv" : "fv";
+          self._uniformTypes.set(name, type);
         }
 
         if(value.length <= 4) {
@@ -219,6 +218,8 @@ export default class GLProgram extends Shader {
         this.gl.detachShader(this._program, attachedShader);
         this._attachedShaders.delete(type);
       }
+      this._uniformLocations = new Map();
+      this._uniformTypes = new Map();
     }
   }
 
