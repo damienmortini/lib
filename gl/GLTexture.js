@@ -1,8 +1,13 @@
 export default class GLTexture {
   constructor({
     gl, 
-    data = undefined, 
-    color = [1, 1, 1, 1], 
+    data = null, 
+    width = undefined,
+    height = undefined,
+    level = 0,
+    internalformat = gl.RGBA,
+    format = gl.RGBA,
+    type = gl.UNSIGNED_BYTE,
     minFilter = gl.NEAREST_MIPMAP_LINEAR, 
     magFilter = gl.LINEAR, 
     wrapS = gl.REPEAT, 
@@ -11,18 +16,16 @@ export default class GLTexture {
   } = {}) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
+    this._width = width;
+    this._height = height;
     
-    if(data) {
+    this.level = level;
+    this.internalformat = internalformat;
+    this.format = format;
+    this.type = type;
+    if(this.data || (this._width && this._height)) {
       this.data = data;
-    } else {
-      this.color = color;
     }
-
-    this._minFilter = this.gl.NEAREST_MIPMAP_LINEAR;
-    this._magFilter = this.gl.LINEAR;
-    this._wrapS = this.gl.REPEAT;
-    this._wrapT = this.gl.REPEAT;
-
     this.minFilter = minFilter;
     this.magFilter = magFilter;
     this.wrapS = wrapS;
@@ -34,13 +37,23 @@ export default class GLTexture {
   }
 
   set data(value) {
+    this._data = value;
     this.bind();
-    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, value);
+    this._width = this._width || this._data.width || this._data.videoWidth;
+    this._height = this._height || this._data.height || this._data.videoHeight;
+    this.gl.texImage2D(this.gl.TEXTURE_2D, this.level, this.internalformat, this._width, this._height, 0, this.format, this.type, this._data);
   }
 
-  set color(value) {
-    this.bind();
-    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([value[0] * 255, value[1] * 255, value[2] * 255, value[3] * 255]));
+  get data() {
+    return this._data;
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
   }
 
   set minFilter(value) {
