@@ -38,7 +38,7 @@ export default class Shader {
     }
   `, uniforms = [], vertexShaderChunks = [], fragmentShaderChunks = [], shaders = []} = {}) {
     this.uniforms = new Map();
-    this._uniformTypes = new Map();
+    this._glslUniformTypes = new Map();
 
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
@@ -93,12 +93,12 @@ export default class Shader {
    */
   _parseUniforms(string, classes) {
     classes = Object.assign({
-      Vector2: new Float32Array(2),
-      Vector3: new Float32Array(3),
-      Vector4: new Float32Array(4),
-      Matrix3: new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]),
-      Matrix4: new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-      Texture2D: class Texture2D {},
+      Vector2: class Vector2 extends Float32Array {constructor() {super(2)}},
+      Vector3: class Vector3 extends Float32Array {constructor() {super(3)}},
+      Vector4: class Vector4 extends Float32Array {constructor() {super(4)}},
+      Matrix3: class Matrix3 extends Float32Array {constructor() {super([1, 0, 0, 0, 1, 0, 0, 0, 1])}},
+      Matrix4: class Matrix3 extends Float32Array {constructor() {super([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])}},
+      Texture: class Texture {},
       TextureCube: class TextureCube {}
     }, classes);
 
@@ -117,7 +117,7 @@ export default class Shader {
       let value;
       let typeMatch;
 
-      this._uniformTypes.set(variableName, glslType);
+      this._glslUniformTypes.set(variableName, glslType);
 
       if (/float|double/.test(glslType)) {
         if (isNaN(length)) {
@@ -133,9 +133,9 @@ export default class Shader {
         }
       } else if (/sampler2D/.test(glslType)) {
         if (isNaN(length)) {
-          value = new classes.Texture2D();
+          value = new classes.Texture();
         } else {
-          value = new Array(length).fill().map(value => new classes.Texture2D());
+          value = new Array(length).fill().map(value => new classes.Texture());
         }
       } else if (/samplerCube/.test(glslType)) {
         if (isNaN(length)) {
