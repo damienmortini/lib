@@ -66,8 +66,8 @@ export default class Loader {
             element = document.createElement("video");
           } else if(/\.(mp3|ogg)$/.test(value)) {
             element = document.createElement("audio");
-          } else if(/\.(woff|woff2)$/.test(value)) {
-            let fontFace = new FontFace(/([^\/]*)\.(woff|woff2)$/.exec(value)[1], `url("${value}")`);
+          } else if(/\.(woff|woff2|ttf)$/.test(value)) {
+            let fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(value)[1], `url("${value}")`);
             fontFace.load().then(onLoad);
             document.fonts.add(fontFace);
           } else {
