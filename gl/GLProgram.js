@@ -88,8 +88,12 @@ export default class GLProgram extends Shader {
           }
         } else if(value[0] instanceof Object) {
           for (let i = 0; i < value.length; i++) {
-            for (let key in value[i]) {
-              self.uniforms.set(`${name}[${i}].${key}`, value[i][key]);
+            if(value[0].length) {
+              self.uniforms.set(`${name}[${i}]`, value[i]);
+            } else {
+              for (let key in value[i]) {
+                self.uniforms.set(`${name}[${i}].${key}`, value[i][key]);
+              }
             }
           }
           return;
