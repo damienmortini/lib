@@ -71,8 +71,8 @@ export default class Matrix4 extends Float32Array {
     return this;
   }
 
-  scale(vector3, matrix4 = this) {
-    mat4.scale(this, matrix4, typeof vector3 === "number" ? [vector3, vector3, vector3] : vector3);
+  scale(value, matrix4 = this) {
+    mat4.scale(this, matrix4, typeof value === "number" ? [value, value, value] : value);
     return this;
   }
 
