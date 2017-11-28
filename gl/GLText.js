@@ -127,7 +127,6 @@ export default class GLText {
     
     let width = this._context.measureText(this.textContent).width + this.shadowBlur * 2 + Math.abs(this.shadowOffsetX) + this.paddingX;
     let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + this.shadowBlur * 2 + Math.abs(this.shadowOffsetY) + this.paddingY;
-    console.log(width);
     if(this._canvas.width !== width || this._canvas.height !== height) {
       this._canvas.width = width;
       this._canvas.height = height;
