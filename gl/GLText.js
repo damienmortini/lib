@@ -14,13 +14,13 @@ export default class GLText {
     shadowBlur = 0,
     shadowOffsetX = 0,
     shadowOffsetY = 0,
-    paddingX = 0,
-    paddingY = 0,
-    scale = 1,
+    paddingPercentageWidth = 0,
+    paddingPercentageHeight = 0,
+    textScale = 1,
   } = {}) {
     this.gl = gl;
 
-    this._scale = scale;
+    this._textScale = textScale;
 
     this._scaleOffset = [1, 1, 0, 0];
 
@@ -37,8 +37,10 @@ export default class GLText {
     this.shadowBlur = shadowBlur;
     this.shadowOffsetX = shadowOffsetX;
     this.shadowOffsetY = shadowOffsetY;
-    this.paddingX = paddingX;
-    this.paddingY = paddingY;
+    this.paddingPercentageWidth = paddingPercentageWidth;
+    this.paddingPercentageHeight = paddingPercentageHeight;
+
+    this.lock = false;
 
     this._initGL();
 
@@ -52,7 +54,7 @@ export default class GLText {
       wrapT: this.gl.CLAMP_TO_EDGE,
     });
 
-    this._mesh = new GLMesh({
+    this.mesh = new GLMesh({
       gl: this.gl,
       attributes: [
         ["position", {
@@ -118,18 +120,25 @@ export default class GLText {
   }
 
   _update() {
-    if(!this._texture) {
+    if(!this._texture || this.lock) {
       return;
     }
 
-    let offsetX = this.shadowOffsetX - this.shadowBlur;
-    let offsetY = this.shadowOffsetY - this.shadowBlur;
+    let width = this._context.measureText(this.textContent).width;
+    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]);
+
+    let offsetX = this.shadowOffsetX - this.shadowBlur + width * this.paddingPercentageWidth;
+    let offsetY = this.shadowOffsetY - this.shadowBlur + height * this.paddingPercentageHeight;
     
-    let width = this._context.measureText(this.textContent).width + this.shadowBlur * 2 + Math.abs(this.shadowOffsetX) + this.paddingX;
-    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + this.shadowBlur * 2 + Math.abs(this.shadowOffsetY) + this.paddingY;
+    width *= (1 + this.paddingPercentageWidth * 2);
+    height *= (1 + this.paddingPercentageHeight * 2);
+    
+    width += this.shadowBlur * 2 + Math.abs(this.shadowOffsetX);
+    height += this.shadowBlur * 2 + Math.abs(this.shadowOffsetY);
+    
     if(this._canvas.width !== width || this._canvas.height !== height) {
-      this._canvas.width = width;
-      this._canvas.height = height;
+      this._canvas.width = width || 1;
+      this._canvas.height = height || 1;
       this._context = this._canvas.getContext("2d");
       this._context.font = this.font;
       this._context.fillStyle = this.fillStyle;
@@ -140,7 +149,7 @@ export default class GLText {
       this._context.textBaseline = "ideographic";
     }
 
-    this._scaleOffset[3] = -offsetY * .5 * this._scale * .01;
+    this._scaleOffset[3] = -offsetY * .5 * .01;
 
     if(this.textAlign === "start" || this.textAlign === "left") {
       this._scaleOffset[2] = (this._canvas.width * .5 + Math.min(0, offsetX)) * .01;
@@ -149,29 +158,29 @@ export default class GLText {
     } else {
       this._scaleOffset[2] = offsetX * .5 * .01;
     }
-    this._scaleOffset[0] = this._canvas.width * this._scale * .01;
-    this._scaleOffset[1] = this._canvas.height * this._scale * .01;
+    this._scaleOffset[0] = this._canvas.width * this._textScale * .01;
+    this._scaleOffset[1] = this._canvas.height * this._textScale * .01;
 
+    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     this._context.globalAlpha = 0.01;
     this._context.fillRect(0, 0, this._canvas.width, this._canvas.height);
     this._context.globalAlpha = 1;
     this._context.fillText(this._textContent, offsetX < 0 ? Math.abs(offsetX) : 0, this._canvas.height - (offsetY > 0 ? Math.abs(offsetY) : 0));
 
-    this.program.uniforms.set("scaleOffset", this._scaleOffset);
-
     this._texture.data = this._canvas;
     this._texture.generateMipmap();
   }
-
+  
   draw({camera} = {}) {
     this.program.use();
-    this.program.attributes.set(this._mesh.attributes);
+    this.program.attributes.set(this.mesh.attributes);
     if(camera) {
       this.program.uniforms.set("projectionView", camera.projectionView);
     }
+    this.program.uniforms.set("scaleOffset", this._scaleOffset);
     this.program.uniforms.set("transform", this.transform);
     this._texture.bind();
-    this._mesh.draw({
+    this.mesh.draw({
       mode: this.gl.TRIANGLE_STRIP,
       count: 4
     });
