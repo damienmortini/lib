@@ -11,8 +11,7 @@ export default class GLTexture {
     minFilter = gl.NEAREST_MIPMAP_LINEAR, 
     magFilter = gl.LINEAR, 
     wrapS = gl.REPEAT, 
-    wrapT = gl.REPEAT, 
-    generateMipmap = false
+    wrapT = gl.REPEAT
   } = {}) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
@@ -23,13 +22,13 @@ export default class GLTexture {
     this.internalformat = internalformat;
     this.format = format;
     this.type = type;
-    if(this.data || (this._width && this._height)) {
-      this.data = data;
-    }
     this.minFilter = minFilter;
     this.magFilter = magFilter;
     this.wrapS = wrapS;
     this.wrapT = wrapT;
+    if(data || (this._width && this._height)) {
+      this.data = data;
+    }
   }
 
   generateMipmap() {
@@ -39,9 +38,9 @@ export default class GLTexture {
   set data(value) {
     this._data = value;
     this.bind();
-    this._width = this._width || this._data.width || this._data.videoWidth;
-    this._height = this._height || this._data.height || this._data.videoHeight;
-    this.gl.texImage2D(this.gl.TEXTURE_2D, this.level, this.internalformat, this._width, this._height, 0, this.format, this.type, this._data);
+    const width = this._width || this._data.width || this._data.videoWidth;
+    const height = this._height || this._data.height || this._data.videoHeight;
+    this.gl.texImage2D(this.gl.TEXTURE_2D, this.level, this.internalformat, width, height, 0, this.format, this.type, this._data);
   }
 
   get data() {
