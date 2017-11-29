@@ -218,10 +218,7 @@ export default class GLProgram extends Shader {
       } else if(programInfoLog) {
         console.warn(programInfoLog);
       }
-      for (let [type, attachedShader] of this._attachedShaders) {
-        this.gl.detachShader(this._program, attachedShader);
-        this._attachedShaders.delete(type);
-      }
+
       this._uniformLocations = new Map();
       this._uniformTypes = new Map();
     }
