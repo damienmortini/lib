@@ -219,6 +219,14 @@ export default class GLProgram extends Shader {
         console.warn(programInfoLog);
       }
 
+      // TODO: Check when issue is resolved on Safari and comment out
+      
+      // for (let [type, attachedShader] of this._attachedShaders) {
+      //   this.gl.detachShader(this._program, attachedShader);
+      //   this.gl.deleteShader(attachedShader);
+      //   this._attachedShaders.delete(type);
+      // }
+      
       this._uniformLocations = new Map();
       this._uniformTypes = new Map();
     }
