@@ -40,7 +40,7 @@ export default class GLTexture {
     this.bind();
     const width = this._width || this._data.width || this._data.videoWidth;
     const height = this._height || this._data.height || this._data.videoHeight;
-    if(!(this.gl instanceof WebGL2RenderingContext) && (this._data.width || this._data.videoWidth)) {
+    if((this.gl instanceof WebGLRenderingContext) && (this._data.width || this._data.videoWidth)) {
       this.gl.texImage2D(this.gl.TEXTURE_2D, this.level, this.internalformat, this.format, this.type, this._data);
     } else {
       this.gl.texImage2D(this.gl.TEXTURE_2D, this.level, this.internalformat, width, height, 0, this.format, this.type, this._data);

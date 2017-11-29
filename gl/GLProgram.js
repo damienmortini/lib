@@ -163,7 +163,7 @@ export default class GLProgram extends Shader {
       return;
     }
 
-    if(!(this.gl instanceof WebGL2RenderingContext)) {
+    if(this.gl instanceof WebGLRenderingContext) {
       source = source.replace(/#version.*?\n/g, "");
       source = source.replace(/\btexture\b/g, "texture2D");
       if(type === this.gl.VERTEX_SHADER) {
