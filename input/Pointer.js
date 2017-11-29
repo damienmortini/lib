@@ -13,7 +13,7 @@ export default class Pointer extends Vector2 {
     return "mousetype";
   }
 
-  static get(domElement) {
+  static get(domElement = window) {
     let pointer = pointers.get(domElement);
     if (!pointer) {
       pointer = new Pointer(domElement);
@@ -68,7 +68,12 @@ export default class Pointer extends Vector2 {
   }
 
   resize() {
-    this._domElementBoundingRect = this.domElement.getBoundingClientRect();
+    this._domElementBoundingRect = (this.domElement !== window) ? this.domElement.getBoundingClientRect() : {
+      top: 0,
+      left: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
   }
 
   _onPointerDown(e) {
