@@ -73,6 +73,7 @@ export default class SDFShader {
       Voxel sdfSubstraction(Voxel voxel1, Voxel voxel2)
       {
         voxel1.coord.w = max(-voxel2.coord.w, voxel1.coord.w);
+        voxel1.material = mix(voxel1.material, voxel2.material, step(voxel1.coord.w, -voxel2.coord.w));
         return voxel1;
       }
     `
