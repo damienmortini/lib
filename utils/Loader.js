@@ -1,3 +1,5 @@
+let baseURI = "";
+
 const PROMISES = new Map();
 const OBJECTS = new Map();
 
@@ -22,6 +24,14 @@ export default class Loader {
 
   static get(value) {
     return OBJECTS.get(value);
+  }
+
+  static get baseURI() {
+    return baseURI;
+  }
+
+  static set baseURI(value) {
+    baseURI = value;
   }
 
   static load(values) {
@@ -71,7 +81,7 @@ export default class Loader {
             fontFace.load().then(onLoad);
             document.fonts.add(fontFace);
           } else {
-            fetch(value)
+            fetch(`${baseURI}${value}`)
             .then((response) => {
               let method;
               if(Loader.typeMap.get("json").has(extension)) {
@@ -94,7 +104,7 @@ export default class Loader {
         }
 
         if(element) {
-          const src = element.src || value;
+          const src = `${baseURI}${element.src || value}`;
           const loaded = () => {
             element.removeEventListener("canplaythrough", loaded);
             element.removeEventListener("load", loaded);
