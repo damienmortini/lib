@@ -32,9 +32,9 @@ export default class GLProgram extends Shader {
       this._vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl);
     }
 
-    const attributesLocations = new Map();
+    this._attributesLocations = new Map();
     class Attributes extends Map {
-      set (name , {buffer, location = attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor} = {}) {
+      set (name , {buffer, location = self._attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0} = {}) {
         if(name instanceof Map) {
           for (let [key, value] of name) {
             this.set(key, value);
@@ -45,15 +45,14 @@ export default class GLProgram extends Shader {
         if(!location) {
           location = gl.getAttribLocation(self._program, name);
           if(location === -1) {
-            console.warn(`Attribute "${name}" is missing or never used`)
+            console.warn(`Attribute "${name}" is missing or never used`);
           }
-          attributesLocations.set(name, location);
+          self._attributesLocations.set(name, location);
         }
         gl.enableVertexAttribArray(location);
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
-        if(divisor !== undefined) {
-          self._vertexAttribDivisor(location, divisor);
-        }
+        buffer.unbind();
+        self._vertexAttribDivisor(location, divisor);
         super.set(name, {buffer, size, type, normalized, stride, offset});
       }
     }
@@ -226,7 +225,8 @@ export default class GLProgram extends Shader {
       //   this.gl.deleteShader(attachedShader);
       //   this._attachedShaders.delete(type);
       // }
-      
+
+      this._attributesLocations = new Map();
       this._uniformLocations = new Map();
       this._uniformTypes = new Map();
     }
