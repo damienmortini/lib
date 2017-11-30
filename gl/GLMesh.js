@@ -41,26 +41,6 @@ export default class GLMesh {
     }
   }
 
-  bind() {
-    for (let attribute of this.attributes.values()) {
-      attribute.buffer.bind();
-    }
-    
-    if(this.indices) {
-      this.indices.buffer.bind();
-    }
-  }
-
-  unbind() {
-    for (let attribute of this.attributes.values()) {
-      attribute.buffer.unbind();
-    }
-
-    if(this.indices) {
-      this.indices.buffer.unbind();
-    }
-  }
-
   draw ({
     mode = this.gl.TRIANGLES, 
     elements = !!this.indices,

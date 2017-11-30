@@ -45,6 +45,7 @@ export default class GLTexture {
     } else {
       this.gl.texImage2D(this.gl.TEXTURE_2D, this.level, this.internalformat, width, height, 0, this.format, this.type, this._data);
     }
+    this.unbind();
   }
 
   get data() {
@@ -66,6 +67,7 @@ export default class GLTexture {
     this._minFilter = value;
     this.bind();
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this._minFilter);
+    this.unbind();
   }
 
   get minFilter() {
@@ -79,6 +81,7 @@ export default class GLTexture {
     this._magFilter = value;
     this.bind();
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this._magFilter);
+    this.unbind();
   }
 
   get magFilter() {
@@ -92,6 +95,7 @@ export default class GLTexture {
     this._wrapS = value;
     this.bind();
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this._wrapS);
+    this.unbind();
   }
 
   get wrapS() {
@@ -105,6 +109,7 @@ export default class GLTexture {
     this._wrapT = value;
     this.bind();
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this._wrapT);
+    this.unbind();
   }
 
   get wrapT() {

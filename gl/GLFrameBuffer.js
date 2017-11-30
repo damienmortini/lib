@@ -28,6 +28,7 @@ export default class GLFrameBuffer {
       this.colorTextures[attachment - this.gl.COLOR_ATTACHMENT0] = texture;
     }
     this.gl.framebufferTexture2D(target, attachment, textarget, texture._texture || texture, 0);
+    this.unbind({target});
   }
 
   bind({
