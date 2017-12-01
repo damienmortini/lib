@@ -32,8 +32,6 @@ export default class Pointer extends Vector2 {
 
     this.type = Pointer.TOUCH_TYPE;
 
-    this._position = new Vector2();
-
     this.velocity = new Vector2();
     this.dragOffset = new Vector2();
 
@@ -64,6 +62,12 @@ export default class Pointer extends Vector2 {
     this._resizeBinded = this.resize.bind(this);
 
     this.resize();
+
+    this._position = new Vector2(
+      this._domElementBoundingRect.left + this._domElementBoundingRect.width * .5,
+      this._domElementBoundingRect.top + this._domElementBoundingRect.height * .5
+    );
+
     this.enable();
   }
 
