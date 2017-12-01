@@ -32,7 +32,9 @@ export default class GLTexture {
   }
 
   generateMipmap() {
+    this.bind();
     this.gl.generateMipmap(this.gl.TEXTURE_2D);
+    this.unbind();
   }
 
   set data(value) {
