@@ -1,7 +1,7 @@
 // GGX from from http://www.filmicworlds.com/images/ggx-opt/optimized-ggx.hlsl
 // PBR from from https://www.shadertoy.com/view/XsfXWX
 
-export default class PBRGLSL {
+export default class PBRShader {
   static PhysicallyBasedMaterial() {
     return `
     struct PhysicallyBasedMaterial
@@ -75,16 +75,16 @@ export default class PBRGLSL {
     `
   }
 
-  static computePBRLighting(reflectionFromRay = `
-    vec3 reflectionFromRay(
+  static computePBRLighting({
+    pbrReflectionFromRay = `return vec3(0.);`
+  } = {}) {
+    return `
+    vec3 pbrReflectionFromRay(
       Ray ray,
       Light light
     ) {
-      return vec3(1.);
-    }`) {
-    return `
-
-    ${reflectionFromRay}
+      ${pbrReflectionFromRay}
+    }
 
     vec3 computePBRLighting (
       Ray ray,
@@ -98,7 +98,7 @@ export default class PBRGLSL {
 
       // reflection
       vec3 roughnessRandomVector = normalize(vec3(random(position.x) * 2. - 1., random(position.y) * 2. - 1., random(position.z) * 2. - 1.)) * material.roughness;
-      vec3 reflection = reflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)), light);
+      vec3 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)), light);
 
       // diffuse
       vec3 color = mix(material.albedo, reflection, material.metalness);
