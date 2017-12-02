@@ -16,6 +16,8 @@ export default class GLText {
     shadowOffsetY = 0,
     paddingPercentageWidth = 0,
     paddingPercentageHeight = 0,
+    offsetXPercentage = 0,
+    offsetYPercentage = 0,
     textScale = 1,
   } = {}) {
     this.gl = gl;
@@ -37,8 +39,11 @@ export default class GLText {
     this.shadowBlur = shadowBlur;
     this.shadowOffsetX = shadowOffsetX;
     this.shadowOffsetY = shadowOffsetY;
+
     this.paddingPercentageWidth = paddingPercentageWidth;
     this.paddingPercentageHeight = paddingPercentageHeight;
+    this.offsetXPercentage = offsetXPercentage;
+    this.offsetYPercentage = offsetYPercentage;
 
     this.lock = false;
 
@@ -127,9 +132,15 @@ export default class GLText {
     let width = this._context.measureText(this.textContent).width;
     let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]);
 
-    let offsetX = this.shadowOffsetX - this.shadowBlur + width * this.paddingPercentageWidth;
-    let offsetY = this.shadowOffsetY - this.shadowBlur + height * this.paddingPercentageHeight;
-    
+    const paddingWidth = width * this.paddingPercentageWidth;
+    const paddingHeight = height * this.paddingPercentageHeight;
+
+    const offsetX = width * this.offsetXPercentage;
+    const offsetY = height * this.offsetYPercentage;
+
+    const shadowOffsetX = this.shadowOffsetX - this.shadowBlur;
+    const shadowOffsetY = this.shadowOffsetY - this.shadowBlur;
+
     width *= (1 + this.paddingPercentageWidth * 2);
     height *= (1 + this.paddingPercentageHeight * 2);
     
@@ -149,14 +160,14 @@ export default class GLText {
       this._context.textBaseline = "ideographic";
     }
 
-    this._scaleOffset[3] = -offsetY * .5 * .01;
+    this._scaleOffset[3] = -shadowOffsetY * .5 * .01;
 
     if(this.textAlign === "start" || this.textAlign === "left") {
-      this._scaleOffset[2] = (this._canvas.width * .5 + Math.min(0, offsetX)) * .01;
+      this._scaleOffset[2] = (this._canvas.width * .5 + Math.min(0, shadowOffsetX)) * .01;
     } else if (this.textAlign === "end" || this.textAlign === "right") {
-      this._scaleOffset[2] = (-this._canvas.width * .5 + Math.max(0, offsetX)) * .01;
+      this._scaleOffset[2] = (-this._canvas.width * .5 + Math.max(0, shadowOffsetX)) * .01;
     } else {
-      this._scaleOffset[2] = offsetX * .5 * .01;
+      this._scaleOffset[2] = shadowOffsetX * .5 * .01;
     }
     this._scaleOffset[0] = this._canvas.width * this._textScale * .01;
     this._scaleOffset[1] = this._canvas.height * this._textScale * .01;
@@ -165,7 +176,7 @@ export default class GLText {
     this._context.globalAlpha = 0.01;
     this._context.fillRect(0, 0, this._canvas.width, this._canvas.height);
     this._context.globalAlpha = 1;
-    this._context.fillText(this._textContent, offsetX < 0 ? Math.abs(offsetX) : 0, this._canvas.height - (offsetY > 0 ? Math.abs(offsetY) : 0));
+    this._context.fillText(this._textContent, (shadowOffsetX < 0 ? Math.abs(shadowOffsetX) : 0) + paddingWidth + offsetX, this._canvas.height - (shadowOffsetY > 0 ? Math.abs(shadowOffsetY) : 0) - paddingHeight + offsetY);
 
     this._texture.data = this._canvas;
     this._texture.generateMipmap();
