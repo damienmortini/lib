@@ -16,7 +16,7 @@ export default class LoopElement extends HTMLElement {
       window.addEventListener("blur", this._pauseBinded = this.pause.bind(this));
       window.addEventListener("focus", this._playBinded = this.play.bind(this));
     }
-    if(this._autoplay) {
+    if(document.hasFocus() && this._autoplay) {
       this.play();
     }
   }
