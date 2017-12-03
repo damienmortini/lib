@@ -93,6 +93,8 @@ export default class PBRShader {
       vec3 normal,
       PhysicallyBasedMaterial material
     ) {
+      light.color *= light.intensity;
+
       // fresnel
       float fresnel = max(1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction), material.metalness);
 
