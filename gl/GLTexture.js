@@ -18,6 +18,8 @@ export default class GLTexture {
     this._texture = this.gl.createTexture();
     this._width = width;
     this._height = height;
+    this._dataWidth = undefined;
+    this._dataHeight = undefined;
     this._target = target;
     
     this.level = level;
@@ -44,18 +46,20 @@ export default class GLTexture {
 
     const data = (this._data && this._data.length) ? this._data : [this._data];
 
-    const width = this._width || data[0].width || data[0].videoWidth;
-    const height = this._height || data[0].height || data[0].videoHeight;
-    
+    if(data[0]) {
+      this._dataWidth = data[0].width || data[0].videoWidth;
+      this._dataHeight = data[0].height || data[0].videoHeight;
+    }
+
     const count = this._target === this.gl.TEXTURE_CUBE_MAP ? 6 : 1;
     const target = this._target === this.gl.TEXTURE_CUBE_MAP ? this.gl.TEXTURE_CUBE_MAP_POSITIVE_X : this._target;
 
     this.bind();
     for (let i = 0; i < data.length; i++) {
-      if((this.gl instanceof WebGLRenderingContext) && (data[0].width || data[0].videoWidth)) {
+      if((this.gl instanceof WebGLRenderingContext) && this._dataWidth) {
         this.gl.texImage2D(target + i, this.level, this.internalformat, this.format, this.type, data[i]);
       } else {
-        this.gl.texImage2D(target + i, this.level, this.internalformat, width, height, 0, this.format, this.type, data[i]);
+        this.gl.texImage2D(target + i, this.level, this.internalformat, this.width, this.height, 0, this.format, this.type, data[i]);
       }
     }
     this.unbind();
@@ -66,11 +70,11 @@ export default class GLTexture {
   }
 
   get width() {
-    return this._width;
+    return this._width || this._dataWidth;
   }
 
   get height() {
-    return this._height;
+    return this._height || this._dataHeight;
   }
 
   set minFilter(value) {
