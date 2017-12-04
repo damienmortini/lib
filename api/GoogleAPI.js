@@ -1,14 +1,13 @@
+let PROMISE;
+
 export default class GoogleAPI {
   static load() {
-    return new Promise((resolve) => {
-      if(document.querySelector(`script[src$="//apis.google.com/js/api.js"]`)) {
-        resolve();
-      }
-    
+    PROMISE = PROMISE || new Promise((resolve) => {
       let script = document.createElement("script");
       script.onload = resolve;
       script.src = "//apis.google.com/js/api.js";
       document.head.appendChild(script);
-    });;
+    });
+    return PROMISE;
   }
 }
