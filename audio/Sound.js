@@ -59,7 +59,8 @@ export default class Sound {
     return soundsMap.get(name);
   }
 
-  constructor(src, {
+  constructor({
+    src,
     name = /([^\\\/]*)\..*$/.exec(src)[1],
     amplification = 1,
     volume = 1,
