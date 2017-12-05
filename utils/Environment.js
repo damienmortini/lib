@@ -1,4 +1,4 @@
-import MobileDetect from "mobile-detect";
+import MobileDetect from "mobile-detect/mobile-detect.min.js";
 
 const MOBILE_DETECT = new MobileDetect(window.navigator.userAgent);
 
