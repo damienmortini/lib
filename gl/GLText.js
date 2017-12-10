@@ -57,6 +57,8 @@ export default class GLText {
       gl: this.gl,
       wrapS: this.gl.CLAMP_TO_EDGE,
       wrapT: this.gl.CLAMP_TO_EDGE,
+      // TODO: Remove when WebGL2 is supported everywhere
+      minFilter: this.gl.LINEAR
     });
 
     this.mesh = new GLMesh({
@@ -179,7 +181,8 @@ export default class GLText {
     this._context.fillText(this._textContent, (shadowOffsetX < 0 ? Math.abs(shadowOffsetX) : 0) + paddingWidth + offsetX, this._canvas.height - (shadowOffsetY > 0 ? Math.abs(shadowOffsetY) : 0) - paddingHeight + offsetY);
 
     this._texture.data = this._canvas;
-    this._texture.generateMipmap();
+    // TODO: Put back when WebGL2 is supported everywhere
+    // this._texture.generateMipmap();
   }
   
   draw({camera} = {}) {

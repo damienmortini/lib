@@ -24,7 +24,7 @@ export default class LoopElement extends HTMLElement {
         }
       });
     }
-    if(document.hasFocus() && this._autoplay) {
+    if(this._autoplay) {
       this.play();
     } else {
       this._pausedByBlur = this._autoplay;
