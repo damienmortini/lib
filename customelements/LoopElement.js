@@ -7,34 +7,35 @@ export default class LoopElement extends HTMLElement {
     this._background = background || this.hasAttribute("background");
 
     this.paused = true;
-    this._pausedByBlur = true;
+    this._pausedByBlur = false;
 
     this._updateBinded = this.update.bind(this);
   }
 
   connectedCallback() {
     if(!this._background) {
-      window.addEventListener("blur", this._onBlur = () => {
+      window.top.addEventListener("blur", this._onBlur = () => {
         this._pausedByBlur = !this.paused;
         this.pause();
       });
-      window.addEventListener("focus", this._onFocus = () => {
+      window.top.addEventListener("focus", this._onFocus = () => {
         if(this._pausedByBlur) {
           this.play();
         }
       });
     }
-    if(this._autoplay) {
+    if(window.top.document.hasFocus() && this._autoplay) {
       this.play();
-    } else {
-      this._pausedByBlur = this._autoplay;
+    } else if (this._autoplay) {
+      this._pausedByBlur = true;
+      requestAnimationFrame(this._updateBinded);
     }
   }
 
   disconnectedCallback() {
     this.pause();
-    window.removeEventListener("blur", this._onBlur);
-    window.removeEventListener("focus", this._onFocus);
+    window.top.removeEventListener("blur", this._onBlur);
+    window.top.removeEventListener("focus", this._onFocus);
   }
 
   play() {
