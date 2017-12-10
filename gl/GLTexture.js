@@ -30,9 +30,7 @@ export default class GLTexture {
     this.magFilter = magFilter;
     this.wrapS = wrapS;
     this.wrapT = wrapT;
-    if(data || (this._width && this._height)) {
-      this.data = data;
-    }
+    this.data = data;
   }
 
   generateMipmap() {
@@ -43,6 +41,10 @@ export default class GLTexture {
 
   set data(value) {
     this._data = value;
+
+    if(!this._data && !(this._width && this._height)) {
+      return;
+    }
 
     const data = (this._data && this._data.length) ? this._data : [this._data];
 
@@ -69,8 +71,18 @@ export default class GLTexture {
     return this._data;
   }
 
+  set width(value) {
+    this._width = value;
+    this.data = this.data;
+  }
+
   get width() {
     return this._width || this._dataWidth;
+  }
+
+  set height(value) {
+    this._height = value;
+    this.data = this.data;
   }
 
   get height() {
