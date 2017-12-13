@@ -42,7 +42,7 @@ export default class GLProgram extends Shader {
           return;
         }
         buffer.bind();
-        if(!location) {
+        if(location === undefined) {
           location = gl.getAttribLocation(self._program, name);
           if(location === -1) {
             console.warn(`Attribute "${name}" is missing or never used`);
@@ -167,7 +167,7 @@ export default class GLProgram extends Shader {
       return;
     }
 
-    if(this.gl instanceof WebGLRenderingContext) {
+    if(this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0")) {
       source = source.replace(/#version.*?\n/g, "");
       source = source.replace(/\btexture\b/g, "texture2D");
       if(type === this.gl.VERTEX_SHADER) {

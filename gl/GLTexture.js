@@ -58,7 +58,7 @@ export default class GLTexture {
 
     this.bind();
     for (let i = 0; i < data.length; i++) {
-      if((this.gl instanceof WebGLRenderingContext) && this._dataWidth) {
+      if(this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0") && this._dataWidth) {
         this.gl.texImage2D(target + i, this.level, this.internalformat, this.format, this.type, data[i]);
       } else {
         this.gl.texImage2D(target + i, this.level, this.internalformat, this.width, this.height, 0, this.format, this.type, data[i]);
