@@ -128,7 +128,12 @@ export default class GLProgram extends Shader {
     this.use();
 
     this.attributes = new Attributes();
-    this.uniforms = new Uniforms([...this.uniforms]);
+    
+    const rawUniforms = this.uniforms;
+    this.uniforms = new Uniforms();
+    for (const [key, value] of rawUniforms) {
+      this.uniforms.set(key, value);
+    }
   }
 
   set vertexShader(value) {
