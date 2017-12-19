@@ -182,14 +182,12 @@ export default class GUIInput extends HTMLElement {
     if(!this._inputs[0] || this._inputs[0].tagName !== "SELECT") {
       return;
     }
-    this._inputs[0].options.length = 0;
+    
+    let html = "";
     for (let option of this._options) {
-      let optionElement = document.createElement("option");
-      optionElement.value = option;
-      optionElement.innerText = option;
-      optionElement.selected = option === this.value;
-      this._inputs[0].appendChild(optionElement);
+      html += `<option selected="${option === this.value}" value="${option}">${option}</option>`;
     }
+    this._inputs[0].innerHTML = html;
   }
 
   get options() {
@@ -268,7 +266,7 @@ export default class GUIInput extends HTMLElement {
       <button class="clear">✕</button>
     `;
 
-    this._inputs = [...this.querySelectorAll("input, select, textarea")];
+    this._inputs = Array.from(this.querySelectorAll("input, select, textarea"));
 
     if(this.type === "range") {
       let nextDecimal = Math.pow(10, Math.abs(parseInt(this.value)).toString().length);
