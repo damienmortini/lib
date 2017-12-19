@@ -82,6 +82,16 @@ export default class Loader {
             document.fonts.add(fontFace);
           } else {
             fetch(`${baseURI}${value}`)
+            .catch(() => {
+              return new Promise(function(resolve, reject) {
+                const xhr = new XMLHttpRequest
+                xhr.onload = function() {
+                  resolve(new Response(xhr.responseText, {status: xhr.status}))
+                }
+                xhr.open("GET", `${baseURI}${value}`)
+                xhr.send(null)
+              })
+            })
             .then((response) => {
               let method;
               if(Loader.typeMap.get("json").has(extension)) {
