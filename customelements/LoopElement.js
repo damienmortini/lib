@@ -1,7 +1,7 @@
 import Ticker from "../utils/Ticker.js";
 
 export default class LoopElement extends HTMLElement {
-  constructor({autoplay = true, background = false} = {}) {
+  constructor({autoplay = false, background = false} = {}) {
     super();
     this._autoplay = autoplay || this.hasAttribute("autoplay");
     this._background = background || this.hasAttribute("background");
