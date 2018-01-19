@@ -4,9 +4,14 @@ const PROMISES = new Map();
 const OBJECTS = new Map();
 
 const TYPE_MAP = new Map([
-  ["text", new Set(["txt", "html", "css", "js", "svg"])],
+  ["text", new Set(["txt", "html", "js", "svg"])],
   ["json", new Set(["json"])],
-  ["binary", new Set(["bin"])]
+  ["binary", new Set(["bin"])],
+  ["image", new Set(["png", "jpg", "gif"])],
+  ["video", new Set(["mp4", "webm"])],
+  ["audio", new Set(["mp3", "ogg"])],
+  ["style", new Set(["css"])],
+  ["font", new Set(["woff", "woff2", "ttf"])],
 ]);
 
 export default class Loader {
@@ -48,6 +53,24 @@ export default class Loader {
         continue;
       }
 
+      let type;
+      if(typeof value === "object") {
+        type = value.type;
+        value = value.value;
+      }
+
+      const src = `${baseURI}${typeof value === "string" ? value : (value.href || value.src)}`;
+      const extension = /[\\/](.*)\.(.*)$/.exec(src)[2];
+
+      if(!type) {
+        for (const [key, value] of TYPE_MAP) {
+          if(value.has(extension)) {
+            type = key;
+            break;
+          }
+        }
+      }
+
       let promise = new Promise(function(resolve, reject) {
         if(PROMISES.get(value)) {
           PROMISES.get(value).then(resolve);
@@ -59,86 +82,66 @@ export default class Loader {
           return;
         }
 
-        let onLoad = (response) => {
+        fetch(`${baseURI}${src}`)
+        .catch(() => {
+          return new Promise(function(resolve, reject) {
+            const xhr = new XMLHttpRequest
+            xhr.onload = function() {
+              resolve(new Response(xhr.responseText, {status: xhr.status}))
+            }
+            xhr.open("GET", `${baseURI}${src}`)
+            xhr.send(null)
+          })
+        })
+        .then((response) => {
+          if(type === "text") {
+            return response.text();
+          } else if(type === "json") {
+            return response.json();
+          } else if(type === "binary") {
+            return response.arrayBuffer();
+          } else if(type === "image") {
+            return new Promise((resolve) => {
+              const image = document.createElement("img");
+              image.onload = () => { resolve(image); }
+              image.src = src;
+            });
+          } else if(type === "video" || type === "audio") {
+            return new Promise((resolve) => {
+              const media = document.createElement(type);
+              media.oncanplaythrough = () => { resolve(media); }
+              media.src = src;
+            });
+          } else if(type === "style") {
+            return new Promise((resolve) => {
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.type = "text/css";
+              link.onload = () => { resolve(link); }
+              document.head.appendChild(link);
+              link.href = src;
+            });
+          } else if(type === "font") {
+            return new Promise((resolve) => {
+              let fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(value)[1], `url("${value}")`);
+              document.fonts.add(fontFace);
+              return fontFace.load();
+            });
+          } else if(type === "template") {
+            return response.text().then((html) => {
+              const template = document.createElement("template");
+              template.innerHTML = html;
+              return template;
+            });
+          } else {
+            return response.blob();
+          }
+        })
+        .then((response) => {
           PROMISES.delete(value);
           OBJECTS.set(value, response);
           resolve(response);
-        };
-
-        let element;
-        
-        if(typeof value === "string") {
-          let extension = /[\\/](.*)\.(.*)$/.exec(value)[2];
-
-          if(/\.(png|jpg|gif)$/.test(value)) {
-            element = document.createElement("img");
-          } else if(/\.(mp4|webm)$/.test(value)) {
-            element = document.createElement("video");
-          } else if(/\.(mp3|ogg)$/.test(value)) {
-            element = document.createElement("audio");
-          } else if(/\.(woff|woff2|ttf)$/.test(value)) {
-            let fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(value)[1], `url("${value}")`);
-            fontFace.load().then(onLoad);
-            document.fonts.add(fontFace);
-          } else {
-            fetch(`${baseURI}${value}`)
-            .catch(() => {
-              return new Promise(function(resolve, reject) {
-                const xhr = new XMLHttpRequest
-                xhr.onload = function() {
-                  resolve(new Response(xhr.responseText, {status: xhr.status}))
-                }
-                xhr.open("GET", `${baseURI}${value}`)
-                xhr.send(null)
-              })
-            })
-            .then((response) => {
-              let method;
-              if(Loader.typeMap.get("json").has(extension)) {
-                method = "json";
-              } else if(Loader.typeMap.get("binary").has(extension)) {
-                method = "arrayBuffer";
-              } else if(Loader.typeMap.get("text").has(extension)) {
-                method = "text";
-              } else {
-                method = "blob";
-              }
-              return response[method]();
-            })
-            .then(onLoad);
-          }
-        }
-
-        if(value instanceof HTMLElement) {
-          element = value;
-        }
-
-        if(element) {
-          const src = `${baseURI}${element.src || value}`;
-          const loaded = () => {
-            element.removeEventListener("canplaythrough", loaded);
-            element.removeEventListener("load", loaded);
-            onLoad(element);
-          }
-          if(element.play) {
-            fetch(src)
-            .then(() => {
-              element.addEventListener("canplaythrough", loaded);
-              element.play();
-              // TODO: Check if this is still needed
-              if(!element.autoplay) {
-                let pauseElement = function() {
-                  element.pause();
-                  element.removeEventListener("playing", pauseElement);
-                }
-                element.addEventListener("playing", pauseElement);
-              }
-            });
-          } else {
-            element.addEventListener("load", loaded);
-          }
-          element.src = src;
-        }
+        });
       });
 
       promises.push(promise);
