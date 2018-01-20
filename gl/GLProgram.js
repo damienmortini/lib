@@ -58,7 +58,6 @@ export default class GLProgram extends Shader {
     }
 
     this._uniformLocations = new Map();
-    this._uniformTypes = new Map();
     class Uniforms extends Map {
       set (name, ...values) {
         let value = values[0];
@@ -101,20 +100,28 @@ export default class GLProgram extends Shader {
         if(location === null) {
           return;
         }
-        
-        let type = self._uniformTypes.get(name);
-        if(!type) {
-          type = /int|ivec|sampler2D|samplerCube/.test(self._glslUniformTypes.get(name)) ? "iv" : "fv";
-          self._uniformTypes.set(name, type);
-        }
 
-        if(value.length <= 4) {
-          gl[`uniform${value.length || 1}${type}`](location, value);
-        }
-        else if(value.length === 9) {
+        const type = self.uniformTypes.get(name);
+
+        if(type === "float") {
+          gl.uniform1fv(location, value);
+        } else if (type === "vec2") {
+          gl.uniform2fv(location, value);
+        } else if (type === "vec3") {
+          gl.uniform3fv(location, value);
+        } else if (type === "vec4") {
+          gl.uniform4fv(location, value);
+        } else if (type === "int" || type === "sampler2D" || type === "samplerCube") {
+          gl.uniform1iv(location, value);
+        } else if (type === "ivec2") {
+          gl.uniform2iv(location, value);
+        } else if (type === "ivec3") {
+          gl.uniform3iv(location, value);
+        } else if (type === "ivec4") {
+          gl.uniform4iv(location, value);
+        } else if (type === "mat3") {
           gl.uniformMatrix3fv(location, false, value);
-        }
-        else if(value.length === 16) {
+        } else if (type === "mat4") {
           gl.uniformMatrix4fv(location, false, value);
         }
 
@@ -233,7 +240,6 @@ export default class GLProgram extends Shader {
 
       this._attributesLocations = new Map();
       this._uniformLocations = new Map();
-      this._uniformTypes = new Map();
     }
   }
 
