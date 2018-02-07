@@ -1,4 +1,4 @@
-import * as mat4 from "gl-matrix/src/gl-matrix/mat4.js";
+import * as mat4 from "../node_modules/gl-matrix/src/gl-matrix/mat4.js";
 
 export default class Matrix4 extends Float32Array {
   constructor(array = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {
@@ -36,11 +36,6 @@ export default class Matrix4 extends Float32Array {
 
   get w() {
     return this[15];
-  }
-
-  copy(matrix4) {
-    mat4.copy(this, matrix4);
-    return this;
   }
 
   set(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) {

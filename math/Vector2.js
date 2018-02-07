@@ -1,4 +1,4 @@
-import * as vec2 from "gl-matrix/src/gl-matrix/vec2.js";
+import * as vec2 from "../node_modules/gl-matrix/src/gl-matrix/vec2.js";
 
 export default class Vector2 extends Float32Array {
   constructor(x = 0, y = 0) {
