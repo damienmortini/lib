@@ -24,9 +24,17 @@ export default class WebGLImageElement extends HTMLElement {
     this._canvas.style.width = "100%";
     this._canvas.style.height = "100%";
     this.appendChild(this._canvas);
-    this.gl = this._canvas.getContext(WebGL2RenderingContext ? "webgl2" : "webgl", {
+
+    const webGLOptions = {
       premultipliedAlpha: false
-    });
+    };
+
+    if(!/\bforcewebgl1\b/.test(window.location.search)) {
+      this.gl = this._canvas.getContext("webgl2", webGLOptions);
+    }
+    if(!this.gl) {
+      this.gl = this._canvas.getContext("webgl", webGLOptions) || this._canvas.getContext("experimental-webgl", webGLOptions);
+    }
 
     this._mesh = new GLMesh({
       gl: this.gl,
