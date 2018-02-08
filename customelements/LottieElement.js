@@ -1,15 +1,14 @@
-import bodymovin from "bodymovin";
 import Loader from "../utils/Loader.js";
 
 const style = document.createElement("style");
 style.textContent = `
-  dlib-bodymovin {
+  dlib-lottie {
     display: block;
   }
 `;
 document.head.appendChild(style);
 
-export default class BodymovinElement extends HTMLElement {
+export default class LottieElement extends HTMLElement {
   constructor() {
     super();
     this.renderer = "svg";
@@ -38,7 +37,7 @@ export default class BodymovinElement extends HTMLElement {
       if(loaderPromise !== this._loaderPromise) {
         return;
       }
-      this.animation = bodymovin.loadAnimation({
+      this.animation = lottie.loadAnimation({
         container: this,
         renderer: this.renderer,
         autoplay: this.autoplay,
@@ -131,4 +130,4 @@ export default class BodymovinElement extends HTMLElement {
   }
 }
 
-window.customElements.define("dlib-bodymovin", BodymovinElement);
+window.customElements.define("dlib-lottie", LottieElement);
