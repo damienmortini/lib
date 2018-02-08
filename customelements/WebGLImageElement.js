@@ -116,6 +116,7 @@ export default class WebGLImageElement extends HTMLElement {
     width = this._canvas.width,
     height = this._canvas.height,
   } = {}) {
+    this._texture.bind();
     this.gl.viewport(0, 0, width, height);
     this.gl.clearColor(0, 0, 0, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
