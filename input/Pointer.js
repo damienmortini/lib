@@ -13,7 +13,7 @@ export default class Pointer extends Vector2 {
     return "mousetype";
   }
 
-  static get(domElement = window) {
+  static get(domElement = document.body) {
     let pointer = pointers.get(domElement);
     if (!pointer) {
       pointer = new Pointer(domElement);
@@ -72,12 +72,7 @@ export default class Pointer extends Vector2 {
   }
 
   resize() {
-    this._domElementBoundingRect = (this.domElement !== window) ? this.domElement.getBoundingClientRect() : {
-      top: 0,
-      left: 0,
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    this._domElementBoundingRect = this.domElement.getBoundingClientRect();
   }
 
   _onPointerDown(e) {
@@ -120,7 +115,7 @@ export default class Pointer extends Vector2 {
   }
 
   _onPointerEvent(e) {
-    if (!!window.TouchEvent && e instanceof window.TouchEvent) {
+    if (!!TouchEvent && e instanceof TouchEvent) {
       if(e.type === "touchend") {
         e = e.changedTouches[0];
       } else {
