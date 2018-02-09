@@ -60,7 +60,8 @@ export default class TrackballController {
     if(!this.enabled) {
       return;
     }
-    this._nextDistance += e.deltaY * this.zoomSpeed;
+    const scrollOffsetRatio = 1 + Math.abs(e.deltaY * this.zoomSpeed * .01);
+    this._nextDistance = e.deltaY > 0 ? this._nextDistance * scrollOffsetRatio : this._nextDistance / scrollOffsetRatio;
     this._nextDistance = Math.max(Math.min(this._nextDistance, this.maxDistance), this.minDistance);
   }
 
