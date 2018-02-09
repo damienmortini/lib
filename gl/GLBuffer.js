@@ -1,12 +1,19 @@
 export default class GLBuffer {
-  constructor({gl, size = 0, data = new ArrayBuffer(size), target = gl.ARRAY_BUFFER, usage = gl.STATIC_DRAW} = {}) {
+  constructor({
+    gl = undefined,
+    data = undefined,
+    target = gl.ARRAY_BUFFER,
+    usage = gl.STATIC_DRAW
+  } = {}) {
     this.gl = gl;
     this._target = target;
     this._usage = usage;
 
     this._buffer = this.gl.createBuffer();
     
-    this.data = data;
+    if(data) {
+      this.data = data;
+    }
   }
 
   set data(value) {

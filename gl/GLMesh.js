@@ -1,7 +1,12 @@
 import GLBuffer from "./GLBuffer.js";
+import GLAttribute from "./GLAttribute.js";
 
 export default class GLMesh {
-  constructor({gl, attributes, indiceData} = {}) {
+  constructor({
+    gl = undefined, 
+    attributes = undefined, 
+    indiceData = undefined
+  } = {}) {
     this.gl = gl;
 
     this.gl.getExtension("OES_element_index_uint");
@@ -18,26 +23,16 @@ export default class GLMesh {
     }
 
     this.attributes = new Map(attributes);
-
-    for (let [name, attribute] of this.attributes) {
-      attribute.buffer = new GLBuffer({
-        gl: this.gl, 
-        data: attribute.data
-      });
-      attribute.count = attribute.count || attribute.data.length / attribute.size;
-    }
     
     if(indiceData) {
-      this.indices = {
+      this.indices = new GLAttribute({
+        gl: this.gl,
         buffer: new GLBuffer({
           gl: this.gl,
           data: indiceData,
           target: this.gl.ELEMENT_ARRAY_BUFFER
-        }),
-        type: (indiceData instanceof Uint8Array ? this.gl.UNSIGNED_BYTE : (indiceData instanceof Uint16Array ? this.gl.UNSIGNED_SHORT : this.gl.UNSIGNED_INT)),
-        offset: 0,
-        count: indiceData ? indiceData.length : 0
-      }
+        })
+      });
     }
   }
 
@@ -46,7 +41,7 @@ export default class GLMesh {
     elements = !!this.indices,
     count = elements ? this.indices.count : this.attributes.get("position").count, 
     offset = this.indices ? this.indices.offset : 0,
-    type = this.indices ? this.indices.type : null,
+    type = elements ? this.indices.type : null,
     first = 0,
     instanceCount = undefined
   } = {}) {
