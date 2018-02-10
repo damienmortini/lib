@@ -1,6 +1,6 @@
 import GLBuffer from "./GLBuffer.js";
 
-export default class GLAttribute {
+export default class GLVertexAttribute {
   constructor({
     gl = undefined,
     data = undefined,

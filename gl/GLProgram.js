@@ -7,7 +7,8 @@ import Shader from "../3d/Shader.js";
 import GLTexture from "./GLTexture.js";
 
 export default class GLProgram extends Shader {
-  constructor({gl,
+  constructor({
+    gl = undefined,
     vertexShader = undefined,
     fragmentShader = undefined,
     uniforms = undefined,
@@ -16,7 +17,7 @@ export default class GLProgram extends Shader {
     fragmentShaderChunks = undefined,
     shaders = undefined
   } = {}) {
-    super({vertexShader, fragmentShader, uniforms, attributes, vertexShaderChunks, fragmentShaderChunks, shaders});
+    super({vertexShader, fragmentShader, uniforms, vertexShaderChunks, fragmentShaderChunks, shaders});
 
     this.gl = gl;
     this._program = gl.createProgram();

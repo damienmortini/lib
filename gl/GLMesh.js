@@ -1,5 +1,5 @@
 import GLBuffer from "./GLBuffer.js";
-import GLAttribute from "./GLAttribute.js";
+import GLVertexAttribute from "./GLVertexAttribute.js";
 
 export default class GLMesh {
   constructor({
@@ -25,7 +25,7 @@ export default class GLMesh {
     this.attributes = new Map(attributes);
     
     if(indiceData) {
-      this.indices = new GLAttribute({
+      this.indices = new GLVertexAttribute({
         gl: this.gl,
         buffer: new GLBuffer({
           gl: this.gl,
