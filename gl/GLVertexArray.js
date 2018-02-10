@@ -28,7 +28,9 @@ export default class GLVertexArray {
   } = {}) {
     this.bind();
     program.attributes.set(mesh.attributes);
-    mesh.indices.buffer.bind();
+    if(mesh.indices) {
+      mesh.indices.buffer.bind();
+    }
     this.unbind();
   }
 
