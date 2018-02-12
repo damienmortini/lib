@@ -239,7 +239,7 @@ export default class GUI extends HTMLElement {
     return this._container.open;
   }
 
-  add(object, key, {type, label = key, id = label, group = "", reload = false, remote = false, client = remote, onChange = (value) => {}, options, max, min, step} = {}) {
+  add({object, key, type, label = key, id = label, group = "", reload = false, remote = false, client = remote, onChange = (value) => {}, options, max, min, step} = {}) {
     
     const INITIAL_VALUE = type === "color" ? colorToHex(object[key]) : object[key];
     

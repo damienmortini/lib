@@ -13,6 +13,7 @@ export default class GLProgram extends Shader {
     fragmentShader = undefined,
     uniforms = undefined,
     attributes = undefined,
+    transformFeedbackVaryings = undefined,
     vertexShaderChunks = undefined,
     fragmentShaderChunks = undefined,
     shaders = undefined
@@ -128,6 +129,10 @@ export default class GLProgram extends Shader {
 
         super.set(name, value);
       }
+    }
+
+    if(transformFeedbackVaryings) {
+      this.gl.transformFeedbackVaryings(this._program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS);
     }
 
     this.vertexShader = this.vertexShader;

@@ -6,8 +6,8 @@ export default class GLBuffer {
     usage = gl.STATIC_DRAW
   } = {}) {
     this.gl = gl;
-    this._target = target;
-    this._usage = usage;
+    this.target = target;
+    this.usage = usage;
 
     this._buffer = this.gl.createBuffer();
     
@@ -20,7 +20,7 @@ export default class GLBuffer {
     this._data = value;
 
     this.bind();
-    this.gl.bufferData(this._target, this._data, this._usage);
+    this.gl.bufferData(this.target, this._data, this.usage);
     this.unbind();
   }
 
@@ -28,11 +28,33 @@ export default class GLBuffer {
     return this._data;
   }
 
-  bind() {
-    this.gl.bindBuffer(this._target, this._buffer);
+  bind({
+    target = this.target,
+    index = undefined,
+    offset = 0,
+    size = undefined
+  } = {}) {
+    if(index === undefined) {
+      this.gl.bindBuffer(target, this._buffer);
+    } else if (size === undefined) {
+      this.gl.bindBufferBase(target, index, this._buffer);
+    } else {
+      this.gl.bindBufferRange(target, index, this._buffer, offset, size);
+    }
   }
 
-  unbind() {
-    this.gl.bindBuffer(this._target, null);
+  unbind({
+    target = this.target,
+    index = undefined,
+    offset = 0,
+    size = undefined
+  } = {}) {
+    if(index === undefined) {
+      this.gl.bindBuffer(target, null);
+    } else if (size === undefined) {
+      this.gl.bindBufferBase(target, index, null);
+    } else {
+      this.gl.bindBufferRange(target, index, null, offset, size);
+    }
   }
 };

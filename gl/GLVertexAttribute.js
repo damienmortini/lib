@@ -20,6 +20,9 @@ export default class GLVertexAttribute {
     this.buffer = buffer;
     this.size = size;
     this.offset = offset;
+    this.normalized = normalized;
+    this.stride = stride;
+    this.divisor = divisor;
 
     if(data) {
       this.data = data;

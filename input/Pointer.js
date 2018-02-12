@@ -63,10 +63,7 @@ export default class Pointer extends Vector2 {
 
     this.resize();
 
-    this._position = new Vector2(
-      this._domElementBoundingRect.left + this._domElementBoundingRect.width * .5,
-      this._domElementBoundingRect.top + this._domElementBoundingRect.height * .5
-    );
+    this._position = new Vector2();
 
     this.enable();
   }
@@ -151,6 +148,10 @@ export default class Pointer extends Vector2 {
   _updatePositions() {
     this.x = this._position.x;
     this.y = this._position.y;
+
+    if(!this.x && !this.y) {
+      return;
+    }
 
     this.centered.x = this.centeredFlippedY.x = this.x - this._domElementBoundingRect.width * .5;
     this.centered.y = this.centeredFlippedY.y = this.y - this._domElementBoundingRect.height * .5;
