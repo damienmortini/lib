@@ -35,7 +35,7 @@ export default class GLVertexAttribute {
   }
 
   get count() {
-    return this.count || this.data.length / this.size;
+    return this._count === undefined ? this.data.length / this.size : this._count;
   }
 
   set type(value) {
