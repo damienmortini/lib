@@ -2,7 +2,7 @@ import GLBuffer from "./GLBuffer.js";
 
 export default class GLVertexAttribute {
   constructor({
-    gl = undefined,
+    gl,
     data = undefined,
     buffer = new GLBuffer({
       gl
@@ -10,11 +10,11 @@ export default class GLVertexAttribute {
     size = 1,
     type = undefined,
     offset = 0,
-    normalized = false, 
-    stride = 0, 
+    normalized = false,
+    stride = 0,
     count = undefined,
     divisor = 0
-  } = {}) {
+  } = { gl }) {
     this.gl = gl;
     this.buffer = buffer;
     this.size = size;
@@ -25,7 +25,7 @@ export default class GLVertexAttribute {
     this.count = count;
     this.divisor = divisor;
 
-    if(data) {
+    if (data) {
       this.data = data;
     }
   }
@@ -44,12 +44,12 @@ export default class GLVertexAttribute {
 
   get type() {
     let type = this._type;
-    if(!type) {
-      if(this.data instanceof Float32Array || this.data instanceof Float64Array) {
+    if (!type) {
+      if (this.data instanceof Float32Array || this.data instanceof Float64Array) {
         type = this.gl.FLOAT;
-      } else if(this.data instanceof Uint8Array) {
+      } else if (this.data instanceof Uint8Array) {
         type = this.gl.UNSIGNED_BYTE;
-      } else if(this.data instanceof Uint16Array) {
+      } else if (this.data instanceof Uint16Array) {
         type = this.gl.UNSIGNED_SHORT;
       } else if (this.data instanceof Uint32Array) {
         type = this.gl.UNSIGNED_INT

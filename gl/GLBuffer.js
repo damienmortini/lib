@@ -4,14 +4,14 @@ export default class GLBuffer {
     data = null,
     target = gl.ARRAY_BUFFER,
     usage = gl.STATIC_DRAW
-  }) {
+  } = { gl }) {
     this.gl = gl;
     this.target = target;
     this.usage = usage;
 
     this._buffer = this.gl.createBuffer();
-    
-    if(data) {
+
+    if (data) {
       this.data = data;
     }
   }
@@ -34,7 +34,7 @@ export default class GLBuffer {
     offset = 0,
     size = undefined
   } = {}) {
-    if(index === undefined) {
+    if (index === undefined) {
       this.gl.bindBuffer(target, this._buffer);
     } else if (size === undefined) {
       this.gl.bindBufferBase(target, index, this._buffer);
@@ -49,7 +49,7 @@ export default class GLBuffer {
     offset = 0,
     size = undefined
   } = {}) {
-    if(index === undefined) {
+    if (index === undefined) {
       this.gl.bindBuffer(target, null);
     } else if (size === undefined) {
       this.gl.bindBufferBase(target, index, null);

@@ -17,8 +17,8 @@ export default class GLProgram extends Shader {
     vertexShaderChunks = undefined,
     fragmentShaderChunks = undefined,
     shaders = undefined
-  }) {
-    super({vertexShader, fragmentShader, uniforms, vertexShaderChunks, fragmentShaderChunks, shaders});
+  } = { gl }) {
+    super({ vertexShader, fragmentShader, uniforms, vertexShaderChunks, fragmentShaderChunks, shaders });
 
     this.gl = gl;
     this._program = gl.createProgram();
@@ -26,27 +26,27 @@ export default class GLProgram extends Shader {
 
     const self = this;
 
-    this._vertexAttribDivisor = function() {};
+    this._vertexAttribDivisor = function () { };
     const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
-    if(instancedArraysExtension) {
+    if (instancedArraysExtension) {
       this._vertexAttribDivisor = instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension);
-    } else if(this.gl.vertexAttribDivisor) {
+    } else if (this.gl.vertexAttribDivisor) {
       this._vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl);
     }
 
     this._attributesLocations = new Map();
     class Attributes extends Map {
-      set (name , {buffer, location = self._attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0} = {}) {
-        if(name instanceof Map) {
+      set(name, { buffer, location = self._attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
+        if (name instanceof Map) {
           for (let [key, value] of name) {
             this.set(key, value);
           }
           return;
         }
         buffer.bind();
-        if(location === undefined) {
+        if (location === undefined) {
           location = gl.getAttribLocation(self._program, name);
-          if(location === -1) {
+          if (location === -1) {
             console.warn(`Attribute "${name}" is missing or never used`);
           }
           self._attributesLocations.set(name, location);
@@ -55,40 +55,40 @@ export default class GLProgram extends Shader {
         gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
         buffer.unbind();
         self._vertexAttribDivisor(location, divisor);
-        super.set(name, {buffer, size, type, normalized, stride, offset});
+        super.set(name, { buffer, size, type, normalized, stride, offset });
       }
     }
 
     this._uniformLocations = new Map();
     class Uniforms extends Map {
-      set (name, ...values) {
+      set(name, ...values) {
         let value = values[0];
-        if(value === undefined) {
+        if (value === undefined) {
           return;
         }
-        
+
         let location = self._uniformLocations.get(name);
-        if(location === undefined) {
+        if (location === undefined) {
           location = gl.getUniformLocation(self._program, name);
           self._uniformLocations.set(name, location);
         }
-        
-        if(value.length === undefined) {
-          if(value instanceof Object) {
+
+        if (value.length === undefined) {
+          if (value instanceof Object) {
             for (let key in value) {
               self.uniforms.set(`${name}.${key}`, value[key]);
             }
             return;
           }
-          if(values.length > 1) {
+          if (values.length > 1) {
             value = self.uniforms.get(name);
             value.set(...values);
           } else {
             value = values;
           }
-        } else if(value[0] instanceof Object) {
+        } else if (value[0] instanceof Object) {
           for (let i = 0; i < value.length; i++) {
-            if(value[0].length) {
+            if (value[0].length) {
               self.uniforms.set(`${name}[${i}]`, value[i]);
             } else {
               for (let key in value[i]) {
@@ -98,14 +98,14 @@ export default class GLProgram extends Shader {
           }
           return;
         }
-        
-        if(location === null) {
+
+        if (location === null) {
           return;
         }
 
         const type = self.uniformTypes.get(name);
 
-        if(type === "float") {
+        if (type === "float") {
           gl.uniform1fv(location, value);
         } else if (type === "vec2") {
           gl.uniform2fv(location, value);
@@ -131,7 +131,7 @@ export default class GLProgram extends Shader {
       }
     }
 
-    if(transformFeedbackVaryings) {
+    if (transformFeedbackVaryings) {
       this.gl.transformFeedbackVaryings(this._program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS);
     }
 
@@ -141,7 +141,7 @@ export default class GLProgram extends Shader {
     this.use();
 
     this.attributes = new Attributes();
-    
+
     const rawUniforms = this.uniforms;
     this.uniforms = new Uniforms();
     for (const [key, value] of rawUniforms) {
@@ -151,7 +151,7 @@ export default class GLProgram extends Shader {
 
   set vertexShader(value) {
     super.vertexShader = value;
-    if(this.gl) {
+    if (this.gl) {
       this._updateShader(this.gl.VERTEX_SHADER, this.vertexShader);
     }
   }
@@ -162,7 +162,7 @@ export default class GLProgram extends Shader {
 
   set fragmentShader(value) {
     super.fragmentShader = value;
-    if(this.gl) {
+    if (this.gl) {
       this._updateShader(this.gl.FRAGMENT_SHADER, this.fragmentShader);
     }
   }
@@ -170,26 +170,26 @@ export default class GLProgram extends Shader {
   get fragmentShader() {
     return super.fragmentShader;
   }
-  
+
   use() {
     this.gl.useProgram(this._program);
   }
 
   _updateShader(type, source) {
-    if(!source) {
+    if (!source) {
       return;
     }
 
-    if(this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0")) {
+    if (this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0")) {
       source = source.replace(/#version.*?\n/g, "");
       source = source.replace(/\btexture\b/g, "texture2D");
-      if(type === this.gl.VERTEX_SHADER) {
+      if (type === this.gl.VERTEX_SHADER) {
         source = source.replace(/\bin\b/g, "attribute");
         source = source.replace(/\bout\b/g, "varying");
       } else {
         source = source.replace(/\bin\b/g, "varying");
         const results = /out vec4 (.*?);/.exec(source);
-        if(results) {
+        if (results) {
           const fragColorName = results[1];
           source = source.replace(/out.*?;/, "");
           source = source.replace(new RegExp(`\\b${fragColorName}\\b`, "g"), "gl_FragColor");
@@ -213,12 +213,12 @@ export default class GLProgram extends Shader {
       }
       this.gl.deleteShader(shader);
       return;
-    } else if(shaderInfoLog) {
+    } else if (shaderInfoLog) {
       console.warn(shaderInfoLog);
     }
 
     const attachedShader = this._attachedShaders.get(type);
-    if(attachedShader) {
+    if (attachedShader) {
       this.gl.detachShader(this._program, attachedShader);
       this.gl.deleteShader(attachedShader);
     }
@@ -226,18 +226,18 @@ export default class GLProgram extends Shader {
     this.gl.attachShader(this._program, shader);
     this.gl.deleteShader(shader);
     this._attachedShaders.set(type, shader);
-    
-    if(this._attachedShaders.size === 2) {
+
+    if (this._attachedShaders.size === 2) {
       this.gl.linkProgram(this._program);
       const programInfoLog = this.gl.getProgramInfoLog(this._program);
       if (!this.gl.getProgramParameter(this._program, this.gl.LINK_STATUS)) {
         console.error(programInfoLog);
-      } else if(programInfoLog) {
+      } else if (programInfoLog) {
         console.warn(programInfoLog);
       }
 
       // TODO: Check when issue is resolved on Safari and comment out
-      
+
       // for (let [type, attachedShader] of this._attachedShaders) {
       //   this.gl.detachShader(this._program, attachedShader);
       //   this.gl.deleteShader(attachedShader);
