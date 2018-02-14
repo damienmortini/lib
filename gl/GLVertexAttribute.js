@@ -8,20 +8,21 @@ export default class GLVertexAttribute {
       gl
     }),
     size = 1,
+    type = undefined,
     offset = 0,
     normalized = false, 
     stride = 0, 
+    count = undefined,
     divisor = 0
   } = {}) {
-    this.count = undefined;
-    this.type = undefined;
-    
     this.gl = gl;
     this.buffer = buffer;
     this.size = size;
+    this.type = type;
     this.offset = offset;
     this.normalized = normalized;
     this.stride = stride;
+    this.count = count;
     this.divisor = divisor;
 
     if(data) {
@@ -29,50 +30,39 @@ export default class GLVertexAttribute {
     }
   }
 
-  set size(value) {
-    this._size = value;
-    this._update();
+  set count(value) {
+    this._count = value;
   }
 
-  get size() {
-    return this._size;
+  get count() {
+    return this.count || this.data.length / this.size;
+  }
+
+  set type(value) {
+    this._type = value;
+  }
+
+  get type() {
+    let type = this._type;
+    if(!type) {
+      if(this.data instanceof Float32Array || this.data instanceof Float64Array) {
+        type = this.gl.FLOAT;
+      } else if(this.data instanceof Uint8Array) {
+        type = this.gl.UNSIGNED_BYTE;
+      } else if(this.data instanceof Uint16Array) {
+        type = this.gl.UNSIGNED_SHORT;
+      } else if (this.data instanceof Uint32Array) {
+        type = this.gl.UNSIGNED_INT
+      }
+    }
+    return type;
   }
 
   set data(value) {
     this.buffer.data = value;
-    this._update();
   }
 
   get data() {
     return this.buffer.data;
-  }
-
-  set buffer(value) {
-    this._buffer = value;
-    this._update();
-  }
-
-  get buffer() {
-    return this._buffer;
-  }
-
-  _update() {
-    if(!this.data) {
-      return;
-    }
-
-    // Compute count
-    this.count = this.data.length / this.size;
-
-    // Type detection
-    if(this.data instanceof Float32Array || this.data instanceof Float64Array) {
-      this.type = this.gl.FLOAT;
-    } else if(this.data instanceof Uint8Array) {
-      this.type = this.gl.UNSIGNED_BYTE;
-    } else if(this.data instanceof Uint16Array) {
-      this.type = this.gl.UNSIGNED_SHORT;
-    } else if (this.data instanceof Uint32Array) {
-      this.type = this.gl.UNSIGNED_INT
-    }
   }
 };

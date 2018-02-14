@@ -2,7 +2,7 @@ export default class GLFrameBuffer {
   constructor({
     gl, 
     target = gl.FRAMEBUFFER,
-  } = {}) {
+  }) {
     this.gl = gl;
     this.target = target;
 

@@ -13,7 +13,7 @@ export default class GLTexture {
     magFilter = gl.LINEAR, 
     wrapS = gl.REPEAT, 
     wrapT = gl.REPEAT
-  } = {}) {
+  }) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
     this._width = width;

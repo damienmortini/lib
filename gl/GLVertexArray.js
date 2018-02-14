@@ -1,9 +1,9 @@
 export default class GLVertexArray {
   constructor({
-    gl = undefined,
+    gl,
     mesh = undefined,
     program = undefined
-  } = {}) {
+  }) {
     this.gl = gl;
 
     const extension = gl.getExtension("OES_vertex_array_object");

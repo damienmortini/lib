@@ -1,8 +1,13 @@
 import GLBuffer from "./GLBuffer.js";
 import GLMesh from "./GLMesh.js";
+import GLVertexAttribute from "./GLVertexAttribute.js";
 
 export default class GLTFMesh extends GLMesh {
-  constructor({gl, data, attributes} = {}) {
+  constructor({
+    gl, 
+    data, 
+    attributes
+  }) {
     super({
       gl,
       attributes
@@ -47,9 +52,10 @@ export default class GLTFMesh extends GLMesh {
     }
 
     let indices = data.primitives[0].indices;
-    
+
     if(indices) {
-      this.indices = {
+      this.indices = new GLVertexAttribute({
+        gl: this.gl,
         buffer: new GLBuffer({
           gl: this.gl,
           data: indices.bufferView.buffer,
@@ -58,7 +64,7 @@ export default class GLTFMesh extends GLMesh {
         type: indices.componentType,
         offset: indices.bufferView.byteOffset,
         count: indices.count
-      }
+      });
     }
   }
 }

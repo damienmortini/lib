@@ -3,10 +3,10 @@ import GLVertexAttribute from "./GLVertexAttribute.js";
 
 export default class GLMesh {
   constructor({
-    gl = undefined, 
-    attributes = undefined, 
-    indiceData = undefined
-  } = {}) {
+    gl, 
+    attributes = [], 
+    indiceData = null
+  }) {
     this.gl = gl;
 
     this.gl.getExtension("OES_element_index_uint");
