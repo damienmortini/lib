@@ -1,7 +1,7 @@
 export default class GLTexture {
   constructor({
     gl, 
-    data = null, 
+    data = undefined, 
     width = undefined,
     height = undefined,
     target = (data && data.length) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D,
@@ -13,7 +13,7 @@ export default class GLTexture {
     magFilter = gl.LINEAR, 
     wrapS = gl.REPEAT, 
     wrapT = gl.REPEAT
-  }) {
+  } = {gl}) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
     this._width = width;
