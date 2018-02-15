@@ -211,9 +211,9 @@ export default class GLProgram extends Shader {
       if (lineNumberResults) {
         const lineNumber = parseFloat(lineNumberResults[1]);
         const shaderLines = source.split("\n");
-        console.error(`${shaderInfoLog}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
+        throw new Error(`${shaderInfoLog}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
       } else {
-        console.error(shaderInfoLog);
+        throw new Error(shaderInfoLog);
       }
       this.gl.deleteShader(shader);
       return;
@@ -235,7 +235,7 @@ export default class GLProgram extends Shader {
       this.gl.linkProgram(this._program);
       const programInfoLog = this.gl.getProgramInfoLog(this._program);
       if (!this.gl.getProgramParameter(this._program, this.gl.LINK_STATUS)) {
-        console.error(programInfoLog);
+        throw new Error(programInfoLog);
       } else if (programInfoLog) {
         console.warn(programInfoLog);
       }
