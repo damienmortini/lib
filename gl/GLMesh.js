@@ -22,7 +22,6 @@ export default class GLMesh {
       this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl);
     }
     
-    
     this.attributes = new Map(attributes);
     for (const [key, value] of this.attributes) {
       if(!(value instanceof GLVertexAttribute)) {
@@ -39,7 +38,7 @@ export default class GLMesh {
           gl: this.gl,
           target: this.gl.ELEMENT_ARRAY_BUFFER
         })
-      }, indices));
+      }, indices.length !== undefined ? {data: indices} : indices));
     }
   }
 
