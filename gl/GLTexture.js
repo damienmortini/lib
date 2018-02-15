@@ -146,7 +146,7 @@ export default class GLTexture {
   }
 
   bind({unit = 0} = {}) {
-    this.gl.activeTexture(this.gl[`TEXTURE${unit}`]);
+    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
     this.gl.bindTexture(this._target, this._texture);
   }
 

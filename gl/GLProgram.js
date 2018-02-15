@@ -34,7 +34,6 @@ export default class GLProgram extends Shader {
       this._vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl);
     }
 
-    this._attributesLocations = new Map();
     class Attributes extends Map {
       set(name, { buffer, location = self._attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
         if (name instanceof Map) {
@@ -59,7 +58,6 @@ export default class GLProgram extends Shader {
       }
     }
 
-    this._uniformLocations = new Map();
     class Uniforms extends Map {
       set(name, ...values) {
         let value = values[0];
@@ -74,7 +72,13 @@ export default class GLProgram extends Shader {
         }
 
         if (value.length === undefined) {
-          if (value instanceof Object) {
+          if (value instanceof GLTexture) {
+            value.bind({
+              unit: self._textureUnitsCount
+            });
+            value = self._textureUnitsCount;
+            self._textureUnitsCount++;
+          } else if (value instanceof Object) {
             for (let key in value) {
               self.uniforms.set(`${name}.${key}`, value[key]);
             }
@@ -246,6 +250,7 @@ export default class GLProgram extends Shader {
 
       this._attributesLocations = new Map();
       this._uniformLocations = new Map();
+      this._textureUnitsCount = 0;
     }
   }
 
@@ -255,8 +260,7 @@ export default class GLProgram extends Shader {
       Vector3,
       Vector4,
       Matrix3,
-      Matrix4,
-      GLTexture
+      Matrix4
     });
   }
 }
