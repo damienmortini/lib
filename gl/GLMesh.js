@@ -5,7 +5,7 @@ export default class GLMesh {
   constructor({
     gl,
     attributes = undefined,
-    indiceData = undefined
+    indices = undefined
   } = { gl }) {
     this.gl = gl;
 
@@ -21,18 +21,25 @@ export default class GLMesh {
       this._drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl);
       this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl);
     }
-
+    
+    
     this.attributes = new Map(attributes);
+    for (const [key, value] of this.attributes) {
+      if(!(value instanceof GLVertexAttribute)) {
+        this.attributes.set(key, new GLVertexAttribute(Object.assign({
+          gl
+        }, value)));
+      }
+    }
 
-    if (indiceData) {
-      this.indices = new GLVertexAttribute({
+    if (indices && !(this.indices instanceof GLVertexAttribute)) {
+      this.indices = new GLVertexAttribute(Object.assign({
         gl: this.gl,
         buffer: new GLBuffer({
           gl: this.gl,
-          data: indiceData,
           target: this.gl.ELEMENT_ARRAY_BUFFER
         })
-      });
+      }, indices));
     }
   }
 

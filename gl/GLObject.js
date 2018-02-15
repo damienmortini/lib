@@ -6,7 +6,6 @@ import GLVertexArray from "./GLVertexArray.js";
 export default class GLObject {
   constructor({
     gl,
-    transform = new Matrix4(),
     mesh = new GLMesh(),
     program = new GLProgram(),
     vertexArray = new GLVertexArray({
@@ -16,7 +15,6 @@ export default class GLObject {
     })
   } = { gl }) {
     this.gl = gl;
-    this.transform = transform;
     this.mesh = mesh;
     this.program = program;
     this.vertexArray = vertexArray;
