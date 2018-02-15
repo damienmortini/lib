@@ -8,7 +8,7 @@ export default class Shader {
     for (let [key, chunk] of chunks) {
       switch (key) {
         case "start":
-          string = string.replace(/(#version .*?)\n([\s\S]*)/, `$1\n${chunk}\n$2`);
+          string = string.replace(/(#version .*?\n(\s*precision highp float;\s)?)([\s\S]*)/, `$1\n${chunk}\n$3`);
           break;
         case "end":
           string = string.replace(/(}\s*$)/, `\n${chunk}\n$1`);
@@ -46,7 +46,7 @@ export default class Shader {
     this._fragmentShaderChunks = [];
 
     this.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
-
+    
     for (let shader of shaders) {
       this.add(shader);
     }
