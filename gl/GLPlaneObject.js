@@ -13,10 +13,10 @@ export default class GLPlaneObject extends GLObject {
     height = 1,
     columns = 1,
     rows = 1,
-    position = true,
-    normal = true,
-    uv = true,
-    indexed = true,
+    positions = undefined,
+    normals = undefined,
+    uvs = undefined,
+    indices = undefined,
     transform = new Matrix4(),
     shaders = []
   } = { gl }) {
@@ -27,10 +27,10 @@ export default class GLPlaneObject extends GLObject {
         height,
         columns,
         rows,
-        position,
-        normal,
-        uv,
-        indexed
+        positions,
+        normals,
+        uvs,
+        indices
       }))),
       program: new GLProgram({
         gl,
