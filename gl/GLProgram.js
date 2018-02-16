@@ -71,13 +71,21 @@ export default class GLProgram extends Shader {
           self._uniformLocations.set(name, location);
         }
 
+        let texture;
+
         if (value.length === undefined) {
           if (value instanceof GLTexture) {
-            value.bind({
-              unit: self._textureUnitsCount
-            });
-            value = self._textureUnitsCount;
-            self._textureUnitsCount++;
+            let unit = 0;
+            for (const [uniformName, type] of self.uniformTypes) {
+              if(type.startsWith("sampler")) {
+                if(uniformName === name) {
+                  texture = value;
+                  values = [unit];
+                  break;
+                }
+                unit++;
+              }
+            }
           } else if (value instanceof Object) {
             for (let key in value) {
               self.uniforms.set(`${name}.${key}`, value[key]);
@@ -117,7 +125,7 @@ export default class GLProgram extends Shader {
           gl.uniform3fv(location, value);
         } else if (type === "vec4") {
           gl.uniform4fv(location, value);
-        } else if (type === "int" || type === "sampler2D" || type === "samplerCube") {
+        } else if (type === "int" || type.startsWith("sampler")) {
           gl.uniform1iv(location, value);
         } else if (type === "ivec2") {
           gl.uniform2iv(location, value);
@@ -131,7 +139,7 @@ export default class GLProgram extends Shader {
           gl.uniformMatrix4fv(location, false, value);
         }
 
-        super.set(name, value);
+        super.set(name, texture || value);
       }
     }
 
@@ -250,7 +258,6 @@ export default class GLProgram extends Shader {
 
       this._attributesLocations = new Map();
       this._uniformLocations = new Map();
-      this._textureUnitsCount = 0;
     }
   }
 

@@ -6,7 +6,7 @@ export default class GLTexture {
     height = undefined,
     target = (data && data.length) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D,
     level = 0,
-    internalformat = gl.RGBA,
+    internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
     minFilter = gl.NEAREST_MIPMAP_LINEAR, 
@@ -23,7 +23,7 @@ export default class GLTexture {
     this._target = target;
     
     this.level = level;
-    this.internalformat = internalformat;
+    this.internalFormat = internalFormat;
     this.format = format;
     this.type = type;
     this.minFilter = minFilter;
@@ -59,9 +59,9 @@ export default class GLTexture {
     this.bind();
     for (let i = 0; i < data.length; i++) {
       if(this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0") && this._dataWidth) {
-        this.gl.texImage2D(target + i, this.level, this.internalformat, this.format, this.type, data[i]);
+        this.gl.texImage2D(target + i, this.level, this.internalFormat, this.format, this.type, data[i]);
       } else {
-        this.gl.texImage2D(target + i, this.level, this.internalformat, this.width, this.height, 0, this.format, this.type, data[i]);
+        this.gl.texImage2D(target + i, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, data[i]);
       }
     }
     this.unbind();
