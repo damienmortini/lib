@@ -1,15 +1,15 @@
 // From https://github.com/Jam3/glsl-fast-gaussian-blur
 
 export default class BlurShader {
-  static shader({
+  constructor({
     textureName = "blurTexture",
-    textureUnit = 0,
+    texture = 0,
     distance = [1, 1]
   } = {}) {
     return {
       uniforms: [
         ["blurDistance", distance],
-        [textureName, textureUnit]
+        [textureName, texture]
       ],
       vertexShaderChunks: [
         ["start", `
