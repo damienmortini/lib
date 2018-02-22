@@ -198,14 +198,24 @@ export default class GUIInput extends HTMLElement {
     if(this.type === "button") {
       return;
     }
+    
     let changed = false;
     for (let input of this._inputs) {
-      let key = input.type === "checkbox" ? "checked" : "value";
-      let value = this.value;
-      value = input.type === "range" ? Math.min(Math.max(value, this.min), this.max) : value;
-      value = input.type !== "checkbox" ? value.toString() : value;
-      if(value !== input[key]) {
-        input[key] = value;
+      let key;
+      switch (input.type) {
+        case "checkbox":
+          key = "checked";
+          break;
+        case "number":
+          key = "valueAsNumber";
+          break;
+        default:
+          key = "value";
+          break;
+      }
+      
+      if(this.value !== input[key]) {
+        input[key] = this.value;
         changed = true;
       }
     }

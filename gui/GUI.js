@@ -1,4 +1,3 @@
-import WebSocket from "../utils/WebSocket.js";
 import Keyboard from "../input/Keyboard.js";
 import GUIInput from "./GUIInput.js";
 
@@ -108,7 +107,7 @@ function urlHashRegExpFromKey(key) {
 const GUI_REG_EXP = /([#&]gui=)((%7B|{).*(%7D|}))([&?]*)/;
 
 let DATA = {};
-(function() {
+(function () {
   let matches = GUI_REG_EXP.exec(window.location.hash);
   if (matches) {
     let string = matches[2];
@@ -172,10 +171,13 @@ export default class GUI extends HTMLElement {
     staticGUI.serverUrl = value;
   }
 
-  constructor({serverUrl} = {}) {
+  constructor({
+    serverUrl = undefined
+  } = {}) {
     super();
 
     this.serverUrl = serverUrl;
+    this._webSocketQueue = [];
 
     this.groups = new Map();
     this._inputs = new Map();
@@ -190,20 +192,28 @@ export default class GUI extends HTMLElement {
   set serverUrl(value) {
     this._serverUrl = value;
 
-    if(this._webSocket) {
+    if (this._webSocket) {
       this._webSocket.removeEventListener("message", this._onWebSocketMessage);
       this._webSocket.close();
       this._webSocket = null;
     }
-    if(!this._serverUrl) {
+    if (!this._serverUrl) {
       return;
     }
     this._webSocket = new WebSocket(this._serverUrl);
+    const sendQueue = () => {
+      this._webSocket.removeEventListener("open", sendQueue);
+      for (let data of this._webSocketQueue) {
+        this._webSocket.send(data);
+      }
+      this._webSocketQueue = [];
+    }
+    this._webSocket.addEventListener("open", sendQueue);
     this._onWebSocketMessage = (e) => {
       let data = JSON.parse(e.data);
       let input = this._inputs.get(data.uid);
-      if(input._client) {
-        if(input.type === "button") {
+      if (input._client) {
+        if (input.type === "button") {
           input.value();
         } else {
           input.value = data.value;
@@ -239,27 +249,40 @@ export default class GUI extends HTMLElement {
     return this._container.open;
   }
 
-  add({object, key, type, label = key, id = label, group = "", reload = false, remote = false, client = remote, onChange = (value) => {}, options, max, min, step} = {}) {
-    
+  add({
+    object,
+    key, 
+    label = key,
+    id = label,
+    group = "",
+    type = undefined,
+    options = undefined,
+    max = undefined,
+    min = undefined,
+    step = undefined,
+    reload = false,
+    remote = false,
+    client = remote,
+    onChange = (value) => { }
+  } = {object, key}) {
+
     const INITIAL_VALUE = type === "color" ? colorToHex(object[key]) : object[key];
-    
-    if(INITIAL_VALUE === null || INITIAL_VALUE === undefined) {
-      console.error(`GUI: ${id} must be defined.`);
-      return;
+
+    if (INITIAL_VALUE === null || INITIAL_VALUE === undefined) {
+      throw new Error(`GUI: ${id} must be defined.`);
     }
 
     let idKey = normalizeString(id);
     let groupKey = normalizeString(group);
     let uid = groupKey ? `${groupKey}/${idKey}` : idKey;
 
-    if(this._uids.has(uid)) {
-      console.error(`GUI: An input with id ${id} already exist in the group ${group}`);
-      return;
+    if (this._uids.has(uid)) {
+      throw new Error(`GUI: An input with id ${id} already exist in the group ${group}`);
     }
 
     this._uids.add(uid);
 
-    if(remote && !this.serverUrl) {
+    if (remote && !this.serverUrl) {
       this._serverUrl = `wss://${location.hostname}:80`;
     }
 
@@ -285,9 +308,9 @@ export default class GUI extends HTMLElement {
       this.appendChild(this._container);
     }
     let container = this._container;
-    if(group) {
+    if (group) {
       container = this.groups.get(group);
-      if(!container) {
+      if (!container) {
         container = document.createElement("details");
         container.open = true;
         container.innerHTML = `<summary>${group}</summary>`;
@@ -319,7 +342,7 @@ export default class GUI extends HTMLElement {
     container.appendChild(input);
 
     const SAVED_VALUE = groupKey && DATA[groupKey] ? DATA[groupKey][idKey] : DATA[idKey];
-    if(SAVED_VALUE !== undefined) {
+    if (SAVED_VALUE !== undefined) {
       input.value = SAVED_VALUE;
       if (type === "color") {
         object[key] = colorFromHex(object[key], SAVED_VALUE);
@@ -331,18 +354,18 @@ export default class GUI extends HTMLElement {
       if (!containerData) {
         containerData = DATA[groupKey] = {};
       }
-      if(input.value !== INITIAL_VALUE) {
+      if (input.value !== INITIAL_VALUE) {
         containerData[idKey] = input.value;
       } else {
         delete containerData[idKey];
-        if(groupKey && !Object.keys(containerData).length) {
+        if (groupKey && !Object.keys(containerData).length) {
           delete DATA[groupKey];
         }
       }
 
       if (GUI_REG_EXP.test(window.location.hash)) {
         window.location.hash = window.location.hash.replace(
-          GUI_REG_EXP, 
+          GUI_REG_EXP,
           Object.keys(DATA).length ? `$1${encodeURI(JSON.stringify(DATA))}$5` : ""
         );
       } else {
@@ -350,8 +373,13 @@ export default class GUI extends HTMLElement {
         window.location.hash += `${prefix}gui=${encodeURI(JSON.stringify(DATA))}`;
       }
 
-      if(remote && this._webSocket) {
-        this._webSocket.send(JSON.stringify({uid, value}));
+      if (remote && this._webSocket) {
+        const jsonString = JSON.stringify({ uid, value });
+        if (this._webSocket.readyState === WebSocket.CONNECTING) {
+          this._webSocketQueue.push(jsonString);
+        } else {
+          this._webSocket.send(jsonString);
+        }
       }
 
       if (reload) {
