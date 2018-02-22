@@ -117,7 +117,7 @@ export default class GLProgram extends Shader {
 
         const type = self.uniformTypes.get(name);
 
-        if (type === "float") {
+        if (type === "float" || type === "bool") {
           gl.uniform1fv(location, value);
         } else if (type === "vec2") {
           gl.uniform2fv(location, value);
