@@ -202,6 +202,7 @@ export default class GUIInput extends HTMLElement {
     let changed = false;
     for (let input of this._inputs) {
       let key;
+      let value = this.value;
       switch (input.type) {
         case "checkbox":
           key = "checked";
@@ -209,13 +210,17 @@ export default class GUIInput extends HTMLElement {
         case "number":
           key = "valueAsNumber";
           break;
+        case "select-one":
+          key = "value";
+          value = value.toString();
+          break;
         default:
           key = "value";
           break;
       }
-      
-      if(this.value !== input[key]) {
-        input[key] = this.value;
+
+      if(value !== input[key]) {
+        input[key] = value;
         changed = true;
       }
     }
