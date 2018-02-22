@@ -100,6 +100,6 @@ export default class Vector3 extends Float32Array {
   }
 
   clone() {
-    return new Vector3(this.x, this.y, this.z);
+    return new Vector3(this);
   }
 }

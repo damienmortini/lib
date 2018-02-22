@@ -1,9 +1,8 @@
 import * as vec2 from "../../gl-matrix/src/gl-matrix/vec2.js";
 
 export default class Vector2 extends Float32Array {
-  constructor(x = 0, y = 0) {
-    super(2);
-    this.set(x, y);
+  constructor(array = [0, 0]) {
+    super(array);
     return this;
   }
 
@@ -93,6 +92,6 @@ export default class Vector2 extends Float32Array {
   }
 
   clone() {
-    return new Vector2(this.x, this.y);
+    return new Vector2(this);
   }
 }
