@@ -2,15 +2,34 @@ export default class GLFrameBuffer {
   constructor({
     gl, 
     target = gl.FRAMEBUFFER,
+    colorTextures = [],
+    depthTexture = undefined,
+    stencilTexture = undefined,
   }) {
     this.gl = gl;
     this.target = target;
 
-    this.colorTextures = [];
-    this.depthTexture = null;
-    this.stencilTexture = null;
+    this._frameBuffer = this.gl.createFramebuffer();    
 
-    this._frameBuffer = this.gl.createFramebuffer();
+    this.colorTextures = [];
+    for (const [i, texture] of colorTextures.entries()) {
+      this.attach({
+        texture,
+        attachment: this.gl.COLOR_ATTACHMENT0 + i
+      })
+    }
+    if(depthTexture) {
+      this.attach({
+        texture: depthTexture,
+        attachment: this.gl.DEPTH_ATTACHMENT
+      })
+    }
+    if(stencilTexture) {
+      this.attach({
+        texture: stencilTexture,
+        attachment: this.gl.STENCIL_ATTACHMENT
+      })
+    }
   }
 
   attach({
@@ -41,5 +60,15 @@ export default class GLFrameBuffer {
     target = this.target
   } = {}) {
     this.gl.bindFramebuffer(target, null);
+  }
+
+  clone() {
+    return new GLFrameBuffer({
+      gl: this.gl,
+      target: this.target,
+      colorTextures: this.colorTextures.map((value) => value.clone()),
+      depthTexture: this.depthTexture ? this.depthTexture.clone() : undefined,
+      stencilTexture: this.stencilTexture ? this.stencilTexture.clone() : undefined
+    });
   }
 };

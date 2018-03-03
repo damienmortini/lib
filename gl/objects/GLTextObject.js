@@ -3,7 +3,7 @@ import GLProgram from "./GLProgram.js";
 import GLTexture from "./GLTexture.js";
 import Matrix4 from "../math/Matrix4.js";
 
-export default class GLText {
+export default class GLTextObject {
   constructor({
     gl,
     textContent = "",

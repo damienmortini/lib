@@ -153,4 +153,8 @@ export default class GLTexture {
   unbind() {
     this.gl.bindTexture(this._target, null);
   }
+
+  clone() {
+    return new GLTexture(this);
+  }
 };
