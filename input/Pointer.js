@@ -98,6 +98,9 @@ export default class Pointer extends Vector2 {
   }
 
   _onPointerUp(e) {
+    if(!this._downed) {
+      return;
+    }
     this._downed = false;
     this._onPointerEvent(e);
     this._updatePositions();

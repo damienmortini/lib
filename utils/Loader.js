@@ -60,7 +60,7 @@ export default class Loader {
       }
 
       const src = `${baseURI}${typeof value === "string" ? value : (value.href || value.src)}`;
-      const extension = /[\\/](.*)\.(.*)$/.exec(src)[2];
+      const extension = /.*\.(.*)$/.exec(src)[1];
 
       if(!type) {
         for (const [key, value] of TYPE_MAP) {
