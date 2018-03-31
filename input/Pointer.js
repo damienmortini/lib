@@ -115,7 +115,7 @@ export default class Pointer extends Vector2 {
   }
 
   _onPointerEvent(e) {
-    if (!!TouchEvent && e instanceof TouchEvent) {
+    if (!!window.TouchEvent && e instanceof window.TouchEvent) {
       if(e.type === "touchend") {
         e = e.changedTouches[0];
       } else {
