@@ -24,7 +24,7 @@ export default class LoopElement extends HTMLElement {
         }
       });
     }
-    if(window.top.document.hasFocus() && this._autoplay) {
+    if((window.top.document.hasFocus() || this._background) && this._autoplay) {
       this.play();
     } else if (this._autoplay) {
       this._pausedByBlur = true;
