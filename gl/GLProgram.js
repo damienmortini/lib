@@ -18,7 +18,21 @@ export default class GLProgram extends Shader {
     fragmentShaderChunks = undefined,
     shaders = undefined
   } = { gl }) {
-    super({ vertexShader, fragmentShader, uniforms, vertexShaderChunks, fragmentShaderChunks, shaders });
+    super({
+      vertexShader,
+      fragmentShader,
+      uniforms,
+      vertexShaderChunks,
+      fragmentShaderChunks,
+      shaders,
+      dataTypeConctructors: {
+        Vector2,
+        Vector3,
+        Vector4,
+        Matrix3,
+        Matrix4
+      }
+    });
 
     this.gl = gl;
     this._program = gl.createProgram();
@@ -77,8 +91,8 @@ export default class GLProgram extends Shader {
           if (value instanceof GLTexture) {
             let unit = 0;
             for (const [uniformName, type] of self.uniformTypes) {
-              if(type.startsWith("sampler")) {
-                if(uniformName === name) {
+              if (type.startsWith("sampler")) {
+                if (uniformName === name) {
                   texture = value;
                   values = [unit];
                   break;
@@ -259,15 +273,5 @@ export default class GLProgram extends Shader {
       this._attributesLocations = new Map();
       this._uniformLocations = new Map();
     }
-  }
-
-  _parseUniforms(string) {
-    super._parseUniforms(string, {
-      Vector2,
-      Vector3,
-      Vector4,
-      Matrix3,
-      Matrix4
-    });
   }
 }
