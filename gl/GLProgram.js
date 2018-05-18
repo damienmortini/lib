@@ -30,7 +30,9 @@ export default class GLProgram extends Shader {
         Vector3,
         Vector4,
         Matrix3,
-        Matrix4
+        Matrix4,
+        Texture: class Texture { },
+        TextureCube: class TextureCube { }
       }
     });
 

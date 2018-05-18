@@ -3,7 +3,7 @@ export default class BasicShader {
     positions = true,
     normals = true,
     uvs = true
-  }) {
+  } = {}) {
     this._positions = !!positions;
     this._normals = !!normals;
     this._uvs = !!uvs;

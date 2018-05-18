@@ -67,7 +67,7 @@ export default class SDFShader {
     }
     `;
   }
-  
+
   static sdfSubstraction() {
     return `
       Voxel sdfSubstraction(Voxel voxel1, Voxel voxel2)
@@ -95,29 +95,30 @@ export default class SDFShader {
     `;
   }
 
-  static rayMarch({
-    map = `
-      Voxel voxel = Voxel(0., vec4(0.));
-      return voxel;
-    `,
-    maxSteps = 128
+  static sdfNormalFromPosition({
+    name = "sdfNormalFromPosition",
+    mapName = "map"
   } = {}) {
     return `
-      Voxel map(vec3 position) {
-        ${map}
-      }
-
-      vec3 normalFromPosition(vec3 position, float step) {
+      vec3 ${name}(vec3 position, float step) {
         vec2 e = vec2(step, 0.0);
         float stepInverse = 1. / step; // for mobile precision
         return normalize(vec3(
-          map(position + e.xyy).coord.w * stepInverse - map(position - e.xyy).coord.w * stepInverse,
-          map(position + e.yxy).coord.w * stepInverse - map(position - e.yxy).coord.w * stepInverse,
-          map(position + e.yyx).coord.w * stepInverse - map(position - e.yyx).coord.w * stepInverse
+          ${mapName}(position + e.xyy).coord.w * stepInverse - ${mapName}(position - e.xyy).coord.w * stepInverse,
+          ${mapName}(position + e.yxy).coord.w * stepInverse - ${mapName}(position - e.yxy).coord.w * stepInverse,
+          ${mapName}(position + e.yyx).coord.w * stepInverse - ${mapName}(position - e.yyx).coord.w * stepInverse
         ));
       }
+    `;
+  }
 
-      Voxel rayMarch(Ray ray, float near, float far, int steps)
+  static sdfRayMarch({
+    name = "sdfRayMarch",
+    mapName = "map",
+    maxSteps = 128
+  } = {}) {
+    return `
+      Voxel ${name}(Ray ray, float near, float far, int steps)
       {
         Voxel voxel;
 
@@ -128,7 +129,7 @@ export default class SDFShader {
         
         for(int i = 0; i < ${maxSteps}; i++) {
           if (i == steps || rayMarchingStep < 0.0001 || distance > far) break;
-          voxel = map(ray.origin + ray.direction * distance);
+          voxel = ${mapName}(ray.origin + ray.direction * distance);
           rayMarchingStep = voxel.coord.w;
           distance += rayMarchingStep;
         }
@@ -136,12 +137,6 @@ export default class SDFShader {
         voxel.coord.w = distance;
         voxel = sdfMin(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
 
-        return voxel;
-      }
-
-      Voxel rayMarchFromCamera(vec2 position, Camera camera, int steps) {
-        Ray ray = rayFromCamera(position, camera);
-        Voxel voxel = rayMarch(ray, camera.near, camera.far, steps);
         return voxel;
       }
     `;

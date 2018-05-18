@@ -1,4 +1,4 @@
-import Loader from"dlib/utils/Loader.js";
+import Loader from"../utils/Loader.js";
 
 export default class GLTFLoader extends Loader {
   static load(value) {
