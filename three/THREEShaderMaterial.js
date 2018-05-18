@@ -45,10 +45,8 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
 
     this.lights = /lambert|phong|standard/.test(type);
 
-    this.onBeforeCompile = (shader, renderer) => {
-      if (this.maxMipLevel !== undefined && this.envMap && this.envMap.generateMipmaps) {
-        this.maxMipLevel = Math.log2(Math.max(this.envMap.image.width, this.envMap.image.height));
-      }
+    if (this.maxMipLevel !== undefined && this.envMap && this.envMap.generateMipmaps) {
+      this.maxMipLevel = Math.log2(Math.max(this.envMap.image.width, this.envMap.image.height));
     }
   }
 
