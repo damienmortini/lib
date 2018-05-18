@@ -33,8 +33,6 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
     }, options));
 
     this.defines = { [type.toUpperCase()]: "" };
-    // if(uniforms)
-
 
     this._shader = shader;
     this.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
