@@ -5,10 +5,11 @@ export default class Shader {
       return new RegExp(`(${regExpString})`);
     }
 
+    
     for (let [key, chunk] of chunks) {
       switch (key) {
         case "start":
-          string = string.replace(/(#version .*?\n(\s*precision highp float;\s)?)([\s\S]*)/, `$1\n${chunk}\n$3`);
+          string = string.replace(/^(#version .*?\n(\s*precision highp float;\s)?)?([\s\S]*)/, `$1\n${chunk}\n$3`);
           break;
         case "end":
           string = string.replace(/(}\s*$)/, `\n${chunk}\n$1`);
@@ -54,12 +55,12 @@ export default class Shader {
     this.uniforms = new Map();
     this.uniformTypes = new Map();
 
+    this._dataTypeConctructors = dataTypeConctructors;
+
     this.vertexShader = vertexShader;
     this.fragmentShader = fragmentShader;
     this._vertexShaderChunks = [];
     this._fragmentShaderChunks = [];
-
-    this._dataTypeConctructors = dataTypeConctructors;
 
     this.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 

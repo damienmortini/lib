@@ -1,18 +1,16 @@
-import { Mesh, BufferAttribute, CylinderBufferGeometry, Vector3 } from "three";
-
 import DVector3 from "../math/Vector3.js";
 
 import FrenetSerretFrame from "../math/FrenetSerretFrame.js";
 
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
 
-export default class THREELine extends Mesh {
+export default class THREELine extends THREE.Mesh {
   constructor({
-    points = [new Vector3(0, -1, 0), new Vector3(0, 1, 0)],
+    points = [new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 1, 0)],
     material = new THREEShaderMaterial(),
     detail = 3,
     thickness = .1,
-    geometry = new CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1)
+    geometry = new THREE.CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1)
   } = {}) {
     super(geometry, material);
 
@@ -32,7 +30,7 @@ export default class THREELine extends Mesh {
       ids[i] = positions[i * 3 + 1] + offsetY;
     }
 
-    this.geometry.addAttribute("linePointId", new BufferAttribute(ids, 1));
+    this.geometry.addAttribute("linePointId", new THREE.BufferAttribute(ids, 1));
 
     if(!material.linePositions) {
       material.add({

@@ -1,6 +1,6 @@
 import {
   Vector3
-} from "three";
+} from "../../three/build/three.module.js";
 
 import THREELine from "./THREELine.js";
 

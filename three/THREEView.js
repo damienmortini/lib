@@ -1,10 +1,8 @@
-import { Object3D } from "three";
-
 import View from "../ecs/components/View.js";
 
 export default class THREEView extends View {
   constructor(entity, {
-    view = new Object3D(),
+    view = new THREE.Object3D(),
     visible,
     visibilityExecutor
   } = {}) {

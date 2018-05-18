@@ -1,4 +1,4 @@
-import { Mesh, PlaneGeometry, Texture, Object3D } from "three";
+import { Mesh, PlaneGeometry, Texture, Object3D } from "../../three/build/three.module.js";
 
 import THREEShaderMaterial from "../three/THREEShaderMaterial.js";
 

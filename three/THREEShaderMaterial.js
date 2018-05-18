@@ -1,9 +1,7 @@
-import { ShaderMaterial, ShaderLib, UniformsUtils } from "three";
-
 import THREEShader from "./THREEShader.js";
 
-export default class THREEShaderMaterial extends ShaderMaterial {
-  constructor (options = {}) {
+export default class THREEShaderMaterial extends THREE.ShaderMaterial {
+  constructor(options = {}) {
     let type = options.type || "";
     let vertexShaderChunks = options.vertexShaderChunks;
     let fragmentShaderChunks = options.fragmentShaderChunks;
@@ -23,9 +21,9 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     delete options.shaders;
 
     let shader = new THREEShader({
-      vertexShader: options.vertexShader || (type ? ShaderLib[type].vertexShader : undefined),
-      fragmentShader: options.fragmentShader || (type ? ShaderLib[type].fragmentShader : undefined),
-      uniforms: type ? UniformsUtils.clone(ShaderLib[type].uniforms) : undefined
+      vertexShader: options.vertexShader || (type ? THREE.ShaderLib[type].vertexShader : undefined),
+      fragmentShader: options.fragmentShader || (type ? THREE.ShaderLib[type].fragmentShader : undefined),
+      uniforms: type ? THREE.UniformsUtils.clone(THREE.ShaderLib[type].uniforms) : undefined
     });
 
     super(Object.assign({
@@ -34,18 +32,28 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       uniforms: shader.uniforms
     }, options));
 
+    this.defines = { [type.toUpperCase()]: "" };
+    // if(uniforms)
+
+
     this._shader = shader;
-    this.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
+    this.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 
     for (let shader of shaders) {
       this.add(shader);
     }
 
     this.lights = /lambert|phong|standard/.test(type);
+
+    this.onBeforeCompile = (shader, renderer) => {
+      if (this.maxMipLevel !== undefined && this.envMap && this.envMap.generateMipmaps) {
+        this.maxMipLevel = Math.log2(Math.max(this.envMap.image.width, this.envMap.image.height));
+      }
+    }
   }
 
-  add({vertexShaderChunks, fragmentShaderChunks, uniforms}) {
-    this._shader.add({vertexShaderChunks, fragmentShaderChunks, uniforms});
+  add({ vertexShaderChunks, fragmentShaderChunks, uniforms }) {
+    this._shader.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 
     this.fragmentShader = this._shader.fragmentShader;
     this.vertexShader = this._shader.vertexShader;
@@ -55,10 +63,10 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       this.uniforms[key] = this._shader.uniforms[key];
       Object.defineProperty(this, key, {
         configurable: true,
-        get: function() { 
+        get: function () {
           return this.uniforms[key].value;
         },
-        set: function(value) {
+        set: function (value) {
           this.uniforms[key].value = value;
         }
       });

@@ -1,16 +1,14 @@
-import { WebGLRenderer, WebGLRenderTarget, Scene, OrthographicCamera, Mesh, PlaneBufferGeometry, RGBAFormat, LinearFilter, DepthTexture, UnsignedShortType } from "three";
-
-export default class THREERenderer extends WebGLRenderer {
+export default class THREERenderer extends THREE.WebGLRenderer {
   constructor(options) {
     super(Object.assign({antialias: true}, options));
 
     this.filters = [];
     this._renderTargets = new Map();
 
-    let renderTargetIn = new WebGLRenderTarget(this.domElement.width, this.domElement.height, {
-      format: RGBAFormat,
-      minFilter: LinearFilter,
-      magFilter: LinearFilter,
+    let renderTargetIn = new THREE.WebGLRenderTarget(this.domElement.width, this.domElement.height, {
+      format: THREE.RGBAFormat,
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
       stencilBuffer: false
     });
     renderTargetIn.texture.generateMipmaps = false;
@@ -19,10 +17,10 @@ export default class THREERenderer extends WebGLRenderer {
     renderTargetOut.texture.generateMipmaps = false;
 
     if(this.context.getExtension("WEBGL_depth_texture")) {
-      renderTargetIn.depthTexture = new DepthTexture();
-      renderTargetIn.depthTexture.type = UnsignedShortType;
-      renderTargetOut.depthTexture = new DepthTexture();
-      renderTargetOut.depthTexture.type = UnsignedShortType;
+      renderTargetIn.depthTexture = new THREE.DepthTexture();
+      renderTargetIn.depthTexture.type = THREE.UnsignedShortType;
+      renderTargetOut.depthTexture = new THREE.DepthTexture();
+      renderTargetOut.depthTexture.type = THREE.UnsignedShortType;
     }
 
     this._renderTargets.set(this, {
@@ -30,9 +28,9 @@ export default class THREERenderer extends WebGLRenderer {
       out: renderTargetOut
     });
 
-    this.scene = new Scene();
-    this.scene.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    this._quad = new Mesh(new PlaneBufferGeometry(2, 2));
+    this.scene = new THREE.Scene();
+    this.scene.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this._quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2));
     this._quad.frustumCulled = false;
     this.scene.add(this._quad);
 

@@ -1,13 +1,3 @@
-import {
-  Vector2,
-  Vector3,
-  Vector4,
-  Matrix3,
-  Matrix4,
-  Texture,
-  CubeTexture
-} from "three";
-
 import Shader from "../3d/Shader.js";
 
 export default class THREEShader extends Shader {
@@ -24,7 +14,16 @@ export default class THREEShader extends Shader {
       vertexShader,
       fragmentShader,
       uniforms,
-      shaders
+      shaders,
+      dataTypeConctructors: {
+        Vector2: THREE.Vector2,
+        Vector3: THREE.Vector3,
+        Vector4: THREE.Vector4,
+        Matrix3: THREE.Matrix3,
+        Matrix4: THREE.Matrix4,
+        Texture: THREE.Texture,
+        TextureCube: THREE.CubeTexture
+      }
     });
   }
 
@@ -52,17 +51,5 @@ export default class THREEShader extends Shader {
       };
     }
     this.uniforms = uniformsObject;
-  }
-
-  _parseUniforms(string) {
-    super._parseUniforms(string, {
-      Vector2,
-      Vector3,
-      Vector4,
-      Matrix3,
-      Matrix4,
-      TextureCube: CubeTexture,
-      Texture2D: Texture
-    });
   }
 }

@@ -5,7 +5,7 @@ import {
   Mesh,
   Line,
   LineSegments,
-} from "three";
+} from "../../three/build/three.module.js";
 
 import "three/examples/js/loaders/ColladaLoader.js";
 import "three/examples/js/loaders/OBJLoader.js";

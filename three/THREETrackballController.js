@@ -1,13 +1,11 @@
-import { Object3D, Matrix4 as THREEMatrix4 } from "three";
-
 import TrackballController from "../3d/controllers/TrackballController.js";
 import Matrix4 from "../math/Matrix4.js";
 
 export default class THREETrackballController extends TrackballController {
-  constructor(object3D = new Object3D(), options) {
+  constructor(object3D = new THREE.Object3D(), options) {
     object3D.updateMatrix();
     super(Object.assign({matrix: new Matrix4(object3D.matrix.elements)}, options));
-    this._matrix4 = new THREEMatrix4();
+    this._matrix4 = new THREE.Matrix4();
     this.object3D = object3D;
 
     this.update();
