@@ -31,6 +31,10 @@ export default class Loader {
     return OBJECTS.get(value);
   }
 
+  static has(value) {
+    return OBJECTS.has(value);
+  }
+
   static get baseURI() {
     return baseURI;
   }
@@ -82,7 +86,15 @@ export default class Loader {
           return;
         }
 
-        fetch(`${baseURI}${src}`)
+        new Promise((resolve) => {
+          if(type === "image") {
+            const image = document.createElement("img");
+            image.onload = () => { resolve(image); }
+            image.src = src;
+          } else {
+            resolve(fetch(`${baseURI}${src}`));
+          }
+        })
           .catch(() => {
             return new Promise(function (resolve, reject) {
               const xhr = new XMLHttpRequest
@@ -101,11 +113,7 @@ export default class Loader {
             } else if (type === "binary") {
               return response.arrayBuffer();
             } else if (type === "image") {
-              return new Promise((resolve) => {
-                const image = document.createElement("img");
-                image.onload = () => { resolve(image); }
-                image.src = src;
-              });
+              return response;
             } else if (type === "video" || type === "audio") {
               return new Promise((resolve) => {
                 const media = document.createElement(type);
