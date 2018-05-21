@@ -1,43 +1,42 @@
 export default class PlaneMesh {
   constructor({
-    width = 1, 
-    height = 1, 
-    columns = 1, 
+    width = 1,
+    height = 1,
+    columns = 1,
     rows = 1,
-    positions = undefined,
+    positions = true,
     normals = undefined,
     uvs = undefined,
-    indices = undefined
+    indices = true
   } = {}) {
     let xSegments = columns + 1;
     let ySegments = rows + 1;
 
     let verticesNumber = xSegments * ySegments;
-    
-    this.positions = positions === undefined ? new Float32Array(verticesNumber * 3) : positions;
-    this.normals = normals === undefined ? new Float32Array(verticesNumber * 3) : normals;
-    this.uvs = uvs === undefined ? new Float32Array(verticesNumber * 2) : uvs;
-    this.indices = indices === undefined ? new Uint16Array(columns * rows * 6) : indices;
+
+    positions = positions === true ? new Float32Array(verticesNumber * 3) : positions;
+    normals = normals === true ? new Float32Array(verticesNumber * 3) : normals;
+    uvs = uvs === true ? new Float32Array(verticesNumber * 2) : uvs;
 
     this.attributes = new Map();
 
-    if(this.positions) {
+    if (positions) {
       this.attributes.set("position", {
-        data: this.positions,
+        data: positions,
         size: 3
       });
     }
-    
-    if(this.normals) {
+
+    if (normals) {
       this.attributes.set("normal", {
-        data: this.normals,
+        data: normals,
         size: 3
       });
     }
-    
-    if(this.uvs) {
+
+    if (uvs) {
       this.attributes.set("uv", {
-        data: this.uvs,
+        data: uvs,
         size: 2
       });
     }
@@ -51,32 +50,34 @@ export default class PlaneMesh {
 
         let offset = j * xSegments + i;
 
-        if(this.positions) {
-          this.positions[offset * 3] = u * width - width * .5;
-          this.positions[offset * 3 + 1] = y;
+        if (positions) {
+          positions[offset * 3] = u * width - width * .5;
+          positions[offset * 3 + 1] = y;
         }
 
-        if(this.normals) {
-          this.normals[offset * 3 + 2] = 1;
+        if (normals) {
+          normals[offset * 3 + 2] = 1;
         }
 
-        if(this.uvs) {
-          this.uvs[offset * 2] = u;
-          this.uvs[offset * 2 + 1] = 1 - v;
+        if (uvs) {
+          uvs[offset * 2] = u;
+          uvs[offset * 2 + 1] = 1 - v;
         }
       }
     }
 
-    if(this.indices) {
+    if (indices) {
+      this.indices = indices === true ? new Uint16Array(columns * rows * 6) : indices;
+
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < columns; i++) {
           var a = i + xSegments * j;
           var b = i + xSegments * (j + 1);
           var c = (i + 1) + xSegments * (j + 1);
           var d = (i + 1) + xSegments * j;
-  
+
           let offset = j * rows + i;
-  
+
           this.indices[offset * 6] = a;
           this.indices[offset * 6 + 1] = d;
           this.indices[offset * 6 + 2] = b;

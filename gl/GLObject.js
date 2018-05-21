@@ -23,7 +23,7 @@ export default class GLObject {
     this._boundTextures = new Set();
   }
 
-  draw(options) {
+  bind() {
     this.program.use();
     this.vertexArray.bind();
     let unit = 0;
@@ -39,7 +39,13 @@ export default class GLObject {
         unit++;
       }
     }
+  }
+
+  draw(options) {
     this.mesh.draw(options);
+  }
+
+  unbind() {
     this.vertexArray.unbind();
     for (const texture of this._boundTextures) {
       texture.unbind();

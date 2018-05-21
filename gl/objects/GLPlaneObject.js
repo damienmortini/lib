@@ -43,20 +43,5 @@ export default class GLPlaneObject extends GLObject {
         ]
       })
     });
-
-    this.transform = transform;
-  }
-
-  draw({ camera = undefined } = {}) {
-    this.program.use();
-    if (this.transform) {
-      this.program.uniforms.set("transform", this.transform);
-    }
-    if (camera) {
-      this.program.uniforms.set("projectionView", camera.projectionView);
-    }
-    this.vertexArray.bind();
-    this.mesh.draw();
-    this.vertexArray.unbind();
   }
 }
