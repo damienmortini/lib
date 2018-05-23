@@ -1,52 +1,38 @@
-let baseURI = "";
+export class Loader {
+  constructor() {
+    this.typeMap = new Map([
+      ["text", new Set(["txt", "html", "js", "svg"])],
+      ["json", new Set(["json"])],
+      ["binary", new Set(["bin"])],
+      ["image", new Set(["png", "jpg", "gif"])],
+      ["video", new Set(["mp4", "webm"])],
+      ["audio", new Set(["mp3", "ogg"])],
+      ["style", new Set(["css"])],
+      ["font", new Set(["woff", "woff2", "ttf"])],
+    ]);
 
-const PROMISES = new Map();
-const OBJECTS = new Map();
+    this.baseURI = "";
 
-const TYPE_MAP = new Map([
-  ["text", new Set(["txt", "html", "js", "svg"])],
-  ["json", new Set(["json"])],
-  ["binary", new Set(["bin"])],
-  ["image", new Set(["png", "jpg", "gif"])],
-  ["video", new Set(["mp4", "webm"])],
-  ["audio", new Set(["mp3", "ogg"])],
-  ["style", new Set(["css"])],
-  ["font", new Set(["woff", "woff2", "ttf"])],
-]);
-
-export default class Loader {
-  static get onLoad() {
-    return Promise.all(PROMISES.values());
+    this._promises = new Map();
+    this._objects = new Map();
   }
 
-  static get promises() {
-    return PROMISES;
+  get onLoad() {
+    return Promise.all(this._promises.values());
   }
 
-  static get typeMap() {
-    return TYPE_MAP;
+  get(value) {
+    return this._objects.get(value);
   }
 
-  static get(value) {
-    return OBJECTS.get(value);
+  has(value) {
+    return this._objects.has(value);
   }
 
-  static has(value) {
-    return OBJECTS.has(value);
-  }
+  load(values) {
+    const isArray = values instanceof Array;
 
-  static get baseURI() {
-    return baseURI;
-  }
-
-  static set baseURI(value) {
-    baseURI = value;
-  }
-
-  static load(values) {
-    const returnArray = values instanceof Array;
-
-    if (!returnArray) {
+    if (!isArray) {
       values = [values];
     }
 
@@ -57,109 +43,120 @@ export default class Loader {
         continue;
       }
 
-      let type;
+      const key = typeof value === "string" ? value : JSON.stringify(value);
+
+      let options;
+      let src = value;
+
       if (typeof value === "object") {
-        type = value.type;
-        value = value.value;
+        src = value.src;
+        options = value;
       }
 
-      const src = `${baseURI}${typeof value === "string" ? value : (value.href || value.src)}`;
-      const extension = /.*\.(.*)$/.exec(src)[1];
-
-      if (!type) {
-        for (const [key, value] of TYPE_MAP) {
-          if (value.has(extension)) {
-            type = key;
-            break;
-          }
-        }
-      }
-
-      let promise = new Promise(function (resolve, reject) {
-        if (PROMISES.get(value)) {
-          PROMISES.get(value).then(resolve);
+      const promise = new Promise((resolve, reject) => {
+        if (this._promises.get(key)) {
+          resolve(this._promises.get(key));
           return;
         }
 
-        if (Loader.get(value)) {
-          resolve(Loader.get(value));
+        if (this.get(key)) {
+          resolve(this.get(key));
           return;
         }
 
-        new Promise((resolve) => {
-          if(type === "image") {
-            const image = document.createElement("img");
-            image.onload = () => { resolve(image); }
-            image.src = src;
-          } else {
-            resolve(fetch(`${baseURI}${src}`));
-          }
-        })
-          .catch(() => {
-            return new Promise(function (resolve, reject) {
-              const xhr = new XMLHttpRequest
-              xhr.onload = function () {
-                resolve(new Response(xhr.responseText, { status: xhr.status }))
-              }
-              xhr.open("GET", `${baseURI}${src}`)
-              xhr.send(null)
-            })
-          })
-          .then((response) => {
-            if (type === "text") {
-              return response.text();
-            } else if (type === "json") {
-              return response.json();
-            } else if (type === "binary") {
-              return response.arrayBuffer();
-            } else if (type === "image") {
-              return response;
-            } else if (type === "video" || type === "audio") {
-              return new Promise((resolve) => {
-                const media = document.createElement(type);
-                media.oncanplaythrough = () => { resolve(media); }
-                media.src = src;
-              });
-            } else if (type === "style") {
-              return new Promise((resolve) => {
-                const link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.type = "text/css";
-                const onLoad = () => {
-                  link.removeEventListener("load", onLoad);
-                  resolve(link);
-                }
-                link.addEventListener("load", onLoad);
-                link.href = src;
-                document.head.appendChild(link);
-              });
-            } else if (type === "font") {
-              return new Promise((resolve) => {
-                let fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(value)[1], `url("${value}")`);
-                document.fonts.add(fontFace);
-                return fontFace.load();
-              });
-            } else if (type === "template") {
-              return response.text().then((html) => {
-                const template = document.createElement("template");
-                template.innerHTML = html;
-                return template;
-              });
-            } else {
-              return response.blob();
-            }
-          })
-          .then((response) => {
-            PROMISES.delete(value);
-            OBJECTS.set(value, response);
-            resolve(response);
-          });
+        this._loadFile(src, options).then((response) => {
+          this._promises.delete(key);
+          this._objects.set(key, response);
+          resolve(response);
+        });
       });
 
+      this._promises.set(key, promise);
       promises.push(promise);
-      PROMISES.set(value, promise);
     }
 
-    return returnArray ? Promise.all(promises) : promises[0];
+    return isArray ? Promise.all(promises) : promises[0];
+  }
+
+  _loadFile(src, options = {}) {
+    let type = options.type;
+
+    const extension = /.*\.(.*)$/.exec(src)[1];
+    src = `${this.baseURI}${src}`;
+
+    if (!type) {
+      for (const [key, value] of this.typeMap) {
+        if (value.has(extension)) {
+          type = key;
+          break;
+        }
+      }
+    }
+
+    return new Promise((resolve) => {
+      if (type === "image") {
+        const image = document.createElement("img");
+        image.onload = () => { resolve(image); }
+        image.src = src;
+      } else {
+        resolve(fetch(`${this.baseURI}${src}`));
+      }
+    })
+      .catch(() => {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest
+          xhr.onload = () => {
+            resolve(new Response(xhr.responseText, { status: xhr.status }))
+          }
+          xhr.open("GET", `${this.baseURI}${src}`)
+          xhr.send(null)
+        })
+      })
+      .then((response) => {
+        if (type === "text") {
+          return response.text();
+        } else if (type === "json") {
+          return response.json();
+        } else if (type === "binary") {
+          return response.arrayBuffer();
+        } else if (type === "image") {
+          return response;
+        } else if (type === "video" || type === "audio") {
+          return new Promise((resolve) => {
+            const media = document.createElement(type);
+            media.oncanplaythrough = () => { resolve(media); }
+            media.src = src;
+          });
+        } else if (type === "style") {
+          return new Promise((resolve) => {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.type = "text/css";
+            const onLoad = () => {
+              link.removeEventListener("load", onLoad);
+              resolve(link);
+            }
+            link.addEventListener("load", onLoad);
+            link.href = src;
+            document.head.appendChild(link);
+          });
+        } else if (type === "font") {
+          return new Promise((resolve) => {
+            let fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(value)[1], `url("${value}")`);
+            document.fonts.add(fontFace);
+            return fontFace.load();
+          });
+        } else if (type === "template") {
+          return response.text().then((html) => {
+            const template = document.createElement("template");
+            template.innerHTML = html;
+            return template;
+          });
+        } else {
+          return response.blob();
+        }
+      })
   }
 }
+
+export default new Loader();
