@@ -43,8 +43,8 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
 
     this.lights = /lambert|phong|standard/.test(type);
 
-    if (this.maxMipLevel !== undefined && this.envMap && this.envMap.generateMipmaps) {
-      this.maxMipLevel = Math.log2(Math.max(this.envMap.image.width, this.envMap.image.height));
+    if(this.envMap) {
+      this.envMap = this.envMap;
     }
   }
 
@@ -57,14 +57,27 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
     for (let name in this._shader.uniforms) {
       let key = name; // Firefox fix
       this.uniforms[key] = this._shader.uniforms[key];
+
+      let setter;
+      if(key === "envMap") {
+        setter = function (value) {
+          if (this.maxMipLevel !== undefined && this.envMap && this.envMap.generateMipmaps && this.envMap.image) {
+            this.maxMipLevel = Math.log2(Math.max(this.envMap.image.width, this.envMap.image.height));
+          }
+          this.uniforms[key].value = value;
+        }
+      } else {
+        setter = function (value) {
+          this.uniforms[key].value = value;
+        }
+      }
+
       Object.defineProperty(this, key, {
         configurable: true,
         get: function () {
           return this.uniforms[key].value;
         },
-        set: function (value) {
-          this.uniforms[key].value = value;
-        }
+        set: setter
       });
     }
 
