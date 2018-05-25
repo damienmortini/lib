@@ -21,6 +21,7 @@ export default class GLTexture {
     this._dataWidth = undefined;
     this._dataHeight = undefined;
     this._target = target;
+    this._unit = 0;
     
     this.level = level;
     this.internalFormat = internalFormat;
@@ -146,11 +147,13 @@ export default class GLTexture {
   }
 
   bind({unit = 0} = {}) {
+    this._unit = unit;
     this.gl.activeTexture(this.gl.TEXTURE0 + unit);
     this.gl.bindTexture(this._target, this._texture);
   }
 
-  unbind() {
+  unbind({unit = this._unit} = {}) {
+    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
     this.gl.bindTexture(this._target, null);
   }
 
