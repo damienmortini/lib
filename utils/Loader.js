@@ -47,11 +47,15 @@ export class Loader {
 
       let options;
       let src = value;
+      let baseURI = this.baseURI;
 
       if (typeof value === "object") {
         src = value.src;
+        baseURI = value.baseURI || baseURI;
         options = value;
       }
+
+      src = `${baseURI}${src}`;
 
       const promise = new Promise((resolve, reject) => {
         if (this._promises.get(key)) {
@@ -82,7 +86,6 @@ export class Loader {
     let type = options.type;
 
     const extension = /.*\.(.*)$/.exec(src)[1];
-    src = `${this.baseURI}${src}`;
 
     if (!type) {
       for (const [key, value] of this.typeMap) {
