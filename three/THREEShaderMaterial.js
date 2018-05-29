@@ -61,8 +61,8 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
       let setter;
       if(key === "envMap") {
         setter = function (value) {
-          if (this.maxMipLevel !== undefined && this.envMap && this.envMap.generateMipmaps && this.envMap.image) {
-            this.maxMipLevel = Math.log2(Math.max(this.envMap.image.width, this.envMap.image.height));
+          if (value && value.generateMipmaps && value.image) {
+            this.maxMipLevel = Math.log2(Math.max(value.image.width, value.image.height));
           }
           this.uniforms[key].value = value;
         }
