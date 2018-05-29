@@ -1,6 +1,10 @@
 import * as vec2 from "../../gl-matrix/src/gl-matrix/vec2.js";
 
 export default class Vector2 extends Float32Array {
+  static distance(vector2a, vector2b) {
+    return vec2.distance(vector2a, vector2b);
+  }
+
   constructor(array = [0, 0]) {
     super(array);
     return this;
@@ -71,6 +75,10 @@ export default class Vector2 extends Float32Array {
 
   dot(vector2) {
     return vec2.dot(this, vector2);
+  }
+
+  distance(vector2) {
+    return Vector2.distance(this, vector2);
   }
 
   equals(vector2) {
