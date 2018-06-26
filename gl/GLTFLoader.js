@@ -1,48 +1,45 @@
-import Loader from"../utils/Loader.js";
+import SingletonLoader, { Loader } from "../utils/Loader.js";
 
-export default class GLTFLoader extends Loader {
-  static load(value) {
-    let path = /([\\/]?.*[\\/])/.exec(value)[1];
-    let objectMap = new Map();
-    let rawData;
+export class GLTFLoader extends Loader {
+  constructor() {
+    super();
+    this.typeMap.get("json").add("gltf");
+  }
 
-    GLTFLoader.typeMap.get("json").add("gltf");
-    
-    let promise = Loader.load(value)
-    .then((data) => {
-      rawData = data;
-      return Loader.load(rawData.buffers.map(value => `${path}${value.uri}`));
-    })
-    .then((buffers) => {
-      const data = JSON.parse(JSON.stringify(rawData));
-      data.raw = rawData;
+  _loadFile(src, options = {}) {
+    return super._loadFile(src, options).then((response) => {
+      const rawData = response;
 
-      for (let node of data.nodes) {
-        node.mesh = data.meshes[node.mesh];
-      }
+      return SingletonLoader.load(response.buffers.map((value) => `${/([\\/]?.*[\\/])/.exec(src)[1]}${value.uri}`))
+        .then((buffers) => {
+          const data = JSON.parse(JSON.stringify(rawData));
+          data.raw = rawData;
 
-      for (let bufferView of data.bufferViews) {
-        bufferView.buffer = buffers[bufferView.buffer];
-      }
-
-      for (let accessor of data.accessors) {
-        accessor.bufferView = data.bufferViews[accessor.bufferView];
-      }
-
-      for (let mesh of data.meshes) {
-        for (let primitive of mesh.primitives) {
-          for (let key in primitive.attributes) {
-            primitive.attributes[key] = data.accessors[primitive.attributes[key]];
+          for (let node of data.nodes) {
+            node.mesh = data.meshes[node.mesh];
           }
-          primitive.indices = data.accessors[primitive.indices];
-        }
-      }
 
-      return data;
+          for (let bufferView of data.bufferViews) {
+            bufferView.buffer = buffers[bufferView.buffer];
+          }
+
+          for (let accessor of data.accessors) {
+            accessor.bufferView = data.bufferViews[accessor.bufferView];
+          }
+
+          for (let mesh of data.meshes) {
+            for (let primitive of mesh.primitives) {
+              for (let key in primitive.attributes) {
+                primitive.attributes[key] = data.accessors[primitive.attributes[key]];
+              }
+              primitive.indices = data.accessors[primitive.indices];
+            }
+          }
+
+          return data;
+        });
     });
-
-    Loader.promises.set(value, promise);
-
-    return promise;
   }
 }
+
+export default new GLTFLoader();
