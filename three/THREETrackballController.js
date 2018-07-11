@@ -4,15 +4,18 @@ import Matrix4 from "../math/Matrix4.js";
 export default class THREETrackballController extends TrackballController {
   constructor(object3D = new THREE.Object3D(), options) {
     object3D.updateMatrix();
-    super(Object.assign({matrix: new Matrix4(object3D.matrix.elements)}, options));
+    super(Object.assign({ matrix: new Matrix4(object3D.matrix.elements) }, options));
     this._matrix4 = new THREE.Matrix4();
     this.object3D = object3D;
 
+    const enabled = this.enabled;
+    this.enabled = true;
     this.update();
+    this.enabled = enabled;
   }
 
   update() {
-    if(!this.object3D) {
+    if (!this.object3D) {
       return;
     }
     this.matrix.x = this.object3D.position.x;
