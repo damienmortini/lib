@@ -51,7 +51,7 @@ export class Loader {
 
       if (typeof value === "object") {
         src = value.src;
-        baseURI = value.baseURI || baseURI;
+        baseURI = value.baseURI !== undefined ? value.baseURI : baseURI;
         options = value;
       }
 
