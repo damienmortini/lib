@@ -1,14 +1,27 @@
-export default class THREERenderer extends THREE.WebGLRenderer {
+import {
+  WebGLRenderer,
+  WebGLRenderTarget,
+  RGBAFormat,
+  LinearFilter,
+  DepthTexture,
+  UnsignedShortType,
+  Scene,
+  OrthographicCamera,
+  Mesh,
+  PlaneBufferGeometry,
+} from "../../three/build/three.module.js";
+
+export default class THREERenderer extends WebGLRenderer {
   constructor(options) {
-    super(Object.assign({antialias: true}, options));
+    super(Object.assign({ antialias: true }, options));
 
     this.filters = [];
     this._renderTargets = new Map();
 
-    let renderTargetIn = new THREE.WebGLRenderTarget(this.domElement.width, this.domElement.height, {
-      format: THREE.RGBAFormat,
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
+    let renderTargetIn = new WebGLRenderTarget(this.domElement.width, this.domElement.height, {
+      format: RGBAFormat,
+      minFilter: LinearFilter,
+      magFilter: LinearFilter,
       stencilBuffer: false
     });
     renderTargetIn.texture.generateMipmaps = false;
@@ -16,11 +29,11 @@ export default class THREERenderer extends THREE.WebGLRenderer {
     let renderTargetOut = renderTargetIn.clone();
     renderTargetOut.texture.generateMipmaps = false;
 
-    if(this.context.getExtension("WEBGL_depth_texture")) {
-      renderTargetIn.depthTexture = new THREE.DepthTexture();
-      renderTargetIn.depthTexture.type = THREE.UnsignedShortType;
-      renderTargetOut.depthTexture = new THREE.DepthTexture();
-      renderTargetOut.depthTexture.type = THREE.UnsignedShortType;
+    if (this.context.getExtension("WEBGL_depth_texture")) {
+      renderTargetIn.depthTexture = new DepthTexture();
+      renderTargetIn.depthTexture.type = UnsignedShortType;
+      renderTargetOut.depthTexture = new DepthTexture();
+      renderTargetOut.depthTexture.type = UnsignedShortType;
     }
 
     this._renderTargets.set(this, {
@@ -28,9 +41,9 @@ export default class THREERenderer extends THREE.WebGLRenderer {
       out: renderTargetOut
     });
 
-    this.scene = new THREE.Scene();
-    this.scene.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    this._quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2));
+    this.scene = new Scene();
+    this.scene.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this._quad = new Mesh(new PlaneBufferGeometry(2, 2));
     this._quad.frustumCulled = false;
     this.scene.add(this._quad);
 
@@ -57,13 +70,13 @@ export default class THREERenderer extends THREE.WebGLRenderer {
     renderTargets.out.setSize(width, height);
   }
 
-  render({scene, camera, filters = this.filters, renderTarget, viewport, scissor = viewport} = {}) {
-    if(arguments.length > 1) {
+  render({ scene, camera, filters = this.filters, renderTarget, viewport, scissor = viewport } = {}) {
+    if (arguments.length > 1) {
       this._render(...arguments);
       return;
     }
     let renderTargets = this._renderTargets.get(renderTarget || this);
-    if(!renderTargets) {
+    if (!renderTargets) {
       renderTargets = {
         in: renderTarget.clone(),
         out: renderTarget.clone()
@@ -72,15 +85,15 @@ export default class THREERenderer extends THREE.WebGLRenderer {
       renderTargets.out.texture.generateMipmaps = false;
       this._renderTargets.set(renderTarget, renderTargets);
     }
-    if(viewport || scissor) {
-      if(viewport) {
-        if(renderTarget) {
+    if (viewport || scissor) {
+      if (viewport) {
+        if (renderTarget) {
           renderTarget.viewport.set(viewport[0], viewport[1], viewport[2], viewport[3]);
         } else {
           this.setViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         }
       }
-      if(renderTarget) {
+      if (renderTarget) {
         renderTarget.scissor.set(scissor[0], scissor[1], scissor[2], scissor[3]);
         renderTarget.scissorTest = true;
       } else {
@@ -88,7 +101,7 @@ export default class THREERenderer extends THREE.WebGLRenderer {
         this.setScissorTest(true);
       }
     } else {
-      if(renderTarget) {
+      if (renderTarget) {
         renderTarget.viewport.set(0, 0, renderTarget.width, renderTarget.height);
         renderTarget.scissor.set(0, 0, renderTarget.width, renderTarget.height);
         renderTarget.scissorTest = false;
@@ -98,7 +111,7 @@ export default class THREERenderer extends THREE.WebGLRenderer {
         this.setScissorTest(false);
       }
     }
-    if(scene) {
+    if (scene) {
       camera = camera || scene.camera;
       this._render(scene, camera, filters.length ? renderTargets.in : renderTarget);
     }

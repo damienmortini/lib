@@ -1,6 +1,12 @@
+import {
+  ShaderMaterial,
+  ShaderLib,
+  UniformsUtils,
+} from "../../three/build/three.module.js";
+
 import THREEShader from "./THREEShader.js";
 
-export default class THREEShaderMaterial extends THREE.ShaderMaterial {
+export default class THREEShaderMaterial extends ShaderMaterial {
   constructor(options = {}) {
     let type = options.type || "";
     let vertexShaderChunks = options.vertexShaderChunks;
@@ -21,9 +27,9 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
     delete options.shaders;
 
     let shader = new THREEShader({
-      vertexShader: options.vertexShader || (type ? THREE.ShaderLib[type].vertexShader : undefined),
-      fragmentShader: options.fragmentShader || (type ? THREE.ShaderLib[type].fragmentShader : undefined),
-      uniforms: type ? THREE.UniformsUtils.clone(THREE.ShaderLib[type].uniforms) : undefined
+      vertexShader: options.vertexShader || (type ? ShaderLib[type].vertexShader : undefined),
+      fragmentShader: options.fragmentShader || (type ? ShaderLib[type].fragmentShader : undefined),
+      uniforms: type ? UniformsUtils.clone(ShaderLib[type].uniforms) : undefined
     });
 
     super(Object.assign({
@@ -43,7 +49,7 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
 
     this.lights = /lambert|phong|standard/.test(type);
 
-    if(this.envMap) {
+    if (this.envMap) {
       this.envMap = this.envMap;
     }
   }
@@ -59,7 +65,7 @@ export default class THREEShaderMaterial extends THREE.ShaderMaterial {
       this.uniforms[key] = this._shader.uniforms[key];
 
       let setter;
-      if(key === "envMap") {
+      if (key === "envMap") {
         setter = function (value) {
           if (value && value.generateMipmaps && value.image) {
             this.maxMipLevel = Math.log2(Math.max(value.image.width, value.image.height));
