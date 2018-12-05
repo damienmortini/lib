@@ -7,7 +7,7 @@ export default class Color {
       parseInt(results[1]) / 255,
       parseInt(results[2]) / 255,
       parseInt(results[3]) / 255,
-      results[5] !== undefined ? parseFloat(results[5]) : 1
+      results[5] !== undefined ? parseFloat(results[5]) : 1,
     ] : null;
   }
 
@@ -19,14 +19,16 @@ export default class Color {
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
 
-    let hue, saturation;
+    let hue;
+    let saturation;
+
     const lightness = (min + max) / 2.0;
 
     if (min === max) {
       hue = 0;
       saturation = 0;
     } else {
-      var delta = max - min;
+      let delta = max - min;
       saturation = lightness <= 0.5 ? delta / (max + min) : delta / (2 - max - min);
       switch (max) {
         case r: hue = (g - b) / delta + (g < b ? 6 : 0); break;
@@ -44,11 +46,11 @@ export default class Color {
   }
 
   static hexToRGB(hex) {
-    var results = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    let results = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return results ? [
       parseInt(results[1], 16) / 255,
       parseInt(results[2], 16) / 255,
-      parseInt(results[3], 16) / 255
+      parseInt(results[3], 16) / 255,
     ] : null;
   }
 }
