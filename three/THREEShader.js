@@ -1,12 +1,10 @@
-import {
-  Vector2,
-  Vector3,
-  Vector4,
-  Matrix3,
-  Matrix4,
-  Texture,
-  CubeTexture,
-} from "../../three/build/three.module.js";
+import { Vector2 } from "../../three/src/math/Vector2.js";
+import { Vector3 } from "../../three/src/math/Vector3.js";
+import { Vector4 } from "../../three/src/math/Vector4.js";
+import { Matrix3 } from "../../three/src/math/Matrix3.js";
+import { Matrix4 } from "../../three/src/math/Matrix4.js";
+import { Texture } from "../../three/src/textures/Texture.js";
+import { CubeTexture } from "../../three/src/textures/CubeTexture.js";
 
 import Shader from "../3d/Shader.js";
 
