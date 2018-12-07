@@ -1,0 +1,28 @@
+{
+  "name": "dlib-three",
+  "version": "0.0.0",
+  "description": "Three.js dlib extension",
+  "registry": "npm",
+  "scripts": {
+    "bump": "npm version patch && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://dmmn@github.com/damienmortini/dlib-three.git"
+  },
+  "keywords": [
+    "three",
+    "3d",
+    "toolkit"
+  ],
+  "author": "Damien Mortini",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/damienmortini/dlib-three/issues"
+  },
+  "homepage": "https://github.com/damienmortini/dlib-three",
+  "dependencies": {
+    "dlib": "0.0.86",
+    "three": "^0.99.0"
+  }
+}
