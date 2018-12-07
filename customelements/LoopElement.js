@@ -1,7 +1,7 @@
 import Ticker from "../utils/Ticker.js";
 
 export default class LoopElement extends HTMLElement {
-  constructor({autoplay = false, background = false} = {}) {
+  constructor({ autoplay = false, background = false } = {}) {
     super();
     this._autoplay = autoplay || this.hasAttribute("autoplay");
     this._background = background || this.hasAttribute("background");
@@ -13,18 +13,18 @@ export default class LoopElement extends HTMLElement {
   }
 
   connectedCallback() {
-    if(!this._background) {
+    if (!this._background) {
       window.top.addEventListener("blur", this._onBlur = () => {
         this._pausedByBlur = !this.paused;
         this.pause();
       });
       window.top.addEventListener("focus", this._onFocus = () => {
-        if(this._pausedByBlur) {
+        if (this._pausedByBlur) {
           this.play();
         }
       });
     }
-    if((window.top.document.hasFocus() || this._background) && this._autoplay) {
+    if ((window.top.document.hasFocus() || this._background) && this._autoplay) {
       this.play();
     } else if (this._autoplay) {
       this._pausedByBlur = true;
@@ -51,7 +51,7 @@ export default class LoopElement extends HTMLElement {
     this.dispatchEvent(new Event("pause"));
   }
 
-  update() {}
+  update() { }
 }
 
 window.customElements.define("dlib-loop", LoopElement);

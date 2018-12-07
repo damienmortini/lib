@@ -25,10 +25,10 @@ export default class Pointer extends Vector2 {
     return this._downed;
   }
 
-  constructor(domElement = window) {
+  constructor(domElement) {
     super();
 
-    this._domElement = domElement;
+    this._domElement = domElement || window;
 
     this.type = Pointer.TOUCH_TYPE;
 
@@ -73,12 +73,12 @@ export default class Pointer extends Vector2 {
       left: 0,
       top: 0,
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
     } : this._domElement.getBoundingClientRect();
   }
 
   _onPointerDown(e) {
-    if(e.type === "touchstart") {
+    if (e.type === "touchstart") {
       this._preventMouseTypeChange = true;
       this._changeType(Pointer.TOUCH_TYPE);
     }
@@ -91,8 +91,8 @@ export default class Pointer extends Vector2 {
   }
 
   _onPointerMove(e) {
-    if(e.type === "mousemove") {
-      if(this._preventMouseTypeChange) {
+    if (e.type === "mousemove") {
+      if (this._preventMouseTypeChange) {
         return;
       } else {
         this._changeType(Pointer.MOUSE_TYPE);
@@ -103,14 +103,14 @@ export default class Pointer extends Vector2 {
   }
 
   _onPointerUp(e) {
-    if(!this._downed) {
+    if (!this._downed) {
       return;
     }
     this._downed = false;
     this._onPointerEvent(e);
     this._updatePositions();
     this.onUp.dispatch(e);
-    if(this.dragOffset.length < 4) {
+    if (this.dragOffset.length < 4) {
       this.onClick.dispatch(e);
     }
     clearTimeout(this._timeout);
@@ -121,7 +121,7 @@ export default class Pointer extends Vector2 {
 
   _onPointerEvent(e) {
     if (!!window.TouchEvent && e instanceof window.TouchEvent) {
-      if(e.type === "touchend") {
+      if (e.type === "touchend") {
         e = e.changedTouches[0];
       } else {
         e = e.touches[0];
@@ -132,7 +132,7 @@ export default class Pointer extends Vector2 {
   }
 
   _changeType(type) {
-    if(this.type === type) {
+    if (this.type === type) {
       return;
     }
     this.type = type;
@@ -142,10 +142,10 @@ export default class Pointer extends Vector2 {
   }
 
   _update() {
-    if(this.x || this.y) {
+    if (this.x || this.y) {
       this.velocity.x = this._position.x - this.x;
       this.velocity.y = this._position.y - this.y;
-      if(this.downed) {
+      if (this.downed) {
         this.dragOffset.add(this.velocity);
       }
     }
@@ -157,7 +157,7 @@ export default class Pointer extends Vector2 {
     this.x = this._position.x;
     this.y = this._position.y;
 
-    if(!this.x && !this.y) {
+    if (!this.x && !this.y) {
       return;
     }
 
@@ -177,7 +177,7 @@ export default class Pointer extends Vector2 {
   enable() {
     this.disable();
     this.resize();
-    if(this.type === Pointer.TOUCH_TYPE) {
+    if (this.type === Pointer.TOUCH_TYPE) {
       this._domElement.addEventListener("touchmove", this._onPointerMoveBinded);
       window.addEventListener("touchend", this._onPointerUpBinded);
     }
