@@ -61,8 +61,6 @@ export default class Pointer extends Vector2 {
     this._updateBinded = this._update.bind(this);
     this._resizeBinded = this.resize.bind(this);
 
-    this.resize();
-
     this._position = new Vector2();
 
     this.enable();
@@ -78,6 +76,7 @@ export default class Pointer extends Vector2 {
   }
 
   _onPointerDown(e) {
+    this.resize();
     if (e.type === "touchstart") {
       this._preventMouseTypeChange = true;
       this._changeType(Pointer.TOUCH_TYPE);
@@ -180,8 +179,7 @@ export default class Pointer extends Vector2 {
     if (this.type === Pointer.TOUCH_TYPE) {
       this._domElement.addEventListener("touchmove", this._onPointerMoveBinded);
       window.addEventListener("touchend", this._onPointerUpBinded);
-    }
-    else {
+    } else {
       this._domElement.addEventListener("mousedown", this._onPointerDownBinded);
       window.addEventListener("mouseup", this._onPointerUpBinded);
     }
