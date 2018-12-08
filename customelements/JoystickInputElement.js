@@ -1,5 +1,4 @@
 import LoopElement from "./LoopElement.js";
-import Pointer from "../input/Pointer.js";
 import Vector2 from "../math/Vector2.js";
 
 export default class JoystickInputElement extends LoopElement {
@@ -17,6 +16,7 @@ export default class JoystickInputElement extends LoopElement {
           cursor: pointer;
         }
         .outer-ring, .joystick {
+          pointer-events: none;
           border-radius: 50%;
           box-sizing: border-box;
         }
@@ -34,39 +34,53 @@ export default class JoystickInputElement extends LoopElement {
           height: 50%;
           margin-top: -25%;
           margin-left: -25%;
-          pointer-events: none;
         }
       </style>
       <div class="outer-ring"></div>
       <div class="joystick"></div>
     `;
 
+    this._joystick = this.shadowRoot.querySelector(".joystick");
+
     this._position = new Vector2();
     this._lerpedPosition = new Vector2();
-    this._firstTouchOrigin = new Vector2();
+    this._origin = new Vector2();
 
-    this._pointer = new Pointer(this);
-    this._windowPointer = new Pointer();
+    this._onPointerMoveBinded = this._onPointerMove.bind(this);
+    this._onPointerUpBinded = this._onPointerUp.bind(this);
 
-    this._windowPointer.onDown.add(() => {
-      if (!this._pointer.downed) {
-        return;
-      }
+    this.addEventListener("touchmove", (event) => {
+      event.preventDefault();
+    }, { passive: false });
 
-      this._firstTouchOrigin.copy(this._windowPointer).subtract(this._pointer.centered);
+    this.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      this._boundingClientRect = this.getBoundingClientRect();
+      window.addEventListener("pointermove", this._onPointerMoveBinded, { passive: false });
+      window.addEventListener("pointerup", this._onPointerUpBinded);
+      this._pointerDowned = true;
       this.play();
-
-      this._windowPointer.onUp.add(() => {
-        this.dispatchEvent(new CustomEvent("input", {
-          detail: [0, 0],
-        }));
-        this.dispatchEvent(new CustomEvent("change", {
-          detail: [...this._position],
-        }));
-      }, { once: true });
     });
+  }
 
-    this._joystick = this.shadowRoot.querySelector(".joystick");
+  _onPointerMove(event) {
+    this._position.x = (event.pageX - this._boundingClientRect.left) / this._boundingClientRect.width * 2 - 1;
+    this._position.y = (event.pageY - this._boundingClientRect.top) / this._boundingClientRect.height * 2 - 1;
+    if (this._position.size > 1) {
+      this._position.normalize();
+    }
+  }
+
+  _onPointerUp(event) {
+    this._pointerDowned = false;
+    window.removeEventListener("pointermove", this._onPointerMoveBinded);
+    window.removeEventListener("pointerup", this._onPointerUpBinded);
+    this.dispatchEvent(new CustomEvent("input", {
+      detail: [0, 0],
+    }));
+    this.dispatchEvent(new CustomEvent("change", {
+      detail: [...this._position],
+    }));
   }
 
   get value() {
@@ -74,27 +88,23 @@ export default class JoystickInputElement extends LoopElement {
   }
 
   update() {
-    if (this._pointer.downed) {
-      this._position.copy(this._windowPointer).subtract(this._firstTouchOrigin).scale(1 / this._pointer._domElementBoundingRect.width * 2);
-
-      if (this._position.size > 1) {
-        this._position.normalize();
-      }
-    } else {
+    if (!this._pointerDowned) {
       this._position.set(0, 0);
     }
 
-    this._lerpedPosition.x += (this._position.x - this._lerpedPosition.x) * (this._pointer.downed ? .5 : .1);
-    this._lerpedPosition.y += (this._position.y - this._lerpedPosition.y) * (this._pointer.downed ? .5 : .1);
+    this._lerpedPosition.x += (this._position.x - this._lerpedPosition.x) * (this._pointerDowned ? .5 : .1);
+    this._lerpedPosition.y += (this._position.y - this._lerpedPosition.y) * (this._pointerDowned ? .5 : .1);
 
-    if (this._lerpedPosition.size < .001) {
-      this._lerpedPosition.set(0, 0);
-      this.pause();
+    if (!this._pointerDowned) {
+      if (this._lerpedPosition.size < .001) {
+        this._lerpedPosition.set(0, 0);
+        this.pause();
+      }
     }
 
-    this._joystick.style.transform = `translate(${this._lerpedPosition.x * this._pointer._domElementBoundingRect.width * .5}px, ${this._lerpedPosition.y * this._pointer._domElementBoundingRect.height * .5}px)`;
+    this._joystick.style.transform = `translate(${this._lerpedPosition.x * this._boundingClientRect.width * .5}px, ${this._lerpedPosition.y * this._boundingClientRect.height * .5}px)`;
 
-    if (this._pointer.downed) {
+    if (this._pointerDowned) {
       this.dispatchEvent(new CustomEvent("input", {
         detail: [...this._position],
       }));
