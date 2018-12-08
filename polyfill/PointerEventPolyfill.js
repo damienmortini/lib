@@ -1,5 +1,5 @@
-export default function (element) {
-  if (PointerEvent) {
+export default function(element) {
+  if (window.PointerEvent) {
     return;
   }
 
@@ -30,7 +30,7 @@ export default function (element) {
 
       element.dispatchEvent(pointerEvent);
     }
-  }
+  };
 
   element.addEventListener("mousedown", transformEvent);
   element.addEventListener("mousemove", transformEvent);
