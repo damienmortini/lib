@@ -6,12 +6,12 @@ let SPRITESHEETS = new Map();
 
 export default class SpriteAnimation {
   constructor({
-    data, 
-    animation, 
+    data = undefined,
+    animation = undefined,
     playbackRate = 1,
     frameRate = 25,
     loop = false,
-    autoplay = false
+    autoplay = false,
   } = {}) {
     this._updateBinded = this.update.bind(this);
 
@@ -27,24 +27,24 @@ export default class SpriteAnimation {
 
     this.onEnd = new Signal();
 
-    if(autoplay) {
+    if (autoplay) {
       this.play();
     }
   }
 
   set data(value) {
-    if(this._data === value) {
+    if (this._data === value) {
       return;
     }
     this._data = value;
     this._animations = SPRITESHEETS.get(this._data);
-    if(!this._animations) {
+    if (!this._animations) {
       this._animations = new Map();
       for (let key in this._data.frames) {
         let match = /(.*?)([0-9]+)[$\.]/.exec(key);
         let animationName = match[1];
         let frames = this._animations.get(animationName);
-        if(!frames) {
+        if (!frames) {
           frames = [];
           this._animations.set(animationName, frames);
         }
@@ -104,7 +104,7 @@ export default class SpriteAnimation {
   }
 
   set animation(value) {
-    if(this._animation === value) {
+    if (this._animation === value) {
       return;
     }
     this._animation = value;
@@ -127,18 +127,18 @@ export default class SpriteAnimation {
   }
 
   set currentTime(value) {
-    if(this._currentTime === value) {
+    if (this._currentTime === value) {
       return;
     }
-    if(this.loop) {
+    if (this.loop) {
       value = ((value % 1) + 1) % 1;
     } else {
       value = Math.min(Math.max(value, 0), 1);
-      if(this._currentTime !== value && (value === 1 && this.playbackRate >= 0 || value === 0 && this.playbackRate < 0)) {
+      if (this._currentTime !== value && (value === 1 && this.playbackRate >= 0 || value === 0 && this.playbackRate < 0)) {
         this.onEnd.dispatch();
       }
     }
-    if(this._currentTime !== value) {
+    if (this._currentTime !== value) {
       this._currentTime = value;
       this._sprite.frame = this._frames[Math.round(this._currentTime * (this._frames.length - 1))];
     }
@@ -153,7 +153,7 @@ export default class SpriteAnimation {
   }
 
   update() {
-    if(!this._animations) {
+    if (!this._animations) {
       return;
     }
     this.currentTime += this.playbackRate * (this.frameRate / 60) * Ticker.timeScale / this._frames.length;

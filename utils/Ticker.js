@@ -3,7 +3,7 @@ import Signal from "./Signal.js";
 class Ticker extends Signal {
   constructor() {
     super();
-    
+
     this._updateBinded = this._update.bind(this);
 
     this.time = window.performance.now() * .001;
