@@ -1,0 +1,25 @@
+{
+  "name": "dlmn",
+  "version": "0.0.0",
+  "description": "Minimalist and reusable custom elements",
+  "scripts": {
+    "bump": "npm version patch && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damienmortini/dlmn.git"
+  },
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damienmortini/dlmn/issues"
+  },
+  "homepage": "https://github.com/damienmortini/dlmn#readme",
+  "dependencies": {
+    "dlib": "0.0.86"
+  }
+}
