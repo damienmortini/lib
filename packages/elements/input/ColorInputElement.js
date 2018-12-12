@@ -7,17 +7,6 @@ export default class ColorInputElement extends InputElement {
 
     this.type = "color";
 
-    // this.shadowRoot.querySelector("slot").innerHTML = `
-    //   <style>
-    //     input {
-    //       flex: .5;
-    //       box-sizing: border-box;
-    //     }
-    //   </style>
-    //   <input type="text">
-    //   <input type="color">
-    // `;
-
     this._input = this.shadowRoot.querySelector("input");
 
     this._colorInput = this._input.cloneNode();
