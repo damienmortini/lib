@@ -68,7 +68,7 @@ export default class THREERenderer extends WebGLRenderer {
     renderTargets.out.setSize(width, height);
   }
 
-  render({ scene, camera, filters = this.filters, renderTarget, viewport, scissor = viewport } = {}) {
+  render({ scene, camera = undefined, filters = this.filters, renderTarget = undefined, viewport = undefined, scissor = viewport } = {}) {
     if (arguments.length > 1) {
       this._render(...arguments);
       return;

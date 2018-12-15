@@ -59,6 +59,7 @@ import { MirroredRepeatWrapping } from "../three/src/constants.js";
 import { RepeatWrapping } from "../three/src/constants.js";
 import { BackSide } from "../three/src/constants.js";
 import { FrontSide } from "../three/src/constants.js";
+import { DoubleSide } from "../three/src/constants.js";
 import { NeverDepth } from "../three/src/constants.js";
 import { LessDepth } from "../three/src/constants.js";
 import { EqualDepth } from "../three/src/constants.js";
