@@ -112,4 +112,4 @@ export default class JoystickInputElement extends LoopElement {
   }
 }
 
-window.customElements.define("dlib-input-joystick", JoystickInputElement);
+window.customElements.define("dlmn-input-joystick", JoystickInputElement);
