@@ -1,6 +1,5 @@
 import {
   Mesh,
-  Color,
   OrthographicCamera,
   PlaneBufferGeometry,
   Vector2,

@@ -1,7 +1,7 @@
-import { Loader } from "../dlib/utils/Loader.js";
-import { TextureLoader } from "../three/src/loaders/TextureLoader.js";
+import { Loader } from "../../dlib/utils/Loader.js";
+import { TextureLoader } from "../../three/src/loaders/TextureLoader.js";
 
-import THREEGLTFLoader from "./THREEGLTFLoader.js";
+import _THREEGLTFLoader from "./_THREEGLTFLoader.js";
 
 function scaleScene(data, scale) {
   if (scale === 1) {
@@ -20,7 +20,7 @@ class THREELoader extends Loader {
   _loadFile(src, { scale = 1 } = {}) {
     return new Promise((resolve) => {
       if (/\.(gltf|glb)$/.test(src)) {
-        const loader = new THREEGLTFLoader();
+        const loader = new _THREEGLTFLoader();
 
         const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
