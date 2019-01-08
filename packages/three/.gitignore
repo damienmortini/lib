@@ -1,2 +1,7 @@
 .eslintrc
-node_modules/
+
+node_modules/**
+!node_modules/**/
+
+!node_modules/three/examples/js/libs/draco/draco_wasm_wrapper.js
+!node_modules/three/examples/js/libs/draco/draco_decoder.wasm
