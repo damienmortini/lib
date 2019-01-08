@@ -3,6 +3,7 @@
  * Do not remove, see below them for content to replace
  */
 
+import { Object3D } from "../../three/src/core/Object3D.js";
 import { ShaderLib } from "../../three/src/renderers/shaders/ShaderLib.js";
 import { UniformsUtils } from "../../three/src/renderers/shaders/UniformsUtils.js";
 import { Scene } from "../../three/src/scenes/Scene.js";
@@ -86,6 +87,7 @@ import { InterpolateLinear } from "../../three/src/constants.js";
 import { InterpolateDiscrete } from "../../three/src/constants.js";
 import { RGBAFormat } from "../../three/src/constants.js";
 import { RGBFormat } from "../../three/src/constants.js";
+import DRACOLoader from "./_THREEDRACOLoader.js";
 
 
 /**
