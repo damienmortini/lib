@@ -1,6 +1,10 @@
-import { Mesh, PlaneGeometry, Texture, Object3D } from "../../three/build/three.module.js";
+import { Object3D } from "../../three/src/core/Object3D.js";
+import { Mesh } from "../../three/src/objects/Mesh.js";
+import { PlaneGeometry } from "../../three/src/geometries/PlaneGeometry.js";
+import { Texture } from "../../three/src/textures/Texture.js";
+import { LinearFilter } from "../../three/src/constants.js";
 
-import THREEShaderMaterial from "../three/THREEShaderMaterial.js";
+import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 
 export default class THREEText extends Object3D {
   constructor({
@@ -28,7 +32,7 @@ export default class THREEText extends Object3D {
 
     this._texture = new Texture(this._canvas);
     this._texture.generateMipmaps = false;
-    this._texture.minFilter = THREE.LinearFilter;
+    this._texture.minFilter = LinearFilter;
     
     material.map = this._texture;
 
