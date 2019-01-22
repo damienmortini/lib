@@ -9,7 +9,7 @@ import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 export default class THREEText extends Object3D {
   constructor({
     textContent = "",
-    font = "100px sans-serif",
+    font = "10px sans-serif",
     fillStyle = "black",
     textAlign = "start",
     shadowColor = "rgba(0, 0, 0 ,0)",
@@ -17,6 +17,7 @@ export default class THREEText extends Object3D {
     shadowOffsetX = 0,
     shadowOffsetY = 0,
     scale = 1,
+    maxWidth = Infinity,
     geometry = new PlaneGeometry(1, 1),
     material = new THREEShaderMaterial({
       type: "basic",
@@ -33,59 +34,121 @@ export default class THREEText extends Object3D {
     this._texture = new Texture(this._canvas);
     this._texture.generateMipmaps = false;
     this._texture.minFilter = LinearFilter;
-    
-    material.map = this._texture;
 
-    this._mesh = new Mesh(geometry, material);
-    this.add(this._mesh);
+    material.map = this._texture;
 
     this.textContent = textContent;
     this.font = font;
     this.fillStyle = fillStyle;
     this.textAlign = textAlign;
+    this.maxWidth = maxWidth;
     this.shadowColor = shadowColor;
     this.shadowBlur = shadowBlur;
     this.shadowOffsetX = shadowOffsetX;
     this.shadowOffsetY = shadowOffsetY;
 
+    this._mesh = new Mesh(geometry, material);
+    this.add(this._mesh);
+
     this._update();
   }
 
+  _updateContextProperties() {
+    this._context.font = this.font;
+    this._context.fillStyle = this.fillStyle;
+    this._context.shadowColor = this.shadowColor;
+    this._context.shadowBlur = this.shadowBlur;
+    this._context.shadowOffsetX = this.shadowOffsetX;
+    this._context.shadowOffsetY = this.shadowOffsetY;
+    this._context.textBaseline = "top";
+  }
+
   _update() {
-    if(!this._mesh) {
+    if (!this._mesh) {
       return;
     }
 
-    let offsetX = this.shadowOffsetX - this.shadowBlur;
-    let offsetY = this.shadowOffsetY - this.shadowBlur;
+    this._updateContextProperties();
 
-    let width = this._context.measureText(this.textContent).width + this.shadowBlur * 2 + Math.abs(this.shadowOffsetX);
-    let height = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]) + this.shadowBlur * 2 + Math.abs(this.shadowOffsetY);
-    if(this._canvas.width !== width || this._canvas.height !== height) {
-      this._canvas.width = width;
-      this._canvas.height = height;
-      this._context = this._canvas.getContext("2d");
-      this._context.font = this.font;
-      this._context.fillStyle = this.fillStyle;
-      this._context.shadowColor = this.shadowColor;
-      this._context.shadowBlur = this.shadowBlur;
-      this._context.shadowOffsetX = this.shadowOffsetX;
-      this._context.shadowOffsetY = this.shadowOffsetY;
-      this._context.textBaseline = "ideographic";
+    let shadowOffsetX = this.shadowOffsetX - this.shadowBlur;
+    let shadowOffsetY = this.shadowOffsetY - this.shadowBlur;
+
+    const words = this.textContent.split(" ");
+
+    const spaceWidth = this._context.measureText(" ").width;
+    const wordsWidth = new Map();
+    const lines = [{
+      textContent: "",
+      width: 0
+    }];
+    for (const word of words) {
+      if (!wordsWidth.get(word)) {
+        wordsWidth.set(word, this._context.measureText(word).width);
+      }
     }
 
-    this._mesh.position.y = -offsetY * .5 * this._scale;
+    let width = 0;
+    let lineNumber = 0;
+    for (const word of words) {
+      const newWidth = lines[lineNumber].width + wordsWidth.get(word);
 
-    if(this.textAlign === "start" || this.textAlign === "left") {
-      this._mesh.position.x = (this._canvas.width * .5 + Math.min(0, offsetX)) * this._scale;
+      if (newWidth > this.maxWidth) {
+        lineNumber++;
+        lines[lineNumber] = {
+          textContent: word,
+          width: wordsWidth.get(word)
+        };
+      } else {
+        if (lines[lineNumber].textContent !== "") {
+          lines[lineNumber].textContent += " ";
+        }
+        lines[lineNumber].textContent += word;
+        lines[lineNumber].width += spaceWidth + wordsWidth.get(word);
+      }
+      width = Math.max(width, lines[lineNumber].width);
+    }
+
+    width += this.shadowBlur * 2 + Math.abs(this.shadowOffsetX);
+
+    const lineHeight = parseFloat(/\b(\d*)px/.exec(this._context.font)[1]);
+    let height = lineHeight;
+    height *= lines.length;
+    height += this.shadowBlur * 2 + Math.abs(this.shadowOffsetY);
+
+    if (this._canvas.width !== width || this._canvas.height !== height) {
+      this._canvas.width = width;
+      this._canvas.height = height;
+      this._updateContextProperties();
+    }
+
+    this._mesh.position.y = -shadowOffsetY * .5 * this._scale;
+
+    if (this.textAlign === "start" || this.textAlign === "left") {
+      this._mesh.position.x = (this._canvas.width * .5 + Math.min(0, shadowOffsetX)) * this._scale;
     } else if (this.textAlign === "end" || this.textAlign === "right") {
-      this._mesh.position.x = (-this._canvas.width * .5 + Math.max(0, offsetX)) * this._scale;
+      this._mesh.position.x = (-this._canvas.width * .5 + Math.max(0, shadowOffsetX)) * this._scale;
     } else {
-      this._mesh.position.x = offsetX * .5 * this._scale;
+      this._mesh.position.x = shadowOffsetX * .5 * this._scale;
     }
     this._mesh.scale.x = this._canvas.width * this._scale;
     this._mesh.scale.y = this._canvas.height * this._scale;
-    this._context.fillText(this._textContent, offsetX < 0 ? Math.abs(offsetX) : 0, this._canvas.height - (offsetY > 0 ? Math.abs(offsetY) : 0));
+    for (const [i, line] of lines.entries()) {
+      let offsetX;
+      switch (this.textAlign) {
+        case "start":
+        case "left":
+          offsetX = 0;
+          break;
+        case "center":
+          offsetX = (width - line.width) * .5;
+          break;
+        case "end":
+        case "right":
+          offsetX = width - line.width;
+          break;
+      }
+      this._context.fillText(line.textContent, offsetX + (shadowOffsetX < 0 ? Math.abs(shadowOffsetX) : 0), (shadowOffsetY < 0 ? Math.abs(shadowOffsetY) : 0) + lineHeight * i);
+    }
     this._texture.needsUpdate = true;
   }
 
@@ -127,6 +190,15 @@ export default class THREEText extends Object3D {
 
   get textAlign() {
     return this._textAlign;
+  }
+
+  set maxWidth(value) {
+    this._maxWidth = value;
+    this._update();
+  }
+
+  get maxWidth() {
+    return this._maxWidth;
   }
 
   set shadowColor(value) {
