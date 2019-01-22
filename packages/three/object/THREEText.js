@@ -132,6 +132,9 @@ export default class THREEText extends Object3D {
     }
     this._mesh.scale.x = this._canvas.width * this._scale;
     this._mesh.scale.y = this._canvas.height * this._scale;
+    this._context.globalAlpha = 1 / 255;
+    this._context.fillRect(0, 0, width, height);
+    this._context.globalAlpha = 1;
     for (const [i, line] of lines.entries()) {
       let offsetX;
       switch (this.textAlign) {
