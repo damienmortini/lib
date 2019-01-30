@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/damienmortini/dlib-three",
   "dependencies": {
-    "dlib": "0.0.88",
+    "dlib": "0.0.89",
     "three": "^0.100.0"
   }
 }
