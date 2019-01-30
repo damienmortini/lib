@@ -1,6 +1,6 @@
 {
   "name": "dlmn",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Minimalist and reusable custom elements",
   "scripts": {
     "bump": "npm version patch && npm publish"
