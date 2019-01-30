@@ -66,7 +66,7 @@ export default class Sound {
     volume = 1,
     loop = false,
     autoplay = false
-  } = {}) {
+  }) {
     this.name = name;
 
     sounds.add(this);
@@ -165,7 +165,8 @@ export default class Sound {
   }
 
   cloneNode() {
-    let sound = new Sound(this.src, {
+    let sound = new Sound({
+      src: this.src,
       name: null,
       volume: this.volume,
       amplification: this.amplification,
