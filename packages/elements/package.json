@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/damienmortini/dlmn#readme",
   "dependencies": {
-    "dlib": "0.0.88"
+    "dlib": "0.0.89"
   }
 }
