@@ -25,16 +25,12 @@ class Ticker extends Signal {
   _update() {
     requestAnimationFrame(this._updateBinded);
 
-    console.log(document.hidden);
-
     this.time = window.performance.now() * 0.001;
     this.deltaTime = this.time - this._previousTime;
     this.smoothDeltatime += (this.deltaTime - this.smoothDeltatime) * .05;
     this.timeScale = this.deltaTime / DELTA_TIME_BASE;
     this.smoothTimeScale = this.smoothDeltatime / DELTA_TIME_BASE;
     this._previousTime = this.time;
-
-    console.log(this.smoothTimeScale);
 
     this.dispatch();
   }

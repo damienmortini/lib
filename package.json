@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/damienmortini/dlib",
   "dependencies": {
-    "gl-matrix": "^2.6.1",
-    "mobile-detect": "^1.4.2"
+    "gl-matrix": "^3.0.0",
+    "mobile-detect": "^1.4.3"
   }
 }

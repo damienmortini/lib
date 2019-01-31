@@ -1,4 +1,4 @@
-import * as vec2 from "../../gl-matrix/src/gl-matrix/vec2.js";
+import * as vec2 from "../../gl-matrix/src/vec2.js";
 
 export default class Vector2 extends Float32Array {
   static distance(vector2a, vector2b) {
