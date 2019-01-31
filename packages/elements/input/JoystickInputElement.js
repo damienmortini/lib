@@ -14,6 +14,7 @@ export default class JoystickInputElement extends LoopElement {
           width: 100px;
           height: 100px;
           cursor: pointer;
+          touch-action: none;
         }
         .outer-ring, .joystick {
           pointer-events: none;
@@ -26,6 +27,7 @@ export default class JoystickInputElement extends LoopElement {
           height: 100%;
         }
         .joystick {
+          will-change: transform;
           background: currentColor;
           position: absolute;
           top: 50%;
@@ -49,12 +51,7 @@ export default class JoystickInputElement extends LoopElement {
     this._onPointerMoveBinded = this._onPointerMove.bind(this);
     this._onPointerUpBinded = this._onPointerUp.bind(this);
 
-    this.addEventListener("touchmove", (event) => {
-      event.preventDefault();
-    }, { passive: false });
-
     this.addEventListener("pointerdown", (event) => {
-      event.preventDefault();
       this._boundingClientRect = this.getBoundingClientRect();
       window.addEventListener("pointermove", this._onPointerMoveBinded, { passive: false });
       window.addEventListener("pointerup", this._onPointerUpBinded);
