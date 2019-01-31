@@ -3,6 +3,7 @@
   "version": "0.0.4",
   "description": "Minimalist and reusable custom elements",
   "scripts": {
+    "start": "node server.js",
     "bump": "npm version patch && npm publish"
   },
   "repository": {
@@ -21,5 +22,8 @@
   "homepage": "https://github.com/damienmortini/dlmn#readme",
   "dependencies": {
     "dlib": "0.0.89"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.3"
   }
 }
