@@ -9,17 +9,21 @@ class Ticker extends Signal {
     this._updateBinded = this._update.bind(this);
 
     this.time = window.performance.now() * .001;
-    this._previousTime = this.time;
-    this.deltaTime = DELTA_TIME_BASE;
-    this.timeScale = 1;
-    this.smoothDeltatime = this.deltaTime;
-    this.smoothTimeScale = this.timeScale;
+    this.reset();
 
     document.addEventListener("visibilitychange", () => {
-      this._previousTime = window.performance.now() * .001;
+      this.reset();
     });
 
     this._update();
+  }
+
+  reset() {
+    this._previousTime = window.performance.now() * .001;
+    this.deltaTime = DELTA_TIME_BASE;
+    this.smoothDeltatime = this.deltaTime;
+    this.timeScale = 1;
+    this.smoothTimeScale = this.timeScale;
   }
 
   _update() {
