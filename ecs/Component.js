@@ -1,4 +1,4 @@
-import Signal from "../utils/Signal.js";
+import Signal from "../util/Signal.js";
 
 const STATIC_ON_ADD_MAP = new Map();
 const STATIC_ON_REMOVE_MAP = new Map();

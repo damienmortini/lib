@@ -1,6 +1,6 @@
 import Vector2 from "../math/Vector2.js";
-import Signal from "../utils/Signal.js";
-import Ticker from "../utils/Ticker.js";
+import Signal from "../util/Signal.js";
+import Ticker from "../util/Ticker.js";
 
 let pointers = new Map();
 

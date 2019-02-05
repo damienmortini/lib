@@ -1,4 +1,4 @@
-import SingletonLoader, { Loader } from "../utils/Loader.js";
+import SingletonLoader, { Loader } from "../util/Loader.js";
 
 export class GLTFLoader extends Loader {
   constructor() {

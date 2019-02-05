@@ -12,7 +12,7 @@ import "auduno/clmtrackr/examples/ext_js/mosse.js";
 import "auduno/clmtrackr/examples/ext_js/jsfeat_detect.js";
 import "auduno/clmtrackr/models/model_pca_20_svm.js";
 
-import Ticker from "../utils/Ticker.js";
+import Ticker from "../util/Ticker.js";
 
 export default class FaceTracker {
   constructor(input, {width = input.width, height = input.height} = {}) {

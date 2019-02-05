@@ -1,4 +1,4 @@
-import Signal from "../utils/Signal.js";
+import Signal from "../util/Signal.js";
 
 import Matrix3 from "../math/Matrix3.js";
 import Matrix4 from "../math/Matrix4.js";

@@ -1,36 +1,36 @@
-let sounds = new Set();
-let soundsMap = new Map();
+import Environment from "../util/Environment.js";
+
+const sounds = new Map();
 
 let muted = false;
 let loopMuted = false;
 let initialized = true;
 
-const MOBILE = /mobi/.test(window.navigator.userAgent.toLowerCase());
-
-if(MOBILE) {
+if (Environment.mobile) {
   initialized = false;
 
-  let onTouchEnd = () => {
+  const onTouchEnd = () => {
     window.removeEventListener("touchend", onTouchEnd);
-    for (let sound of sounds) {
+    for (const sound of sounds.values()) {
       sound._audio.play();
-      if(!sound._audio.autoplay) {
-        let pauseElement = function() {
+      if (!sound._audio.autoplay) {
+        const pauseElement = () => {
           sound._audio.pause();
           sound._audio.removeEventListener("playing", pauseElement);
-        }
+        };
         sound._audio.addEventListener("playing", pauseElement);
       }
     }
     initialized = true;
   };
+
   window.addEventListener("touchend", onTouchEnd);
 }
 
 export default class Sound {
   static set muted(value) {
     muted = value;
-    for (let sound of sounds) {
+    for (const sound of sounds.values()) {
       sound.muted = sound.muted;
     }
   }
@@ -41,7 +41,7 @@ export default class Sound {
 
   static set loopMuted(value) {
     loopMuted = value;
-    for (let sound of sounds) {
+    for (const sound of sounds.values()) {
       sound.muted = sound.muted;
     }
   }
@@ -50,29 +50,29 @@ export default class Sound {
     return loopMuted;
   }
 
-  static add(src) {
-    let sound = new Sound(src);
+  static add(options) {
+    const sound = new Sound(options);
     return sound;
   }
 
   static get(name) {
-    return soundsMap.get(name);
+    return sounds.get(name);
   }
 
   constructor({
     src,
-    name = /([^\\\/]*)\..*$/.exec(src)[1],
+    name = src,
     amplification = 1,
     volume = 1,
     loop = false,
-    autoplay = false
+    autoplay = false,
   }) {
     this.name = name;
 
-    sounds.add(this);
-    if(this.name) {
-      soundsMap.set(this.name, this);
+    if (sounds.get(this.name)) {
+      throw new Error(`Sound with name/src "${this.name}" already exists, choose another name or use Sound.get(name) to get sound.`);
     }
+    sounds.set(this.name, this);
 
     this._audio = document.createElement("audio");
     this._audio.src = src;
@@ -135,10 +135,6 @@ export default class Sound {
     return this._audio.duration;
   }
 
-  set duration(value) {
-    this._audio.duration = value;
-  }
-
   get volume() {
     return this._volume;
   }
@@ -149,7 +145,7 @@ export default class Sound {
   }
 
   play() {
-    if(!initialized) {
+    if (!initialized) {
       return;
     }
     this._audio.play();
@@ -163,21 +159,4 @@ export default class Sound {
   pause() {
     this._audio.pause();
   }
-
-  cloneNode() {
-    let sound = new Sound({
-      src: this.src,
-      name: null,
-      volume: this.volume,
-      amplification: this.amplification,
-    });
-    sound.muted = this.muted;
-    sound.loop = this.loop;
-    sound.currentTime = this.currentTime;
-
-    return sound;
-  }
 }
-
-Sound.muted = /\bmuted\b/.test(window.location.search);
-Sound.loopMuted = /\bloopmuted\b/.test(window.location.search);
