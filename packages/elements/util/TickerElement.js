@@ -1,4 +1,4 @@
-import Ticker from "../../dlib/utils/Ticker.js";
+import Ticker from "../../dlib/util/Ticker.js";
 
 export default class TickerElement extends HTMLElement {
   constructor({ autoplay = false, background = false } = {}) {

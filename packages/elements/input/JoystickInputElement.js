@@ -1,7 +1,7 @@
-import LoopElement from "../utils/TickerElement.js";
+import TickerElement from "../util/TickerElement.js";
 import Vector2 from "../../dlib/math/Vector2.js";
 
-export default class JoystickInputElement extends LoopElement {
+export default class JoystickInputElement extends TickerElement {
   constructor() {
     super();
 
