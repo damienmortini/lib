@@ -1,4 +1,4 @@
-import { Loader } from "../../dlib/utils/Loader.js";
+import { Loader } from "../../dlib/util/Loader.js";
 import { TextureLoader } from "../../three/src/loaders/TextureLoader.js";
 
 import _THREEGLTFLoader from "./_THREEGLTFLoader.js";
