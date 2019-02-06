@@ -4,11 +4,12 @@ export default class Sound extends Audio {
 
     const load = () => {
       window.removeEventListener("click", load);
-      const play = this.autoplay || !this.paused;
-      this.play();
-      if (!play) {
-        this.pause();
-      }
+      const paused = this.paused;
+      this.play().then(() => {
+        if (paused && !this.autoplay) {
+          this.pause();
+        }
+      });
     };
 
     window.addEventListener("click", load);
