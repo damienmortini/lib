@@ -1,6 +1,16 @@
+let baseURI = "";
+
 export default class Sound extends Audio {
+  static get baseURI() {
+    return baseURI;
+  }
+
+  static set baseURI(value) {
+    baseURI = value;
+  }
+
   constructor({ src }) {
-    super(src);
+    super(`${Sound.baseURI}${src}`);
 
     const load = () => {
       window.removeEventListener("click", load);
