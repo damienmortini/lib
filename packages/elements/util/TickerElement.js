@@ -19,6 +19,7 @@ export default class TickerElement extends HTMLElement {
     if (!this._background) {
       window.top.addEventListener("blur", this._onFocusChangeBinded);
       window.top.addEventListener("focus", this._onFocusChangeBinded);
+      document.addEventListener("visibilitychange", this._onFocusChangeBinded);
     }
     if (this._autoplay) {
       if (!window.top.document.hasFocus() && !this._background) {
@@ -33,6 +34,7 @@ export default class TickerElement extends HTMLElement {
     this._pausedByBlur = true;
     window.top.removeEventListener("blur", this._onFocusChangeBinded);
     window.top.removeEventListener("focus", this._onFocusChangeBinded);
+    document.removeEventListener("visibilitychange", this._onFocusChangeBinded);
   }
 
   get paused() {
@@ -59,6 +61,11 @@ export default class TickerElement extends HTMLElement {
 
   _onFocusChange(event) {
     switch (event.type) {
+      case "visibilitychange":
+        if (document.visibilityState !== "visible") {
+          this._pausedByBlur = true;
+        }
+        break;
       case "blur":
         this._pausedByBlur = true;
         break;
