@@ -89,7 +89,7 @@ export default class TickerElement extends HTMLElement {
       this.dispatchEvent(new Event("pause"));
     } else {
       Ticker.add(this._updateBinded);
-      this.dispatchEvent(new Event("playing"));
+      this.dispatchEvent(new Event("play"));
     }
   }
 
