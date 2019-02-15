@@ -1,6 +1,6 @@
 {
   "name": "dlmn",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Minimalist and reusable custom elements",
   "scripts": {
     "start": "node server.js",
