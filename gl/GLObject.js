@@ -1,4 +1,3 @@
-import Matrix4 from "../math/Matrix4.js";
 import GLMesh from "./GLMesh.js";
 import GLProgram from "./GLProgram.js";
 import GLVertexArray from "./GLVertexArray.js";
@@ -10,16 +9,16 @@ export default class GLObject {
     mesh = new GLMesh(),
     program = new GLProgram(),
     vertexArray = new GLVertexArray({
-      gl, 
+      gl,
       mesh,
-      program
-    })
+      program,
+    }),
   } = { gl }) {
     this.gl = gl;
     this.mesh = mesh;
     this.program = program;
     this.vertexArray = vertexArray;
-    
+
     this._boundTextures = new Set();
   }
 
@@ -28,11 +27,11 @@ export default class GLObject {
     this.vertexArray.bind();
     let unit = 0;
     for (const [name, type] of this.program.uniformTypes) {
-      if(type.startsWith("sampler")) {
+      if (type.startsWith("sampler")) {
         const value = this.program.uniforms.get(name);
-        if(value instanceof GLTexture) {
+        if (value instanceof GLTexture) {
           value.bind({
-            unit
+            unit,
           });
           this._boundTextures.add(value);
         }
