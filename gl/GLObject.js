@@ -40,7 +40,13 @@ export default class GLObject {
     }
   }
 
-  draw(options) {
+  draw({ bind = true, uniforms = {}, ...options } = {}) {
+    if (bind) {
+      this.bind();
+    }
+    for (const uniform in uniforms) {
+      this.program.uniforms.set(uniform, uniforms[uniform]);
+    }
     this.mesh.draw(options);
   }
 

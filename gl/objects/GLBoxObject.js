@@ -1,16 +1,18 @@
-import PlaneMesh from "../../3d/mesh/PlaneMesh.js";
+import BoxMesh from "../../3d/mesh/BoxMesh.js";
 import GLObject from "../GLObject.js";
 import GLMesh from "../GLMesh.js";
 import GLProgram from "../GLProgram.js";
 import BasicShader from "../../shader/BasicShader.js";
 
-export default class GLPlaneObject extends GLObject {
+export default class GLBoxObject extends GLObject {
   constructor({
     gl,
     width = undefined,
     height = undefined,
-    columns = undefined,
-    rows = undefined,
+    depth = undefined,
+    widthSegments = undefined,
+    heightSegments = undefined,
+    depthSegments = undefined,
     normals = true,
     uvs = true,
     shaders = [],
@@ -19,11 +21,13 @@ export default class GLPlaneObject extends GLObject {
       gl,
       mesh: new GLMesh({
         gl,
-        ...new PlaneMesh({
+        ...new BoxMesh({
           width,
           height,
-          columns,
-          rows,
+          depth,
+          widthSegments,
+          heightSegments,
+          depthSegments,
           normals,
           uvs,
         })
