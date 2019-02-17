@@ -12,11 +12,10 @@ export default class GLProgram extends Shader {
     vertexShader = undefined,
     fragmentShader = undefined,
     uniforms = undefined,
-    attributes = undefined,
     transformFeedbackVaryings = undefined,
     vertexShaderChunks = undefined,
     fragmentShaderChunks = undefined,
-    shaders = undefined
+    shaders = undefined,
   } = { gl }) {
     super({
       vertexShader,
@@ -36,8 +35,8 @@ export default class GLProgram extends Shader {
             super({ gl });
           }
         },
-        TextureCube: class TextureCube { }
-      }
+        TextureCube: class TextureCube { },
+      },
     });
 
     this.gl = gl;
@@ -46,7 +45,7 @@ export default class GLProgram extends Shader {
 
     const self = this;
 
-    this._vertexAttribDivisor = function () { };
+    this._vertexAttribDivisor = function() { };
     const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
     if (instancedArraysExtension) {
       this._vertexAttribDivisor = instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension);
@@ -57,7 +56,7 @@ export default class GLProgram extends Shader {
     class Attributes extends Map {
       set(name, { buffer, location = self._attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
         if (name instanceof Map) {
-          for (let [key, value] of name) {
+          for (const [key, value] of name) {
             this.set(key, value);
           }
           return;
@@ -107,7 +106,7 @@ export default class GLProgram extends Shader {
               }
             }
           } else if (value instanceof Object) {
-            for (let key in value) {
+            for (const key in value) {
               self.uniforms.set(`${name}.${key}`, value[key]);
             }
             return;
@@ -123,7 +122,7 @@ export default class GLProgram extends Shader {
             if (value[0].length) {
               self.uniforms.set(`${name}[${i}]`, value[i]);
             } else {
-              for (let key in value[i]) {
+              for (const key in value[i]) {
                 self.uniforms.set(`${name}[${i}].${key}`, value[i][key]);
               }
             }
@@ -243,8 +242,6 @@ export default class GLProgram extends Shader {
       } else {
         throw new Error(shaderInfoLog);
       }
-      this.gl.deleteShader(shader);
-      return;
     } else if (shaderInfoLog) {
       console.warn(shaderInfoLog);
     }

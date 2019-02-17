@@ -6,7 +6,7 @@ export default class SDFShader {
         vec4 coord;
         vec4 material;
       };
-    `
+    `;
   }
 
   static sdfBox() {
@@ -76,7 +76,7 @@ export default class SDFShader {
         voxel1.material = mix(voxel1.material, voxel2.material, step(voxel1.coord.w, -voxel2.coord.w));
         return voxel1;
       }
-    `
+    `;
   }
 
   static sdfRepeat() {
@@ -97,7 +97,7 @@ export default class SDFShader {
 
   static sdfNormalFromPosition({
     name = "sdfNormalFromPosition",
-    mapName = "map"
+    mapName = "map",
   } = {}) {
     return `
       vec3 ${name}(vec3 position, float step) {
@@ -115,7 +115,7 @@ export default class SDFShader {
   static sdfRayMarch({
     name = "sdfRayMarch",
     mapName = "map",
-    maxSteps = 128
+    maxSteps = 128,
   } = {}) {
     return `
       Voxel ${name}(Ray ray, float near, float far, int steps)

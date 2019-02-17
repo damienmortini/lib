@@ -1,12 +1,6 @@
 export default class Shader {
   static add(string = "void main() {}", chunks) {
-    function regExpFromKey(key) {
-      let regExpString = key instanceof RegExp ? key.source : key.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
-      return new RegExp(`(${regExpString})`);
-    }
-
-    
-    for (let [key, chunk] of chunks) {
+    for (const [key, chunk] of chunks) {
       switch (key) {
         case "start":
           string = string.replace(/^(#version .*?\n(\s*precision highp float;\s)?)?([\s\S]*)/, `$1\n${chunk}\n$3`);
@@ -18,18 +12,20 @@ export default class Shader {
           string = string.replace(/(\bvoid\b +\bmain\b[\s\S]*?{\s*)/, `$1\n${chunk}\n`);
           break;
         default:
-          string = string.replace(key, chunk)
+          string = string.replace(key, chunk);
       }
     }
 
     return string;
   }
 
-  constructor({ vertexShader = `#version 300 es
+  constructor({
+    vertexShader = `#version 300 es
       void main() {
         gl_Position = vec4(0., 0., 0., 1.);
       }
-    `, fragmentShader = `#version 300 es
+    `,
+    fragmentShader = `#version 300 es
       precision highp float;
 
       out vec4 fragColor;
@@ -39,18 +35,38 @@ export default class Shader {
       }
     `,
     dataTypeConctructors = {
-      Vector2: class Vector2 extends Float32Array { constructor() { super(2) } },
-      Vector3: class Vector3 extends Float32Array { constructor() { super(3) } },
-      Vector4: class Vector4 extends Float32Array { constructor() { super(4) } },
-      Matrix3: class Matrix3 extends Float32Array { constructor() { super([1, 0, 0, 0, 1, 0, 0, 0, 1]) } },
-      Matrix4: class Matrix4 extends Float32Array { constructor() { super([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) } },
+      Vector2: class Vector2 extends Float32Array {
+        constructor() {
+          super(2);
+        }
+      },
+      Vector3: class Vector3 extends Float32Array {
+        constructor() {
+          super(3);
+        }
+      },
+      Vector4: class Vector4 extends Float32Array {
+        constructor() {
+          super(4);
+        }
+      },
+      Matrix3: class Matrix3 extends Float32Array {
+        constructor() {
+          super([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+        }
+      },
+      Matrix4: class Matrix4 extends Float32Array {
+        constructor() {
+          super([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+        }
+      },
       Texture: class Texture { },
-      TextureCube: class TextureCube { }
+      TextureCube: class TextureCube { },
     },
     uniforms = [],
     vertexShaderChunks = [],
     fragmentShaderChunks = [],
-    shaders = []
+    shaders = [],
   } = {}) {
     this.uniforms = new Map();
     this.uniformTypes = new Map();
@@ -64,7 +80,7 @@ export default class Shader {
 
     this.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 
-    for (let shader of shaders) {
+    for (const shader of shaders) {
       this.add(shader);
     }
   }
@@ -74,7 +90,7 @@ export default class Shader {
     this._vertexShaderChunks.push(...vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
     this._fragmentShaderChunks.push(...fragmentShaderChunks);
-    for (let [key, value] of uniforms) {
+    for (const [key, value] of uniforms) {
       this.uniforms.set(key, value);
     }
   }
@@ -106,7 +122,6 @@ export default class Shader {
   }
 
   _addUniform(name, type, arrayLength) {
-
     if (this.uniforms.has(name)) {
       return;
     }
@@ -132,27 +147,27 @@ export default class Shader {
       if (isNaN(arrayLength)) {
         value = new this._dataTypeConctructors["Texture"]();
       } else {
-        value = new Array(arrayLength).fill().map(value => new this._dataTypeConctructors["Texture"]());
+        value = new Array(arrayLength).fill(undefined).map((value) => new this._dataTypeConctructors["Texture"]());
       }
     } else if (/samplerCube/.test(type)) {
       if (isNaN(arrayLength)) {
         value = new this._dataTypeConctructors["TextureCube"]();
       } else {
-        value = new Array(arrayLength).fill().map(value => new this._dataTypeConctructors["TextureCube"]());
+        value = new Array(arrayLength).fill(undefined).map((value) => new this._dataTypeConctructors["TextureCube"]());
       }
     } else if ((typeMatch = /(.?)vec(\d)/.exec(type))) {
-      let vectorLength = typeMatch[2];
+      const vectorLength = typeMatch[2];
       if (isNaN(arrayLength)) {
         value = new this._dataTypeConctructors[`Vector${vectorLength}`]();
       } else {
-        value = new Array(arrayLength).fill().map(value => new this._dataTypeConctructors[`Vector${vectorLength}`]());
+        value = new Array(arrayLength).fill(undefined).map((value) => new this._dataTypeConctructors[`Vector${vectorLength}`]());
       }
     } else if ((typeMatch = /mat(\d)/.exec(type))) {
-      let matrixLength = typeMatch[1];
+      const matrixLength = typeMatch[1];
       if (isNaN(arrayLength)) {
         value = new this._dataTypeConctructors[`Matrix${matrixLength}`]();
       } else {
-        value = new Array(arrayLength).fill().map(value => new this._dataTypeConctructors[`Matrix${matrixLength}`]());
+        value = new Array(arrayLength).fill(undefined).map((value) => new this._dataTypeConctructors[`Matrix${matrixLength}`]());
       }
     } else {
       value = undefined;
@@ -161,14 +176,13 @@ export default class Shader {
     this.uniforms.set(name, value);
   }
 
-  /**
-   * Parse shader strings to extract uniforms
-   */
+  // Parse shader strings to extract uniforms
+
   _parseUniforms(string) {
     const structures = new Map();
 
     const structRegExp = /struct\s*(.*)\s*{\s*([\s\S]*?)}/g;
-    const structMemberRegExp = /^\s*(.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
+    const structMemberRegExp = /^\s*(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
     let structMatch;
     while ((structMatch = structRegExp.exec(string))) {
       const structName = structMatch[1];
@@ -181,14 +195,14 @@ export default class Shader {
         const arrayLength = parseInt(arrayLengthStr);
         structure[name] = {
           type,
-          arrayLength
+          arrayLength,
         };
       }
 
       structures.set(structName, structure);
     }
 
-    const uniformsRegExp = /^\s*uniform (.[^ ]+) (.[^ ;\[\]]+)\[? *(\d+)? *\]?/gm;
+    const uniformsRegExp = /^\s*uniform (.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
     let uniformMatch;
     while ((uniformMatch = uniformsRegExp.exec(string))) {
       const [, type, name, arrayLengthStr] = uniformMatch;

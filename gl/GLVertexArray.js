@@ -2,7 +2,7 @@ export default class GLVertexArray {
   constructor({
     gl,
     mesh = undefined,
-    program = undefined
+    program = undefined,
   } = { gl }) {
     this.gl = gl;
 
@@ -17,14 +17,14 @@ export default class GLVertexArray {
     if (mesh || program) {
       this.add({
         mesh,
-        program
+        program,
       });
     }
   }
 
   add({
     mesh = undefined,
-    program = undefined
+    program = undefined,
   } = {}) {
     this.bind();
     program.attributes.set(mesh.attributes);
