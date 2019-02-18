@@ -22,18 +22,15 @@ export default class BasicShader {
         ${this._positions ? "out vec3 vPosition;" : ""}
         ${this._normals ? "out vec3 vNormal;" : ""}
         ${this._uvs ? "out vec2 vUv;" : ""}
-      `,
-      ],
+      `],
       ["main", `
         ${this._positions ? "vPosition = position;" : ""}
         ${this._normals ? "vNormal = normal;" : ""}
         ${this._uvs ? "vUv = uv;" : ""}
-      `,
-      ],
+      `],
       ["end", `
         gl_Position = projectionView * transform * vec4(position, 1.);
-      `,
-      ],
+      `],
     ];
   }
 
@@ -43,8 +40,7 @@ export default class BasicShader {
         ${this._positions ? "in vec3 vPosition;" : ""}
         ${this._normals ? "in vec3 vNormal;" : ""}
         ${this._uvs ? "in vec2 vUv;" : ""}
-      `,
-      ],
+      `],
     ];
   }
 }

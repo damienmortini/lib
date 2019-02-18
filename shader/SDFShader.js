@@ -35,10 +35,10 @@ export default class SDFShader {
 
   static sdfSmoothMin() {
     return `
-      Voxel sdfSmoothMin(Voxel voxel1, Voxel voxel2, float blendRatio) {
-        float ratio = clamp(.5 + .5 * (voxel2.coord.w - voxel1.coord.w) / blendRatio, 0., 1.);
+      Voxel sdfSmoothMin(Voxel voxel1, Voxel voxel2, float blend) {
+        float ratio = clamp(.5 + .5 * (voxel2.coord.w - voxel1.coord.w) / blend, 0., 1.);
     
-        vec4 coord = mix(voxel2.coord, voxel1.coord, ratio) - blendRatio * ratio * (1. - ratio);
+        vec4 coord = mix(voxel2.coord, voxel1.coord, ratio) - blend * ratio * (1. - ratio);
         vec4 material = mix(voxel2.material, voxel1.material, ratio);
     
         return Voxel(coord, material);

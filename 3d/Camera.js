@@ -68,10 +68,10 @@ export default class Camera {
   }
 }
 
-// Object.defineProperty(Camera.prototype, "near", { enumerable: true });
-// Object.defineProperty(Camera.prototype, "far", { enumerable: true });
-// Object.defineProperty(Camera.prototype, "fov", { enumerable: true });
-// Object.defineProperty(Camera.prototype, "aspectRatio", { enumerable: true });
-// Object.defineProperty(Camera.prototype, "inverseTransform", { enumerable: true });
-// Object.defineProperty(Camera.prototype, "projection", { enumerable: true });
-// Object.defineProperty(Camera.prototype, "projectionView", { enumerable: true });
+Object.defineProperty(Camera.prototype, "near", { enumerable: true });
+Object.defineProperty(Camera.prototype, "far", { enumerable: true });
+Object.defineProperty(Camera.prototype, "fov", { enumerable: true });
+Object.defineProperty(Camera.prototype, "aspectRatio", { enumerable: true });
+Object.defineProperty(Camera.prototype, "inverseTransform", { enumerable: true });
+Object.defineProperty(Camera.prototype, "projection", { enumerable: true });
+Object.defineProperty(Camera.prototype, "projectionView", { enumerable: true });

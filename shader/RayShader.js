@@ -6,7 +6,7 @@ export default class RayShader {
         vec3 origin;
         vec3 direction;
       };
-    `
+    `;
   }
 
   static rayFromCamera() {
