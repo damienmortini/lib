@@ -134,7 +134,7 @@ export default class GLProgram extends Shader {
           return;
         }
 
-        const type = self.uniformTypes.get(name);
+        const type = self.uniformTypes.get(name.replace(/\[.*?\]/, ""));
 
         if (type === "float" || type === "bool") {
           gl.uniform1fv(location, value);

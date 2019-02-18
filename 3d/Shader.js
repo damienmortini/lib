@@ -206,7 +206,6 @@ export default class Shader {
     let uniformMatch;
     while ((uniformMatch = uniformsRegExp.exec(string))) {
       const [, type, name, arrayLengthStr] = uniformMatch;
-      const arrayLength = parseInt(arrayLengthStr);
 
       const structure = structures.get(type);
       if (structure) {
@@ -214,6 +213,7 @@ export default class Shader {
           this._addUniform(`${name}.${key}`, structure[key].type, structure[key].arrayLength);
         }
       } else {
+        const arrayLength = parseInt(arrayLengthStr);
         this._addUniform(name, type, arrayLength);
       }
     }
