@@ -48,6 +48,9 @@ export default class GLObject {
       this.program.uniforms.set(uniform, uniforms[uniform]);
     }
     this.mesh.draw(options);
+    if (bind) {
+      this.unbind();
+    }
   }
 
   unbind() {

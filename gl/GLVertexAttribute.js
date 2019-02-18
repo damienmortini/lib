@@ -5,7 +5,7 @@ export default class GLVertexAttribute {
     gl,
     data = undefined,
     buffer = new GLBuffer({
-      gl
+      gl,
     }),
     size = 1,
     type = undefined,
@@ -13,7 +13,7 @@ export default class GLVertexAttribute {
     normalized = false,
     stride = 0,
     count = undefined,
-    divisor = 0
+    divisor = 0,
   } = { gl }) {
     this.gl = gl;
     this.buffer = buffer;
@@ -52,7 +52,7 @@ export default class GLVertexAttribute {
       } else if (this.data instanceof Uint16Array) {
         type = this.gl.UNSIGNED_SHORT;
       } else if (this.data instanceof Uint32Array) {
-        type = this.gl.UNSIGNED_INT
+        type = this.gl.UNSIGNED_INT;
       }
     }
     return type;
@@ -65,4 +65,4 @@ export default class GLVertexAttribute {
   get data() {
     return this.buffer.data;
   }
-};
+}
