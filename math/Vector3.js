@@ -57,6 +57,10 @@ export default class Vector3 extends Float32Array {
     return vec3.distance(this, vector3);
   }
 
+  squaredDistance(vector3) {
+    return vec3.squaredDistance(this, vector3);
+  }
+
   subtract(vector3) {
     vec3.subtract(this, this, vector3);
     return this;
