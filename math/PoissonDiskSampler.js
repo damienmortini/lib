@@ -4,72 +4,68 @@ const CURRENT_POINT = new Vector3();
 const BEST_POINT = new Vector3();
 
 export default class PoissonDiskSampler {
-  constructor({
+  static fill({
+    x = 0,
+    y = 0,
+    z = 0,
     width,
     height,
     depth = 0,
     radius,
-    maxPoints = Infinity,
+    steps = 100,
+    points = []
   }) {
-    this.points = new Set([new Vector3()]);
-
-    this._width = width;
-    this._height = height;
-    this._depth = depth;
-    this._radius = radius;
-    this._maxPoints = maxPoints;
-
-    this.fill();
-  }
-
-  fill({
-    width = this._width,
-    height = this._height,
-    depth = this._depth,
-    radius = this._radius,
-    maxPoints = this._maxPoints,
-  } = {}) {
-    const halfWidth = width * .5;
-    const halfHeight = height * .5;
-    const halfDepth = depth * .5;
-
-    let step = 0;
+    const newPoints = [];
 
     const squaredRadius = radius * radius;
 
     const grid = [];
-    for (const point of this.points) {
-      const column = Math.floor(point.x / this._radius);
-      const row = Math.floor(point.y / this._radius);
-      if (!grid[column]) {
-        grid[column] = [];
+    for (const point of points) {
+      const gridX = Math.floor((point.x - x) / radius);
+      const gridY = Math.floor((point.y - y) / radius);
+      const gridZ = Math.floor((point.z - z) / radius);
+      if (!grid[gridZ]) {
+        grid[gridZ] = [];
       }
-      if (!grid[column][row]) {
-        grid[column][row] = [];
+      if (!grid[gridZ][gridY]) {
+        grid[gridZ][gridY] = [];
       }
-      grid[column][row].push(point);
+      if (!grid[gridZ][gridY][gridX]) {
+        grid[gridZ][gridY][gridX] = [];
+      }
+      grid[gridZ][gridY][gridX].push(point);
     }
 
-    while (step < 100) {
+    let step = 0;
+    while (step < steps) {
       let distanceOk = true;
       for (let index = 0; index < 10; index++) {
         CURRENT_POINT.set(
-          (Math.random() * 2 - 1) * halfWidth,
-          (Math.random() * 2 - 1) * halfHeight,
-          (Math.random() * 2 - 1) * halfDepth,
+          x + Math.random() * width,
+          y + Math.random() * height,
+          z + Math.random() * depth,
         );
-        const column = Math.floor(CURRENT_POINT.x / this._radius);
-        const row = Math.floor(CURRENT_POINT.y / this._radius);
+        BEST_POINT.copy(CURRENT_POINT);
+
+        const gridX = Math.floor((CURRENT_POINT.x - x) / radius);
+        const gridY = Math.floor((CURRENT_POINT.y - y) / radius);
+        const gridZ = Math.floor((CURRENT_POINT.z - z) / radius);
         const points = [];
-        for (let columnOffset = -1; columnOffset < 2; columnOffset++) {
-          for (let rowOffset = -1; rowOffset < 2; rowOffset++) {
-            const currentColumn = column + columnOffset;
-            const currentRow = row + rowOffset;
-            if (grid[currentColumn] && grid[currentColumn][currentRow]) {
-              points.push(...grid[currentColumn][currentRow]);
+        
+        const hasDepth = depth ? 1 : 0;
+        for (let gridZOffset = -hasDepth; gridZOffset < 1 + hasDepth; gridZOffset++) {
+          for (let gridYOffset = -1; gridYOffset < 2; gridYOffset++) {
+            for (let gridXOffset = -1; gridXOffset < 2; gridXOffset++) {
+              const currentGridX = gridX + gridXOffset;
+              const currentGridY = gridY + gridYOffset;
+              const currentGridZ = gridZ + gridZOffset;
+              if (grid[currentGridZ] && grid[currentGridZ][currentGridY] && grid[currentGridZ][currentGridY][currentGridX]) {
+                points.push(...grid[currentGridZ][currentGridY][currentGridX]);
+              }
             }
           }
         }
+
         distanceOk = true;
         for (const point of points) {
           const currentDistance = CURRENT_POINT.squaredDistance(point);
@@ -91,24 +87,27 @@ export default class PoissonDiskSampler {
       }
       if (distanceOk) {
         const point = new Vector3(BEST_POINT);
-        this.points.add(point);
-        if (this.points.size === maxPoints) {
-          break;
-        }
+        newPoints.push(point);
 
-        const column = Math.floor(point.x / this._radius);
-        const row = Math.floor(point.y / this._radius);
-        if (!grid[column]) {
-          grid[column] = [];
+        const gridX = Math.floor((point.x - x) / radius);
+        const gridY = Math.floor((point.y - y) / radius);
+        const gridZ = Math.floor((point.z - z) / radius);
+        if (!grid[gridZ]) {
+          grid[gridZ] = [];
         }
-        if (!grid[column][row]) {
-          grid[column][row] = [];
+        if (!grid[gridZ][gridY]) {
+          grid[gridZ][gridY] = [];
         }
-        grid[column][row].push(point);
+        if (!grid[gridZ][gridY][gridX]) {
+          grid[gridZ][gridY][gridX] = [];
+        }
+        grid[gridZ][gridY][gridX].push(point);
 
         step = 0;
       }
       step++;
     }
+
+    return newPoints;
   }
 }
