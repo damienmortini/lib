@@ -11,11 +11,24 @@ export default class GLRayMarchingObject extends GLObject {
     gl,
     sdfObjects = [],
     shaders = [],
+    sdfRayMarchSteps = 64,
   } = { gl }) {
+    const instanceIDs = new Float32Array(sdfObjects.length);
+    for (let index = 0; index < instanceIDs.length; index++) {
+      instanceIDs[index] = index;
+    }
+
     super({
       gl,
       mesh: new GLMesh({
         gl,
+        attributes: [
+          ["instanceID", {
+            data: instanceIDs,
+            size: 1,
+            divisor: 1,
+          }]
+        ],
         ...new BoxMesh({
           width: 1,
           height: 1,
@@ -46,20 +59,60 @@ export default class GLRayMarchingObject extends GLObject {
                 uniform Camera camera;
                 uniform SDFObject sdfObjects[${sdfObjects.length}];
 
+                ${RayShader.Ray()}
+                ${RayShader.rayFromCamera()}
+                ${SDFShader.Voxel()}
+                ${SDFShader.sdfSphere()}
+                ${SDFShader.sdfMin()}
+                ${SDFShader.sdfSmoothMin()}
+
+                Voxel map(vec3 position) {
+                  Voxel voxel = Voxel(vec4(0., 0., 0., camera.far), vec4(0.));
+                  for(int i = 0; i < ${sdfObjects.length}; i++) {
+                    SDFObject sdfObject = sdfObjects[i];
+                    vec3 objectPosition = position - sdfObject.position;
+                    voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, sdfObject.size * .5, vec4(1.)), sdfObject.blend * sdfObject.size);
+                  }
+                  return voxel;
+                }
+
+                ${SDFShader.sdfRayMarch()}
+                ${SDFShader.sdfNormalFromPosition()}
+
+                in float instanceID;
                 in vec3 position;
+
+                out vec2 screenPosition;
+                // out vec3 normal;
+                // out vec4 material;
               `],
               ["end", `
-                SDFObject sdfObject = sdfObjects[gl_InstanceID];
+                SDFObject sdfObject = sdfObjects[int(instanceID)];
 
                 vec3 position = position;
                 position = mix(position, normalize(position) * .5, sdfObject.spherical);
                 position *= sdfObject.size + sdfObject.blend * sdfObject.size;
                 position += sdfObject.position;
                 gl_Position = camera.projectionView * vec4(position, 1.);
+
+                screenPosition = gl_Position.xy / gl_Position.w;
+
+                // Ray ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
+
+                // Voxel voxel = sdfRayMarch(ray, camera.near, camera.far, ${sdfRayMarchSteps});
+
+                // normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
+
+                // material = voxel.material;
               `]
             ],
             fragmentShaderChunks: [
               ["start", `
+                // in vec3 normal;
+                // in vec4 material;
+
+                in vec2 screenPosition;
+
                 ${CameraShader.Camera()}
 
                 struct SDFObject
@@ -71,7 +124,6 @@ export default class GLRayMarchingObject extends GLObject {
                 };
 
                 uniform Camera camera;
-                uniform vec2 viewportSize;
                 uniform SDFObject sdfObjects[${sdfObjects.length}];
 
                 ${RayShader.Ray()}
@@ -95,18 +147,16 @@ export default class GLRayMarchingObject extends GLObject {
                 ${SDFShader.sdfNormalFromPosition()}
               `],
               ["end", `
-                vec2 position2d = (gl_FragCoord.xy / viewportSize) * 2. - 1.;
+                Ray ray = rayFromCamera(screenPosition, camera);
 
-                Ray ray = rayFromCamera(position2d, camera);
+                Voxel voxel = sdfRayMarch(ray, camera.near, camera.far, ${sdfRayMarchSteps});
 
-                Voxel voxel = sdfRayMarch(ray, camera.near, camera.far, 32);
+                vec3 normal = vec3(1.);
+                // normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, 1.);
 
-                vec3 normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .01);
+                vec4 material = voxel.material;
 
-                // fragColor = vec4(position2d, 0., 1.);
-                // fragColor = vec4(normal, 1.);
-                fragColor = vec4(mix(vec3(0.), normal, step(.999, voxel.material.x)), 1.);
-                // fragColor = voxel.material;
+                fragColor = vec4(normal, material.w);
               `],
             ]
           },
