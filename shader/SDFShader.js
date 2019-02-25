@@ -95,19 +95,22 @@ export default class SDFShader {
     `;
   }
 
+  // http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
   static sdfNormalFromPosition({
     name = "sdfNormalFromPosition",
     mapName = "map",
   } = {}) {
     return `
-      vec3 ${name}(vec3 position, float step) {
-        vec2 e = vec2(step, 0.0);
-        float stepInverse = 1. / step; // for mobile precision
-        return normalize(vec3(
-          ${mapName}(position + e.xyy).coord.w * stepInverse - ${mapName}(position - e.xyy).coord.w * stepInverse,
-          ${mapName}(position + e.yxy).coord.w * stepInverse - ${mapName}(position - e.yxy).coord.w * stepInverse,
-          ${mapName}(position + e.yyx).coord.w * stepInverse - ${mapName}(position - e.yyx).coord.w * stepInverse
-        ));
+      vec3 ${name}(in vec3 position, in float epsilon)
+      {
+        #define ZERO (min(int(epsilon),0)) // or any other non constant and cheap expression that is guaranteed to evaluate to zero
+        vec3 n = vec3(0.0);
+        for( int i=ZERO; i<4; i++ )
+        {
+          vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
+          n += e*${mapName}(position+e*epsilon).coord.w;
+        }
+        return normalize(n);
       }
     `;
   }
