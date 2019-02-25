@@ -118,7 +118,8 @@ export default class SDFShader {
   static sdfRayMarch({
     name = "sdfRayMarch",
     mapName = "map",
-    maxSteps = 128,
+    maxSteps = 512,
+    precision = 0.001,
   } = {}) {
     return `
       Voxel ${name}(Ray ray, float near, float far, int steps)
@@ -131,7 +132,7 @@ export default class SDFShader {
         // TODO: Remove use of maxsteps and just use step when WebGL2 is broadly supported
         
         for(int i = 0; i < ${maxSteps}; i++) {
-          if (i == steps || rayMarchingStep < 0.0001 || distance > far) break;
+          if (i == steps || rayMarchingStep < ${precision.toFixed(`${precision}`.length)} || distance > far) break;
           voxel = ${mapName}(ray.origin + ray.direction * distance);
           rayMarchingStep = voxel.coord.w;
           distance += rayMarchingStep;

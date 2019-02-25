@@ -11,8 +11,9 @@ export default class GLRayMarchingObject extends GLObject {
     gl,
     sdfObjects = [],
     shaders = [],
-    sdfRayMarchSteps = 64,
     meshDefinition = 10,
+    sdfRayMarchSteps = 64,
+    sdfPrecision = 0.001,
     vertexCompute = false,
   } = { gl }) {
     const instanceIDs = new Float32Array(sdfObjects.length);
@@ -83,18 +84,18 @@ export default class GLRayMarchingObject extends GLObject {
           return voxel;
         }
 
-        ${SDFShader.sdfRayMarch()}
+        ${SDFShader.sdfRayMarch({
+          precision: sdfPrecision
+        })}
         ${SDFShader.sdfNormalFromPosition()}
       `],
       ["main", `
         Ray ray = rayFromCamera(screenPosition, camera);
 
-        Voxel voxel = sdfRayMarch(ray, camera.near, camera.far, ${sdfRayMarchSteps});
+        voxel = sdfRayMarch(ray, camera.near, camera.far, ${sdfRayMarchSteps});
         
         normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
         normal = mix(normal, vec3(0.), step(camera.far, voxel.coord.w));
-        
-        material = voxel.material;
       `]
     ]);
 
@@ -132,11 +133,11 @@ export default class GLRayMarchingObject extends GLObject {
             in float instanceID;
             in vec3 position;
 
+            ${rayMarchingChunks.get("start")}
+            
             out vec2 screenPosition;
             out vec3 normal;
-            out vec4 material;
-
-            ${rayMarchingChunks.get("start")}
+            out Voxel voxel;
           `],
           ["end", `
             SDFObject sdfObject = sdfObjects[int(instanceID)];
@@ -158,22 +159,21 @@ export default class GLRayMarchingObject extends GLObject {
           ["start", `
             uniform bool vertexCompute;
 
-            in vec3 normal;
-            in vec4 material;
+            ${rayMarchingChunks.get("start")}
 
             in vec2 screenPosition;
-
-            ${rayMarchingChunks.get("start")}
+            in Voxel voxel;
+            in vec3 normal;
           `],
           ["end", `
-            vec3 normal = normal;  
-            vec4 material = material;
+            vec3 normal = normal;
+            Voxel voxel = voxel;
 
             if(!vertexCompute) {
               ${rayMarchingChunks.get("main")}
             }
 
-            fragColor = vec4(normal, material.w);
+            fragColor = vec4(normal, voxel.material.w);
           `],
         ],
         shaders,
