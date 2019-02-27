@@ -101,7 +101,7 @@ export default class SDFShader {
     mapName = "map",
   } = {}) {
     return `
-      vec3 ${name}(in vec3 position, in float epsilon)
+      vec3 ${name}(vec3 position, float epsilon)
       {
         #define ZERO (min(int(epsilon),0)) // or any other non constant and cheap expression that is guaranteed to evaluate to zero
         vec3 n = vec3(0.0);
@@ -138,6 +138,7 @@ export default class SDFShader {
           distance += rayMarchingStep;
         }
 
+        voxel.coord.xyz = ray.origin + ray.direction * distance;
         voxel.coord.w = distance;
         voxel = sdfMin(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
 

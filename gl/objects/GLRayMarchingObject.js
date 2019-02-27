@@ -90,8 +90,6 @@ export default class GLRayMarchingObject extends GLObject {
         ${SDFShader.sdfNormalFromPosition()}
       `],
       ["main", `
-        Ray ray = rayFromCamera(screenPosition, camera);
-
         voxel = sdfRayMarch(ray, camera.near, camera.far, ${sdfRayMarchSteps});
         
         normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
@@ -135,8 +133,8 @@ export default class GLRayMarchingObject extends GLObject {
 
             ${rayMarchingChunks.get("start")}
             
-            out vec2 screenPosition;
             out vec3 normal;
+            out Ray ray;
             out Voxel voxel;
           `],
           ["end", `
@@ -148,7 +146,7 @@ export default class GLRayMarchingObject extends GLObject {
             position += sdfObject.position;
             gl_Position = camera.projectionView * vec4(position, 1.);
 
-            screenPosition = gl_Position.xy / gl_Position.w;
+            ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
 
             if(vertexCompute) {
               ${rayMarchingChunks.get("main")}
@@ -161,7 +159,7 @@ export default class GLRayMarchingObject extends GLObject {
 
             ${rayMarchingChunks.get("start")}
 
-            in vec2 screenPosition;
+            in Ray ray;
             in Voxel voxel;
             in vec3 normal;
           `],
@@ -173,7 +171,7 @@ export default class GLRayMarchingObject extends GLObject {
               ${rayMarchingChunks.get("main")}
             }
 
-            fragColor = vec4(normal, voxel.material.w);
+            fragColor = voxel.material;
           `],
         ],
         shaders,
