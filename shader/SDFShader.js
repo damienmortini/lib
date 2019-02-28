@@ -99,30 +99,43 @@ export default class SDFShader {
   static sdfNormalFromPosition({
     name = "sdfNormalFromPosition",
     mapName = "map",
+    preventInline = false,
   } = {}) {
-    return `
-      vec3 ${name}(vec3 position, float epsilon)
-      {
-        #define ZERO (min(int(epsilon),0)) // or any other non constant and cheap expression that is guaranteed to evaluate to zero
-        vec3 n = vec3(0.0);
-        for( int i=ZERO; i<4; i++ )
+    if (preventInline) {
+      return `
+        vec3 ${name}(vec3 position, float epsilon)
         {
-          vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
-          n += e*${mapName}(position+e*epsilon).coord.w;
+          #define ZERO (min(int(epsilon),0)) // or any other non constant and cheap expression that is guaranteed to evaluate to zero
+          vec3 n = vec3(0.0);
+          for( int i=ZERO; i<4; i++ )
+          {
+            vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
+            n += e*${mapName}(position+e*epsilon).coord.w;
+          }
+          return normalize(n);
         }
-        return normalize(n);
-      }
-    `;
+      `;
+    } else {
+      return `
+        vec3 ${name}(vec3 position, float epsilon)
+        {
+            const vec2 k = vec2(1,-1);
+            return normalize( k.xyy*${mapName}( position + k.xyy*epsilon ).coord.w + 
+                              k.yyx*${mapName}( position + k.yyx*epsilon ).coord.w + 
+                              k.yxy*${mapName}( position + k.yxy*epsilon ).coord.w + 
+                              k.xxx*${mapName}( position + k.xxx*epsilon ).coord.w );
+        }
+      `;
+    }
   }
 
   static sdfRayMarch({
     name = "sdfRayMarch",
     mapName = "map",
     maxSteps = 512,
-    precision = 0.001,
   } = {}) {
     return `
-      Voxel ${name}(Ray ray, float near, float far, int steps)
+      Voxel ${name}(Ray ray, float near, float far, int steps, float distancePrecision)
       {
         Voxel voxel;
 
@@ -132,7 +145,7 @@ export default class SDFShader {
         // TODO: Remove use of maxsteps and just use step when WebGL2 is broadly supported
         
         for(int i = 0; i < ${maxSteps}; i++) {
-          if (i == steps || rayMarchingStep < ${precision.toFixed(`${precision}`.length)} || distance > far) break;
+          if (i == steps || rayMarchingStep < distancePrecision || distance > far) break;
           voxel = ${mapName}(ray.origin + ray.direction * distance);
           rayMarchingStep = voxel.coord.w;
           distance += rayMarchingStep;

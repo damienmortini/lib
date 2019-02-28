@@ -238,7 +238,11 @@ export default class GLProgram extends Shader {
       if (lineNumberResults) {
         const lineNumber = parseFloat(lineNumberResults[1]);
         const shaderLines = source.split("\n");
-        throw new Error(`${shaderInfoLog}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
+        const typeName = type === this.gl.VERTEX_SHADER ? "Vertex Shader" : "Fragment Shader";
+        console.groupCollapsed(`${typeName} source`);
+        console.warn(source);
+        console.groupEnd();
+        throw new Error(`${typeName}: ${shaderInfoLog}\nat: ${shaderLines[lineNumber - 1].replace(/^\s*/, "")}`);
       } else {
         throw new Error(shaderInfoLog);
       }

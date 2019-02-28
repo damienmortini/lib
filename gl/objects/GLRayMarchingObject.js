@@ -13,7 +13,7 @@ export default class GLRayMarchingObject extends GLObject {
     shaders = [],
     meshDefinition = 10,
     sdfRayMarchSteps = 64,
-    sdfPrecision = 0.001,
+    sdfRayMarchPrecision = 0.001,
     vertexCompute = false,
   } = { gl }) {
     const instanceIDs = new Float32Array(sdfObjects.length);
@@ -67,12 +67,12 @@ export default class GLRayMarchingObject extends GLObject {
           vec3 position;
         };
 
+        uniform int sdfRayMarchSteps;
+        uniform float sdfRayMarchPrecision;
         uniform Camera camera;
         uniform SDFObject sdfObjects[${sdfObjects.length}];
 
-        ${RayShader.Ray()}
         ${RayShader.rayFromCamera()}
-        ${SDFShader.Voxel()}
         ${SDFShader.sdfSphere()}
         ${SDFShader.sdfBox()}
         ${SDFShader.sdfMin()}
@@ -84,13 +84,13 @@ export default class GLRayMarchingObject extends GLObject {
           return voxel;
         }
 
-        ${SDFShader.sdfRayMarch({
-          precision: sdfPrecision
+        ${SDFShader.sdfRayMarch()}
+        ${SDFShader.sdfNormalFromPosition({
+          preventInline: !(gl instanceof WebGLRenderingContext)
         })}
-        ${SDFShader.sdfNormalFromPosition()}
       `],
       ["main", `
-        voxel = sdfRayMarch(ray, camera.near, camera.far, ${sdfRayMarchSteps});
+        voxel = sdfRayMarch(ray, camera.near, camera.far, sdfRayMarchSteps, sdfRayMarchPrecision);
         
         normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
         normal = mix(normal, vec3(0.), step(camera.far, voxel.coord.w));
@@ -122,16 +122,18 @@ export default class GLRayMarchingObject extends GLObject {
       program: new GLProgram({
         gl,
         uniforms: [
-          ["vertexCompute", vertexCompute]
+          ["sdfRayMarchSteps", sdfRayMarchSteps],
+          ["sdfRayMarchPrecision", sdfRayMarchPrecision]
         ],
         vertexShaderChunks: [
           ["start", `
-            uniform bool vertexCompute;
-
             in float instanceID;
             in vec3 position;
 
-            ${rayMarchingChunks.get("start")}
+            ${RayShader.Ray()}
+            ${SDFShader.Voxel()}
+
+            ${vertexCompute ? rayMarchingChunks.get("start") : ""}
             
             out vec3 normal;
             out Ray ray;
@@ -148,28 +150,22 @@ export default class GLRayMarchingObject extends GLObject {
 
             ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
 
-            if(vertexCompute) {
-              ${rayMarchingChunks.get("main")}
-            }
+            ${vertexCompute ? rayMarchingChunks.get("main") : ""}
           `]
         ],
         fragmentShaderChunks: [
           ["start", `
-            uniform bool vertexCompute;
+            ${RayShader.Ray()}
+            ${SDFShader.Voxel()}
 
-            ${rayMarchingChunks.get("start")}
+            ${!vertexCompute ? rayMarchingChunks.get("start") : ""}
 
             in Ray ray;
             in Voxel voxel;
             in vec3 normal;
           `],
           ["end", `
-            vec3 normal = normal;
-            Voxel voxel = voxel;
-
-            if(!vertexCompute) {
-              ${rayMarchingChunks.get("main")}
-            }
+            ${!vertexCompute ? "Voxel voxel = voxel;\nvec3 normal = normal;\n" + rayMarchingChunks.get("main") : ""}
 
             fragColor = voxel.material;
           `],
