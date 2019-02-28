@@ -35,16 +35,15 @@ export default class GLRayMarchingObject extends GLObject {
         sdfObject = sdfObjects[${i}];
         objectPosition = position - sdfObject.position;
       `;
-      const material = `vec4(${sdfObject.material[0].toFixed(4)}, ${sdfObject.material[1].toFixed(4)}, ${sdfObject.material[2].toFixed(4)}, ${sdfObject.material[3].toFixed(4)})`;
       switch (sdfObject.shape) {
         case "sphere":
           mapChunk += `
-            voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, sdfObject.size * .5, ${material}), sdfObject.blend * sdfObject.size);
+            voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, sdfObject.size * .5, sdfObject.material), sdfObject.blend * sdfObject.size);
           `;
           break;
         case "box":
           mapChunk += `
-            voxel = sdfSmoothMin(voxel, sdfBox(objectPosition, vec3(sdfObject.size * .5), ${material}), sdfObject.blend * sdfObject.size);
+            voxel = sdfSmoothMin(voxel, sdfBox(objectPosition, vec3(sdfObject.size * .5), sdfObject.material), sdfObject.blend * sdfObject.size);
           `;
           break;
         default:
@@ -65,6 +64,7 @@ export default class GLRayMarchingObject extends GLObject {
           float size;
           float blend;
           vec3 position;
+          vec4 material;
         };
 
         uniform int sdfRayMarchSteps;
