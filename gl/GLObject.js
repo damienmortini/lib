@@ -40,15 +40,16 @@ export default class GLObject {
     }
   }
 
-  draw({ bind = true, uniforms = {}, ...options } = {}) {
-    if (bind) {
+  draw(options) {
+    options = Object.assign({ bind: true, uniforms: {} }, options);
+    if (options.bind) {
       this.bind();
     }
-    for (const uniform in uniforms) {
-      this.program.uniforms.set(uniform, uniforms[uniform]);
+    for (const uniform in options.uniforms) {
+      this.program.uniforms.set(uniform, options.uniforms[uniform]);
     }
     this.mesh.draw(options);
-    if (bind) {
+    if (options.bind) {
       this.unbind();
     }
   }

@@ -19,19 +19,18 @@ export default class GLBoxObject extends GLObject {
   } = { gl }) {
     super({
       gl,
-      mesh: new GLMesh({
+      mesh: new GLMesh(Object.assign({
         gl,
-        ...new BoxMesh({
-          width,
-          height,
-          depth,
-          widthSegments,
-          heightSegments,
-          depthSegments,
-          normals,
-          uvs,
-        })
-      }),
+      }, new BoxMesh({
+        width,
+        height,
+        depth,
+        widthSegments,
+        heightSegments,
+        depthSegments,
+        normals,
+        uvs,
+      }))),
       program: new GLProgram({
         gl,
         shaders: [

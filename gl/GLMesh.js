@@ -53,7 +53,7 @@ export default class GLMesh {
 
     for (const [key, value] of this.attributes) {
       if (!(value instanceof GLVertexAttribute)) {
-        this.attributes.set(key, new GLVertexAttribute({ gl, ...value }));
+        this.attributes.set(key, new GLVertexAttribute(Object.assign({ gl }, value)));
       }
     }
 

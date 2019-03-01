@@ -85,40 +85,37 @@ export default class GLRayMarchingObject extends GLObject {
         }
 
         ${SDFShader.sdfRayMarch()}
-        ${SDFShader.sdfNormalFromPosition({
-          preventInline: !(gl instanceof WebGLRenderingContext)
-        })}
+        ${SDFShader.sdfNormalFromPosition({ preventInline: !(gl instanceof window.WebGLRenderingContext) })}
       `],
       ["main", `
         voxel = sdfRayMarch(ray, camera.near, camera.far, sdfRayMarchSteps, sdfRayMarchPrecision);
         
         normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
         normal = mix(normal, vec3(0.), step(camera.far, voxel.coord.w));
-      `]
+      `],
     ]);
 
     super({
       gl,
-      mesh: new GLMesh({
+      mesh: new GLMesh(Object.assign({
         gl,
         attributes: [
           ["instanceID", {
             data: instanceIDs,
             size: 1,
             divisor: 1,
-          }]
+          }],
         ],
-        ...new BoxMesh({
-          width: 1,
-          height: 1,
-          depth: 1,
-          widthSegments: meshDefinition,
-          heightSegments: meshDefinition,
-          depthSegments: meshDefinition,
-          normals: false,
-          uvs: false,
-        })
-      }),
+      }, new BoxMesh({
+        width: 1,
+        height: 1,
+        depth: 1,
+        widthSegments: meshDefinition,
+        heightSegments: meshDefinition,
+        depthSegments: meshDefinition,
+        normals: false,
+        uvs: false,
+      }))),
       program: new GLProgram({
         gl,
         uniforms: [
@@ -178,6 +175,6 @@ export default class GLRayMarchingObject extends GLObject {
   }
 
   draw(options) {
-    super.draw({ ...{ instanceCount: this.sdfObjects.length }, ...options });
+    super.draw(Object.assign({ instanceCount: this.sdfObjects.length }, options));
   }
 }
