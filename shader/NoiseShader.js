@@ -1,7 +1,7 @@
 // From https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 // and https://github.com/stegu/webgl-noise
 
-export default class NoiseGLSL {
+export default class NoiseShader {
   static psrdNoise() {
     return `
     //
