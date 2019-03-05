@@ -6,14 +6,14 @@ import GLTexture from "./GLTexture.js";
 export default class GLObject {
   constructor({
     gl,
-    mesh = new GLMesh(),
-    program = new GLProgram(),
+    mesh = undefined,
+    program = undefined,
     vertexArray = new GLVertexArray({
       gl,
       mesh,
       program,
     }),
-  } = { gl }) {
+  }) {
     this.gl = gl;
     this.mesh = mesh;
     this.program = program;

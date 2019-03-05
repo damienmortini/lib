@@ -54,7 +54,7 @@ export default class GLProgram extends Shader {
     }
 
     class Attributes extends Map {
-      set(name, { buffer, location = self._attributesLocations.get(name), size, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
+      set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = undefined, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
         if (name instanceof Map) {
           for (const [key, value] of name) {
             this.set(key, value);

@@ -14,7 +14,7 @@ export default class GLVertexArray {
 
     this._vertexArray = this.gl.createVertexArray();
 
-    if (mesh || program) {
+    if (mesh && program) {
       this.add({
         mesh,
         program,
