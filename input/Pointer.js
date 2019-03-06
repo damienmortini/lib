@@ -2,7 +2,7 @@ import Vector2 from "../math/Vector2.js";
 import Signal from "../util/Signal.js";
 import Ticker from "../util/Ticker.js";
 
-let pointers = new Map();
+const pointers = new Map();
 
 export default class Pointer extends Vector2 {
   static get TOUCH_TYPE() {
