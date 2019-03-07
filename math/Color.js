@@ -2,7 +2,7 @@ export default class Color {
   static styleToRGBA(value) {
     document.head.style.color = value;
 
-    const results = /rgba?\s*\(\s*(\d*),\s*(\d*)\s*,\s*(\d*)\s*(,\s*([\.\d]*))?\s*\)/.exec(getComputedStyle(document.head).getPropertyValue("color"));
+    const results = /rgba?\s*\(\s*(\d*),\s*(\d*)\s*,\s*(\d*)\s*(,\s*([.\d]*))?\s*\)/.exec(getComputedStyle(document.head).getPropertyValue("color"));
     return results ? [
       parseInt(results[1]) / 255,
       parseInt(results[2]) / 255,
@@ -28,7 +28,7 @@ export default class Color {
       hue = 0;
       saturation = 0;
     } else {
-      let delta = max - min;
+      const delta = max - min;
       saturation = lightness <= 0.5 ? delta / (max + min) : delta / (2 - max - min);
       switch (max) {
         case r: hue = (g - b) / delta + (g < b ? 6 : 0); break;
@@ -46,7 +46,7 @@ export default class Color {
   }
 
   static hexToRGB(hex) {
-    let results = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const results = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return results ? [
       parseInt(results[1], 16) / 255,
       parseInt(results[2], 16) / 255,
