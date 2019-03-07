@@ -109,7 +109,7 @@ export default class Pointer extends Vector2 {
     this._onPointerEvent(e);
     this._updatePositions();
     this.onUp.dispatch(e);
-    if (this.dragOffset.length < 4) {
+    if (this.dragOffset.size < 4) {
       this.onClick.dispatch(e);
     }
     clearTimeout(this._timeout);
