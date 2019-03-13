@@ -1,5 +1,5 @@
 export default class CameraShader {
-  static Camera() {
+  static get Camera() {
     return `
       struct Camera
       {

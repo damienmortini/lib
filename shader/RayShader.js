@@ -1,5 +1,5 @@
 export default class RayShader {
-  static Ray() {
+  static get Ray() {
     return `
       struct Ray
       {

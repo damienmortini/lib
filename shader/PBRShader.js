@@ -1,8 +1,12 @@
 // GGX from from http://www.filmicworlds.com/images/ggx-opt/optimized-ggx.hlsl
-// PBR from from https://www.shadertoy.com/view/XsfXWX
+// PBR adapted from from https://www.shadertoy.com/view/XsfXWX
+
+import LightShader from "./LightShader.js";
+import RayShader from "./RayShader.js";
+import CameraShader from "./CameraShader.js";
 
 export default class PBRShader {
-  static PhysicallyBasedMaterial() {
+  static get PhysicallyBasedMaterial() {
     return `
     struct PhysicallyBasedMaterial
     {
@@ -11,7 +15,7 @@ export default class PBRShader {
       float roughness;
       float reflectance;
     };
-    `
+    `;
   }
 
   static ggx() {
@@ -54,7 +58,7 @@ export default class PBRShader {
       float specular = dotNL * D * F * vis;
       return specular;
     }
-    `
+    `;
   }
 
   static computeGGXLighting() {
@@ -72,16 +76,17 @@ export default class PBRShader {
 
       return color;
     }
-    `
+    `;
   }
 
   static computePBRLighting({
-    pbrReflectionFromRay = `return vec3(0.);`
+    pbrReflectionFromRay = "return vec3(0.);",
   } = {}) {
     return `
     vec3 pbrReflectionFromRay(
       Ray ray,
-      Light light
+      Light light,
+      float roughness
     ) {
       ${pbrReflectionFromRay}
     }
@@ -99,8 +104,7 @@ export default class PBRShader {
       float fresnel = max(1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction), material.metalness);
 
       // reflection
-      vec3 roughnessRandomVector = normalize(vec3(random(position.x) * 2. - 1., random(position.y) * 2. - 1., random(position.z) * 2. - 1.)) * material.roughness;
-      vec3 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal) + roughnessRandomVector * .3)), light);
+      vec3 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal))), light, material.roughness);
 
       // diffuse
       vec3 color = mix(material.albedo, reflection, material.metalness);
@@ -113,6 +117,72 @@ export default class PBRShader {
 
       return color;
     }
-    `
+    `;
+  }
+
+  constructor({
+    uvs = true,
+  } = {}) {
+    this._uvs = !!uvs;
+  }
+
+  get vertexShaderChunks() {
+    return [
+      ["start", `
+        ${CameraShader.Camera}
+        ${RayShader.Ray}
+        
+        uniform Camera camera;
+        uniform mat4 projectionView;
+        uniform mat4 transform;
+
+        in vec3 position;
+        in vec3 normal;
+        ${this._uvs ? "in vec2 uv;" : ""}
+        
+        out vec3 vPosition;
+        out vec3 vNormal;
+        ${this._uvs ? "out vec2 vUv;" : ""}
+        out vec3 vRayDirection;
+
+        ${RayShader.rayFromCamera()}
+      `],
+      ["main", `
+        vPosition = position;
+        vNormal = normal;
+        ${this._uvs ? "vUv = uv;" : ""}
+      `],
+      ["end", `
+        gl_Position = camera.projectionView * transform * vec4(position, 1.);
+        vRayDirection = rayFromCamera(gl_Position.xy, camera).direction;
+      `],
+    ];
+  }
+
+  get fragmentShaderChunks() {
+    return [
+      ["start", `
+        ${LightShader.Light}
+        ${RayShader.Ray}
+        ${PBRShader.PhysicallyBasedMaterial}
+
+        uniform Light light;
+
+        in vec3 vPosition;
+        in vec3 vNormal;
+        ${this._uvs ? "in vec2 vUv;" : ""}
+        in vec3 vRayDirection;
+
+        ${PBRShader.ggx()}
+        ${PBRShader.computePBRLighting()}
+      `],
+      ["end", `
+        PhysicallyBasedMaterial material = PhysicallyBasedMaterial(vec3(1.), 0., 1., 0.);
+        Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
+        Ray pbrRay = Ray(vec3(0.), vRayDirection);
+        vec3 pbrColor = computePBRLighting(pbrRay, light, vPosition, vNormal, material);
+        fragColor = vec4(pbrColor, 1.);
+      `],
+    ];
   }
 }

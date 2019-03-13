@@ -1,5 +1,5 @@
 export default class LightShader {
-  static Light() {
+  static get Light() {
     return `
       struct Light
       {
