@@ -1,5 +1,5 @@
 export default class SDFShader {
-  static Voxel() {
+  static get Voxel() {
     return `
       struct Voxel
       {

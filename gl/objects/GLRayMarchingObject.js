@@ -56,8 +56,10 @@ export default class GLRayMarchingObject extends GLObject {
 
     const rayMarchingChunks = new Map([
       ["start", `
-        ${CameraShader.Camera()}
-
+        ${CameraShader.Camera}
+        ${RayShader.Ray}
+        ${SDFShader.Voxel}
+        
         struct SDFObject
         {
           float spherical;
@@ -66,13 +68,16 @@ export default class GLRayMarchingObject extends GLObject {
           vec3 position;
           vec4 material;
         };
-
-        uniform int sdfRayMarchSteps;
-        uniform float sdfRayMarchPrecision;
+        
         uniform Camera camera;
         uniform SDFObject sdfObjects[${sdfObjects.length}];
-
+        
         ${RayShader.rayFromCamera()}
+      `],
+      ["compute", `
+        uniform int sdfRayMarchSteps;
+        uniform float sdfRayMarchPrecision;
+
         ${SDFShader.sdfSphere()}
         ${SDFShader.sdfBox()}
         ${SDFShader.sdfMin()}
@@ -127,14 +132,13 @@ export default class GLRayMarchingObject extends GLObject {
             in float instanceID;
             in vec3 position;
 
-            ${RayShader.Ray()}
-            ${SDFShader.Voxel()}
+            ${rayMarchingChunks.get("start")}
 
-            ${vertexCompute ? rayMarchingChunks.get("start") : ""}
+            ${vertexCompute ? rayMarchingChunks.get("compute") : ""}
             
             out vec3 normal;
             out Ray ray;
-            out Voxel voxel;
+            ${vertexCompute ? "out Voxel voxel;" : ""}
           `],
           ["end", `
             SDFObject sdfObject = sdfObjects[int(instanceID)];
@@ -148,21 +152,20 @@ export default class GLRayMarchingObject extends GLObject {
             ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
 
             ${vertexCompute ? rayMarchingChunks.get("main") : ""}
-          `]
+          `],
         ],
         fragmentShaderChunks: [
           ["start", `
-            ${RayShader.Ray()}
-            ${SDFShader.Voxel()}
-
-            ${!vertexCompute ? rayMarchingChunks.get("start") : ""}
+            ${rayMarchingChunks.get("start")}
+            
+            ${!vertexCompute ? rayMarchingChunks.get("compute") : ""}
 
             in Ray ray;
-            in Voxel voxel;
             in vec3 normal;
+            ${vertexCompute ? "in Voxel voxel;" : ""}
           `],
           ["end", `
-            ${!vertexCompute ? "Voxel voxel = voxel;\nvec3 normal = normal;\n" + rayMarchingChunks.get("main") : ""}
+            ${!vertexCompute ? "Voxel voxel = Voxel(vec4(0.), vec4(0.));\nvec3 normal = normal;\n" + rayMarchingChunks.get("main") : ""}
 
             fragColor = voxel.material;
           `],
