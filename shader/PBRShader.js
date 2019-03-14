@@ -69,29 +69,30 @@ export default class PBRShader {
       vec3 normal,
       PhysicallyBasedMaterial material
     ) {
-      vec3 color = material.albedo;
-
       vec3 specular = light.color * ggx(normal, -ray.direction, -light.direction, material.roughness, material.reflectance);
-      color += specular;
-
-      return color;
+      return specular;
     }
     `;
   }
 
-  static computePBRLighting({
-    pbrReflectionFromRay = "return vec3(0.);",
+  static computePBRColor({
+    pbrReflectionFromRay = `
+      vec3 color = ray.direction * .5 + .5;
+      float grey = color.r;
+      grey = smoothstep((1. - roughness) * .5, .5 + roughness * .5, grey);
+      color = vec3(grey);
+      return color;
+    `,
   } = {}) {
     return `
     vec3 pbrReflectionFromRay(
       Ray ray,
-      Light light,
       float roughness
     ) {
       ${pbrReflectionFromRay}
     }
 
-    vec3 computePBRLighting (
+    vec3 computePBRColor (
       Ray ray,
       Light light,
       vec3 position,
@@ -104,16 +105,15 @@ export default class PBRShader {
       float fresnel = max(1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction), material.metalness);
 
       // reflection
-      vec3 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal))), light, material.roughness);
+      vec3 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal))), material.roughness);
 
       // diffuse
       vec3 color = mix(material.albedo, reflection, material.metalness);
       color = mix(color, reflection, fresnel);
       color *= light.color;
 
-      // specular
-      vec3 specular = light.color * ggx(normal, -ray.direction, -light.direction, material.roughness, material.reflectance);
-      color += specular;
+      color += computeGGXLighting(ray, light, normal, material);
+      color = clamp(vec3(0.), vec3(1.), color);
 
       return color;
     }
@@ -122,13 +122,21 @@ export default class PBRShader {
 
   constructor({
     albedo = [1, 1, 1],
+    metalness = 0,
+    roughness = 0,
+    reflectance = 1,
     uvs = true,
   } = {}) {
     this._uvs = !!uvs;
 
     this.uniforms = {
-      albedo,
-    }
+      material: {
+        albedo,
+        metalness,
+        roughness,
+        reflectance,
+      },
+    };
   }
 
   get vertexShaderChunks() {
@@ -171,7 +179,7 @@ export default class PBRShader {
         ${RayShader.Ray}
         ${PBRShader.PhysicallyBasedMaterial}
 
-        uniform vec3 albedo;
+        uniform PhysicallyBasedMaterial material;
         uniform Light light;
 
         in vec3 vPosition;
@@ -180,13 +188,13 @@ export default class PBRShader {
         in vec3 vRayDirection;
 
         ${PBRShader.ggx()}
-        ${PBRShader.computePBRLighting()}
+        ${PBRShader.computeGGXLighting()}
+        ${PBRShader.computePBRColor()}
       `],
       ["end", `
-        PhysicallyBasedMaterial material = PhysicallyBasedMaterial(albedo, 0., 1., 0.);
         Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
         Ray pbrRay = Ray(vec3(0.), vRayDirection);
-        vec3 pbrColor = computePBRLighting(pbrRay, light, vPosition, vNormal, material);
+        vec3 pbrColor = computePBRColor(pbrRay, light, vPosition, vNormal, material);
         fragColor = vec4(pbrColor, 1.);
       `],
     ];
