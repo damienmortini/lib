@@ -121,9 +121,14 @@ export default class PBRShader {
   }
 
   constructor({
+    albedo = [1, 1, 1],
     uvs = true,
   } = {}) {
     this._uvs = !!uvs;
+
+    this.uniforms = {
+      albedo,
+    }
   }
 
   get vertexShaderChunks() {
@@ -166,6 +171,7 @@ export default class PBRShader {
         ${RayShader.Ray}
         ${PBRShader.PhysicallyBasedMaterial}
 
+        uniform vec3 albedo;
         uniform Light light;
 
         in vec3 vPosition;
@@ -177,7 +183,7 @@ export default class PBRShader {
         ${PBRShader.computePBRLighting()}
       `],
       ["end", `
-        PhysicallyBasedMaterial material = PhysicallyBasedMaterial(vec3(1.), 0., 1., 0.);
+        PhysicallyBasedMaterial material = PhysicallyBasedMaterial(albedo, 0., 1., 0.);
         Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
         Ray pbrRay = Ray(vec3(0.), vRayDirection);
         vec3 pbrColor = computePBRLighting(pbrRay, light, vPosition, vNormal, material);

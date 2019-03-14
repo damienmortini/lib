@@ -2,7 +2,6 @@ import BoxMesh from "../../3d/mesh/BoxMesh.js";
 import GLObject from "../GLObject.js";
 import GLMesh from "../GLMesh.js";
 import GLProgram from "../GLProgram.js";
-import BasicShader from "../../shader/BasicShader.js";
 
 export default class GLBoxObject extends GLObject {
   constructor({
@@ -13,9 +12,20 @@ export default class GLBoxObject extends GLObject {
     widthSegments = undefined,
     heightSegments = undefined,
     depthSegments = undefined,
-    normals = true,
-    uvs = true,
-    shaders = [],
+    normals = false,
+    uvs = false,
+    shaders = [
+      {
+        vertexShaderChunks: [
+          ["start", `
+            in vec3 position;
+          `],
+          ["end", `
+            gl_Position = vec4(position, 1.);
+          `],
+        ],
+      },
+    ],
   } = { gl }) {
     super({
       gl,
@@ -33,16 +43,8 @@ export default class GLBoxObject extends GLObject {
       }))),
       program: new GLProgram({
         gl,
-        shaders: [
-          new BasicShader({
-            normals: normals,
-            uvs: uvs,
-          }),
-          ...shaders,
-        ],
+        shaders,
       }),
     });
-
-    this.transform = this.program.uniforms.get("transform");
   }
 }
