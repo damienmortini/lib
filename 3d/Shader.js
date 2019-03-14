@@ -122,6 +122,10 @@ export default class Shader {
   }
 
   _addUniform(name, type, arrayLength) {
+    if (this.uniforms[name] !== undefined) {
+      return;
+    }
+
     let value;
     let typeMatch;
 
