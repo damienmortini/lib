@@ -95,8 +95,8 @@ export default class GLProgram extends Shader {
         if (value.length === undefined) {
           if (value instanceof GLTexture) {
             let unit = 0;
-            for (const [uniformName, type] of self.uniformTypes) {
-              if (type.startsWith("sampler")) {
+            for (const uniformName in self.uniformTypes) {
+              if (self.uniformTypes[uniformName].startsWith("sampler")) {
                 if (uniformName === name) {
                   texture = value;
                   values = [unit];
@@ -134,7 +134,7 @@ export default class GLProgram extends Shader {
           return;
         }
 
-        const type = self.uniformTypes.get(name.replace(/\[.*?\]/, ""));
+        const type = self.uniformTypes[name.replace(/\[.*?\]/, "")];
 
         if (type === "float" || type === "bool") {
           gl.uniform1fv(location, value);
@@ -175,8 +175,8 @@ export default class GLProgram extends Shader {
 
     const rawUniforms = this.uniforms;
     this.uniforms = new Uniforms();
-    for (const [key, value] of rawUniforms) {
-      this.uniforms.set(key, value);
+    for (const key in rawUniforms) {
+      this.uniforms.set(key, rawUniforms[key]);
     }
   }
 

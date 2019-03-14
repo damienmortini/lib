@@ -63,13 +63,13 @@ export default class Shader {
       Texture: class Texture { },
       TextureCube: class TextureCube { },
     },
-    uniforms = [],
+    uniforms = {},
     vertexShaderChunks = [],
     fragmentShaderChunks = [],
     shaders = [],
   } = {}) {
-    this.uniforms = new Map();
-    this.uniformTypes = new Map();
+    this.uniforms = uniforms;
+    this.uniformTypes = {};
 
     this._dataTypeConctructors = dataTypeConctructors;
 
@@ -85,13 +85,13 @@ export default class Shader {
     }
   }
 
-  add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = [] } = {}) {
+  add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = {} } = {}) {
     this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
     this._vertexShaderChunks.push(...vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
     this._fragmentShaderChunks.push(...fragmentShaderChunks);
-    for (const [key, value] of uniforms) {
-      this.uniforms.set(key, value);
+    for (const key in uniforms) {
+      this.uniforms[key] = uniforms[key];
     }
   }
 
@@ -122,14 +122,10 @@ export default class Shader {
   }
 
   _addUniform(name, type, arrayLength) {
-    if (this.uniforms.has(name)) {
-      return;
-    }
-
     let value;
     let typeMatch;
 
-    this.uniformTypes.set(name, type);
+    this.uniformTypes[name] = type;
 
     if (/float|double/.test(type)) {
       if (isNaN(arrayLength)) {
@@ -173,7 +169,7 @@ export default class Shader {
       value = undefined;
     }
 
-    this.uniforms.set(name, value);
+    this.uniforms[name] = value;
   }
 
   // Parse shader strings to extract uniforms

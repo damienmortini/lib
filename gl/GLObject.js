@@ -26,8 +26,8 @@ export default class GLObject {
     this.program.use();
     this.vertexArray.bind();
     let unit = 0;
-    for (const [name, type] of this.program.uniformTypes) {
-      if (type.startsWith("sampler")) {
+    for (const name in this.program.uniformTypes) {
+      if (this.program.uniformTypes[name].startsWith("sampler")) {
         const value = this.program.uniforms.get(name);
         if (value instanceof GLTexture) {
           value.bind({
