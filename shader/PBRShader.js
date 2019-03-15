@@ -77,9 +77,10 @@ export default class PBRShader {
 
   static computePBRColor({
     pbrReflectionFromRay = `
+      ray.direction *= 1. / max(roughness, .0001);
+      ray.direction = clamp(ray.direction, vec3(-1.), vec3(1.));
       vec3 color = ray.direction * .5 + .5;
-      float grey = color.r;
-      grey = smoothstep((1. - roughness) * .5, .5 + roughness * .5, grey);
+      float grey = (color.r + color.g + color.b) / 3.;
       color = vec3(grey);
       return color;
     `,
@@ -102,13 +103,13 @@ export default class PBRShader {
       light.color *= light.intensity;
 
       // fresnel
-      float fresnel = max(1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction), material.metalness);
+      float fresnel = 1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction);
 
       // reflection
       vec3 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal))), material.roughness);
 
       // diffuse
-      vec3 color = mix(material.albedo, reflection, material.metalness);
+      vec3 color = mix(material.albedo, material.albedo * reflection, material.metalness);
       color = mix(color, reflection, fresnel);
       color *= light.color;
 
@@ -160,14 +161,12 @@ export default class PBRShader {
 
         ${RayShader.rayFromCamera()}
       `],
-      ["main", `
-        vPosition = position;
-        vNormal = normal;
-        ${this._uvs ? "vUv = uv;" : ""}
-      `],
       ["end", `
+        ${this._uvs ? "vUv = uv;" : ""}
         gl_Position = camera.projectionView * transform * vec4(position, 1.);
-        vRayDirection = rayFromCamera(gl_Position.xy, camera).direction;
+        vPosition = position;
+        vNormal = normalize(mat3(transform) * normal);
+        vRayDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
       `],
     ];
   }
