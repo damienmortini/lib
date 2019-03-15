@@ -126,8 +126,12 @@ export default class PBRShader {
       ray.direction = clamp(ray.direction, vec3(-1.), vec3(1.));
       vec3 color = ray.direction * .5 + .5;
       float grey = (color.r + color.g + color.b) / 3.;
-      color = vec3(grey);
-      return color;
+      return vec3(grey);
+    `,
+    pbrDiffuseLightFromRay = `
+      vec3 color = ray.direction * .5 + .5;
+      float grey = (color.r + color.g + color.b) / 3.;
+      return vec3(grey);
     `,
   } = {}) {
     return `
@@ -136,6 +140,12 @@ export default class PBRShader {
       float roughness
     ) {
       ${pbrReflectionFromRay}
+    }
+
+    vec3 pbrDiffuseLightFromRay(
+      Ray ray
+    ) {
+      ${pbrDiffuseLightFromRay}
     }
 
     // This fragment shader defines a reference implementation for Physically Based Shading of
@@ -178,7 +188,7 @@ export default class PBRShader {
     // See our README.md on Environment Maps [3] for additional discussion.
     vec3 getIBLContribution(PBRInfo pbrInputs, vec3 n, vec3 reflection)
     {
-      vec3 diffuseLight = vec3(.2);
+      vec3 diffuseLight = pbrDiffuseLightFromRay(Ray(vec3(0.), n));
 
       // Fake BRDF Lookup
       vec2 brdfPosition = vec2(pbrInputs.NdotV, pbrInputs.perceptualRoughness);
@@ -190,7 +200,7 @@ export default class PBRShader {
     
       vec3 diffuse = diffuseLight * pbrInputs.diffuseColor;
       vec3 specular = specularLight * (pbrInputs.specularColor * brdf.x + brdf.y);
-      
+
       return diffuse + specular;
     }
 
