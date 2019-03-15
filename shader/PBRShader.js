@@ -173,49 +173,26 @@ export default class PBRShader {
     const float M_PI = 3.141592653589793;
     const float c_MinRoughness = 0.04;
 
-    vec4 SRGBtoLINEAR(vec4 srgbIn)
-    {
-        #ifdef MANUAL_SRGB
-        #ifdef SRGB_FAST_APPROXIMATION
-        vec3 linOut = pow(srgbIn.xyz,vec3(2.2));
-        #else //SRGB_FAST_APPROXIMATION
-        vec3 bLess = step(vec3(0.04045),srgbIn.xyz);
-        vec3 linOut = mix( srgbIn.xyz/vec3(12.92), pow((srgbIn.xyz+vec3(0.055))/vec3(1.055),vec3(2.4)), bLess );
-        #endif //SRGB_FAST_APPROXIMATION
-        return vec4(linOut,srgbIn.w);;
-        #else //MANUAL_SRGB
-        return srgbIn;
-        #endif //MANUAL_SRGB
-    }
-
     // Calculation of the lighting contribution from an optional Image Based Light source.
     // Precomputed Environment Maps are required uniform inputs and are computed as outlined in [1].
     // See our README.md on Environment Maps [3] for additional discussion.
-    #ifdef USE_IBL
     vec3 getIBLContribution(PBRInfo pbrInputs, vec3 n, vec3 reflection)
     {
-        float mipCount = 9.0; // resolution of 512x512
-        float lod = (pbrInputs.perceptualRoughness * mipCount);
-        // retrieve a scale and bias to F0. See [1], Figure 3
-        vec3 brdf = SRGBtoLINEAR(texture2D(u_brdfLUT, vec2(pbrInputs.NdotV, 1.0 - pbrInputs.perceptualRoughness))).rgb;
-        vec3 diffuseLight = SRGBtoLINEAR(textureCube(u_DiffuseEnvSampler, n)).rgb;
+      vec3 diffuseLight = vec3(.2);
 
-    #ifdef USE_TEX_LOD
-        vec3 specularLight = SRGBtoLINEAR(textureCubeLodEXT(u_SpecularEnvSampler, reflection, lod)).rgb;
-    #else
-        vec3 specularLight = SRGBtoLINEAR(textureCube(u_SpecularEnvSampler, reflection)).rgb;
-    #endif
-
-        vec3 diffuse = diffuseLight * pbrInputs.diffuseColor;
-        vec3 specular = specularLight * (pbrInputs.specularColor * brdf.x + brdf.y);
-
-        // For presentation, this allows us to disable IBL terms
-        diffuse *= u_ScaleIBLAmbient.x;
-        specular *= u_ScaleIBLAmbient.y;
-
-        return diffuse + specular;
+      // Fake BRDF Lookup
+      vec2 brdfPosition = vec2(pbrInputs.NdotV, pbrInputs.perceptualRoughness);
+      float brdfLength = length(brdfPosition);
+      vec2 brdf = vec2(1. - smoothstep(0., 2., brdfLength), 1. - smoothstep(0., .3, brdfLength));
+      brdf.x *= 1. - brdf.y;
+    
+      vec3 specularLight = pbrReflectionFromRay(Ray(vec3(0.), reflection), pbrInputs.perceptualRoughness * (1. + c_MinRoughness) - c_MinRoughness);
+    
+      vec3 diffuse = diffuseLight * pbrInputs.diffuseColor;
+      vec3 specular = specularLight * (pbrInputs.specularColor * brdf.x + brdf.y);
+      
+      return diffuse + specular;
     }
-    #endif
 
     // Basic Lambertian diffuse
     // Implementation from Lambert's Photometria https://archive.org/details/lambertsphotome00lambgoog
@@ -295,7 +272,7 @@ export default class PBRShader {
 
         vec3 n = normal;                                  // normal at surface point
         vec3 v = -ray.direction;                          // Vector from surface point to camera
-        vec3 l = normalize(light.direction);              // Vector from surface point to light
+        vec3 l = normalize(-light.direction);             // Vector from surface point to light
         vec3 h = normalize(l+v);                          // Half vector between both l and v
         vec3 reflection = -normalize(reflect(v, n));
 
@@ -332,20 +309,7 @@ export default class PBRShader {
         vec3 color = NdotL * light.color * (diffuseContrib + specContrib);
 
         // Calculate lighting contribution from image based lighting source (IBL)
-      #ifdef USE_IBL
         color += getIBLContribution(pbrInputs, n, reflection);
-      #endif
-
-        // Apply optional PBR terms for additional (optional) shading
-      #ifdef HAS_OCCLUSIONMAP
-        float ao = texture2D(u_OcclusionSampler, v_UV).r;
-        color = mix(color, color * ao, u_OcclusionStrength);
-      #endif
-
-      #ifdef HAS_EMISSIVEMAP
-        vec3 emissive = SRGBtoLINEAR(texture2D(u_EmissiveSampler, v_UV)).rgb * u_EmissiveFactor;
-        color += emissive;
-      #endif
 
         return vec4(pow(color,vec3(1.0/2.2)), baseColor.a);
       }
