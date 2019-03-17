@@ -75,7 +75,7 @@ export default class PBRShader {
     `;
   }
 
-  static computePBRColor({
+  static computeSimplePBRColor({
     pbrReflectionFromRay = `
       ray.direction *= 1. / max(roughness, .0001);
       ray.direction = clamp(ray.direction, vec3(-1.), vec3(1.));
@@ -92,7 +92,7 @@ export default class PBRShader {
       ${pbrReflectionFromRay}
     }
 
-    vec4 computePBRColor (
+    vec4 computeSimplePBRColor (
       Ray ray,
       Light light,
       vec3 position,
@@ -120,9 +120,9 @@ export default class PBRShader {
     `;
   }
 
-  static computePBRColor2({
+  static computePBRColor({
     pbrReflectionFromRay = `
-      ray.direction *= 1. / max(roughness, .0001);
+      ray.direction *= 1. / roughness;
       ray.direction = clamp(ray.direction, vec3(-1.), vec3(1.));
       vec3 color = ray.direction * .5 + .5;
       float grey = (color.r + color.g + color.b) / 3.;
@@ -147,6 +147,8 @@ export default class PBRShader {
     ) {
       ${pbrDiffuseLightFromRay}
     }
+
+    // From https://github.com/KhronosGroup/glTF-WebGL-PBR
 
     // This fragment shader defines a reference implementation for Physically Based Shading of
     // a microfacet surface material defined by a glTF model.
@@ -186,9 +188,9 @@ export default class PBRShader {
     // Calculation of the lighting contribution from an optional Image Based Light source.
     // Precomputed Environment Maps are required uniform inputs and are computed as outlined in [1].
     // See our README.md on Environment Maps [3] for additional discussion.
-    vec3 getIBLContribution(PBRInfo pbrInputs, vec3 n, vec3 reflection)
+    vec3 getIBLContribution(PBRInfo pbrInputs, vec3 n, vec3 reflection, vec3 position)
     {
-      vec3 diffuseLight = pbrDiffuseLightFromRay(Ray(vec3(0.), n));
+      vec3 diffuseLight = pbrDiffuseLightFromRay(Ray(position, n));
 
       // Fake BRDF Lookup
       vec2 brdfPosition = vec2(pbrInputs.NdotV, pbrInputs.perceptualRoughness);
@@ -196,7 +198,7 @@ export default class PBRShader {
       vec2 brdf = vec2(1. - smoothstep(0., 2., brdfLength), 1. - smoothstep(0., .3, brdfLength));
       brdf.x *= 1. - brdf.y;
     
-      vec3 specularLight = pbrReflectionFromRay(Ray(vec3(0.), reflection), pbrInputs.perceptualRoughness * (1. + c_MinRoughness) - c_MinRoughness);
+      vec3 specularLight = pbrReflectionFromRay(Ray(position, reflection), pbrInputs.alphaRoughness);
     
       vec3 diffuse = diffuseLight * pbrInputs.diffuseColor;
       vec3 specular = specularLight * (pbrInputs.specularColor * brdf.x + brdf.y);
@@ -245,7 +247,7 @@ export default class PBRShader {
     }
 
     vec4 computePBRColor(
-      Ray ray,
+      vec3 viewDirection,
       Light light,
       vec3 position,
       vec3 normal,
@@ -281,7 +283,7 @@ export default class PBRShader {
         vec3 specularEnvironmentR90 = vec3(1.0, 1.0, 1.0) * reflectance90;
 
         vec3 n = normal;                                  // normal at surface point
-        vec3 v = -ray.direction;                          // Vector from surface point to camera
+        vec3 v = -viewDirection;                          // Vector from surface point to camera
         vec3 l = normalize(-light.direction);             // Vector from surface point to light
         vec3 h = normalize(l+v);                          // Half vector between both l and v
         vec3 reflection = -normalize(reflect(v, n));
@@ -319,7 +321,7 @@ export default class PBRShader {
         vec3 color = NdotL * light.color * (diffuseContrib + specContrib);
 
         // Calculate lighting contribution from image based lighting source (IBL)
-        color += getIBLContribution(pbrInputs, n, reflection);
+        color += getIBLContribution(pbrInputs, n, reflection, position);
 
         return vec4(pow(color,vec3(1.0/2.2)), baseColor.a);
       }
@@ -332,8 +334,12 @@ export default class PBRShader {
     roughness = 0,
     reflectance = 1,
     uvs = true,
+    pbrDiffuseLightFromRay = undefined,
+    pbrReflectionFromRay = undefined,
   } = {}) {
     this._uvs = !!uvs;
+    this._pbrDiffuseLightFromRay = pbrDiffuseLightFromRay;
+    this._pbrReflectionFromRay = pbrReflectionFromRay;
 
     this.uniforms = {
       material: {
@@ -362,7 +368,7 @@ export default class PBRShader {
         out vec3 vPosition;
         out vec3 vNormal;
         ${this._uvs ? "out vec2 vUv;" : ""}
-        out vec3 vRayDirection;
+        out vec3 vViewDirection;
 
         ${RayShader.rayFromCamera()}
       `],
@@ -371,7 +377,7 @@ export default class PBRShader {
         gl_Position = camera.projectionView * transform * vec4(position, 1.);
         vPosition = position;
         vNormal = normalize(mat3(transform) * normal);
-        vRayDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
+        vViewDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
       `],
     ];
   }
@@ -389,16 +395,18 @@ export default class PBRShader {
         in vec3 vPosition;
         in vec3 vNormal;
         ${this._uvs ? "in vec2 vUv;" : ""}
-        in vec3 vRayDirection;
+        in vec3 vViewDirection;
 
         ${PBRShader.ggx()}
         ${PBRShader.computeGGXLighting()}
-        ${PBRShader.computePBRColor2()}
+        ${PBRShader.computePBRColor({
+          pbrDiffuseLightFromRay: this._pbrDiffuseLightFromRay,
+          pbrReflectionFromRay: this._pbrReflectionFromRay,
+        })}
       `],
       ["end", `
         Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
-        Ray pbrRay = Ray(vec3(0.), vRayDirection);
-        fragColor = computePBRColor(pbrRay, light, vPosition, vNormal, material);
+        fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
       `],
     ];
   }
