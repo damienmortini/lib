@@ -1,7 +1,7 @@
 export default class GLTexture {
   constructor({
-    gl, 
-    data = undefined, 
+    gl,
+    data = undefined,
     width = undefined,
     height = undefined,
     target = (data && data.length) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D,
@@ -9,11 +9,11 @@ export default class GLTexture {
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
-    minFilter = gl.NEAREST_MIPMAP_LINEAR, 
-    magFilter = gl.LINEAR, 
-    wrapS = gl.REPEAT, 
-    wrapT = gl.REPEAT
-  } = {gl}) {
+    minFilter = gl.NEAREST_MIPMAP_LINEAR,
+    magFilter = gl.LINEAR,
+    wrapS = gl.REPEAT,
+    wrapT = gl.REPEAT,
+  }) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
     this._width = width;
@@ -22,7 +22,7 @@ export default class GLTexture {
     this._dataHeight = undefined;
     this._target = target;
     this._unit = 0;
-    
+
     this.level = level;
     this.internalFormat = internalFormat;
     this.format = format;
@@ -43,23 +43,22 @@ export default class GLTexture {
   set data(value) {
     this._data = value;
 
-    if(!this._data && !(this._width && this._height)) {
+    if (!this._data && !(this._width && this._height)) {
       return;
     }
 
     const data = (this._data && this._data.length) ? this._data : [this._data];
 
-    if(data[0]) {
+    if (data[0]) {
       this._dataWidth = data[0].width || data[0].videoWidth;
       this._dataHeight = data[0].height || data[0].videoHeight;
     }
 
-    const count = this._target === this.gl.TEXTURE_CUBE_MAP ? 6 : 1;
     const target = this._target === this.gl.TEXTURE_CUBE_MAP ? this.gl.TEXTURE_CUBE_MAP_POSITIVE_X : this._target;
 
     this.bind();
     for (let i = 0; i < data.length; i++) {
-      if(this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0") && this._dataWidth) {
+      if (this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0") && this._dataWidth) {
         this.gl.texImage2D(target + i, this.level, this.internalFormat, this.format, this.type, data[i]);
       } else {
         this.gl.texImage2D(target + i, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, data[i]);
@@ -91,7 +90,7 @@ export default class GLTexture {
   }
 
   set minFilter(value) {
-    if(this._minFilter === value) {
+    if (this._minFilter === value) {
       return;
     }
     this._minFilter = value;
@@ -105,7 +104,7 @@ export default class GLTexture {
   }
 
   set magFilter(value) {
-    if(this._magFilter === value) {
+    if (this._magFilter === value) {
       return;
     }
     this._magFilter = value;
@@ -119,7 +118,7 @@ export default class GLTexture {
   }
 
   set wrapS(value) {
-    if(this._wrapS === value) {
+    if (this._wrapS === value) {
       return;
     }
     this._wrapS = value;
@@ -133,7 +132,7 @@ export default class GLTexture {
   }
 
   set wrapT(value) {
-    if(this._wrapT === value) {
+    if (this._wrapT === value) {
       return;
     }
     this._wrapT = value;
@@ -146,13 +145,13 @@ export default class GLTexture {
     return this._wrapT;
   }
 
-  bind({unit = 0} = {}) {
+  bind({ unit = 0 } = {}) {
     this._unit = unit;
     this.gl.activeTexture(this.gl.TEXTURE0 + unit);
     this.gl.bindTexture(this._target, this._texture);
   }
 
-  unbind({unit = this._unit} = {}) {
+  unbind({ unit = this._unit } = {}) {
     this.gl.activeTexture(this.gl.TEXTURE0 + unit);
     this.gl.bindTexture(this._target, null);
   }
@@ -160,4 +159,4 @@ export default class GLTexture {
   clone() {
     return new GLTexture(this);
   }
-};
+}
