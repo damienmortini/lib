@@ -4,9 +4,8 @@
 import LightShader from "./LightShader.js";
 import RayShader from "./RayShader.js";
 import CameraShader from "./CameraShader.js";
-import Shader from "../3d/Shader.js";
 
-export default class PBRShader extends Shader {
+export default class PBRShader {
   static get PhysicallyBasedMaterial() {
     return `
     struct PhysicallyBasedMaterial
@@ -341,17 +340,17 @@ export default class PBRShader extends Shader {
     pbrDiffuseLightFromRay = undefined,
     pbrReflectionFromRay = undefined,
   } = {}) {
-    super({
-      uniforms: Object.assign({
-        material: {
-          baseColor,
-          metallic,
-          roughness,
-          reflectance,
-        },
-      }, uniforms),
-      vertexShaderChunks: [
-        ["start", `
+    this.uniforms = Object.assign({
+      material: {
+        baseColor,
+        metallic,
+        roughness,
+        reflectance,
+      },
+    }, uniforms);
+    
+    this.vertexShaderChunks = [
+      ["start", `
           ${CameraShader.Camera}
           ${RayShader.Ray}
           
@@ -370,39 +369,39 @@ export default class PBRShader extends Shader {
   
           ${RayShader.rayFromCamera()}
        `],
-        ["end", `
-          ${uvs ? "vUv = uv;" : ""}
-          gl_Position = camera.projectionView * transform * vec4(position, 1.);
-          vPosition = position;
-          vNormal = normalize(mat3(transform) * normal);
-          vViewDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
-        `],
-        ...vertexShaderChunks,
-      ],
-      fragmentShaderChunks: [
-        ["start", `
-          ${LightShader.Light}
-          ${RayShader.Ray}
-          ${PBRShader.PhysicallyBasedMaterial}
+      ["end", `
+        ${uvs ? "vUv = uv;" : ""}
+        gl_Position = camera.projectionView * transform * vec4(position, 1.);
+        vPosition = position;
+        vNormal = normalize(mat3(transform) * normal);
+        vViewDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
+      `],
+      ...vertexShaderChunks,
+    ];
 
-          uniform PhysicallyBasedMaterial material;
-          uniform Light light;
+    this.fragmentShaderChunks = [
+      ["start", `
+        ${LightShader.Light}
+        ${RayShader.Ray}
+        ${PBRShader.PhysicallyBasedMaterial}
 
-          in vec3 vPosition;
-          in vec3 vNormal;
-          ${uvs ? "in vec2 vUv;" : ""}
-          in vec3 vViewDirection;
+        uniform PhysicallyBasedMaterial material;
+        uniform Light light;
 
-          ${PBRShader.ggx()}
-          ${PBRShader.computeGGXLighting()}
-          ${PBRShader.computePBRColor({ pbrDiffuseLightFromRay, pbrReflectionFromRay })}
-        `],
-        ["end", `
-          Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
-          fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
-        `],
-        ...fragmentShaderChunks,
-      ],
-    });
+        in vec3 vPosition;
+        in vec3 vNormal;
+        ${uvs ? "in vec2 vUv;" : ""}
+        in vec3 vViewDirection;
+
+        ${PBRShader.ggx()}
+        ${PBRShader.computeGGXLighting()}
+        ${PBRShader.computePBRColor({ pbrDiffuseLightFromRay, pbrReflectionFromRay })}
+      `],
+      ["end", `
+        Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
+        fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
+      `],
+      ...fragmentShaderChunks,
+    ];
   }
 }
