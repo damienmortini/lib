@@ -47,6 +47,12 @@ export default class GLVertexAttribute {
     if (!type) {
       if (this.data instanceof Float32Array || this.data instanceof Float64Array) {
         type = this.gl.FLOAT;
+      } else if (this.data instanceof Int8Array) {
+        type = this.gl.BYTE;
+      } else if (this.data instanceof Int16Array) {
+        type = this.gl.SHORT;
+      } else if (this.data instanceof Int32Array) {
+        type = this.gl.INT;
       } else if (this.data instanceof Uint8Array) {
         type = this.gl.UNSIGNED_BYTE;
       } else if (this.data instanceof Uint16Array) {

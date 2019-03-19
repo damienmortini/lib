@@ -7,7 +7,7 @@ export default class GLMesh {
     positions = undefined,
     normals = undefined,
     uvs = undefined,
-    attributes = undefined,
+    attributes = {},
     indices = undefined,
   } = { gl }) {
     this.gl = gl;
@@ -25,7 +25,7 @@ export default class GLMesh {
       this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl);
     }
 
-    this.attributes = new Map(attributes);
+    this.attributes = new Map(attributes.entries ? attributes : Object.entries(attributes));
 
     if (positions) {
       this.attributes.set("position", new GLVertexAttribute({

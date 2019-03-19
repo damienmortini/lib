@@ -9,21 +9,18 @@ import GLTexture from "./GLTexture.js";
 export default class GLProgram extends Shader {
   constructor({
     gl,
+    uniforms = undefined,
     vertexShader = undefined,
     fragmentShader = undefined,
-    uniforms = undefined,
-    transformFeedbackVaryings = undefined,
-    vertexShaderChunks = undefined,
-    fragmentShaderChunks = undefined,
-    shaders = undefined,
-  } = { gl }) {
-    super({
+    shader = {
+      uniforms,
       vertexShader,
       fragmentShader,
-      uniforms,
-      vertexShaderChunks,
-      fragmentShaderChunks,
-      shaders,
+    },
+    transformFeedbackVaryings = undefined,
+  } = { gl }) {
+    super({
+      shaders: [shader],
       dataTypeConctructors: {
         Vector2,
         Vector3,
@@ -45,7 +42,7 @@ export default class GLProgram extends Shader {
 
     const self = this;
 
-    this._vertexAttribDivisor = function() { };
+    this._vertexAttribDivisor = () => { };
     const instancedArraysExtension = this.gl.getExtension("ANGLE_instanced_arrays");
     if (instancedArraysExtension) {
       this._vertexAttribDivisor = instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension);
@@ -70,7 +67,13 @@ export default class GLProgram extends Shader {
           self._attributesLocations.set(name, location);
         }
         gl.enableVertexAttribArray(location);
-        gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+
+        if (type === gl.FLOAT || type === gl.HALF_FLOAT) {
+          gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+        } else {
+          gl.vertexAttribIPointer(location, size, type, normalized, stride, offset);
+        }
+
         buffer.unbind();
         self._vertexAttribDivisor(location, divisor);
         super.set(name, { buffer, size, type, normalized, stride, offset });

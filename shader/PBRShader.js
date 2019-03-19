@@ -4,8 +4,9 @@
 import LightShader from "./LightShader.js";
 import RayShader from "./RayShader.js";
 import CameraShader from "./CameraShader.js";
+import Shader from "../3d/Shader.js";
 
-export default class PBRShader {
+export default class PBRShader extends Shader {
   static get PhysicallyBasedMaterial() {
     return `
     struct PhysicallyBasedMaterial
@@ -340,68 +341,68 @@ export default class PBRShader {
     pbrDiffuseLightFromRay = undefined,
     pbrReflectionFromRay = undefined,
   } = {}) {
-    this.uniforms = Object.assign({
-      material: {
-        baseColor,
-        metallic,
-        roughness,
-        reflectance,
-      },
-    }, uniforms);
+    super({
+      uniforms: Object.assign({
+        material: {
+          baseColor,
+          metallic,
+          roughness,
+          reflectance,
+        },
+      }, uniforms),
+      vertexShaderChunks: [
+        ["start", `
+            ${CameraShader.Camera}
+            ${RayShader.Ray}
+            
+            uniform Camera camera;
+            uniform mat4 projectionView;
+            uniform mat4 transform;
     
-    this.vertexShaderChunks = [
-      ["start", `
-          ${CameraShader.Camera}
+            in vec3 position;
+            in vec3 normal;
+            ${uvs ? "in vec2 uv;" : ""}
+            
+            out vec3 vPosition;
+            out vec3 vNormal;
+            ${uvs ? "out vec2 vUV;" : ""}
+            out vec3 vViewDirection;
+    
+            ${RayShader.rayFromCamera()}
+         `],
+        ["end", `
+          ${uvs ? "vUV = uv;" : ""}
+          gl_Position = camera.projectionView * transform * vec4(position, 1.);
+          vPosition = position;
+          vNormal = normalize(mat3(transform) * normal);
+          vViewDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
+        `],
+        ...vertexShaderChunks,
+      ],
+      fragmentShaderChunks: [
+        ["start", `
+          ${LightShader.Light}
           ${RayShader.Ray}
-          
-          uniform Camera camera;
-          uniform mat4 projectionView;
-          uniform mat4 transform;
+          ${PBRShader.PhysicallyBasedMaterial}
   
-          in vec3 position;
-          in vec3 normal;
-          ${uvs ? "in vec2 uv;" : ""}
-          
-          out vec3 vPosition;
-          out vec3 vNormal;
-          ${uvs ? "out vec2 vUv;" : ""}
-          out vec3 vViewDirection;
+          uniform PhysicallyBasedMaterial material;
+          uniform Light light;
   
-          ${RayShader.rayFromCamera()}
-       `],
-      ["end", `
-        ${uvs ? "vUv = uv;" : ""}
-        gl_Position = camera.projectionView * transform * vec4(position, 1.);
-        vPosition = position;
-        vNormal = normalize(mat3(transform) * normal);
-        vViewDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
-      `],
-      ...vertexShaderChunks,
-    ];
-
-    this.fragmentShaderChunks = [
-      ["start", `
-        ${LightShader.Light}
-        ${RayShader.Ray}
-        ${PBRShader.PhysicallyBasedMaterial}
-
-        uniform PhysicallyBasedMaterial material;
-        uniform Light light;
-
-        in vec3 vPosition;
-        in vec3 vNormal;
-        ${uvs ? "in vec2 vUv;" : ""}
-        in vec3 vViewDirection;
-
-        ${PBRShader.ggx()}
-        ${PBRShader.computeGGXLighting()}
-        ${PBRShader.computePBRColor({ pbrDiffuseLightFromRay, pbrReflectionFromRay })}
-      `],
-      ["end", `
-        Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
-        fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
-      `],
-      ...fragmentShaderChunks,
-    ];
+          in vec3 vPosition;
+          in vec3 vNormal;
+          ${uvs ? "in vec2 vUV;" : ""}
+          in vec3 vViewDirection;
+  
+          ${PBRShader.ggx()}
+          ${PBRShader.computeGGXLighting()}
+          ${PBRShader.computePBRColor({ pbrDiffuseLightFromRay, pbrReflectionFromRay })}
+        `],
+        ["end", `
+          Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
+          fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
+        `],
+        ...fragmentShaderChunks,
+      ]
+    });
   }
 }

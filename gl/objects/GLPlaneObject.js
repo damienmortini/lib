@@ -1,8 +1,8 @@
+import Shader from "../../3d/Shader.js";
 import PlaneMesh from "../../3d/mesh/PlaneMesh.js";
 import GLObject from "../GLObject.js";
 import GLMesh from "../GLMesh.js";
 import GLProgram from "../GLProgram.js";
-import BasicShader from "../../shader/BasicShader.js";
 
 export default class GLPlaneObject extends GLObject {
   constructor({
@@ -11,35 +11,37 @@ export default class GLPlaneObject extends GLObject {
     height = undefined,
     columns = undefined,
     rows = undefined,
-    normals = true,
-    uvs = true,
-    shaders = [],
-  } = { gl }) {
+    attributes = undefined,
+    normals = false,
+    uvs = false,
+    shader = new Shader({
+      vertexShaderChunks: [
+        ["start", `
+          in vec3 position;
+        `],
+        ["end", `
+          gl_Position = vec4(position, 1.);
+        `],
+      ],
+    }),
+  }) {
     super({
       gl,
-      mesh: new GLMesh({
+      mesh: new GLMesh(Object.assign({
         gl,
-        ...new PlaneMesh({
-          width,
-          height,
-          columns,
-          rows,
-          normals,
-          uvs,
-        })
-      }),
+        attributes,
+      }, new PlaneMesh({
+        width,
+        height,
+        columns,
+        rows,
+        normals,
+        uvs,
+      }))),
       program: new GLProgram({
         gl,
-        shaders: [
-          new BasicShader({
-            normals: normals,
-            uvs: uvs,
-          }),
-          ...shaders,
-        ],
+        shader,
       }),
     });
-
-    this.transform = this.program.uniforms.get("transform");
   }
 }

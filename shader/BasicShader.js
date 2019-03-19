@@ -1,46 +1,47 @@
-export default class BasicShader {
+import Shader from "../3d/Shader.js";
+
+export default class BasicShader extends Shader {
   constructor({
     positions = true,
     normals = true,
     uvs = true,
+    uniforms = undefined,
+    vertexShaderChunks = [],
+    fragmentShaderChunks = [],
   } = {}) {
-    this._positions = !!positions;
-    this._normals = !!normals;
-    this._uvs = !!uvs;
-  }
-
-  get vertexShaderChunks() {
-    return [
-      ["start", `
-        uniform mat4 projectionView;
-        uniform mat4 transform;
-
-        ${this._positions ? "in vec3 position;" : ""}
-        ${this._normals ? "in vec3 normal;" : ""}
-        ${this._uvs ? "in vec2 uv;" : ""}
-
-        ${this._positions ? "out vec3 vPosition;" : ""}
-        ${this._normals ? "out vec3 vNormal;" : ""}
-        ${this._uvs ? "out vec2 vUv;" : ""}
-      `],
-      ["main", `
-        ${this._positions ? "vPosition = position;" : ""}
-        ${this._normals ? "vNormal = normal;" : ""}
-        ${this._uvs ? "vUv = uv;" : ""}
-      `],
-      ["end", `
-        gl_Position = projectionView * transform * vec4(position, 1.);
-      `],
-    ];
-  }
-
-  get fragmentShaderChunks() {
-    return [
-      ["start", `
-        ${this._positions ? "in vec3 vPosition;" : ""}
-        ${this._normals ? "in vec3 vNormal;" : ""}
-        ${this._uvs ? "in vec2 vUv;" : ""}
-      `],
-    ];
+    super({
+      uniforms,
+      vertexShaderChunks: [
+        ["start", `
+          uniform mat4 projectionView;
+          uniform mat4 transform;
+  
+          ${positions ? "in vec3 position;" : ""}
+          ${normals ? "in vec3 normal;" : ""}
+          ${uvs ? "in vec2 uv;" : ""}
+  
+          ${positions ? "out vec3 vPosition;" : ""}
+          ${normals ? "out vec3 vNormal;" : ""}
+          ${uvs ? "out vec2 vUV;" : ""}
+        `],
+        ["main", `
+          ${positions ? "vPosition = position;" : ""}
+          ${normals ? "vNormal = normal;" : ""}
+          ${uvs ? "vUV = uv;" : ""}
+        `],
+        ["end", `
+          gl_Position = projectionView * transform * vec4(position, 1.);
+        `],
+        ...vertexShaderChunks,
+      ],
+      fragmentShaderChunks: [
+        ["start", `
+          ${positions ? "in vec3 vPosition;" : ""}
+          ${normals ? "in vec3 vNormal;" : ""}
+          ${uvs ? "in vec2 vUV;" : ""}
+        `],
+        ...fragmentShaderChunks,
+      ],
+    });
   }
 }

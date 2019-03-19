@@ -1,5 +1,3 @@
-import GLMesh from "./GLMesh.js";
-import GLProgram from "./GLProgram.js";
 import GLVertexArray from "./GLVertexArray.js";
 import GLTexture from "./GLTexture.js";
 
