@@ -9,12 +9,15 @@ export default class GLMSDFTextObject extends GLPlaneObject {
     fontData,
     textContent = "",
     fillStyle = "black",
-    textAlign = "start",
-    textScale = 1,
+    textAlign = "left",
+    verticalAlign = "top",
+    fontSize = 16,
   }) {
     const glyphsData = new Map();
     const uvRectangles = [];
     const sizes = [];
+    console.log(fontData);
+    
     for (const [index, glyphData] of fontData.chars.entries()) {
       uvRectangles.push([glyphData.x / fontImage.width, glyphData.y / fontImage.height, glyphData.width / fontImage.width, glyphData.height / fontImage.height]);
       sizes.push([glyphData.width, glyphData.height]);
@@ -48,7 +51,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
             wrapT: gl.CLAMP_TO_EDGE,
             minFilter: gl.LINEAR,
           }),
-          msdfTextScale: textScale,
+          msdfFontScale: fontSize / fontData.info.size,
           msdfTextUVRectangles: uvRectangles,
           msdfTextSizes: sizes,
           msdfTextPixelRange: parseFloat(fontData.distanceField.distanceRange),
@@ -56,7 +59,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
         vertexShaderChunks: [
           ["start", `
             uniform vec2 msdfTextSizes[${fontData.chars.length}];
-            uniform float msdfTextScale;
+            uniform float msdfFontScale;
 
             in int msdfTextGlyphIndex;
             in vec2 msdfTextGlyphPosition;
@@ -65,8 +68,8 @@ export default class GLMSDFTextObject extends GLPlaneObject {
           `],
           ["main", `
             vec3 position = position;
-            position.xy *= msdfTextSizes[msdfTextGlyphIndex] * msdfTextScale;
-            position.xy += msdfTextGlyphPosition * msdfTextScale;
+            position.xy *= msdfTextSizes[msdfTextGlyphIndex] * msdfFontScale;
+            position.xy += msdfTextGlyphPosition * msdfFontScale;
           `],
           ["end", `
             vMSDFTextGlyphIndex = msdfTextGlyphIndex;
@@ -96,10 +99,12 @@ export default class GLMSDFTextObject extends GLPlaneObject {
 
     this._glyphsData = glyphsData;
     this._glyphsNumber = 0;
+    this._lineHeight = fontData.common.lineHeight;
 
-    this.textContent = textContent;
-    this.fillStyle = fillStyle;
     this.textAlign = textAlign;
+    this.verticalAlign = verticalAlign;
+    this.fillStyle = fillStyle;
+    this.textContent = textContent;
   }
 
   get textContent() {
@@ -112,11 +117,13 @@ export default class GLMSDFTextObject extends GLPlaneObject {
     const glyphIndexes = [];
     const glyphPositionAttribute = this.mesh.attributes.get("msdfTextGlyphPosition");
     const glyphPositions = [];
+
     let lineXOffset = 0;
-    for (const character of this._textContent) {
+
+    for (const [index, character] of [...this._textContent].entries()) {
       const glyphData = this._glyphsData.get(character);
       console.log(glyphData);
-      
+
       if (character !== " ") {
         glyphIndexes.push(glyphData._glyphIndex);
         const x = lineXOffset + glyphData.width * .5 + glyphData.xoffset;
@@ -125,7 +132,22 @@ export default class GLMSDFTextObject extends GLPlaneObject {
         this._glyphsNumber++;
       }
       lineXOffset += glyphData.xadvance;
+
+      if (index === this._textContent.length - 1) {
+        if (this.textAlign === "center") {
+          for (let index = 0; index < glyphPositions.length; index += 2) {
+            glyphPositions[index] -= lineXOffset * .5;
+          }
+        }
+
+        if (this.verticalAlign === "middle") {
+          for (let index = 0; index < glyphPositions.length; index += 2) {
+            glyphPositions[index + 1] += this._lineHeight * .5;
+          }
+        }
+      }
     }
+
     glyphIndexAttribute.data = new Uint8Array(glyphIndexes);
     glyphPositionAttribute.data = new Float32Array(glyphPositions);
   }
