@@ -11,13 +11,14 @@ export default class GLMSDFTextObject extends GLPlaneObject {
     fillStyle = "black",
     textAlign = "left",
     verticalAlign = "top",
+    maxWidth = Infinity,
     fontSize = 16,
   }) {
     const glyphsData = new Map();
     const uvRectangles = [];
     const sizes = [];
-    console.log(fontData);
-    
+    const fontScale = fontSize / fontData.info.size;
+
     for (const [index, glyphData] of fontData.chars.entries()) {
       uvRectangles.push([glyphData.x / fontImage.width, glyphData.y / fontImage.height, glyphData.width / fontImage.width, glyphData.height / fontImage.height]);
       sizes.push([glyphData.width, glyphData.height]);
@@ -51,7 +52,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
             wrapT: gl.CLAMP_TO_EDGE,
             minFilter: gl.LINEAR,
           }),
-          msdfFontScale: fontSize / fontData.info.size,
+          msdfFontScale: fontScale,
           msdfTextUVRectangles: uvRectangles,
           msdfTextSizes: sizes,
           msdfTextPixelRange: parseFloat(fontData.distanceField.distanceRange),
@@ -100,7 +101,9 @@ export default class GLMSDFTextObject extends GLPlaneObject {
     this._glyphsData = glyphsData;
     this._glyphsNumber = 0;
     this._lineHeight = fontData.common.lineHeight;
+    this._fontScale = fontScale;
 
+    this.maxWidth = maxWidth;
     this.textAlign = textAlign;
     this.verticalAlign = verticalAlign;
     this.fillStyle = fillStyle;
@@ -113,46 +116,67 @@ export default class GLMSDFTextObject extends GLPlaneObject {
 
   set textContent(value) {
     this._textContent = value;
-    const glyphIndexAttribute = this.mesh.attributes.get("msdfTextGlyphIndex");
-    const glyphIndexes = [];
-    const glyphPositionAttribute = this.mesh.attributes.get("msdfTextGlyphPosition");
-    const glyphPositions = [];
+
+    const glyphIndexes = new Int8Array(this._textContent.length);
+    const glyphPositions = new Float32Array(this._textContent.length * 2);
 
     let lineXOffset = 0;
+    let lineYOffset = 0;
 
-    for (const [index, character] of [...this._textContent].entries()) {
-      const glyphData = this._glyphsData.get(character);
-      console.log(glyphData);
+    let linelastWordXOffset = 0;
+    let lineFirstWordFirstGlyphId = 0;
+    let lineLastWordFirstGlyphId = 0;
 
-      if (character !== " ") {
-        glyphIndexes.push(glyphData._glyphIndex);
-        const x = lineXOffset + glyphData.width * .5 + glyphData.xoffset;
-        const y = -glyphData.height * .5 - glyphData.yoffset;
-        glyphPositions.push(x, y);
-        this._glyphsNumber++;
-      }
-      lineXOffset += glyphData.xadvance;
+    for (let index = 0; index < this._textContent.length; index++) {
+      const glyph = this._textContent[index];
 
-      if (index === this._textContent.length - 1) {
+      const glyphData = this._glyphsData.get(glyph);
+
+      glyphIndexes[index] = glyphData._glyphIndex;
+
+      glyphPositions[index * 2] = lineXOffset + glyphData.width * .5 + glyphData.xoffset;
+      glyphPositions[index * 2 + 1] = -glyphData.height * .5 - glyphData.yoffset - lineYOffset;
+
+      if (lineXOffset > this.maxWidth / this._fontScale && lineLastWordFirstGlyphId !== lineFirstWordFirstGlyphId) {
         if (this.textAlign === "center") {
-          for (let index = 0; index < glyphPositions.length; index += 2) {
-            glyphPositions[index] -= lineXOffset * .5;
+          for (let textAlignIndex = lineFirstWordFirstGlyphId; textAlignIndex < lineLastWordFirstGlyphId; textAlignIndex++) {
+            glyphPositions[textAlignIndex * 2] -= linelastWordXOffset * .5;
           }
         }
 
-        if (this.verticalAlign === "middle") {
-          for (let index = 0; index < glyphPositions.length; index += 2) {
-            glyphPositions[index + 1] += this._lineHeight * .5;
-          }
-        }
+        lineXOffset = 0;
+        lineYOffset += this._lineHeight;
+        index = lineLastWordFirstGlyphId;
+        lineFirstWordFirstGlyphId = lineLastWordFirstGlyphId;
+
+        continue;
+      }
+
+      if (glyph === " ") {
+        linelastWordXOffset = lineXOffset;
+        lineLastWordFirstGlyphId = index;
+      }
+
+      lineXOffset += glyphData.xadvance;
+    }
+
+    if (this.textAlign === "center") {
+      for (let textAlignIndex = lineFirstWordFirstGlyphId; textAlignIndex < this._textContent.length; textAlignIndex++) {
+        glyphPositions[textAlignIndex * 2] -= lineXOffset * .5;
       }
     }
 
-    glyphIndexAttribute.data = new Uint8Array(glyphIndexes);
-    glyphPositionAttribute.data = new Float32Array(glyphPositions);
+    if (this.verticalAlign === "middle") {
+      for (let index = 0; index < glyphPositions.length; index += 2) {
+        glyphPositions[index + 1] += lineYOffset * .5 + this._lineHeight * .5;
+      }
+    }
+
+    this.mesh.attributes.get("msdfTextGlyphIndex").data = glyphIndexes;
+    this.mesh.attributes.get("msdfTextGlyphPosition").data = glyphPositions;
   }
 
   draw(options) {
-    super.draw(Object.assign({ instanceCount: this._glyphsNumber }, options));
+    super.draw(Object.assign({ instanceCount: this.textContent.length }, options));
   }
 }
