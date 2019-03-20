@@ -8,6 +8,7 @@ export default class BasicShader extends Shader {
     uniforms = undefined,
     vertexShaderChunks = [],
     fragmentShaderChunks = [],
+    shaders = [],
   } = {}) {
     super({
       uniforms,
@@ -42,6 +43,7 @@ export default class BasicShader extends Shader {
         `],
         ...fragmentShaderChunks,
       ],
+      shaders,
     });
   }
 }

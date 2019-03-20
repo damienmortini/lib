@@ -11,9 +11,9 @@ export default class GLPlaneObject extends GLObject {
     height = undefined,
     columns = undefined,
     rows = undefined,
-    attributes = undefined,
     normals = false,
     uvs = false,
+    attributes = undefined,
     shader = new Shader({
       vertexShaderChunks: [
         ["start", `
