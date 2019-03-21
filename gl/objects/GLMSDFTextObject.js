@@ -16,6 +16,8 @@ export default class GLMSDFTextObject extends GLPlaneObject {
     attributes = {},
     shader = undefined,
   }) {
+    const isWebGL1 = gl instanceof WebGLRenderingContext;
+
     const glyphsData = new Map();
     const uvRectangles = [];
     const sizes = [];
@@ -28,6 +30,8 @@ export default class GLMSDFTextObject extends GLPlaneObject {
       glyphsData.set(glyphData.char, glyphData);
     }
 
+    gl.getExtension("OES_standard_derivatives");
+
     super({
       gl,
       width: 1,
@@ -35,7 +39,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
       uvs: true,
       attributes: Object.assign({
         msdfTextGlyphIndex: {
-          data: new Int8Array(2),
+          data: new (isWebGL1 ? Float32Array : Int8Array)(2),
           size: 1,
           divisor: 1,
         },
@@ -55,6 +59,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
             minFilter: gl.LINEAR,
           }),
           msdfFontScale: fontScale,
+          msdfTextFontTextureSize: [fontImage.width, fontImage.height],
           msdfTextUVRectangles: uvRectangles,
           msdfTextSizes: sizes,
           msdfTextPixelRange: parseFloat(fontData.distanceField.distanceRange),
@@ -62,47 +67,51 @@ export default class GLMSDFTextObject extends GLPlaneObject {
         vertexShaderChunks: [
           ["start", `
             uniform vec2 msdfTextSizes[${fontData.chars.length}];
+            uniform vec4 msdfTextUVRectangles[${fontData.chars.length}];
             uniform float msdfFontScale;
 
-            in int msdfTextGlyphIndex;
+            ${isWebGL1 ? "in float msdfTextGlyphIndex;" : "in int msdfTextGlyphIndex;"}
             in vec2 msdfTextGlyphPosition;
 
-            flat out int vMSDFTextGlyphIndex;
+            out vec2 vMSDFTextPosition;
           `],
           ["main", `
             vec3 position = position;
 
-            position.xy *= msdfTextSizes[msdfTextGlyphIndex] * msdfFontScale;
+            position.xy *= msdfTextSizes[int(msdfTextGlyphIndex)] * msdfFontScale;
             position.xy += msdfTextGlyphPosition * msdfFontScale;
           `],
           ["end", `
-            vMSDFTextGlyphIndex = msdfTextGlyphIndex;
+            vec4 msdfTextUVRectangle = msdfTextUVRectangles[int(msdfTextGlyphIndex)];
+            vMSDFTextPosition = vec2(msdfTextUVRectangle.x + msdfTextUVRectangle.z * uv.x, msdfTextUVRectangle.y + msdfTextUVRectangle.w * (1. - uv.y));
           `],
         ],
         fragmentShaderChunks: [
           ["start", `
             uniform sampler2D msdfTextFontTexture;
             uniform float msdfTextPixelRange;
-            uniform vec4 msdfTextUVRectangles[${fontData.chars.length}];
+            uniform vec2 msdfTextFontTextureSize;
 
-            flat in int vMSDFTextGlyphIndex;
+            in vec2 vMSDFTextPosition;
           `],
           ["end", `
-            vec4 msdfTextUVRectangle = msdfTextUVRectangles[vMSDFTextGlyphIndex];
-            vec2 msdfTextPosition = vec2(msdfTextUVRectangle.x + msdfTextUVRectangle.z * vUV.x, msdfTextUVRectangle.y + msdfTextUVRectangle.w * (1. - vUV.y));
-            vec2 msdfTextUnit = msdfTextPixelRange / vec2(textureSize(msdfTextFontTexture, 0));
-            vec3 msdfTextTexel = texture(msdfTextFontTexture, msdfTextPosition).rgb;
+            vec3 msdfTextTexel = texture(msdfTextFontTexture, vMSDFTextPosition).rgb;
             float msdfTextSDF = max(min(msdfTextTexel.r, msdfTextTexel.g), min(max(msdfTextTexel.r, msdfTextTexel.g), msdfTextTexel.b));
             float msdfTextSDFValue = msdfTextSDF - .5;
-            msdfTextSDFValue *= dot(msdfTextUnit, .5 / fwidth(msdfTextPosition));
+            msdfTextSDFValue *= dot(msdfTextPixelRange / msdfTextFontTextureSize, .5 / fwidth(vMSDFTextPosition));
             msdfTextSDFValue = clamp(msdfTextSDFValue, 0., 1.);
             fragColor = vec4(vec3(1.), msdfTextSDFValue);
           `],
         ],
-        shaders: [shader],
+        shaders: [shader, {
+          fragmentShaderChunks: [
+            ["precision highp float;", isWebGL1 ? "#extension GL_OES_standard_derivatives : enable\nprecision highp float;" : "precision highp float;"],
+          ],
+        }],
       }),
     });
 
+    this._isWebGL1 = isWebGL1;
     this._glyphsData = glyphsData;
     this._glyphsNumber = 0;
     this._lineHeight = fontData.common.lineHeight;
@@ -123,7 +132,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
   set textContent(value) {
     this._textContent = value;
 
-    const glyphIndexes = new Int8Array(this._textContent.length);
+    const glyphIndexes = new (this._isWebGL1 ? Float32Array : Int8Array)(this._textContent.length);
     const glyphPositions = new Float32Array(this._textContent.length * 2);
 
     let lineXOffset = 0;
