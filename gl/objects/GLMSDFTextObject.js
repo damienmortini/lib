@@ -1,5 +1,6 @@
 import GLTexture from "../GLTexture.js";
 import GLPlaneObject from "./GLPlaneObject.js";
+import GLProgram from "../GLProgram.js";
 import BasicShader from "../../shader/BasicShader.js";
 
 export default class GLMSDFTextObject extends GLPlaneObject {
@@ -49,65 +50,68 @@ export default class GLMSDFTextObject extends GLPlaneObject {
           divisor: 1,
         },
       }, attributes),
-      shader: new BasicShader({
-        uniforms: {
-          msdfTextFontTexture: new GLTexture({
-            gl,
-            data: fontImage,
-            wrapS: gl.CLAMP_TO_EDGE,
-            wrapT: gl.CLAMP_TO_EDGE,
-            minFilter: gl.LINEAR,
-          }),
-          msdfFontScale: fontScale,
-          msdfTextFontTextureSize: [fontImage.width, fontImage.height],
-          msdfTextUVRectangles: uvRectangles,
-          msdfTextSizes: sizes,
-          msdfTextPixelRange: parseFloat(fontData.distanceField.distanceRange),
-        },
-        vertexShaderChunks: [
-          ["start", `
-            uniform vec2 msdfTextSizes[${fontData.chars.length}];
-            uniform vec4 msdfTextUVRectangles[${fontData.chars.length}];
-            uniform float msdfFontScale;
+      program: new GLProgram({
+        gl,
+        shader: new BasicShader({
+          uniforms: {
+            msdfTextFontTexture: new GLTexture({
+              gl,
+              data: fontImage,
+              wrapS: gl.CLAMP_TO_EDGE,
+              wrapT: gl.CLAMP_TO_EDGE,
+              minFilter: gl.LINEAR,
+            }),
+            msdfFontScale: fontScale,
+            msdfTextFontTextureSize: [fontImage.width, fontImage.height],
+            msdfTextUVRectangles: uvRectangles,
+            msdfTextSizes: sizes,
+            msdfTextPixelRange: parseFloat(fontData.distanceField.distanceRange),
+          },
+          vertexShaderChunks: [
+            ["start", `
+              uniform vec2 msdfTextSizes[${fontData.chars.length}];
+              uniform vec4 msdfTextUVRectangles[${fontData.chars.length}];
+              uniform float msdfFontScale;
 
-            ${isWebGL1 ? "in float msdfTextGlyphIndex;" : "in int msdfTextGlyphIndex;"}
-            in vec2 msdfTextGlyphPosition;
+              ${isWebGL1 ? "in float msdfTextGlyphIndex;" : "in int msdfTextGlyphIndex;"}
+              in vec2 msdfTextGlyphPosition;
 
-            out vec2 vMSDFTextPosition;
-          `],
-          ["main", `
-            vec3 position = position;
+              out vec2 vMSDFTextPosition;
+            `],
+            ["main", `
+              vec3 position = position;
 
-            position.xy *= msdfTextSizes[int(msdfTextGlyphIndex)] * msdfFontScale;
-            position.xy += msdfTextGlyphPosition * msdfFontScale;
-          `],
-          ["end", `
-            vec4 msdfTextUVRectangle = msdfTextUVRectangles[int(msdfTextGlyphIndex)];
-            vMSDFTextPosition = vec2(msdfTextUVRectangle.x + msdfTextUVRectangle.z * uv.x, msdfTextUVRectangle.y + msdfTextUVRectangle.w * (1. - uv.y));
-          `],
-        ],
-        fragmentShaderChunks: [
-          ["start", `
-            uniform sampler2D msdfTextFontTexture;
-            uniform float msdfTextPixelRange;
-            uniform vec2 msdfTextFontTextureSize;
-
-            in vec2 vMSDFTextPosition;
-          `],
-          ["end", `
-            vec3 msdfTextTexel = texture(msdfTextFontTexture, vMSDFTextPosition).rgb;
-            float msdfTextSDF = max(min(msdfTextTexel.r, msdfTextTexel.g), min(max(msdfTextTexel.r, msdfTextTexel.g), msdfTextTexel.b));
-            float msdfTextSDFValue = msdfTextSDF - .5;
-            msdfTextSDFValue *= dot(msdfTextPixelRange / msdfTextFontTextureSize, .5 / fwidth(vMSDFTextPosition));
-            msdfTextSDFValue = clamp(msdfTextSDFValue, 0., 1.);
-            fragColor = vec4(vec3(1.), msdfTextSDFValue);
-          `],
-        ],
-        shaders: [shader, {
-          fragmentShaderChunks: [
-            ["precision highp float;", isWebGL1 ? "#extension GL_OES_standard_derivatives : enable\nprecision highp float;" : "precision highp float;"],
+              position.xy *= msdfTextSizes[int(msdfTextGlyphIndex)] * msdfFontScale;
+              position.xy += msdfTextGlyphPosition * msdfFontScale;
+            `],
+            ["end", `
+              vec4 msdfTextUVRectangle = msdfTextUVRectangles[int(msdfTextGlyphIndex)];
+              vMSDFTextPosition = vec2(msdfTextUVRectangle.x + msdfTextUVRectangle.z * uv.x, msdfTextUVRectangle.y + msdfTextUVRectangle.w * (1. - uv.y));
+            `],
           ],
-        }],
+          fragmentShaderChunks: [
+            ["start", `
+              uniform sampler2D msdfTextFontTexture;
+              uniform float msdfTextPixelRange;
+              uniform vec2 msdfTextFontTextureSize;
+
+              in vec2 vMSDFTextPosition;
+            `],
+            ["end", `
+              vec3 msdfTextTexel = texture(msdfTextFontTexture, vMSDFTextPosition).rgb;
+              float msdfTextSDF = max(min(msdfTextTexel.r, msdfTextTexel.g), min(max(msdfTextTexel.r, msdfTextTexel.g), msdfTextTexel.b));
+              float msdfTextSDFValue = msdfTextSDF - .5;
+              msdfTextSDFValue *= dot(msdfTextPixelRange / msdfTextFontTextureSize, .5 / fwidth(vMSDFTextPosition));
+              msdfTextSDFValue = clamp(msdfTextSDFValue, 0., 1.);
+              fragColor = vec4(vec3(1.), msdfTextSDFValue);
+            `],
+          ],
+          shaders: [shader, {
+            fragmentShaderChunks: [
+              ["precision highp float;", isWebGL1 ? "#extension GL_OES_standard_derivatives : enable\nprecision highp float;" : "precision highp float;"],
+            ],
+          }],
+        }),
       }),
     });
 

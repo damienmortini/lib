@@ -14,15 +14,18 @@ export default class GLPlaneObject extends GLObject {
     normals = false,
     uvs = false,
     attributes = undefined,
-    shader = new Shader({
-      vertexShaderChunks: [
-        ["start", `
-          in vec3 position;
-        `],
-        ["end", `
-          gl_Position = vec4(position, 1.);
-        `],
-      ],
+    program = new GLProgram({
+      gl,
+      shader: {
+        vertexShaderChunks: [
+          ["start", `
+            in vec3 position;
+          `],
+          ["end", `
+            gl_Position = vec4(position, 1.);
+          `],
+        ],
+      }
     }),
   }) {
     super({
@@ -38,10 +41,7 @@ export default class GLPlaneObject extends GLObject {
         normals,
         uvs,
       }))),
-      program: new GLProgram({
-        gl,
-        shader,
-      }),
+      program,
     });
   }
 }
