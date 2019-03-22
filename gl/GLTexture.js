@@ -4,7 +4,7 @@ export default class GLTexture {
     data = undefined,
     width = undefined,
     height = undefined,
-    target = (data && data.length) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D,
+    target = gl.TEXTURE_2D,
     level = 0,
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
@@ -43,26 +43,17 @@ export default class GLTexture {
   set data(value) {
     this._data = value;
 
-    if (!this._data && !(this._width && this._height)) {
-      return;
+    if (this._data && this._data.width) {
+      this._dataWidth = this._data.width || this._data.videoWidth;
+      this._dataHeight = this._data.height || this._data.videoHeight;
     }
 
-    const data = (this._data && this._data.length) ? this._data : [this._data];
-
-    if (data[0]) {
-      this._dataWidth = data[0].width || data[0].videoWidth;
-      this._dataHeight = data[0].height || data[0].videoHeight;
-    }
-
-    const target = this._target === this.gl.TEXTURE_CUBE_MAP ? this.gl.TEXTURE_CUBE_MAP_POSITIVE_X : this._target;
-
+    
     this.bind();
-    for (let i = 0; i < data.length; i++) {
-      if (this.gl.getParameter(this.gl.VERSION).startsWith("WebGL 1.0") && this._dataWidth) {
-        this.gl.texImage2D(target + i, this.level, this.internalFormat, this.format, this.type, data[i]);
-      } else {
-        this.gl.texImage2D(target + i, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, data[i]);
-      }
+    if (this.gl instanceof WebGLRenderingContext && this._dataWidth) {
+      this.gl.texImage2D(this._target, this.level, this.internalFormat, this.format, this.type, this._data);
+    } else {
+      this.gl.texImage2D(this._target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this._data);
     }
     this.unbind();
   }
