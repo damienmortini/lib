@@ -90,6 +90,10 @@ export default class Vector3 extends Float32Array {
     return vec3.dot(this, vector3);
   }
 
+  lerp(vector3, value) {
+    return vec3.lerp(this, this, vector3, value);
+  }
+
   equals(vector3) {
     return vec3.exactEquals(this, vector3);
   }
