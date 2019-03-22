@@ -8,38 +8,48 @@ export default class GLGPGPUSystem {
     gl,
     data,
     maxWidth = 1024,
-    channels = 4,
   }) {
+    this.gl = gl;
+
+    if (this.gl instanceof WebGLRenderingContext) {
+      this.gl.getExtension("OES_texture_float");
+    } else {
+      this.gl.getExtension("EXT_color_buffer_float");
+    }
+
+    const channels = 4;
+
     const length = data.length / channels;
     this._width = Math.min(length, maxWidth);
     this._height = Math.ceil(length / maxWidth);
 
-    // console.log(data);
-    
+    const textureData = new Float32Array(this._width * this._height * channels);
+    textureData.set(data);
 
     this._frameBufferIn = new GLFrameBuffer({
-      gl,
+      gl: this.gl,
       colorTextures: [new GLTexture({
-        gl,
-        // data,
+        gl: this.gl,
+        data: textureData,
         width: this._width,
         height: this._height,
-        minFilter: gl.NEAREST,
-        magFilter: gl.NEAREST,
-        format: gl.RGBA,
-        internalFormat: gl.RGBA32F,
-        type: gl.FLOAT,
+        minFilter: this.gl.NEAREST,
+        magFilter: this.gl.NEAREST,
+        format: this.gl.RGBA,
+        internalFormat: this.gl instanceof WebGLRenderingContext ? this.gl.RGBA : this.gl.RGBA32F,
+        type: this.gl.FLOAT,
       })],
     });
     this._frameBufferOut = this._frameBufferIn.clone();
+    this._frameBufferOut.colorTextures[0].data = new Float32Array(this._width * this._height * channels);
 
     this._quad = new GLPlaneObject({
-      gl,
-      width: 1,
-      height: 1,
+      gl: this.gl,
+      width: 2,
+      height: 2,
       uvs: true,
       program: new GLProgram({
-        gl,
+        gl: this.gl,
         shader: {
           uniforms: {
             dataTexture: this._frameBufferIn.colorTextures[0],
@@ -59,10 +69,12 @@ export default class GLGPGPUSystem {
           ],
           fragmentShaderChunks: [
             ["start", `
+              uniform sampler2D dataTexture;
               in vec2 vUV;
             `],
             ["end", `
-              fragColor = vec4(vUV, 0., 1.);
+              vec4 texel = texture(dataTexture, vUV);
+              fragColor = vec4(texel.rgb + .01, 1.);
             `],
           ],
         },
@@ -70,11 +82,18 @@ export default class GLGPGPUSystem {
     });
   }
 
+  get dataTexture() {
+    return this._frameBufferIn.colorTextures[0];
+  }
+
   update() {
+    const viewPort = this.gl.getParameter(this.gl.VIEWPORT);
+    this.gl.viewport(0, 0, this._width, this._height);
     this._frameBufferOut.bind();
     this._quad.draw();
     this._frameBufferOut.unbind();
+    this.gl.viewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
     [this._frameBufferIn, this._frameBufferOut] = [this._frameBufferOut, this._frameBufferIn];
-    this._quad.program.uniforms.set("dataTexture", this._frameBufferIn.colorTextures[0]);
+    this._quad.program.uniforms.set("dataTexture", this.dataTexture);
   }
 }
