@@ -101,12 +101,11 @@ export default class GLGPGPUSystem {
   }
 
   update() {
-    const viewPort = this.gl.getParameter(this.gl.VIEWPORT);
     this.gl.viewport(0, 0, this._width, this._height);
     this._frameBufferOut.bind();
     this._quad.draw();
     this._frameBufferOut.unbind();
-    this.gl.viewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
+    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     [this._frameBufferIn, this._frameBufferOut] = [this._frameBufferOut, this._frameBufferIn];
     this._quad.program.uniforms.set("dataTexture", this.dataTexture);
   }
