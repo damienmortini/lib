@@ -8,6 +8,7 @@ export default class GLGPGPUSystem {
     gl,
     data,
     maxWidth = 1024,
+    fragmentShaderChunks = [],
   }) {
     this.gl = gl;
 
@@ -40,6 +41,7 @@ export default class GLGPGPUSystem {
         type: this.gl.FLOAT,
       })],
     });
+
     this._frameBufferOut = this._frameBufferIn.clone();
     this._frameBufferOut.colorTextures[0].data = new Float32Array(this._width * this._height * channels);
 
@@ -53,6 +55,7 @@ export default class GLGPGPUSystem {
         shader: {
           uniforms: {
             dataTexture: this._frameBufferIn.colorTextures[0],
+            dataTextureSize: [this._width, this._height],
           },
           vertexShaderChunks: [
             ["start", `
@@ -68,13 +71,16 @@ export default class GLGPGPUSystem {
             `],
           ],
           fragmentShaderChunks: [
+            ...fragmentShaderChunks,
             ["start", `
               uniform sampler2D dataTexture;
               in vec2 vUV;
             `],
+            ["main", `
+              vec4 data = texture(dataTexture, vUV);
+            `],
             ["end", `
-              vec4 texel = texture(dataTexture, vUV);
-              fragColor = vec4(texel.rgb + .01, 1.);
+              fragColor = data;
             `],
           ],
         },
@@ -84,6 +90,14 @@ export default class GLGPGPUSystem {
 
   get dataTexture() {
     return this._frameBufferIn.colorTextures[0];
+  }
+
+  get dataTextureWidth() {
+    return this._width;
+  }
+
+  get dataTextureHeight() {
+    return this._height;
   }
 
   update() {
