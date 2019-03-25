@@ -4,28 +4,28 @@ export default class BlurShader {
   constructor({
     textureName = "blurTexture",
     texture = 0,
-    distance = [1, 1]
+    distance = [1, 1],
   } = {}) {
     return {
       uniforms: [
         ["blurDistance", distance],
-        [textureName, texture]
+        [textureName, texture],
       ],
       vertexShaderChunks: [
         ["start", `
           uniform vec2 blurDistance;
           ${BlurShader.computeBlurTextureCoordinates()}
         `],
-        ["end", `computeBlurTextureCoordinates(uv, blurDistance);`]
+        ["end", "computeBlurTextureCoordinates(uv, blurDistance);"],
       ],
       fragmentShaderChunks: [
         ["start", `
           uniform sampler2D ${textureName};
           ${BlurShader.blur()}
         `],
-        ["end", `fragColor = blur(${textureName});`]
-      ]
-    }
+        ["end", `fragColor = blur(${textureName});`],
+      ],
+    };
   }
 
   static computeBlurTextureCoordinates() {
@@ -49,7 +49,7 @@ export default class BlurShader {
         blurTextureCoordinates[13] = uv + distance * .024;
         blurTextureCoordinates[14] = uv + distance * .028;
       }
-    `
+    `;
   }
 
   static blur() {
@@ -75,6 +75,6 @@ export default class BlurShader {
         result += texture(inTexture, blurTextureCoordinates[14]) * 0.0044299121055113265;
         return result;
       }
-    `
+    `;
   }
 }

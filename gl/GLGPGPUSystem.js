@@ -55,7 +55,6 @@ export default class GLGPGPUSystem {
         shader: {
           uniforms: {
             dataTexture: this._frameBufferIn.colorTextures[0],
-            dataTextureSize: [this._width, this._height],
           },
           vertexShaderChunks: [
             ["start", `
