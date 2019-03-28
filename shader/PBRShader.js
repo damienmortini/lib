@@ -375,7 +375,8 @@ export default class PBRShader extends Shader {
           gl_Position = camera.projectionView * transform * vec4(position, 1.);
           vPosition = position;
           vNormal = normalize(mat3(transform) * normal);
-          vViewDirection = rayFromCamera(gl_Position.xy / gl_Position.w, camera).direction;
+          Ray ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
+          vViewDirection = ray.direction;
         `],
         ...vertexShaderChunks,
       ],
@@ -400,6 +401,7 @@ export default class PBRShader extends Shader {
         ["end", `
           Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
           fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
+          // fragColor = vec4(vViewDirection, 1.);
         `],
         ...fragmentShaderChunks,
       ],
