@@ -27,6 +27,8 @@ export default class PointerEventPolyfill {
             }
             pointerEvent[key] = touch[key];
           }
+          pointerEvent.x = touch.clientX;
+          pointerEvent.y = touch.clientY;
         }
 
         element.dispatchEvent(pointerEvent);

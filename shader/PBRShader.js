@@ -402,7 +402,7 @@ export default class PBRShader extends Shader {
           fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
         `],
         ...fragmentShaderChunks,
-      ]
+      ],
     });
   }
 }

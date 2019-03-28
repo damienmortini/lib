@@ -48,7 +48,7 @@ export default class GLTexture {
       this._dataHeight = this._data.height || this._data.videoHeight;
     }
 
-    
+
     this.bind();
     if (this.gl instanceof WebGLRenderingContext && this._dataWidth) {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.format, this.type, this._data);

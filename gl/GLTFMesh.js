@@ -7,6 +7,7 @@ export default class GLTFMesh extends GLMesh {
     gl,
     data,
     attributes = undefined,
+    uvs = true,
   }) {
     super({
       gl,
@@ -38,7 +39,7 @@ export default class GLTFMesh extends GLMesh {
     });
 
     const uvAttributeData = data.primitives[0].attributes["TEXCOORD_0"];
-    if (uvAttributeData) {
+    if (uvs && uvAttributeData) {
       this.attributes.set("uv", {
         buffer: new GLBuffer({
           gl: this.gl,
