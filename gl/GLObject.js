@@ -40,11 +40,14 @@ export default class GLObject {
 
   draw(options) {
     options = Object.assign({ bind: true, uniforms: {} }, options);
-    if (options.bind) {
-      this.bind();
-    }
+    // Todo: Fix double call to Program.use when bind is true
+    // (needed to update texture uniforms before binding them)
+    this.program.use();
     for (const uniform in options.uniforms) {
       this.program.uniforms.set(uniform, options.uniforms[uniform]);
+    }
+    if (options.bind) {
+      this.bind();
     }
     this.mesh.draw(options);
     if (options.bind) {
@@ -56,6 +59,7 @@ export default class GLObject {
     this.vertexArray.unbind();
     for (const texture of this._boundTextures) {
       texture.unbind();
+      this._boundTextures.delete(texture);
     }
   }
 }
