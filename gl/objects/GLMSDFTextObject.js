@@ -1,3 +1,5 @@
+// Work with https://github.com/soimy/msdf-bmfont-xml
+
 import GLTexture from "../GLTexture.js";
 import GLPlaneObject from "./GLPlaneObject.js";
 import GLProgram from "../GLProgram.js";
