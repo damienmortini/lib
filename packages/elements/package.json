@@ -23,7 +23,5 @@
   "dependencies": {
     "dlib": "0.0.92"
   },
-  "devDependencies": {
-    "browser-sync": "^2.26.3"
-  }
+  "devDependencies": {}
 }
