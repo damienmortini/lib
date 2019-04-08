@@ -17,7 +17,7 @@
     "toolkit"
   ],
   "author": "Damien Mortini",
-  "license": "MIT",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/damienmortini/dlib/issues"
   },
