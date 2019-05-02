@@ -9,10 +9,10 @@ import {
   WebGLRenderer,
   WebGLRenderTarget,
   Scene,
-  NearestFilter
+  NearestFilter,
 } from "../../three/build/three.module.js";
 
-import THREEShaderMaterial from "./THREEShaderMaterial.js";
+import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 
 const MAX_WIDTH = 2048;
 
@@ -24,8 +24,8 @@ export default class THREEGPGPUSystem {
     size = 1,
     fragmentShaderChunks = [],
     format = RGBAFormat,
-    debug = false
-  } = {}) {
+    debug = false,
+  }) {
     this._renderer = renderer;
 
     const channels = format === RGBAFormat ? 4 : 3;
@@ -35,10 +35,10 @@ export default class THREEGPGPUSystem {
 
     const finalData = new Float32Array(this._width * this._height * channels);
     finalData.set(data);
-    let dataTexture = new DataTexture(finalData, this._width, this._height, format, FloatType);
+    const dataTexture = new DataTexture(finalData, this._width, this._height, format, FloatType);
     dataTexture.needsUpdate = true;
 
-    if(debug) {
+    if (debug) {
       this._debugRenderer = new WebGLRenderer();
       document.body.appendChild(this._debugRenderer.domElement);
       this._debugRenderer.setSize(this._width, this._height, false);
@@ -59,7 +59,7 @@ export default class THREEGPGPUSystem {
       format: format,
       stencilBuffer: false,
       depthBuffer: false,
-      type: FloatType
+      type: FloatType,
     });
     this._webglRenderTargetIn.texture.generateMipmaps = false;
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
@@ -70,21 +70,21 @@ export default class THREEGPGPUSystem {
         str += `vec4 dataChunk${i} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / dataTextureSize);\n`;
       }
       return str;
-    }
+    };
 
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEShaderMaterial({
       uniforms: new Map([
         ["dataTextureSize", new Vector2(dataTexture.image.width, dataTexture.image.height)],
         ["dataTexture", dataTexture],
-        ...uniforms
+        ...uniforms,
       ]),
       vertexShaderChunks: [
         ["start",
-          `varying vec2 vUv;`
+          "varying vec2 vUv;",
         ],
         ["main",
-          `vUv = uv;`
-        ]
+          "vUv = uv;",
+        ],
       ],
       fragmentShaderChunks: [
         ...fragmentShaderChunks,
@@ -98,8 +98,8 @@ export default class THREEGPGPUSystem {
           float chunkOffset = mod(dataPosition.x, ${size}.);
           dataPosition.x -= chunkOffset;
           ${createDataChunks()}
-        `]
-      ]
+        `],
+      ],
     }));
     this.scene.add(this._quad);
 
@@ -123,7 +123,7 @@ export default class THREEGPGPUSystem {
   }
 
   update() {
-    if(this._debugRenderer) {
+    if (this._debugRenderer) {
       this._debugRenderer.render(this.scene, this.camera, this._webglRenderTargetOut);
       this._debugRenderer.render(this.scene, this.camera);
     }
