@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/damienmortini/dlmn#readme",
   "dependencies": {
-    "dlib": "0.0.92"
-  },
-  "devDependencies": {}
+    "dlib": "0.0.97"
+  }
 }
