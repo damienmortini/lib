@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/lib",
-  "version": "0.0.100",
+  "version": "0.0.101",
   "description": "Helpers library for the web.",
   "registry": "npm",
   "scripts": {
