@@ -104,7 +104,7 @@ export class Loader {
         };
         image.src = src;
       } else {
-        resolve(fetch(`${this.baseURI}${src}`));
+        resolve(fetch(src));
       }
     })
         .catch(() => {
