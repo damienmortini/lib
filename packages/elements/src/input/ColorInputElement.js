@@ -1,5 +1,5 @@
 import InputElement from "./InputElement.js";
-import Color from "../../dlib/math/Color.js";
+import Color from "../../@damienmortini/lib/math/Color.js";
 
 export default class ColorInputElement extends InputElement {
   constructor() {

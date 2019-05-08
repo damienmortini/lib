@@ -1,5 +1,5 @@
 import GLImageElement from "./GLImageElement.js";
-import Ticker from "../../dlib/utils/Ticker.js";
+import Ticker from "../../@damienmortini/lib/utils/Ticker.js";
 
 let style = document.createElement("style");
 style.textContent = `

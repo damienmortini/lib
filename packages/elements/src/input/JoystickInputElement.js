@@ -1,5 +1,5 @@
 import TickerElement from "../util/TickerElement.js";
-import Vector2 from "../../dlib/math/Vector2.js";
+import Vector2 from "../../node_modules/@damienmortini/lib/math/Vector2.js";
 
 export default class JoystickInputElement extends TickerElement {
   constructor() {
@@ -108,5 +108,3 @@ export default class JoystickInputElement extends TickerElement {
     }
   }
 }
-
-window.customElements.define("dlmn-input-joystick", JoystickInputElement);
