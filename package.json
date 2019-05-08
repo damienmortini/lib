@@ -1,29 +1,31 @@
 {
-  "name": "dlib",
+  "name": "@damienmortini/lib",
   "version": "0.0.99",
-  "description": "Toolkit for the web",
+  "description": "Helpers library for the web.",
   "registry": "npm",
   "scripts": {
-    "bump": "npm version patch && npm publish"
+    "bump": "npm version patch && npm publish --access=public"
   },
   "repository": {
     "type": "git",
-    "url": "https://damienmortini@github.com/damienmortini/dlib.git"
+    "url": "https://damienmortini@github.com/damienmortini/lib.git"
   },
   "keywords": [
     "math",
     "physics",
     "3d",
-    "toolkit"
+    "web",
+    "helpers",
+    "toolkit",
+    "library"
   ],
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/damienmortini/dlib/issues"
+    "url": "https://github.com/damienmortini/lib/issues"
   },
-  "homepage": "https://github.com/damienmortini/dlib",
+  "homepage": "https://github.com/damienmortini/lib",
   "dependencies": {
-    "base64-js": "^1.3.0",
     "gl-matrix": "^3.0.0",
     "mobile-detect": "^1.4.3"
   }

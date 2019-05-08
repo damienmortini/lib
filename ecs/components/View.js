@@ -1,6 +1,6 @@
 import Component from "../Component.js";
 
-console.error("Deprecated: needs refactor using dlib/abstract/View.js");
+console.error("Deprecated: needs refactor using abstract/View.js");
 
 export default class View extends Component {
   constructor(entity, view, {
