@@ -1,13 +1,13 @@
-import { WebGLRenderer } from "../../three/src/renderers/WebGLRenderer.js";
-import { WebGLRenderTarget } from "../../three/src/renderers/WebGLRenderTarget.js";
-import { DepthTexture } from "../../three/src/textures/DepthTexture.js";
-import { RGBAFormat } from "../../three/src/constants.js";
-import { LinearFilter } from "../../three/src/constants.js";
-import { UnsignedShortType } from "../../three/src/constants.js";
-import { Scene } from "../../three/src/scenes/Scene.js";
-import { OrthographicCamera } from "../../three/src/cameras/OrthographicCamera.js";
-import { Mesh } from "../../three/src/objects/Mesh.js";
-import { PlaneBufferGeometry } from "../../three/src/geometries/PlaneGeometry.js";
+import { WebGLRenderer } from "../../../three/src/renderers/WebGLRenderer.js";
+import { WebGLRenderTarget } from "../../../three/src/renderers/WebGLRenderTarget.js";
+import { DepthTexture } from "../../../three/src/textures/DepthTexture.js";
+import { RGBAFormat } from "../../../three/src/constants.js";
+import { LinearFilter } from "../../../three/src/constants.js";
+import { UnsignedShortType } from "../../../three/src/constants.js";
+import { Scene } from "../../../three/src/scenes/Scene.js";
+import { OrthographicCamera } from "../../../three/src/cameras/OrthographicCamera.js";
+import { Mesh } from "../../../three/src/objects/Mesh.js";
+import { PlaneBufferGeometry } from "../../../three/src/geometries/PlaneGeometry.js";
 
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {

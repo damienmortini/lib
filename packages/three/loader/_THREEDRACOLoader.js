@@ -3,18 +3,18 @@
  * Do not remove, see below them for content to replace
  */
 
-import { DefaultLoadingManager } from "../../three/src/loaders/LoadingManager.js";
-import { FileLoader } from "../../three/src/loaders/FileLoader.js";
-import { TrianglesDrawMode } from "../../three/src/constants.js";
-import { TriangleStripDrawMode } from "../../three/src/constants.js";
-import { Float32BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Int8BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Int16BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Int32BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Uint8BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Uint16BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Uint32BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { BufferGeometry } from "../../three/src/core/BufferGeometry.js";
+import { DefaultLoadingManager } from "../../../three/src/loaders/LoadingManager.js";
+import { FileLoader } from "../../../three/src/loaders/FileLoader.js";
+import { TrianglesDrawMode } from "../../../three/src/constants.js";
+import { TriangleStripDrawMode } from "../../../three/src/constants.js";
+import { Float32BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Int8BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Int16BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Int32BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Uint8BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Uint16BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Uint32BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "../../../three/src/core/BufferGeometry.js";
 
 const THREE = {
   DefaultLoadingManager,

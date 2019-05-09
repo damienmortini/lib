@@ -10,7 +10,7 @@ import {
   WebGLRenderTarget,
   Scene,
   NearestFilter,
-} from "../../three/build/three.module.js";
+} from "../../../three/build/three.module.js";
 
 import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 

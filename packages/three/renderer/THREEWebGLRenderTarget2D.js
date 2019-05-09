@@ -1,8 +1,8 @@
-import { Scene } from "../../three/src/scenes/Scene.js";
-import { Mesh } from "../../three/src/objects/Mesh.js";
-import { PlaneBufferGeometry } from "../../three/src/geometries/PlaneGeometry.js";
-import { WebGLRenderTarget } from "../../three/src/renderers/WebGLRenderTarget.js";
-import { OrthographicCamera } from "../../three/src/cameras/OrthographicCamera.js";
+import { Scene } from "../../../three/src/scenes/Scene.js";
+import { Mesh } from "../../../three/src/objects/Mesh.js";
+import { PlaneBufferGeometry } from "../../../three/src/geometries/PlaneGeometry.js";
+import { WebGLRenderTarget } from "../../../three/src/renderers/WebGLRenderTarget.js";
+import { OrthographicCamera } from "../../../three/src/cameras/OrthographicCamera.js";
 
 import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 

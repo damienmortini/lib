@@ -3,12 +3,12 @@
  * Do not remove, see below them for content to replace
  */
 
-import { BufferGeometry } from "../../three/src/core/BufferGeometry.js";
-import { InterleavedBufferAttribute } from "../../three/src/core/InterleavedBufferAttribute.js";
-import { InterleavedBuffer } from "../../three/src/core/InterleavedBuffer.js";
-import { BufferAttribute } from "../../three/src/core/BufferAttribute.js";
-import { Vector3 } from "../../three/src/math/Vector3.js";
-import { Vector2 } from "../../three/src/math/Vector2.js";
+import { BufferGeometry } from "../../../three/src/core/BufferGeometry.js";
+import { InterleavedBufferAttribute } from "../../../three/src/core/InterleavedBufferAttribute.js";
+import { InterleavedBuffer } from "../../../three/src/core/InterleavedBuffer.js";
+import { BufferAttribute } from "../../../three/src/core/BufferAttribute.js";
+import { Vector3 } from "../../../three/src/math/Vector3.js";
+import { Vector2 } from "../../../three/src/math/Vector2.js";
 
 const THREE = {
   BufferGeometry,

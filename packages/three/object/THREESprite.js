@@ -1,4 +1,4 @@
-import { Object3D, Mesh, Color, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "../../three/build/three.module.js";
+import { Object3D, Mesh, Color, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "../../../three/build/three.module.js";
 
 import THREEShaderMaterial from "./THREEShaderMaterial.js";
 

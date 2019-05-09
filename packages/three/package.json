@@ -24,6 +24,6 @@
   "homepage": "https://github.com/damienmortini/three",
   "dependencies": {
     "@damienmortini/lib": "0.0.101",
-    "three": "^0.104.0"
+    "three": "0.101.1"
   }
 }

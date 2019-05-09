@@ -1,5 +1,5 @@
 import { Loader } from "../../lib/util/Loader.js";
-import { TextureLoader } from "../../three/src/loaders/TextureLoader.js";
+import { TextureLoader } from "../../../three/src/loaders/TextureLoader.js";
 
 import _THREEGLTFLoader from "./_THREEGLTFLoader.js";
 import _THREEDRACOLoader from "./_THREEDRACOLoader.js";
