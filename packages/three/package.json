@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/three",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Three.js helpers",
   "registry": "npm",
   "scripts": {
