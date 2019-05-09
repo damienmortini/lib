@@ -6,7 +6,7 @@ import Quaternion from "../../math/Quaternion.js";
 
 export default class TrackballController {
   constructor({
-    matrix = new Matrix4(), 
+    matrix = new Matrix4(),
     domElement = document.body,
     distance = 0,
     invertRotation = true,
@@ -15,7 +15,7 @@ export default class TrackballController {
     zoomEaseRatio = .1,
     minDistance = 0,
     maxDistance = Infinity,
-    enabled = true
+    enabled = true,
   } = {}) {
     this.matrix = matrix;
 
@@ -26,23 +26,23 @@ export default class TrackballController {
     this.minDistance = minDistance;
     this.zoomSpeed = zoomSpeed;
     this.zoomEaseRatio = zoomEaseRatio;
-    
+
     this._pointer = Pointer.get(domElement);
     this._nextDistance = this._distance;
-    
+
     this._cachedQuaternion = new Quaternion();
     this._cachedMatrix = new Matrix4();
     this._cachedVector3 = new Vector3();
-    
+
     this._velocity = new Vector2();
     this._velocityOrigin = new Vector2();
-    
+
     this._position = new Vector3([this.matrix.x, this.matrix.y, this.matrix.z]);
     this._positionPrevious = this._position.clone();
     this._positionOffset = new Vector3();
-    
+
     domElement.addEventListener("wheel", this.onWheel.bind(this));
-    
+
     this.enabled = true;
     this.update();
     this.enabled = enabled;
@@ -57,7 +57,7 @@ export default class TrackballController {
   }
 
   onWheel(e) {
-    if(!this.enabled) {
+    if (!this.enabled) {
       return;
     }
     const scrollOffsetRatio = 1 + Math.abs(e.deltaY * this.zoomSpeed * .01);
@@ -67,7 +67,7 @@ export default class TrackballController {
   }
 
   update() {
-    if(!this.enabled) {
+    if (!this.enabled) {
       return;
     }
 
@@ -82,7 +82,7 @@ export default class TrackballController {
     this.matrix.y = 0;
     this.matrix.z = 0;
 
-    if(this._pointer.downed) {
+    if (this._pointer.downed) {
       this._velocity.copy(this._pointer.velocity).scale(.003);
     }
 
