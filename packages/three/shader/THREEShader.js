@@ -6,7 +6,7 @@ import { Matrix4 } from "../../three/src/math/Matrix4.js";
 import { Texture } from "../../three/src/textures/Texture.js";
 import { CubeTexture } from "../../three/src/textures/CubeTexture.js";
 
-import Shader from "../../dlib/3d/Shader.js";
+import Shader from "../../lib/3d/Shader.js";
 
 export default class THREEShader extends Shader {
   constructor({ vertexShader = `

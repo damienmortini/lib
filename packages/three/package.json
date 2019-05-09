@@ -1,28 +1,29 @@
 {
-  "name": "dlib-three",
+  "name": "@damienmortini/three",
   "version": "0.0.6",
-  "description": "Three.js dlib extension",
+  "description": "Three.js helpers",
   "registry": "npm",
   "scripts": {
-    "bump": "npm version patch && npm publish"
+    "bump": "npm version patch && npm publish --access=public"
   },
   "repository": {
     "type": "git",
-    "url": "https://dmmn@github.com/damienmortini/dlib-three.git"
+    "url": "https://damienmortini@github.com/damienmortini/three.git"
   },
   "keywords": [
     "three",
     "3d",
-    "toolkit"
+    "helpers",
+    "library"
   ],
   "author": "Damien Mortini",
-  "license": "MIT",
+  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/damienmortini/dlib-three/issues"
+    "url": "https://github.com/damienmortini/three/issues"
   },
-  "homepage": "https://github.com/damienmortini/dlib-three",
+  "homepage": "https://github.com/damienmortini/three",
   "dependencies": {
-    "dlib": "0.0.92",
-    "three": "^0.101.1"
+    "@damienmortini/lib": "0.0.101",
+    "three": "^0.104.0"
   }
 }
