@@ -4,12 +4,10 @@ import { PlaneBufferGeometry } from "../../../three/src/geometries/PlaneGeometry
 import { WebGLRenderTarget } from "../../../three/src/renderers/WebGLRenderTarget.js";
 import { OrthographicCamera } from "../../../three/src/cameras/OrthographicCamera.js";
 
-import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
-
 export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
   constructor({
-    material,
     renderer,
+    material = undefined,
     width = 1024,
     height = 1024,
     wrapS = undefined,
@@ -40,7 +38,6 @@ export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
       depthTexture,
     });
 
-    this.material = material;
     this.renderer = renderer;
 
     this._scene = new Scene();
@@ -48,8 +45,14 @@ export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
 
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), material);
     this._scene.add(this._quad);
+  }
 
-    this.render();
+  get material() {
+    return this._quad.material;
+  }
+
+  set material(value) {
+    this._quad.material = value;
   }
 
   render() {
