@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/damienmortini/three",
   "dependencies": {
-    "@damienmortini/lib": "0.0.101",
-    "three": "0.101.1"
+    "@damienmortini/lib": "0.0.102",
+    "three": "0.104.0"
   }
 }
