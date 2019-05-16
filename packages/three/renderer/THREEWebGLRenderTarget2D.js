@@ -56,6 +56,8 @@ export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
   }
 
   render() {
-    this.renderer.render(this._scene, this._camera, this);
+    this.renderer.setRenderTarget(this);
+    this.renderer.render(this._scene, this._camera);
+    this.renderer.setRenderTarget(null);
   }
 }

@@ -33,31 +33,18 @@ export default class THREEShader extends Shader {
         TextureCube: CubeTexture
       }
     });
+
   }
 
-  add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = [] } = {}) {
-    if (!(uniforms instanceof Array || uniforms instanceof Map)) {
-      const uniformObject = uniforms;
-      uniforms = new Map();
-      for (let key in uniformObject) {
-        uniforms.set(key, uniformObject[key].value !== undefined ? uniformObject[key].value : uniformObject[key]);
-      }
-    }
-    if (!(this.uniforms instanceof Array || this.uniforms instanceof Map)) {
-      const uniformObject = this.uniforms;
-      this.uniforms = new Map();
-      for (let key in uniformObject) {
-        this.uniforms.set(key, uniformObject[key].value !== undefined ? uniformObject[key].value : uniformObject[key]);
-      }
-    }
+  add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = {} } = {}) {
     super.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 
-    const uniformsObject = {};
-    for (let [key, uniform] of this.uniforms) {
-      uniformsObject[key] = {
-        value: uniform
-      };
+    for (let key in this.uniforms) {
+      if (this.uniforms[key].value === undefined) {
+        this.uniforms[key] = {
+          value: this.uniforms[key]
+        };
+      }
     }
-    this.uniforms = uniformsObject;
   }
 }

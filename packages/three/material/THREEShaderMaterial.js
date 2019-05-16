@@ -78,7 +78,7 @@ export default class THREEShaderMaterial extends ShaderMaterial {
 
       Object.defineProperty(this, key, {
         configurable: true,
-        get: function () {
+        get: function () {          
           return this.uniforms[key].value;
         },
         set: setter
