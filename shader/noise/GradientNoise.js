@@ -168,7 +168,15 @@ export default class GradientNoise3D {
     `;
   }
 
-  static gradientDerivativesNoise3D() {
+  static gradientDerivativesNoise3D({
+    hash = `
+      p = vec3( dot(p,vec3(127.1,311.7, 74.7)),
+        dot(p,vec3(269.5,183.3,246.1)),
+        dot(p,vec3(113.5,271.9,124.6)));
+
+      return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+    `,
+  } = {}) {
     return `
       // The MIT License
       // Copyright © 2017 Inigo Quilez
@@ -191,18 +199,16 @@ export default class GradientNoise3D {
       // Simplex  Noise 2D             : https://www.shadertoy.com/view/Msf3WH
       
       
-      vec3 gradientDerivativesNoise3DHash( vec3 p ) // replace this by something better. really. do
+      vec3 gradientDerivativesNoise3DHash( vec3 p )
       {
-        p = vec3( dot(p,vec3(127.1,311.7, 74.7)),
-              dot(p,vec3(269.5,183.3,246.1)),
-              dot(p,vec3(113.5,271.9,124.6)));
-      
-        return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+        ${hash}
       }
       
       // return value noise (in x) and its derivatives (in yzw)
       vec4 gradientDerivativesNoise3D( in vec3 x )
       {
+          x *= 10.;
+          
           // grid
           vec3 p = floor(x);
           vec3 w = fract(x);
