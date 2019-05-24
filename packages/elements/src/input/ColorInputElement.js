@@ -28,12 +28,10 @@ export default class ColorInputElement extends HTMLElement {
 
     this._colorInput.addEventListener("input", () => {
       this.value = this._colorInput.value;
-      this._textInput.value = this.value;
     });
 
     this._textInput.addEventListener("input", () => {
       this.value = this._textInput.value;
-      this._colorInput.value = this.value;
     });
 
     for (const key in this._textInput) {
