@@ -6,12 +6,13 @@ export default class ButtonInputElement extends HTMLElement {
       <style>
         :host {
           display: inline-flex;
+          height: 20px;
         }
         button {
           flex: 1;
           resize: vertical;
           width: 100%;
-          height: 20px;
+          height: 100%;
         }
       </style>
       <button><slot></slot></button>
