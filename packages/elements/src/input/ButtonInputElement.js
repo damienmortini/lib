@@ -1,29 +1,37 @@
-import InputElement from "./InputElement.js";
-
-export default class ButtonInputElement extends InputElement {
+export default class ButtonInputElement extends HTMLElement {
   constructor() {
     super();
 
-    this.type = "button";
-
-    this._input = document.createElement("button");
-    this.shadowRoot.querySelector("input").replaceWith(this._input);
-
-    this._input.insertAdjacentHTML("beforebegin", `
+    this.attachShadow({ mode: "open" }).innerHTML = `
       <style>
+        :host {
+          display: inline-flex;
+        }
         button {
           flex: 1;
+          resize: vertical;
+          width: 100%;
+          height: 20px;
         }
       </style>
-    `);
-  }
+      <button><slot></slot></button>
+    `;
 
-  get name() {
-    return this._input.textContent;
-  }
+    const input = this.shadowRoot.querySelector("button");
 
-  set name(value) {
-    this._input.textContent = value;
+    for (const key in input) {
+      if (key in ButtonInputElement.prototype) {
+        continue;
+      }
+      Object.defineProperty(this, key, {
+        get() {
+          return input[key];
+        },
+        set(value) {
+          input[key] = value;
+        },
+      });
+    }
   }
 
   get value() {
@@ -38,21 +46,5 @@ export default class ButtonInputElement extends InputElement {
     this.dispatchEvent(new Event("change", {
       bubbles: true,
     }));
-  }
-
-  get defaultValue() {
-    return this._defaultValue;
-  }
-
-  set defaultValue(value) {
-    this._defaultValue = value;
-  }
-
-  get disabled() {
-    return this._input.disabled;
-  }
-
-  set disabled(value) {
-    this._input.disabled = value;
   }
 }

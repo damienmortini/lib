@@ -1,45 +1,35 @@
-import InputElement from "./InputElement.js";
-
-export default class TextInputElement extends InputElement {
+export default class TextInputElement extends HTMLElement {
   constructor() {
     super();
 
-    this.type = "text";
-
-    this._input = document.createElement("textarea");
-    this._input.rows = 1;
-    this.shadowRoot.querySelector("input").replaceWith(this._input);
-
-    this._input.insertAdjacentHTML("beforebegin", `
+    this.attachShadow({ mode: "open" }).innerHTML = `
       <style>
+        :host {
+          display: inline-flex;
+        }
         textarea {
           flex: 1;
+          resize: vertical;
+          width: 100%;
         }
       </style>
-    `);
-  }
+      <textarea rows="1">
+    `;
 
-  get value() {
-    return this._input.value;
-  }
+    const input = this.shadowRoot.querySelector("textarea");
 
-  set value(value) {
-    this._input.value = value;
-  }
-
-  get defaultValue() {
-    return this._input.defaultValue;
-  }
-
-  set defaultValue(value) {
-    this._input.defaultValue = value;
-  }
-
-  get disabled() {
-    return this._input.disabled;
-  }
-
-  set disabled(value) {
-    this._input.disabled = value;
+    for (const key in input) {
+      if (key in TextInputElement.prototype) {
+        continue;
+      }
+      Object.defineProperty(this, key, {
+        get() {
+          return input[key];
+        },
+        set(value) {
+          input[key] = value;
+        },
+      });
+    }
   }
 }
