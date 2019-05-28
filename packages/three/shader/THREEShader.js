@@ -17,7 +17,7 @@ export default class THREEShader extends Shader {
     void main() {
       gl_FragColor = vec4(1.);
     }
-  `, uniforms, shaders } = {}) {
+  `, uniforms = {}, shaders = [] } = {}) {
     super({
       vertexShader,
       fragmentShader,
@@ -30,19 +30,18 @@ export default class THREEShader extends Shader {
         Matrix3: Matrix3,
         Matrix4: Matrix4,
         Texture: Texture,
-        TextureCube: CubeTexture
-      }
+        TextureCube: CubeTexture,
+      },
     });
-
   }
 
   add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = {} } = {}) {
     super.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 
-    for (let key in this.uniforms) {
+    for (const key in this.uniforms) {
       if (this.uniforms[key].value === undefined) {
         this.uniforms[key] = {
-          value: this.uniforms[key]
+          value: this.uniforms[key],
         };
       }
     }
