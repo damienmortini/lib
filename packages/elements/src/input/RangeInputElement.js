@@ -1,8 +1,4 @@
 export default class RangeInputElement extends HTMLElement {
-  static get observedAttributes() {
-    return ["value", "disabled", "step", "min", "max"];
-  }
-
   constructor() {
     super();
 
@@ -51,6 +47,21 @@ export default class RangeInputElement extends HTMLElement {
         },
       });
     }
+
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (this._rangeInput.getAttribute(mutation.attributeName) === this.getAttribute(mutation.attributeName)) {
+          return;
+        }
+        if (mutation.target === this._rangeInput) {
+          this.setAttribute(mutation.attributeName, this._rangeInput.getAttribute(mutation.attributeName));
+        } else {
+          this._rangeInput.setAttribute(mutation.attributeName, this.getAttribute(mutation.attributeName));
+        }
+      }
+    });
+    observer.observe(this._rangeInput, { attributes: true });
+    observer.observe(this, { attributes: true });
   }
 
   get value() {
