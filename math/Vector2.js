@@ -70,7 +70,7 @@ export default class Vector2 extends Float32Array {
   }
 
   normalize() {
-    vec2.normalize(this, this);
+    return vec2.normalize(this, this);
   }
 
   dot(vector2) {
