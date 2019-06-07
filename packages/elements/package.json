@@ -26,11 +26,11 @@
   },
   "homepage": "https://github.com/damienmortini/elements#readme",
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^2.2.10",
-    "@damienmortini/lib": "0.0.101"
+    "@damienmortini/lib": "^0.1.2",
+    "@webcomponents/webcomponentsjs": "^2.2.10"
   },
   "devDependencies": {
-    "@damienmortini/server": "0.0.6",
-    "jsdoc": "^3.6.1"
+    "@damienmortini/server": "^1.0.0",
+    "jsdoc": "^3.6.2"
   }
 }
