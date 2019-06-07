@@ -4,7 +4,7 @@
   "description": "Helpers library for the web.",
   "registry": "npm",
   "scripts": {
-    "bump": "npm version patch && npm publish --access=public"
+    "bump": "npm version minor && npm publish --access=public"
   },
   "repository": {
     "type": "git",
