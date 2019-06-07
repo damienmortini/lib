@@ -4,9 +4,8 @@
   "description": "Helpers library for the web.",
   "registry": "npm",
   "scripts": {
-    "bump-patch": "npm version patch && npm run publish",
-    "bump-minor": "npm version minor && npm run publish",
-    "publish": "npm publish --access=public"
+    "bump-patch": "npm version patch && npm publish --access=public",
+    "bump-minor": "npm version minor && npm publish --access=public"
   },
   "repository": {
     "type": "git",
