@@ -4,7 +4,9 @@
   "description": "Three.js helpers",
   "registry": "npm",
   "scripts": {
-    "bump": "npm version patch && npm publish --access=public"
+    "bump-patch": "npm version patch && npm publish --access=public",
+    "bump-minor": "npm version minor && npm publish --access=public",
+    "bump-major": "npm version major && npm publish --access=public"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,7 @@
   },
   "homepage": "https://github.com/damienmortini/three",
   "dependencies": {
-    "@damienmortini/lib": "0.0.102",
-    "three": "0.104.0"
+    "@damienmortini/lib": "^0.1.2",
+    "three": "^0.105.2"
   }
 }
