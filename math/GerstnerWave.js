@@ -12,7 +12,7 @@ export default class GerstnerWave {
     time = 0,
   }) {
     POSITION.set(x, y);
-    const wavenumber = 2. * 3.14159265359 / wavelength;
+    const wavenumber = 2. * Math.PI / wavelength;
     const speed = Math.sqrt(9.8 / wavenumber);
     const amplitude = steepness / wavenumber;
 
