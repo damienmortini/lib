@@ -27,6 +27,7 @@
   "homepage": "https://github.com/damienmortini/elements#readme",
   "dependencies": {
     "@damienmortini/lib": "^0.1.2",
+    "@simonwep/pickr": "^0.6.5",
     "@webcomponents/webcomponentsjs": "^2.2.10"
   },
   "devDependencies": {
