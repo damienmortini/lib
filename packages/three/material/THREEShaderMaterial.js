@@ -6,7 +6,7 @@ import THREEShader from "../shader/THREEShader.js";
 
 export default class THREEShaderMaterial extends ShaderMaterial {
   constructor(options = {}) {
-    let type = options.type || "";
+    let type = options.type;
     let vertexShaderChunks = options.vertexShaderChunks;
     let fragmentShaderChunks = options.fragmentShaderChunks;
     let uniforms = options.uniforms;
@@ -36,7 +36,9 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       uniforms: shader.uniforms
     }, options));
 
-    this.defines = { [type.toUpperCase()]: "" };
+    if (type) {
+      this.defines = { [type.toUpperCase()]: "" };
+    }
 
     this._shader = shader;
     this.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
@@ -78,7 +80,7 @@ export default class THREEShaderMaterial extends ShaderMaterial {
 
       Object.defineProperty(this, key, {
         configurable: true,
-        get: function () {          
+        get: function () {
           return this.uniforms[key].value;
         },
         set: setter
