@@ -1,7 +1,7 @@
 // From https://catlikecoding.com/unity/tutorials/flow/waves/
 
 export default class GerstnerWaveShader {
-  static GerstnerWave() {
+  static get GerstnerWave() {
     return `
       struct GerstnerWave {
         vec2 direction;

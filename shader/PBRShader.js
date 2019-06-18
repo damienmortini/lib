@@ -319,7 +319,7 @@ export default class PBRShader extends Shader {
         vec3 diffuseContrib = (1.0 - F) * diffuse(pbrInputs);
         vec3 specContrib = F * G * D / (4.0 * NdotL * NdotV);
         // Obtain final intensity as reflectance (BRDF) scaled by the energy of the light (cosine law)
-        vec3 color = NdotL * light.color * (diffuseContrib + specContrib);
+        vec3 color = NdotL * light.color * light.intensity * (diffuseContrib + specContrib);
 
         // Calculate lighting contribution from image based lighting source (IBL)
         color += getIBLContribution(pbrInputs, n, reflection, position);
