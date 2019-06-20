@@ -41,6 +41,11 @@ export default class Vector2 extends Float32Array {
     return this;
   }
 
+  multiply(vector2) {
+    vec2.multiply(this, this, vector2);
+    return this;
+  }
+
   get size() {
     return vec2.length(this);
   }
