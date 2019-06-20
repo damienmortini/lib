@@ -10,6 +10,7 @@ export default class Pad2DInputElement extends HTMLElement {
           width: 100px;
           height: 100px;
           touch-action: none;
+          background: white;
         }
         .pad {
           position: absolute;
@@ -17,7 +18,7 @@ export default class Pad2DInputElement extends HTMLElement {
           left: 0;
           width: 100%;
           height: 100%;
-          background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px;
+          background-size: 10% 10%, 10% 10%, 50% 50%, 50% 50%;
           background-image: linear-gradient(to right, grey 0px, transparent 1px), linear-gradient(to bottom, grey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px), linear-gradient(to bottom, black 0px, transparent 1px);
           background-position: -.5px -.5px;
           touch-action: none;
@@ -73,6 +74,10 @@ export default class Pad2DInputElement extends HTMLElement {
     });
 
     this.value = [0, 0];
+  }
+
+  connectedCallback() {
+    this.value = this.value;
   }
 
   get value() {
