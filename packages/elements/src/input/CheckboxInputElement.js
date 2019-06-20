@@ -5,11 +5,7 @@ export default class CheckboxInputElement extends HTMLElement {
     this.attachShadow({ mode: "open" }).innerHTML = `
       <style>
         :host {
-          display: inline-flex;
-        }
-        input {
-          flex: 1;
-          width: 100%;
+          display: inline-block;
         }
       </style>
       <input type="checkbox">
