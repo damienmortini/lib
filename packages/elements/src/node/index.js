@@ -78,26 +78,7 @@ export default class NodeElement extends HTMLElement {
           if (!("value" in node)) {
             continue;
           }
-          // const nodeInput = document.createElement("graph-node-input");
-          // nodeInput.name = node.name;
-          // const slot = document.createElement("slot");
-          // slot.name = String(inputSlotUID++);
-          // nodeInput.appendChild(slot);
-          const label = node.label || node.name || node.id || "";
-          const section = document.createElement("section");
-          section.classList.add("input");
-          section.innerHTML = `
-            <graph-connector></graph-connector>
-            <label title="${label}">${label}</label>
-            <div class="input"><slot name="${inputSlotUID}"></slot></div>
-            <graph-connector></graph-connector>
-          `;
-          const connectors = section.querySelectorAll("graph-connector");
-          connectors[0].outputs.add(node);
-          connectors[1].inputs.add(node);
-          this.shadowRoot.querySelector(".content").appendChild(section);
-          node.slot = inputSlotUID;
-          inputSlotUID++;
+          this._addInput(node);
         }
         for (const node of mutation.removedNodes) {
           if (!("value" in node)) {
@@ -111,13 +92,22 @@ export default class NodeElement extends HTMLElement {
     observer.observe(this, { childList: true });
   }
 
+  connectedCallback() {
+    for (const child of this.children) {
+      if (!("value" in child)) {
+        continue;
+      }
+      this._addInput(child);
+    }
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case "name":
         this.shadowRoot.querySelector(".content").querySelector("summary").textContent = newValue;
         break;
       case "draggable":
-        console.log(newValue);
+        // console.log(newValue);
         break;
       case "open":
         this.shadowRoot.querySelector(".content").open = newValue;
@@ -135,6 +125,27 @@ export default class NodeElement extends HTMLElement {
         this.style.height = `${this.height}px`;
         break;
     }
+  }
+
+  _addInput(node) {
+    if (this.shadowRoot.querySelector(`slot[name="${node.slot}"]`)) {
+      return;
+    }
+    const label = node.label || node.name || node.id || "";
+    const section = document.createElement("section");
+    section.classList.add("input");
+    section.innerHTML = `
+      <graph-connector></graph-connector>
+      <label title="${label}">${label}</label>
+      <div class="input"><slot name="${inputSlotUID}"></slot></div>
+      <graph-connector></graph-connector>
+    `;
+    const connectors = section.querySelectorAll("graph-connector");
+    connectors[0].outputs.add(node);
+    connectors[1].inputs.add(node);
+    this.shadowRoot.querySelector(".content").appendChild(section);
+    node.slot = inputSlotUID;
+    inputSlotUID++;
   }
 
   set open(value) {
