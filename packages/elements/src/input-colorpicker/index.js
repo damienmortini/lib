@@ -49,7 +49,9 @@ export default class InputColorPickerElement extends HTMLElement {
     });
 
     this._pickr.on("init", () => {
-      this._pickr.setColor(this.value);
+      if (this.value) {
+        this._pickr.setColor(this.value);
+      }
 
       this._pickr.on("change", () => {
         this._value = this._pickr.getColor().toHEXA().toString();
