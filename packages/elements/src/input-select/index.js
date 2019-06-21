@@ -1,4 +1,4 @@
-export default class SelectInputElement extends HTMLElement {
+export default class InputSelectElement extends HTMLElement {
   constructor() {
     super();
 
@@ -20,7 +20,7 @@ export default class SelectInputElement extends HTMLElement {
     this._select = this.shadowRoot.querySelector("select");
 
     for (const key in this._select) {
-      if (key in SelectInputElement.prototype) {
+      if (key in InputSelectElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {

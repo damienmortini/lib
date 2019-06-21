@@ -1,6 +1,6 @@
 import Ticker from "../../../lib/util/Ticker.js";
 
-export default class TickerElement extends HTMLElement {
+export default class AnimationTickerElement extends HTMLElement {
   constructor({ autoplay = false, background = false } = {}) {
     super();
 

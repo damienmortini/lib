@@ -1,4 +1,4 @@
-export default class ButtonInputElement extends HTMLElement {
+export default class InputButtonElement extends HTMLElement {
   constructor() {
     super();
 
@@ -21,7 +21,7 @@ export default class ButtonInputElement extends HTMLElement {
     const input = this.shadowRoot.querySelector("button");
 
     for (const key in input) {
-      if (key in ButtonInputElement.prototype) {
+      if (key in InputButtonElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {

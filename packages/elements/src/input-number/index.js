@@ -1,4 +1,4 @@
-export default class NumberInputElement extends HTMLElement {
+export default class InputNumberElement extends HTMLElement {
   constructor() {
     super();
 
@@ -18,7 +18,7 @@ export default class NumberInputElement extends HTMLElement {
     this._input = this.shadowRoot.querySelector("input");
 
     for (const key in this._input) {
-      if (key in NumberInputElement.prototype) {
+      if (key in InputNumberElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {

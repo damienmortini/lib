@@ -12,7 +12,7 @@ document.head.insertAdjacentHTML("beforeend", `
   </style>
 `);
 
-export default class ColorInputElement extends HTMLElement {
+export default class InputColorPickerElement extends HTMLElement {
   constructor() {
     super();
 

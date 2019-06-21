@@ -1,4 +1,4 @@
-export default class RangeInputElement extends HTMLElement {
+export default class InputRangeElement extends HTMLElement {
   constructor() {
     super();
 
@@ -34,7 +34,7 @@ export default class RangeInputElement extends HTMLElement {
     });
 
     for (const key in this._numberInput) {
-      if (key in RangeInputElement.prototype) {
+      if (key in InputRangeElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {

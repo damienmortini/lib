@@ -1,4 +1,4 @@
-export default class TextInputElement extends HTMLElement {
+export default class InputTextElement extends HTMLElement {
   constructor() {
     super();
 
@@ -19,7 +19,7 @@ export default class TextInputElement extends HTMLElement {
     const input = this.shadowRoot.querySelector("textarea");
 
     for (const key in input) {
-      if (key in TextInputElement.prototype) {
+      if (key in InputTextElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {

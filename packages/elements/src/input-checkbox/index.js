@@ -1,4 +1,4 @@
-export default class CheckboxInputElement extends HTMLElement {
+export default class InputCheckboxElement extends HTMLElement {
   constructor() {
     super();
 
@@ -14,7 +14,7 @@ export default class CheckboxInputElement extends HTMLElement {
     this._input = this.shadowRoot.querySelector("input");
 
     for (const key in this._input) {
-      if (key in CheckboxInputElement.prototype) {
+      if (key in InputCheckboxElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {

@@ -1,4 +1,4 @@
-export default class Pad2DInputElement extends HTMLElement {
+export default class InputPad2DElement extends HTMLElement {
   constructor() {
     super();
 

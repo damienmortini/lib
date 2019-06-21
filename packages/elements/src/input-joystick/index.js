@@ -1,7 +1,7 @@
-import TickerElement from "../util/TickerElement.js";
+import TickerElement from "../animation-ticker/index.js";
 import Vector2 from "../../../lib/math/Vector2.js";
 
-export default class JoystickInputElement extends TickerElement {
+export default class InputJoystickElement extends TickerElement {
   constructor() {
     super();
 

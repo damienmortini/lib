@@ -1,6 +1,6 @@
 import Color from "../../../lib/math/Color.js";
 
-export default class ColorInputElement extends HTMLElement {
+export default class InputColorElement extends HTMLElement {
   constructor() {
     super();
 
@@ -35,7 +35,7 @@ export default class ColorInputElement extends HTMLElement {
     });
 
     for (const key in this._textInput) {
-      if (key in ColorInputElement.prototype) {
+      if (key in InputColorElement.prototype) {
         continue;
       }
       Object.defineProperty(this, key, {
