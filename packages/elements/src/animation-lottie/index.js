@@ -8,7 +8,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-export default class LottieElement extends HTMLElement {
+export default class LottieAnimationElement extends HTMLElement {
   constructor() {
     super();
     this.renderer = "svg";

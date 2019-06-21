@@ -1,4 +1,4 @@
-import GLImageElement from "./GLImageElement.js";
+import GLImageElement from "./GLImageElement.js.js.js.js.js";
 import Ticker from "../../@damienmortini/lib/utils/Ticker.js";
 
 let style = document.createElement("style");

@@ -48,5 +48,3 @@ export default class ViewElement extends HTMLElement {
     resolve();
   }
 }
-
-window.customElements.define("dlmn-view", ViewElement);

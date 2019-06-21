@@ -18,6 +18,7 @@ export default class Pad2DInputElement extends HTMLElement {
           left: 0;
           width: 100%;
           height: 100%;
+          cursor: crosshair;
           background-size: 10% 10%, 10% 10%, 50% 50%, 50% 50%;
           background-image: linear-gradient(to right, grey 0px, transparent 1px), linear-gradient(to bottom, grey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px), linear-gradient(to bottom, black 0px, transparent 1px);
           background-position: -.5px -.5px;
