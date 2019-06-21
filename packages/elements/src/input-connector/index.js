@@ -125,6 +125,11 @@ class InputConnectorElement extends HTMLElement {
         self._updateConnectedStatus();
         return returnValue;
       }
+      clear() {
+        for (const value of this) {
+          this.delete(value);
+        }
+      }
     };
 
     this._outputs = new class extends Set {
@@ -159,7 +164,9 @@ class InputConnectorElement extends HTMLElement {
         }
         self._connectorElementOutputs.delete(value);
         self._inputElementOutputs.delete(value);
-        value.inputs.delete(self);
+        if (value instanceof InputConnectorElement) {
+          value.inputs.delete(self);
+        }
         self._updateConnectedStatus();
         if (value instanceof InputConnectorElement) {
           self.dispatchEvent(new CustomEvent("disconnected", {
@@ -171,6 +178,11 @@ class InputConnectorElement extends HTMLElement {
           }));
         }
         return returnValue;
+      }
+      clear() {
+        for (const value of this) {
+          this.delete(value);
+        }
       }
     };
   }
@@ -189,8 +201,12 @@ class InputConnectorElement extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.inputs.clear();
-    this.outputs.clear();
+    if (this.type & InputConnectorElement.TYPE_INPUT) {
+      this.inputs.clear();
+    }
+    if (this.type & InputConnectorElement.TYPE_OUTPUT) {
+      this.outputs.clear();
+    }
   }
 
   _onInputChange(event) {
