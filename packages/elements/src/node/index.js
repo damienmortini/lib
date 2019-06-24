@@ -1,4 +1,5 @@
 let inputSlotUID = 0;
+let inputConnectorTagName = "input-connector";
 
 /**
  * Node Element
@@ -6,6 +7,14 @@ let inputSlotUID = 0;
 export default class NodeElement extends HTMLElement {
   static get observedAttributes() {
     return ["name", "draggable", "open", "x", "y", "width", "height"];
+  }
+
+  static get inputConnectorTagName() {
+    return inputConnectorTagName;
+  }
+
+  static set inputConnectorTagName(value) {
+    inputConnectorTagName = value;
   }
 
   constructor() {
@@ -55,7 +64,7 @@ export default class NodeElement extends HTMLElement {
         section.input label:empty {
           display: none;
         }
-        :host([noconnector]) section.input graph-connector {
+        :host([noconnector]) section.input ${inputConnectorTagName} {
           display: none;
         }
       </style>
@@ -135,14 +144,18 @@ export default class NodeElement extends HTMLElement {
     const section = document.createElement("section");
     section.classList.add("input");
     section.innerHTML = `
-      <graph-connector></graph-connector>
+      <${inputConnectorTagName}></${inputConnectorTagName}>
       <label title="${label}">${label}</label>
       <div class="input"><slot name="${inputSlotUID}"></slot></div>
-      <graph-connector></graph-connector>
+      <${inputConnectorTagName}></${inputConnectorTagName}>
     `;
-    const connectors = section.querySelectorAll("graph-connector");
-    connectors[0].outputs.add(node);
-    connectors[1].inputs.add(node);
+    const connectors = section.querySelectorAll("${inputConnectorTagName}");
+    if (connectors[0].outputs) {
+      connectors[0].outputs.add(node);
+    }
+    if (connectors[0].inputs) {
+      connectors[1].inputs.add(node);
+    }
     this.shadowRoot.querySelector(".content").appendChild(section);
     node.slot = inputSlotUID;
     inputSlotUID++;
