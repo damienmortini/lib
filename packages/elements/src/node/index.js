@@ -149,7 +149,7 @@ export default class NodeElement extends HTMLElement {
       <div class="input"><slot name="${inputSlotUID}"></slot></div>
       <${inputConnectorTagName}></${inputConnectorTagName}>
     `;
-    const connectors = section.querySelectorAll("${inputConnectorTagName}");
+    const connectors = section.querySelectorAll(`${inputConnectorTagName}`);
     if (connectors[0].outputs) {
       connectors[0].outputs.add(node);
     }
