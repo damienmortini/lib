@@ -93,8 +93,7 @@ export default class NodeElement extends HTMLElement {
           if (!("value" in node)) {
             continue;
           }
-          const nodeInputSlot = this.shadowRoot.querySelector(`slot[name="${node.slot}"]`);
-          nodeInputSlot.parentElement.remove();
+          this.shadowRoot.querySelector(`section#slot${node.slot}`).remove();
         }
       }
     });
@@ -142,6 +141,7 @@ export default class NodeElement extends HTMLElement {
     }
     const label = node.label || node.name || node.id || "";
     const section = document.createElement("section");
+    section.id = `slot${inputSlotUID}`;
     section.classList.add("input");
     section.innerHTML = `
       <${inputConnectorTagName}></${inputConnectorTagName}>
