@@ -6,7 +6,7 @@ let inputConnectorTagName = "input-connector";
  */
 export default class NodeElement extends HTMLElement {
   static get observedAttributes() {
-    return ["name", "draggable", "open", "x", "y", "width", "height"];
+    return ["name", "draggable", "close", "x", "y", "width", "height"];
   }
 
   static get inputConnectorTagName() {
@@ -68,7 +68,7 @@ export default class NodeElement extends HTMLElement {
           display: none;
         }
       </style>
-      <details class="content" open>
+      <details class="content">
         <summary></summary>
       </details>
     `;
@@ -99,9 +99,15 @@ export default class NodeElement extends HTMLElement {
       }
     });
     observer.observe(this, { childList: true });
+
+    this.shadowRoot.querySelector("details").addEventListener("toggle", (event) => {
+      this.close = !event.target.open;
+      this.dispatchEvent(new Event(event.type, event));
+    });
   }
 
   connectedCallback() {
+    this.shadowRoot.querySelector(".content").open = !this.close;
     for (const child of this.children) {
       if (!("value" in child)) {
         continue;
@@ -118,8 +124,8 @@ export default class NodeElement extends HTMLElement {
       case "draggable":
         // console.log(newValue);
         break;
-      case "open":
-        this.shadowRoot.querySelector(".content").open = newValue;
+      case "close":
+        this.shadowRoot.querySelector(".content").open = !this.close;
         break;
       case "x":
         this.style.left = `${this.x}px`;
@@ -162,16 +168,16 @@ export default class NodeElement extends HTMLElement {
     slotUID++;
   }
 
-  set open(value) {
+  set close(value) {
     if (value) {
-      this.shadowRoot.querySelector(".content").setAttribute("open", "");
+      this.setAttribute("close", "");
     } else {
-      this.shadowRoot.querySelector(".content").removeAttribute("open");
+      this.removeAttribute("close");
     }
   }
 
-  get open() {
-    return this.shadowRoot.querySelector(".content").hasAttribute("open");
+  get close() {
+    return this.hasAttribute("close");
   }
 
   get name() {
