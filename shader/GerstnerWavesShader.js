@@ -10,9 +10,9 @@ export default class GerstnerWaveShader {
         float sinf = sin(f);
 
         float WA = wavenumber * amplitude;
-        normal.x -= direction.x * WA * cosf;
-        normal.y -= steepness * WA * sinf;
-        normal.z -= direction.y * WA * cosf;
+        normal.x += direction.x * WA * cosf;
+        normal.y += steepness * WA * sinf;
+        normal.z += direction.y * WA * cosf;
         
         return vec3(
           steepness * amplitude * direction.x * cosf,
