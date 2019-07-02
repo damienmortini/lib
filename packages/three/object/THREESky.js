@@ -105,7 +105,8 @@ const skyShader = {
 
       uniform float luminance;
       uniform float mieDirectionalG;
-
+    `],
+    ["end", `
       const vec3 cameraPos = vec3( 0.0, 0.0, 0.0 );
 
       // constants for atmospheric scattering
@@ -126,31 +127,6 @@ const skyShader = {
       // 1.0 / ( 4.0 * pi )
       const float ONE_OVER_FOURPI = 0.07957747154594767;
 
-      float rayleighPhase( float cosTheta ) {
-        return THREE_OVER_SIXTEENPI * ( 1.0 + pow( cosTheta, 2.0 ) );
-      }
-
-      float hgPhase( float cosTheta, float g ) {
-        float g2 = pow( g, 2.0 );
-        float inverse = 1.0 / pow( 1.0 - 2.0 * g * cosTheta + g2, 1.5 );
-        return ONE_OVER_FOURPI * ( ( 1.0 - g2 ) * inverse );
-      }
-
-      // Filmic ToneMapping http://filmicgames.com/archives/75
-      const float A = 0.15;
-      const float B = 0.50;
-      const float C = 0.10;
-      const float D = 0.20;
-      const float E = 0.02;
-      const float F = 0.30;
-
-      const float whiteScale = 1.0748724675633854; // 1.0 / Uncharted2Tonemap(1000.0)
-
-      vec3 Uncharted2Tonemap( vec3 x ) {
-        return ( ( x * ( A * x + C * B ) + D * E ) / ( x * ( A * x + B ) + D * F ) ) - E / F;
-      }
-    `],
-    ["end", `
       // optical length
       // cutoff angle at 90 to avoid singularity in next formula.
       float zenithAngle = acos( max( 0.0, dot( up, normalize( vWorldPosition - cameraPos ) ) ) );
@@ -164,10 +140,14 @@ const skyShader = {
       // in scattering
       float cosTheta = dot( normalize( vWorldPosition - cameraPos ), vSunDirection );
 
-      float rPhase = rayleighPhase( cosTheta * 0.5 + 0.5 );
+      // Rayleigh Phase
+      float rPhase = THREE_OVER_SIXTEENPI * ( 1.0 + pow( cosTheta * 0.5 + 0.5, 2.0 ) );
       vec3 betaRTheta = vBetaR * rPhase;
 
-      float mPhase = hgPhase( cosTheta, mieDirectionalG );
+      // Hg Phase
+      float g2 = pow( mieDirectionalG, 2.0 );
+      float inverseHg = 1.0 / pow( 1.0 - 2.0 * mieDirectionalG * cosTheta + g2, 1.5 );
+      float mPhase = ONE_OVER_FOURPI * ( ( 1.0 - g2 ) * inverseHg );
       vec3 betaMTheta = vBetaM * mPhase;
 
       vec3 Lin = pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * ( 1.0 - Fex ), vec3( 1.5 ) );
@@ -186,9 +166,24 @@ const skyShader = {
 
       vec3 texColor = ( Lin + L0 ) * 0.04 + vec3( 0.0, 0.0003, 0.00075 );
 
-      vec3 curr = Uncharted2Tonemap( ( log2( 2.0 / pow( luminance, 4.0 ) ) ) * texColor );
+      // Tone Mapping
+
+      vec3 uncharted = ( log2( 2.0 / pow( luminance, 4.0 ) ) ) * texColor;
+
+      // Filmic ToneMapping http://filmicgames.com/archives/75
+      const float A = 0.15;
+      const float B = 0.50;
+      const float C = 0.10;
+      const float D = 0.20;
+      const float E = 0.02;
+      const float F = 0.30;
+
+      const float whiteScale = 1.0748724675633854; // 1.0 / Uncharted2Tonemap(1000.0)
+
+      vec3 curr = ( ( uncharted * ( A * uncharted + C * B ) + D * E ) / ( uncharted * ( A * uncharted + B ) + D * F ) ) - E / F;
       vec3 color = curr * whiteScale;
 
+      // Final
       vec3 retColor = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * vSunfade ) ) ) );
 
       gl_FragColor = vec4( retColor, 1.0 );
