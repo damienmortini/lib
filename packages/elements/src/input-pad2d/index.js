@@ -51,7 +51,7 @@ export default class InputPad2DElement extends HTMLElement {
     const updatePointer = (event) => {
       event.preventDefault();
       let x = ((pointerDownPosition[0] + event.screenX - pointerDownScreenPosition[0]) / this._pad.offsetWidth) * 2 - 1;
-      let y = ((pointerDownPosition[1] + event.screenY - pointerDownScreenPosition[1]) / this._pad.offsetHeight) * 2 - 1;
+      let y = -(((pointerDownPosition[1] + event.screenY - pointerDownScreenPosition[1]) / this._pad.offsetHeight) * 2 - 1);
       x = Math.max(Math.min(1, x), -1);
       y = Math.max(Math.min(1, y), -1);
       this.value = [x, y];
@@ -77,16 +77,13 @@ export default class InputPad2DElement extends HTMLElement {
     this.value = [0, 0];
   }
 
-  connectedCallback() {
-    this.value = this.value;
-  }
-
   get value() {
     return this._value;
   }
 
   set value(value) {
     this._value = value;
-    this._pointer.style.transform = `translate(${(this._value[0] * .5 + .5) * this._pad.offsetWidth}px, ${(this._value[1] * .5 + .5) * this._pad.offsetHeight}px)`;
+    this._pointer.style.left = `${(this._value[0] * .5 + .5) * 100}%`;
+    this._pointer.style.top = `${(-this._value[1] * .5 + .5) * 100}%`;
   }
 }
