@@ -8,15 +8,15 @@ import SkyShader from "../../lib/shader/SkyShader.js";
 const skyShader = {
   uniforms: {
     sunPosition: new Vector3(0, 1, 0),
+    sunRayleigh: 1.5,
+    sunTurbidity: 6,
     sunLuminance: 1,
-    sunTurbidity: 2,
-    sunRayleigh: 1,
     sunMieCoefficient: 0.005,
     sunMieDirectionalG: 0.8,
     moonPosition: new Vector3(0, 1, 0),
-    moonLuminance: 1,
-    moonTurbidity: 2,
     moonRayleigh: 0,
+    moonTurbidity: 1.5,
+    moonLuminance: 1.1,
     moonMieCoefficient: 0.005,
     moonMieDirectionalG: 0.8,
   },
@@ -50,11 +50,22 @@ const skyShader = {
       varying vec3 vWorldPosition;
 
       ${SkyShader.computeSkyColor()}
+
+      float blendScreen(float base, float blend) {
+        return 1.0-((1.0-base)*(1.0-blend));
+      }
+      
+      vec3 blendScreen(vec3 base, vec3 blend) {
+        return vec3(blendScreen(base.r,blend.r),blendScreen(base.g,blend.g),blendScreen(base.b,blend.b));
+      }
     `],
     ["end", `
+      vec3 normalizedSunPosition = normalize(sunPosition);
       
-      vec3 skyColor = computeSkyColor(vWorldPosition, sunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
-      skyColor += computeSkyColor(vWorldPosition, moonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
+      vec3 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
+      vec3 skyMoonColor = computeSkyColor(vWorldPosition, moonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
+
+      vec3 skyColor = blendScreen(skySunColor, skyMoonColor);
 
       gl_FragColor = vec4( skyColor, 1.0 );
     `]
@@ -73,6 +84,9 @@ export default class Sky extends Mesh {
 
     this.sunInclination = Math.PI * .5;
     this.sunAzimuth = 0;
+
+    this.moonInclination = Math.PI * .5;
+    this.moonAzimuth = Math.PI;
   }
 
   _updatePositionFromInclinationAzimuth(position, inclination, azimuth) {
@@ -108,6 +122,46 @@ export default class Sky extends Mesh {
   set sunPosition(value) {
     this.material.sunPosition = value;
   }
+
+  get sunRayleigh() {
+    return this.material.sunRayleigh;
+  }
+
+  set sunRayleigh(value) {
+    this.material.sunRayleigh = value;
+  }
+
+  get sunTurbidity() {
+    return this.material.sunTurbidity;
+  }
+
+  set sunTurbidity(value) {
+    this.material.sunTurbidity = value;
+  }
+
+  get sunLuminance() {
+    return this.material.sunLuminance;
+  }
+
+  set sunLuminance(value) {
+    this.material.sunLuminance = value;
+  }
+
+  get sunMieCoefficient() {
+    return this.material.sunMieCoefficient;
+  }
+
+  set sunMieCoefficient(value) {
+    this.material.sunMieCoefficient = value;
+  }
+
+  get sunMieDirectionalG() {
+    return this.material.sunMieDirectionalG;
+  }
+
+  set sunMieDirectionalG(value) {
+    this.material.sunMieDirectionalG = value;
+  }
   
   get moonInclination() {
     return this._moonInclination;
@@ -133,5 +187,45 @@ export default class Sky extends Mesh {
 
   set moonPosition(value) {
     this.material.moonPosition = value;
+  }
+
+  get moonRayleigh() {
+    return this.material.moonRayleigh;
+  }
+
+  set moonRayleigh(value) {
+    this.material.moonRayleigh = value;
+  }
+
+  get moonTurbidity() {
+    return this.material.moonTurbidity;
+  }
+
+  set moonTurbidity(value) {
+    this.material.moonTurbidity = value;
+  }
+
+  get moonLuminance() {
+    return this.material.moonLuminance;
+  }
+
+  set moonLuminance(value) {
+    this.material.moonLuminance = value;
+  }
+
+  get moonMieCoefficient() {
+    return this.material.moonMieCoefficient;
+  }
+
+  set moonMieCoefficient(value) {
+    this.material.moonMieCoefficient = value;
+  }
+
+  get moonMieDirectionalG() {
+    return this.material.moonMieDirectionalG;
+  }
+
+  set moonMieDirectionalG(value) {
+    this.material.moonMieDirectionalG = value;
   }
 }
