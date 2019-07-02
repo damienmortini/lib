@@ -31,17 +31,25 @@ const skyShader = {
   },
   vertexShaderChunks: [
     ["start", `
+      varying vec3 vWorldPosition;
+    `],
+    ["end", `
+      vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+      vWorldPosition = worldPosition.xyz;
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    `]
+  ],
+  fragmentShaderChunks: [
+    ["start", `
       uniform vec3 sunPosition;
       uniform float rayleigh;
       uniform float turbidity;
       uniform float mieCoefficient;
+      uniform float luminance;
+      uniform float mieDirectionalG;
 
       varying vec3 vWorldPosition;
-      varying vec3 vSunDirection;
-      varying float vSunfade;
-      varying vec3 vBetaR;
-      varying vec3 vBetaM;
-      varying float vSunE;
     `],
     ["end", `
       const vec3 up = vec3( 0.0, 1.0, 0.0 );
@@ -69,48 +77,26 @@ const skyShader = {
       const float steepness = 1.5;
       const float EE = 1000.0;
 
-      vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-      vWorldPosition = worldPosition.xyz;
-
-      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-      vSunDirection = normalize( sunPosition );
+      vec3 sunDirection = normalize( sunPosition );
 
       // Sun Intensity
-      float zenithAngleCos = clamp( dot( vSunDirection, up ), -1.0, 1.0 );
-      vSunE = EE * max( 0.0, 1.0 - pow( e, -( ( cutoffAngle - acos( zenithAngleCos ) ) / steepness ) ) );;
+      float zenithAngleCos = clamp( dot( sunDirection, up ), -1.0, 1.0 );
+      float sunIntensity = EE * max( 0.0, 1.0 - pow( e, -( ( cutoffAngle - acos( zenithAngleCos ) ) / steepness ) ) );
 
-      vSunfade = 1.0 - clamp( 1.0 - exp( ( sunPosition.y / 450000.0 ) ), 0.0, 1.0 );
+      float sunFade = 1.0 - clamp( 1.0 - exp( ( sunPosition.y / 450000.0 ) ), 0.0, 1.0 );
 
-      float rayleighCoefficient = rayleigh - ( 1.0 * ( 1.0 - vSunfade ) );
+      float rayleighCoefficient = rayleigh - ( 1.0 * ( 1.0 - sunFade ) );
 
       // extinction (absorbtion + out scattering)
       // rayleigh coefficients
-      vBetaR = totalRayleigh * rayleighCoefficient;
+      vec3 betaR = totalRayleigh * rayleighCoefficient;
 
       // mie coefficients
       float c = ( 0.2 * turbidity ) * 10E-18;
       vec3 totalMie = 0.434 * c * MieConst;
-      vBetaM = totalMie * mieCoefficient;
-    `]
-  ],
-  fragmentShaderChunks: [
-    ["start", `
-      varying vec3 vWorldPosition;
-      varying vec3 vSunDirection;
-      varying float vSunfade;
-      varying vec3 vBetaR;
-      varying vec3 vBetaM;
-      varying float vSunE;
+      vec3 betaM = totalMie * mieCoefficient;
 
-      uniform float luminance;
-      uniform float mieDirectionalG;
-    `],
-    ["end", `
       const vec3 cameraPos = vec3( 0.0, 0.0, 0.0 );
-
-      // constants for atmospheric scattering
-      const float pi = 3.141592653589793238462643383279502884197169;
 
       const float n = 1.0003; // refractive index of air
       const float N = 2.545E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
@@ -118,7 +104,6 @@ const skyShader = {
       // optical length at zenith for molecules
       const float rayleighZenithLength = 8.4E3;
       const float mieZenithLength = 1.25E3;
-      const vec3 up = vec3( 0.0, 1.0, 0.0 );
       // 66 arc seconds -> degrees, and the cosine of that
       const float sunAngularDiameterCos = 0.999956676946448443553574619906976478926848692873900859324;
 
@@ -135,23 +120,23 @@ const skyShader = {
       float sM = mieZenithLength * inverse;
 
       // combined extinction factor
-      vec3 Fex = exp( -( vBetaR * sR + vBetaM * sM ) );
+      vec3 Fex = exp( -( betaR * sR + betaM * sM ) );
 
       // in scattering
-      float cosTheta = dot( normalize( vWorldPosition - cameraPos ), vSunDirection );
+      float cosTheta = dot( normalize( vWorldPosition - cameraPos ), sunDirection );
 
       // Rayleigh Phase
       float rPhase = THREE_OVER_SIXTEENPI * ( 1.0 + pow( cosTheta * 0.5 + 0.5, 2.0 ) );
-      vec3 betaRTheta = vBetaR * rPhase;
+      vec3 betaRTheta = betaR * rPhase;
 
       // Hg Phase
       float g2 = pow( mieDirectionalG, 2.0 );
       float inverseHg = 1.0 / pow( 1.0 - 2.0 * mieDirectionalG * cosTheta + g2, 1.5 );
       float mPhase = ONE_OVER_FOURPI * ( ( 1.0 - g2 ) * inverseHg );
-      vec3 betaMTheta = vBetaM * mPhase;
+      vec3 betaMTheta = betaM * mPhase;
 
-      vec3 Lin = pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * ( 1.0 - Fex ), vec3( 1.5 ) );
-      Lin *= mix( vec3( 1.0 ), pow( vSunE * ( ( betaRTheta + betaMTheta ) / ( vBetaR + vBetaM ) ) * Fex, vec3( 1.0 / 2.0 ) ), clamp( pow( 1.0 - dot( up, vSunDirection ), 5.0 ), 0.0, 1.0 ) );
+      vec3 Lin = pow( sunIntensity * ( ( betaRTheta + betaMTheta ) / ( betaR + betaM ) ) * ( 1.0 - Fex ), vec3( 1.5 ) );
+      Lin *= mix( vec3( 1.0 ), pow( sunIntensity * ( ( betaRTheta + betaMTheta ) / ( betaR + betaM ) ) * Fex, vec3( 1.0 / 2.0 ) ), clamp( pow( 1.0 - dot( up, sunDirection ), 5.0 ), 0.0, 1.0 ) );
 
       // nightsky
       vec3 direction = normalize( vWorldPosition - cameraPos );
@@ -162,7 +147,7 @@ const skyShader = {
 
       // composition + solar disc
       float sundisk = smoothstep( sunAngularDiameterCos, sunAngularDiameterCos + 0.00002, cosTheta );
-      L0 += ( vSunE * 19000.0 * Fex ) * sundisk;
+      L0 += ( sunIntensity * 19000.0 * Fex ) * sundisk;
 
       vec3 texColor = ( Lin + L0 ) * 0.04 + vec3( 0.0, 0.0003, 0.00075 );
 
@@ -184,7 +169,7 @@ const skyShader = {
       vec3 color = curr * whiteScale;
 
       // Final
-      vec3 retColor = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * vSunfade ) ) ) );
+      vec3 retColor = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * sunFade ) ) ) );
 
       gl_FragColor = vec4( retColor, 1.0 );
     `]
