@@ -26,9 +26,9 @@ function computeSceneGeometry(data, scale, offset) {
 }
 
 class THREELoader extends Loader {
-  _loadFile(src, { scale = 1, offset = new Vector3() } = {}) {
+  _loadFile(src, { scale = 1, offset = new Vector3(), type = "" } = {}) {
     return new Promise((resolve) => {
-      if (/\.(gltf|glb)$/.test(src)) {
+      if (/\.(gltf|glb)$/.test(src) || type === "gltf") {
         const loader = new _THREEGLTFLoader();
         _THREEDRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}node_modules/three/examples/js/libs/draco/`);
         loader.setDRACOLoader(new _THREEDRACOLoader());
