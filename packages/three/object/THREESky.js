@@ -42,7 +42,8 @@ const skyShader = {
       varying vec3 vBetaR;
       varying vec3 vBetaM;
       varying float vSunE;
-
+    `],
+    ["end", `
       const vec3 up = vec3( 0.0, 1.0, 0.0 );
 
       // constants for atmospheric scattering
@@ -68,17 +69,6 @@ const skyShader = {
       const float steepness = 1.5;
       const float EE = 1000.0;
 
-      float sunIntensity( float zenithAngleCos ) {
-        zenithAngleCos = clamp( zenithAngleCos, -1.0, 1.0 );
-        return EE * max( 0.0, 1.0 - pow( e, -( ( cutoffAngle - acos( zenithAngleCos ) ) / steepness ) ) );
-      }
-
-      vec3 totalMie( float T ) {
-        float c = ( 0.2 * T ) * 10E-18;
-        return 0.434 * c * MieConst;
-      }
-    `],
-    ["end", `
       vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
       vWorldPosition = worldPosition.xyz;
 
@@ -86,7 +76,9 @@ const skyShader = {
 
       vSunDirection = normalize( sunPosition );
 
-      vSunE = sunIntensity( dot( vSunDirection, up ) );
+      // Sun Intensity
+      float zenithAngleCos = clamp( dot( vSunDirection, up ), -1.0, 1.0 );
+      vSunE = EE * max( 0.0, 1.0 - pow( e, -( ( cutoffAngle - acos( zenithAngleCos ) ) / steepness ) ) );;
 
       vSunfade = 1.0 - clamp( 1.0 - exp( ( sunPosition.y / 450000.0 ) ), 0.0, 1.0 );
 
@@ -97,7 +89,9 @@ const skyShader = {
       vBetaR = totalRayleigh * rayleighCoefficient;
 
       // mie coefficients
-      vBetaM = totalMie( turbidity ) * mieCoefficient;
+      float c = ( 0.2 * turbidity ) * 10E-18;
+      vec3 totalMie = 0.434 * c * MieConst;
+      vBetaM = totalMie * mieCoefficient;
     `]
   ],
   fragmentShaderChunks: [
