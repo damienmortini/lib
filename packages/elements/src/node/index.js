@@ -1,4 +1,4 @@
-let inputSlotUID = 0;
+let slotUID = 0;
 let inputConnectorTagName = "input-connector";
 
 /**
@@ -70,7 +70,6 @@ export default class NodeElement extends HTMLElement {
       </style>
       <details class="content" open>
         <summary></summary>
-        <slot></slot>
       </details>
     `;
 
@@ -85,14 +84,16 @@ export default class NodeElement extends HTMLElement {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
           if (!("value" in node)) {
-            continue;
+            const section = document.createElement("section");
+            section.id = `slot${slotUID}`;
+            section.innerHTML = `<slot name="${slotUID}"></slot>`;
+            this.shadowRoot.querySelector(".content").appendChild(section);
+            node.slot = slotUID;
+            slotUID++;
           }
           this._addInput(node);
         }
         for (const node of mutation.removedNodes) {
-          if (!("value" in node)) {
-            continue;
-          }
           this.shadowRoot.querySelector(`section#slot${node.slot}`).remove();
         }
       }
@@ -141,12 +142,12 @@ export default class NodeElement extends HTMLElement {
     }
     const label = node.label || node.name || node.id || "";
     const section = document.createElement("section");
-    section.id = `slot${inputSlotUID}`;
+    section.id = `slot${slotUID}`;
     section.classList.add("input");
     section.innerHTML = `
       <${inputConnectorTagName}></${inputConnectorTagName}>
       <label title="${label}">${label}</label>
-      <div class="input"><slot name="${inputSlotUID}"></slot></div>
+      <div class="input"><slot name="${slotUID}"></slot></div>
       <${inputConnectorTagName}></${inputConnectorTagName}>
     `;
     const connectors = section.querySelectorAll(`${inputConnectorTagName}`);
@@ -157,8 +158,8 @@ export default class NodeElement extends HTMLElement {
       connectors[1].inputs.add(node);
     }
     this.shadowRoot.querySelector(".content").appendChild(section);
-    node.slot = inputSlotUID;
-    inputSlotUID++;
+    node.slot = slotUID;
+    slotUID++;
   }
 
   set open(value) {
