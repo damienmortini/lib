@@ -61,13 +61,16 @@ const skyShader = {
     `],
     ["end", `
       vec3 normalizedSunPosition = normalize(sunPosition);
+      vec3 normalizedMoonPosition = normalize(moonPosition);
       
       vec3 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
-      vec3 skyMoonColor = computeSkyColor(vWorldPosition, moonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
+      vec3 skyMoonColor = computeSkyColor(vWorldPosition, normalizedMoonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
 
-      vec3 skyColor = blendScreen(skySunColor, skyMoonColor);
+      float moonIntensity = max(0., -dot(normalize(sunPosition.xz), normalize(moonPosition.xz)));
 
-      gl_FragColor = vec4( skyColor, 1.0 );
+      vec3 skyColor = blendScreen(skySunColor, skyMoonColor * moonIntensity);
+
+      gl_FragColor = vec4(skyColor, 1.);
     `]
   ]
 };
