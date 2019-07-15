@@ -1,4 +1,19 @@
+
 export default class NormalShader {
+  // https://blog.selfshadow.com/publications/blending-in-detail/
+  static blendNormals() {
+    return `
+      vec3 blendNormals(vec3 n1, vec3 n2)
+      {
+          vec3 t = n1.xyz + vec3( 0, 0, 1);
+          vec3 u = n2.xyz * vec3(-1, 1, 1);
+          vec3 r = (t/t.z)*dot(t, u) - u;
+          return r;
+      }
+    `;
+  }
+
+  // From Three.js
   static perturbNormal() {
     return `
       vec3 perturbNormal(vec3 baseNormal, vec3 normal, vec3 viewPosition, vec2 uv) {
