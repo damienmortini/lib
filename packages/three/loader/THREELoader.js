@@ -2,7 +2,8 @@ import { Loader } from "../../lib/util/Loader.js";
 import { TextureLoader } from "../../../three/src/loaders/TextureLoader.js";
 
 import { DRACOLoader } from "../../../three/examples/jsm/loaders/DRACOLoader.js";
-import { GLTFLoader } from "../../../three/examples/jsm/loaders/GLTFLoader.js";
+// import { GLTFLoader } from "../../../three/examples/jsm/loaders/GLTFLoader.js";
+import GLTFLoader from "./_THREEGLTFLoader.js";
 import { Mesh } from "../../../three/src/objects/Mesh.js";
 import { Line } from "../../../three/src/objects/Line.js";
 import { LineSegments } from "../../../three/src/objects/LineSegments.js";
