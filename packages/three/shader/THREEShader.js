@@ -39,11 +39,12 @@ export default class THREEShader extends Shader {
     super.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
 
     for (const key in this.uniforms) {
-      if (this.uniforms[key].value === undefined) {
-        this.uniforms[key] = {
-          value: this.uniforms[key],
-        };
+      if (this.uniforms[key] !== undefined && this.uniforms[key].value !== undefined) {
+        continue;
       }
+      this.uniforms[key] = {
+        value: this.uniforms[key],
+      };
     }
   }
 }

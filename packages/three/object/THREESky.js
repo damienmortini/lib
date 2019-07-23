@@ -92,6 +92,10 @@ export default class Sky extends Mesh {
     this.moonAzimuth = Math.PI;
   }
 
+  get radius() {
+    return this._radius;
+  }
+  
   _updatePositionFromInclinationAzimuth(position, inclination, azimuth) {
     const theta = inclination;
     const phi = azimuth + Math.PI * .5;
