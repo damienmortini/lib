@@ -1,9 +1,9 @@
 import { Loader } from "../../lib/util/Loader.js";
 import { TextureLoader } from "../../../three/src/loaders/TextureLoader.js";
 
-import { DRACOLoader } from "../../../three/examples/jsm/loaders/DRACOLoader.js";
-// import { GLTFLoader } from "../../../three/examples/jsm/loaders/GLTFLoader.js";
-import GLTFLoader from "./_THREEGLTFLoader.js";
+import DRACOLoader from "./_THREEDRACOLoader.js";
+// import { DRACOLoader } from "../../../three/examples/jsm/loaders/DRACOLoader.js";
+import { GLTFLoader } from "../../../three/examples/jsm/loaders/GLTFLoader.js";
 import { Mesh } from "../../../three/src/objects/Mesh.js";
 import { Line } from "../../../three/src/objects/Line.js";
 import { LineSegments } from "../../../three/src/objects/LineSegments.js";
@@ -36,7 +36,7 @@ class THREELoader extends Loader {
     return new Promise((resolve) => {
       if (/\.(gltf|glb)$/.test(src) || type === "gltf") {
         const loader = new GLTFLoader();
-        DRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : "node_modules/three/examples/js/libs/draco/"}`);
+        DRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : "node_modules/three/examples/js/libs/draco/gltf/"}`);
         loader.setDRACOLoader(new DRACOLoader());
 
         const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
