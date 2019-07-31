@@ -1,4 +1,4 @@
-export default class FractalBrownianMotion {
+export default class FractalBrownianMotionShader {
   static fbmDerivatives3D({
     noiseFunctionName,
     octaves = 5,

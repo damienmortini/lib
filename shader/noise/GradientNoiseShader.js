@@ -1,4 +1,4 @@
-export default class GradientNoise {
+export default class GradientNoiseShader {
   static gradientNoise2D() {
     return `
       // The MIT License
