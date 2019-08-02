@@ -32,7 +32,7 @@ class THREELoader extends Loader {
     this.dracoDecoderPath = "";
   }
 
-  _loadFile(src, { scale = 1, offset = new Vector3(), type = "" } = {}) {
+  _loadFile(src, { type = "", scale = 1, offset = new Vector3() } = {}) {
     return new Promise((resolve) => {
       if (/\.(gltf|glb)$/.test(src) || type === "gltf") {
         const loader = new GLTFLoader();
@@ -50,6 +50,8 @@ class THREELoader extends Loader {
         new TextureLoader().load(src, (data) => {
           resolve(data);
         });
+      } else {
+        resolve(super._loadFile(src, { type }));
       }
     });
   }
