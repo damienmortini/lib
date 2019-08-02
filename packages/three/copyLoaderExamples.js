@@ -1,8 +1,8 @@
 const fs = require("fs");
 
 const files = new Map([
-  ["node_modules/three/examples/jsm/loaders/GLTFLoader.js", "./loader/_GLTFLoader.js"],
-  ["node_modules/three/examples/jsm/loaders/DRACOLoader.js", "./loader/_DRACOLoader.js"],
+  ["/node_modules/three/examples/jsm/loaders/GLTFLoader.js", "./loader/_GLTFLoader.js"],
+  ["/node_modules/three/examples/jsm/loaders/DRACOLoader.js", "./loader/_DRACOLoader.js"],
 ]);
 
 for (const [source, destination] of files) {
