@@ -46,7 +46,7 @@ class THREELoader extends Loader {
           computeSceneGeometry(data.scene, scale, offset);
           resolve(data);
         });
-      } else if (/\.(png|jpg|mp4)$/.test(src)) {
+      } else if (/\.(png|jpg|mp4)$/.test(src) || type === "texture") {
         new TextureLoader().load(src, (data) => {
           resolve(data);
         });
