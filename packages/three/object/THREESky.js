@@ -4,6 +4,7 @@ import { Vector3 } from "../../../three/src/math/Vector3.js";
 import { IcosahedronBufferGeometry } from "../../../three/src/geometries/IcosahedronGeometry.js";
 import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 import SkyShader from "../../lib/shader/SkyShader.js";
+import GradientNoiseShader from "../../lib/shader/noise/GradientNoiseShader.js";
 
 const skyShader = {
   uniforms: {
@@ -51,6 +52,8 @@ const skyShader = {
 
       ${SkyShader.computeSkyColor()}
 
+      ${GradientNoiseShader.gradientNoise3D()}
+
       float blendScreen(float base, float blend) {
         return 1.0-((1.0-base)*(1.0-blend));
       }
@@ -66,9 +69,23 @@ const skyShader = {
       vec3 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
       vec3 skyMoonColor = computeSkyColor(vWorldPosition, normalizedMoonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
 
-      float moonIntensity = max(0., -dot(normalize(sunPosition.xz), normalize(moonPosition.xz)));
+      float nightIntensity = 1. - smoothstep(0., .2, max(0., normalizedSunPosition.y));
 
-      vec3 skyColor = blendScreen(skySunColor, skyMoonColor * moonIntensity);
+      float moonIntensity = max(0., -dot(normalize(sunPosition.xz), normalize(moonPosition.xz)));
+      // skyMoonColor *= moonIntensity;
+      skyMoonColor *= nightIntensity;
+
+      // Stars
+      vec3 rayDirection = normalize(vWorldPosition);
+      float starsIntensity = gradientNoise3D(rayDirection * 400.) * .5 + .5;
+      starsIntensity = pow(starsIntensity, 10.);
+      starsIntensity *= max(0., rayDirection.y);
+      starsIntensity *= 10.;
+      starsIntensity *= nightIntensity;
+
+      skyMoonColor = blendScreen(skyMoonColor, vec3(starsIntensity));
+
+      vec3 skyColor = blendScreen(skySunColor, skyMoonColor);
 
       gl_FragColor = vec4(skyColor, 1.);
     `]
