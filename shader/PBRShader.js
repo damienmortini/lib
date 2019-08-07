@@ -324,7 +324,7 @@ export default class PBRShader extends Shader {
         // Calculate lighting contribution from image based lighting source (IBL)
         color += getIBLContribution(pbrInputs, n, reflection, position);
 
-        return vec4(pow(color,vec3(1.0/2.2)), baseColor.a);
+        return vec4(color, baseColor.a);
       }
     `;
   }
