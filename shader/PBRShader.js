@@ -1,6 +1,3 @@
-// GGX from from http://www.filmicworlds.com/images/ggx-opt/optimized-ggx.hlsl
-// PBR adapted from from https://www.shadertoy.com/view/XsfXWX
-
 import LightShader from "./LightShader.js";
 import RayShader from "./RayShader.js";
 import CameraShader from "./CameraShader.js";
@@ -16,108 +13,6 @@ export default class PBRShader extends Shader {
       float roughness;
       float reflectance;
     };
-    `;
-  }
-
-  static ggx() {
-    return `
-    #define PI 3.1415926535897932384626433832795
-
-    float G1V(float dotNV, float k)
-    {
-      return 1. / (dotNV * (1. - k) + k);
-    }
-
-    float ggx(vec3 N, vec3 V, vec3 L, float roughness, float F0)
-    {
-      roughness = .01 + roughness * .99;
-
-      float alpha = roughness * roughness;
-
-      vec3 H = normalize(V + L);
-
-      float dotNL = clamp(dot(N, L), 0., 1.);
-      float dotNV = clamp(dot(N, V), 0., 1.);
-      float dotNH = clamp(dot(N, H), 0., 1.);
-      float dotLH = clamp(dot(L, H), 0., 1.);
-
-      float F, D, vis;
-
-      // D
-      float alphaSqr = alpha * alpha;
-      float denom = dotNH * dotNH * (alphaSqr - 1.) + 1.;
-      D = alphaSqr / (PI * denom * denom);
-
-      // F
-      float dotLH5 = pow(1. - dotLH, 5.);
-      F = F0 + (1. - F0) * dotLH5;
-
-      // V
-      float k = alpha / 2.;
-      vis = G1V(dotNL, k) * G1V(dotNV, k);
-
-      float specular = dotNL * D * F * vis;
-      return specular;
-    }
-    `;
-  }
-
-  static computeGGXLighting() {
-    return `
-    vec3 computeGGXLighting (
-      Ray ray,
-      Light light,
-      vec3 normal,
-      PhysicallyBasedMaterial material
-    ) {
-      vec3 specular = light.color * ggx(normal, -ray.direction, -light.direction, material.roughness, material.reflectance);
-      return specular;
-    }
-    `;
-  }
-
-  static computeSimplePBRColor({
-    pbrReflectionFromRay = `
-      ray.direction *= 1. / max(roughness, .0001);
-      ray.direction = clamp(ray.direction, vec3(-1.), vec3(1.));
-      vec4 color = vec4(vec3(ray.direction * .5 + .5), 1.);
-      float grey = (color.r + color.g + color.b) / 3.;
-      return vec4(vec3(grey), 1.);
-    `,
-  } = {}) {
-    return `
-    vec4 pbrReflectionFromRay(
-      Ray ray,
-      float roughness
-    ) {
-      ${pbrReflectionFromRay}
-    }
-
-    vec4 computeSimplePBRColor (
-      Ray ray,
-      Light light,
-      vec3 position,
-      vec3 normal,
-      PhysicallyBasedMaterial material
-    ) {
-      light.color *= light.intensity;
-
-      // fresnel
-      float fresnel = 1. - dot(mix(normal, -ray.direction, material.roughness), -ray.direction);
-
-      // reflection
-      vec4 reflection = pbrReflectionFromRay(Ray(position, normalize(reflect(ray.direction, normal))), material.roughness);
-
-      // diffuse
-      vec4 color = mix(material.baseColor, material.baseColor * reflection, material.metallic);
-      color = mix(color, reflection, fresnel);
-      color.rgb *= light.color;
-
-      color.rgb += computeGGXLighting(ray, light, normal, material);
-      color.rgb = clamp(vec3(0.), vec3(1.), color.rgb);
-
-      return color;
-    }
     `;
   }
 
@@ -394,14 +289,11 @@ export default class PBRShader extends Shader {
           ${uvs ? "in vec2 vUV;" : ""}
           in vec3 vViewDirection;
   
-          ${PBRShader.ggx()}
-          ${PBRShader.computeGGXLighting()}
           ${PBRShader.computePBRColor({ pbrDiffuseLightFromRay, pbrReflectionFromRay })}
         `],
         ["end", `
           Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
           fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
-          // fragColor = vec4(vViewDirection, 1.);
         `],
         ...fragmentShaderChunks,
       ],
