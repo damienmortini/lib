@@ -29,14 +29,20 @@ class THREELoader extends Loader {
   constructor() {
     super();
     this.dracoDecoderPath = "";
+
+    this.extensionTypeMap.set("gltf", "model/gltf+json");
+    this.extensionTypeMap.set("glb", "model/gltf-binary");
+    this.extensionTypeMap.set("png", "application/texture");
+    this.extensionTypeMap.set("jpg", "application/texture");
+    this.extensionTypeMap.set("mp4", "application/texture");
   }
 
-  _loadFile(src, { type = "", scale = 1, offset = new Vector3() } = {}) {
+  _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
     return new Promise((resolve) => {
-      if (/\.(gltf|glb)$/.test(src) || type === "gltf") {
+      if (type.startsWith("model")) {
         const loader = new GLTFLoader();
         DRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : "node_modules/three/examples/js/libs/draco/gltf/"}`);
-        loader.setDRACOLoader(new DRACOLoader());
+        loader.setDRACOLoader(new DRACOLoader(undefined));
 
         const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
@@ -45,12 +51,12 @@ class THREELoader extends Loader {
           computeSceneGeometry(data.scene, scale, offset);
           resolve(data);
         });
-      } else if (/\.(png|jpg|mp4)$/.test(src) || type === "texture") {
+      } else if (type === "application/texture") {
         new TextureLoader().load(src, (data) => {
           resolve(data);
         });
       } else {
-        resolve(super._loadFile(src, { type }));
+        resolve(super._loadFile({ src, type }));
       }
     });
   }
