@@ -7,7 +7,7 @@
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
     "bump-major": "npm version major && npm publish --access=public",
-    "postinstall": "node copyLoaderExamples.js"
+    "prepublish": "node copyLoaderExamples.js"
   },
   "repository": {
     "type": "git",
