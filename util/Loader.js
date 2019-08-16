@@ -53,9 +53,9 @@ export class Loader {
 
       const key = typeof value === "string" ? value : JSON.stringify(value);
 
-      const options = typeof value === "string" ? { src: value } : { ...value };
+      const options = typeof value === "string" ? { src: value } : Object.assign({}, value);
 
-      let baseURI = options.baseURI !== undefined ? options.baseURI : this.baseURI;
+      const baseURI = options.baseURI !== undefined ? options.baseURI : this.baseURI;
 
       options.src = `${baseURI}${options.src}`;
 
