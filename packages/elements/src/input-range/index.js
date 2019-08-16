@@ -33,7 +33,7 @@ export default class InputRangeElement extends HTMLElement {
       this._rangeInput.valueAsNumber = this.value;
     });
 
-    for (const key in this._numberInput) {
+    for (const key in HTMLInputElement.prototype) {
       if (key in InputRangeElement.prototype) {
         continue;
       }

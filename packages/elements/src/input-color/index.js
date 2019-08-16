@@ -34,7 +34,7 @@ export default class InputColorElement extends HTMLElement {
       this.value = this._textInput.value;
     });
 
-    for (const key in this._textInput) {
+    for (const key in HTMLInputElement.prototype) {
       if (key in InputColorElement.prototype) {
         continue;
       }

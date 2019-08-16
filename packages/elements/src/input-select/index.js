@@ -19,7 +19,7 @@ export default class InputSelectElement extends HTMLElement {
 
     this._select = this.shadowRoot.querySelector("select");
 
-    for (const key in this._select) {
+    for (const key in HTMLSelectElement.prototype) {
       if (key in InputSelectElement.prototype) {
         continue;
       }

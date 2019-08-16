@@ -20,7 +20,7 @@ export default class InputButtonElement extends HTMLElement {
 
     const input = this.shadowRoot.querySelector("button");
 
-    for (const key in input) {
+    for (const key in HTMLButtonElement.prototype) {
       if (key in InputButtonElement.prototype) {
         continue;
       }

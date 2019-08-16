@@ -18,7 +18,7 @@ export default class InputTextElement extends HTMLElement {
 
     const input = this.shadowRoot.querySelector("textarea");
 
-    for (const key in input) {
+    for (const key in HTMLTextAreaElement.prototype) {
       if (key in InputTextElement.prototype) {
         continue;
       }

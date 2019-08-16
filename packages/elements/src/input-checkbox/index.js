@@ -13,7 +13,7 @@ export default class InputCheckboxElement extends HTMLElement {
 
     this._input = this.shadowRoot.querySelector("input");
 
-    for (const key in this._input) {
+    for (const key in HTMLInputElement.prototype) {
       if (key in InputCheckboxElement.prototype) {
         continue;
       }
