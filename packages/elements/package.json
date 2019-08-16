@@ -27,11 +27,11 @@
   "homepage": "https://github.com/damienmortini/elements#readme",
   "dependencies": {
     "@damienmortini/lib": "^0.2.0",
-    "@simonwep/pickr": "^1.2.1",
+    "@simonwep/pickr": "^1.2.7",
     "@webcomponents/webcomponentsjs": "^2.2.10"
   },
   "devDependencies": {
-    "@damienmortini/server": "^1.0.0",
-    "jsdoc": "^3.6.2"
+    "@damienmortini/server": "^1.0.2",
+    "jsdoc": "^3.6.3"
   }
 }
