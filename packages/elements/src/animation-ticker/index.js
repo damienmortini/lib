@@ -22,10 +22,6 @@ export default class AnimationTickerElement extends HTMLElement {
       document.addEventListener("visibilitychange", this._onFocusChangeBinded);
     }
     if (this._autoplay) {
-      if (!window.top.document.hasFocus() && !this._background) {
-        this._pausedByBlur = true;
-        requestAnimationFrame(this._updateBinded);
-      }
       this.play();
     }
   }
@@ -95,6 +91,10 @@ export default class AnimationTickerElement extends HTMLElement {
 
   play() {
     this._pausedByUser = false;
+    if (!window.top.document.hasFocus() && !this._background) {
+      this._pausedByBlur = true;
+      requestAnimationFrame(this._updateBinded);
+    }
   }
 
   pause() {
