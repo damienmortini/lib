@@ -10,7 +10,7 @@ import {
   WebGLRenderTarget,
   Scene,
   NearestFilter,
-} from "../../../three/build/three.module.js";
+} from "../../../three/src/Three.js";
 
 import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
 
@@ -53,10 +53,10 @@ export default class THREEGPGPUSystem {
     this.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     this.scene = new Scene();
 
-    this._webglRenderTargetIn = new WebGLRenderTarget(dataTexture.image.width, dataTexture.image.height, {
+    this._webglRenderTargetIn = new WebGLRenderTarget(this._width, this._height, {
       minFilter: NearestFilter,
       magFilter: NearestFilter,
-      format: format,
+      format,
       stencilBuffer: false,
       depthBuffer: false,
       type: FloatType,
@@ -73,11 +73,15 @@ export default class THREEGPGPUSystem {
     };
 
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEShaderMaterial({
-      uniforms: new Map([
-        ["dataTextureSize", new Vector2(dataTexture.image.width, dataTexture.image.height)],
-        ["dataTexture", dataTexture],
-        ...uniforms,
-      ]),
+      uniforms: Object.assign({
+        dataTextureSize: new Vector2(this._width, this._height),
+        dataTexture,
+      }, uniforms),
+      fragmentShader: `
+        void main() {
+          gl_FragColor = vec4(0.);
+        }
+      `,
       vertexShaderChunks: [
         ["start",
           "varying vec2 vUv;",
@@ -94,7 +98,7 @@ export default class THREEGPGPUSystem {
           varying vec2 vUv;
         `],
         ["main", `
-          vec2 dataPosition = floor(vUv * dataTextureSize);
+          vec2 dataPosition = vUv * dataTextureSize;
           float chunkOffset = mod(dataPosition.x, ${size}.);
           dataPosition.x -= chunkOffset;
           ${createDataChunks()}
@@ -123,12 +127,22 @@ export default class THREEGPGPUSystem {
   }
 
   update() {
+    const savedRendertarget = this._renderer.getRenderTarget();
+
+    this._renderer.setRenderTarget(this._webglRenderTargetOut);
+    this._renderer.render(this.scene, this.camera);
+
     if (this._debugRenderer) {
-      this._debugRenderer.render(this.scene, this.camera, this._webglRenderTargetOut);
+      this._debugRenderer.setRenderTarget(this._webglRenderTargetOut);
+      this._debugRenderer.render(this.scene, this.camera);
+      this._debugRenderer.setRenderTarget(null);
       this._debugRenderer.render(this.scene, this.camera);
     }
-    this._renderer.render(this.scene, this.camera, this._webglRenderTargetOut);
+
     [this._webglRenderTargetIn, this._webglRenderTargetOut] = [this._webglRenderTargetOut, this._webglRenderTargetIn];
+
     this._quad.material.dataTexture = this._webglRenderTargetIn.texture;
+
+    this._renderer.setRenderTarget(savedRendertarget);
   }
 }
