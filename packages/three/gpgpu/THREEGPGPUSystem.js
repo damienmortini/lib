@@ -67,7 +67,7 @@ export default class THREEGPGPUSystem {
     const createDataChunks = () => {
       let str = "\n";
       for (let i = 0; i < size; i++) {
-        str += `vec4 dataChunk${i} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / dataTextureSize);\n`;
+        str += `vec4 dataChunk${i} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / (dataTextureSize - 1.));\n`;
       }
       return str;
     };
@@ -98,7 +98,7 @@ export default class THREEGPGPUSystem {
           varying vec2 vUv;
         `],
         ["main", `
-          vec2 dataPosition = vUv * dataTextureSize;
+          vec2 dataPosition = floor(vUv * (dataTextureSize - 1.) + .5);
           float chunkOffset = mod(dataPosition.x, ${size}.);
           dataPosition.x -= chunkOffset;
           ${createDataChunks()}
