@@ -576,24 +576,4 @@ float snoise(vec2 pos) {
       }
     `;
   }
-
-  static random() {
-    return `
-      float random(float n){
-        return fract(sin(n) * 43758.5453123);
-      }
-
-      float random(vec2 co){
-        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-      }
-
-      float random(vec2 co, float l) {
-        return random(vec2(random(co), l));
-      }
-
-      float random(vec2 co, float l, float t) {
-        return random(vec2(random(co, l), t));
-      }
-    `;
-  }
 }
