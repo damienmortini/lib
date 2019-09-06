@@ -5,7 +5,7 @@ export default class GerstnerWaveShader {
     return `
       struct GerstnerWave {
         vec2 direction;
-        float wavenumber;
+        float wavelength;
         float amplitude;
         float steepness;
         float speed;
@@ -15,20 +15,26 @@ export default class GerstnerWaveShader {
 
   static gerstnerWave() {
     return `
-      vec3 gerstnerWave(vec2 position, vec2 direction, float wavenumber, float amplitude, float steepness, float speed, float time) {
+      vec3 gerstnerWave(vec2 position, float time, vec2 direction, float wavelength, float steepness, float speed) {
+        float wavenumber = 2. * ${Math.PI} / wavelength;
+        float amplitude = steepness / wavenumber;
+
         float f = wavenumber * (dot(direction, position) - speed * time);
 
         float cosf = cos(f);
         float sinf = sin(f);
         
         return vec3(
-          steepness * amplitude * direction.x * cosf,
-          steepness * amplitude * sinf,
-          steepness * amplitude * direction.y * cosf
+          amplitude * direction.x * cosf,
+          amplitude * sinf,
+          amplitude * direction.y * cosf
         );
       }
 
-      vec3 gerstnerWave(vec2 position, vec2 direction, float wavenumber, float amplitude, float steepness, float speed, float time, inout vec3 normal) {
+      vec3 gerstnerWave(vec2 position, float time, vec2 direction, float wavelength, float steepness, float speed, inout vec3 normal) {
+        float wavenumber = 2. * ${Math.PI} / wavelength;
+        float amplitude = steepness / wavenumber;
+
         float f = wavenumber * (dot(direction, position) - speed * time);
 
         float cosf = cos(f);
@@ -40,9 +46,9 @@ export default class GerstnerWaveShader {
         normal.z += direction.y * WA * cosf;
         
         return vec3(
-          steepness * amplitude * direction.x * cosf,
-          steepness * amplitude * sinf,
-          steepness * amplitude * direction.y * cosf
+          amplitude * direction.x * cosf,
+          amplitude * sinf,
+          amplitude * direction.y * cosf
         );
       }
     `;
