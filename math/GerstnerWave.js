@@ -10,7 +10,7 @@ export default class GerstnerWave {
     direction = [1, 0],
     steepness = 1,
     wavelength = 1,
-    speed = 1,
+    speed = Math.sqrt(9.8 / (2. * Math.PI / wavelength)),
   }) {
     POSITION.set(x, y);
 

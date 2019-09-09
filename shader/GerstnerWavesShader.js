@@ -6,7 +6,6 @@ export default class GerstnerWaveShader {
       struct GerstnerWave {
         vec2 direction;
         float wavelength;
-        float amplitude;
         float steepness;
         float speed;
       };

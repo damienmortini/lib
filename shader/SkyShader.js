@@ -15,7 +15,7 @@
 export default class SkyShader {
   static computeSkyColor() {
     return `
-      vec3 computeSkyColor(vec3 worldPosition, vec3 sunPosition, float rayleigh, float turbidity, float luminance, float mieCoefficient, float mieDirectionalG){
+      vec4 computeSkyColor(vec3 worldPosition, vec3 sunPosition, float rayleigh, float turbidity, float luminance, float mieCoefficient, float mieDirectionalG){
         const vec3 up = vec3( 0.0, 1.0, 0.0 );
 
         // constants for atmospheric scattering
@@ -133,7 +133,10 @@ export default class SkyShader {
         vec3 color = curr * whiteScale;
 
         // Final
-        return pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * sunFade ) ) ) );
+        color = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * sunFade ) ) ) );
+        float hdrIntensity = (color.r + color.g + color.b) / 3.;
+        // return vec4(hdrIntensity);
+        return vec4(color, hdrIntensity);
       }
     `;
   }
