@@ -66,8 +66,8 @@ const skyShader = {
       vec3 normalizedSunPosition = normalize(sunPosition);
       vec3 normalizedMoonPosition = normalize(moonPosition);
       
-      vec3 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
-      vec3 skyMoonColor = computeSkyColor(vWorldPosition, normalizedMoonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
+      vec4 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
+      vec4 skyMoonColor = computeSkyColor(vWorldPosition, normalizedMoonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
 
       float nightIntensity = 1. - smoothstep(0., .2, max(0., normalizedSunPosition.y));
 
@@ -83,11 +83,11 @@ const skyShader = {
       starsIntensity *= 10.;
       starsIntensity *= nightIntensity;
 
-      skyMoonColor = blendScreen(skyMoonColor, vec3(starsIntensity));
+      skyMoonColor.rgb = blendScreen(skyMoonColor.rgb, vec3(starsIntensity));
 
-      vec3 skyColor = blendScreen(skySunColor, skyMoonColor);
+      vec3 skyColor = blendScreen(skySunColor.rgb, skyMoonColor.rgb);
 
-      gl_FragColor = vec4(skyColor, 1.);
+      gl_FragColor = vec4(skyColor, (skySunColor.a + skyMoonColor.a) / 2.);
     `]
   ]
 };
