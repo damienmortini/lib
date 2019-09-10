@@ -7,22 +7,6 @@ export default class DraggableElement extends HTMLElement {
     super();
 
     this.attachShadow({ mode: "open" }).innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
-        
-        slot {
-          width: 20px;
-          height: 20px;
-          width: 100%;
-          height: 100%;
-        }
-
-        slot:hover {
-          outline: 1px dotted;
-        }
-      </style>
       <slot></slot>
     `;
 
@@ -121,6 +105,8 @@ export default class DraggableElement extends HTMLElement {
   }
 
   _onPointerDown(event) {
+    console.log("dkshfdskj");
+    
     if (!this.handles.includes(event.target)) {
       return;
     }
