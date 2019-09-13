@@ -20,6 +20,8 @@ const skyShader = {
     moonLuminance: 1.1,
     moonMieCoefficient: 0.005,
     moonMieDirectionalG: 0.8,
+    displaySun: 1,
+    displayMoon: 1,
   },
   vertexShaderChunks: [
     ["start", `
@@ -40,6 +42,8 @@ const skyShader = {
       uniform float sunLuminance;
       uniform float sunMieCoefficient;
       uniform float sunMieDirectionalG;
+      uniform float displaySun;
+      uniform float displayMoon;
 
       uniform vec3 moonPosition;
       uniform float moonRayleigh;
@@ -66,10 +70,10 @@ const skyShader = {
       vec3 normalizedSunPosition = normalize(sunPosition);
       vec3 normalizedMoonPosition = normalize(moonPosition);
       
-      vec4 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
-      vec4 skyMoonColor = computeSkyColor(vWorldPosition, normalizedMoonPosition, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
+      vec4 skySunColor = computeSkyColor(vWorldPosition, normalizedSunPosition, ${SkyShader.SUN_ANGULAR_DIAMETER} * displaySun, sunRayleigh, sunTurbidity, sunLuminance, sunMieCoefficient, sunMieDirectionalG);
+      vec4 skyMoonColor = computeSkyColor(vWorldPosition, normalizedMoonPosition, ${SkyShader.MOON_ANGULAR_DIAMETER} * displayMoon, moonRayleigh, moonTurbidity, moonLuminance, moonMieCoefficient, moonMieDirectionalG);
 
-      float nightIntensity = 1. - smoothstep(0., .2, max(0., normalizedSunPosition.y));
+      float nightIntensity = 1. - smoothstep(-.05, 0., normalizedSunPosition.y);
 
       float moonIntensity = max(0., -dot(normalize(sunPosition.xz), normalize(moonPosition.xz)));
       // skyMoonColor *= moonIntensity;
@@ -119,6 +123,22 @@ export default class Sky extends Mesh {
     position.x = this._radius * Math.cos(phi) * Math.cos(theta);
     position.y = this._radius * Math.sin(theta);
     position.z = this._radius * Math.sin(phi) * Math.cos(theta);
+  }
+  
+  get displaySun() {
+    return this.material.displaySun === 1;
+  }
+  
+  set displaySun(value) {
+    this.material.displaySun = value ? 1 : 0;
+  }
+
+  get displayMoon() {
+    return this.material.displayMoon === 1;
+  }
+  
+  set displayMoon(value) {
+    this.material.displayMoon = value ? 1 : 0;
   }
 
   get sunInclination() {
