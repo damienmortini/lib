@@ -13,9 +13,19 @@
 */
 
 export default class SkyShader {
+  static get SUN_ANGULAR_DIAMETER() {
+    const sunArcMin = 32;
+    return (sunArcMin / 60) / 180 * Math.PI;
+  }
+
+  static get MOON_ANGULAR_DIAMETER() {
+    const moonArcMin = 31;
+    return (moonArcMin / 60) / 180 * Math.PI;
+  }
+
   static computeSkyColor() {
     return `
-      vec4 computeSkyColor(vec3 worldPosition, vec3 sunPosition, float rayleigh, float turbidity, float luminance, float mieCoefficient, float mieDirectionalG){
+      vec4 computeSkyColor(vec3 worldPosition, vec3 sunPosition, float angularDiameter, float rayleigh, float turbidity, float luminance, float mieCoefficient, float mieDirectionalG){
         const vec3 up = vec3( 0.0, 1.0, 0.0 );
 
         // constants for atmospheric scattering
@@ -68,8 +78,6 @@ export default class SkyShader {
         // optical length at zenith for molecules
         const float rayleighZenithLength = 8.4E3;
         const float mieZenithLength = 1.25E3;
-        // 66 arc seconds -> degrees, and the cosine of that
-        const float sunAngularDiameterCos = 0.999956676946448443553574619906976478926848692873900859324;
 
         // 3.0 / ( 16.0 * pi )
         const float THREE_OVER_SIXTEENPI = 0.05968310365946075;
@@ -110,7 +118,8 @@ export default class SkyShader {
         vec3 L0 = vec3( 0.1 ) * Fex;
 
         // composition + solar disc
-        float sundisk = smoothstep( sunAngularDiameterCos, sunAngularDiameterCos + 0.00002, cosTheta );
+        float angularDiameterCos = cos(angularDiameter);
+        float sundisk = smoothstep( angularDiameterCos, angularDiameterCos + 0.00002, cosTheta );
         L0 += ( sunIntensity * 19000.0 * Fex ) * sundisk;
 
         vec3 texColor = ( Lin + L0 ) * 0.04 + vec3( 0.0, 0.0003, 0.00075 );
