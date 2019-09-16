@@ -9,9 +9,8 @@ export default class PBRShader extends Shader {
     struct PhysicallyBasedMaterial
     {
       vec4 baseColor;
-      float metallic;
+      float metalness;
       float roughness;
-      float reflectance;
     };
     `;
   }
@@ -154,7 +153,7 @@ export default class PBRShader extends Shader {
         // In glTF, these factors can be specified by fixed scalar values
         // or from a metallic-roughness map
         float perceptualRoughness = material.roughness;
-        float metallic = material.metallic;
+        float metallic = material.metalness;
 
         perceptualRoughness = clamp(perceptualRoughness, c_MinRoughness, 1.0);
         metallic = clamp(metallic, 0.0, 1.0);
@@ -226,9 +225,8 @@ export default class PBRShader extends Shader {
 
   constructor({
     baseColor = [1, 1, 1, 1],
-    metallic = 0,
+    metalness = 0,
     roughness = 0,
-    reflectance = 1,
     uniforms = {},
     vertexShaderChunks = [],
     fragmentShaderChunks = [],
@@ -240,9 +238,8 @@ export default class PBRShader extends Shader {
       uniforms: Object.assign({
         material: {
           baseColor,
-          metallic,
+          metalness,
           roughness,
-          reflectance,
         },
       }, uniforms),
       vertexShaderChunks: [
@@ -269,7 +266,7 @@ export default class PBRShader extends Shader {
           ${uvs ? "vUV = uv;" : ""}
           gl_Position = camera.projectionView * transform * vec4(position, 1.);
           vPosition = position;
-          vNormal = normalize(mat3(transform) * normal);
+          vNormal = mat3(transform) * normal;
           Ray ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
           vViewDirection = ray.direction;
         `],
