@@ -83,6 +83,15 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       });
     }
 
+    // if (["boneTexture", "boneTextureSize"].includes(key)) {
+    //   continue;
+    // }
+
+    delete this.uniforms.boneTexture;
+    delete this.uniforms.boneTextureSize;
+    delete this.uniforms.bindMatrix;
+    delete this.uniforms.bindMatrixInverse;
+
     this.needsUpdate = true;
   }
 }
