@@ -57,19 +57,20 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           varying vec3 vViewPosition;
         `],
         ["main", `
-          ${options.skinning ? "vec3 position = position;" : ""}
-          ${options.skinning ? "vec3 normal = normal;" : ""}
+          vec3 pbrPosition = position;
+          vec3 pbrNormal = normal;
+          
           ${options.skinning ? ShaderChunk.skinbase_vertex : ""}
-          ${options.skinning ? ShaderChunk.skinnormal_vertex.replace(/objectNormal/g, "normal") : ""}
-          ${options.skinning ? ShaderChunk.skinning_vertex.replace(/transformed/g, "position") : ""}
+          ${options.skinning ? ShaderChunk.skinnormal_vertex.replace(/objectNormal/g, "pbrNormal") : ""}
+          ${options.skinning ? ShaderChunk.skinning_vertex.replace(/transformed/g, "pbrPosition") : ""}
         `],
         ["end", `
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pbrPosition, 1.);
           Ray ray = Ray(cameraPosition, mat3(inverse(viewMatrix)) * (inverse(projectionMatrix) * vec4((gl_Position.xy / gl_Position.w), 1., 1.)).xyz);
           
           vRay = ray;
-          vPosition = position;
-          vNormal = normalize(mat3(modelMatrix) * normal);
+          vPosition = pbrPosition;
+          vNormal = normalize(mat3(modelMatrix) * pbrNormal);
           vUv = uv;
         `],
         ...vertexShaderChunks,
