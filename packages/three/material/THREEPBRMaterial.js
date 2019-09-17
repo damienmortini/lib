@@ -19,8 +19,14 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
       direction: new Vector3(),
     },
     skinning = false,
-    pbrDiffuseLightFromRay = envMap ? "return textureCube(envMap, ray.direction).rgb;" : undefined,
-    pbrReflectionFromRay = envMap ? "return textureCube(envMap, ray.direction).rgb;" : undefined,
+    pbrDiffuseLightFromRay = envMap ? `
+      vec4 texel = textureLod(envMap, ray.direction, roughness * ${Math.log2(envMap.image.width).toFixed(1)});
+      return texel.rgb + texel.a;
+    ` : undefined,
+    pbrReflectionFromRay = envMap ? `
+      vec4 texel = textureLod(envMap, ray.direction, roughness * ${Math.log2(envMap.image.width).toFixed(1)});
+      return texel.rgb + texel.a;
+    ` : undefined,
     vertexShaderChunks = [],
     fragmentShaderChunks = [],
     uniforms = {},
