@@ -5,43 +5,40 @@ import PBRShader from "../../lib/shader/PBRShader.js";
 import { Color, Vector3, ShaderChunk } from "../../../three/src/Three.js";
 
 export default class THREEPBRMaterial extends THREEShaderMaterial {
-  constructor({
-    baseColor = new Color("#ffffff"),
-    metalness = 0,
-    roughness = 0,
-    opacity = 1,
-    map = undefined,
-    envMap = undefined,
-    light = {
-      intensity: 0,
-      color: new Color("#ffffff"),
-      position: new Vector3(),
-      direction: new Vector3(),
-    },
-    skinning = false,
-    pbrDiffuseLightFromRay = envMap ? `
-      vec4 texel = textureLod(envMap, ray.direction, roughness * ${Math.log2(envMap.image.width).toFixed(1)});
-      return texel.rgb + texel.a;
-    ` : undefined,
-    pbrReflectionFromRay = envMap ? `
-      vec4 texel = textureLod(envMap, ray.direction, roughness * ${Math.log2(envMap.image.width).toFixed(1)});
-      return texel.rgb + texel.a;
-    ` : undefined,
-    vertexShaderChunks = [],
-    fragmentShaderChunks = [],
-    uniforms = {},
-  } = {}) {
-    super({
-      lights: !!light,
-      skinning,
+  constructor(options = {}) {
+    const vertexShaderChunks = options.vertexShaderChunks || [];
+    const fragmentShaderChunks = options.fragmentShaderChunks || [];
+    const uniforms = options.uniforms || {};
+    const pbrDiffuseLightFromRay = options.pbrDiffuseLightFromRay || (uniforms.envMap ? `
+      vec4 texel = textureLod(envMap, ray.direction, roughness * ${Math.log2(uniforms.envMap.image.width).toFixed(1)});
+      return texel.rgb;
+    ` : undefined);
+    const pbrReflectionFromRay = options.pbrReflectionFromRay || (uniforms.envMap ? `
+      vec4 texel = textureLod(envMap, ray.direction, roughness * ${Math.log2(uniforms.envMap.image.width).toFixed(1)});
+      return texel.rgb;
+    ` : undefined);
+
+    options = Object.assign({}, options);
+
+    delete options.vertexShaderChunks;
+    delete options.fragmentShaderChunks;
+    delete options.uniforms;
+    delete options.pbrDiffuseLightFromRay;
+    delete options.pbrReflectionFromRay;
+
+    super(Object.assign({
+      lights: !!uniforms.light,
       uniforms: Object.assign({
-        baseColor,
-        metalness,
-        roughness,
-        opacity,
-        map,
-        envMap,
-        light,
+        baseColor: new Color("#ffffff"),
+        metalness: 0,
+        roughness: 0,
+        opacity: 1,
+        light: {
+          intensity: 0,
+          color: new Color("#ffffff"),
+          position: new Vector3(),
+          direction: new Vector3(),
+        },
       }, uniforms),
       vertexShader: `
         void main() {
@@ -51,7 +48,7 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
         ["start", `
           ${RayShader.Ray}
 
-          ${ShaderChunk.skinning_pars_vertex}
+          ${options.skinning ? ShaderChunk.skinning_pars_vertex : ""}
           
           varying vec3 vPosition;
           varying vec3 vNormal;
@@ -60,21 +57,19 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           varying vec3 vViewPosition;
         `],
         ["main", `
-          vec3 position = position;
-          vec3 normal = normal;
-          vec2 uv = uv;
-
-          ${ShaderChunk.skinbase_vertex}
-          ${ShaderChunk.skinnormal_vertex.replace(/objectNormal/g, "normal")}
-          ${ShaderChunk.skinning_vertex.replace(/transformed/g, "position")}
-
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
-          Ray ray = Ray(cameraPosition, mat3(inverse(viewMatrix)) * (inverse(projectionMatrix) * vec4((gl_Position.xy / gl_Position.w), 1., 1.)).xyz);
+          ${options.skinning ? "vec3 position = position;" : ""}
+          ${options.skinning ? "vec3 normal = normal;" : ""}
+          ${options.skinning ? ShaderChunk.skinbase_vertex : ""}
+          ${options.skinning ? ShaderChunk.skinnormal_vertex.replace(/objectNormal/g, "normal") : ""}
+          ${options.skinning ? ShaderChunk.skinning_vertex.replace(/transformed/g, "position") : ""}
         `],
         ["end", `
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+          Ray ray = Ray(cameraPosition, mat3(inverse(viewMatrix)) * (inverse(projectionMatrix) * vec4((gl_Position.xy / gl_Position.w), 1., 1.)).xyz);
+          
           vRay = ray;
           vPosition = position;
-          vNormal = mat3(modelMatrix) * normal;
+          vNormal = normalize(mat3(modelMatrix) * normal);
           vUv = uv;
         `],
         ...vertexShaderChunks,
@@ -90,8 +85,8 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           uniform float roughness;
           uniform float opacity;
           uniform Light light;
-          ${envMap ? "uniform samplerCube envMap;" : ""}
-          ${map ? "uniform sampler2D map;" : ""}
+          ${uniforms.envMap ? "uniform samplerCube envMap;" : ""}
+          ${uniforms.map ? "uniform sampler2D map;" : ""}
 
           varying vec3 vNormal;
           varying vec3 vPosition;
@@ -101,17 +96,14 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           ${PBRShader.computePBRColor({ pbrReflectionFromRay, pbrDiffuseLightFromRay })}
         `],
         ["main", `
-          ${map ? `
-            vec4 mapTexel = texture2D(map, vUv);
-            vec3 baseColor = baseColor * mapTexel.rgb;
-            float opacity = opacity * mapTexel.a;
-          ` : ""}
+          ${uniforms.map ? `vec4 mapTexel = texture2D(map, vUv);` : ""}
+          vec4 pbrColor = computePBRColor(vRay.direction, light, vPosition, vNormal, PhysicallyBasedMaterial(vec4(${uniforms.map ? "baseColor * mapTexel.rgb" : "baseColor"}, ${uniforms.map ? "opacity * mapTexel.a" : "opacity"}), metalness, roughness));
         `],
         ["end", `
-          gl_FragColor = computePBRColor(vRay.direction, light, vPosition, vNormal, PhysicallyBasedMaterial(vec4(baseColor, opacity), metalness, roughness));
+          gl_FragColor = pbrColor;
         `],
         ...fragmentShaderChunks,
       ],
-    });
+    }, options));
   }
 }
