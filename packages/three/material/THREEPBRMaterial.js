@@ -96,7 +96,7 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           ${PBRShader.computePBRColor({ pbrReflectionFromRay, pbrDiffuseLightFromRay })}
         `],
         ["main", `
-          ${uniforms.map ? `vec4 mapTexel = texture2D(map, vUv);` : ""}
+          ${uniforms.map ? "vec4 mapTexel = texture2D(map, vUv);" : ""}
           vec4 pbrColor = computePBRColor(vRay.direction, light, vPosition, vNormal, PhysicallyBasedMaterial(vec4(${uniforms.map ? "baseColor * mapTexel.rgb" : "baseColor"}, ${uniforms.map ? "opacity * mapTexel.a" : "opacity"}), metalness, roughness));
         `],
         ["end", `
