@@ -38,7 +38,8 @@ export default class PBRShader extends Shader {
     }
 
     vec3 pbrDiffuseLightFromRay(
-      Ray ray
+      Ray ray,
+      float roughness
     ) {
       ${pbrDiffuseLightFromRay}
     }
@@ -85,7 +86,7 @@ export default class PBRShader extends Shader {
     // See our README.md on Environment Maps [3] for additional discussion.
     vec3 getIBLContribution(PBRInfo pbrInputs, vec3 n, vec3 reflection, vec3 position)
     {
-      vec3 diffuseLight = pbrDiffuseLightFromRay(Ray(position, n));
+      vec3 diffuseLight = pbrDiffuseLightFromRay(Ray(position, n), pbrInputs.alphaRoughness);
 
       // Fake BRDF Lookup
       vec2 brdfPosition = vec2(pbrInputs.NdotV, pbrInputs.perceptualRoughness);
