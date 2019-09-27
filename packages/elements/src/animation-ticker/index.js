@@ -33,6 +33,11 @@ export default class AnimationTickerElement extends HTMLElement {
     document.removeEventListener("visibilitychange", this._onFocusChangeBinded);
   }
 
+  /**
+   * @type {Boolean}
+   * @readonly
+   * @description Tells whether the element is paused
+   */
   get paused() {
     return this._paused;
   }
@@ -89,6 +94,9 @@ export default class AnimationTickerElement extends HTMLElement {
     }
   }
 
+  /**
+   * Play element animation
+   */
   play() {
     this._pausedByUser = false;
     if (!window.top.document.hasFocus() && !this._background) {
@@ -97,6 +105,9 @@ export default class AnimationTickerElement extends HTMLElement {
     }
   }
 
+  /**
+   * Pause element animation
+   */
   pause() {
     this._pausedByUser = true;
   }
