@@ -21,8 +21,8 @@ export default class THREEText extends Object3D {
     geometry = new PlaneGeometry(1, 1),
     material = new THREEShaderMaterial({
       type: "basic",
-      transparent: true
-    })
+      transparent: true,
+    }),
   } = {}) {
     super();
 
@@ -32,8 +32,6 @@ export default class THREEText extends Object3D {
     this._context = this._canvas.getContext("2d");
 
     this._texture = new Texture(this._canvas);
-    this._texture.generateMipmaps = false;
-    this._texture.minFilter = LinearFilter;
 
     material.map = this._texture;
 
@@ -70,8 +68,8 @@ export default class THREEText extends Object3D {
 
     this._updateContextProperties();
 
-    let shadowOffsetX = this.shadowOffsetX - this.shadowBlur;
-    let shadowOffsetY = this.shadowOffsetY - this.shadowBlur;
+    const shadowOffsetX = this.shadowOffsetX - this.shadowBlur;
+    const shadowOffsetY = this.shadowOffsetY - this.shadowBlur;
 
     const words = this.textContent.split(" ");
 
@@ -79,7 +77,7 @@ export default class THREEText extends Object3D {
     const wordsWidth = new Map();
     const lines = [{
       textContent: "",
-      width: 0
+      width: 0,
     }];
     for (const word of words) {
       if (!wordsWidth.get(word)) {
@@ -96,7 +94,7 @@ export default class THREEText extends Object3D {
         lineNumber++;
         lines[lineNumber] = {
           textContent: word,
-          width: wordsWidth.get(word)
+          width: wordsWidth.get(word),
         };
       } else {
         if (lines[lineNumber].textContent !== "") {

@@ -91,18 +91,18 @@ const skyShader = {
 
       vec3 skyColor = blendScreen(skySunColor.rgb, skyMoonColor.rgb);
 
-      gl_FragColor = vec4(skyColor, (skySunColor.a + skyMoonColor.a) / 2.);
+      // gl_FragColor = vec4(skyColor, (skySunColor.a + skyMoonColor.a) / 2.);
+      gl_FragColor = vec4(skyColor, 1.);
     `]
   ]
 };
 
 export default class Sky extends Mesh {
   constructor({ radius = 1 } = {}) {
-    super(new IcosahedronBufferGeometry(radius, 3), new THREEShaderMaterial({
+    super(new IcosahedronBufferGeometry(radius, 3), new THREEShaderMaterial(Object.assign({
       type: "basic",
       side: BackSide,
-      ...skyShader
-    }));
+    }, skyShader)));
 
     this._radius = radius;
 
@@ -116,7 +116,7 @@ export default class Sky extends Mesh {
   get radius() {
     return this._radius;
   }
-  
+
   _updatePositionFromInclinationAzimuth(position, inclination, azimuth) {
     const theta = inclination;
     const phi = azimuth + Math.PI * .5;
@@ -124,11 +124,11 @@ export default class Sky extends Mesh {
     position.y = this._radius * Math.sin(theta);
     position.z = this._radius * Math.sin(phi) * Math.cos(theta);
   }
-  
+
   get displaySun() {
     return this.material.displaySun === 1;
   }
-  
+
   set displaySun(value) {
     this.material.displaySun = value ? 1 : 0;
   }
@@ -136,7 +136,7 @@ export default class Sky extends Mesh {
   get displayMoon() {
     return this.material.displayMoon === 1;
   }
-  
+
   set displayMoon(value) {
     this.material.displayMoon = value ? 1 : 0;
   }
@@ -206,7 +206,7 @@ export default class Sky extends Mesh {
   set sunMieDirectionalG(value) {
     this.material.sunMieDirectionalG = value;
   }
-  
+
   get moonInclination() {
     return this._moonInclination;
   }
