@@ -25,6 +25,9 @@ function computeSceneGeometry(data, scale, offset) {
   });
 }
 
+const loader = new GLTFLoader();
+loader.setDRACOLoader(new DRACOLoader(undefined));
+
 class THREELoader extends Loader {
   constructor() {
     super();
@@ -38,27 +41,28 @@ class THREELoader extends Loader {
   }
 
   _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
-    return new Promise((resolve) => {
-      if (type.startsWith("model")) {
-        const loader = new GLTFLoader();
-        DRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : "node_modules/three/examples/js/libs/draco/gltf/"}`);
-        loader.setDRACOLoader(new DRACOLoader(undefined));
+    if (type.startsWith("model")) {
+      DRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : "node_modules/three/examples/js/libs/draco/gltf/"}`);
 
-        const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
+      const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
-        loader.setPath(path);
+      loader.setPath(path);
+
+      return new Promise((resolve) => {
         loader.load(file, (data) => {
           computeSceneGeometry(data.scene, scale, offset);
           resolve(data);
         });
-      } else if (type === "application/texture") {
+      });
+    } else if (type === "application/texture") {
+      return new Promise((resolve) => {
         new TextureLoader().load(src, (data) => {
           resolve(data);
         });
-      } else {
-        resolve(super._loadFile({ src, type }));
-      }
-    });
+      });
+    } else {
+      return super._loadFile({ src, type });
+    }
   }
 }
 
