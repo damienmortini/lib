@@ -20,21 +20,6 @@ export class Loader {
     ]);
 
     this.baseURI = "";
-
-    this._promises = new Map();
-    this._objects = new Map();
-  }
-
-  get onLoad() {
-    return Promise.all(this._promises.values());
-  }
-
-  get(value) {
-    return this._objects.get(value);
-  }
-
-  has(value) {
-    return this._objects.has(value);
   }
 
   load(values) {
@@ -51,8 +36,6 @@ export class Loader {
         continue;
       }
 
-      const key = typeof value === "string" ? value : JSON.stringify(value);
-
       const options = typeof value === "string" ? { src: value } : Object.assign({}, value);
 
       const baseURI = options.baseURI !== undefined ? options.baseURI : this.baseURI;
@@ -64,26 +47,7 @@ export class Loader {
         options.type = this.extensionTypeMap.get(extension);
       }
 
-      const promise = new Promise((resolve, reject) => {
-        if (this._promises.get(key)) {
-          resolve(this._promises.get(key));
-          return;
-        }
-
-        if (this.get(key)) {
-          resolve(this.get(key));
-          return;
-        }
-
-        this._loadFile(options).then((response) => {
-          this._promises.delete(key);
-          this._objects.set(key, response);
-          resolve(response);
-        });
-      });
-
-      this._promises.set(key, promise);
-      promises.push(promise);
+      promises.push(this._loadFile(options));
     }
 
     return isArray ? Promise.all(promises) : promises[0];
@@ -154,6 +118,8 @@ export class Loader {
             document.fonts.add(fontFace);
             return fontFace.load();
           });
+        } else if (type === "application/octet-stream") {
+          return response.arrayBuffer();
         } else {
           return response.blob();
         }
