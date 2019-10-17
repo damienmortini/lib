@@ -98,10 +98,14 @@ const skyShader = {
 };
 
 export default class Sky extends Mesh {
-  constructor({ radius = 1 } = {}) {
+  constructor({ 
+    radius = 1,
+    shaders = [],
+  } = {}) {
     super(new IcosahedronBufferGeometry(radius, 3), new THREEShaderMaterial(Object.assign({
       type: "basic",
       side: BackSide,
+      shaders,
     }, skyShader)));
 
     this._radius = radius;
