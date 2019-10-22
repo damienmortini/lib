@@ -82,7 +82,7 @@ const skyShader = {
       // Stars
       vec3 rayDirection = normalize(vWorldPosition);
       float starsIntensity = gradientNoise3D(rayDirection * 400.) * .5 + .5;
-      starsIntensity = pow(starsIntensity, 10.);
+      starsIntensity = pow(starsIntensity, 15.);
       starsIntensity *= max(0., rayDirection.y);
       starsIntensity *= 10.;
       starsIntensity *= nightIntensity;
