@@ -177,13 +177,13 @@ export default class Pointer extends Vector2 {
     this.disable();
     this.resize();
     if (this.type === Pointer.TOUCH_TYPE) {
-      this._domElement.addEventListener("touchmove", this._onPointerMoveBinded);
-      window.addEventListener("touchend", this._onPointerUpBinded);
+      this._domElement.addEventListener("touchmove", this._onPointerMoveBinded, { passive: true });
+      window.addEventListener("touchend", this._onPointerUpBinded, { passive: true });
     } else {
       this._domElement.addEventListener("mousedown", this._onPointerDownBinded);
       window.addEventListener("mouseup", this._onPointerUpBinded);
     }
-    this._domElement.addEventListener("touchstart", this._onPointerDownBinded);
+    this._domElement.addEventListener("touchstart", this._onPointerDownBinded, { passive: true });
     this._domElement.addEventListener("mousemove", this._onPointerMoveBinded);
     window.addEventListener("resize", this._resizeBinded);
     Ticker.add(this._updateBinded = this._updateBinded || this._update.bind(this));
