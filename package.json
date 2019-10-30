@@ -4,6 +4,7 @@
   "description": "Helpers library for the web.",
   "registry": "npm",
   "scripts": {
+    "docs": "jsdoc -c jsdoc.config.json",
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
     "bump-major": "npm version major && npm publish --access=public",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "eslint": "^6.6.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "jsdoc": "^3.6.3"
   }
 }
