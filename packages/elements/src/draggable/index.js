@@ -1,12 +1,12 @@
 export default class DraggableElement extends HTMLElement {
   static get observedAttributes() {
-    return ["targets", "handles", "disabled"];
+    return ['targets', 'handles', 'disabled'];
   }
 
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <slot></slot>
     `;
 
@@ -36,12 +36,12 @@ export default class DraggableElement extends HTMLElement {
       return;
     }
     switch (name) {
-      case "targets":
-      case "handles":
+      case 'targets':
+      case 'handles':
         this[name] = new Function(`return ${newValue}`).apply(this);
         break;
-      case "disabled":
-        this[name] = newValue === "true";
+      case 'disabled':
+        this[name] = newValue === 'true';
         break;
     }
   }
@@ -52,10 +52,10 @@ export default class DraggableElement extends HTMLElement {
 
   disconnectedCallback() {
     for (const handle of this.handles) {
-      handle.removeEventListener("pointerdown", this._onPointerDownBinded);
+      handle.removeEventListener('pointerdown', this._onPointerDownBinded);
     }
     for (const target of this.targets) {
-      target.removeEventListener("dragstart", this._preventDefaultBinded);
+      target.removeEventListener('dragstart', this._preventDefaultBinded);
     }
   }
 
@@ -90,14 +90,14 @@ export default class DraggableElement extends HTMLElement {
 
     if (!this._disabled) {
       for (const handle of this.handles) {
-        handle.addEventListener("pointerdown", this._onPointerDownBinded);
+        handle.addEventListener('pointerdown', this._onPointerDownBinded);
       }
       for (const target of this.targets) {
-        target.addEventListener("dragstart", this._preventDefaultBinded);
+        target.addEventListener('dragstart', this._preventDefaultBinded);
       }
     }
 
-    this.setAttribute("disabled", this._disabled);
+    this.setAttribute('disabled', this._disabled);
   }
 
   _preventDefault(event) {
@@ -105,8 +105,8 @@ export default class DraggableElement extends HTMLElement {
   }
 
   _onPointerDown(event) {
-    console.log("dkshfdskj");
-    
+    console.log('dkshfdskj');
+
     if (!this.handles.includes(event.target)) {
       return;
     }
@@ -126,9 +126,9 @@ export default class DraggableElement extends HTMLElement {
     this._offsetX = this._targets[0].offsetLeft;
     this._offsetY = this._targets[0].offsetTop;
 
-    window.addEventListener("pointermove", this._onPointerMoveBinded, { passive: false });
-    window.addEventListener("pointerup", this._onPointerUpBinded);
-    window.addEventListener("touchmove", this._preventDefaultBinded, { passive: false });
+    window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
+    window.addEventListener('pointerup', this._onPointerUpBinded);
+    window.addEventListener('touchmove', this._preventDefaultBinded, { passive: false });
   }
 
   _onPointerMove(event) {
@@ -138,13 +138,13 @@ export default class DraggableElement extends HTMLElement {
   }
 
   _onPointerUp(event) {
-    window.removeEventListener("pointermove", this._onPointerMoveBinded);
-    window.removeEventListener("pointerup", this._onPointerUpBinded);
-    window.removeEventListener("touchmove", this._preventDefaultBinded);
+    window.removeEventListener('pointermove', this._onPointerMoveBinded);
+    window.removeEventListener('pointerup', this._onPointerUpBinded);
+    window.removeEventListener('touchmove', this._preventDefaultBinded);
     for (const target of this.targets) {
       target.style.left = `${this._offsetX + event.clientX * this._currentDragFactor - this._dragStartX}px`;
       target.style.top = `${this._offsetY + event.clientY * this._currentDragFactor - this._dragStartY}px`;
-      target.style.transform = "";
+      target.style.transform = '';
     }
   }
 }

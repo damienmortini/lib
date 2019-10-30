@@ -1,5 +1,5 @@
-import Ticker from "../../../lib/util/Ticker.js";
-import Pointer from "../../../lib/input/Pointer.js";
+import Ticker from '../../../lib/util/Ticker.js';
+import Pointer from '../../../lib/input/Pointer.js';
 
 const POINTER = Pointer.get();
 
@@ -7,7 +7,7 @@ export default class LinkElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           position: absolute;
@@ -54,10 +54,10 @@ export default class LinkElement extends HTMLElement {
       </slot>
     `;
 
-    this._svg = this.shadowRoot.querySelector("svg");
-    this._path = this.shadowRoot.querySelector("path.main");
-    this._hitTestPath = this.shadowRoot.querySelector("path.hit-test");
-    this._scaleMarker = this.shadowRoot.querySelector("#scale-marker");
+    this._svg = this.shadowRoot.querySelector('svg');
+    this._path = this.shadowRoot.querySelector('path.main');
+    this._hitTestPath = this.shadowRoot.querySelector('path.hit-test');
+    this._scaleMarker = this.shadowRoot.querySelector('#scale-marker');
 
     this._updateBinded = this._update.bind(this);
 
@@ -95,8 +95,8 @@ export default class LinkElement extends HTMLElement {
     const rootBoundingRect = this.getBoundingClientRect();
     const scaleMarkerBoundingRect = this._scaleMarker.getBoundingClientRect();
 
-    let pointerX = (POINTER.x - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
-    let pointerY = (POINTER.y - rootBoundingRect.y) / scaleMarkerBoundingRect.height;
+    const pointerX = (POINTER.x - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
+    const pointerY = (POINTER.y - rootBoundingRect.y) / scaleMarkerBoundingRect.height;
 
     let inputX = pointerX;
     let inputY = pointerY;
@@ -106,7 +106,7 @@ export default class LinkElement extends HTMLElement {
       let isNode = false;
       do {
         inBoundingRect = input.getBoundingClientRect();
-        isNode = input.nodeName === "graph-NODE";
+        isNode = input.nodeName === 'graph-NODE';
         input = input.parentElement;
       } while (inBoundingRect.x + inBoundingRect.y + inBoundingRect.width + inBoundingRect.height === 0);
       inputX = (inBoundingRect.x + inBoundingRect.width * (isNode ? 1 : .5) - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
@@ -121,7 +121,7 @@ export default class LinkElement extends HTMLElement {
       let isNode = false;
       do {
         outBoundingRect = output.getBoundingClientRect();
-        isNode = output.nodeName === "graph-NODE";
+        isNode = output.nodeName === 'graph-NODE';
         output = output.parentElement;
       } while (outBoundingRect.x + outBoundingRect.y + outBoundingRect.width + outBoundingRect.height === 0);
       outputX = (outBoundingRect.x + outBoundingRect.width * (isNode ? 0 : .5) - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
@@ -154,8 +154,8 @@ export default class LinkElement extends HTMLElement {
       outputY = 0;
     }
 
-    this._path.setAttribute("d", `M${inputX + padding} ${inputY + padding} L ${outputX + padding} ${outputY + padding}`);
-    this._hitTestPath.setAttribute("d", `M${inputX + padding} ${inputY + padding} L ${outputX + padding} ${outputY + padding}`);
+    this._path.setAttribute('d', `M${inputX + padding} ${inputY + padding} L ${outputX + padding} ${outputY + padding}`);
+    this._hitTestPath.setAttribute('d', `M${inputX + padding} ${inputY + padding} L ${outputX + padding} ${outputY + padding}`);
     // this._path.setAttribute("d", `M${inputX + padding} ${inputY + padding} C ${inputX + (outputX - inputX) * .5} ${inputY}, ${outputX + (inputX - outputX) * .5} ${outputY}, ${outputX + padding} ${outputY + padding}`);
     // this._hitTestPath.setAttribute("d", `M${inputX + padding} ${inputY + padding} C ${inputX + (outputX - inputX) * .5} ${inputY}, ${outputX + (inputX - outputX) * .5} ${outputY}, ${outputX + padding} ${outputY + padding}`);
   }
@@ -169,6 +169,6 @@ export default class LinkElement extends HTMLElement {
       return;
     }
     this._linked = value;
-    this._hitTestPath.classList.toggle("hidden", !this._linked);
+    this._hitTestPath.classList.toggle('hidden', !this._linked);
   }
 }

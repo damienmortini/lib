@@ -1,8 +1,8 @@
-import GLMesh from "../../@damienmortini/lib/gl/GLMesh.js";
-import GLProgram from "../../@damienmortini/lib/gl/GLProgram.js";
-import GLTexture from "../../@damienmortini/lib/gl/GLTexture.js";
+import GLMesh from '../../@damienmortini/lib/gl/GLMesh.js';
+import GLProgram from '../../@damienmortini/lib/gl/GLProgram.js';
+import GLTexture from '../../@damienmortini/lib/gl/GLTexture.js';
 
-let style = document.createElement("style");
+const style = document.createElement('style');
 style.textContent = `
   dlib-webglimage {
     display: block;
@@ -13,16 +13,16 @@ document.head.appendChild(style);
 
 export default class GLImageElement extends HTMLElement {
   constructor({
-    tagName = "img",
+    tagName = 'img',
   } = {}) {
     super();
 
     this._resizeBinded = this.resize.bind(this);
 
     this._data = document.createElement(tagName);
-    this._canvas = document.createElement("canvas");
-    this._canvas.style.width = "100%";
-    this._canvas.style.height = "100%";
+    this._canvas = document.createElement('canvas');
+    this._canvas.style.width = '100%';
+    this._canvas.style.height = '100%';
     this.appendChild(this._canvas);
 
     const webGLOptions = {
@@ -30,16 +30,16 @@ export default class GLImageElement extends HTMLElement {
     };
 
     if (!/\bforcewebgl1\b/.test(window.location.search)) {
-      this.gl = this._canvas.getContext("webgl2", webGLOptions);
+      this.gl = this._canvas.getContext('webgl2', webGLOptions);
     }
     if (!this.gl) {
-      this.gl = this._canvas.getContext("webgl", webGLOptions) || this._canvas.getContext("experimental-webgl", webGLOptions);
+      this.gl = this._canvas.getContext('webgl', webGLOptions) || this._canvas.getContext('experimental-webgl', webGLOptions);
     }
 
     this._mesh = new GLMesh({
       gl: this.gl,
       attributes: [
-        ["position", {
+        ['position', {
           data: new Float32Array([
             -1, -1,
             -1, 1,
@@ -48,7 +48,7 @@ export default class GLImageElement extends HTMLElement {
           ]),
           size: 2,
         }],
-        ["uv", {
+        ['uv', {
           data: new Float32Array([
             0, 1,
             0, 0,
@@ -69,7 +69,7 @@ export default class GLImageElement extends HTMLElement {
     this.program = new GLProgram({
       gl: this.gl,
       uniforms: [
-        ["data", 0],
+        ['data', 0],
       ],
       vertexShader: `#version 300 es
         in vec2 position;
@@ -101,18 +101,18 @@ export default class GLImageElement extends HTMLElement {
 
     this.program.attributes.set(this._mesh.attributes);
 
-    if (this.hasAttribute("src")) {
-      this.src = this.getAttribute("src");
+    if (this.hasAttribute('src')) {
+      this.src = this.getAttribute('src');
     }
   }
 
   connectedCallback() {
-    window.addEventListener("resize", this._resizeBinded);
+    window.addEventListener('resize', this._resizeBinded);
   }
 
   disconnectedCallback() {
-    this.gl.getExtension("WEBGL_lose_context").loseContext();
-    window.removeEventListener("resize", this._resizeBinded);
+    this.gl.getExtension('WEBGL_lose_context').loseContext();
+    window.removeEventListener('resize', this._resizeBinded);
   }
 
   update() {
@@ -148,20 +148,20 @@ export default class GLImageElement extends HTMLElement {
     this._data.src = value;
 
     const resizeCanvas = () => {
-      this._data.removeEventListener("load", resizeCanvas);
+      this._data.removeEventListener('load', resizeCanvas);
       this.resize();
     };
 
-    this._data.addEventListener("load", resizeCanvas);
+    this._data.addEventListener('load', resizeCanvas);
   }
 
-  addEventListener() {
-    this._data.addEventListener(...arguments);
+  addEventListener(...args) {
+    this._data.addEventListener(...args);
   }
 
-  removeEventListener() {
-    this._data.removeEventListener(...arguments);
+  removeEventListener(...args) {
+    this._data.removeEventListener(...args);
   }
 }
 
-window.customElements.define("dlmn-gl-img", GLImageElement);
+window.customElements.define('dlmn-gl-img', GLImageElement);

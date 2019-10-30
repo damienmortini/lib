@@ -2,7 +2,7 @@ export default class InputSelectElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-flex;
@@ -17,7 +17,7 @@ export default class InputSelectElement extends HTMLElement {
 
     this._optionsMap = new Map();
 
-    this._select = this.shadowRoot.querySelector("select");
+    this._select = this.shadowRoot.querySelector('select');
 
     for (const key in HTMLSelectElement.prototype) {
       if (key in InputSelectElement.prototype) {
@@ -40,11 +40,11 @@ export default class InputSelectElement extends HTMLElement {
 
   set options(value) {
     this._options = value;
-    this._select.innerHTML = "";
+    this._select.innerHTML = '';
     this._optionsMap.clear();
     for (const option of this._options) {
-      const optionElement = document.createElement("option");
-      const stringifiedOption = typeof option === "object" ? JSON.stringify(option) : option.toString();
+      const optionElement = document.createElement('option');
+      const stringifiedOption = typeof option === 'object' ? JSON.stringify(option) : option.toString();
       optionElement.value = stringifiedOption;
       optionElement.text = stringifiedOption;
       optionElement.selected = option === this.value;

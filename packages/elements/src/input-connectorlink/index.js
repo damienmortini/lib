@@ -1,4 +1,4 @@
-import InputConnectorElement from "../input-connector/index.js";
+import InputConnectorElement from '../input-connector/index.js';
 
 let activeConnector = null;
 
@@ -9,13 +9,13 @@ class InputConnectorLinkElement extends InputConnectorElement {
   constructor() {
     super();
 
-    this.addEventListener("pointerdown", this._onPointerDown);
+    this.addEventListener('pointerdown', this._onPointerDown);
 
     this._outputLinkMap = new Map();
 
     this._onWindowPointerUpBinded = this._onWindowPointerUp.bind(this);
-    this.addEventListener("connected", this._onConnected);
-    this.addEventListener("disconnected", this._onDisconnected);
+    this.addEventListener('connected', this._onConnected);
+    this.addEventListener('disconnected', this._onDisconnected);
   }
 
   _addLink() {
@@ -23,20 +23,20 @@ class InputConnectorLinkElement extends InputConnectorElement {
     let element = this;
     while (element) {
       element = element.parentElement || element.getRootNode().host;
-      if (element && element.tagName === "graph-EDITOR") {
+      if (element && element.tagName === 'graph-EDITOR') {
         root = element;
         break;
       }
     }
 
-    const link = document.createElement("graph-link");
+    const link = document.createElement('graph-link');
     root.prepend(link);
     return link;
   }
 
   _onConnected(event) {
     const link = this._outputLinkMap.get(undefined) || this._addLink();
-    link.addEventListener("click", () => {
+    link.addEventListener('click', () => {
       link.input.outputs.delete(link.output);
     });
     link.input = event.target;
@@ -61,7 +61,7 @@ class InputConnectorLinkElement extends InputConnectorElement {
 
     this._outputLinkMap.set(undefined, link);
 
-    window.addEventListener("pointerup", this._onWindowPointerUpBinded);
+    window.addEventListener('pointerup', this._onWindowPointerUpBinded);
   }
 
   _onWindowPointerUp(event) {
@@ -84,7 +84,7 @@ class InputConnectorLinkElement extends InputConnectorElement {
     this._outputLinkMap.get(undefined).remove();
     this._outputLinkMap.delete(undefined);
 
-    window.removeEventListener("pointerup", this._onWindowPointerUpBinded);
+    window.removeEventListener('pointerup', this._onWindowPointerUpBinded);
 
     if (!connector || (activeConnector.type === connector.type && connector.type !== InputConnectorLinkElement.TYPE_BOTH)) {
       activeConnector = null;

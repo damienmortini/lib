@@ -1,11 +1,11 @@
-import Ticker from "../../../lib/util/Ticker.js";
+import Ticker from '../../../lib/util/Ticker.js';
 
 export default class AnimationTickerElement extends HTMLElement {
   constructor({ autoplay = false, background = false } = {}) {
     super();
 
-    this._autoplay = autoplay || this.hasAttribute("autoplay");
-    this._background = background || this.hasAttribute("background");
+    this._autoplay = autoplay || this.hasAttribute('autoplay');
+    this._background = background || this.hasAttribute('background');
 
     this._paused = true;
     this._pausedByUser = true;
@@ -17,9 +17,9 @@ export default class AnimationTickerElement extends HTMLElement {
 
   connectedCallback() {
     if (!this._background) {
-      window.top.addEventListener("blur", this._onFocusChangeBinded);
-      window.top.addEventListener("focus", this._onFocusChangeBinded);
-      document.addEventListener("visibilitychange", this._onFocusChangeBinded);
+      window.top.addEventListener('blur', this._onFocusChangeBinded);
+      window.top.addEventListener('focus', this._onFocusChangeBinded);
+      document.addEventListener('visibilitychange', this._onFocusChangeBinded);
     }
     if (this._autoplay) {
       this.play();
@@ -28,9 +28,9 @@ export default class AnimationTickerElement extends HTMLElement {
 
   disconnectedCallback() {
     this._pausedByBlur = true;
-    window.top.removeEventListener("blur", this._onFocusChangeBinded);
-    window.top.removeEventListener("focus", this._onFocusChangeBinded);
-    document.removeEventListener("visibilitychange", this._onFocusChangeBinded);
+    window.top.removeEventListener('blur', this._onFocusChangeBinded);
+    window.top.removeEventListener('focus', this._onFocusChangeBinded);
+    document.removeEventListener('visibilitychange', this._onFocusChangeBinded);
   }
 
   /**
@@ -62,15 +62,15 @@ export default class AnimationTickerElement extends HTMLElement {
 
   _onFocusChange(event) {
     switch (event.type) {
-      case "visibilitychange":
-        if (document.visibilityState !== "visible") {
+      case 'visibilitychange':
+        if (document.visibilityState !== 'visible') {
           this._pausedByBlur = true;
         }
         break;
-      case "blur":
+      case 'blur':
         this._pausedByBlur = true;
         break;
-      case "focus":
+      case 'focus':
         this._pausedByBlur = false;
         break;
     }
@@ -87,10 +87,10 @@ export default class AnimationTickerElement extends HTMLElement {
 
     if (this._paused) {
       Ticker.delete(this._updateBinded);
-      this.dispatchEvent(new Event("pause"));
+      this.dispatchEvent(new Event('pause'));
     } else {
       Ticker.add(this._updateBinded);
-      this.dispatchEvent(new Event("play"));
+      this.dispatchEvent(new Event('play'));
     }
   }
 

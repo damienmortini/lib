@@ -1,8 +1,8 @@
-import LoopElement from "./LoopElement.js";
-import SoundMatrix from "../audio/SoundMatrix.js";
+import LoopElement from './LoopElement.js';
+import SoundMatrix from '../audio/SoundMatrix.js';
 
 (() => {
-  let style = document.createElement("style");
+  const style = document.createElement('style');
   style.textContent = `
     dlib-soundmatrix *:focus {
       outline: none;
@@ -12,7 +12,7 @@ import SoundMatrix from "../audio/SoundMatrix.js";
 })();
 
 export default class SoundMatrixElement extends LoopElement {
-  constructor({soundMatrix = new SoundMatrix()} = {}) {
+  constructor({ soundMatrix = new SoundMatrix() } = {}) {
     super();
 
     this.soundMatrix = soundMatrix;
@@ -21,7 +21,7 @@ export default class SoundMatrixElement extends LoopElement {
   }
 
   set soundMatrix(value) {
-    if(this._soundMatrix) {
+    if (this._soundMatrix) {
       this._soundMatrix.onBeat.delete(this._onBeatBinded);
     }
     this._soundMatrix = value;
@@ -33,12 +33,12 @@ export default class SoundMatrixElement extends LoopElement {
   }
 
   _onBeat(beat) {
-    for (let pads of this._padsMatrix.values()) {
-      for (let [i, pad] of pads.entries()) {
-        if(i !== beat && pad.classList.contains("highlight")) {
-          pad.classList.remove("highlight");
-        } else if(i === beat && !pad.classList.contains("highlight")) {
-          pad.classList.add("highlight");
+    for (const pads of this._padsMatrix.values()) {
+      for (const [i, pad] of pads.entries()) {
+        if (i !== beat && pad.classList.contains('highlight')) {
+          pad.classList.remove('highlight');
+        } else if (i === beat && !pad.classList.contains('highlight')) {
+          pad.classList.add('highlight');
         }
       }
     }
@@ -47,49 +47,49 @@ export default class SoundMatrixElement extends LoopElement {
   update() {
     super.update();
 
-    for (let [sound, array] of this.soundMatrix) {
+    for (const [sound, array] of this.soundMatrix) {
       let pads = this._padsMatrix.get(sound);
 
-      if(!pads) {
-        let row = document.createElement("div");
-        row.classList.add("row");
+      if (!pads) {
+        const row = document.createElement('div');
+        row.classList.add('row');
 
-        let empty = document.createElement("input")
-        empty.type = "button";
-        empty.value = "✖";
+        const empty = document.createElement('input');
+        empty.type = 'button';
+        empty.value = '✖';
         empty.onclick = () => {
           for (let i = 0; i < array.length; i++) {
             array[i] = 0;
           }
-        }
+        };
         row.appendChild(empty);
 
         pads = [];
         for (let i = 0; i < this.soundMatrix.beats; i++) {
-          let pad = document.createElement("input");
+          const pad = document.createElement('input');
           pad.onkeyup = (e) => {
-            if(e.keyCode === 32) {
+            if (e.keyCode === 32) {
               e.preventDefault();
             }
-          }
-          pad.type = "checkbox";
-          pad.classList.add("pad");
+          };
+          pad.type = 'checkbox';
+          pad.classList.add('pad');
           pad.onchange = () => {
             array[i] = pad.checked ? 1 : 0;
-          }
+          };
           row.appendChild(pad);
           pads.push(pad);
         }
-        this._padsMatrix.set(sound, pads)
+        this._padsMatrix.set(sound, pads);
 
         this.appendChild(row);
       }
 
-      for (let [i, pad] of pads.entries()) {
+      for (const [i, pad] of pads.entries()) {
         pad.checked = !!array[i];
       }
     }
   }
 }
 
-window.customElements.define("dlib-soundmatrix", SoundMatrixElement);
+window.customElements.define('dlib-soundmatrix', SoundMatrixElement);

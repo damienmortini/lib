@@ -1,11 +1,11 @@
-import TickerElement from "../animation-ticker/index.js";
-import Vector2 from "../../../lib/math/Vector2.js";
+import TickerElement from '../animation-ticker/index.js';
+import Vector2 from '../../../lib/math/Vector2.js';
 
 export default class InputJoystickElement extends TickerElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           -webkit-tap-highlight-color: transparent;
@@ -42,7 +42,7 @@ export default class InputJoystickElement extends TickerElement {
       <div class="joystick"></div>
     `;
 
-    this._joystick = this.shadowRoot.querySelector(".joystick");
+    this._joystick = this.shadowRoot.querySelector('.joystick');
 
     this._position = new Vector2();
     this._lerpedPosition = new Vector2();
@@ -51,10 +51,10 @@ export default class InputJoystickElement extends TickerElement {
     this._onPointerMoveBinded = this._onPointerMove.bind(this);
     this._onPointerUpBinded = this._onPointerUp.bind(this);
 
-    this.addEventListener("pointerdown", (event) => {
+    this.addEventListener('pointerdown', (event) => {
       this._boundingClientRect = this.getBoundingClientRect();
-      window.addEventListener("pointermove", this._onPointerMoveBinded, { passive: false });
-      window.addEventListener("pointerup", this._onPointerUpBinded);
+      window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
+      window.addEventListener('pointerup', this._onPointerUpBinded);
       this._pointerDowned = true;
       this.play();
     });
@@ -70,12 +70,12 @@ export default class InputJoystickElement extends TickerElement {
 
   _onPointerUp(event) {
     this._pointerDowned = false;
-    window.removeEventListener("pointermove", this._onPointerMoveBinded);
-    window.removeEventListener("pointerup", this._onPointerUpBinded);
-    this.dispatchEvent(new CustomEvent("input", {
+    window.removeEventListener('pointermove', this._onPointerMoveBinded);
+    window.removeEventListener('pointerup', this._onPointerUpBinded);
+    this.dispatchEvent(new CustomEvent('input', {
       detail: [0, 0],
     }));
-    this.dispatchEvent(new CustomEvent("change", {
+    this.dispatchEvent(new CustomEvent('change', {
       detail: [...this._position],
     }));
   }
@@ -102,7 +102,7 @@ export default class InputJoystickElement extends TickerElement {
     this._joystick.style.transform = `translate(${this._lerpedPosition.x * this._boundingClientRect.width * .5}px, ${this._lerpedPosition.y * this._boundingClientRect.height * .5}px)`;
 
     if (this._pointerDowned) {
-      this.dispatchEvent(new CustomEvent("input", {
+      this.dispatchEvent(new CustomEvent('input', {
         detail: [...this._position],
       }));
     }

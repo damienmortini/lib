@@ -2,7 +2,7 @@ export default class InputButtonElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-flex;
@@ -18,7 +18,7 @@ export default class InputButtonElement extends HTMLElement {
       <button><slot></slot></button>
     `;
 
-    const input = this.shadowRoot.querySelector("button");
+    const input = this.shadowRoot.querySelector('button');
 
     for (const key in HTMLButtonElement.prototype) {
       if (key in InputButtonElement.prototype) {
@@ -41,10 +41,10 @@ export default class InputButtonElement extends HTMLElement {
 
   set value(value) {
     this._value = value;
-    this.dispatchEvent(new Event("input", {
+    this.dispatchEvent(new Event('input', {
       bubbles: true,
     }));
-    this.dispatchEvent(new Event("change", {
+    this.dispatchEvent(new Event('change', {
       bubbles: true,
     }));
   }

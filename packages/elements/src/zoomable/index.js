@@ -1,12 +1,12 @@
 export default class ZoomableElement extends HTMLElement {
   static get observedAttributes() {
-    return ["handle", "target", "min", "max", "zoom", "disabled"];
+    return ['handle', 'target', 'min', 'max', 'zoom', 'disabled'];
   }
 
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <slot></slot>
     `;
 
@@ -23,11 +23,11 @@ export default class ZoomableElement extends HTMLElement {
       return;
     }
     switch (name) {
-      case "handle":
-      case "target":
+      case 'handle':
+      case 'target':
         this[name] = new Function(`return ${newValue}`).apply(this);
         break;
-      case "disabled":
+      case 'disabled':
         this[name] = newValue !== null;
         break;
       default:
@@ -42,7 +42,7 @@ export default class ZoomableElement extends HTMLElement {
 
   disconnectedCallback() {
     if (this.handle) {
-      this.handle.removeEventListener("wheel", this._onWheelBinded);
+      this.handle.removeEventListener('wheel', this._onWheelBinded);
     }
   }
 
@@ -70,7 +70,7 @@ export default class ZoomableElement extends HTMLElement {
     this.disconnectedCallback();
 
     if (!this._disabled) {
-      this._handle.addEventListener("wheel", this._onWheelBinded = this._onWheelBinded || this._onWheel.bind(this));
+      this._handle.addEventListener('wheel', this._onWheelBinded = this._onWheelBinded || this._onWheel.bind(this));
     }
   }
 
@@ -89,7 +89,7 @@ export default class ZoomableElement extends HTMLElement {
 
     this.target.style.transform = `scale(${this._zoom})`;
 
-    this.dispatchEvent(new Event("zoom"));
+    this.dispatchEvent(new Event('zoom'));
   }
 
   get min() {

@@ -1,0 +1,23 @@
+{
+  "env": {
+      "browser": true,
+      "es6": true,
+      "node": true
+  },
+  "extends": [
+      "google"
+  ],
+  "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+      "ecmaVersion": 2020,
+      "sourceType": "module"
+  },
+  "rules": {
+      "max-len": 0,
+      "require-jsdoc": 0,
+      "object-curly-spacing": [2, "always"]
+  }
+}

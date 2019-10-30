@@ -1,10 +1,10 @@
-import Color from "../../../lib/math/Color.js";
+import Color from '../../../lib/math/Color.js';
 
 export default class InputColorElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-flex;
@@ -23,14 +23,14 @@ export default class InputColorElement extends HTMLElement {
       <input type="text">
     `;
 
-    this._colorInput = this.shadowRoot.querySelector("input[type=color]");
-    this._textInput = this.shadowRoot.querySelector("input[type=text]");
+    this._colorInput = this.shadowRoot.querySelector('input[type=color]');
+    this._textInput = this.shadowRoot.querySelector('input[type=text]');
 
-    this._colorInput.addEventListener("input", () => {
+    this._colorInput.addEventListener('input', () => {
       this.value = this._colorInput.value;
     });
 
-    this._textInput.addEventListener("input", () => {
+    this._textInput.addEventListener('input', () => {
       this.value = this._textInput.value;
     });
 
@@ -57,7 +57,7 @@ export default class InputColorElement extends HTMLElement {
   set value(value) {
     const hexValue = this._valueToHexadecimal(value);
 
-    if (typeof this._value === "object" && typeof value === "string") {
+    if (typeof this._value === 'object' && typeof value === 'string') {
       const RGBA = Color.styleToRGBA(hexValue);
       if (this._value.r !== undefined) {
         [this._value.r, this._value.g, this._value.b] = [RGBA[0], RGBA[1], RGBA[2]];
@@ -66,7 +66,7 @@ export default class InputColorElement extends HTMLElement {
       } else {
         [this._value[0], this._value[1], this._value[2]] = [RGBA[0], RGBA[1], RGBA[2]];
       }
-    } else if (typeof this._value === "object" && typeof value === "object") {
+    } else if (typeof this._value === 'object' && typeof value === 'object') {
       if (this._value.r !== undefined) {
         [this._value.r, this._value.g, this._value.b] = [value.r, value.g, value.b];
       } else if (this._value.x !== undefined) {
@@ -78,14 +78,14 @@ export default class InputColorElement extends HTMLElement {
       this._value = value;
     }
 
-    this._textInput.value = typeof value === "string" ? value : hexValue;
+    this._textInput.value = typeof value === 'string' ? value : hexValue;
     this._colorInput.value = hexValue;
   }
 
   _valueToHexadecimal(value) {
     let RGBA;
 
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       RGBA = Color.styleToRGBA(value);
     } else if (value.r !== undefined) {
       RGBA = [value.r, value.g, value.b, 1];
@@ -95,6 +95,6 @@ export default class InputColorElement extends HTMLElement {
       RGBA = [value[0], value[1], value[2], 1];
     }
 
-    return `#${Math.floor(RGBA[0] * 255).toString(16).padStart(2, "0")}${Math.floor(RGBA[1] * 255).toString(16).padStart(2, "0")}${Math.floor(RGBA[2] * 255).toString(16).padStart(2, "0")}`;
+    return `#${Math.floor(RGBA[0] * 255).toString(16).padStart(2, '0')}${Math.floor(RGBA[1] * 255).toString(16).padStart(2, '0')}${Math.floor(RGBA[2] * 255).toString(16).padStart(2, '0')}`;
   }
 }

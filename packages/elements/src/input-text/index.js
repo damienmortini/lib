@@ -2,7 +2,7 @@ export default class InputTextElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-flex;
@@ -16,7 +16,7 @@ export default class InputTextElement extends HTMLElement {
       <textarea rows="1">
     `;
 
-    const input = this.shadowRoot.querySelector("textarea");
+    const input = this.shadowRoot.querySelector('textarea');
 
     for (const key in HTMLTextAreaElement.prototype) {
       if (key in InputTextElement.prototype) {

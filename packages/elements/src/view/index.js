@@ -1,4 +1,4 @@
-import View from "../../@damienmortini/lib/abstract/View.js";
+import View from '../../@damienmortini/lib/abstract/View.js';
 
 export default class ViewElement extends HTMLElement {
   constructor() {
@@ -33,7 +33,7 @@ export default class ViewElement extends HTMLElement {
 
     this._view.visibilityExecutor = this.visibilityExecutor.bind(this);
 
-    this.visible = this.getAttribute("visible") !== "false";
+    this.visible = this.getAttribute('visible') !== 'false';
   }
 
   disconnectedCallback() {

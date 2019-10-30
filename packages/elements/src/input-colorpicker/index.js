@@ -1,6 +1,6 @@
-import "../../../../@simonwep/pickr/dist/pickr.min.js";
+import '../../../../@simonwep/pickr/dist/pickr.min.js';
 
-document.head.insertAdjacentHTML("beforeend", `
+document.head.insertAdjacentHTML('beforeend', `
   <style>
     @import url("node_modules/@simonwep/pickr/dist/pickr.min.css");
     .pcr-app {
@@ -16,7 +16,7 @@ export default class InputColorPickerElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         @import url("node_modules/@simonwep/pickr/dist/pickr.min.css");
         
@@ -34,7 +34,7 @@ export default class InputColorPickerElement extends HTMLElement {
     `;
 
     this._pickr = window.Pickr.create({
-      el: this.shadowRoot.querySelector("div"),
+      el: this.shadowRoot.querySelector('div'),
       comparison: false,
       components: {
         preview: true,
@@ -48,18 +48,18 @@ export default class InputColorPickerElement extends HTMLElement {
       },
     });
 
-    this._pickr.on("init", () => {
+    this._pickr.on('init', () => {
       if (this.value) {
         this._pickr.setColor(this.value);
       }
 
-      this._pickr.on("change", () => {
+      this._pickr.on('change', () => {
         this._value = this._pickr.getColor().toHEXA().toString();
-        this.dispatchEvent(new Event("input"));
+        this.dispatchEvent(new Event('input'));
       });
 
-      this._pickr.on("save", () => {
-        this.dispatchEvent(new Event("input"));
+      this._pickr.on('save', () => {
+        this.dispatchEvent(new Event('input'));
       });
     });
   }

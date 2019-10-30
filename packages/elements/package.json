@@ -9,7 +9,8 @@
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
     "bump-major": "npm version major && npm publish --access=public",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "fix": "eslint src --fix",
+    "test": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,8 @@
   },
   "devDependencies": {
     "@damienmortini/server": "^1.0.3",
+    "eslint": "^6.6.0",
+    "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.3"
   }
 }

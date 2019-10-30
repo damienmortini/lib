@@ -1,6 +1,6 @@
-if (!customElements.get("node-input-connector")) {
-  import("../input-connectorlink/index.js").then((module) => {
-    customElements.define("node-input-connector", module.default);
+if (!customElements.get('node-input-connector')) {
+  import('../input-connectorlink/index.js').then((module) => {
+    customElements.define('node-input-connector', module.default);
   });
 }
 
@@ -11,13 +11,13 @@ let slotUID = 0;
  */
 export default class NodeElement extends HTMLElement {
   static get observedAttributes() {
-    return ["name", "close"];
+    return ['name', 'close'];
   }
 
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: block;
@@ -70,11 +70,11 @@ export default class NodeElement extends HTMLElement {
     const observer = new MutationObserver((mutationsList, observer) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
-          if (!("value" in node)) {
-            const section = document.createElement("section");
+          if (!('value' in node)) {
+            const section = document.createElement('section');
             section.id = `slot${slotUID}`;
             section.innerHTML = `<slot name="${slotUID}"></slot>`;
-            this.shadowRoot.querySelector(".content").appendChild(section);
+            this.shadowRoot.querySelector('.content').appendChild(section);
             node.slot = slotUID;
             slotUID++;
           }
@@ -87,16 +87,16 @@ export default class NodeElement extends HTMLElement {
     });
     observer.observe(this, { childList: true });
 
-    this.shadowRoot.querySelector("details").addEventListener("toggle", (event) => {
+    this.shadowRoot.querySelector('details').addEventListener('toggle', (event) => {
       this.close = !event.target.open;
       this.dispatchEvent(new Event(event.type, event));
     });
   }
 
   connectedCallback() {
-    this.shadowRoot.querySelector(".content").open = !this.close;
+    this.shadowRoot.querySelector('.content').open = !this.close;
     for (const child of this.children) {
-      if (!("value" in child)) {
+      if (!('value' in child)) {
         continue;
       }
       this._addInput(child);
@@ -105,11 +105,11 @@ export default class NodeElement extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-      case "name":
-        this.shadowRoot.querySelector(".content").querySelector("summary").textContent = newValue;
+      case 'name':
+        this.shadowRoot.querySelector('.content').querySelector('summary').textContent = newValue;
         break;
-      case "close":
-        this.shadowRoot.querySelector(".content").open = !this.close;
+      case 'close':
+        this.shadowRoot.querySelector('.content').open = !this.close;
         break;
     }
   }
@@ -118,45 +118,45 @@ export default class NodeElement extends HTMLElement {
     if (this.shadowRoot.querySelector(`slot[name="${node.slot}"]`)) {
       return;
     }
-    const label = node.getAttribute("label") || node.getAttribute("name") || node.id || "";
-    const section = document.createElement("section");
+    const label = node.getAttribute('label') || node.getAttribute('name') || node.id || '';
+    const section = document.createElement('section');
     section.id = `slot${slotUID}`;
-    section.classList.add("input");
+    section.classList.add('input');
     section.innerHTML = `
       <node-input-connector></node-input-connector>
       <label title="${label}">${label}</label>
       <div class="input"><slot name="${slotUID}"></slot></div>
       <node-input-connector></node-input-connector>
     `;
-    const connectors = section.querySelectorAll("node-input-connector");
+    const connectors = section.querySelectorAll('node-input-connector');
     if (connectors[0].outputs) {
       connectors[0].outputs.add(node);
     }
     if (connectors[0].inputs) {
       connectors[1].inputs.add(node);
     }
-    this.shadowRoot.querySelector(".content").appendChild(section);
+    this.shadowRoot.querySelector('.content').appendChild(section);
     node.slot = slotUID;
     slotUID++;
   }
 
   set close(value) {
     if (value) {
-      this.setAttribute("close", "");
+      this.setAttribute('close', '');
     } else {
-      this.removeAttribute("close");
+      this.removeAttribute('close');
     }
   }
 
   get close() {
-    return this.hasAttribute("close");
+    return this.hasAttribute('close');
   }
 
   get name() {
-    return this.getAttribute("name");
+    return this.getAttribute('name');
   }
 
   set name(value) {
-    this.setAttribute("name", value);
+    this.setAttribute('name', value);
   }
 }

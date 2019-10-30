@@ -1,6 +1,6 @@
-import Loader from "../../@damienmortini/lib/utils/Loader.js";
+import Loader from '../../@damienmortini/lib/utils/Loader.js';
 
-const style = document.createElement("style");
+const style = document.createElement('style');
 style.textContent = `
   dlmn-lottie {
     display: block;
@@ -11,13 +11,13 @@ document.head.appendChild(style);
 export default class LottieAnimationElement extends HTMLElement {
   constructor() {
     super();
-    this.renderer = "svg";
-    this.loop = this.hasAttribute("loop");
-    this.autoplay = this.hasAttribute("autoplay");
+    this.renderer = 'svg';
+    this.loop = this.hasAttribute('loop');
+    this.autoplay = this.hasAttribute('autoplay');
     this.playbackRate = 1;
     this.currentTime = 0;
 
-    this.src = this.getAttribute("src");
+    this.src = this.getAttribute('src');
   }
 
   get src() {
@@ -43,7 +43,7 @@ export default class LottieAnimationElement extends HTMLElement {
         autoplay: this.autoplay,
         animationData: data,
       });
-      this.animation.addEventListener("DOMLoaded", () => {
+      this.animation.addEventListener('DOMLoaded', () => {
         if (this._segments) {
           this.segments = this._segments;
         }
@@ -52,11 +52,11 @@ export default class LottieAnimationElement extends HTMLElement {
         this.currentTime = this._currentTime;
         this.playbackRate = this._playbackRate;
       });
-      this.animation.addEventListener("loopComplete", () => {
-        this.dispatchEvent(new Event("ended"));
+      this.animation.addEventListener('loopComplete', () => {
+        this.dispatchEvent(new Event('ended'));
       });
-      this.animation.addEventListener("complete", () => {
-        this.dispatchEvent(new Event("ended"));
+      this.animation.addEventListener('complete', () => {
+        this.dispatchEvent(new Event('ended'));
       });
     });
   }
@@ -87,7 +87,7 @@ export default class LottieAnimationElement extends HTMLElement {
   set currentTime(value) {
     this._currentTime = value;
     if (this.animation) {
-      this.animation[this.paused ? "goToAndStop" : "goToAndPlay"](this._currentTime, false);
+      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this._currentTime, false);
     }
   }
 
@@ -130,4 +130,4 @@ export default class LottieAnimationElement extends HTMLElement {
   }
 }
 
-window.customElements.define("dlmn-lottie", LottieElement);
+window.customElements.define('dlmn-lottie', LottieElement);

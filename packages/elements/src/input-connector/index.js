@@ -14,7 +14,7 @@ class InputConnectorElement extends HTMLElement {
    * @constant {Array.<String>}
    */
   static get observedAttributes() {
-    return ["inputs", "outputs"];
+    return ['inputs', 'outputs'];
   }
 
   /**
@@ -63,7 +63,7 @@ class InputConnectorElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-block;
@@ -79,7 +79,7 @@ class InputConnectorElement extends HTMLElement {
       <slot></slot>
     `;
 
-    this._radio = this.shadowRoot.querySelector("input");
+    this._radio = this.shadowRoot.querySelector('input');
 
     this._onInputChangeBinded = this._onInputChange.bind(this);
 
@@ -105,7 +105,7 @@ class InputConnectorElement extends HTMLElement {
           value.outputs.add(self);
         } else {
           self._inputElementInputs.add(value);
-          value.addEventListener("input", self._onInputChangeBinded);
+          value.addEventListener('input', self._onInputChangeBinded);
         }
         self._updateConnectedStatus();
         return this;
@@ -115,7 +115,7 @@ class InputConnectorElement extends HTMLElement {
         if (!returnValue) {
           return;
         }
-        value.removeEventListener("input", self._onInputChangeBinded);
+        value.removeEventListener('input', self._onInputChangeBinded);
         if (value instanceof InputConnectorElement) {
           self._connectorElementInputs.delete(value);
           value.outputs.delete(self);
@@ -141,7 +141,7 @@ class InputConnectorElement extends HTMLElement {
         if (value instanceof InputConnectorElement) {
           self._connectorElementOutputs.add(value);
           value.inputs.add(self);
-          self.dispatchEvent(new CustomEvent("connected", {
+          self.dispatchEvent(new CustomEvent('connected', {
             bubbles: true,
             composed: true,
             detail: {
@@ -169,7 +169,7 @@ class InputConnectorElement extends HTMLElement {
         }
         self._updateConnectedStatus();
         if (value instanceof InputConnectorElement) {
-          self.dispatchEvent(new CustomEvent("disconnected", {
+          self.dispatchEvent(new CustomEvent('disconnected', {
             bubbles: true,
             composed: true,
             detail: {
@@ -192,7 +192,7 @@ class InputConnectorElement extends HTMLElement {
       return;
     }
 
-    name = name.replace("data-", "");
+    name = name.replace('data-', '');
 
     const array = new Function(`return ${newValue}`).apply(this);
     for (const value of array) {
@@ -230,10 +230,10 @@ class InputConnectorElement extends HTMLElement {
       const oldValue = output.value;
       output.value = value;
       if (!(output instanceof InputConnectorElement) && oldValue !== value) {
-        output.dispatchEvent(new Event("input", {
+        output.dispatchEvent(new Event('input', {
           bubbles: true,
         }));
-        output.dispatchEvent(new Event("change", {
+        output.dispatchEvent(new Event('change', {
           bubbles: true,
         }));
       }

@@ -2,7 +2,7 @@ export default class InputCheckboxElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-block;
@@ -11,7 +11,7 @@ export default class InputCheckboxElement extends HTMLElement {
       <input type="checkbox">
     `;
 
-    this._input = this.shadowRoot.querySelector("input");
+    this._input = this.shadowRoot.querySelector('input');
 
     for (const key in HTMLInputElement.prototype) {
       if (key in InputCheckboxElement.prototype) {

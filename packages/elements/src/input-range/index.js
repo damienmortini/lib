@@ -2,7 +2,7 @@ export default class InputRangeElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-flex;
@@ -20,15 +20,15 @@ export default class InputRangeElement extends HTMLElement {
       <input max="1" step="0.01" type="number">
     `;
 
-    this._rangeInput = this.shadowRoot.querySelector("input[type=range]");
-    this._numberInput = this.shadowRoot.querySelector("input[type=number]");
+    this._rangeInput = this.shadowRoot.querySelector('input[type=range]');
+    this._numberInput = this.shadowRoot.querySelector('input[type=number]');
 
-    this._rangeInput.addEventListener("input", () => {
+    this._rangeInput.addEventListener('input', () => {
       this.value = this._rangeInput.valueAsNumber;
       this._numberInput.valueAsNumber = this.value;
     });
 
-    this._numberInput.addEventListener("input", () => {
+    this._numberInput.addEventListener('input', () => {
       this.value = this._numberInput.valueAsNumber;
       this._rangeInput.valueAsNumber = this.value;
     });

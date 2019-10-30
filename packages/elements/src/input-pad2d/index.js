@@ -2,7 +2,7 @@ export default class InputPad2DElement extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: inline-block;
@@ -42,8 +42,8 @@ export default class InputPad2DElement extends HTMLElement {
       <div class="pointer"></div>
     `;
 
-    this._pad = this.shadowRoot.querySelector(".pad");
-    this._pointer = this.shadowRoot.querySelector(".pointer");
+    this._pad = this.shadowRoot.querySelector('.pad');
+    this._pointer = this.shadowRoot.querySelector('.pointer');
 
     const pointerDownPosition = [0, 0];
     const pointerDownScreenPosition = [0, 0];
@@ -55,23 +55,23 @@ export default class InputPad2DElement extends HTMLElement {
       x = Math.max(Math.min(1, x), -1);
       y = Math.max(Math.min(1, y), -1);
       this.value = [x, y];
-      this.dispatchEvent(new Event("input"));
+      this.dispatchEvent(new Event('input'));
     };
 
     const onPointerUp = (event) => {
       updatePointer(event);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointermove", updatePointer);
-      this.dispatchEvent(new Event("change"));
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointermove', updatePointer);
+      this.dispatchEvent(new Event('change'));
     };
 
-    this._pad.addEventListener("pointerdown", (event) => {
+    this._pad.addEventListener('pointerdown', (event) => {
       pointerDownPosition[0] = event.offsetX;
       pointerDownPosition[1] = event.offsetY;
       pointerDownScreenPosition[0] = event.screenX;
       pointerDownScreenPosition[1] = event.screenY;
-      window.addEventListener("pointermove", updatePointer);
-      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener('pointermove', updatePointer);
+      window.addEventListener('pointerup', onPointerUp);
     });
 
     this.value = [0, 0];

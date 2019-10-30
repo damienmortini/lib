@@ -1,7 +1,7 @@
-import GLImageElement from "./GLImageElement.js.js.js.js.js";
-import Ticker from "../../@damienmortini/lib/utils/Ticker.js";
+import GLImageElement from './GLImageElement.js.js.js.js.js';
+import Ticker from '../../@damienmortini/lib/utils/Ticker.js';
 
-let style = document.createElement("style");
+const style = document.createElement('style');
 style.textContent = `
   dlib-webglvideo {
     display: block;
@@ -13,10 +13,10 @@ document.head.appendChild(style);
 export default class GLVideoElement extends GLImageElement {
   constructor() {
     super({
-      tagName: "video",
+      tagName: 'video',
     });
 
-    this._data.setAttribute("playsinline", "true");
+    this._data.setAttribute('playsinline', 'true');
 
     this._updateBinded = this.update.bind(this);
     this._playTickerBinded = this._playTicker.bind(this);
@@ -25,13 +25,13 @@ export default class GLVideoElement extends GLImageElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this._data.addEventListener("playing", this._playTickerBinded);
-    this._data.addEventListener("pause", this._pauseTickerBinded);
+    this._data.addEventListener('playing', this._playTickerBinded);
+    this._data.addEventListener('pause', this._pauseTickerBinded);
   }
 
   disconnectedCallback() {
-    this._data.removeEventListener("playing", this._playTickerBinded);
-    this._data.removeEventListener("pause", this._pauseTickerBinded);
+    this._data.removeEventListener('playing', this._playTickerBinded);
+    this._data.removeEventListener('pause', this._pauseTickerBinded);
     super.connectedCallback();
   }
 
@@ -55,22 +55,22 @@ export default class GLVideoElement extends GLImageElement {
     this._data.src = value;
 
     const resizeCanvas = () => {
-      this._data.removeEventListener("loadedmetadata", resizeCanvas);
+      this._data.removeEventListener('loadedmetadata', resizeCanvas);
       this.resize();
     };
 
-    this._data.addEventListener("loadedmetadata", resizeCanvas);
+    this._data.addEventListener('loadedmetadata', resizeCanvas);
   }
 
   set srcObject(value) {
     this._data.srcObject = value;
 
     const resizeCanvas = () => {
-      this._data.removeEventListener("loadedmetadata", resizeCanvas);
+      this._data.removeEventListener('loadedmetadata', resizeCanvas);
       this.resize();
     };
 
-    this._data.addEventListener("loadedmetadata", resizeCanvas);
+    this._data.addEventListener('loadedmetadata', resizeCanvas);
   }
 
   set currentTime(value) {
@@ -107,4 +107,4 @@ export default class GLVideoElement extends GLImageElement {
   }
 }
 
-window.customElements.define("dlib-gl-video", GLVideoElement);
+window.customElements.define('dlib-gl-video', GLVideoElement);

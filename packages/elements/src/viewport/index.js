@@ -1,12 +1,12 @@
 export default class ViewportElement extends HTMLElement {
   static get observedAttributes() {
-    return ["draggable", "zoomable"];
+    return ['draggable', 'zoomable'];
   }
 
   constructor() {
     super();
 
-    this.attachShadow({ mode: "open" }).innerHTML = `
+    this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: block;
@@ -19,46 +19,46 @@ export default class ViewportElement extends HTMLElement {
       </graph-zoomable>
     `;
 
-    this._zoomable = this.shadowRoot.querySelector("graph-zoomable");
-    this._draggable = this.shadowRoot.querySelector("graph-draggable");
+    this._zoomable = this.shadowRoot.querySelector('graph-zoomable');
+    this._draggable = this.shadowRoot.querySelector('graph-draggable');
 
-    this._zoomable.addEventListener("zoom", () => {
+    this._zoomable.addEventListener('zoom', () => {
       this._draggable.dragFactor = 1 / this._zoomable.zoom;
     });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-      case "draggable":
+      case 'draggable':
         this._draggable.disabled = !newValue;
         break;
-      case "zoomable":
+      case 'zoomable':
         this._zoomable.disabled = !newValue;
         break;
     }
   }
 
   get zoomable() {
-    return this.hasAttribute("zoomable");
+    return this.hasAttribute('zoomable');
   }
 
   set zoomable(value) {
     if (value) {
-      this.setAttribute("zoomable", "");
+      this.setAttribute('zoomable', '');
     } else {
-      this.removeAttribute("zoomable");
+      this.removeAttribute('zoomable');
     }
   }
 
   get draggable() {
-    return this.hasAttribute("draggable");
+    return this.hasAttribute('draggable');
   }
 
   set draggable(value) {
     if (value) {
-      this.setAttribute("draggable", "");
+      this.setAttribute('draggable', '');
     } else {
-      this.removeAttribute("draggable");
+      this.removeAttribute('draggable');
     }
   }
 }
