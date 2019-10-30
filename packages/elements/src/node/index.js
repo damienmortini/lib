@@ -1,20 +1,17 @@
+if (!customElements.get("node-input-connector")) {
+  import("../input-connectorlink/index.js").then((module) => {
+    customElements.define("node-input-connector", module.default);
+  });
+}
+
 let slotUID = 0;
-let inputConnectorTagName = "input-connector";
 
 /**
  * Node Element
  */
 export default class NodeElement extends HTMLElement {
   static get observedAttributes() {
-    return ["name", "draggable", "close", "x", "y", "width", "height"];
-  }
-
-  static get inputConnectorTagName() {
-    return inputConnectorTagName;
-  }
-
-  static set inputConnectorTagName(value) {
-    inputConnectorTagName = value;
+    return ["name", "close"];
   }
 
   constructor() {
@@ -64,21 +61,11 @@ export default class NodeElement extends HTMLElement {
         section.input label:empty {
           display: none;
         }
-        :host([noconnector]) section.input ${inputConnectorTagName} {
-          display: none;
-        }
       </style>
       <details class="content">
         <summary></summary>
       </details>
     `;
-
-    // <graph-draggable targets="[this.getRootNode().host]"></graph-draggable>
-    // this._draggable = this.shadowRoot.querySelector("graph-draggable");
-    // this._draggable.handles = [this.shadowRoot.querySelector("summary"), this.shadowRoot.querySelector(".content")];
-
-    // this.open = true;
-    // this.draggable = true;
 
     const observer = new MutationObserver((mutationsList, observer) => {
       for (const mutation of mutationsList) {
@@ -121,23 +108,8 @@ export default class NodeElement extends HTMLElement {
       case "name":
         this.shadowRoot.querySelector(".content").querySelector("summary").textContent = newValue;
         break;
-      case "draggable":
-        // console.log(newValue);
-        break;
       case "close":
         this.shadowRoot.querySelector(".content").open = !this.close;
-        break;
-      case "x":
-        this.style.left = `${this.x}px`;
-        break;
-      case "y":
-        this.style.top = `${this.y}px`;
-        break;
-      case "width":
-        this.style.width = `${this.width}px`;
-        break;
-      case "height":
-        this.style.height = `${this.height}px`;
         break;
     }
   }
@@ -146,17 +118,17 @@ export default class NodeElement extends HTMLElement {
     if (this.shadowRoot.querySelector(`slot[name="${node.slot}"]`)) {
       return;
     }
-    const label = node.label || node.name || node.id || "";
+    const label = node.getAttribute("label") || node.getAttribute("name") || node.id || "";
     const section = document.createElement("section");
     section.id = `slot${slotUID}`;
     section.classList.add("input");
     section.innerHTML = `
-      <${inputConnectorTagName}></${inputConnectorTagName}>
+      <node-input-connector></node-input-connector>
       <label title="${label}">${label}</label>
       <div class="input"><slot name="${slotUID}"></slot></div>
-      <${inputConnectorTagName}></${inputConnectorTagName}>
+      <node-input-connector></node-input-connector>
     `;
-    const connectors = section.querySelectorAll(`${inputConnectorTagName}`);
+    const connectors = section.querySelectorAll("node-input-connector");
     if (connectors[0].outputs) {
       connectors[0].outputs.add(node);
     }
@@ -186,49 +158,5 @@ export default class NodeElement extends HTMLElement {
 
   set name(value) {
     this.setAttribute("name", value);
-  }
-
-  get noConnector() {
-    return this.hasAttribute("noconnector");
-  }
-
-  set noConnector(value) {
-    if (value) {
-      this.setAttribute("noconnector", "");
-    } else {
-      this.removeAttribute("noconnector");
-    }
-  }
-
-  get x() {
-    return Number(this.getAttribute("x"));
-  }
-
-  set x(value) {
-    this.setAttribute("x", String(value));
-  }
-
-  get y() {
-    return Number(this.getAttribute("y"));
-  }
-
-  set y(value) {
-    this.setAttribute("y", String(value));
-  }
-
-  get width() {
-    return Number(this.getAttribute("width"));
-  }
-
-  set width(value) {
-    this.setAttribute("width", String(value));
-  }
-
-  get height() {
-    return Number(this.getAttribute("height"));
-  }
-
-  set height(value) {
-    this.setAttribute("height", String(value));
   }
 }
