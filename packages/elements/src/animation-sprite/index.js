@@ -1,6 +1,6 @@
-import TickerElement from '../utils/TickerElement.js';
-import SpriteAnimation from '../../@damienmortini/lib/abstract/SpriteAnimation.js';
-import Loader from '../../@damienmortini/lib/utils/Loader.js';
+import AnimationTickerElement from '../animation-ticker/index.js';
+import SpriteAnimation from '../../../lib/src/abstract/SpriteAnimation.js';
+import Loader from '../../../lib/src/util/Loader.js';
 
 const CACHED_DATA_URL = new Map();
 
@@ -15,7 +15,7 @@ const CACHED_DATA_URL = new Map();
   document.head.appendChild(style);
 })();
 
-window.customElements.define('dlmn-spriteanimation', class SpriteAnimationElement extends TickerElement {
+window.customElements.define('dlmn-spriteanimation', class SpriteAnimationElement extends AnimationTickerElement {
   constructor() {
     super({
       autoplay: false,
@@ -123,27 +123,26 @@ window.customElements.define('dlmn-spriteanimation', class SpriteAnimationElemen
     Loader.load(this._src).then((data) => {
       this._spriteAnimation.data = data;
       return Loader.load(`${/(.*[/\\]).*$/.exec(this._src)[1]}${data.meta.image}`);
-    })
-        .then((image) => {
-        // Optimise images decoding
-          let dataUrl = CACHED_DATA_URL.get(image);
+    }).then((image) => {
+      // Optimise images decoding
+      let dataUrl = CACHED_DATA_URL.get(image);
 
-          if (!dataUrl) {
-            const canvas = document.createElement('canvas');
-            canvas.width = image.width;
-            canvas.height = image.height;
-            const context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0);
-            dataUrl = canvas.toDataURL();
-            CACHED_DATA_URL.set(image, dataUrl);
-          }
+      if (!dataUrl) {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0);
+        dataUrl = canvas.toDataURL();
+        CACHED_DATA_URL.set(image, dataUrl);
+      }
 
-          this._sprite.style.backgroundImage = `url(${dataUrl})`;
+      this._sprite.style.backgroundImage = `url(${dataUrl})`;
 
-          this.resize();
-          this.update();
+      this.resize();
+      this.update();
 
-          this.dispatchEvent(new Event('load'));
-        });
+      this.dispatchEvent(new Event('load'));
+    });
   }
 });

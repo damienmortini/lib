@@ -1,4 +1,4 @@
-import Loader from '../../@damienmortini/lib/utils/Loader.js';
+import Loader from '../../../lib/src/util/Loader.js';
 
 const style = document.createElement('style');
 style.textContent = `
