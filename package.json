@@ -6,7 +6,9 @@
   "scripts": {
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
-    "bump-major": "npm version major && npm publish --access=public"
+    "bump-major": "npm version major && npm publish --access=public",
+    "fix": "eslint src --fix",
+    "test": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -30,5 +32,9 @@
   "dependencies": {
     "gl-matrix": "^3.0.0",
     "mobile-detect": "^1.4.3"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-google": "^0.14.0"
   }
 }
