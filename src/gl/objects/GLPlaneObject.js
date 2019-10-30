@@ -1,4 +1,3 @@
-import Shader from '../../3d/Shader.js';
 import PlaneMesh from '../../3d/mesh/PlaneMesh.js';
 import GLObject from '../GLObject.js';
 import GLMesh from '../GLMesh.js';

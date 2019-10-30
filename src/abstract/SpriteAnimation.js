@@ -40,10 +40,7 @@ export default class SpriteAnimation {
     this._animations = SPRITESHEETS.get(this._data);
     if (!this._animations) {
       this._animations = new Map();
-      for (const key in this._data.frames) {
-        if (!this._data.frames.hasOwnProperty(key)) {
-          continue;
-        }
+      for (const key of Object.keys(this._data.frames)) {
         const match = /(.*?)([0-9]+)[$\.]/.exec(key);
         const animationName = match[1];
         let frames = this._animations.get(animationName);

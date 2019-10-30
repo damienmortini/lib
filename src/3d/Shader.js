@@ -90,10 +90,8 @@ export default class Shader {
     this._vertexShaderChunks.push(...vertexShaderChunks);
     this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
     this._fragmentShaderChunks.push(...fragmentShaderChunks);
-    for (const key in uniforms) {
-      if (uniforms.hasOwnProperty(key)) {
-        this.uniforms[key] = uniforms[key];
-      }
+    for (const key of Object.keys(uniforms)) {
+      this.uniforms[key] = uniforms[key];
     }
   }
 
@@ -211,10 +209,8 @@ export default class Shader {
 
       const structure = structures.get(type);
       if (structure) {
-        for (const key in structure) {
-          if (structure.hasOwnProperty(key)) {
-            this._addUniform(`${name}.${key}`, structure[key].type, structure[key].arrayLength);
-          }
+        for (const key of Object.keys(structure)) {
+          this._addUniform(`${name}.${key}`, structure[key].type, structure[key].arrayLength);
         }
       } else {
         const arrayLength = parseInt(arrayLengthStr);

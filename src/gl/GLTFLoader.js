@@ -40,7 +40,7 @@ export class GLTFLoader extends Loader {
 
         for (const mesh of data.meshes) {
           for (const primitive of mesh.primitives) {
-            for (const key in primitive.attributes) {
+            for (const key of Object.keys(primitive.attributes)) {
               primitive.attributes[key] = data.accessors[primitive.attributes[key]];
             }
             primitive.indices = data.accessors[primitive.indices];

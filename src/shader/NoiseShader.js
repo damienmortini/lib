@@ -160,17 +160,17 @@ vec3 psrdnoise(vec2 pos, vec2 per, float rot) {
   if (t.x < 0.0) {
     dtdx.x = 0.0;
     dtdy.x = 0.0;
-	t.x = 0.0;
+  t.x = 0.0;
   }
   if (t.y < 0.0) {
     dtdx.y = 0.0;
     dtdy.y = 0.0;
-	t.y = 0.0;
+  t.y = 0.0;
   }
   if (t.z < 0.0) {
     dtdx.z = 0.0;
     dtdy.z = 0.0;
-	t.z = 0.0;
+  t.z = 0.0;
   }
 
   // Fourth power of t (and third power for derivative)
@@ -341,17 +341,17 @@ vec3 srdnoise(vec2 pos, float rot) {
   if (t.x < 0.0) {
     dtdx.x = 0.0;
     dtdy.x = 0.0;
-	t.x = 0.0;
+  t.x = 0.0;
   }
   if (t.y < 0.0) {
     dtdx.y = 0.0;
     dtdy.y = 0.0;
-	t.y = 0.0;
+  t.y = 0.0;
   }
   if (t.z < 0.0) {
     dtdx.z = 0.0;
     dtdy.z = 0.0;
-	t.z = 0.0;
+  t.z = 0.0;
   }
 
   // Fourth power of t (and third power for derivative)

@@ -1,7 +1,6 @@
 import Signal from '../util/Signal.js';
 
 import Matrix3 from '../math/Matrix3.js';
-import Matrix4 from '../math/Matrix4.js';
 import Vector3 from '../math/Vector3.js';
 import Quaternion from '../math/Quaternion.js';
 
@@ -40,7 +39,7 @@ class Hand {
       ['wrist', new Bone()],
     ]);
 
-    for (const [i, fingerName] of HandTracker.FINGER_NAMES.entries()) {
+    for (const [, fingerName] of HandTracker.FINGER_NAMES.entries()) {
       const l = fingerName === HandTracker.THUMB ? 3 : 4;
       for (let j = 0; j < l; j++) {
         const bone = new Bone();

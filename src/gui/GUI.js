@@ -1,5 +1,4 @@
 import Keyboard from '../input/Keyboard.js';
-import GUIInput from './GUIInput.js.js';
 
 let staticGUI;
 
@@ -98,16 +97,12 @@ function normalizeString(string) {
   return `${string.toLowerCase().replace(/[^\w-]/g, '')}`;
 }
 
-function urlHashRegExpFromKey(key) {
-  return new RegExp(`([#&]gui/${key}=)([^=&#?]*)`, 'g');
-}
-
 // GUI
 
 const GUI_REG_EXP = /([#&]gui=)((%7B|{).*(%7D|}))([&?]*)/;
 
 let DATA = {};
-(function() {
+(function () {
   const matches = GUI_REG_EXP.exec(window.location.hash);
   if (matches) {
     let string = matches[2];
@@ -363,10 +358,7 @@ export default class GUI extends HTMLElement {
       }
 
       if (GUI_REG_EXP.test(window.location.hash)) {
-        window.location.hash = window.location.hash.replace(
-            GUI_REG_EXP,
-          Object.keys(DATA).length ? `$1${encodeURI(JSON.stringify(DATA))}$5` : '',
-        );
+        window.location.hash = window.location.hash.replace(GUI_REG_EXP, Object.keys(DATA).length ? `$1${encodeURI(JSON.stringify(DATA))}$5` : '');
       } else {
         const prefix = window.location.hash ? '&' : '#';
         window.location.hash += `${prefix}gui=${encodeURI(JSON.stringify(DATA))}`;

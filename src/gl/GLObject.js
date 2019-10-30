@@ -43,8 +43,8 @@ export default class GLObject {
     // Todo: Fix double call to Program.use when bind is true
     // (needed to update texture uniforms before binding them)
     this.program.use();
-    for (const uniform in options.uniforms) {
-      this.program.uniforms.set(uniform, options.uniforms[uniform]);
+    for (const key of Object.keys(options.uniforms)) {
+      this.program.uniforms.set(key, options.uniforms[key]);
     }
     if (options.bind) {
       this.bind();

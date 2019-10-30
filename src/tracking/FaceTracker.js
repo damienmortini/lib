@@ -28,7 +28,7 @@ export default class FaceTracker {
     this._mapCanvas.height = 512;
     this._context = this._mapCanvas.getContext('2d');
 
-    this.tracker = new clm.tracker();
+    this.tracker = new window.clm.tracker();
     this.tracker.init(pModel);
     this.tracker.start(this._inputCanvas);
 

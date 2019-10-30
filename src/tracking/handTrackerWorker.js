@@ -1,3 +1,3 @@
-this.onmessage = function(e) {
+self.onmessage = function (e) {
   postMessage(JSON.parse(e.data));
 };

@@ -102,10 +102,8 @@ export default class GLProgram extends Shader {
               }
             }
           } else if (value instanceof Object) {
-            for (const key in value) {
-              if (value.hasOwnProperty(key)) {
-                self.uniforms.set(`${name}.${key}`, value[key]);
-              }
+            for (const key of Object.keys(value)) {
+              self.uniforms.set(`${name}.${key}`, value[key]);
             }
             return;
           }
@@ -120,10 +118,8 @@ export default class GLProgram extends Shader {
             if (value[0].length) {
               self.uniforms.set(`${name}[${i}]`, value[i]);
             } else {
-              for (const key in value[i]) {
-                if (value[i].hasOwnProperty(key)) {
-                  self.uniforms.set(`${name}[${i}].${key}`, value[i][key]);
-                }
+              for (const key of Object.keys(value[i])) {
+                self.uniforms.set(`${name}[${i}].${key}`, value[i][key]);
               }
             }
           }
@@ -175,10 +171,8 @@ export default class GLProgram extends Shader {
 
     const rawUniforms = this.uniforms;
     this.uniforms = new Uniforms();
-    for (const key in rawUniforms) {
-      if (rawUniforms.hasOwnProperty(key)) {
-        this.uniforms.set(key, rawUniforms[key]);
-      }
+    for (const key of Object.keys(rawUniforms)) {
+      this.uniforms.set(key, rawUniforms[key]);
     }
   }
 

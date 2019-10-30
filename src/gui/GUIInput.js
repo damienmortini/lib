@@ -231,8 +231,6 @@ export default class GUIInput extends HTMLElement {
   }
 
   _onChange(e) {
-    let value;
-
     if (e.target instanceof HTMLInputElement && e.target.type === 'checkbox') {
       this.value = e.target.checked;
     } else if (e.target.type === 'range' || e.target.type === 'number') {
