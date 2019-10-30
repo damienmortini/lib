@@ -1,4 +1,4 @@
-import * as mat4 from '../../../gl-matrix/esm/mat4.js';
+import * as mat4 from '../../../../gl-matrix/esm/mat4.js';
 
 export default class Matrix4 extends Float32Array {
   constructor(array = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {

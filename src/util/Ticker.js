@@ -1,4 +1,4 @@
-import Signal from './Signal.js.js';
+import Signal from './Signal.js';
 
 const DELTA_TIME_BASE = 1 / 60;
 
