@@ -1,11 +1,11 @@
-import { Object3D, Mesh, Color, PlaneGeometry, Texture, DoubleSide, LinearFilter } from "../../../three/build/three.module.js";
+import { Object3D, Mesh, Color, PlaneGeometry, Texture, DoubleSide, LinearFilter } from '../../../three/build/three.module.js';
 
-import THREEShaderMaterial from "./THREEShaderMaterial.js";
+import THREEShaderMaterial from './THREEShaderMaterial.js';
 
-let CACHED_IMAGES = new Map();
+const CACHED_IMAGES = new Map();
 
 export default class Sprite extends Object3D {
-  constructor(image, {data, frame, scale = 1} = {}) {
+  constructor(image, { data, frame, scale = 1 } = {}) {
     super();
 
     this._data = data;
@@ -15,23 +15,23 @@ export default class Sprite extends Object3D {
     // Optimise images decoding
     let canvas = CACHED_IMAGES.get(this.image);
 
-    if(!canvas) {
-      canvas = document.createElement("canvas");
+    if (!canvas) {
+      canvas = document.createElement('canvas');
       canvas.width = this.image.width;
       canvas.height = this.image.height;
-      let context = canvas.getContext("2d");
+      const context = canvas.getContext('2d');
       context.drawImage(this.image, 0, 0);
       CACHED_IMAGES.set(this.image, canvas);
     }
 
     this.mesh = new Mesh(new PlaneGeometry(1, 1), new THREEShaderMaterial({
-      type: "basic",
+      type: 'basic',
       transparent: true,
       side: DoubleSide,
       uniforms: {
         diffuse: new Color(0xffffff),
-        map: new Texture(canvas)
-      }
+        map: new Texture(canvas),
+      },
     }));
     this.mesh.scale.x = canvas.width * this._scale;
     this.mesh.scale.y = canvas.height * this._scale;
@@ -41,7 +41,7 @@ export default class Sprite extends Object3D {
 
     this.add(this.mesh);
 
-    if(frame) {
+    if (frame) {
       this.frame = frame;
     }
   }
@@ -64,14 +64,14 @@ export default class Sprite extends Object3D {
   }
 
   set frame(value) {
-    if(!this.data) {
+    if (!this.data) {
       return;
     }
 
     this._frame = value;
 
-    let offsetRepeat = this.mesh.material.offsetRepeat;
-    let frameData = this.data.frames[this._frame];
+    const offsetRepeat = this.mesh.material.offsetRepeat;
+    const frameData = this.data.frames[this._frame];
 
     offsetRepeat.z = (frameData.rotated ? frameData.frame.h : frameData.frame.w) / this.image.width;
     offsetRepeat.w = (frameData.rotated ? frameData.frame.w : frameData.frame.h) / this.image.height;
@@ -79,7 +79,7 @@ export default class Sprite extends Object3D {
     offsetRepeat.x = frameData.frame.x / this.image.width;
     offsetRepeat.y = 1. - frameData.frame.y / this.image.height - offsetRepeat.w;
 
-    let scale = 1 / parseFloat(this.data.meta.scale);
+    const scale = 1 / parseFloat(this.data.meta.scale);
 
     this.mesh.scale.x = (frameData.rotated ? frameData.frame.h : frameData.frame.w) * scale * this._scale;
     this.mesh.scale.y = (frameData.rotated ? frameData.frame.w : frameData.frame.h) * scale * this._scale;

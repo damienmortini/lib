@@ -1,10 +1,10 @@
 import {
-  Vector3
-} from "../../../three/build/three.module.js";
+  Vector3,
+} from '../../../three/build/three.module.js';
 
-import THREELine from "./THREELine.js";
+import THREELine from './THREELine.js';
 
-import FrenetSerretFrame from "../math/FrenetSerretFrame.js";
+import FrenetSerretFrame from '../math/FrenetSerretFrame.js';
 
 export default class THREERibbon extends THREELine {
   constructor({
@@ -12,21 +12,21 @@ export default class THREERibbon extends THREELine {
     thickness,
     detail,
     geometry,
-    material
+    material,
   } = {}) {
     super({
       points,
       thickness,
       detail,
       geometry,
-      material
+      material,
     });
 
     this.head = points[this.points.length - 1].clone();
   }
 
   update() {
-    if(!this._initialized) {
+    if (!this._initialized) {
       super.update();
       this._initialized = true;
       return;
@@ -43,7 +43,7 @@ export default class THREERibbon extends THREELine {
     FrenetSerretFrame.compute({
       positions: this.userData._linePositions,
       normals: this.userData._lineNormals,
-      range: [headId - 3, headId]
+      range: [headId - 3, headId],
     });
   }
 }

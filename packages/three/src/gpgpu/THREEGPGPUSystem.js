@@ -10,9 +10,9 @@ import {
   WebGLRenderTarget,
   Scene,
   NearestFilter,
-} from "../../../three/src/Three.js";
+} from '../../../three/src/Three.js';
 
-import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
+import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 
 const MAX_WIDTH = 2048;
 
@@ -42,12 +42,12 @@ export default class THREEGPGPUSystem {
       this._debugRenderer = new WebGLRenderer();
       document.body.appendChild(this._debugRenderer.domElement);
       this._debugRenderer.setSize(this._width, this._height, false);
-      this._debugRenderer.domElement.style.position = "absolute";
-      this._debugRenderer.domElement.style.bottom = "0";
-      this._debugRenderer.domElement.style.left = "0";
-      this._debugRenderer.domElement.style.width = "100%";
-      this._debugRenderer.domElement.style.height = "25%";
-      this._debugRenderer.domElement.style.imageRendering = "pixelated";
+      this._debugRenderer.domElement.style.position = 'absolute';
+      this._debugRenderer.domElement.style.bottom = '0';
+      this._debugRenderer.domElement.style.left = '0';
+      this._debugRenderer.domElement.style.width = '100%';
+      this._debugRenderer.domElement.style.height = '25%';
+      this._debugRenderer.domElement.style.imageRendering = 'pixelated';
     }
 
     this.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -65,7 +65,7 @@ export default class THREEGPGPUSystem {
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
 
     const createDataChunks = () => {
-      let str = "\n";
+      let str = '\n';
       for (let i = 0; i < size; i++) {
         str += `vec4 dataChunk${i} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / (dataTextureSize - 1.));\n`;
       }
@@ -83,21 +83,21 @@ export default class THREEGPGPUSystem {
         }
       `,
       vertexShaderChunks: [
-        ["start",
-          "varying vec2 vUv;",
+        ['start',
+          'varying vec2 vUv;',
         ],
-        ["main",
-          "vUv = uv;",
+        ['main',
+          'vUv = uv;',
         ],
       ],
       fragmentShaderChunks: [
         ...fragmentShaderChunks,
-        ["start", `
+        ['start', `
           uniform sampler2D dataTexture;
           uniform vec2 dataTextureSize;
           varying vec2 vUv;
         `],
-        ["main", `
+        ['main', `
           vec2 dataPosition = floor(vUv * (dataTextureSize - 1.) + .5);
           float chunkOffset = mod(dataPosition.x, ${size}.);
           dataPosition.x -= chunkOffset;

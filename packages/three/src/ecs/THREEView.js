@@ -1,12 +1,12 @@
-import View from "../ecs/components/View.js";
+import View from '../ecs/components/View.js';
 
 export default class THREEView extends View {
   constructor(entity, {
     view = new THREE.Object3D(),
     visible,
-    visibilityExecutor
+    visibilityExecutor,
   } = {}) {
-    super(entity, view, {visible, visibilityExecutor});
+    super(entity, view, { visible, visibilityExecutor });
   }
 
   get position() {

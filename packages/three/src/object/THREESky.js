@@ -1,10 +1,10 @@
-import { BackSide } from "../../../three/src/constants.js";
-import { Mesh } from "../../../three/src/objects/Mesh.js";
-import { Vector3 } from "../../../three/src/math/Vector3.js";
-import { IcosahedronBufferGeometry } from "../../../three/src/geometries/IcosahedronGeometry.js";
-import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
-import SkyShader from "../../lib/shader/SkyShader.js";
-import GradientNoiseShader from "../../lib/shader/noise/GradientNoiseShader.js";
+import { BackSide } from '../../../three/src/constants.js';
+import { Mesh } from '../../../three/src/objects/Mesh.js';
+import { Vector3 } from '../../../three/src/math/Vector3.js';
+import { IcosahedronBufferGeometry } from '../../../three/src/geometries/IcosahedronGeometry.js';
+import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
+import SkyShader from '../../lib/shader/SkyShader.js';
+import GradientNoiseShader from '../../lib/shader/noise/GradientNoiseShader.js';
 
 const skyShader = {
   uniforms: {
@@ -24,18 +24,18 @@ const skyShader = {
     displayMoon: 1,
   },
   vertexShaderChunks: [
-    ["start", `
+    ['start', `
       varying vec3 vWorldPosition;
     `],
-    ["end", `
+    ['end', `
       vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
       vWorldPosition = worldPosition.xyz;
 
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-    `]
+    `],
   ],
   fragmentShaderChunks: [
-    ["start", `
+    ['start', `
       uniform vec3 sunPosition;
       uniform float sunRayleigh;
       uniform float sunTurbidity;
@@ -66,7 +66,7 @@ const skyShader = {
         return vec3(blendScreen(base.r,blend.r),blendScreen(base.g,blend.g),blendScreen(base.b,blend.b));
       }
     `],
-    ["end", `
+    ['end', `
       vec3 normalizedSunPosition = normalize(sunPosition);
       vec3 normalizedMoonPosition = normalize(moonPosition);
       
@@ -93,17 +93,17 @@ const skyShader = {
 
       // gl_FragColor = vec4(skyColor, (skySunColor.a + skyMoonColor.a) / 2.);
       gl_FragColor = vec4(skyColor, 1.);
-    `]
-  ]
+    `],
+  ],
 };
 
 export default class Sky extends Mesh {
-  constructor({ 
+  constructor({
     radius = 1,
     shaders = [],
   } = {}) {
     super(new IcosahedronBufferGeometry(radius, 3), new THREEShaderMaterial(Object.assign({
-      type: "basic",
+      type: 'basic',
       side: BackSide,
       shaders,
     }, skyShader)));

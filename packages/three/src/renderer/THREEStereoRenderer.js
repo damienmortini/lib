@@ -1,4 +1,4 @@
-import { WebGLRenderer, StereoCamera } from "../../../three/build/three.module.js";
+import { WebGLRenderer, StereoCamera } from '../../../three/build/three.module.js';
 
 export default class THREEStereoRenderer {
   constructor(renderer = new WebGLRenderer()) {
@@ -23,11 +23,11 @@ export default class THREEStereoRenderer {
 
     this._stereoCamera.update(camera);
 
-    let size = this.renderer.getSize();
+    const size = this.renderer.getSize();
 
     this.renderer.clear();
 
-    if(renderTarget) {
+    if (renderTarget) {
       renderTarget.scissorTest = true;
       renderTarget.scissor.set(0, 0, size.width * .5, size.height);
       renderTarget.viewport.set(0, 0, size.width * .5, size.height);
@@ -38,7 +38,7 @@ export default class THREEStereoRenderer {
     }
     this.renderer.render(scene, this._stereoCamera.cameraL, renderTarget);
 
-    if(renderTarget) {
+    if (renderTarget) {
       renderTarget.scissor.set(size.width * .5, 0, size.width * .5, size.height);
       renderTarget.viewport.set(size.width * .5, 0, size.width * .5, size.height);
     } else {
@@ -47,7 +47,7 @@ export default class THREEStereoRenderer {
     }
     this.renderer.render(scene, this._stereoCamera.cameraR, renderTarget);
 
-    if(renderTarget) {
+    if (renderTarget) {
       renderTarget.scissorTest = false;
       renderTarget.scissor.set(0, 0, size.width, size.height);
       renderTarget.viewport.set(0, 0, size.width, size.height);

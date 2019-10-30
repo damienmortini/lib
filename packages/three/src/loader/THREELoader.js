@@ -1,12 +1,12 @@
-import { Loader } from "../../lib/util/Loader.js";
-import { TextureLoader } from "../../../three/src/loaders/TextureLoader.js";
+import { Loader } from '../../lib/util/Loader.js';
+import { TextureLoader } from '../../../three/src/loaders/TextureLoader.js';
 
-import { DRACOLoader } from "./_DRACOLoader.js";
-import { GLTFLoader } from "./_GLTFLoader.js";
-import { Mesh } from "../../../three/src/objects/Mesh.js";
-import { Line } from "../../../three/src/objects/Line.js";
-import { LineSegments } from "../../../three/src/objects/LineSegments.js";
-import { Vector3 } from "../../../three/src/math/Vector3.js";
+import { DRACOLoader } from './_DRACOLoader.js';
+import { GLTFLoader } from './_GLTFLoader.js';
+import { Mesh } from '../../../three/src/objects/Mesh.js';
+import { Line } from '../../../three/src/objects/Line.js';
+import { LineSegments } from '../../../three/src/objects/LineSegments.js';
+import { Vector3 } from '../../../three/src/math/Vector3.js';
 
 function computeSceneGeometry(data, scale, offset) {
   const hasOffset = offset.lengthSq() !== 0;
@@ -31,18 +31,18 @@ loader.setDRACOLoader(new DRACOLoader(undefined));
 class THREELoader extends Loader {
   constructor() {
     super();
-    this.dracoDecoderPath = "";
+    this.dracoDecoderPath = '';
 
-    this.extensionTypeMap.set("gltf", "model/gltf+json");
-    this.extensionTypeMap.set("glb", "model/gltf-binary");
-    this.extensionTypeMap.set("png", "application/texture");
-    this.extensionTypeMap.set("jpg", "application/texture");
-    this.extensionTypeMap.set("mp4", "application/texture");
+    this.extensionTypeMap.set('gltf', 'model/gltf+json');
+    this.extensionTypeMap.set('glb', 'model/gltf-binary');
+    this.extensionTypeMap.set('png', 'application/texture');
+    this.extensionTypeMap.set('jpg', 'application/texture');
+    this.extensionTypeMap.set('mp4', 'application/texture');
   }
 
   _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
-    if (type.startsWith("model")) {
-      DRACOLoader.setDecoderPath(`${this.baseURI.startsWith("/") ? "/" : ""}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : "node_modules/three/examples/js/libs/draco/gltf/"}`);
+    if (type.startsWith('model')) {
+      DRACOLoader.setDecoderPath(`${this.baseURI.startsWith('/') ? '/' : ''}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : 'node_modules/three/examples/js/libs/draco/gltf/'}`);
 
       const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
@@ -54,7 +54,7 @@ class THREELoader extends Loader {
           resolve(data);
         });
       });
-    } else if (type === "application/texture") {
+    } else if (type === 'application/texture') {
       return new Promise((resolve) => {
         new TextureLoader().load(src, (data) => {
           resolve(data);

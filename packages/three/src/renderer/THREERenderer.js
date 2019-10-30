@@ -1,13 +1,13 @@
-import { WebGLRenderer } from "../../../three/src/renderers/WebGLRenderer.js";
-import { WebGLRenderTarget } from "../../../three/src/renderers/WebGLRenderTarget.js";
-import { DepthTexture } from "../../../three/src/textures/DepthTexture.js";
-import { RGBAFormat } from "../../../three/src/constants.js";
-import { LinearFilter } from "../../../three/src/constants.js";
-import { UnsignedShortType } from "../../../three/src/constants.js";
-import { Scene } from "../../../three/src/scenes/Scene.js";
-import { OrthographicCamera } from "../../../three/src/cameras/OrthographicCamera.js";
-import { Mesh } from "../../../three/src/objects/Mesh.js";
-import { PlaneBufferGeometry } from "../../../three/src/geometries/PlaneGeometry.js";
+import { WebGLRenderer } from '../../../three/src/renderers/WebGLRenderer.js';
+import { WebGLRenderTarget } from '../../../three/src/renderers/WebGLRenderTarget.js';
+import { DepthTexture } from '../../../three/src/textures/DepthTexture.js';
+import { RGBAFormat } from '../../../three/src/constants.js';
+import { LinearFilter } from '../../../three/src/constants.js';
+import { UnsignedShortType } from '../../../three/src/constants.js';
+import { Scene } from '../../../three/src/scenes/Scene.js';
+import { OrthographicCamera } from '../../../three/src/cameras/OrthographicCamera.js';
+import { Mesh } from '../../../three/src/objects/Mesh.js';
+import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneGeometry.js';
 
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {
@@ -16,18 +16,18 @@ export default class THREERenderer extends WebGLRenderer {
     this.filters = [];
     this._renderTargets = new Map();
 
-    let renderTargetIn = new WebGLRenderTarget(this.domElement.width, this.domElement.height, {
+    const renderTargetIn = new WebGLRenderTarget(this.domElement.width, this.domElement.height, {
       format: RGBAFormat,
       minFilter: LinearFilter,
       magFilter: LinearFilter,
-      stencilBuffer: false
+      stencilBuffer: false,
     });
     renderTargetIn.texture.generateMipmaps = false;
 
-    let renderTargetOut = renderTargetIn.clone();
+    const renderTargetOut = renderTargetIn.clone();
     renderTargetOut.texture.generateMipmaps = false;
 
-    if (this.context.getExtension("WEBGL_depth_texture")) {
+    if (this.context.getExtension('WEBGL_depth_texture')) {
       renderTargetIn.depthTexture = new DepthTexture();
       renderTargetIn.depthTexture.type = UnsignedShortType;
       renderTargetOut.depthTexture = new DepthTexture();
@@ -36,7 +36,7 @@ export default class THREERenderer extends WebGLRenderer {
 
     this._renderTargets.set(this, {
       in: renderTargetIn,
-      out: renderTargetOut
+      out: renderTargetOut,
     });
 
     this.scene = new Scene();
@@ -63,7 +63,7 @@ export default class THREERenderer extends WebGLRenderer {
 
   resize(width, height) {
     this.setSize(width, height, false);
-    let renderTargets = this._renderTargets.get(this);
+    const renderTargets = this._renderTargets.get(this);
     renderTargets.in.setSize(width, height);
     renderTargets.out.setSize(width, height);
   }
@@ -77,7 +77,7 @@ export default class THREERenderer extends WebGLRenderer {
     if (!renderTargets) {
       renderTargets = {
         in: renderTarget.clone(),
-        out: renderTarget.clone()
+        out: renderTarget.clone(),
       };
       renderTargets.in.texture.generateMipmaps = false;
       renderTargets.out.texture.generateMipmaps = false;
@@ -113,7 +113,7 @@ export default class THREERenderer extends WebGLRenderer {
       camera = camera || scene.camera;
       this._render(scene, camera, filters.length ? renderTargets.in : renderTarget);
     }
-    for (let [i, filter] of filters.entries()) {
+    for (const [i, filter] of filters.entries()) {
       this.applyFilter(filter, renderTargets.in, i < filters.length - 1 ? renderTargets.out : renderTarget);
       [renderTargets.in, renderTargets.out] = [renderTargets.out, renderTargets.in];
     }

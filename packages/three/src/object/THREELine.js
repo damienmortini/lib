@@ -1,6 +1,6 @@
-import FrenetSerretFrame from "../lib/math/FrenetSerretFrame.js";
+import FrenetSerretFrame from '../lib/math/FrenetSerretFrame.js';
 
-import THREEShaderMaterial from "./THREEShaderMaterial.js";
+import THREEShaderMaterial from './THREEShaderMaterial.js';
 
 export default class THREELine extends THREE.Mesh {
   constructor({
@@ -8,7 +8,7 @@ export default class THREELine extends THREE.Mesh {
     material = new THREEShaderMaterial(),
     detail = 3,
     thickness = .1,
-    geometry = new THREE.CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1)
+    geometry = new THREE.CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1),
   } = {}) {
     super(geometry, material);
 
@@ -20,27 +20,27 @@ export default class THREELine extends THREE.Mesh {
 
     this.frustumCulled = false;
 
-    let positions = this.geometry.getAttribute("position").array;
-    let verticesNumber = positions.length / 3;
-    let ids = new Float32Array(verticesNumber);
-    let offsetY = (points.length - 1) / 2;
+    const positions = this.geometry.getAttribute('position').array;
+    const verticesNumber = positions.length / 3;
+    const ids = new Float32Array(verticesNumber);
+    const offsetY = (points.length - 1) / 2;
     for (let i = 0; i < verticesNumber; i++) {
       ids[i] = positions[i * 3 + 1] + offsetY;
     }
 
-    this.geometry.addAttribute("linePointId", new THREE.BufferAttribute(ids, 1));
+    this.geometry.addAttribute('linePointId', new THREE.BufferAttribute(ids, 1));
 
-    if(!material.linePositions) {
+    if (!material.linePositions) {
       material.add({
         vertexShaderChunks: [
-          ["start", `
+          ['start', `
             uniform float lineThickness;
             uniform vec3 linePositions[${this.points.length}];
             uniform vec3 lineNormals[${this.points.length}];
 
             attribute float linePointId;
           `],
-          ["main", `
+          ['main', `
             vec3 position = position;
             vec3 normal = normal;
 
@@ -57,8 +57,8 @@ export default class THREELine extends THREE.Mesh {
             position.y = 0.;
             position = linePosition + lineRotationMatrix * position * lineThickness;
             normal = lineRotationMatrix * normal;
-          `]
-        ]
+          `],
+        ],
       });
     }
 
@@ -72,7 +72,7 @@ export default class THREELine extends THREE.Mesh {
 
     const threeProgram = renderer.properties.get(material).program;
 
-    if(!threeProgram) {
+    if (!threeProgram) {
       return;
     }
 
@@ -80,9 +80,9 @@ export default class THREELine extends THREE.Mesh {
     const uniforms = threeProgram.getUniforms();
 
     gl.useProgram(threeProgram.program);
-    uniforms.setValue(gl, "lineThickness", this.userData._thickness);
-    uniforms.setValue(gl, "lineNormals", this.userData._lineNormals);
-    uniforms.setValue(gl, "linePositions", this.userData._linePositions);
+    uniforms.setValue(gl, 'lineThickness', this.userData._thickness);
+    uniforms.setValue(gl, 'lineNormals', this.userData._lineNormals);
+    uniforms.setValue(gl, 'linePositions', this.userData._linePositions);
   }
 
   set thickness(value) {
@@ -94,7 +94,7 @@ export default class THREELine extends THREE.Mesh {
   }
 
   update({
-    range = [0, this.points.length - 1]
+    range = [0, this.points.length - 1],
   } = {}) {
     const end = range[1];
     for (let i = range[0]; i <= end; i++) {
@@ -107,7 +107,7 @@ export default class THREELine extends THREE.Mesh {
     FrenetSerretFrame.compute({
       positions: this.userData._linePositions,
       normals: this.userData._lineNormals,
-      range
+      range,
     });
   }
 }

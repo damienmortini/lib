@@ -7,7 +7,9 @@
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
     "bump-major": "npm version major && npm publish --access=public",
-    "prepublish": "node copyExamples.js"
+    "prepublish": "node copyExamples.js",
+    "fix": "eslint src --fix",
+    "test": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -28,5 +30,9 @@
   "dependencies": {
     "@damienmortini/lib": "^0.2.7",
     "three": "^0.107.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-google": "^0.14.0"
   }
 }

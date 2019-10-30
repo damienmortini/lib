@@ -1,18 +1,18 @@
-import { Object3D } from "../../../three/src/core/Object3D.js";
-import { Mesh } from "../../../three/src/objects/Mesh.js";
-import { PlaneGeometry } from "../../../three/src/geometries/PlaneGeometry.js";
-import { Texture } from "../../../three/src/textures/Texture.js";
-import { LinearFilter } from "../../../three/src/constants.js";
+import { Object3D } from '../../../three/src/core/Object3D.js';
+import { Mesh } from '../../../three/src/objects/Mesh.js';
+import { PlaneGeometry } from '../../../three/src/geometries/PlaneGeometry.js';
+import { Texture } from '../../../three/src/textures/Texture.js';
+import { LinearFilter } from '../../../three/src/constants.js';
 
-import THREEShaderMaterial from "../material/THREEShaderMaterial.js";
+import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 
 export default class THREEText extends Object3D {
   constructor({
-    textContent = "",
-    font = "10px sans-serif",
-    fillStyle = "black",
-    textAlign = "start",
-    shadowColor = "rgba(0, 0, 0 ,0)",
+    textContent = '',
+    font = '10px sans-serif',
+    fillStyle = 'black',
+    textAlign = 'start',
+    shadowColor = 'rgba(0, 0, 0 ,0)',
     shadowBlur = 0,
     shadowOffsetX = 0,
     shadowOffsetY = 0,
@@ -20,7 +20,7 @@ export default class THREEText extends Object3D {
     maxWidth = Infinity,
     geometry = new PlaneGeometry(1, 1),
     material = new THREEShaderMaterial({
-      type: "basic",
+      type: 'basic',
       transparent: true,
     }),
   } = {}) {
@@ -28,8 +28,8 @@ export default class THREEText extends Object3D {
 
     this._scale = scale;
 
-    this._canvas = document.createElement("canvas");
-    this._context = this._canvas.getContext("2d");
+    this._canvas = document.createElement('canvas');
+    this._context = this._canvas.getContext('2d');
 
     this._texture = new Texture(this._canvas);
 
@@ -58,7 +58,7 @@ export default class THREEText extends Object3D {
     this._context.shadowBlur = this.shadowBlur;
     this._context.shadowOffsetX = this.shadowOffsetX;
     this._context.shadowOffsetY = this.shadowOffsetY;
-    this._context.textBaseline = "top";
+    this._context.textBaseline = 'top';
   }
 
   _update() {
@@ -71,12 +71,12 @@ export default class THREEText extends Object3D {
     const shadowOffsetX = this.shadowOffsetX - this.shadowBlur;
     const shadowOffsetY = this.shadowOffsetY - this.shadowBlur;
 
-    const words = this.textContent.split(" ");
+    const words = this.textContent.split(' ');
 
-    const spaceWidth = this._context.measureText(" ").width;
+    const spaceWidth = this._context.measureText(' ').width;
     const wordsWidth = new Map();
     const lines = [{
-      textContent: "",
+      textContent: '',
       width: 0,
     }];
     for (const word of words) {
@@ -97,8 +97,8 @@ export default class THREEText extends Object3D {
           width: wordsWidth.get(word),
         };
       } else {
-        if (lines[lineNumber].textContent !== "") {
-          lines[lineNumber].textContent += " ";
+        if (lines[lineNumber].textContent !== '') {
+          lines[lineNumber].textContent += ' ';
         }
         lines[lineNumber].textContent += word;
         lines[lineNumber].width += spaceWidth + wordsWidth.get(word);
@@ -121,9 +121,9 @@ export default class THREEText extends Object3D {
 
     this._mesh.position.y = -shadowOffsetY * .5 * this._scale;
 
-    if (this.textAlign === "start" || this.textAlign === "left") {
+    if (this.textAlign === 'start' || this.textAlign === 'left') {
       this._mesh.position.x = (this._canvas.width * .5 + Math.min(0, shadowOffsetX)) * this._scale;
-    } else if (this.textAlign === "end" || this.textAlign === "right") {
+    } else if (this.textAlign === 'end' || this.textAlign === 'right') {
       this._mesh.position.x = (-this._canvas.width * .5 + Math.max(0, shadowOffsetX)) * this._scale;
     } else {
       this._mesh.position.x = shadowOffsetX * .5 * this._scale;
@@ -136,15 +136,15 @@ export default class THREEText extends Object3D {
     for (const [i, line] of lines.entries()) {
       let offsetX;
       switch (this.textAlign) {
-        case "start":
-        case "left":
+        case 'start':
+        case 'left':
           offsetX = 0;
           break;
-        case "center":
+        case 'center':
           offsetX = (width - line.width) * .5;
           break;
-        case "end":
-        case "right":
+        case 'end':
+        case 'right':
           offsetX = width - line.width;
           break;
       }
