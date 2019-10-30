@@ -4,10 +4,10 @@
   "description": "Helpers library for the web.",
   "registry": "npm",
   "scripts": {
-    "docs": "jsdoc -c jsdoc.config.json",
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
     "bump-major": "npm version major && npm publish --access=public",
+    "docs": "jsdoc -c jsdoc.config.json",
     "fix": "eslint src --fix",
     "test": "eslint src"
   },
