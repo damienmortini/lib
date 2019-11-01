@@ -25,14 +25,24 @@ export default class ViewportElement extends HTMLElement {
       <slot></slot>
     `;
 
+    this._dragHandler = new DragHandler({
+      elements: [this],
+      exceptions: [
+        (nodes) => {
+          return nodes[0] !== this;
+        },
+      ],
+    });
     this._childrenDragHandler = new DragHandler();
 
     const observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
+          this._dragHandler.add(node);
           this._childrenDragHandler.add(node);
         }
         for (const node of mutation.removedNodes) {
+          this._dragHandler.delete(node);
           this._childrenDragHandler.delete(node);
         }
       }
@@ -42,6 +52,7 @@ export default class ViewportElement extends HTMLElement {
     for (const child of this.children) {
       if (child instanceof HTMLSlotElement) {
         for (const element of child.assignedElements()) {
+          this._dragHandler.add(element);
           this._childrenDragHandler.add(element);
           child.addEventListener('slotchange', (event) => {
             for (const element of event.target.assignedElements()) {
@@ -51,6 +62,7 @@ export default class ViewportElement extends HTMLElement {
           observer.observe(element.parentElement, { childList: true });
         }
       } else {
+        this._dragHandler.add(child);
         this._childrenDragHandler.add(child);
       }
     }
