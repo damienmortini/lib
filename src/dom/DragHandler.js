@@ -39,12 +39,10 @@ export default class DragHandler extends Set {
   }
 
   _onPointerDown(event) {
-    const composed = event.composedPath();
-    for (const node of composed) {
-      for (const exception of this.exceptions) {
-        if (exception(node)) {
-          return;
-        }
+    const nodes = event.composedPath();
+    for (const exception of this.exceptions) {
+      if (exception(nodes)) {
+        return;
       }
     }
     this._preventDrag = false;
