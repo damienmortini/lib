@@ -36,9 +36,11 @@ export default class NodeElement extends HTMLElement {
         .content, slot {
           padding: 5px;
         }
-        datails summary {
+        details summary {
           position: relative;
           padding: 5px;
+        }
+        details summary:focus {
           outline: none;
         }
         section.input {

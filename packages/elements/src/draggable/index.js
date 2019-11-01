@@ -105,8 +105,6 @@ export default class DraggableElement extends HTMLElement {
   }
 
   _onPointerDown(event) {
-    console.log('dkshfdskj');
-
     if (!this.handles.includes(event.target)) {
       return;
     }
