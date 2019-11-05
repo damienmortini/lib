@@ -226,8 +226,8 @@ class ConnectorInputElement extends HTMLElement {
         break;
       case 'connected':
         if (!this.connected) {
-          this.inputs.clear();
-          this.outputs.clear();
+          this._connectorElementInputs.clear();
+          this._connectorElementOutputs.clear();
         }
         break;
     }
