@@ -32,13 +32,11 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
 
     this._onWindowPointerUpBinded = this._onWindowPointerUp.bind(this);
     this.addEventListener('pointerup', (event) => {
-      console.log(event.composedPath());
     }, { passive: false });
   }
 
   connectedCallback() {
     CONNECTORS.add(this);
-    console.log(CONNECTORS);
   }
 
   disconnectedCallback() {
