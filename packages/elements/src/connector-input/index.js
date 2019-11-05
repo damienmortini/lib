@@ -7,14 +7,14 @@
  *    outputs="[document.getElementById('output1'), document.getElementById('output2')]"
  * ></graph-connector>
  */
-class InputConnectorElement extends HTMLElement {
+class ConnectorInputElement extends HTMLElement {
   /**
    * Observed Attributes
    * @private
    * @constant {Array.<String>}
    */
   static get observedAttributes() {
-    return ['inputs', 'outputs'];
+    return ['inputs', 'outputs', 'connected'];
   }
 
   /**
@@ -64,22 +64,46 @@ class InputConnectorElement extends HTMLElement {
     super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
-      <style>
-        :host {
-          display: inline-block;
-          cursor: pointer;
-        }
-        input {
-          cursor: pointer;
-          display: inline-block;
-          margin: 5px;
-        }
-      </style>
-      <input type="radio" disabled>
-      <slot></slot>
-    `;
+      <slot>
+        <style>
+          :host {
+            display: inline-block;
+            position: relative;
+            width: .8em;
+            height: .8em;
+            margin: .2em;
+          }
 
-    this._radio = this.shadowRoot.querySelector('input');
+          :host([connected]) .inside {
+            visibility: visible;
+          }
+
+          .inside {
+            visibility: hidden;
+            position: absolute;
+            margin: auto;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            height: 50%;
+            background: currentColor;
+            border-radius: 50%;
+          }
+
+          .outside {
+            width: 100%;
+            height: 100%;
+            border: 1px dotted;
+            border-radius: 50%;
+            box-sizing: border-box;
+          }
+        </style>
+        <div class="inside"></div>
+        <div class="outside"></div>
+      </slot>
+    `;
 
     this._onInputChangeBinded = this._onInputChange.bind(this);
 
@@ -100,7 +124,7 @@ class InputConnectorElement extends HTMLElement {
         if (value.value !== undefined) {
           self._value = value.value;
         }
-        if (value instanceof InputConnectorElement) {
+        if (value instanceof ConnectorInputElement) {
           self._connectorElementInputs.add(value);
           value.outputs.add(self);
         } else {
@@ -116,7 +140,7 @@ class InputConnectorElement extends HTMLElement {
           return;
         }
         value.removeEventListener('input', self._onInputChangeBinded);
-        if (value instanceof InputConnectorElement) {
+        if (value instanceof ConnectorInputElement) {
           self._connectorElementInputs.delete(value);
           value.outputs.delete(self);
         } else {
@@ -138,7 +162,7 @@ class InputConnectorElement extends HTMLElement {
           return this;
         }
         super.add(value);
-        if (value instanceof InputConnectorElement) {
+        if (value instanceof ConnectorInputElement) {
           self._connectorElementOutputs.add(value);
           value.inputs.add(self);
           self.dispatchEvent(new CustomEvent('connected', {
@@ -164,11 +188,11 @@ class InputConnectorElement extends HTMLElement {
         }
         self._connectorElementOutputs.delete(value);
         self._inputElementOutputs.delete(value);
-        if (value instanceof InputConnectorElement) {
+        if (value instanceof ConnectorInputElement) {
           value.inputs.delete(self);
         }
         self._updateConnectedStatus();
-        if (value instanceof InputConnectorElement) {
+        if (value instanceof ConnectorInputElement) {
           self.dispatchEvent(new CustomEvent('disconnected', {
             bubbles: true,
             composed: true,
@@ -192,21 +216,42 @@ class InputConnectorElement extends HTMLElement {
       return;
     }
 
-    name = name.replace('data-', '');
-
-    const array = new Function(`return ${newValue}`).apply(this);
-    for (const value of array) {
-      this[name].add(value);
+    switch (name) {
+      case 'inputs':
+      case 'outputs':
+        const array = new Function(`return ${newValue}`).apply(this);
+        for (const value of array) {
+          this[name].add(value);
+        }
+        break;
+      case 'connected':
+        if (!this.connected) {
+          this.inputs.clear();
+          this.outputs.clear();
+        }
+        break;
     }
   }
 
   disconnectedCallback() {
-    if (this.type & InputConnectorElement.TYPE_INPUT) {
+    if (this.type & ConnectorInputElement.TYPE_INPUT) {
       this.inputs.clear();
     }
-    if (this.type & InputConnectorElement.TYPE_OUTPUT) {
+    if (this.type & ConnectorInputElement.TYPE_OUTPUT) {
       this.outputs.clear();
     }
+  }
+
+  set connected(value) {
+    if (value) {
+      this.setAttribute('connected', '');
+    } else {
+      this.removeAttribute('connected');
+    }
+  }
+
+  get connected() {
+    return this.hasAttribute('connected');
   }
 
   _onInputChange(event) {
@@ -214,9 +259,9 @@ class InputConnectorElement extends HTMLElement {
   }
 
   _updateConnectedStatus() {
-    this._radio.checked = !!this._connectorElementInputs.size || !!this._connectorElementOutputs.size;
+    this.connected = !!this._connectorElementInputs.size || !!this._connectorElementOutputs.size;
     for (const output of this._inputElementOutputs) {
-      output.disabled = this._radio.checked;
+      output.disabled = this.connected;
     }
   }
 
@@ -229,7 +274,7 @@ class InputConnectorElement extends HTMLElement {
     for (const output of this.outputs) {
       const oldValue = output.value;
       output.value = value;
-      if (!(output instanceof InputConnectorElement) && oldValue !== value) {
+      if (!(output instanceof ConnectorInputElement) && oldValue !== value) {
         output.dispatchEvent(new Event('input', {
           bubbles: true,
         }));
@@ -241,18 +286,9 @@ class InputConnectorElement extends HTMLElement {
   }
 
   /**
-   * Return true if connected to another connector
-   * @readonly
-   * @type {boolean}
-   */
-  get connected() {
-    return this._radio.checked;
-  }
-
-  /**
    * Set of inputs
    * @readonly
-   * @type {Set.<HTMLInputElement|InputConnectorElement>}
+   * @type {Set.<HTMLInputElement|ConnectorInputElement>}
    */
   get inputs() {
     return this._inputs;
@@ -261,7 +297,7 @@ class InputConnectorElement extends HTMLElement {
   /**
    * Set of outputs
    * @readonly
-   * @type {Set.<(HTMLInputElement|InputConnectorElement)>}
+   * @type {Set.<(HTMLInputElement|ConnectorInputElement)>}
    */
   get outputs() {
     return this._outputs;
@@ -277,4 +313,4 @@ class InputConnectorElement extends HTMLElement {
   }
 }
 
-export default InputConnectorElement;
+export default ConnectorInputElement;

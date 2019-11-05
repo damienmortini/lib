@@ -1,7 +1,7 @@
-import InputConnectorLink from '../input-connectorlink/index.js';
+import ConnectorInputLinkableElement from '../connector-input-linkable/index.js';
 
-if (!customElements.get('node-input-connector')) {
-  customElements.define('node-input-connector', InputConnectorLink);
+if (!customElements.get('node-connector-input')) {
+  customElements.define('node-connector-input', ConnectorInputLinkableElement);
 }
 
 let slotUID = 0;
@@ -125,12 +125,12 @@ export default class NodeElement extends HTMLElement {
     section.id = `slot${slotUID}`;
     section.classList.add('input');
     section.innerHTML = `
-      <node-input-connector></node-input-connector>
+      <node-connector-input></node-connector-input>
       <label title="${label}">${label}</label>
       <div class="input"><slot name="${slotUID}"></slot></div>
-      <node-input-connector></node-input-connector>
+      <node-connector-input></node-connector-input>
     `;
-    const connectors = section.querySelectorAll('node-input-connector');
+    const connectors = section.querySelectorAll('node-connector-input');
     connectors[0].outputs.add(node);
     connectors[1].inputs.add(node);
     this.shadowRoot.querySelector('.content').appendChild(section);

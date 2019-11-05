@@ -1,23 +1,34 @@
 {
-  "env": {
+    "env": {
       "browser": true,
       "es6": true,
       "node": true
-  },
-  "extends": [
+    },
+    "extends": [
       "google"
-  ],
-  "globals": {
+    ],
+    "globals": {
       "Atomics": "readonly",
       "SharedArrayBuffer": "readonly"
-  },
-  "parserOptions": {
+    },
+    "parserOptions": {
       "ecmaVersion": 2020,
       "sourceType": "module"
-  },
-  "rules": {
+    },
+    "rules": {
       "max-len": 0,
       "require-jsdoc": 0,
-      "object-curly-spacing": [2, "always"]
+      "object-curly-spacing": [
+        2,
+        "always"
+      ],
+      "space-before-function-paren": [
+        2,
+        {
+          "anonymous": "always",
+          "named": "never",
+          "asyncArrow": "always"
+        }
+      ]
+    }
   }
-}
