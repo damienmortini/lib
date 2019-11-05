@@ -1,7 +1,7 @@
+import InputConnectorLink from '../input-connectorlink/index.js';
+
 if (!customElements.get('node-input-connector')) {
-  import('../input-connectorlink/index.js').then((module) => {
-    customElements.define('node-input-connector', module.default);
-  });
+  customElements.define('node-input-connector', InputConnectorLink);
 }
 
 let slotUID = 0;
@@ -21,7 +21,7 @@ export default class NodeElement extends HTMLElement {
       <style>
         :host {
           display: block;
-          overflow: auto;
+          // overflow: auto;
           resize: horizontal;
           border: 1px dotted;
           background: rgba(255, 255, 255, .9);
@@ -131,12 +131,8 @@ export default class NodeElement extends HTMLElement {
       <node-input-connector></node-input-connector>
     `;
     const connectors = section.querySelectorAll('node-input-connector');
-    if (connectors[0].outputs) {
-      connectors[0].outputs.add(node);
-    }
-    if (connectors[0].inputs) {
-      connectors[1].inputs.add(node);
-    }
+    connectors[0].outputs.add(node);
+    connectors[1].inputs.add(node);
     this.shadowRoot.querySelector('.content').appendChild(section);
     node.slot = slotUID;
     slotUID++;
