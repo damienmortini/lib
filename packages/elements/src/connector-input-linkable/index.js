@@ -9,67 +9,22 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
   constructor() {
     super();
 
-    // this.shadowRoot.innerHTML = `
-    //   <style>
-    //     :host {
-    //       display: inline-block;
-    //       cursor: pointer;
-    //     }
-    //     :host(:hover) {
-    //       background: red;
-    //     }
-    //     :host(:focus-within) {
-    //       background: green;
-    //     }
-    //     :host([connected]) {
-    //       background: orange;
-    //     }
-    //     input {
-    //       cursor: pointer;
-    //       display: inline-block;
-    //       margin: 5px;
-    //     }
-    //   </style>
-    //   <slot>
-    //     <input type="radio">
-    //   </slot>
-    // `;
+    this.shadowRoot.querySelector('slot style').insertAdjacentHTML('beforeend', `
+      :host(:hover) {
+        background: red;
+      }
+      :host(:focus-within) {
+        background: green;
+      }
+      :host([connected]) {
+        background: orange;
+      }
+    `);
 
     this.addEventListener('pointerdown', this._onPointerDown);
 
-    // this._outputLinkMap = new Map();
-
     this._onWindowPointerUpBinded = this._onWindowPointerUp.bind(this);
-    this.addEventListener('connected', this._onConnected);
-    this.addEventListener('disconnected', this._onDisconnected);
   }
-
-  // _addLink() {
-  //   let root = this;
-  //   let element = this;
-  //   while (element) {
-  //     element = element.parentElement || element.getRootNode().host;
-  //     if (element && element.tagName === 'GRAPH-EDITOR') {
-  //       root = element;
-  //       break;
-  //     }
-  //   }
-
-  //   const link = document.createElement('graph-link');
-  //   root.prepend(link);
-  //   return link;
-  // }
-
-  // _onConnected(event) {
-  //   const link = this._outputLinkMap.get(undefined) || this._addLink();
-  //   link.addEventListener('click', () => {
-  //     link.input.outputs.delete(link.output);
-  //   });
-  //   link.input = event.target;
-  //   link.output = event.detail.output;
-
-  //   this._outputLinkMap.set(event.detail.output, link);
-  // }
 
   _onPointerDown() {
     if (activeConnector) {
@@ -77,12 +32,16 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
     }
     activeConnector = this;
 
-    this.dispatchEvent(new Event('linkstart', {
+    window.addEventListener('pointerup', this._onWindowPointerUpBinded);
+
+    this.dispatchEvent(new CustomEvent('linkstart', {
       composed: true,
       bubbles: true,
+      detail: {
+        input: this,
+        output: undefined,
+      },
     }));
-
-    window.addEventListener('pointerup', this._onWindowPointerUpBinded);
   }
 
   _onWindowPointerUp(event) {
@@ -106,6 +65,14 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
 
     if (!connector || (activeConnector.type === connector.type && connector.type !== ConnectorInputLinkableElement.TYPE_BOTH)) {
       activeConnector = null;
+      this.dispatchEvent(new CustomEvent('linkend', {
+        composed: true,
+        bubbles: true,
+        detail: {
+          input: null,
+          output: null,
+        },
+      }));
       return;
     }
 
@@ -115,6 +82,15 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
     inputConnector.outputs.add(outputConnector);
 
     activeConnector = null;
+
+    this.dispatchEvent(new CustomEvent('linkend', {
+      composed: true,
+      bubbles: true,
+      detail: {
+        input: inputConnector,
+        output: outputConnector,
+      },
+    }));
   }
 }
 
