@@ -86,7 +86,7 @@ export default class DragHandler extends Set {
       return;
     }
     this._animationFrameID = requestAnimationFrame(this._updateBinded);
-    if (Math.abs(this._clientX - this._dragStartX) < 2 || Math.abs(this._clientY - this._dragStartY) < 2) {
+    if (Math.abs(this._clientX - this._dragStartX) < 2 && Math.abs(this._clientY - this._dragStartY) < 2) {
       return;
     }
     for (const element of this.selected) {
