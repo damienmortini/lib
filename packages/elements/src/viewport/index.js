@@ -1,10 +1,6 @@
 import DragHandler from '../../../lib/src/dom/DragHandler.js';
 
 export default class ViewportElement extends HTMLElement {
-  static get observedAttributes() {
-    return ['draggable', 'zoomable'];
-  }
-
   constructor() {
     super();
 
@@ -25,7 +21,11 @@ export default class ViewportElement extends HTMLElement {
       <slot></slot>
     `;
 
-    this._dragHandler = new DragHandler({
+    const slot = this.shadowRoot.querySelector('slot');
+    const slottedElements = new Set(slot.assignedElements({ flatten: true }));
+
+    // Drag handlers
+    const dragHandler = new DragHandler({
       elements: [this],
       exceptions: [
         (nodes) => {
@@ -35,44 +35,38 @@ export default class ViewportElement extends HTMLElement {
     });
     this._childrenDragHandler = new DragHandler();
 
-    const observer = new MutationObserver((mutationsList) => {
-      for (const mutation of mutationsList) {
-        for (const node of mutation.addedNodes) {
-          this._dragHandler.add(node);
-          this._childrenDragHandler.add(node);
+    // Add/remove elements functions
+    const addElement = (element) => {
+      slottedElements.add(element);
+      dragHandler.add(element);
+      this._childrenDragHandler.add(element);
+    };
+
+    const removeElement = (element) => {
+      slottedElements.delete(element);
+      dragHandler.delete(element);
+      this._childrenDragHandler.delete(element);
+    };
+
+    // Initialize
+    for (const element of slottedElements) {
+      addElement(element);
+    }
+
+    // Observe slot change
+    slot.addEventListener('slotchange', (event) => {
+      const newSlottedElements = slot.assignedElements({ flatten: true });
+      for (const element of newSlottedElements) {
+        if (!slottedElements.has(element)) {
+          addElement(element);
         }
-        for (const node of mutation.removedNodes) {
-          this._dragHandler.delete(node);
-          this._childrenDragHandler.delete(node);
+      }
+      for (const element of slottedElements) {
+        if (!newSlottedElements.includes(element)) {
+          removeElement(element);
         }
       }
     });
-    observer.observe(this, { childList: true });
-
-    for (const child of this.children) {
-      if (child instanceof HTMLSlotElement) {
-        for (const element of child.assignedElements()) {
-          this._dragHandler.add(element);
-          this._childrenDragHandler.add(element);
-          child.addEventListener('slotchange', (event) => {
-            for (const element of event.target.assignedElements()) {
-              this._childrenDragHandler.add(element);
-            }
-          });
-          observer.observe(element.parentElement, { childList: true });
-        }
-      } else {
-        this._dragHandler.add(child);
-        this._childrenDragHandler.add(child);
-      }
-    }
-
-    // this._zoomable = this.shadowRoot.querySelector('graph-zoomable');
-    // this._draggable = this.shadowRoot.querySelector('graph-draggable');
-
-    // this._zoomable.addEventListener('zoom', () => {
-    //   this._draggable.dragFactor = 1 / this._zoomable.zoom;
-    // });
   }
 
   get childrenDragAndDropExceptions() {
@@ -81,40 +75,5 @@ export default class ViewportElement extends HTMLElement {
 
   set childrenDragAndDropExceptions(value) {
     this._childrenDragHandler.exceptions = value;
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    switch (name) {
-      case 'draggable':
-        // this._draggable.disabled = !newValue;
-        break;
-      case 'zoomable':
-        // this._zoomable.disabled = !newValue;
-        break;
-    }
-  }
-
-  get zoomable() {
-    return this.hasAttribute('zoomable');
-  }
-
-  set zoomable(value) {
-    if (value) {
-      this.setAttribute('zoomable', '');
-    } else {
-      this.removeAttribute('zoomable');
-    }
-  }
-
-  get draggable() {
-    return this.hasAttribute('draggable');
-  }
-
-  set draggable(value) {
-    if (value) {
-      this.setAttribute('draggable', '');
-    } else {
-      this.removeAttribute('draggable');
-    }
   }
 }
