@@ -1,15 +1,12 @@
-export default class DragHandler extends Set {
+export default class DragHandler {
   constructor({
     elements = [],
     exceptions = [],
   } = {}) {
-    super();
-
     this.exceptions = exceptions;
 
-    this.selected = new Set();
+    this._draggedElements = null;
 
-    this._onPointerDownBinded = this._onPointerDown.bind(this);
     this._onPointerMoveBinded = this._onPointerMove.bind(this);
     this._onPointerUpBinded = this._onPointerUp.bind(this);
     this._updateBinded = this._update.bind(this);
@@ -24,46 +21,53 @@ export default class DragHandler extends Set {
     this._dragStartY = 0;
 
     this._preventDrag = false;
+    this._dragInitialized = false;
 
     this._animationFrameID = -1;
 
     this._elementTransformMatrices = new Map();
 
+    /**
+     * Fix for ResizeObserver first time calling issue
+     */
+    this._resizedOnceElements = new Set();
     this._resizeObserver = new ResizeObserver((entries) => {
-      this._preventDrag = true;
+      for (const entry of entries) {
+        if (this._resizedOnceElements.has(entry.target)) {
+          this._preventDrag = true;
+        } else {
+          this._resizedOnceElements.add(entry.target);
+        }
+      }
     });
-
-    for (const element of elements) {
-      this.add(element);
-    }
   }
 
-  _onPointerDown(event) {
-    const nodes = event.composedPath();
-    for (const exception of this.exceptions) {
-      if (exception(nodes)) {
-        return;
-      }
+  drag(elements) {
+    if (!(elements instanceof Array)) {
+      elements = [elements];
     }
-    this._preventDrag = false;
-    this._previousClientX = event.clientX;
-    this._previousClientY = event.clientY;
-    this._clientX = event.clientX;
-    this._clientY = event.clientY;
-    this._dragStartX = event.clientX;
-    this._dragStartY = event.clientY;
-    this.selected.add(event.currentTarget);
-    for (const element of this.selected) {
-      this._elementTransformMatrices.set(element, new DOMMatrix(element.style.transform));
-    }
+    this._draggedElements = elements;
+    this._dragInitialized = false;
     window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
     window.addEventListener('pointerup', this._onPointerUpBinded, { passive: false });
-    this._update();
   }
 
   _onPointerMove(event) {
-    for (const element of this.selected) {
-      element.style.pointerEvents = 'none';
+    if (!this._dragInitialized) {
+      this._previousClientX = event.clientX;
+      this._previousClientY = event.clientY;
+      this._clientX = event.clientX;
+      this._clientY = event.clientY;
+      this._dragStartX = event.clientX;
+      this._dragStartY = event.clientY;
+      this._resizedOnceElements.clear();
+      this._preventDrag = false;
+      for (const element of this._draggedElements) {
+        this._elementTransformMatrices.set(element, new DOMMatrix(element.style.transform));
+        this._resizeObserver.observe(element);
+      }
+      this._dragInitialized = true;
+      this._update();
     }
     this._clientX = event.clientX;
     this._clientY = event.clientY;
@@ -73,11 +77,13 @@ export default class DragHandler extends Set {
     cancelAnimationFrame(this._animationFrameID);
     window.removeEventListener('pointermove', this._onPointerMoveBinded);
     window.removeEventListener('pointerup', this._onPointerUpBinded);
-    for (const element of this.selected) {
+    this._resizeObserver.disconnect();
+    for (const element of this._draggedElements) {
       element.style.pointerEvents = '';
     }
+    this._dragInitialized = false;
     this._preventDrag = false;
-    this.selected.clear();
+    this._draggedElements = null;
   }
 
   _update() {
@@ -89,30 +95,13 @@ export default class DragHandler extends Set {
     if (Math.abs(this._clientX - this._dragStartX) < 2 && Math.abs(this._clientY - this._dragStartY) < 2) {
       return;
     }
-    for (const element of this.selected) {
+    for (const element of this._draggedElements) {
+      element.style.pointerEvents = 'none';
       const domMatrix = this._elementTransformMatrices.get(element);
       domMatrix.translateSelf(this._clientX - this._previousClientX, this._clientY - this._previousClientY);
       element.style.transform = domMatrix.toString();
     }
     this._previousClientX = this._clientX;
     this._previousClientY = this._clientY;
-  }
-
-  add(element) {
-    element.addEventListener('pointerdown', this._onPointerDownBinded, { passive: false });
-    this._resizeObserver.observe(element);
-    return super.add(element);
-  }
-
-  clear() {
-    for (const element of this) {
-      this.delete(element);
-    }
-  }
-
-  delete(element) {
-    element.removeEventListener('pointerdown', this._onPointerDownBinded);
-    this._resizeObserver.unobserve(element);
-    return super.delete(element);
   }
 }
