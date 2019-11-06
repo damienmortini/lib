@@ -4,11 +4,21 @@ export default class ViewportElement extends HTMLElement {
   constructor() {
     super();
 
+    this.dragAndDropException = function (event) {
+      return false;
+    };
+
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: block;
           touch-action: none;
+        }
+
+        div {
+          position: absolute;
+          left: 50%;
+          top: 50%;
         }
 
         ::slotted(*) {
@@ -18,34 +28,31 @@ export default class ViewportElement extends HTMLElement {
           user-select: none;
         }
       </style>
-      <slot></slot>
+      <div>
+        <slot></slot>
+      </div>
     `;
 
     const slot = this.shadowRoot.querySelector('slot');
     const slottedElements = new Set(slot.assignedElements({ flatten: true }));
 
-    // Drag handlers
-    const dragHandler = new DragHandler({
-      elements: [this],
-      exceptions: [
-        (nodes) => {
-          return nodes[0] !== this;
-        },
-      ],
-    });
-    this._childrenDragHandler = new DragHandler();
+    const dragHandler = new DragHandler();
+
+    const startDrag = (event) => {
+      if (this.dragAndDropException(event)) {
+        return;
+      }
+      dragHandler.drag(event.currentTarget);
+    };
 
     // Add/remove elements functions
     const addElement = (element) => {
       slottedElements.add(element);
-      dragHandler.add(element);
-      this._childrenDragHandler.add(element);
+      element.addEventListener('pointerdown', startDrag, { passive: false });
     };
 
     const removeElement = (element) => {
       slottedElements.delete(element);
-      dragHandler.delete(element);
-      this._childrenDragHandler.delete(element);
     };
 
     // Initialize
@@ -67,13 +74,14 @@ export default class ViewportElement extends HTMLElement {
         }
       }
     });
-  }
 
-  get childrenDragAndDropExceptions() {
-    return this._childrenDragHandler.exceptions;
-  }
-
-  set childrenDragAndDropExceptions(value) {
-    this._childrenDragHandler.exceptions = value;
+    const domRect = new DOMRect(Infinity, Infinity, 0, 0);
+    for (const element of slottedElements) {
+      const boundingClientRect = element.getBoundingClientRect();
+      domRect.x = Math.min(domRect.x, boundingClientRect.x);
+      domRect.y = Math.min(domRect.y, boundingClientRect.y);
+      domRect.width = Math.max(domRect.width, boundingClientRect.x + boundingClientRect.width - domRect.x);
+      domRect.height = Math.max(domRect.height, boundingClientRect.y + boundingClientRect.height - domRect.y);
+    }
   }
 }
