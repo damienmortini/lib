@@ -38,7 +38,7 @@ export default class ViewportElement extends HTMLElement {
 
     const dragHandler = new DragHandler();
 
-    window.addEventListener('pointerdown', (event) => {
+    this.addEventListener('pointerdown', (event) => {
       if (event.composedPath()[0] !== this) {
         return;
       }
@@ -82,6 +82,7 @@ export default class ViewportElement extends HTMLElement {
       }
     });
 
+    // Center nodes
     const domRect = new DOMRect(Infinity, Infinity, 0, 0);
     for (const element of slottedElements) {
       const boundingClientRect = element.getBoundingClientRect();
@@ -89,6 +90,14 @@ export default class ViewportElement extends HTMLElement {
       domRect.y = Math.min(domRect.y, boundingClientRect.y);
       domRect.width = Math.max(domRect.width, boundingClientRect.x + boundingClientRect.width - domRect.x);
       domRect.height = Math.max(domRect.height, boundingClientRect.y + boundingClientRect.height - domRect.y);
+    }
+
+    const offsetX = -domRect.x - domRect.width * .5 + this.clientWidth * .5;
+    const offsetY = -domRect.y - domRect.height * .5 + this.clientHeight * .5;
+    for (const element of slottedElements) {
+      const domMatrix = new DOMMatrix(element.style.transform);
+      domMatrix.translateSelf(offsetX, offsetY);
+      element.style.transform = domMatrix.toString();
     }
   }
 }
