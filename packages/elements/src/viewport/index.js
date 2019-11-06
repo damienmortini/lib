@@ -38,6 +38,13 @@ export default class ViewportElement extends HTMLElement {
 
     const dragHandler = new DragHandler();
 
+    window.addEventListener('pointerdown', (event) => {
+      if (event.composedPath()[0] !== this) {
+        return;
+      }
+      dragHandler.drag([...slottedElements]);
+    }, { passive: false });
+
     const startDrag = (event) => {
       if (this.dragAndDropException(event)) {
         return;
