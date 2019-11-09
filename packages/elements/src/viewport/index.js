@@ -52,6 +52,23 @@ export default class ViewportElement extends HTMLElement {
       dragHandler.drag(event.currentTarget);
     };
 
+    // Zoom
+    this.addEventListener('wheel', (event) => {
+      const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
+
+      const scaleDOMMatrix = new DOMMatrix();
+      // scaleDOMMatrix.m41 = event.clientX - this.clientWidth * .5;
+      // scaleDOMMatrix.m42 = event.clientY - this.clientHeight * .5;
+      scaleDOMMatrix.scale3dSelf(scale);
+
+      for (const element of slottedElements) {
+        const domMatrix = new DOMMatrix(element.style.transform);
+        domMatrix.preMultiplySelf(scaleDOMMatrix);
+        element.style.transformOrigin = 'top left';
+        element.style.transform = domMatrix.toString();
+      }
+    });
+
     // Add/remove elements functions
     const addElement = (element) => {
       slottedElements.add(element);
