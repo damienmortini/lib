@@ -98,7 +98,8 @@ export default class DragHandler {
     for (const element of this._draggedElements) {
       element.style.pointerEvents = 'none';
       const domMatrix = this._elementTransformMatrices.get(element);
-      domMatrix.translateSelf(this._clientX - this._previousClientX, this._clientY - this._previousClientY);
+      domMatrix.m41 += this._clientX - this._previousClientX;
+      domMatrix.m42 += this._clientY - this._previousClientY;
       element.style.transform = domMatrix.toString();
     }
     this._previousClientX = this._clientX;
