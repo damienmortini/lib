@@ -57,9 +57,9 @@ export default class ViewportElement extends HTMLElement {
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
 
       const scaleDOMMatrix = new DOMMatrix();
-      // scaleDOMMatrix.m41 = event.clientX - this.clientWidth * .5;
-      // scaleDOMMatrix.m42 = event.clientY - this.clientHeight * .5;
       scaleDOMMatrix.scale3dSelf(scale);
+      scaleDOMMatrix.m41 = -((event.clientX - this.clientWidth * .5)) * (scale - 1);
+      scaleDOMMatrix.m42 = -((event.clientY - this.clientHeight * .5)) * (scale - 1);
 
       for (const element of slottedElements) {
         const domMatrix = new DOMMatrix(element.style.transform);
