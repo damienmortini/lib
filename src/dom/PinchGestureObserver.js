@@ -29,8 +29,8 @@ export default class PinchGestureObserver {
   }
 
   _onPointerDown(event) {
-    if (event.currentTarget !== window && !this._elementsData.has(event.target)) {
-      this._elementsData.set(event.target, {
+    if (event.currentTarget !== window && !this._elementsData.has(event.currentTarget)) {
+      this._elementsData.set(event.currentTarget, {
         previousSize: 0,
         pointerMap: new Map(),
       });
