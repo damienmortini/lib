@@ -29,25 +29,33 @@ export default class PinchGestureObserver {
   }
 
   _onPointerDown(event) {
-    if (event.currentTarget !== window && !this._elementsData.has(event.currentTarget)) {
-      this._elementsData.set(event.currentTarget, {
-        previousSize: 0,
-        pointerMap: new Map(),
-      });
+    if (event.currentTarget !== window && !this._elementsData.has(event.target)) {
+      let assigned = false;
+      for (const data of this._elementsData.values()) {
+        if (data.pointerMap.has(event.pointerId)) {
+          assigned = true;
+        }
+      }
+      if (!assigned) {
+        this._elementsData.set(event.target, {
+          previousSize: 0,
+          pointerMap: new Map(),
+        });
+      }
+    }
+    if (this._elementsData.size === 1) {
       window.addEventListener('pointerdown', this._onPointerDownBinded, { passive: false });
+      window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
       window.addEventListener('pointerup', this._onPointerUpBinded, { passive: false });
+      cancelAnimationFrame(this._animationFrameID);
+      this._update();
     }
     for (const data of this._elementsData.values()) {
       if (data.pointerMap.size === 2) {
         return;
       }
-      data.pointerMap.set(event.pointerId, event);
       data.previousSize = 0;
-      if (data.pointerMap.size === 2) {
-        window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
-        cancelAnimationFrame(this._animationFrameID);
-        this._update();
-      }
+      data.pointerMap.set(event.pointerId, event);
     }
   }
 
@@ -106,6 +114,7 @@ export default class PinchGestureObserver {
           clientX,
           clientY,
           scale: size / data.previousSize,
+          pointerEvents: [...data.pointerMap.values()],
         });
       }
       data.previousSize = size;
