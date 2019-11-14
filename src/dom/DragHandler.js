@@ -51,6 +51,7 @@ export default class DragHandler {
     window.addEventListener('pointerdown', this._onPointerDownBinded, { passive: false });
     window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
     window.addEventListener('pointerup', this._onPointerUpBinded, { passive: false });
+    cancelAnimationFrame(this._animationFrameID);
     this._update();
   }
 
