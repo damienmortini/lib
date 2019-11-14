@@ -53,13 +53,16 @@ export default class PinchGestureObserver {
 
   _onPointerMove(event) {
     for (const data of this._elementsData.values()) {
-      data.pointerMap.set(event.pointerId, event);
+      if (data.pointerMap.has(event.pointerId)) {
+        data.pointerMap.set(event.pointerId, event);
+      }
     }
   }
 
   _onPointerUp(event) {
     for (const [element, data] of this._elementsData) {
       data.pointerMap.delete(event.pointerId);
+      data.previousSize = 0;
       if (!data.pointerMap.size) {
         this._elementsData.delete(element);
       }
