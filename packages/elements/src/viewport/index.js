@@ -1,4 +1,4 @@
-import DragHandler from '../../../lib/src/dom/DragHandler.js';
+import Vector2 from "../../../lib/src/math/Vector2.js";
 
 export default class ViewportElement extends HTMLElement {
   constructor() {
@@ -28,38 +28,47 @@ export default class ViewportElement extends HTMLElement {
           user-select: none;
         }
       </style>
-      <div>
+      <div id="container">
         <slot></slot>
       </div>
     `;
 
+    const container = this.shadowRoot.querySelector('#container');
     const slot = this.shadowRoot.querySelector('slot');
     const slottedElements = new Set(slot.assignedElements({ flatten: true }));
 
-    const dragHandler = new DragHandler();
+    // Drag
+    // const dragGestureObserver = new DragGestureObserver((data) => {
+    //   let elements;
+    //   if (data.target === this) {
+    //     elements = slottedElements;
+    //   } else if (slottedElements.has(data.target)) {
+    //     elements = [data.target];
+    //   }
+    //   if (!elements) {
+    //     return;
+    //   }
+    //   for (const element of elements) {
+    //     const domMatrix = new DOMMatrix(element.style.transform);
+    //     domMatrix.m41 += data.translateX;
+    //     domMatrix.m42 += data.translateY;
+    //     element.style.transform = domMatrix.toString();
+    //   }
+    // });
+    // dragGestureObserver.observe(this);
+
+    const pointers = new Map();
+    let previousSize = 0;
 
     this.addEventListener('pointerdown', (event) => {
-      if (event.composedPath()[0] !== this) {
-        return;
-      }
-      dragHandler.drag([...slottedElements]);
-    }, { passive: false });
-
-    const startDrag = (event) => {
-      if (this.dragAndDropException(event)) {
-        return;
-      }
-      dragHandler.drag(event.currentTarget);
-    };
-
-    // Zoom
-    this.addEventListener('wheel', (event) => {
-      const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
-
+      previousSize = 0;
+      pointers.set(event.pointerId, event);
+    });
+    const zoom = (scale, x, y) => {
       const scaleDOMMatrix = new DOMMatrix();
       scaleDOMMatrix.scale3dSelf(scale);
-      scaleDOMMatrix.m41 = -((event.clientX - this.clientWidth * .5)) * (scale - 1);
-      scaleDOMMatrix.m42 = -((event.clientY - this.clientHeight * .5)) * (scale - 1);
+      scaleDOMMatrix.m41 = -x * (scale - 1);
+      scaleDOMMatrix.m42 = -y * (scale - 1);
 
       for (const element of slottedElements) {
         const domMatrix = new DOMMatrix(element.style.transform);
@@ -67,16 +76,75 @@ export default class ViewportElement extends HTMLElement {
         element.style.transformOrigin = 'top left';
         element.style.transform = domMatrix.toString();
       }
+    }
+    const vector2 = new Vector2();
+    let firstClientX = 0;
+    let firstClientY = 0;
+    window.addEventListener('pointermove', (event) => {
+      pointers.set(event.pointerId, event);
+      const pointerIds = [...pointers.keys()];
+
+      if (pointers.size) {
+        let sumMovementX = 0;
+        let sumMovementY = 0;
+        for (const pointer of pointers.values()) {
+          sumMovementX += pointer.movementX;
+          sumMovementY += pointer.movementY;
+        }
+        sumMovementX /= pointers.size;
+        sumMovementY /= pointers.size;
+
+        for (const element of slottedElements) {
+          const domMatrix = new DOMMatrix(element.style.transform);
+          domMatrix.m41 += sumMovementX / window.devicePixelRatio;
+          domMatrix.m42 += sumMovementY / window.devicePixelRatio;
+          element.style.transform = domMatrix.toString();
+        }
+      }
+
+      if (event.pointerId === pointerIds[0]) {
+        firstClientX = event.clientX;
+        firstClientY = event.clientY;
+      }
+      if (event.pointerId === pointerIds[1]) {
+        if (firstClientX || firstClientY) {
+          const x = (firstClientX + event.clientX) * .5 - this.clientWidth * .5;
+          const y = (firstClientY + event.clientY) * .5 - this.clientHeight * .5;
+          vector2.x = firstClientX - event.clientX;
+          vector2.y = firstClientY - event.clientY;
+
+          const size = vector2.size;
+
+          if (previousSize) {
+            const scale = size / previousSize;
+            zoom(scale, x, y);
+          }
+
+          previousSize = size;
+        }
+      }
+    });
+    window.addEventListener('pointerup', (event) => {
+      pointers.delete(event.pointerId);
+    });
+
+    this.addEventListener('wheel', (event) => {
+      const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
+      const x = event.clientX - this.clientWidth * .5;
+      const y = event.clientY - this.clientHeight * .5;
+      zoom(scale, x, y);
     });
 
     // Add/remove elements functions
     const addElement = (element) => {
       slottedElements.add(element);
-      element.addEventListener('pointerdown', startDrag, { passive: false });
+      // dragGestureObserver.observe(element);
+      // element.addEventListener('pointerdown', startDrag, { passive: false });
     };
 
     const removeElement = (element) => {
       slottedElements.delete(element);
+      // dragGestureObserver.unobserve(element);
     };
 
     // Initialize
