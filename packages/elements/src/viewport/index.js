@@ -1,4 +1,4 @@
-import Vector2 from "../../../lib/src/math/Vector2.js";
+import Vector2 from '../../../lib/src/math/Vector2.js';
 
 export default class ViewportElement extends HTMLElement {
   constructor() {
@@ -57,6 +57,61 @@ export default class ViewportElement extends HTMLElement {
     // });
     // dragGestureObserver.observe(this);
 
+    // Nodes
+
+    const elementPointerMap = new Map();
+    let preventViewportActions = false;
+
+    const onElementPointerMove = (event) => {
+      if (!event.pressure) {
+        return;
+      }
+      preventViewportActions = true;
+      const domMatrix = new DOMMatrix(event.currentTarget.style.transform);
+      domMatrix.m41 += event.movementX / window.devicePixelRatio;
+      domMatrix.m42 += event.movementY / window.devicePixelRatio;
+      event.currentTarget.style.transform = domMatrix.toString();
+    };
+
+    const onElementPointerOut = (event) => {
+      preventViewportActions = false;
+    };
+
+    // Add/remove elements functions
+    const addElement = (element) => {
+      slottedElements.add(element);
+      element.addEventListener('pointermove', onElementPointerMove);
+      element.addEventListener('pointerout', onElementPointerOut);
+    };
+
+    const removeElement = (element) => {
+      slottedElements.delete(element);
+      element.removeEventListener('pointermove', onElementPointerMove);
+      element.removeEventListener('pointerout', onElementPointerOut);
+    };
+
+    // Initialize
+    for (const element of slottedElements) {
+      addElement(element);
+    }
+
+    // Observe slot change
+    slot.addEventListener('slotchange', (event) => {
+      const newSlottedElements = slot.assignedElements({ flatten: true });
+      for (const element of newSlottedElements) {
+        if (!slottedElements.has(element)) {
+          addElement(element);
+        }
+      }
+      for (const element of slottedElements) {
+        if (!newSlottedElements.includes(element)) {
+          removeElement(element);
+        }
+      }
+    });
+
+    // Viewport behaviours
+
     const pointers = new Map();
     let previousSize = 0;
 
@@ -64,6 +119,7 @@ export default class ViewportElement extends HTMLElement {
       previousSize = 0;
       pointers.set(event.pointerId, event);
     });
+
     const zoom = (scale, x, y) => {
       const scaleDOMMatrix = new DOMMatrix();
       scaleDOMMatrix.scale3dSelf(scale);
@@ -76,11 +132,16 @@ export default class ViewportElement extends HTMLElement {
         element.style.transformOrigin = 'top left';
         element.style.transform = domMatrix.toString();
       }
-    }
+    };
+
     const vector2 = new Vector2();
     let firstClientX = 0;
     let firstClientY = 0;
     window.addEventListener('pointermove', (event) => {
+      if (preventViewportActions) {
+        return;
+      }
+
       pointers.set(event.pointerId, event);
       const pointerIds = [...pointers.keys()];
 
@@ -88,6 +149,9 @@ export default class ViewportElement extends HTMLElement {
         let sumMovementX = 0;
         let sumMovementY = 0;
         for (const pointer of pointers.values()) {
+          if (!pointer.pressure) {
+            continue;
+          }
           sumMovementX += pointer.movementX;
           sumMovementY += pointer.movementY;
         }
@@ -124,7 +188,8 @@ export default class ViewportElement extends HTMLElement {
         }
       }
     });
-    window.addEventListener('pointerup', (event) => {
+
+    window.addEventListener('pointerout', (event) => {
       pointers.delete(event.pointerId);
     });
 
@@ -133,38 +198,6 @@ export default class ViewportElement extends HTMLElement {
       const x = event.clientX - this.clientWidth * .5;
       const y = event.clientY - this.clientHeight * .5;
       zoom(scale, x, y);
-    });
-
-    // Add/remove elements functions
-    const addElement = (element) => {
-      slottedElements.add(element);
-      // dragGestureObserver.observe(element);
-      // element.addEventListener('pointerdown', startDrag, { passive: false });
-    };
-
-    const removeElement = (element) => {
-      slottedElements.delete(element);
-      // dragGestureObserver.unobserve(element);
-    };
-
-    // Initialize
-    for (const element of slottedElements) {
-      addElement(element);
-    }
-
-    // Observe slot change
-    slot.addEventListener('slotchange', (event) => {
-      const newSlottedElements = slot.assignedElements({ flatten: true });
-      for (const element of newSlottedElements) {
-        if (!slottedElements.has(element)) {
-          addElement(element);
-        }
-      }
-      for (const element of slottedElements) {
-        if (!newSlottedElements.includes(element)) {
-          removeElement(element);
-        }
-      }
     });
 
     // Center nodes
