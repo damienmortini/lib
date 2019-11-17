@@ -4,7 +4,7 @@ export default class ViewportElement extends HTMLElement {
   constructor() {
     super();
 
-    this.dragAndDropException = function (event) {
+    this.preventManipulation = function (event) {
       return false;
     };
 
@@ -76,6 +76,10 @@ export default class ViewportElement extends HTMLElement {
       if (pointers.has(event.pointerId)) {
         return;
       }
+      if (this.preventManipulation(event)) {
+        return;
+      }
+
       if (!pointers.size) {
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
@@ -101,26 +105,25 @@ export default class ViewportElement extends HTMLElement {
         }
       }
 
-      if (pointers.size) {
+      if (isViewport && pointers.size) {
         let sumMovementX = 0;
         let sumMovementY = 0;
         for (const pointer of pointers.values()) {
           if (!pointer.pressure) {
             continue;
           }
-          sumMovementX += pointer.movementX / window.devicePixelRatio;
-          sumMovementY += pointer.movementY / window.devicePixelRatio;
+          sumMovementX += pointer.movementX;
+          sumMovementY += pointer.movementY;
         }
         sumMovementX /= pointers.size;
         sumMovementY /= pointers.size;
 
-        if (isViewport) {
-          for (const element of slottedElements) {
-            move(element, sumMovementX, sumMovementY);
-          }
-        } else {
-          move(pointerTargets.get(event.pointerId), sumMovementX, sumMovementY);
+        for (const element of slottedElements) {
+          move(element, sumMovementX / window.devicePixelRatio, sumMovementY / window.devicePixelRatio);
         }
+      } else if (!isViewport) {
+        pointerTargets.get(event.pointerId).style.pointerEvents = 'none';
+        move(pointerTargets.get(event.pointerId), event.movementX / window.devicePixelRatio, event.movementY / window.devicePixelRatio);
       }
 
       if (event.pointerId === pointerIds[0]) {
@@ -155,11 +158,11 @@ export default class ViewportElement extends HTMLElement {
     };
 
     const onPointerUp = (event) => {
-      if (event.pointerType === 'mouse' && event.type === 'pointerout') {
+      if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointers.has(event.pointerId)) {
         return;
       }
-
       previousSize = 0;
+      pointerTargets.get(event.pointerId).style.pointerEvents = '';
       pointers.delete(event.pointerId);
       pointerTargets.delete(event.pointerId);
       if (!pointers.size) {
