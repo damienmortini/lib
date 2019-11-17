@@ -28,66 +28,167 @@ export default class ViewportElement extends HTMLElement {
           user-select: none;
         }
       </style>
-      <div id="container">
+      <div>
         <slot></slot>
       </div>
     `;
 
-    const container = this.shadowRoot.querySelector('#container');
     const slot = this.shadowRoot.querySelector('slot');
     const slottedElements = new Set(slot.assignedElements({ flatten: true }));
 
-    // Drag
-    // const dragGestureObserver = new DragGestureObserver((data) => {
-    //   let elements;
-    //   if (data.target === this) {
-    //     elements = slottedElements;
-    //   } else if (slottedElements.has(data.target)) {
-    //     elements = [data.target];
-    //   }
-    //   if (!elements) {
-    //     return;
-    //   }
-    //   for (const element of elements) {
-    //     const domMatrix = new DOMMatrix(element.style.transform);
-    //     domMatrix.m41 += data.translateX;
-    //     domMatrix.m42 += data.translateY;
-    //     element.style.transform = domMatrix.toString();
-    //   }
-    // });
-    // dragGestureObserver.observe(this);
+    // Behaviour
 
-    // Nodes
+    const pointers = new Map();
+    const pointerTargets = new Map();
 
-    const elementPointerMap = new Map();
-    let preventViewportActions = false;
+    const VECTOR2 = new Vector2();
 
-    const onElementPointerMove = (event) => {
+    const DOM_MATRIX_A = new DOMMatrix();
+    const DOM_MATRIX_B = new DOMMatrix();
+
+    let previousSize = 0;
+
+    let firstClientX = 0;
+    let firstClientY = 0;
+
+    const zoom = (scale, x, y) => {
+      DOM_MATRIX_B.setMatrixValue('');
+      DOM_MATRIX_B.scaleSelf(scale);
+      DOM_MATRIX_B.m41 = -x * (scale - 1);
+      DOM_MATRIX_B.m42 = -y * (scale - 1);
+
+      for (const element of slottedElements) {
+        DOM_MATRIX_A.setMatrixValue(element.style.transform);
+        DOM_MATRIX_A.preMultiplySelf(DOM_MATRIX_B);
+        element.style.transformOrigin = 'top left';
+        element.style.transform = DOM_MATRIX_A.toString();
+      }
+    };
+
+    const move = (element, movementX, movementY) => {
+      DOM_MATRIX_A.setMatrixValue(element.style.transform);
+      DOM_MATRIX_A.m41 += movementX;
+      DOM_MATRIX_A.m42 += movementY;
+      element.style.transform = DOM_MATRIX_A.toString();
+    };
+
+    const onPointerDown = (event) => {
+      if (pointers.has(event.pointerId)) {
+        return;
+      }
+      if (!pointers.size) {
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointerout', onPointerUp);
+      }
+      previousSize = 0;
+      pointers.set(event.pointerId, event);
+      pointerTargets.set(event.pointerId, event.currentTarget);
+    };
+
+    const onPointerMove = (event) => {
       if (!event.pressure) {
         return;
       }
-      preventViewportActions = true;
-      const domMatrix = new DOMMatrix(event.currentTarget.style.transform);
-      domMatrix.m41 += event.movementX / window.devicePixelRatio;
-      domMatrix.m42 += event.movementY / window.devicePixelRatio;
-      event.currentTarget.style.transform = domMatrix.toString();
+
+      pointers.set(event.pointerId, event);
+      const pointerIds = [...pointers.keys()];
+
+      let isViewport = false;
+      for (const target of pointerTargets.values()) {
+        if (target === this) {
+          isViewport = true;
+        }
+      }
+
+      if (pointers.size) {
+        let sumMovementX = 0;
+        let sumMovementY = 0;
+        for (const pointer of pointers.values()) {
+          if (!pointer.pressure) {
+            continue;
+          }
+          sumMovementX += pointer.movementX / window.devicePixelRatio;
+          sumMovementY += pointer.movementY / window.devicePixelRatio;
+        }
+        sumMovementX /= pointers.size;
+        sumMovementY /= pointers.size;
+
+        if (isViewport) {
+          for (const element of slottedElements) {
+            move(element, sumMovementX, sumMovementY);
+          }
+        } else {
+          move(pointerTargets.get(event.pointerId), sumMovementX, sumMovementY);
+        }
+      }
+
+      if (event.pointerId === pointerIds[0]) {
+        firstClientX = event.clientX;
+        firstClientY = event.clientY;
+      }
+      if (event.pointerId === pointerIds[1]) {
+        if (firstClientX || firstClientY) {
+          const x = (firstClientX + event.clientX) * .5 - this.clientWidth * .5;
+          const y = (firstClientY + event.clientY) * .5 - this.clientHeight * .5;
+          VECTOR2.x = firstClientX - event.clientX;
+          VECTOR2.y = firstClientY - event.clientY;
+
+          const size = VECTOR2.size;
+
+          if (previousSize) {
+            const scale = size / previousSize;
+            if (isViewport) {
+              zoom(scale, x, y);
+            } else {
+              // const element = pointerTargets.get(event.pointerId);
+              // DOM_MATRIX_A.setMatrixValue(element.style.transform);
+              // DOM_MATRIX_A.scaleSelf(scale);
+              // element.style.transformOrigin = 'top left';
+              // element.style.transform = DOM_MATRIX_A.toString();
+            }
+          }
+
+          previousSize = size;
+        }
+      }
     };
 
-    const onElementPointerOut = (event) => {
-      preventViewportActions = false;
+    const onPointerUp = (event) => {
+      if (event.pointerType === 'mouse' && event.type === 'pointerout') {
+        return;
+      }
+
+      previousSize = 0;
+      pointers.delete(event.pointerId);
+      pointerTargets.delete(event.pointerId);
+      if (!pointers.size) {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointerout', onPointerUp);
+      }
     };
+
+    this.addEventListener('pointerdown', onPointerDown);
+
+    this.addEventListener('wheel', (event) => {
+      const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
+      const x = event.clientX - this.clientWidth * .5;
+      const y = event.clientY - this.clientHeight * .5;
+      zoom(scale, x, y);
+    });
+
+    // Nodes
 
     // Add/remove elements functions
     const addElement = (element) => {
       slottedElements.add(element);
-      element.addEventListener('pointermove', onElementPointerMove);
-      element.addEventListener('pointerout', onElementPointerOut);
+      element.addEventListener('pointerdown', onPointerDown);
     };
 
     const removeElement = (element) => {
+      element.removeEventListener('pointerdown', onPointerDown);
       slottedElements.delete(element);
-      element.removeEventListener('pointermove', onElementPointerMove);
-      element.removeEventListener('pointerout', onElementPointerOut);
     };
 
     // Initialize
@@ -108,96 +209,6 @@ export default class ViewportElement extends HTMLElement {
           removeElement(element);
         }
       }
-    });
-
-    // Viewport behaviours
-
-    const pointers = new Map();
-    let previousSize = 0;
-
-    this.addEventListener('pointerdown', (event) => {
-      previousSize = 0;
-      pointers.set(event.pointerId, event);
-    });
-
-    const zoom = (scale, x, y) => {
-      const scaleDOMMatrix = new DOMMatrix();
-      scaleDOMMatrix.scale3dSelf(scale);
-      scaleDOMMatrix.m41 = -x * (scale - 1);
-      scaleDOMMatrix.m42 = -y * (scale - 1);
-
-      for (const element of slottedElements) {
-        const domMatrix = new DOMMatrix(element.style.transform);
-        domMatrix.preMultiplySelf(scaleDOMMatrix);
-        element.style.transformOrigin = 'top left';
-        element.style.transform = domMatrix.toString();
-      }
-    };
-
-    const vector2 = new Vector2();
-    let firstClientX = 0;
-    let firstClientY = 0;
-    window.addEventListener('pointermove', (event) => {
-      if (preventViewportActions) {
-        return;
-      }
-
-      pointers.set(event.pointerId, event);
-      const pointerIds = [...pointers.keys()];
-
-      if (pointers.size) {
-        let sumMovementX = 0;
-        let sumMovementY = 0;
-        for (const pointer of pointers.values()) {
-          if (!pointer.pressure) {
-            continue;
-          }
-          sumMovementX += pointer.movementX;
-          sumMovementY += pointer.movementY;
-        }
-        sumMovementX /= pointers.size;
-        sumMovementY /= pointers.size;
-
-        for (const element of slottedElements) {
-          const domMatrix = new DOMMatrix(element.style.transform);
-          domMatrix.m41 += sumMovementX / window.devicePixelRatio;
-          domMatrix.m42 += sumMovementY / window.devicePixelRatio;
-          element.style.transform = domMatrix.toString();
-        }
-      }
-
-      if (event.pointerId === pointerIds[0]) {
-        firstClientX = event.clientX;
-        firstClientY = event.clientY;
-      }
-      if (event.pointerId === pointerIds[1]) {
-        if (firstClientX || firstClientY) {
-          const x = (firstClientX + event.clientX) * .5 - this.clientWidth * .5;
-          const y = (firstClientY + event.clientY) * .5 - this.clientHeight * .5;
-          vector2.x = firstClientX - event.clientX;
-          vector2.y = firstClientY - event.clientY;
-
-          const size = vector2.size;
-
-          if (previousSize) {
-            const scale = size / previousSize;
-            zoom(scale, x, y);
-          }
-
-          previousSize = size;
-        }
-      }
-    });
-
-    window.addEventListener('pointerout', (event) => {
-      pointers.delete(event.pointerId);
-    });
-
-    this.addEventListener('wheel', (event) => {
-      const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
-      const x = event.clientX - this.clientWidth * .5;
-      const y = event.clientY - this.clientHeight * .5;
-      zoom(scale, x, y);
     });
 
     // Center nodes
