@@ -22,6 +22,7 @@ export default class ViewportElement extends HTMLElement {
         }
 
         ::slotted(*) {
+          box-sizing: border-box;
           position: absolute;
           will-change: transform;
           touch-action: none;
@@ -46,7 +47,7 @@ export default class ViewportElement extends HTMLElement {
     const DOM_MATRIX_A = new DOMMatrix();
     const DOM_MATRIX_B = new DOMMatrix();
 
-    let previousSize = 0;
+    let previousPinchSize = 0;
 
     let firstClientX = 0;
     let firstClientY = 0;
@@ -72,10 +73,14 @@ export default class ViewportElement extends HTMLElement {
       element.style.transform = DOM_MATRIX_A.toString();
     };
 
-    const onPointerDown = (event) => {
+    const reset = () => {
+      previousPinchSize = 0;
       firstClientX = 0;
       firstClientY = 0;
-      previousSize = 0;
+    };
+
+    const onPointerDown = (event) => {
+      reset();
 
       if (pointers.has(event.pointerId)) {
         return;
@@ -85,9 +90,9 @@ export default class ViewportElement extends HTMLElement {
       }
 
       if (!pointers.size) {
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('pointerout', onPointerUp);
+        window.addEventListener('pointermove', onPointerMove, { passive: true });
+        window.addEventListener('pointerup', onPointerUp, { passive: true });
+        window.addEventListener('pointerout', onPointerUp, { passive: true });
       }
       pointers.set(event.pointerId, event);
       pointerTargets.set(event.pointerId, event.currentTarget);
@@ -126,14 +131,34 @@ export default class ViewportElement extends HTMLElement {
         }
       } else if (!isViewport) {
         const element = pointerTargets.get(event.pointerId);
-        let pointerNumForElement = 0;
-        for (const target of pointerTargets.values()) {
+        const elementPointers = [];
+        for (const [key, target] of pointerTargets) {
           if (target === element) {
-            pointerNumForElement++;
+            elementPointers.push(pointers.get(key));
           }
         }
-        if (pointerNumForElement === 1) {
+
+        if (elementPointers.length === 1) {
           move(element, event.movementX / window.devicePixelRatio, event.movementY / window.devicePixelRatio);
+        } else if (elementPointers.length === 2) {
+          const element = pointerTargets.get(event.pointerId);
+          const boundingClientRect = element.getBoundingClientRect();
+
+          DOM_MATRIX_A.setMatrixValue(element.style.transform);
+
+          const otherPointer = elementPointers[0] === event ? elementPointers[1] : elementPointers[0];
+
+          const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
+          const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
+          const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+          const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+
+          element.style.width = `${boundingClientRect.width * (1 / DOM_MATRIX_A.a) - pinchOffsetLeft + pinchOffsetRight}px`;
+          element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
+          DOM_MATRIX_A.m41 += pinchOffsetLeft * DOM_MATRIX_A.a;
+          DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d;
+          element.style.transformOrigin = 'top left';
+          element.style.transform = DOM_MATRIX_A.toString();
         }
       }
 
@@ -148,31 +173,19 @@ export default class ViewportElement extends HTMLElement {
           VECTOR2.x = firstClientX - event.clientX;
           VECTOR2.y = firstClientY - event.clientY;
 
-          const size = VECTOR2.size;
+          const pinchSize = VECTOR2.size;
 
-          if (previousSize) {
-            const scale = size / previousSize;
-            if (isViewport) {
-              zoom(scale, x, y);
-            } else {
-              const element = pointerTargets.get(event.pointerId);
-              element.style.width = `${element.offsetWidth * scale}px`;
-              // DOM_MATRIX_A.setMatrixValue(element.style.transform);
-              // DOM_MATRIX_A.m41 -= (element.offsetWidth * (scale - 1)) * .5;
-              // element.style.transformOrigin = 'top left';
-              // element.style.transform = DOM_MATRIX_A.toString();
-            }
+          if (isViewport && previousPinchSize) {
+            zoom(pinchSize / previousPinchSize, x, y);
           }
 
-          previousSize = size;
+          previousPinchSize = pinchSize;
         }
       }
     };
 
     const onPointerUp = (event) => {
-      previousSize = 0;
-      firstClientX = 0;
-      firstClientY = 0;
+      reset();
       if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointers.has(event.pointerId)) {
         return;
       }
@@ -185,21 +198,21 @@ export default class ViewportElement extends HTMLElement {
       }
     };
 
-    this.addEventListener('pointerdown', onPointerDown);
+    this.addEventListener('pointerdown', onPointerDown, { passive: true });
 
     this.addEventListener('wheel', (event) => {
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
       const x = event.clientX - this.clientWidth * .5;
       const y = event.clientY - this.clientHeight * .5;
       zoom(scale, x, y);
-    });
+    }, { passive: true });
 
     // Nodes
 
     // Add/remove elements functions
     const addElement = (element) => {
       slottedElements.add(element);
-      element.addEventListener('pointerdown', onPointerDown);
+      element.addEventListener('pointerdown', onPointerDown, { passive: true });
     };
 
     const removeElement = (element) => {
