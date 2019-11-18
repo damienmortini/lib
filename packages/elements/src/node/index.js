@@ -93,7 +93,10 @@ export default class NodeElement extends HTMLElement {
       this.dispatchEvent(new Event(event.type, event));
     });
 
-    this.addEventListener('dblclick', (event) => {
+    this.shadowRoot.querySelector('details').addEventListener('dblclick', (event) => {
+      if (event.target !== event.currentTarget) {
+        return;
+      }
       this.close = !this.close;
     });
   }

@@ -1,18 +1,21 @@
 export default class InputSelectElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['options', 'value'];
+  }
+
   constructor() {
     super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          display: inline-flex;
+          display: inline-block;
         }
         select {
-          flex: 1;
           width: 100%;
         }
       </style>
-      <select>
+      <select></select>
     `;
 
     this._optionsMap = new Map();
@@ -31,6 +34,22 @@ export default class InputSelectElement extends HTMLElement {
           this._select[key] = value;
         },
       });
+    }
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) {
+      return;
+    }
+
+    switch (name) {
+      case 'options':
+        const values = new Function(`return ${newValue}`).apply(this);
+        this[name] = values;
+        break;
+      case 'value':
+        this.value = new Function(`return ${newValue}`).apply(this);
+        break;
     }
   }
 
