@@ -22,7 +22,6 @@ export default class NodeElement extends HTMLElement {
         :host {
           display: block;
           overflow: auto;
-          resize: horizontal;
           border: 1px dotted;
           background: rgba(255, 255, 255, .9);
         }
@@ -37,7 +36,7 @@ export default class NodeElement extends HTMLElement {
           padding: 5px;
         }
         details summary {
-          position: relative;
+          pointer-events: none;
           padding: 5px;
         }
         details summary:focus {
@@ -92,6 +91,10 @@ export default class NodeElement extends HTMLElement {
     this.shadowRoot.querySelector('details').addEventListener('toggle', (event) => {
       this.close = !event.target.open;
       this.dispatchEvent(new Event(event.type, event));
+    });
+
+    this.addEventListener('dblclick', (event) => {
+      this.close = !this.close;
     });
   }
 
