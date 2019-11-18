@@ -82,6 +82,9 @@ export default class ViewportElement extends HTMLElement {
     const onPointerDown = (event) => {
       reset();
 
+      if (event.target !== event.currentTarget && event.target.scrollHeight > event.target.offsetHeight) {
+        return;
+      }
       if (pointers.has(event.pointerId)) {
         return;
       }
@@ -99,7 +102,7 @@ export default class ViewportElement extends HTMLElement {
     };
 
     const onPointerMove = (event) => {
-      if (!event.pressure || !pointers.has(event.pointerId)) {
+      if (!pointers.has(event.pointerId)) {
         return;
       }
 
@@ -117,9 +120,6 @@ export default class ViewportElement extends HTMLElement {
         let sumMovementX = 0;
         let sumMovementY = 0;
         for (const pointer of pointers.values()) {
-          if (!pointer.pressure) {
-            continue;
-          }
           sumMovementX += pointer.movementX;
           sumMovementY += pointer.movementY;
         }
@@ -138,25 +138,50 @@ export default class ViewportElement extends HTMLElement {
           }
         }
 
-        if (elementPointers.length === 1) {
-          move(element, event.movementX / window.devicePixelRatio, event.movementY / window.devicePixelRatio);
-        } else if (elementPointers.length === 2) {
+        let sumMovementX = 0;
+        let sumMovementY = 0;
+        for (const pointer of elementPointers) {
+          sumMovementX += pointer.movementX;
+          sumMovementY += pointer.movementY;
+        }
+        sumMovementX /= elementPointers.length * elementPointers.length;
+        sumMovementY /= elementPointers.length * elementPointers.length;
+        sumMovementX /= window.devicePixelRatio;
+        sumMovementY /= window.devicePixelRatio;
+
+        move(element, sumMovementX, sumMovementY);
+
+        if (elementPointers.length === 2) {
           const element = pointerTargets.get(event.pointerId);
+          const styles = getComputedStyle(element);
           const boundingClientRect = element.getBoundingClientRect();
 
           DOM_MATRIX_A.setMatrixValue(element.style.transform);
 
           const otherPointer = elementPointers[0] === event ? elementPointers[1] : elementPointers[0];
 
-          const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
-          const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
-          const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
-          const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+          if (styles.resize === 'both' || styles.resize === 'horizontal') {
+            if (element.scrollWidth <= element.offsetWidth) {
+              const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
+              const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
+              element.style.width = `${boundingClientRect.width * (1 / DOM_MATRIX_A.a) - pinchOffsetLeft + pinchOffsetRight}px`;
+              DOM_MATRIX_A.m41 += pinchOffsetLeft * DOM_MATRIX_A.a - sumMovementX;
+            } else {
+              element.style.width = `${element.scrollWidth}px`;
+            }
+          }
 
-          element.style.width = `${boundingClientRect.width * (1 / DOM_MATRIX_A.a) - pinchOffsetLeft + pinchOffsetRight}px`;
-          element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
-          DOM_MATRIX_A.m41 += pinchOffsetLeft * DOM_MATRIX_A.a;
-          DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d;
+          if (styles.resize === 'both' || styles.resize === 'vertical') {
+            if (element.scrollHeight <= element.offsetHeight) {
+              const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+              const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+              element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
+              DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d - sumMovementY;
+            } else {
+              element.style.height = `${element.scrollHeight}px`;
+            }
+          }
+
           element.style.transformOrigin = 'top left';
           element.style.transform = DOM_MATRIX_A.toString();
         }
@@ -201,6 +226,9 @@ export default class ViewportElement extends HTMLElement {
     this.addEventListener('pointerdown', onPointerDown, { passive: true });
 
     this.addEventListener('wheel', (event) => {
+      if (event.target.scrollHeight > event.target.clientHeight) {
+        return;
+      }
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
       const x = event.clientX - this.clientWidth * .5;
       const y = event.clientY - this.clientHeight * .5;

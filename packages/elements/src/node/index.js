@@ -21,9 +21,9 @@ export default class NodeElement extends HTMLElement {
       <style>
         :host {
           display: block;
-          overflow: auto;
           border: 1px dotted;
           background: rgba(255, 255, 255, .9);
+          resize: horizontal;
         }
         :host(:hover) {
           border: 1px dashed;
