@@ -73,6 +73,10 @@ export default class ViewportElement extends HTMLElement {
     };
 
     const onPointerDown = (event) => {
+      firstClientX = 0;
+      firstClientY = 0;
+      previousSize = 0;
+
       if (pointers.has(event.pointerId)) {
         return;
       }
@@ -85,13 +89,12 @@ export default class ViewportElement extends HTMLElement {
         window.addEventListener('pointerup', onPointerUp);
         window.addEventListener('pointerout', onPointerUp);
       }
-      previousSize = 0;
       pointers.set(event.pointerId, event);
       pointerTargets.set(event.pointerId, event.currentTarget);
     };
 
     const onPointerMove = (event) => {
-      if (!event.pressure) {
+      if (!event.pressure || !pointers.has(event.pointerId)) {
         return;
       }
 
@@ -122,8 +125,16 @@ export default class ViewportElement extends HTMLElement {
           move(element, sumMovementX / window.devicePixelRatio, sumMovementY / window.devicePixelRatio);
         }
       } else if (!isViewport) {
-        pointerTargets.get(event.pointerId).style.pointerEvents = 'none';
-        move(pointerTargets.get(event.pointerId), event.movementX / window.devicePixelRatio, event.movementY / window.devicePixelRatio);
+        const element = pointerTargets.get(event.pointerId);
+        let pointerNumForElement = 0;
+        for (const target of pointerTargets.values()) {
+          if (target === element) {
+            pointerNumForElement++;
+          }
+        }
+        if (pointerNumForElement === 1) {
+          move(element, event.movementX / window.devicePixelRatio, event.movementY / window.devicePixelRatio);
+        }
       }
 
       if (event.pointerId === pointerIds[0]) {
@@ -144,9 +155,10 @@ export default class ViewportElement extends HTMLElement {
             if (isViewport) {
               zoom(scale, x, y);
             } else {
-              // const element = pointerTargets.get(event.pointerId);
+              const element = pointerTargets.get(event.pointerId);
+              element.style.width = `${element.offsetWidth * scale}px`;
               // DOM_MATRIX_A.setMatrixValue(element.style.transform);
-              // DOM_MATRIX_A.scaleSelf(scale);
+              // DOM_MATRIX_A.m41 -= (element.offsetWidth * (scale - 1)) * .5;
               // element.style.transformOrigin = 'top left';
               // element.style.transform = DOM_MATRIX_A.toString();
             }
@@ -158,11 +170,12 @@ export default class ViewportElement extends HTMLElement {
     };
 
     const onPointerUp = (event) => {
+      previousSize = 0;
+      firstClientX = 0;
+      firstClientY = 0;
       if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointers.has(event.pointerId)) {
         return;
       }
-      previousSize = 0;
-      pointerTargets.get(event.pointerId).style.pointerEvents = '';
       pointers.delete(event.pointerId);
       pointerTargets.delete(event.pointerId);
       if (!pointers.size) {

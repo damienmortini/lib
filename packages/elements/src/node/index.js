@@ -33,7 +33,7 @@ export default class NodeElement extends HTMLElement {
           z-index: 1;
         }
         .content, slot {
-          padding: 5px;
+          padding: 10px;
         }
         details summary {
           pointer-events: none;
