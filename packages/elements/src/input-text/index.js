@@ -13,7 +13,7 @@ export default class InputTextElement extends HTMLElement {
           width: 100%;
         }
       </style>
-      <textarea rows="1">
+      <textarea rows="1"></textarea>
     `;
 
     const input = this.shadowRoot.querySelector('textarea');
