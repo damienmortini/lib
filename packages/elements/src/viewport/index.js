@@ -17,6 +17,7 @@ export default class ViewportElement extends HTMLElement {
 
         div {
           position: absolute;
+          touch-action: none;
           left: 50%;
           top: 50%;
         }
@@ -93,9 +94,9 @@ export default class ViewportElement extends HTMLElement {
       }
 
       if (!pointers.size) {
-        window.addEventListener('pointermove', onPointerMove, { passive: true });
-        window.addEventListener('pointerup', onPointerUp, { passive: true });
-        window.addEventListener('pointerout', onPointerUp, { passive: true });
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointerout', onPointerUp);
       }
       pointers.set(event.pointerId, event);
       pointerTargets.set(event.pointerId, event.currentTarget);
@@ -116,7 +117,7 @@ export default class ViewportElement extends HTMLElement {
         }
       }
 
-      if (isViewport && pointers.size) {
+      if (isViewport) {
         let sumMovementX = 0;
         let sumMovementY = 0;
         for (const pointer of pointers.values()) {
@@ -149,41 +150,50 @@ export default class ViewportElement extends HTMLElement {
         sumMovementX /= window.devicePixelRatio;
         sumMovementY /= window.devicePixelRatio;
 
-        move(element, sumMovementX, sumMovementY);
-
-        if (elementPointers.length === 2) {
-          const element = pointerTargets.get(event.pointerId);
+        if (elementPointers.length === 1) {
+          move(element, sumMovementX, sumMovementY);
+        } else if (elementPointers.length === 2) {
           const styles = getComputedStyle(element);
-          const boundingClientRect = element.getBoundingClientRect();
 
-          DOM_MATRIX_A.setMatrixValue(element.style.transform);
+          if (styles.resize === 'none') {
+            isViewport = true;
+          } else {
+            const boundingClientRect = element.getBoundingClientRect();
 
-          const otherPointer = elementPointers[0] === event ? elementPointers[1] : elementPointers[0];
+            DOM_MATRIX_A.setMatrixValue(element.style.transform);
 
-          if (styles.resize === 'both' || styles.resize === 'horizontal') {
-            if (element.scrollWidth <= element.offsetWidth) {
-              const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
-              const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
-              element.style.width = `${boundingClientRect.width * (1 / DOM_MATRIX_A.a) - pinchOffsetLeft + pinchOffsetRight}px`;
-              DOM_MATRIX_A.m41 += pinchOffsetLeft * DOM_MATRIX_A.a - sumMovementX;
-            } else {
-              element.style.width = `${element.scrollWidth}px`;
+            const otherPointer = elementPointers[0] === event ? elementPointers[1] : elementPointers[0];
+
+            const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
+            const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
+            const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+            const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+
+            if (styles.resize === 'both' || styles.resize === 'horizontal') {
+              if (element.scrollWidth <= element.offsetWidth) {
+                element.style.width = `${boundingClientRect.width * (1 / DOM_MATRIX_A.a) - pinchOffsetLeft + pinchOffsetRight}px`;
+                DOM_MATRIX_A.m41 += pinchOffsetLeft * DOM_MATRIX_A.a;
+              } else {
+                element.style.width = `${element.scrollWidth}px`;
+              }
+            } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) > Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
+              isViewport = true;
             }
-          }
 
-          if (styles.resize === 'both' || styles.resize === 'vertical') {
-            if (element.scrollHeight <= element.offsetHeight) {
-              const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
-              const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
-              element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
-              DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d - sumMovementY;
-            } else {
-              element.style.height = `${element.scrollHeight}px`;
+            if (styles.resize === 'both' || styles.resize === 'vertical') {
+              if (element.scrollHeight <= element.offsetHeight) {
+                element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
+                DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d;
+              } else {
+                element.style.height = `${element.scrollHeight}px`;
+              }
+            } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) < Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
+              isViewport = true;
             }
-          }
 
-          element.style.transformOrigin = 'top left';
-          element.style.transform = DOM_MATRIX_A.toString();
+            element.style.transformOrigin = 'top left';
+            element.style.transform = DOM_MATRIX_A.toString();
+          }
         }
       }
 
@@ -211,6 +221,7 @@ export default class ViewportElement extends HTMLElement {
 
     const onPointerUp = (event) => {
       reset();
+      event.preventDefault();
       if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointers.has(event.pointerId)) {
         return;
       }
@@ -223,7 +234,7 @@ export default class ViewportElement extends HTMLElement {
       }
     };
 
-    this.addEventListener('pointerdown', onPointerDown, { passive: true });
+    this.addEventListener('pointerdown', onPointerDown);
 
     this.addEventListener('wheel', (event) => {
       if (event.target.scrollHeight > event.target.clientHeight) {
@@ -233,14 +244,14 @@ export default class ViewportElement extends HTMLElement {
       const x = event.clientX - this.clientWidth * .5;
       const y = event.clientY - this.clientHeight * .5;
       zoom(scale, x, y);
-    }, { passive: true });
+    });
 
     // Nodes
 
     // Add/remove elements functions
     const addElement = (element) => {
       slottedElements.add(element);
-      element.addEventListener('pointerdown', onPointerDown, { passive: true });
+      element.addEventListener('pointerdown', onPointerDown);
     };
 
     const removeElement = (element) => {
