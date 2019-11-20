@@ -44,6 +44,7 @@ export default class ViewportElement extends HTMLElement {
           top: 0 !important;
           left: 0 !important;
           user-select: none;
+          box-sizing: border-box !important;
         }
 
         .disable-children::slotted(*) {
@@ -259,17 +260,6 @@ export default class ViewportElement extends HTMLElement {
     });
 
     // Mutation Observer
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const boundingClientRect = entry.target.assignedSlot.getBoundingClientRect();
-        if (Math.abs(boundingClientRect.width - entry.contentRect.width) < 1 &&
-          Math.abs(boundingClientRect.height - entry.contentRect.height) < 1) {
-          continue;
-        }
-        entry.target.assignedSlot.style.width = `${entry.contentRect.width}px`;
-        entry.target.assignedSlot.style.height = `${entry.contentRect.height}px`;
-      }
-    });
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
@@ -282,16 +272,16 @@ export default class ViewportElement extends HTMLElement {
           slot.classList.add('viewport-slot');
           node.slot = slot.name;
           slot.style.transform = `translate(${boundingClientRect.x}px, ${boundingClientRect.y}px)`;
-          slot.style.width = `${boundingClientRect.width}px`;
-          slot.style.height = `${boundingClientRect.height}px`;
           const style = getComputedStyle(node);
           slot.style.resize = style.resize;
           if (style.resize !== 'none') {
             let ruleString = `[name="${slot.name}"]::slotted(*) {`;
             if (/both|horizontal/.test(style.resize)) {
+              slot.style.width = `${boundingClientRect.width}px`;
               ruleString += 'width: 100% !important;';
             }
             if (/both|vertical/.test(style.resize)) {
+              slot.style.height = `${boundingClientRect.height}px`;
               ruleString += 'height: 100% !important;';
             }
             ruleString += '}';
@@ -303,13 +293,11 @@ export default class ViewportElement extends HTMLElement {
           slotElementMap.set(slot, node);
           elementSlotMap.set(node, slot);
           slot.addEventListener('pointerdown', onPointerDown);
-          resizeObserver.observe(node);
         }
         for (const node of mutation.removedNodes) {
           if (!(node instanceof HTMLElement)) {
             continue;
           }
-          resizeObserver.unobserve(node);
           const slot = elementSlotMap.get(node);
           slot.removeEventListener('pointerdown', onPointerDown);
           slotElementMap.delete(slot);
