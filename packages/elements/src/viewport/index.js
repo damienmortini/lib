@@ -1,5 +1,10 @@
 import Vector2 from '../../../lib/src/math/Vector2.js';
 
+const VECTOR2 = new Vector2();
+
+const DOM_MATRIX_A = new DOMMatrix();
+const DOM_MATRIX_B = new DOMMatrix();
+
 export default class ViewportElement extends HTMLElement {
   constructor() {
     super();
@@ -36,6 +41,10 @@ export default class ViewportElement extends HTMLElement {
           left: 0 !important;
           user-select: none;
         }
+
+        .disable-children::slotted(*) {
+          pointer-events: none;
+        }
       </style>
       <slot></slot>
       <div id="content"></div>
@@ -43,19 +52,15 @@ export default class ViewportElement extends HTMLElement {
 
     const content = this.shadowRoot.querySelector('#content');
     this._styleSheet = this.shadowRoot.querySelector('style').sheet;
-    const slots = new Set();
+    this._slots = new Set();
     const slotElementMap = new Map();
     const elementSlotMap = new Map();
 
     // Behaviour
 
-    const pointers = new Map();
-    const pointerTargets = new Map();
-
-    const VECTOR2 = new Vector2();
-
-    const DOM_MATRIX_A = new DOMMatrix();
-    const DOM_MATRIX_B = new DOMMatrix();
+    const pointerEventMap = new Map();
+    const pointerTargetMap = new Map();
+    const targetPointersMap = new Map();
 
     let previousPinchSize = 0;
 
@@ -68,19 +73,12 @@ export default class ViewportElement extends HTMLElement {
       DOM_MATRIX_B.m41 = -x * (scale - 1);
       DOM_MATRIX_B.m42 = -y * (scale - 1);
 
-      for (const slot of slots) {
+      for (const slot of this._slots) {
         DOM_MATRIX_A.setMatrixValue(slot.style.transform);
         DOM_MATRIX_A.preMultiplySelf(DOM_MATRIX_B);
         slot.style.transformOrigin = 'top left';
         slot.style.transform = DOM_MATRIX_A.toString();
       }
-    };
-
-    const move = (element, movementX, movementY) => {
-      DOM_MATRIX_A.setMatrixValue(element.style.transform);
-      DOM_MATRIX_A.m41 += movementX;
-      DOM_MATRIX_A.m42 += movementY;
-      element.style.transform = DOM_MATRIX_A.toString();
     };
 
     const reset = () => {
@@ -95,32 +93,39 @@ export default class ViewportElement extends HTMLElement {
       if (event.target !== event.currentTarget && event.target.scrollHeight > event.target.offsetHeight) {
         return;
       }
-      if (pointers.has(event.pointerId)) {
+      if (pointerEventMap.has(event.pointerId)) {
         return;
       }
       if (this.preventManipulation(event)) {
         return;
       }
 
-      if (!pointers.size) {
+      if (!pointerEventMap.size) {
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
         window.addEventListener('pointerout', onPointerUp);
       }
-      pointers.set(event.pointerId, event);
-      pointerTargets.set(event.pointerId, event.currentTarget);
+      pointerEventMap.set(event.pointerId, event);
+      pointerTargetMap.set(event.pointerId, event.currentTarget);
+      let targetPointersSet = targetPointersMap.get(event.currentTarget);
+      if (!targetPointersSet) {
+        targetPointersSet = new Set();
+        targetPointersMap.set(event.currentTarget, targetPointersSet);
+        event.currentTarget.classList.add('disable-children');
+      }
+      targetPointersSet.add(event.pointerId);
     };
 
     const onPointerMove = (event) => {
-      if (!pointers.has(event.pointerId)) {
+      if (!pointerEventMap.has(event.pointerId)) {
         return;
       }
 
-      pointers.set(event.pointerId, event);
-      const pointerIds = [...pointers.keys()];
+      pointerEventMap.set(event.pointerId, event);
+      const pointerIds = [...pointerEventMap.keys()];
 
       let isViewport = false;
-      for (const target of pointerTargets.values()) {
+      for (const target of pointerTargetMap.values()) {
         if (target === this) {
           isViewport = true;
         }
@@ -129,22 +134,22 @@ export default class ViewportElement extends HTMLElement {
       if (isViewport) {
         let sumMovementX = 0;
         let sumMovementY = 0;
-        for (const pointer of pointers.values()) {
+        for (const pointer of pointerEventMap.values()) {
           sumMovementX += pointer.movementX;
           sumMovementY += pointer.movementY;
         }
-        sumMovementX /= pointers.size;
-        sumMovementY /= pointers.size;
+        sumMovementX /= pointerEventMap.size;
+        sumMovementY /= pointerEventMap.size;
 
-        for (const slot of slots) {
-          move(slot, sumMovementX / window.devicePixelRatio, sumMovementY / window.devicePixelRatio);
+        for (const slot of this._slots) {
+          this._offsetElement(slot, sumMovementX / window.devicePixelRatio, sumMovementY / window.devicePixelRatio);
         }
       } else if (!isViewport) {
-        const slot = pointerTargets.get(event.pointerId);
+        const slot = pointerTargetMap.get(event.pointerId);
         const elementPointers = [];
-        for (const [key, target] of pointerTargets) {
+        for (const [key, target] of pointerTargetMap) {
           if (target === slot) {
-            elementPointers.push(pointers.get(key));
+            elementPointers.push(pointerEventMap.get(key));
           }
         }
 
@@ -160,7 +165,7 @@ export default class ViewportElement extends HTMLElement {
         sumMovementY /= window.devicePixelRatio;
 
         if (elementPointers.length === 1) {
-          move(slot, sumMovementX, sumMovementY);
+          this._offsetElement(slot, sumMovementX, sumMovementY);
         } else if (elementPointers.length === 2) {
           const element = slotElementMap.get(slot);
           const styles = getComputedStyle(element);
@@ -236,12 +241,19 @@ export default class ViewportElement extends HTMLElement {
     const onPointerUp = (event) => {
       reset();
       event.preventDefault();
-      if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointers.has(event.pointerId)) {
+      if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointerEventMap.has(event.pointerId)) {
         return;
       }
-      pointers.delete(event.pointerId);
-      pointerTargets.delete(event.pointerId);
-      if (!pointers.size) {
+      const target = pointerTargetMap.get(event.pointerId);
+      const targetPointersSet = targetPointersMap.get(target);
+      targetPointersSet.delete(event.pointerId);
+      if (!targetPointersSet.size) {
+        targetPointersMap.delete(target);
+        target.classList.remove('disable-children');
+      }
+      pointerEventMap.delete(event.pointerId);
+      pointerTargetMap.delete(event.pointerId);
+      if (!pointerEventMap.size) {
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
         window.removeEventListener('pointerout', onPointerUp);
@@ -275,6 +287,9 @@ export default class ViewportElement extends HTMLElement {
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
+          if (!(node instanceof HTMLElement)) {
+            continue;
+          }
           const boundingClientRect = node.getBoundingClientRect();
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
@@ -297,18 +312,21 @@ export default class ViewportElement extends HTMLElement {
           }
           content.appendChild(slot);
           this._slotUID++;
-          slots.add(slot);
+          this._slots.add(slot);
           slotElementMap.set(slot, node);
           elementSlotMap.set(node, slot);
           slot.addEventListener('pointerdown', onPointerDown);
-          resizeObserver.observe(node);
+          // resizeObserver.observe(node);
         }
         for (const node of mutation.removedNodes) {
+          if (!(node instanceof HTMLElement)) {
+            continue;
+          }
           resizeObserver.unobserve(node);
           const slot = elementSlotMap.get(node);
           slot.removeEventListener('pointerdown', onPointerDown);
           slotElementMap.delete(slot);
-          slots.delete(slot);
+          this._slots.delete(slot);
           slot.remove();
           for (const [index, rule] of [...this._styleSheet.cssRules].entries()) {
             if (rule.selectorText === `[name="${slot.name}"]::slotted(*)`) {
@@ -324,10 +342,11 @@ export default class ViewportElement extends HTMLElement {
     }]);
     const observer = new MutationObserver(mutationCallback);
     observer.observe(this, { childList: true });
+  }
 
-    // Center nodes
+  centerView() {
     const domRect = new DOMRect(Infinity, Infinity, 0, 0);
-    for (const slot of slots) {
+    for (const slot of this._slots) {
       const boundingClientRect = slot.getBoundingClientRect();
       domRect.x = Math.min(domRect.x, boundingClientRect.x);
       domRect.y = Math.min(domRect.y, boundingClientRect.y);
@@ -337,8 +356,15 @@ export default class ViewportElement extends HTMLElement {
 
     const offsetX = -domRect.x - domRect.width * .5 + this.clientWidth * .5;
     const offsetY = -domRect.y - domRect.height * .5 + this.clientHeight * .5;
-    for (const slot of slots) {
-      move(slot, offsetX, offsetY);
+    for (const slot of this._slots) {
+      this._offsetElement(slot, offsetX, offsetY);
     }
+  }
+
+  _offsetElement(element, offsetX, offsetY) {
+    DOM_MATRIX_A.setMatrixValue(element.style.transform);
+    DOM_MATRIX_A.m41 += offsetX;
+    DOM_MATRIX_A.m42 += offsetY;
+    element.style.transform = DOM_MATRIX_A.toString();
   }
 }
