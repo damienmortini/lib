@@ -32,15 +32,17 @@ export default class NodeElement extends HTMLElement {
           border: 1px solid;
           z-index: 1;
         }
-        .content, slot {
+        details, slot {
           padding: 10px;
         }
-        details summary {
-          pointer-events: none;
+        summary {
           padding: 5px;
         }
-        details summary:focus {
+        summary:focus {
           outline: none;
+        }
+        summary span {
+          // pointer-events: auto;
         }
         section.input {
           display: flex;
@@ -63,10 +65,14 @@ export default class NodeElement extends HTMLElement {
           display: none;
         }
       </style>
-      <details class="content">
-        <summary></summary>
+      <details>
+        <summary><span></span></summary>
       </details>
     `;
+
+    this._details = this.shadowRoot.querySelector('details');
+    this._summary = this.shadowRoot.querySelector('summary');
+    this._summaryContent = this.shadowRoot.querySelector('summary span');
 
     const observer = new MutationObserver((mutationsList, observer) => {
       for (const mutation of mutationsList) {
@@ -75,7 +81,7 @@ export default class NodeElement extends HTMLElement {
             const section = document.createElement('section');
             section.id = `slot${slotUID}`;
             section.innerHTML = `<slot name="${slotUID}"></slot>`;
-            this.shadowRoot.querySelector('.content').appendChild(section);
+            this._details.appendChild(section);
             node.slot = slotUID;
             slotUID++;
           }
@@ -88,21 +94,26 @@ export default class NodeElement extends HTMLElement {
     });
     observer.observe(this, { childList: true });
 
-    this.shadowRoot.querySelector('details').addEventListener('toggle', (event) => {
-      this.close = !event.target.open;
-      this.dispatchEvent(new Event(event.type, event));
-    });
-
-    this.shadowRoot.querySelector('details').addEventListener('dblclick', (event) => {
+    this._summary.addEventListener('click', (event) => {
+      event.preventDefault();
       if (event.target !== event.currentTarget) {
         return;
       }
       this.close = !this.close;
     });
+
+    this._details.addEventListener('toggle', (event) => {
+      this.close = !event.target.open;
+      this.dispatchEvent(new Event(event.type, event));
+    });
+
+    this._summaryContent.addEventListener('dblclick', (event) => {
+      this._editElementContent(this._summaryContent);
+    });
   }
 
   connectedCallback() {
-    this.shadowRoot.querySelector('.content').open = !this.close;
+    this._details.open = !this.close;
     for (const child of this.children) {
       if (!('value' in child)) {
         continue;
@@ -114,12 +125,30 @@ export default class NodeElement extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'name':
-        this.shadowRoot.querySelector('.content').querySelector('summary').textContent = newValue;
+        this._summaryContent.textContent = newValue;
         break;
       case 'close':
-        this.shadowRoot.querySelector('.content').open = !this.close;
+        this._details.open = !this.close;
         break;
     }
+  }
+
+  _editElementContent(element) {
+    element.contentEditable = true;
+    element.focus();
+    const onKeyDown = (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        element.addEventListener('keydown', onKeyDown);
+        element.blur();
+      }
+    };
+    element.addEventListener('keydown', onKeyDown);
+    element.addEventListener('blur', () => {
+      element.contentEditable = false;
+    }, {
+      once: true,
+    });
   }
 
   _addInput(node) {
@@ -139,7 +168,7 @@ export default class NodeElement extends HTMLElement {
     const connectors = section.querySelectorAll('node-connector-input');
     connectors[0].outputs.add(node);
     connectors[1].inputs.add(node);
-    this.shadowRoot.querySelector('.content').appendChild(section);
+    this._details.appendChild(section);
     node.slot = slotUID;
     slotUID++;
   }
