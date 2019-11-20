@@ -4,6 +4,8 @@ export default class ViewportElement extends HTMLElement {
   constructor() {
     super();
 
+    this._slotUID = 0;
+
     this.preventManipulation = function (event) {
       return false;
     };
@@ -22,21 +24,28 @@ export default class ViewportElement extends HTMLElement {
           top: 50%;
         }
 
-        ::slotted(*) {
-          box-sizing: border-box;
+        slot {
           position: absolute;
+          display: block;
           will-change: transform;
-          touch-action: none;
+        }
+
+        .viewport-slot::slotted(*) {
+          transform: none !important;
+          top: 0 !important;
+          left: 0 !important;
           user-select: none;
         }
       </style>
-      <div>
-        <slot></slot>
-      </div>
+      <slot></slot>
+      <div id="content"></div>
     `;
 
-    const slot = this.shadowRoot.querySelector('slot');
-    const slottedElements = new Set(slot.assignedElements({ flatten: true }));
+    const content = this.shadowRoot.querySelector('#content');
+    this._styleSheet = this.shadowRoot.querySelector('style').sheet;
+    const slots = new Set();
+    const slotElementMap = new Map();
+    const elementSlotMap = new Map();
 
     // Behaviour
 
@@ -59,11 +68,11 @@ export default class ViewportElement extends HTMLElement {
       DOM_MATRIX_B.m41 = -x * (scale - 1);
       DOM_MATRIX_B.m42 = -y * (scale - 1);
 
-      for (const element of slottedElements) {
-        DOM_MATRIX_A.setMatrixValue(element.style.transform);
+      for (const slot of slots) {
+        DOM_MATRIX_A.setMatrixValue(slot.style.transform);
         DOM_MATRIX_A.preMultiplySelf(DOM_MATRIX_B);
-        element.style.transformOrigin = 'top left';
-        element.style.transform = DOM_MATRIX_A.toString();
+        slot.style.transformOrigin = 'top left';
+        slot.style.transform = DOM_MATRIX_A.toString();
       }
     };
 
@@ -127,14 +136,14 @@ export default class ViewportElement extends HTMLElement {
         sumMovementX /= pointers.size;
         sumMovementY /= pointers.size;
 
-        for (const element of slottedElements) {
-          move(element, sumMovementX / window.devicePixelRatio, sumMovementY / window.devicePixelRatio);
+        for (const slot of slots) {
+          move(slot, sumMovementX / window.devicePixelRatio, sumMovementY / window.devicePixelRatio);
         }
       } else if (!isViewport) {
-        const element = pointerTargets.get(event.pointerId);
+        const slot = pointerTargets.get(event.pointerId);
         const elementPointers = [];
         for (const [key, target] of pointerTargets) {
-          if (target === element) {
+          if (target === slot) {
             elementPointers.push(pointers.get(key));
           }
         }
@@ -151,8 +160,9 @@ export default class ViewportElement extends HTMLElement {
         sumMovementY /= window.devicePixelRatio;
 
         if (elementPointers.length === 1) {
-          move(element, sumMovementX, sumMovementY);
+          move(slot, sumMovementX, sumMovementY);
         } else if (elementPointers.length === 2) {
+          const element = slotElementMap.get(slot);
           const styles = getComputedStyle(element);
 
           if (styles.resize === 'none') {
@@ -160,39 +170,43 @@ export default class ViewportElement extends HTMLElement {
           } else {
             const boundingClientRect = element.getBoundingClientRect();
 
-            DOM_MATRIX_A.setMatrixValue(element.style.transform);
+            DOM_MATRIX_A.setMatrixValue(slot.style.transform);
 
             const otherPointer = elementPointers[0] === event ? elementPointers[1] : elementPointers[0];
 
-            const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
-            const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.a);
-            const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
-            const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio * (1 / DOM_MATRIX_A.d);
+            const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio;
+            const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio;
+            const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio;
+            const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio;
+
+            console.log(pinchOffsetLeft);
+
 
             if (styles.resize === 'both' || styles.resize === 'horizontal') {
               if (element.scrollWidth <= element.offsetWidth) {
-                element.style.width = `${boundingClientRect.width * (1 / DOM_MATRIX_A.a) - pinchOffsetLeft + pinchOffsetRight}px`;
-                DOM_MATRIX_A.m41 += pinchOffsetLeft * DOM_MATRIX_A.a;
-              } else {
-                element.style.width = `${element.scrollWidth}px`;
+                element.style.width = `${boundingClientRect.width - pinchOffsetLeft}px`;
+                DOM_MATRIX_A.m41 += pinchOffsetLeft;
               }
+              //  else {
+              //   element.style.width = `${element.scrollWidth}px`;
+              // }
             } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) > Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
-              isViewport = true;
+              // isViewport = true;
             }
 
-            if (styles.resize === 'both' || styles.resize === 'vertical') {
-              if (element.scrollHeight <= element.offsetHeight) {
-                element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
-                DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d;
-              } else {
-                element.style.height = `${element.scrollHeight}px`;
-              }
-            } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) < Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
-              isViewport = true;
-            }
+            // if (styles.resize === 'both' || styles.resize === 'vertical') {
+            //   if (element.scrollHeight <= element.offsetHeight) {
+            //     element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
+            //     DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d;
+            //   } else {
+            //     element.style.height = `${element.scrollHeight}px`;
+            //   }
+            // } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) < Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
+            //   isViewport = true;
+            // }
 
-            element.style.transformOrigin = 'top left';
-            element.style.transform = DOM_MATRIX_A.toString();
+            // element.style.transformOrigin = 'top left';
+            slot.style.transform = DOM_MATRIX_A.toString();
           }
         }
       }
@@ -246,43 +260,75 @@ export default class ViewportElement extends HTMLElement {
       zoom(scale, x, y);
     });
 
-    // Nodes
-
-    // Add/remove elements functions
-    const addElement = (element) => {
-      slottedElements.add(element);
-      element.addEventListener('pointerdown', onPointerDown);
-    };
-
-    const removeElement = (element) => {
-      element.removeEventListener('pointerdown', onPointerDown);
-      slottedElements.delete(element);
-    };
-
-    // Initialize
-    for (const element of slottedElements) {
-      addElement(element);
-    }
-
-    // Observe slot change
-    slot.addEventListener('slotchange', (event) => {
-      const newSlottedElements = slot.assignedElements({ flatten: true });
-      for (const element of newSlottedElements) {
-        if (!slottedElements.has(element)) {
-          addElement(element);
+    // Mutation Observer
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const boundingClientRect = entry.target.assignedSlot.getBoundingClientRect();
+        if (Math.abs(boundingClientRect.width - entry.contentRect.width) < 1 &&
+          Math.abs(boundingClientRect.height - entry.contentRect.height) < 1) {
+          continue;
         }
-      }
-      for (const element of slottedElements) {
-        if (!newSlottedElements.includes(element)) {
-          removeElement(element);
-        }
+        entry.target.assignedSlot.style.width = `${entry.contentRect.width}px`;
+        entry.target.assignedSlot.style.height = `${entry.contentRect.height}px`;
       }
     });
+    const mutationCallback = (mutationsList) => {
+      for (const mutation of mutationsList) {
+        for (const node of mutation.addedNodes) {
+          const boundingClientRect = node.getBoundingClientRect();
+          const slot = document.createElement('slot');
+          slot.name = `viewport-slot-${this._slotUID}`;
+          slot.classList.add('viewport-slot');
+          node.slot = slot.name;
+          slot.style.transform = `translate(${boundingClientRect.x}px, ${boundingClientRect.y}px)`;
+          slot.style.width = `${boundingClientRect.width}px`;
+          slot.style.height = `${boundingClientRect.height}px`;
+          const style = getComputedStyle(node);
+          if (style.resize !== 'none') {
+            let ruleString = `[name="${slot.name}"]::slotted(*) {`;
+            if (/both|horizontal/.test(style.resize)) {
+              ruleString += 'width: 100% !important;';
+            }
+            if (/both|vertical/.test(style.resize)) {
+              ruleString += 'height: 100% !important;';
+            }
+            ruleString += '}';
+            this._styleSheet.insertRule(ruleString, this._styleSheet.cssRules.length);
+          }
+          content.appendChild(slot);
+          this._slotUID++;
+          slots.add(slot);
+          slotElementMap.set(slot, node);
+          elementSlotMap.set(node, slot);
+          slot.addEventListener('pointerdown', onPointerDown);
+          resizeObserver.observe(node);
+        }
+        for (const node of mutation.removedNodes) {
+          resizeObserver.unobserve(node);
+          const slot = elementSlotMap.get(node);
+          slot.removeEventListener('pointerdown', onPointerDown);
+          slotElementMap.delete(slot);
+          slots.delete(slot);
+          slot.remove();
+          for (const [index, rule] of [...this._styleSheet.cssRules].entries()) {
+            if (rule.selectorText === `[name="${slot.name}"]::slotted(*)`) {
+              this._styleSheet.deleteRule(index);
+            }
+          }
+        }
+      }
+    };
+    mutationCallback([{
+      addedNodes: this.children,
+      removedNodes: [],
+    }]);
+    const observer = new MutationObserver(mutationCallback);
+    observer.observe(this, { childList: true });
 
     // Center nodes
     const domRect = new DOMRect(Infinity, Infinity, 0, 0);
-    for (const element of slottedElements) {
-      const boundingClientRect = element.getBoundingClientRect();
+    for (const slot of slots) {
+      const boundingClientRect = slot.getBoundingClientRect();
       domRect.x = Math.min(domRect.x, boundingClientRect.x);
       domRect.y = Math.min(domRect.y, boundingClientRect.y);
       domRect.width = Math.max(domRect.width, boundingClientRect.x + boundingClientRect.width - domRect.x);
@@ -291,10 +337,8 @@ export default class ViewportElement extends HTMLElement {
 
     const offsetX = -domRect.x - domRect.width * .5 + this.clientWidth * .5;
     const offsetY = -domRect.y - domRect.height * .5 + this.clientHeight * .5;
-    for (const element of slottedElements) {
-      const domMatrix = new DOMMatrix(element.style.transform);
-      domMatrix.translateSelf(offsetX, offsetY);
-      element.style.transform = domMatrix.toString();
+    for (const slot of slots) {
+      move(slot, offsetX, offsetY);
     }
   }
 }
