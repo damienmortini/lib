@@ -35,6 +35,10 @@ export default class ViewportElement extends HTMLElement {
           will-change: transform;
         }
 
+        .viewport-slot:focus-within {
+          z-index: 1;
+        }
+
         .viewport-slot::slotted(*) {
           transform: none !important;
           top: 0 !important;
@@ -146,71 +150,53 @@ export default class ViewportElement extends HTMLElement {
         }
       } else if (!isViewport) {
         const slot = pointerTargetMap.get(event.pointerId);
-        const elementPointers = [];
-        for (const [key, target] of pointerTargetMap) {
-          if (target === slot) {
-            elementPointers.push(pointerEventMap.get(key));
-          }
-        }
+        const targetPointersSet = targetPointersMap.get(slot);
 
         let sumMovementX = 0;
         let sumMovementY = 0;
-        for (const pointer of elementPointers) {
-          sumMovementX += pointer.movementX;
-          sumMovementY += pointer.movementY;
+        for (const pointer of targetPointersSet) {
+          const pointerEvent = pointerEventMap.get(pointer);
+          sumMovementX += pointerEvent.movementX;
+          sumMovementY += pointerEvent.movementY;
         }
-        sumMovementX /= elementPointers.length * elementPointers.length;
-        sumMovementY /= elementPointers.length * elementPointers.length;
+        sumMovementX /= targetPointersSet.size * targetPointersSet.size;
+        sumMovementY /= targetPointersSet.size * targetPointersSet.size;
         sumMovementX /= window.devicePixelRatio;
         sumMovementY /= window.devicePixelRatio;
 
-        if (elementPointers.length === 1) {
-          this._offsetElement(slot, sumMovementX, sumMovementY);
-        } else if (elementPointers.length === 2) {
-          const element = slotElementMap.get(slot);
-          const styles = getComputedStyle(element);
-
-          if (styles.resize === 'none') {
+        this._offsetElement(slot, sumMovementX, sumMovementY);
+        if (targetPointersSet.size === 2) {
+          if (slot.style.resize === 'none') {
             isViewport = true;
           } else {
-            const boundingClientRect = element.getBoundingClientRect();
+            const boundingClientRect = slot.getBoundingClientRect();
 
             DOM_MATRIX_A.setMatrixValue(slot.style.transform);
 
-            const otherPointer = elementPointers[0] === event ? elementPointers[1] : elementPointers[0];
+            let otherPointerEvent;
 
-            const pinchOffsetLeft = (event.clientX < otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio;
-            const pinchOffsetRight = (event.clientX > otherPointer.clientX ? event.movementX : 0) / window.devicePixelRatio;
-            const pinchOffsetTop = (event.clientY < otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio;
-            const pinchOffsetBottom = (event.clientY > otherPointer.clientY ? event.movementY : 0) / window.devicePixelRatio;
-
-            console.log(pinchOffsetLeft);
-
-
-            if (styles.resize === 'both' || styles.resize === 'horizontal') {
-              if (element.scrollWidth <= element.offsetWidth) {
-                element.style.width = `${boundingClientRect.width - pinchOffsetLeft}px`;
-                DOM_MATRIX_A.m41 += pinchOffsetLeft;
+            for (const pointer of targetPointersSet) {
+              const pointerEvent = pointerEventMap.get(pointer);
+              if (pointerEvent !== event) {
+                otherPointerEvent = pointerEvent;
               }
-              //  else {
-              //   element.style.width = `${element.scrollWidth}px`;
-              // }
-            } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) > Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
-              // isViewport = true;
             }
 
-            // if (styles.resize === 'both' || styles.resize === 'vertical') {
-            //   if (element.scrollHeight <= element.offsetHeight) {
-            //     element.style.height = `${boundingClientRect.height * (1 / DOM_MATRIX_A.d) - pinchOffsetTop + pinchOffsetBottom}px`;
-            //     DOM_MATRIX_A.m42 += pinchOffsetTop * DOM_MATRIX_A.d;
-            //   } else {
-            //     element.style.height = `${element.scrollHeight}px`;
-            //   }
-            // } else if (Math.abs(pinchOffsetLeft) + Math.abs(pinchOffsetRight) < Math.abs(pinchOffsetTop) + Math.abs(pinchOffsetBottom)) {
-            //   isViewport = true;
-            // }
+            const pinchOffsetLeft = (event.clientX < otherPointerEvent.clientX ? event.movementX : 0) / window.devicePixelRatio;
+            const pinchOffsetRight = (event.clientX > otherPointerEvent.clientX ? event.movementX : 0) / window.devicePixelRatio;
+            const pinchOffsetTop = (event.clientY < otherPointerEvent.clientY ? event.movementY : 0) / window.devicePixelRatio;
+            const pinchOffsetBottom = (event.clientY > otherPointerEvent.clientY ? event.movementY : 0) / window.devicePixelRatio;
 
-            // element.style.transformOrigin = 'top left';
+            if (slot.style.resize === 'both' || slot.style.resize === 'horizontal') {
+              slot.style.width = `${(boundingClientRect.width - pinchOffsetLeft + pinchOffsetRight) * (1 / DOM_MATRIX_A.a)}px`;
+              DOM_MATRIX_A.m41 += pinchOffsetLeft - sumMovementX;
+            }
+
+            if (slot.style.resize === 'both' || slot.style.resize === 'vertical') {
+              slot.style.height = `${(boundingClientRect.height - pinchOffsetTop + pinchOffsetBottom) * (1 / DOM_MATRIX_A.d)}px`;
+              DOM_MATRIX_A.m42 += pinchOffsetTop - sumMovementY;
+            }
+
             slot.style.transform = DOM_MATRIX_A.toString();
           }
         }
@@ -299,6 +285,7 @@ export default class ViewportElement extends HTMLElement {
           slot.style.width = `${boundingClientRect.width}px`;
           slot.style.height = `${boundingClientRect.height}px`;
           const style = getComputedStyle(node);
+          slot.style.resize = style.resize;
           if (style.resize !== 'none') {
             let ruleString = `[name="${slot.name}"]::slotted(*) {`;
             if (/both|horizontal/.test(style.resize)) {
@@ -316,7 +303,7 @@ export default class ViewportElement extends HTMLElement {
           slotElementMap.set(slot, node);
           elementSlotMap.set(node, slot);
           slot.addEventListener('pointerdown', onPointerDown);
-          // resizeObserver.observe(node);
+          resizeObserver.observe(node);
         }
         for (const node of mutation.removedNodes) {
           if (!(node instanceof HTMLElement)) {

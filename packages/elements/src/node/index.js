@@ -30,7 +30,6 @@ export default class NodeElement extends HTMLElement {
         }
         :host(:focus-within) {
           border: 1px solid;
-          z-index: 1;
         }
         details, slot {
           padding: 10px;
@@ -65,6 +64,7 @@ export default class NodeElement extends HTMLElement {
           display: none;
         }
       </style>
+      <slot></slot>
       <details>
         <summary><span></span></summary>
       </details>
@@ -115,9 +115,10 @@ export default class NodeElement extends HTMLElement {
   connectedCallback() {
     this._details.open = !this.close;
     for (const child of this.children) {
-      if (!('value' in child)) {
-        continue;
-      }
+      // console.log('value' in child);
+      // if (!('value' in child)) {
+      //   continue;
+      // }
       this._addInput(child);
     }
   }
