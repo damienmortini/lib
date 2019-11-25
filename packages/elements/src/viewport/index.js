@@ -125,7 +125,8 @@ export default class ViewportElement extends HTMLElement {
       if (!targetPointersSet) {
         targetPointersSet = new Set();
         targetPointersMap.set(event.currentTarget, targetPointersSet);
-        if (!event.shiftKey && !this._selectedElements.has(slotElementMap.get(event.currentTarget)) || event.currentTarget === this) {
+        const currentElement = slotElementMap.get(event.currentTarget);
+        if (!event.shiftKey && !this._selectedElements.has(currentElement) || event.currentTarget === this) {
           for (const element of this._selectedElements) {
             const slot = elementSlotMap.get(element);
             slot.removeAttribute('selected');
@@ -134,8 +135,13 @@ export default class ViewportElement extends HTMLElement {
         }
         if (event.currentTarget !== this) {
           event.currentTarget.setAttribute('disabled', '');
-          event.currentTarget.setAttribute('selected', '');
-          this._selectedElements.add(slotElementMap.get(event.currentTarget));
+          if (event.shiftKey && this._selectedElements.has(currentElement)) {
+            event.currentTarget.removeAttribute('selected');
+            this._selectedElements.delete(currentElement);
+          } else {
+            event.currentTarget.setAttribute('selected', '');
+            this._selectedElements.add(slotElementMap.get(event.currentTarget));
+          }
         }
       }
       targetPointersSet.add(event.pointerId);
