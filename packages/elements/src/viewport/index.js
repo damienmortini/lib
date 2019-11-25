@@ -9,12 +9,6 @@ export default class ViewportElement extends HTMLElement {
   constructor() {
     super();
 
-    this._slotUID = 0;
-
-    this.preventManipulation = function (event) {
-      return false;
-    };
-
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
@@ -33,22 +27,31 @@ export default class ViewportElement extends HTMLElement {
           position: absolute;
           display: block;
           will-change: transform;
+          box-sizing: border-box;
         }
 
-        .viewport-slot:focus-within {
+        #content slot:focus-within {
           z-index: 1;
         }
 
-        .viewport-slot::slotted(*) {
+        #content slot[disabled]::slotted(*) {
+          pointer-events: none;
+        }
+
+        #content slot::slotted(*) {
           transform: none !important;
           top: 0 !important;
           left: 0 !important;
           user-select: none;
-          box-sizing: border-box !important;
+          box-sizing: border-box;
         }
 
-        .disable-children::slotted(*) {
-          pointer-events: none;
+        #content slot:hover {
+          outline: 1px dotted;
+        }
+
+        #content slot[selected] {
+          outline: 1px solid;
         }
       </style>
       <slot></slot>
@@ -57,15 +60,38 @@ export default class ViewportElement extends HTMLElement {
 
     const content = this.shadowRoot.querySelector('#content');
     this._styleSheet = this.shadowRoot.querySelector('style').sheet;
+    this._slotUID = 0;
     this._slots = new Set();
     const slotElementMap = new Map();
     const elementSlotMap = new Map();
 
-    // Behaviour
+    this.preventManipulation = function (event) {
+      return false;
+    };
+
+    this._selectedElements = new class extends Set {
+      add(value) {
+        // value.setAttribute('selected', '');
+        return super.add(value);
+      }
+      delete(value) {
+        // value.removeAttribute('selected');
+        return super.delete(value);
+      }
+      clear() {
+        for (const value of this) {
+          this.delete(value);
+        }
+      }
+    };
+
+    // Drag/Zoom
 
     const pointerEventMap = new Map();
     const pointerTargetMap = new Map();
     const targetPointersMap = new Map();
+
+    let dragged = false;
 
     let previousPinchSize = 0;
 
@@ -116,7 +142,18 @@ export default class ViewportElement extends HTMLElement {
       if (!targetPointersSet) {
         targetPointersSet = new Set();
         targetPointersMap.set(event.currentTarget, targetPointersSet);
-        event.currentTarget.classList.add('disable-children');
+        if (!event.shiftKey && this._selectedElements.size <= 1 || event.currentTarget === this) {
+          for (const element of this._selectedElements) {
+            const slot = elementSlotMap.get(element);
+            slot.removeAttribute('selected');
+          }
+          this._selectedElements.clear();
+        }
+        if (event.currentTarget !== this) {
+          event.currentTarget.setAttribute('disabled', '');
+          event.currentTarget.setAttribute('selected', '');
+          this._selectedElements.add(slotElementMap.get(event.currentTarget));
+        }
       }
       targetPointersSet.add(event.pointerId);
     };
@@ -125,6 +162,8 @@ export default class ViewportElement extends HTMLElement {
       if (!pointerEventMap.has(event.pointerId)) {
         return;
       }
+
+      dragged = true;
 
       pointerEventMap.set(event.pointerId, event);
       const pointerIds = [...pointerEventMap.keys()];
@@ -165,7 +204,12 @@ export default class ViewportElement extends HTMLElement {
         sumMovementX /= window.devicePixelRatio;
         sumMovementY /= window.devicePixelRatio;
 
-        this._offsetElement(slot, sumMovementX, sumMovementY);
+
+
+        for (const element of this._selectedElements) {
+          const slot = elementSlotMap.get(element);
+          this._offsetElement(slot, sumMovementX, sumMovementY);
+        }
         if (targetPointersSet.size === 2) {
           if (slot.style.resize === 'none') {
             isViewport = true;
@@ -236,7 +280,7 @@ export default class ViewportElement extends HTMLElement {
       targetPointersSet.delete(event.pointerId);
       if (!targetPointersSet.size) {
         targetPointersMap.delete(target);
-        target.classList.remove('disable-children');
+        target.removeAttribute('disabled');
       }
       pointerEventMap.delete(event.pointerId);
       pointerTargetMap.delete(event.pointerId);
@@ -244,6 +288,16 @@ export default class ViewportElement extends HTMLElement {
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
         window.removeEventListener('pointerout', onPointerUp);
+        if (!dragged && !event.shiftKey && this._selectedElements.size > 1) {
+          for (const element of this._selectedElements) {
+            const slot = elementSlotMap.get(element);
+            if (slot !== target) {
+              slot.removeAttribute('selected');
+              this._selectedElements.delete(element);
+            }
+          }
+        }
+        dragged = false;
       }
     };
 
@@ -269,7 +323,6 @@ export default class ViewportElement extends HTMLElement {
           const boundingClientRect = node.getBoundingClientRect();
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
-          slot.classList.add('viewport-slot');
           node.slot = slot.name;
           slot.style.transform = `translate(${boundingClientRect.x}px, ${boundingClientRect.y}px)`;
           const style = getComputedStyle(node);
@@ -317,6 +370,10 @@ export default class ViewportElement extends HTMLElement {
     }]);
     const observer = new MutationObserver(mutationCallback);
     observer.observe(this, { childList: true });
+  }
+
+  get selectedElements() {
+    return this._selectedElements;
   }
 
   centerView() {
