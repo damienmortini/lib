@@ -76,8 +76,6 @@ export default class ViewportElement extends HTMLElement {
     const pointerTargetMap = new Map();
     const targetPointersMap = new Map();
 
-    let dragged = false;
-
     let previousPinchSize = 0;
 
     let firstClientX = 0;
@@ -127,7 +125,7 @@ export default class ViewportElement extends HTMLElement {
       if (!targetPointersSet) {
         targetPointersSet = new Set();
         targetPointersMap.set(event.currentTarget, targetPointersSet);
-        if (!event.shiftKey && this._selectedElements.size <= 1 || event.currentTarget === this) {
+        if (!event.shiftKey && !this._selectedElements.has(slotElementMap.get(event.currentTarget)) || event.currentTarget === this) {
           for (const element of this._selectedElements) {
             const slot = elementSlotMap.get(element);
             slot.removeAttribute('selected');
@@ -147,8 +145,6 @@ export default class ViewportElement extends HTMLElement {
       if (!pointerEventMap.has(event.pointerId)) {
         return;
       }
-
-      dragged = true;
 
       pointerEventMap.set(event.pointerId, event);
       const pointerIds = [...pointerEventMap.keys()];
@@ -275,16 +271,6 @@ export default class ViewportElement extends HTMLElement {
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
         window.removeEventListener('pointerout', onPointerUp);
-        if (!dragged && !event.shiftKey && this._selectedElements.size > 1) {
-          for (const element of this._selectedElements) {
-            const slot = elementSlotMap.get(element);
-            if (slot !== target) {
-              slot.removeAttribute('selected');
-              this._selectedElements.delete(element);
-            }
-          }
-        }
-        dragged = false;
       }
     };
 
