@@ -62,27 +62,12 @@ export default class ViewportElement extends HTMLElement {
     this._styleSheet = this.shadowRoot.querySelector('style').sheet;
     this._slotUID = 0;
     this._slots = new Set();
+    this._selectedElements = new Set();
     const slotElementMap = new Map();
     const elementSlotMap = new Map();
 
     this.preventManipulation = function (event) {
       return false;
-    };
-
-    this._selectedElements = new class extends Set {
-      add(value) {
-        // value.setAttribute('selected', '');
-        return super.add(value);
-      }
-      delete(value) {
-        // value.removeAttribute('selected');
-        return super.delete(value);
-      }
-      clear() {
-        for (const value of this) {
-          this.delete(value);
-        }
-      }
     };
 
     // Drag/Zoom
@@ -204,11 +189,13 @@ export default class ViewportElement extends HTMLElement {
         sumMovementX /= window.devicePixelRatio;
         sumMovementY /= window.devicePixelRatio;
 
-
-
-        for (const element of this._selectedElements) {
-          const slot = elementSlotMap.get(element);
+        if (pointerTargetMap.size > 1) {
           this._offsetElement(slot, sumMovementX, sumMovementY);
+        } else {
+          for (const element of this._selectedElements) {
+            const slot = elementSlotMap.get(element);
+            this._offsetElement(slot, sumMovementX, sumMovementY);
+          }
         }
         if (targetPointersSet.size === 2) {
           if (slot.style.resize === 'none') {
