@@ -103,13 +103,15 @@ export default class LinkElement extends HTMLElement {
     if (this.input) {
       let inBoundingRect;
       let input = this.input;
-      let isNode = false;
       do {
+        if (!input) {
+          this.remove();
+          return;
+        }
         inBoundingRect = input.getBoundingClientRect();
-        isNode = input.nodeName === 'graph-NODE';
         input = input.parentElement;
       } while (inBoundingRect.x + inBoundingRect.y + inBoundingRect.width + inBoundingRect.height === 0);
-      inputX = (inBoundingRect.x + inBoundingRect.width * (isNode ? 1 : .5) - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
+      inputX = (inBoundingRect.x + inBoundingRect.width * .5 - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
       inputY = (inBoundingRect.y + inBoundingRect.height * .5 - rootBoundingRect.y) / scaleMarkerBoundingRect.height;
     }
 
@@ -118,13 +120,15 @@ export default class LinkElement extends HTMLElement {
     if (this.output) {
       let outBoundingRect;
       let output = this.output;
-      let isNode = false;
       do {
+        if (!output) {
+          this.remove();
+          return;
+        }
         outBoundingRect = output.getBoundingClientRect();
-        isNode = output.nodeName === 'graph-NODE';
         output = output.parentElement;
       } while (outBoundingRect.x + outBoundingRect.y + outBoundingRect.width + outBoundingRect.height === 0);
-      outputX = (outBoundingRect.x + outBoundingRect.width * (isNode ? 0 : .5) - rootBoundingRect.x) / scaleMarkerBoundingRect.width;
+      outputX = (outBoundingRect.x - rootBoundingRect.x + outBoundingRect.width * .5) / scaleMarkerBoundingRect.width;
       outputY = (outBoundingRect.y + outBoundingRect.height * .5 - rootBoundingRect.y) / scaleMarkerBoundingRect.height;
     }
 
@@ -156,8 +160,8 @@ export default class LinkElement extends HTMLElement {
 
     this._path.setAttribute('d', `M${inputX + padding} ${inputY + padding} L ${outputX + padding} ${outputY + padding}`);
     this._hitTestPath.setAttribute('d', `M${inputX + padding} ${inputY + padding} L ${outputX + padding} ${outputY + padding}`);
-    // this._path.setAttribute("d", `M${inputX + padding} ${inputY + padding} C ${inputX + (outputX - inputX) * .5} ${inputY}, ${outputX + (inputX - outputX) * .5} ${outputY}, ${outputX + padding} ${outputY + padding}`);
-    // this._hitTestPath.setAttribute("d", `M${inputX + padding} ${inputY + padding} C ${inputX + (outputX - inputX) * .5} ${inputY}, ${outputX + (inputX - outputX) * .5} ${outputY}, ${outputX + padding} ${outputY + padding}`);
+    // this._path.setAttribute('d', `M${inputX + padding} ${inputY + padding} C ${inputX + (outputX - inputX) * .5} ${inputY}, ${outputX + (inputX - outputX) * .5} ${outputY}, ${outputX + padding} ${outputY + padding}`);
+    // this._hitTestPath.setAttribute('d', `M${inputX + padding} ${inputY + padding} C ${inputX + (outputX - inputX) * .5} ${inputY}, ${outputX + (inputX - outputX) * .5} ${outputY}, ${outputX + padding} ${outputY + padding}`);
   }
 
   get linked() {
