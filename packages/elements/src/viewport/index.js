@@ -13,6 +13,7 @@ export default class ViewportElement extends HTMLElement {
       <style>
         :host {
           display: block;
+          overflow: hidden;
           touch-action: none;
         }
 
@@ -283,7 +284,7 @@ export default class ViewportElement extends HTMLElement {
     this.addEventListener('pointerdown', onPointerDown);
 
     this.addEventListener('wheel', (event) => {
-      if (event.target.scrollHeight > event.target.clientHeight) {
+      if (event.target !== this && event.target.scrollHeight > event.target.clientHeight) {
         return;
       }
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
