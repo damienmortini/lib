@@ -23,7 +23,6 @@ export default class ViewportElement extends HTMLElement {
           position: absolute;
           display: block;
           transform-origin: top left;
-          will-change: transform;
           box-sizing: border-box;
         }
 
@@ -45,6 +44,10 @@ export default class ViewportElement extends HTMLElement {
 
         #content slot:hover {
           outline: 1px dotted;
+        }
+
+        #content slot[disabled], #content[disabled] slot {
+          will-change: transform;
         }
 
         #content slot[selected] {
