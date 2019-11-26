@@ -21,15 +21,6 @@ export default class NodeElement extends HTMLElement {
       <style>
         :host {
           display: block;
-          border: 1px dotted;
-          background: rgba(255, 255, 255, .9);
-          resize: horizontal;
-        }
-        :host(:hover) {
-          border: 1px dashed;
-        }
-        :host(:focus-within) {
-          border: 1px solid;
         }
         details, slot {
           padding: 10px;
@@ -39,9 +30,6 @@ export default class NodeElement extends HTMLElement {
         }
         summary:focus {
           outline: none;
-        }
-        summary span {
-          // pointer-events: auto;
         }
         section.input {
           display: flex;
