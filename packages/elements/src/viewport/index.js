@@ -1,10 +1,5 @@
 import Vector2 from '../../../lib/src/math/Vector2.js';
 
-const VECTOR2 = new Vector2();
-
-const DOM_MATRIX_A = new DOMMatrix();
-const DOM_MATRIX_B = new DOMMatrix();
-
 export default class ViewportElement extends HTMLElement {
   constructor() {
     super();
@@ -27,6 +22,7 @@ export default class ViewportElement extends HTMLElement {
         slot {
           position: absolute;
           display: block;
+          transform-origin: top left;
           will-change: transform;
           box-sizing: border-box;
         }
@@ -61,6 +57,7 @@ export default class ViewportElement extends HTMLElement {
 
     const slotElementMap = new Map();
     const elementSlotMap = new Map();
+    this._slotDOMMatrixMap = new Map();
 
     const content = this.shadowRoot.querySelector('#content');
     this._styleSheet = this.shadowRoot.querySelector('style').sheet;
@@ -100,21 +97,26 @@ export default class ViewportElement extends HTMLElement {
     let firstClientX = 0;
     let firstClientY = 0;
 
+    const pinchVector = new Vector2();
+
+    let viewportBoundingClientRect = this.getBoundingClientRect();
+
+    const zoomMatrix = new DOMMatrix();
     const zoom = (scale, x, y) => {
-      DOM_MATRIX_B.setMatrixValue('');
-      DOM_MATRIX_B.scaleSelf(scale);
-      DOM_MATRIX_B.m41 = -x * (scale - 1);
-      DOM_MATRIX_B.m42 = -y * (scale - 1);
+      zoomMatrix.m11 = scale;
+      zoomMatrix.m22 = scale;
+      zoomMatrix.m41 = -x * (scale - 1);
+      zoomMatrix.m42 = -y * (scale - 1);
 
       for (const slot of this._slots) {
-        DOM_MATRIX_A.setMatrixValue(slot.style.transform);
-        DOM_MATRIX_A.preMultiplySelf(DOM_MATRIX_B);
-        slot.style.transformOrigin = 'top left';
-        slot.style.transform = DOM_MATRIX_A.toString();
+        const domMatrix = this._slotDOMMatrixMap.get(slot);
+        domMatrix.preMultiplySelf(zoomMatrix);
+        slot.style.transform = domMatrix.toString();
       }
     };
 
     const resetPositions = () => {
+      viewportBoundingClientRect = this.getBoundingClientRect();
       previousPinchSize = 0;
       firstClientX = 0;
       firstClientY = 0;
@@ -232,10 +234,6 @@ export default class ViewportElement extends HTMLElement {
           if (slot.style.resize === 'none') {
             isViewport = true;
           } else {
-            const boundingClientRect = slot.getBoundingClientRect();
-
-            DOM_MATRIX_A.setMatrixValue(slot.style.transform);
-
             let otherPointerEvent;
 
             for (const pointer of targetPointersSet) {
@@ -250,17 +248,20 @@ export default class ViewportElement extends HTMLElement {
             const pinchOffsetTop = (event.clientY < otherPointerEvent.clientY ? event.movementY : 0) / window.devicePixelRatio;
             const pinchOffsetBottom = (event.clientY > otherPointerEvent.clientY ? event.movementY : 0) / window.devicePixelRatio;
 
+            const boundingClientRect = slot.getBoundingClientRect();
+            const domMatrix = this._slotDOMMatrixMap.get(slot);
+
             if (slot.style.resize === 'both' || slot.style.resize === 'horizontal') {
-              slot.style.width = `${(boundingClientRect.width - pinchOffsetLeft + pinchOffsetRight) * (1 / DOM_MATRIX_A.a)}px`;
-              DOM_MATRIX_A.m41 += pinchOffsetLeft - sumMovementX;
+              slot.style.width = `${(boundingClientRect.width - pinchOffsetLeft + pinchOffsetRight) * (1 / domMatrix.a)}px`;
+              domMatrix.m41 += pinchOffsetLeft - sumMovementX;
             }
 
             if (slot.style.resize === 'both' || slot.style.resize === 'vertical') {
-              slot.style.height = `${(boundingClientRect.height - pinchOffsetTop + pinchOffsetBottom) * (1 / DOM_MATRIX_A.d)}px`;
-              DOM_MATRIX_A.m42 += pinchOffsetTop - sumMovementY;
+              slot.style.height = `${(boundingClientRect.height - pinchOffsetTop + pinchOffsetBottom) * (1 / domMatrix.d)}px`;
+              domMatrix.m42 += pinchOffsetTop - sumMovementY;
             }
 
-            slot.style.transform = DOM_MATRIX_A.toString();
+            slot.style.transform = domMatrix.toString();
           }
         }
       }
@@ -271,12 +272,12 @@ export default class ViewportElement extends HTMLElement {
       }
       if (event.pointerId === pointerIds[1]) {
         if (firstClientX || firstClientY) {
-          const x = (firstClientX + event.clientX) * .5 - this.clientWidth * .5;
-          const y = (firstClientY + event.clientY) * .5 - this.clientHeight * .5;
-          VECTOR2.x = firstClientX - event.clientX;
-          VECTOR2.y = firstClientY - event.clientY;
+          const x = (firstClientX + event.clientX) * .5 - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5;
+          const y = (firstClientY + event.clientY) * .5 - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5;
+          pinchVector.x = firstClientX - event.clientX;
+          pinchVector.y = firstClientY - event.clientY;
 
-          const pinchSize = VECTOR2.size;
+          const pinchSize = pinchVector.size;
 
           if (isViewport && previousPinchSize) {
             zoom(pinchSize / previousPinchSize, x, y);
@@ -331,9 +332,10 @@ export default class ViewportElement extends HTMLElement {
       if (event.target !== this && event.target.scrollHeight > event.target.clientHeight) {
         return;
       }
+      const viewportBoundingClientRect = this.getBoundingClientRect();
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
-      const x = event.clientX - this.clientWidth * .5;
-      const y = event.clientY - this.clientHeight * .5;
+      const x = event.clientX - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5;
+      const y = event.clientY - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5;
       zoom(scale, x, y);
     });
 
@@ -348,7 +350,9 @@ export default class ViewportElement extends HTMLElement {
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
           node.slot = slot.name;
-          slot.style.transform = `translate(${boundingClientRect.x}px, ${boundingClientRect.y}px)`;
+          const domMatrix = new DOMMatrix();
+          this._slotDOMMatrixMap.set(slot, domMatrix);
+          this._offsetElement(slot, boundingClientRect.x, boundingClientRect.y);
           const style = getComputedStyle(node);
           slot.style.resize = style.resize;
           if (style.resize !== 'none') {
@@ -410,17 +414,18 @@ export default class ViewportElement extends HTMLElement {
       domRect.height = Math.max(domRect.height, boundingClientRect.y + boundingClientRect.height - domRect.y);
     }
 
-    const offsetX = -domRect.x - domRect.width * .5 + this.clientWidth * .5;
-    const offsetY = -domRect.y - domRect.height * .5 + this.clientHeight * .5;
+    const viewportBoundingClientRect = this.getBoundingClientRect();
+    const offsetX = -domRect.x - domRect.width * .5 + viewportBoundingClientRect.x + viewportBoundingClientRect.width * .5;
+    const offsetY = -domRect.y - domRect.height * .5 + viewportBoundingClientRect.y + viewportBoundingClientRect.height * .5;
     for (const slot of this._slots) {
       this._offsetElement(slot, offsetX, offsetY);
     }
   }
 
   _offsetElement(element, offsetX, offsetY) {
-    DOM_MATRIX_A.setMatrixValue(element.style.transform);
-    DOM_MATRIX_A.m41 += offsetX;
-    DOM_MATRIX_A.m42 += offsetY;
-    element.style.transform = DOM_MATRIX_A.toString();
+    const domMatrix = this._slotDOMMatrixMap.get(element);
+    domMatrix.m41 += offsetX;
+    domMatrix.m42 += offsetY;
+    element.style.transform = domMatrix.toString();
   }
 }
