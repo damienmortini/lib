@@ -58,6 +58,8 @@ export default class ViewportElement extends HTMLElement {
       <div id="content"></div>
     `;
 
+    this._scale = 1;
+
     const slotElementMap = new Map();
     const elementSlotMap = new Map();
     this._slotDOMMatrixMap = new Map();
@@ -106,6 +108,8 @@ export default class ViewportElement extends HTMLElement {
 
     const zoomMatrix = new DOMMatrix();
     const zoom = (scale, x, y) => {
+      this._scale *= scale;
+
       zoomMatrix.m11 = scale;
       zoomMatrix.m22 = scale;
       zoomMatrix.m41 = -x * (scale - 1);
@@ -355,6 +359,8 @@ export default class ViewportElement extends HTMLElement {
           node.slot = slot.name;
           const domMatrix = new DOMMatrix();
           this._slotDOMMatrixMap.set(slot, domMatrix);
+          domMatrix.m11 = this._scale;
+          domMatrix.m22 = this._scale;
           this._offsetElement(slot, boundingClientRect.x, boundingClientRect.y);
           const style = getComputedStyle(node);
           slot.style.resize = style.resize;
