@@ -178,6 +178,7 @@ export default class ViewportElement extends HTMLElement {
       }
 
       actioned = true;
+      content.setAttribute('disabled', '');
 
       pointerEventMap.set(event.pointerId, event);
       const pointerIds = [...pointerEventMap.keys()];
@@ -210,8 +211,6 @@ export default class ViewportElement extends HTMLElement {
         if (!this._selectedElements.has(element)) {
           this._selectedElements.add(element);
         }
-
-        slot.setAttribute('disabled', '');
 
         let sumMovementX = 0;
         let sumMovementY = 0;
@@ -326,6 +325,7 @@ export default class ViewportElement extends HTMLElement {
           }
         }
         actioned = false;
+        content.removeAttribute('disabled');
       }
     };
 
