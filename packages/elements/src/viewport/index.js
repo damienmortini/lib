@@ -35,7 +35,7 @@ export default class ViewportElement extends HTMLElement {
           z-index: 1;
         }
 
-        #content slot[disabled]::slotted(*) {
+        #content slot[disabled]::slotted(*), #content[disabled] slot::slotted(*) {
           pointer-events: none;
         }
 
@@ -59,13 +59,30 @@ export default class ViewportElement extends HTMLElement {
       <div id="content"></div>
     `;
 
+    const slotElementMap = new Map();
+    const elementSlotMap = new Map();
+
     const content = this.shadowRoot.querySelector('#content');
     this._styleSheet = this.shadowRoot.querySelector('style').sheet;
     this._slotUID = 0;
     this._slots = new Set();
-    this._selectedElements = new Set();
-    const slotElementMap = new Map();
-    const elementSlotMap = new Map();
+    this._selectedElements = new class extends Set {
+      add(value) {
+        elementSlotMap.get(value).setAttribute('selected', '');
+        return super.add(value);
+      }
+
+      delete(value) {
+        elementSlotMap.get(value).removeAttribute('selected');
+        return super.delete(value);
+      }
+
+      clear() {
+        for (const value of this) {
+          this.delete(value);
+        }
+      }
+    };
 
     this.preventManipulation = function (event) {
       return false;
@@ -77,6 +94,7 @@ export default class ViewportElement extends HTMLElement {
     const pointerTargetMap = new Map();
     const targetPointersMap = new Map();
 
+    let actioned = false;
     let previousPinchSize = 0;
 
     let firstClientX = 0;
@@ -96,24 +114,38 @@ export default class ViewportElement extends HTMLElement {
       }
     };
 
-    const reset = () => {
+    const resetPositions = () => {
       previousPinchSize = 0;
       firstClientX = 0;
       firstClientY = 0;
     };
 
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Shift') {
+        content.setAttribute('disabled', '');
+      }
+    });
+
+    window.addEventListener('keyup', (event) => {
+      if (event.key === 'Shift') {
+        content.removeAttribute('disabled');
+      }
+    });
+
     const onPointerDown = (event) => {
-      reset();
+      if (pointerEventMap.has(event.pointerId)) {
+        return;
+      }
 
       if (event.target !== event.currentTarget && event.target.scrollHeight > event.target.offsetHeight) {
         return;
       }
-      if (pointerEventMap.has(event.pointerId)) {
-        return;
-      }
+
       if (this.preventManipulation(event)) {
         return;
       }
+
+      resetPositions();
 
       if (!pointerEventMap.size) {
         window.addEventListener('pointermove', onPointerMove);
@@ -126,32 +158,21 @@ export default class ViewportElement extends HTMLElement {
       if (!targetPointersSet) {
         targetPointersSet = new Set();
         targetPointersMap.set(event.currentTarget, targetPointersSet);
-        const currentElement = slotElementMap.get(event.currentTarget);
-        if (!event.shiftKey && !this._selectedElements.has(currentElement) || event.currentTarget === this) {
-          for (const element of this._selectedElements) {
-            const slot = elementSlotMap.get(element);
-            slot.removeAttribute('selected');
-          }
-          this._selectedElements.clear();
-        }
-        if (event.currentTarget !== this) {
-          event.currentTarget.setAttribute('disabled', '');
-          if (event.shiftKey && this._selectedElements.has(currentElement)) {
-            event.currentTarget.removeAttribute('selected');
-            this._selectedElements.delete(currentElement);
-          } else {
-            event.currentTarget.setAttribute('selected', '');
-            this._selectedElements.add(slotElementMap.get(event.currentTarget));
-          }
-        }
       }
       targetPointersSet.add(event.pointerId);
+
+      const currentElement = slotElementMap.get(event.currentTarget);
+      if (!event.shiftKey && event.currentTarget !== this && !this._selectedElements.has(currentElement)) {
+        this._selectedElements.clear();
+      }
     };
 
     const onPointerMove = (event) => {
       if (!pointerEventMap.has(event.pointerId)) {
         return;
       }
+
+      actioned = true;
 
       pointerEventMap.set(event.pointerId, event);
       const pointerIds = [...pointerEventMap.keys()];
@@ -179,6 +200,13 @@ export default class ViewportElement extends HTMLElement {
       } else if (!isViewport) {
         const slot = pointerTargetMap.get(event.pointerId);
         const targetPointersSet = targetPointersMap.get(slot);
+        const element = slotElementMap.get(slot);
+
+        if (!this._selectedElements.has(element)) {
+          this._selectedElements.add(element);
+        }
+
+        slot.setAttribute('disabled', '');
 
         let sumMovementX = 0;
         let sumMovementY = 0;
@@ -260,7 +288,7 @@ export default class ViewportElement extends HTMLElement {
     };
 
     const onPointerUp = (event) => {
-      reset();
+      resetPositions();
       event.preventDefault();
       if (event.pointerType === 'mouse' && event.type === 'pointerout' || !pointerEventMap.has(event.pointerId)) {
         return;
@@ -278,6 +306,22 @@ export default class ViewportElement extends HTMLElement {
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
         window.removeEventListener('pointerout', onPointerUp);
+        const element = slotElementMap.get(target);
+        if (!actioned) {
+          if (target === this) {
+            this._selectedElements.clear();
+          } else {
+            if (event.shiftKey && this._selectedElements.has(element)) {
+              this._selectedElements.delete(element);
+            } else {
+              if (!event.shiftKey) {
+                this._selectedElements.clear();
+              }
+              this._selectedElements.add(element);
+            }
+          }
+        }
+        actioned = false;
       }
     };
 
