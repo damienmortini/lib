@@ -31,11 +31,11 @@
   },
   "homepage": "https://github.com/damienmortini/lib",
   "dependencies": {
-    "gl-matrix": "^3.0.0",
-    "mobile-detect": "^1.4.3"
+    "gl-matrix": "^3.1.0",
+    "mobile-detect": "^1.4.4"
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
+    "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.3"
   }
