@@ -27,13 +27,13 @@
   },
   "homepage": "https://github.com/damienmortini/elements#readme",
   "dependencies": {
-    "@damienmortini/lib": "^0.2.7",
-    "@simonwep/pickr": "^1.4.5",
-    "@webcomponents/webcomponentsjs": "^2.3.0"
+    "@damienmortini/lib": "^0.2.10",
+    "@simonwep/pickr": "^1.4.8",
+    "@webcomponents/webcomponentsjs": "^2.4.0"
   },
   "devDependencies": {
-    "@damienmortini/server": "^1.0.3",
-    "eslint": "^6.6.0",
+    "@damienmortini/server": "^1.0.4",
+    "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.3"
   }
