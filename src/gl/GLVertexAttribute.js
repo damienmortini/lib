@@ -14,7 +14,7 @@ export default class GLVertexAttribute {
     stride = 0,
     count = undefined,
     divisor = 0,
-  } = { gl }) {
+  }) {
     this.gl = gl;
     this.buffer = buffer;
     this.size = size;

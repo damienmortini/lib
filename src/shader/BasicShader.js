@@ -3,8 +3,8 @@ import Shader from '../3d/Shader.js';
 export default class BasicShader extends Shader {
   constructor({
     positions = true,
-    normals = true,
-    uvs = true,
+    normals = false,
+    uvs = false,
     uniforms = undefined,
     vertexShaderChunks = [],
     fragmentShaderChunks = [],
