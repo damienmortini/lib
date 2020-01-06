@@ -33,6 +33,10 @@ export default class InputButtonElement extends HTMLElement {
         },
       });
     }
+
+    if (this.getAttribute('value')) {
+      this.value = JSON.parse(this.getAttribute('value'));
+    }
   }
 
   get value() {
@@ -42,9 +46,6 @@ export default class InputButtonElement extends HTMLElement {
   set value(value) {
     this._value = value;
     this.dispatchEvent(new Event('input', {
-      bubbles: true,
-    }));
-    this.dispatchEvent(new Event('change', {
       bubbles: true,
     }));
   }

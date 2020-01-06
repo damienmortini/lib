@@ -22,6 +22,10 @@ export default class InputSelectElement extends HTMLElement {
 
     this._select = this.shadowRoot.querySelector('select');
 
+    this._select.addEventListener('input', (event) => {
+      event.stopPropagation();
+    });
+
     for (const key in HTMLSelectElement.prototype) {
       if (key in InputSelectElement.prototype) {
         continue;
@@ -34,6 +38,10 @@ export default class InputSelectElement extends HTMLElement {
           this._select[key] = value;
         },
       });
+    }
+
+    if (this.getAttribute('value')) {
+      this.value = JSON.parse(this.getAttribute('value'));
     }
   }
 
@@ -80,5 +88,8 @@ export default class InputSelectElement extends HTMLElement {
   set value(value) {
     this._value = value;
     this._select.value = value;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }

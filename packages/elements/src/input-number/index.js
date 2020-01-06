@@ -30,6 +30,10 @@ export default class InputNumberElement extends HTMLElement {
         },
       });
     }
+
+    if (this.getAttribute('value')) {
+      this.value = Number(this.getAttribute('value'));
+    }
   }
 
   get value() {
@@ -37,6 +41,12 @@ export default class InputNumberElement extends HTMLElement {
   }
 
   set value(value) {
+    if (this._input.valueAsNumber === value) {
+      return;
+    }
     this._input.valueAsNumber = value;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }

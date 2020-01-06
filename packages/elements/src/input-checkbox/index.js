@@ -26,6 +26,8 @@ export default class InputCheckboxElement extends HTMLElement {
         },
       });
     }
+
+    this.value = this.getAttribute('value') === 'true';
   }
 
   get value() {
@@ -33,6 +35,12 @@ export default class InputCheckboxElement extends HTMLElement {
   }
 
   set value(value) {
+    if (value === this._input.checked) {
+      return;
+    }
     this._input.checked = value;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }

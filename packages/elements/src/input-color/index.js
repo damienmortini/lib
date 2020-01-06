@@ -26,11 +26,13 @@ export default class InputColorElement extends HTMLElement {
     this._colorInput = this.shadowRoot.querySelector('input[type=color]');
     this._textInput = this.shadowRoot.querySelector('input[type=text]');
 
-    this._colorInput.addEventListener('input', () => {
+    this._colorInput.addEventListener('input', (event) => {
+      event.stopPropagation();
       this.value = this._colorInput.value;
     });
 
-    this._textInput.addEventListener('input', () => {
+    this._textInput.addEventListener('input', (event) => {
+      event.stopPropagation();
       this.value = this._textInput.value;
     });
 
@@ -47,6 +49,11 @@ export default class InputColorElement extends HTMLElement {
           this._textInput[key] = value;
         },
       });
+    }
+
+    const value = this.getAttribute('value');
+    if (value) {
+      this.value = typeof value === 'object' ? JSON.parse(value) : value;
     }
   }
 
@@ -80,6 +87,10 @@ export default class InputColorElement extends HTMLElement {
 
     this._textInput.value = typeof value === 'string' ? value : hexValue;
     this._colorInput.value = hexValue;
+
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 
   _valueToHexadecimal(value) {

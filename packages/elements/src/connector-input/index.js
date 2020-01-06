@@ -277,9 +277,6 @@ class ConnectorInputElement extends HTMLElement {
         output.dispatchEvent(new Event('input', {
           bubbles: true,
         }));
-        output.dispatchEvent(new Event('change', {
-          bubbles: true,
-        }));
       }
     }
   }

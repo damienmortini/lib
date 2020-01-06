@@ -23,12 +23,14 @@ export default class InputRangeElement extends HTMLElement {
     this._rangeInput = this.shadowRoot.querySelector('input[type=range]');
     this._numberInput = this.shadowRoot.querySelector('input[type=number]');
 
-    this._rangeInput.addEventListener('input', () => {
+    this._rangeInput.addEventListener('input', (event) => {
+      event.stopPropagation();
       this.value = this._rangeInput.valueAsNumber;
       this._numberInput.valueAsNumber = this.value;
     });
 
-    this._numberInput.addEventListener('input', () => {
+    this._numberInput.addEventListener('input', (event) => {
+      event.stopPropagation();
       this.value = this._numberInput.valueAsNumber;
       this._rangeInput.valueAsNumber = this.value;
     });
@@ -62,6 +64,10 @@ export default class InputRangeElement extends HTMLElement {
     });
     observer.observe(this._rangeInput, { attributes: true });
     observer.observe(this, { attributes: true });
+
+    if (this.getAttribute('value')) {
+      this.value = Number(this.getAttribute('value'));
+    }
   }
 
   get value() {
@@ -69,7 +75,13 @@ export default class InputRangeElement extends HTMLElement {
   }
 
   set value(value) {
+    if (value === this._rangeInput.valueAsNumber && value === this._numberInput.valueAsNumber) {
+      return;
+    }
     this._rangeInput.valueAsNumber = value;
     this._numberInput.valueAsNumber = value;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }

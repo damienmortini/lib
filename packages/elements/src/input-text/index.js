@@ -16,7 +16,7 @@ export default class InputTextElement extends HTMLElement {
       <textarea rows="1"></textarea>
     `;
 
-    const input = this.shadowRoot.querySelector('textarea');
+    this._textarea = this.shadowRoot.querySelector('textarea');
 
     for (const key in HTMLTextAreaElement.prototype) {
       if (key in InputTextElement.prototype) {
@@ -24,12 +24,30 @@ export default class InputTextElement extends HTMLElement {
       }
       Object.defineProperty(this, key, {
         get() {
-          return input[key];
+          return this._textarea[key];
         },
         set(value) {
-          input[key] = value;
+          this._textarea[key] = value;
         },
       });
     }
+
+    if (this.getAttribute('value')) {
+      this.value = this.getAttribute('value');
+    }
+  }
+
+  get value() {
+    return this._textarea.value;
+  }
+
+  set value(value) {
+    if (this._textarea.value === value) {
+      return;
+    }
+    this._textarea.value = value;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }

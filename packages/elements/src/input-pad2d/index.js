@@ -74,7 +74,7 @@ export default class InputPad2DElement extends HTMLElement {
       window.addEventListener('pointerup', onPointerUp);
     });
 
-    this.value = [0, 0];
+    this.value = this.getAttribute('value') ? JSON.parse(this.getAttribute('value')) : [0, 0];
   }
 
   get value() {
@@ -82,8 +82,14 @@ export default class InputPad2DElement extends HTMLElement {
   }
 
   set value(value) {
+    if (this._value[0] === value[0] && this._value[1] === value[1]) {
+      return;
+    }
     this._value = value;
     this._pointer.style.left = `${(this._value[0] * .5 + .5) * 100}%`;
     this._pointer.style.top = `${(-this._value[1] * .5 + .5) * 100}%`;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }
