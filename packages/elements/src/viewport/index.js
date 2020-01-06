@@ -60,22 +60,25 @@ export default class ViewportElement extends HTMLElement {
 
     this._scale = 1;
 
-    const slotElementMap = new Map();
-    const elementSlotMap = new Map();
+    this._slotElementMap = new Map();
+    this._elementSlotMap = new Map();
     this._slotDOMMatrixMap = new Map();
 
     const content = this.shadowRoot.querySelector('#content');
     this._styleSheet = this.shadowRoot.querySelector('style').sheet;
     this._slotUID = 0;
     this._slots = new Set();
+
+    const self = this;
+
     this._selectedElements = new class extends Set {
       add(value) {
-        elementSlotMap.get(value).setAttribute('selected', '');
+        self._elementSlotMap.get(value).setAttribute('selected', '');
         return super.add(value);
       }
 
       delete(value) {
-        elementSlotMap.get(value).removeAttribute('selected');
+        self._elementSlotMap.get(value).removeAttribute('selected');
         return super.delete(value);
       }
 
@@ -170,7 +173,7 @@ export default class ViewportElement extends HTMLElement {
       }
       targetPointersSet.add(event.pointerId);
 
-      const currentElement = slotElementMap.get(event.currentTarget);
+      const currentElement = this._slotElementMap.get(event.currentTarget);
       if (!event.shiftKey && event.currentTarget !== this && !this._selectedElements.has(currentElement)) {
         this._selectedElements.clear();
       }
@@ -210,7 +213,7 @@ export default class ViewportElement extends HTMLElement {
       } else if (!isViewport) {
         const slot = pointerTargetMap.get(event.pointerId);
         const targetPointersSet = targetPointersMap.get(slot);
-        const element = slotElementMap.get(slot);
+        const element = this._slotElementMap.get(slot);
 
         if (!this._selectedElements.has(element)) {
           this._selectedElements.add(element);
@@ -232,7 +235,7 @@ export default class ViewportElement extends HTMLElement {
           this._offsetElement(slot, sumMovementX, sumMovementY);
         } else {
           for (const element of this._selectedElements) {
-            const slot = elementSlotMap.get(element);
+            const slot = this._elementSlotMap.get(element);
             this._offsetElement(slot, sumMovementX, sumMovementY);
           }
         }
@@ -313,7 +316,7 @@ export default class ViewportElement extends HTMLElement {
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
         window.removeEventListener('pointerout', onPointerUp);
-        const element = slotElementMap.get(target);
+        const element = this._slotElementMap.get(target);
         if (!actioned) {
           if (target === this) {
             this._selectedElements.clear();
@@ -381,17 +384,17 @@ export default class ViewportElement extends HTMLElement {
           content.appendChild(slot);
           this._slotUID++;
           this._slots.add(slot);
-          slotElementMap.set(slot, node);
-          elementSlotMap.set(node, slot);
+          this._slotElementMap.set(slot, node);
+          this._elementSlotMap.set(node, slot);
           slot.addEventListener('pointerdown', onPointerDown);
         }
         for (const node of mutation.removedNodes) {
           if (!(node instanceof HTMLElement)) {
             continue;
           }
-          const slot = elementSlotMap.get(node);
+          const slot = this._elementSlotMap.get(node);
           slot.removeEventListener('pointerdown', onPointerDown);
-          slotElementMap.delete(slot);
+          this._slotElementMap.delete(slot);
           this._slots.delete(slot);
           slot.remove();
           for (const [index, rule] of [...this._styleSheet.cssRules].entries()) {
@@ -412,6 +415,23 @@ export default class ViewportElement extends HTMLElement {
 
   get selectedElements() {
     return this._selectedElements;
+  }
+
+  getElementBoundingRect(element) {
+    const slot = this._elementSlotMap.get(element);
+    const domMatrix = this._slotDOMMatrixMap.get(slot);
+
+    const domRect = new DOMRect();
+    domRect.x = domMatrix.m41 / this._scale;
+    domRect.y = domMatrix.m42 / this._scale;
+    if (slot.attributeStyleMap.get('width')) {
+      domRect.width = slot.attributeStyleMap.get('width').value;
+    }
+    if (slot.attributeStyleMap.get('height')) {
+      domRect.height = slot.attributeStyleMap.get('height').value;
+    }
+
+    return domRect;
   }
 
   centerView() {
