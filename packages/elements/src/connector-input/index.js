@@ -74,12 +74,11 @@ class ConnectorInputElement extends HTMLElement {
             margin: .2em;
           }
 
-          :host([connected]) .inside {
-            visibility: visible;
+          :host(:not([connected])) .inside {
+            visibility: hidden;
           }
 
           .inside {
-            visibility: hidden;
             position: absolute;
             margin: auto;
             left: 0;
