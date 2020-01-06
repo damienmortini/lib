@@ -353,6 +353,7 @@ export default class ViewportElement extends HTMLElement {
           if (!(node instanceof HTMLElement)) {
             continue;
           }
+          node.slot = '';
           const boundingClientRect = node.getBoundingClientRect();
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
