@@ -7,7 +7,7 @@
  *    outputs="[document.getElementById('output1'), document.getElementById('output2')]"
  * ></graph-connector>
  */
-class ConnectorInputElement extends HTMLElement {
+class InputConnectorElement extends HTMLElement {
   /**
    * Observed Attributes
    * @private
@@ -123,7 +123,7 @@ class ConnectorInputElement extends HTMLElement {
         if (value.value !== undefined) {
           self._value = value.value;
         }
-        if (value instanceof ConnectorInputElement) {
+        if (value instanceof InputConnectorElement) {
           self._connectorElementInputs.add(value);
           value.outputs.add(self);
         } else {
@@ -139,7 +139,7 @@ class ConnectorInputElement extends HTMLElement {
           return;
         }
         value.removeEventListener('input', self._onInputChangeBinded);
-        if (value instanceof ConnectorInputElement) {
+        if (value instanceof InputConnectorElement) {
           self._connectorElementInputs.delete(value);
           value.outputs.delete(self);
         } else {
@@ -161,7 +161,7 @@ class ConnectorInputElement extends HTMLElement {
           return this;
         }
         super.add(value);
-        if (value instanceof ConnectorInputElement) {
+        if (value instanceof InputConnectorElement) {
           self._connectorElementOutputs.add(value);
           value.inputs.add(self);
           self.dispatchEvent(new CustomEvent('connected', {
@@ -187,11 +187,11 @@ class ConnectorInputElement extends HTMLElement {
         }
         self._connectorElementOutputs.delete(value);
         self._inputElementOutputs.delete(value);
-        if (value instanceof ConnectorInputElement) {
+        if (value instanceof InputConnectorElement) {
           value.inputs.delete(self);
         }
         self._updateConnectedStatus();
-        if (value instanceof ConnectorInputElement) {
+        if (value instanceof InputConnectorElement) {
           self.dispatchEvent(new CustomEvent('disconnected', {
             bubbles: true,
             composed: true,
@@ -233,10 +233,10 @@ class ConnectorInputElement extends HTMLElement {
   }
 
   disconnectedCallback() {
-    if (this.type & ConnectorInputElement.TYPE_INPUT) {
+    if (this.type & InputConnectorElement.TYPE_INPUT) {
       this.inputs.clear();
     }
-    if (this.type & ConnectorInputElement.TYPE_OUTPUT) {
+    if (this.type & InputConnectorElement.TYPE_OUTPUT) {
       this.outputs.clear();
     }
   }
@@ -273,7 +273,7 @@ class ConnectorInputElement extends HTMLElement {
     for (const output of this.outputs) {
       const oldValue = output.value;
       output.value = value;
-      if (!(output instanceof ConnectorInputElement) && oldValue !== value) {
+      if (!(output instanceof InputConnectorElement) && oldValue !== value) {
         output.dispatchEvent(new Event('input', {
           bubbles: true,
         }));
@@ -284,7 +284,7 @@ class ConnectorInputElement extends HTMLElement {
   /**
    * Set of inputs
    * @readonly
-   * @type {Set.<HTMLInputElement|ConnectorInputElement>}
+   * @type {Set.<HTMLInputElement|InputConnectorElement>}
    */
   get inputs() {
     return this._inputs;
@@ -293,7 +293,7 @@ class ConnectorInputElement extends HTMLElement {
   /**
    * Set of outputs
    * @readonly
-   * @type {Set.<(HTMLInputElement|ConnectorInputElement)>}
+   * @type {Set.<(HTMLInputElement|InputConnectorElement)>}
    */
   get outputs() {
     return this._outputs;
@@ -309,4 +309,4 @@ class ConnectorInputElement extends HTMLElement {
   }
 }
 
-export default ConnectorInputElement;
+export default InputConnectorElement;

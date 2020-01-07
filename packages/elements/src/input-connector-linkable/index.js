@@ -1,4 +1,4 @@
-import ConnectorInputElement from '../connector-input/index.js';
+import InputConnectorElement from '../input-connector/index.js';
 
 const CONNECTORS = new Set();
 
@@ -7,7 +7,7 @@ let activeConnector = null;
 /**
  * Handle connector elements linking
  */
-class ConnectorInputLinkableElement extends ConnectorInputElement {
+class InputConnectorLinkableElement extends InputConnectorElement {
   constructor() {
     super();
 
@@ -16,6 +16,7 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
         cursor: pointer;
         margin: 0;
         padding: .2em;
+        touch-action: none;
       }
       :host(:hover) {
         background: red;
@@ -85,7 +86,7 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
 
     window.removeEventListener('pointerup', this._onWindowPointerUpBinded);
 
-    if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== ConnectorInputLinkableElement.TYPE_BOTH)) {
+    if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== InputConnectorLinkableElement.TYPE_BOTH)) {
       activeConnector = null;
       this.dispatchEvent(new CustomEvent('linkend', {
         composed: true,
@@ -98,8 +99,8 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
       return;
     }
 
-    const inputConnector = activeConnector.type & ConnectorInputLinkableElement.TYPE_OUTPUT ? activeConnector : hitConnector;
-    const outputConnector = hitConnector.type & ConnectorInputLinkableElement.TYPE_INPUT ? hitConnector : activeConnector;
+    const inputConnector = activeConnector.type & InputConnectorLinkableElement.TYPE_OUTPUT ? activeConnector : hitConnector;
+    const outputConnector = hitConnector.type & InputConnectorLinkableElement.TYPE_INPUT ? hitConnector : activeConnector;
 
     inputConnector.outputs.add(outputConnector);
 
@@ -116,4 +117,4 @@ class ConnectorInputLinkableElement extends ConnectorInputElement {
   }
 }
 
-export default ConnectorInputLinkableElement;
+export default InputConnectorLinkableElement;

@@ -90,6 +90,17 @@ export default class ViewportElement extends HTMLElement {
     };
 
     this.preventManipulation = function (event) {
+      for (const node of event.composedPath()) {
+        if (node === content) {
+          return false;
+        }
+        if (!(node instanceof HTMLElement)) {
+          continue;
+        }
+        if (getComputedStyle(node)['touch-action'] === 'none') {
+          return true;
+        }
+      }
       return false;
     };
 
