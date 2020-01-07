@@ -91,7 +91,7 @@ export default class ViewportElement extends HTMLElement {
 
     this.preventManipulation = function (event) {
       for (const node of event.composedPath()) {
-        if (node === content) {
+        if (node === content || node === this) {
           return false;
         }
         if (!(node instanceof HTMLElement)) {
