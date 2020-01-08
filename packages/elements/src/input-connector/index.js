@@ -128,9 +128,13 @@ class InputConnectorElement extends HTMLElement {
           value.outputs.add(self);
         } else {
           self._inputElementInputs.add(value);
-          value.addEventListener('input', self._onInputChangeBinded);
         }
+        value.addEventListener('input', self._onInputChangeBinded);
         self._updateConnectedStatus();
+        self.dispatchEvent(new InputEvent('input', {
+          bubbles: true,
+          composed: true,
+        }));
         return this;
       }
       delete(value) {
@@ -175,9 +179,10 @@ class InputConnectorElement extends HTMLElement {
           self._inputElementOutputs.add(value);
         }
         self._updateConnectedStatus();
-        if (self._value !== undefined) {
-          value.value = self._value;
-        }
+        self.dispatchEvent(new InputEvent('input', {
+          bubbles: true,
+          composed: true,
+        }));
         return this;
       }
       delete(value) {
@@ -254,7 +259,13 @@ class InputConnectorElement extends HTMLElement {
   }
 
   _onInputChange(event) {
-    this.value = event.target.value;
+    this._value = event.target.value;
+    for (const output of this.outputs) {
+      if (!(output instanceof InputConnectorElement)) {
+        output.value = this._value;
+      }
+    }
+    this.dispatchEvent(new event.constructor(event.type, event));
   }
 
   _updateConnectedStatus() {
@@ -265,20 +276,11 @@ class InputConnectorElement extends HTMLElement {
   }
 
   /**
-   * Value inputted, automatically set on input change but can be set manually
-   * @param {any} value
+   * Get current value stored in connector
+   * @readonly
    */
-  set value(value) {
-    this._value = value;
-    for (const output of this.outputs) {
-      const oldValue = output.value;
-      output.value = value;
-      if (!(output instanceof InputConnectorElement) && oldValue !== value) {
-        output.dispatchEvent(new Event('input', {
-          bubbles: true,
-        }));
-      }
-    }
+  get value() {
+    return this._value;
   }
 
   /**
