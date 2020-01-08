@@ -99,8 +99,8 @@ class InputConnectorLinkableElement extends InputConnectorElement {
       return;
     }
 
-    const inputConnector = activeConnector.type & InputConnectorLinkableElement.TYPE_OUTPUT ? activeConnector : hitConnector;
-    const outputConnector = hitConnector.type & InputConnectorLinkableElement.TYPE_INPUT ? hitConnector : activeConnector;
+    const inputConnector = activeConnector.type & InputConnectorLinkableElement.TYPE_INPUT || hitConnector.type & InputConnectorLinkableElement.TYPE_OUTPUT ? hitConnector : activeConnector;
+    const outputConnector = inputConnector === activeConnector ? hitConnector : activeConnector;
 
     inputConnector.outputs.add(outputConnector);
 
