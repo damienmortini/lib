@@ -97,7 +97,12 @@ export default class ViewportElement extends HTMLElement {
         if (!(node instanceof HTMLElement)) {
           continue;
         }
-        if (getComputedStyle(node)['touch-action'] === 'none') {
+        if (
+          node.isContentEditable ||
+          node instanceof HTMLInputElement && ['text', 'number', 'password', 'search', 'number', 'range', 'email', 'url', 'tel'].includes(node.type) ||
+          node instanceof HTMLTextAreaElement ||
+          getComputedStyle(node)['touch-action'] === 'none'
+        ) {
           return true;
         }
       }
