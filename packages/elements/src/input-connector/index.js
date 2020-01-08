@@ -131,10 +131,12 @@ class InputConnectorElement extends HTMLElement {
         }
         value.addEventListener('input', self._onInputChangeBinded);
         self._updateConnectedStatus();
-        self.dispatchEvent(new InputEvent('input', {
-          bubbles: true,
-          composed: true,
-        }));
+        if (!(value instanceof InputConnectorElement)) {
+          self.dispatchEvent(new InputEvent('input', {
+            bubbles: true,
+            composed: true,
+          }));
+        }
         return this;
       }
       delete(value) {
@@ -179,10 +181,12 @@ class InputConnectorElement extends HTMLElement {
           self._inputElementOutputs.add(value);
         }
         self._updateConnectedStatus();
-        self.dispatchEvent(new InputEvent('input', {
-          bubbles: true,
-          composed: true,
-        }));
+        if (value instanceof InputConnectorElement) {
+          self.dispatchEvent(new InputEvent('input', {
+            bubbles: true,
+            composed: true,
+          }));
+        }
         return this;
       }
       delete(value) {
