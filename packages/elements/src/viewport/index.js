@@ -445,7 +445,7 @@ export default class ViewportElement extends HTMLElement {
     return this._selectedElements;
   }
 
-  getElementBoundingRect(element) {
+  getElementRect(element) {
     const slot = this._elementSlotMap.get(element);
     const domMatrix = this._slotDOMMatrixMap.get(slot);
 
