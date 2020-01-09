@@ -12,7 +12,7 @@ export default class ViewportElement extends HTMLElement {
           touch-action: none;
         }
 
-        div {
+        #content {
           position: absolute;
           touch-action: none;
           left: 50%;
@@ -42,17 +42,17 @@ export default class ViewportElement extends HTMLElement {
           box-sizing: border-box;
         }
 
-        #content slot:hover {
-          outline: 1px dotted;
-        }
+        // #content slot:hover {
+        //   outline: 1px dotted;
+        // }
 
         #content slot[disabled], #content[disabled] slot {
           will-change: transform;
         }
 
-        #content slot[selected] {
-          outline: 1px solid;
-        }
+        // #content slot[selected] {
+        //   outline: 1px solid;
+        // }
       </style>
       <slot></slot>
       <div id="content"></div>
@@ -62,6 +62,7 @@ export default class ViewportElement extends HTMLElement {
 
     this._slotElementMap = new Map();
     this._elementSlotMap = new Map();
+    this._slotAssignedElementMap = new Map();
     this._slotDOMMatrixMap = new Map();
 
     const content = this.shadowRoot.querySelector('#content');
@@ -372,17 +373,27 @@ export default class ViewportElement extends HTMLElement {
           if (!(node instanceof HTMLElement)) {
             continue;
           }
+
+          let assignedElement = node;
+          if (node instanceof HTMLSlotElement) {
+            assignedElement = node.assignedElements({ flatten: true })[0];
+          }
+
           node.slot = '';
-          const boundingClientRect = node.getBoundingClientRect();
+          const boundingClientRect = assignedElement.getBoundingClientRect();
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
           node.slot = slot.name;
+
           const domMatrix = new DOMMatrix();
           this._slotDOMMatrixMap.set(slot, domMatrix);
           domMatrix.m11 = this._scale;
           domMatrix.m22 = this._scale;
           this._offsetElement(slot, boundingClientRect.x, boundingClientRect.y);
-          const style = getComputedStyle(node);
+          console.log(boundingClientRect);
+
+
+          const style = getComputedStyle(assignedElement);
           slot.style.resize = style.resize;
           if (style.resize !== 'none') {
             let ruleString = `[name="${slot.name}"]::slotted(*) {`;
@@ -402,6 +413,7 @@ export default class ViewportElement extends HTMLElement {
           this._slots.add(slot);
           this._slotElementMap.set(slot, node);
           this._elementSlotMap.set(node, slot);
+          this._slotAssignedElementMap.set(slot, assignedElement);
           slot.addEventListener('pointerdown', onPointerDown);
         }
         for (const node of mutation.removedNodes) {
@@ -410,8 +422,10 @@ export default class ViewportElement extends HTMLElement {
           }
           const slot = this._elementSlotMap.get(node);
           slot.removeEventListener('pointerdown', onPointerDown);
-          this._slotElementMap.delete(slot);
           this._slots.delete(slot);
+          this._slotElementMap.delete(slot);
+          this._elementSlotMap.delete(node);
+          this._slotAssignedElementMap.delete(slot);
           slot.remove();
           for (const [index, rule] of [...this._styleSheet.cssRules].entries()) {
             if (rule.selectorText === `[name="${slot.name}"]::slotted(*)`) {
@@ -451,18 +465,23 @@ export default class ViewportElement extends HTMLElement {
   }
 
   centerView() {
-    const domRect = new DOMRect(Infinity, Infinity, 0, 0);
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
     for (const slot of this._slots) {
-      const boundingClientRect = slot.getBoundingClientRect();
-      domRect.x = Math.min(domRect.x, boundingClientRect.x);
-      domRect.y = Math.min(domRect.y, boundingClientRect.y);
-      domRect.width = Math.max(domRect.width, boundingClientRect.x + boundingClientRect.width - domRect.x);
-      domRect.height = Math.max(domRect.height, boundingClientRect.y + boundingClientRect.height - domRect.y);
+      const assignedElement = this._slotAssignedElementMap.get(slot);
+      const boundingClientRect = assignedElement.getBoundingClientRect();
+      minX = Math.min(minX, boundingClientRect.x);
+      minY = Math.min(minY, boundingClientRect.y);
+      maxX = Math.max(maxX, boundingClientRect.x + boundingClientRect.width);
+      maxY = Math.max(maxY, boundingClientRect.y + boundingClientRect.height);
     }
 
     const viewportBoundingClientRect = this.getBoundingClientRect();
-    const offsetX = -domRect.x - domRect.width * .5 + viewportBoundingClientRect.x + viewportBoundingClientRect.width * .5;
-    const offsetY = -domRect.y - domRect.height * .5 + viewportBoundingClientRect.y + viewportBoundingClientRect.height * .5;
+    const offsetX = -minX - (maxX - minX) * .5 + viewportBoundingClientRect.x + viewportBoundingClientRect.width * .5;
+    const offsetY = -minY - (maxY - minY) * .5 + viewportBoundingClientRect.y + viewportBoundingClientRect.height * .5;
     for (const slot of this._slots) {
       this._offsetElement(slot, offsetX, offsetY);
     }
