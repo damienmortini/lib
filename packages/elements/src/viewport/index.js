@@ -422,6 +422,7 @@ export default class ViewportElement extends HTMLElement {
           slot.removeEventListener('pointerdown', onPointerDown);
           this._slots.delete(slot);
           this._slotElementMap.delete(slot);
+          this._selectedElements.delete(node);
           this._elementSlotMap.delete(node);
           this._slotAssignedElementMap.delete(slot);
           slot.remove();
