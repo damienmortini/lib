@@ -390,8 +390,6 @@ export default class ViewportElement extends HTMLElement {
           domMatrix.m11 = this._scale;
           domMatrix.m22 = this._scale;
           this._offsetElement(slot, boundingClientRect.x, boundingClientRect.y);
-          console.log(boundingClientRect);
-
 
           const style = getComputedStyle(assignedElement);
           slot.style.resize = style.resize;
