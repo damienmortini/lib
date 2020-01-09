@@ -1,4 +1,8 @@
 export default class InputRangeElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'max', 'min', 'step'];
+  }
+
   constructor() {
     super();
 
@@ -68,6 +72,14 @@ export default class InputRangeElement extends HTMLElement {
     if (this.getAttribute('value')) {
       this.value = Number(this.getAttribute('value'));
     }
+
+    if (this.getAttribute('value')) {
+      this.value = Number(this.getAttribute('value'));
+    }
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    this[name] = Number(newValue);
   }
 
   get value() {

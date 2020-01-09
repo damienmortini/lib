@@ -14,7 +14,7 @@ class InputConnectorElement extends HTMLElement {
    * @constant {Array.<String>}
    */
   static get observedAttributes() {
-    return ['inputs', 'outputs', 'connected'];
+    return ['input', 'output', 'connected'];
   }
 
   /**
@@ -105,6 +105,7 @@ class InputConnectorElement extends HTMLElement {
     `;
 
     this._onInputChangeBinded = this._onInputChange.bind(this);
+    this._checkConnectionBinded = this._checkConnection.bind(this);
 
     this._inputElementInputs = new Set();
     this._connectorElementInputs = new Set();
@@ -225,12 +226,33 @@ class InputConnectorElement extends HTMLElement {
     }
 
     switch (name) {
-      case 'inputs':
-      case 'outputs':
-        const array = new Function(`return ${newValue}`).apply(this);
-        for (const value of array) {
-          this[name].add(value);
+      case 'input':
+        const inputIds = newValue.split(' ');
+        for (const inputId of inputIds) {
+          const input = this.getRootNode().querySelector(`#${inputId}`);
+          requestAnimationFrame(() => {
+            if (input instanceof InputConnectorElement) {
+              return;
+            }
+            this.inputs.add(input);
+          });
         }
+        break;
+      case 'output':
+        const outputIds = newValue.split(' ');
+        for (const outputId of outputIds) {
+          const output = this.getRootNode().querySelector(`#${outputId}`);
+          requestAnimationFrame(() => {
+            if (output instanceof InputConnectorElement) {
+              return;
+            }
+            this.outputs.add(output);
+          });
+        }
+        // const array = new Function(`return ${newValue}`).apply(this);
+        // for (const value of array) {
+        //   this[name].add(value);
+        // }
         break;
       case 'connected':
         if (!this.connected) {
@@ -241,7 +263,29 @@ class InputConnectorElement extends HTMLElement {
     }
   }
 
+  _checkConnection(event) {
+    if (!(event.detail instanceof InputConnectorElement)) {
+      return;
+    }
+    if (!this.getAttribute('output')) {
+      return;
+    }
+    if (this.getAttribute('output').split(' ').includes(event.detail.id)) {
+      this.outputs.add(event.detail);
+    }
+  }
+
+  connectedCallback() {
+    this.dispatchEvent(new CustomEvent('connectoradd', {
+      bubbles: true,
+      composed: true,
+      detail: this,
+    }));
+    window.addEventListener('connectoradd', this._checkConnectionBinded);
+  }
+
   disconnectedCallback() {
+    window.removeEventListener('connectoradd', this._checkConnectionBinded);
     if (this.type & InputConnectorElement.TYPE_INPUT) {
       this.inputs.clear();
     }

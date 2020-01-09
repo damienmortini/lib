@@ -37,6 +37,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
   }
 
   connectedCallback() {
+    super.connectedCallback();
     CONNECTORS.add(this);
   }
 
