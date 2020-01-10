@@ -14,8 +14,6 @@ class InputConnectorLinkableElement extends InputConnectorElement {
     this.shadowRoot.querySelector('slot style').insertAdjacentHTML('beforeend', `
       :host {
         cursor: pointer;
-        margin: 0;
-        padding: .2em;
         touch-action: none;
       }
       :host(:hover) {

@@ -73,38 +73,30 @@ class InputConnectorElement extends HTMLElement {
           :host {
             display: inline-block;
             position: relative;
-            width: .8em;
-            height: .8em;
-            margin: .2em;
+            width: 1em;
+            height: 1em;
+            margin: 3px;
           }
 
           :host(:not([connected])) .inside {
             visibility: hidden;
           }
 
-          .inside {
-            position: absolute;
-            margin: auto;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 50%;
-            height: 50%;
-            background: currentColor;
-            border-radius: 50%;
+          .outside {
+            stroke: currentColor;
+            fill: none;
+            vector-effect: non-scaling-stroke;
           }
 
-          .outside {
+          svg {
             width: 100%;
             height: 100%;
-            border: 1px dotted;
-            border-radius: 50%;
-            box-sizing: border-box;
           }
         </style>
-        <div class="inside"></div>
-        <div class="outside"></div>
+        <svg viewBox="0 0 5 5" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="2.5" cy="2.5" r="1" class="inside"/>
+          <circle cx="2.5" cy="2.5" r="2" stroke-dasharray="1 1" class="outside"/>
+        </svg>
       </slot>
     `;
 
