@@ -1,3 +1,7 @@
+import Signal from '../../../lib/src/util/Signal.js';
+
+const CONNECTOR_ADD_SIGNAL = new Signal();
+
 /**
  * Connector element used to link inputs and other connectors together
  * @attribute inputs
@@ -169,6 +173,9 @@ class InputConnectorElement extends HTMLElement {
         }
         super.add(value);
         if (value instanceof InputConnectorElement) {
+          if (self.value !== undefined) {
+            value._value = self.value;
+          }
           self._connectorElementOutputs.add(value);
           value.inputs.add(self);
           self.dispatchEvent(new CustomEvent('connected', {
@@ -179,6 +186,9 @@ class InputConnectorElement extends HTMLElement {
             },
           }));
         } else {
+          if (self.value !== undefined) {
+            value.value = self.value;
+          }
           self._inputElementOutputs.add(value);
         }
         self._updateConnectedStatus();
@@ -243,16 +253,9 @@ class InputConnectorElement extends HTMLElement {
         for (const outputId of outputIds) {
           const output = this.getRootNode().querySelector(`#${outputId}`);
           requestAnimationFrame(() => {
-            if (output instanceof InputConnectorElement) {
-              return;
-            }
             this.outputs.add(output);
           });
         }
-        // const array = new Function(`return ${newValue}`).apply(this);
-        // for (const value of array) {
-        //   this[name].add(value);
-        // }
         break;
       case 'connected':
         if (!this.connected) {
@@ -263,29 +266,22 @@ class InputConnectorElement extends HTMLElement {
     }
   }
 
-  _checkConnection(event) {
-    if (!(event.detail instanceof InputConnectorElement)) {
-      return;
-    }
+  _checkConnection(connector) {
     if (!this.getAttribute('output')) {
       return;
     }
-    if (this.getAttribute('output').split(' ').includes(event.detail.id)) {
-      this.outputs.add(event.detail);
+    if (this.getAttribute('output').split(' ').includes(connector.id)) {
+      this.outputs.add(connector);
     }
   }
 
   connectedCallback() {
-    this.dispatchEvent(new CustomEvent('connectoradd', {
-      bubbles: true,
-      composed: true,
-      detail: this,
-    }));
-    window.addEventListener('connectoradd', this._checkConnectionBinded);
+    CONNECTOR_ADD_SIGNAL.dispatch(this);
+    CONNECTOR_ADD_SIGNAL.add(this._checkConnectionBinded);
   }
 
   disconnectedCallback() {
-    window.removeEventListener('connectoradd', this._checkConnectionBinded);
+    CONNECTOR_ADD_SIGNAL.delete(this._checkConnectionBinded);
     if (this.type & InputConnectorElement.TYPE_INPUT) {
       this.inputs.clear();
     }
