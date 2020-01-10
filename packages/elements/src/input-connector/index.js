@@ -129,10 +129,7 @@ class InputConnectorElement extends HTMLElement {
         value.addEventListener('input', self._onInputChangeBinded);
         self._updateConnectedStatus();
         if (!(value instanceof InputConnectorElement)) {
-          self.dispatchEvent(new InputEvent('input', {
-            bubbles: true,
-            composed: true,
-          }));
+          self.dispatchEvent(new InputEvent('input'));
         }
         return this;
       }
@@ -185,10 +182,7 @@ class InputConnectorElement extends HTMLElement {
         }
         self._updateConnectedStatus();
         if (value instanceof InputConnectorElement) {
-          self.dispatchEvent(new InputEvent('input', {
-            bubbles: true,
-            composed: true,
-          }));
+          self.dispatchEvent(new InputEvent('input'));
         }
         return this;
       }
@@ -305,7 +299,7 @@ class InputConnectorElement extends HTMLElement {
         output.value = this._value;
       }
     }
-    this.dispatchEvent(new event.constructor(event.type, event));
+    this.dispatchEvent(new InputEvent('input'));
   }
 
   _updateConnectedStatus() {
