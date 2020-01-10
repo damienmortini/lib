@@ -46,7 +46,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
   }
 
   _onConnected(event) {
-    this.dispatchEvent(new CustomEvent('link', {
+    this.dispatchEvent(new CustomEvent('connectorlink', {
       composed: true,
       bubbles: true,
       detail: {
@@ -64,7 +64,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
     window.addEventListener('pointerup', this._onWindowPointerUpBinded, { passive: false });
 
-    this.dispatchEvent(new CustomEvent('link', {
+    this.dispatchEvent(new CustomEvent('connectorlink', {
       composed: true,
       bubbles: true,
       detail: {
@@ -99,7 +99,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
     if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== InputConnectorLinkableElement.TYPE_BOTH)) {
       activeConnector = null;
-      this.dispatchEvent(new CustomEvent('link', {
+      this.dispatchEvent(new CustomEvent('connectorlink', {
         composed: true,
         bubbles: true,
         detail: {
