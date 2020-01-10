@@ -236,7 +236,9 @@ class InputConnectorElement extends HTMLElement {
             if (input instanceof InputConnectorElement) {
               return;
             }
-            this.inputs.add(input);
+            if (input) {
+              this.inputs.add(input);
+            }
           });
         }
         break;
@@ -244,9 +246,11 @@ class InputConnectorElement extends HTMLElement {
         const outputIds = newValue.split(' ');
         for (const outputId of outputIds) {
           const output = this.getRootNode().querySelector(`#${outputId}`);
-          requestAnimationFrame(() => {
-            this.outputs.add(output);
-          });
+          if (output) {
+            requestAnimationFrame(() => {
+              this.outputs.add(output);
+            });
+          }
         }
         break;
       case 'connected':
