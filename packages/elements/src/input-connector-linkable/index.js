@@ -30,18 +30,30 @@ class InputConnectorLinkableElement extends InputConnectorElement {
     this.addEventListener('pointerdown', this._onPointerDown);
 
     this._onWindowPointerUpBinded = this._onWindowPointerUp.bind(this);
-    this.addEventListener('pointerup', (event) => {
-    }, { passive: false });
   }
 
   connectedCallback() {
     super.connectedCallback();
     CONNECTORS.add(this);
+    this.addEventListener('connected', this._onConnected);
   }
 
   disconnectedCallback() {
+    this.removeEventListener('connected', this._onConnected);
+    window.removeEventListener('pointerup', this._onWindowPointerUpBinded);
     CONNECTORS.delete(this);
     super.disconnectedCallback();
+  }
+
+  _onConnected(event) {
+    this.dispatchEvent(new CustomEvent('link', {
+      composed: true,
+      bubbles: true,
+      detail: {
+        input: this,
+        output: event.detail.output,
+      },
+    }));
   }
 
   _onPointerDown() {
@@ -52,7 +64,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
     window.addEventListener('pointerup', this._onWindowPointerUpBinded, { passive: false });
 
-    this.dispatchEvent(new CustomEvent('linkstart', {
+    this.dispatchEvent(new CustomEvent('link', {
       composed: true,
       bubbles: true,
       detail: {
@@ -87,7 +99,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
     if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== InputConnectorLinkableElement.TYPE_BOTH)) {
       activeConnector = null;
-      this.dispatchEvent(new CustomEvent('linkend', {
+      this.dispatchEvent(new CustomEvent('link', {
         composed: true,
         bubbles: true,
         detail: {
@@ -104,15 +116,6 @@ class InputConnectorLinkableElement extends InputConnectorElement {
     inputConnector.outputs.add(outputConnector);
 
     activeConnector = null;
-
-    this.dispatchEvent(new CustomEvent('linkend', {
-      composed: true,
-      bubbles: true,
-      detail: {
-        input: inputConnector,
-        output: outputConnector,
-      },
-    }));
   }
 }
 
