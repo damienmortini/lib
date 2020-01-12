@@ -67,6 +67,7 @@ export default class InputRangeElement extends HTMLElement {
       default:
         this._rangeInput.setAttribute(name, newValue);
         this._numberInput.setAttribute(name, newValue);
+        this._rangeInput.valueAsNumber = this.value;
         break;
     }
   }
