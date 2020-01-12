@@ -1,6 +1,6 @@
 export default class InputRangeElement extends HTMLElement {
   static get observedAttributes() {
-    return ['value', 'max', 'min', 'step'];
+    return ['value', 'max', 'min', 'step', 'disabled'];
   }
 
   constructor() {
@@ -54,32 +54,21 @@ export default class InputRangeElement extends HTMLElement {
       });
     }
 
-    const observer = new MutationObserver((mutationsList) => {
-      for (const mutation of mutationsList) {
-        if (this._rangeInput.getAttribute(mutation.attributeName) === this.getAttribute(mutation.attributeName)) {
-          return;
-        }
-        if (mutation.target === this._rangeInput) {
-          this.setAttribute(mutation.attributeName, this._rangeInput.getAttribute(mutation.attributeName));
-        } else {
-          this._rangeInput.setAttribute(mutation.attributeName, this.getAttribute(mutation.attributeName));
-        }
-      }
-    });
-    observer.observe(this._rangeInput, { attributes: true });
-    observer.observe(this, { attributes: true });
-
-    if (this.getAttribute('value')) {
-      this.value = Number(this.getAttribute('value'));
-    }
-
     if (this.getAttribute('value')) {
       this.value = Number(this.getAttribute('value'));
     }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    this[name] = Number(newValue);
+    switch (name) {
+      case 'value':
+        this.value = Number(newValue);
+        break;
+      default:
+        this._rangeInput.setAttribute(name, newValue);
+        this._numberInput.setAttribute(name, newValue);
+        break;
+    }
   }
 
   get value() {
