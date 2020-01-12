@@ -171,6 +171,7 @@ class InputConnectorElement extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: {
+              input: self,
               output: value,
             },
           }));
@@ -202,6 +203,7 @@ class InputConnectorElement extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: {
+              input: self,
               output: value,
             },
           }));
@@ -333,6 +335,24 @@ class InputConnectorElement extends HTMLElement {
    */
   get outputs() {
     return this._outputs;
+  }
+
+  /**
+   * Set of input elements (non connector) only
+   * @readonly
+   * @type {Set.<HTMLInputElement>}
+   */
+  get inputElements() {
+    return this._inputElementInputs;
+  }
+
+  /**
+   * Set of output elements (non connector) only
+   * @readonly
+   * @type {Set.<(HTMLInputElement)>}
+   */
+  get outputElements() {
+    return this._inputElementOutputs;
   }
 
   /**
