@@ -364,7 +364,7 @@ export default class ViewportElement extends HTMLElement {
       const x = event.clientX - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5;
       const y = event.clientY - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5;
       zoom(scale, x, y);
-    });
+    }, { passive: true });
 
     // Mutation Observer
     const mutationCallback = (mutationsList) => {
