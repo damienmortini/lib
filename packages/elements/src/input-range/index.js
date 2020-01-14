@@ -15,6 +15,7 @@ export default class InputRangeElement extends HTMLElement {
         input {
           flex: 1;
           width: 100%;
+          min-width: 0;
         }
         input[type=range] {
           flex: 2;
