@@ -43,29 +43,27 @@ export default class GLVertexAttribute {
   }
 
   get type() {
-    let type = this._type;
-    if (!type) {
-      if (this.data instanceof Float32Array || this.data instanceof Float64Array) {
-        type = this.gl.FLOAT;
-      } else if (this.data instanceof Int8Array) {
-        type = this.gl.BYTE;
-      } else if (this.data instanceof Int16Array) {
-        type = this.gl.SHORT;
-      } else if (this.data instanceof Int32Array) {
-        type = this.gl.INT;
-      } else if (this.data instanceof Uint8Array) {
-        type = this.gl.UNSIGNED_BYTE;
-      } else if (this.data instanceof Uint16Array) {
-        type = this.gl.UNSIGNED_SHORT;
-      } else if (this.data instanceof Uint32Array) {
-        type = this.gl.UNSIGNED_INT;
-      }
-    }
-    return type;
+    return this._type || this._dataType;
   }
 
   set data(value) {
     this.buffer.data = value;
+
+    if (this.data instanceof Float32Array || this.data instanceof Float64Array) {
+      this._dataType = this.gl.FLOAT;
+    } else if (this.data instanceof Int8Array) {
+      this._dataType = this.gl.BYTE;
+    } else if (this.data instanceof Int16Array) {
+      this._dataType = this.gl.SHORT;
+    } else if (this.data instanceof Int32Array) {
+      this._dataType = this.gl.INT;
+    } else if (this.data instanceof Uint8Array) {
+      this._dataType = this.gl.UNSIGNED_BYTE;
+    } else if (this.data instanceof Uint16Array) {
+      this._dataType = this.gl.UNSIGNED_SHORT;
+    } else if (this.data instanceof Uint32Array) {
+      this._dataType = this.gl.UNSIGNED_INT;
+    }
   }
 
   get data() {
