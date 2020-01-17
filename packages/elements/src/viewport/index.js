@@ -63,6 +63,7 @@ export default class ViewportElement extends HTMLElement {
     this._slotElementMap = new Map();
     this._elementSlotMap = new Map();
     this._slotAssignedElementMap = new Map();
+    this._assignedElementSlotMap = new Map();
     this._slotDOMMatrixMap = new Map();
 
     const content = this.shadowRoot.querySelector('#content');
@@ -366,6 +367,19 @@ export default class ViewportElement extends HTMLElement {
       zoom(scale, x, y);
     }, { passive: true });
 
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const style = getComputedStyle(entry.target);
+        const slot = this._assignedElementSlotMap.get(entry.target);
+        if (!/both|horizontal/.test(style.resize)) {
+          slot.style.width = `${entry.contentRect.width}px`;
+        }
+        if (!/both|vertical/.test(style.resize)) {
+          slot.style.height = `${entry.contentRect.height}px`;
+        }
+      }
+    });
+
     // Mutation Observer
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
@@ -406,12 +420,14 @@ export default class ViewportElement extends HTMLElement {
             ruleString += '}';
             this._styleSheet.insertRule(ruleString, this._styleSheet.cssRules.length);
           }
+          resizeObserver.observe(assignedElement);
           content.appendChild(slot);
           this._slotUID++;
           this._slots.add(slot);
           this._slotElementMap.set(slot, node);
           this._elementSlotMap.set(node, slot);
           this._slotAssignedElementMap.set(slot, assignedElement);
+          this._assignedElementSlotMap.set(assignedElement, slot);
           slot.addEventListener('pointerdown', onPointerDown);
         }
         for (const node of mutation.removedNodes) {
@@ -420,11 +436,14 @@ export default class ViewportElement extends HTMLElement {
           }
           const slot = this._elementSlotMap.get(node);
           slot.removeEventListener('pointerdown', onPointerDown);
+          const assignedElement = this._slotAssignedElementMap.get(slot);
+          resizeObserver.unobserve(assignedElement);
           this._slots.delete(slot);
           this._slotElementMap.delete(slot);
           this._selectedElements.delete(node);
           this._elementSlotMap.delete(node);
           this._slotAssignedElementMap.delete(slot);
+          this._assignedElementSlotMap.delete(assignedElement);
           slot.remove();
           for (const [index, rule] of [...this._styleSheet.cssRules].entries()) {
             if (rule.selectorText === `[name="${slot.name}"]::slotted(*)`) {
