@@ -42,17 +42,17 @@ export default class ViewportElement extends HTMLElement {
           box-sizing: border-box;
         }
 
-        // #content slot:hover {
-        //   outline: 1px dotted;
-        // }
+        #content slot::slotted(*:hover) {
+          box-shadow: 0 0 3px grey;
+        }
 
         #content slot[disabled], #content[disabled] slot {
           will-change: transform;
         }
 
-        // #content slot[selected] {
-        //   outline: 1px solid;
-        // }
+        #content slot[selected]::slotted(*) {
+          box-shadow: 0 0 3px white;
+        }
       </style>
       <slot></slot>
       <div id="content"></div>
@@ -376,7 +376,7 @@ export default class ViewportElement extends HTMLElement {
 
           let assignedElement = node;
           if (node instanceof HTMLSlotElement) {
-            assignedElement = node.assignedElements({ flatten: true })[0];
+            assignedElement = node.assignedElements({ flatten: true })[0] || node;
           }
 
           node.slot = '';
