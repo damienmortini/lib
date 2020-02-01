@@ -2,6 +2,8 @@ export default class InputPad2DElement extends HTMLElement {
   constructor() {
     super();
 
+    this._value = [undefined, undefined];
+
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {

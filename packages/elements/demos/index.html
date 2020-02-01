@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Element Demos</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 40px;
+      margin: 40px;
+    }
+
+    section {
+      padding: 40px;
+      display: grid;
+      gap: 40px;
+      grid-auto-rows: auto;
+      flex-direction: column;
+      justify-items: center;
+      align-items: center;
+      box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+      border-radius: 4px;
+    }
+
+    section h2 {
+      text-align: center;
+      margin: 0;
+      vertical-align: middle;
+    }
+
+    section p {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <script type="module">
+    import ELEMENTS from './elements.js';
+    for (const elementName of ELEMENTS) {
+      document.body.insertAdjacentHTML("beforeend", `
+        <section data-elementname="${elementName}">
+          <h2><a href="#${elementName}">${elementName}</a></h2>
+          <p><${elementName}></${elementName}></p>
+        </section>
+      `);
+      // section.addEventListener('dblclick', (event) => {
+      //   if (event.target === section) {
+      //     document.body.innerHTML = "";
+      //     document.body.appendChild(section);
+      //   }
+      // });
+      import(`./node_modules/@damienmortini/elements/src/${elementName}/index.js`).then((module) => {
+        customElements.define(elementName, module.default);
+      });
+    }
+  </script>
+</body>
+
+</html>
