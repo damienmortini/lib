@@ -5,7 +5,7 @@
   "registry": "npm",
   "scripts": {
     "docs": "jsdoc -c jsdoc.config.json",
-    "prepublish": "node copyExamples.js",
+    "install": "node copyExamples.js",
     "fix": "eslint src --fix",
     "test": "eslint src"
   },
@@ -26,11 +26,11 @@
   },
   "homepage": "https://github.com/damienmortini/three",
   "dependencies": {
-    "@damienmortini/lib": "^0.2.7",
-    "three": "^0.107.0"
+    "@damienmortini/lib": "^0.2.11",
+    "three": "^0.113.2"
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
+    "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.3"
   }
