@@ -10,13 +10,14 @@ export default class InputColorPickerElement extends HTMLElement {
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
-        @import url("node_modules/a-color-picker/src/acolorpicker.css");
+        @import url("/node_modules/a-color-picker/src/acolorpicker.css");
         
         :host {
           display: inline-block;
           position: relative;
           width: 20px;
           height: 20px;
+          margin: 4px;
         }
 
         #container, #color {
@@ -48,6 +49,7 @@ export default class InputColorPickerElement extends HTMLElement {
           left: 50%;
           transform: translate(-50%, -50%);
           visibility: hidden;
+          z-index: 1;
         }
 
         :host(:focus-within) #colorpicker {
@@ -60,6 +62,8 @@ export default class InputColorPickerElement extends HTMLElement {
       </div>
     `;
 
+    const container = this.shadowRoot.querySelector('#container');
+
     this._color = this.shadowRoot.querySelector('#color');
     this._colorPicker = AColorPicker.createPicker({
       attachTo: this.shadowRoot.querySelector('#colorpicker'),
@@ -70,6 +74,12 @@ export default class InputColorPickerElement extends HTMLElement {
     this._colorPicker.on('change', (target, color) => {
       this.value = target.color;
       this.dispatchEvent(new Event('input'));
+    });
+
+    this.addEventListener('keyup', (event) => {
+      if (event.key.toLowerCase() === 'escape') {
+        container.blur();
+      }
     });
   }
 
