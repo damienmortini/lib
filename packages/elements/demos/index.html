@@ -7,25 +7,36 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Element Demos</title>
   <style>
+    html,
     body {
+      height: 100%;
       margin: 0;
     }
 
-    body {
+    #content {
+      box-sizing: border-box;
+      padding: 40px;
+    }
+
+    #content:not(.list) {
+      height: 100%;
+    }
+
+    #content.list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 40px;
-      margin: 40px;
     }
 
     section {
+      height: 100%;
+      box-sizing: border-box;
       padding: 40px;
       display: grid;
       gap: 40px;
-      grid-auto-rows: auto;
-      flex-direction: column;
       justify-items: center;
       align-items: center;
+      grid-template-rows: 0fr 1fr;
       box-shadow: 0 0 5px rgba(0, 0, 0, .2);
       border-radius: 4px;
     }
@@ -48,25 +59,58 @@
 </head>
 
 <body>
+  <div id="content"></div>
+
   <script type="module">
     import ELEMENTS from './elements.js';
+
+    const content = document.body.querySelector('#content');
+
     for (const elementName of ELEMENTS) {
-      document.body.insertAdjacentHTML("beforeend", `
-        <section data-elementname="${elementName}">
-          <h2><a href="#${elementName}">${elementName}</a></h2>
-          <p><${elementName}></${elementName}></p>
-        </section>
-      `);
-      // section.addEventListener('dblclick', (event) => {
-      //   if (event.target === section) {
-      //     document.body.innerHTML = "";
-      //     document.body.appendChild(section);
-      //   }
-      // });
       import(`./node_modules/@damienmortini/elements/src/${elementName}/index.js`).then((module) => {
         customElements.define(elementName, module.default);
       });
     }
+
+    const updatePath = () => {
+      const elementName = location.hash.slice(1);
+      if (elementName) {
+        content.classList.remove('list');
+        content.innerHTML = '';
+        fetch(`${elementName}.html`)
+          .then((response) => {
+            if (response.status === 200) {
+              return response.text();
+            } else {
+              return `<${elementName}></${elementName}>`;
+            }
+          })
+          .then((data) => {
+            content.innerHTML = `
+            <section data-elementname="${elementName}">
+              <h2><a href="#${elementName}">${elementName}</a></h2>
+              <p>
+                ${data}
+              </p>
+            </section>
+          `;
+          });
+      } else {
+        content.innerHTML = '';
+        content.classList.add('list');
+        for (const elementName of ELEMENTS) {
+          content.insertAdjacentHTML("beforeend", `
+            <section data-elementname="${elementName}">
+              <h2><a href="#${elementName}">${elementName}</a></h2>
+              <p><${elementName}></${elementName}></p>
+            </section>
+          `);
+        }
+      }
+    }
+
+    updatePath();
+    window.addEventListener('hashchange', updatePath);
   </script>
 </body>
 

@@ -4,4 +4,5 @@ export default [
   'input-button',
   'input-checkbox',
   'input-color',
+  'input-colorpicker',
 ];

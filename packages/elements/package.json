@@ -1,10 +1,10 @@
 {
   "name": "@damienmortini/elements",
   "version": "0.2.8",
-  "description": "Minimalist and reusable custom elements",
-  "main": "src/index.js",
+  "description": "Minimalist and reusable custom elements.",
+  "main": "src",
   "scripts": {
-    "start": "server --path=?dev",
+    "start": "server --path=demos",
     "docs": "jsdoc -c jsdoc.config.json",
     "bump-patch": "npm version patch && npm publish --access=public",
     "bump-minor": "npm version minor && npm publish --access=public",
@@ -28,7 +28,7 @@
   "homepage": "https://github.com/damienmortini/elements#readme",
   "dependencies": {
     "@damienmortini/lib": "^0.2.11",
-    "@simonwep/pickr": "^1.5.0"
+    "a-color-picker": "^1.2.1"
   },
   "devDependencies": {
     "@damienmortini/server": "^1.0.12",
