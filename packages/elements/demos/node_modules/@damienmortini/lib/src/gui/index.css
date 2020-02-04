@@ -1,0 +1,31 @@
+dlib-guiinput input[type=range] {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+dlib-guiinput input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  height: 4px;
+  background: black;
+}
+
+dlib-guiinput input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: blue;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  cursor: ew-resize;
+}
+
+dlib-guiinput input[type=checkbox] {
+  margin-left: 2px;
+}
+
+dlib-guiinput input[type=button] {
+  -webkit-appearance: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-align: center;
+  font-family: monospace;
+}
