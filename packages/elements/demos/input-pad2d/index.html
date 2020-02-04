@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>input-pad2d</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    input-pad2d {
+      width: 200px;
+      height: 200px;
+    }
+  </style>
+</head>
+
+<body>
+  <input-pad2d></input-pad2d>
+  <script type="module">
+    import InputPad2DElement from '../node_modules/@damienmortini/elements/src/input-pad2d/index.js';
+    customElements.define('input-pad2d', InputPad2DElement);
+  </script>
+</body>
+
+</html>
