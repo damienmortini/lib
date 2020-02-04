@@ -41,7 +41,7 @@ export default class TrackballController {
     this._positionPrevious = this._position.clone();
     this._positionOffset = new Vector3();
 
-    domElement.addEventListener('wheel', this.onWheel.bind(this));
+    domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: true });
 
     this.enabled = true;
     this.update();

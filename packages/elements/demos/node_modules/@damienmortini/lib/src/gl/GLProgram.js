@@ -211,10 +211,10 @@ export default class GLProgram extends Shader {
       source = source.replace(/#version.*?\n/g, '');
       source = source.replace(/\btexture\b/g, 'texture2D');
       if (type === this.gl.VERTEX_SHADER) {
-        source = source.replace(/\bin\b/g, 'attribute');
-        source = source.replace(/\bout\b/g, 'varying');
+        source = source.replace(/(^\s*)\bin\b/gm, '$1attribute');
+        source = source.replace(/(^\s*)\bout\b/gm, '$1varying');
       } else {
-        source = source.replace(/\bin\b/g, 'varying');
+        source = source.replace(/(^\s*)\bin\b/gm, '$1varying');
         const results = /out vec4 (.*?);/.exec(source);
         if (results) {
           const fragColorName = results[1];

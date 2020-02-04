@@ -14,6 +14,7 @@ export default class GLBoxObject extends GLObject {
     depthSegments = undefined,
     normals = false,
     uvs = false,
+    attributes = {},
     program = new GLProgram({
       gl,
       shader: {
@@ -32,6 +33,7 @@ export default class GLBoxObject extends GLObject {
       gl,
       mesh: new GLMesh(Object.assign({
         gl,
+        attributes,
       }, new BoxMesh({
         width,
         height,
