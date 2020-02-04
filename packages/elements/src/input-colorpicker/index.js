@@ -48,12 +48,12 @@ export default class InputColorPickerElement extends HTMLElement {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          visibility: hidden;
+          display: none;
           z-index: 1;
         }
 
         :host(:focus-within) #colorpicker {
-          visibility: visible;
+          display: block;
         }
       </style>
       <div id="container" tabindex="-1">

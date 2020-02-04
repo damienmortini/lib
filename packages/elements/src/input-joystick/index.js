@@ -1,7 +1,6 @@
-import TickerElement from '../animation-ticker/index.js';
 import Vector2 from '../../../lib/src/math/Vector2.js';
 
-export default class InputJoystickElement extends TickerElement {
+export default class InputJoystickElement extends HTMLElement {
   constructor() {
     super();
 
@@ -44,19 +43,22 @@ export default class InputJoystickElement extends TickerElement {
 
     this._joystick = this.shadowRoot.querySelector('.joystick');
 
+    this._animationFrameID = -1;
     this._position = new Vector2();
     this._lerpedPosition = new Vector2();
     this._origin = new Vector2();
 
     this._onPointerMoveBinded = this._onPointerMove.bind(this);
     this._onPointerUpBinded = this._onPointerUp.bind(this);
+    this._updateBinded = this._update.bind(this);
 
     this.addEventListener('pointerdown', (event) => {
       this._boundingClientRect = this.getBoundingClientRect();
       window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
       window.addEventListener('pointerup', this._onPointerUpBinded);
       this._pointerDowned = true;
-      this.play();
+      this._onPointerMove(event);
+      this._update();
     });
   }
 
@@ -84,7 +86,9 @@ export default class InputJoystickElement extends TickerElement {
     return this._position;
   }
 
-  update() {
+  _update() {
+    this._animationFrameID = requestAnimationFrame(this._updateBinded);
+
     if (!this._pointerDowned) {
       this._position.set(0, 0);
     }
@@ -95,7 +99,7 @@ export default class InputJoystickElement extends TickerElement {
     if (!this._pointerDowned) {
       if (this._lerpedPosition.size < .001) {
         this._lerpedPosition.set(0, 0);
-        this.pause();
+        cancelAnimationFrame(this._animationFrameID);
       }
     }
 
