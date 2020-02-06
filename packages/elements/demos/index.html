@@ -16,15 +16,6 @@
       font-family: monospace;
     }
 
-    body::-webkit-scrollbar-thumb {
-      background-color: black;
-    }
-
-    body::-webkit-scrollbar {
-      width: 4px;
-      background-color: #f8f8f8;
-    }
-
     /* section */
 
     section {
@@ -35,10 +26,24 @@
     /* nav */
 
     nav {
-      height: 100%;
       box-sizing: border-box;
       position: absolute;
       right: 0;
+      height: fit-content;
+      width: fit-content;
+    }
+
+    @media (orientation: landscape) {
+      nav {
+        right: 0;
+      }
+    }
+
+    @media (orientation: portrait) {
+      nav {
+        left: 0;
+        bottom: 0;
+      }
     }
 
     main:not(.open) nav {
@@ -46,27 +51,46 @@
     }
 
     nav ul {
-      padding: 0;
+      display: flex;
+      padding: var(--margin);
       list-style: none;
       margin: 0;
       box-sizing: border-box;
-      height: 100%;
     }
 
-    @media (orientation: portrait) {
-      nav ul {}
+    @media (orientation: landscape) {
+      nav ul {
+        flex-direction: column;
+      }
     }
 
     nav li {
       display: flex;
       flex-direction: column;
+      flex: none;
       width: 200px;
       height: 200px;
-      margin: var(--margin);
       padding: var(--margin);
       box-sizing: border-box;
       box-shadow: 0 0 5px rgba(0, 0, 0, .2);
       border-radius: 4px;
+    }
+
+    nav li:last-of-type {
+      margin-bottom: 0;
+      margin-right: 0;
+    }
+
+    @media (orientation: landscape) {
+      nav li {
+        margin-bottom: var(--margin);
+      }
+    }
+
+    @media (orientation: portrait) {
+      nav li {
+        margin-right: var(--margin);
+      }
     }
 
     nav li h2 {
@@ -77,13 +101,15 @@
       font-size: 18px;
     }
 
-    nav li p {
-      margin: 0;
-      width: 100%;
-      height: 100%;
+    nav li a {
+      max-width: 100%;
     }
 
-    nav li p * {
+    nav li p {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
       width: 100%;
       height: 100%;
     }
@@ -94,8 +120,20 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: calc(100% - 200px - var(--margin) * 2);
-      height: 100%;
+    }
+
+    @media (orientation: landscape) {
+      main {
+        width: calc(100% - 200px - var(--margin) * 2);
+        height: 100%;
+      }
+    }
+
+    @media (orientation: portrait) {
+      main {
+        width: 100%;
+        height: calc(100% - 200px - var(--margin) * 2);
+      }
     }
 
     main iframe {
