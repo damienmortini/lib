@@ -166,7 +166,7 @@
           <p><demo-${elementName}></demo-${elementName}></p>
         </li>
       `);
-      import(`./node_modules/@damienmortini/elements/src/${elementName}/index.js`).then((module) => {
+      import(`./node_modules/@damienmortini/${elementName}/index.js`).then((module) => {
         customElements.define(`demo-${elementName}`, module.default);
       });
     }
