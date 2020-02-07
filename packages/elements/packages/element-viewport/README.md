@@ -3,6 +3,8 @@
 ## Installation
 
 ```
+npm config set @damienmortini:registry https://npm.pkg.github.com
+
 npm install @damienmortini/element-viewport
 ```
 

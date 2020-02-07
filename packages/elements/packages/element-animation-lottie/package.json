@@ -8,7 +8,9 @@
   },
   "author": "Damien Mortini",
   "license": "ISC",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/damienmortini/elements.git",
+    "directory": "packages/element-animation-lottie"
   }
 }
