@@ -1,0 +1,20 @@
+# `<element-video-gl>`
+
+## Installation
+
+```
+npm install @damienmortini/element-video-gl
+```
+
+## Usage
+```
+<script type="module">
+
+  import MyElement from '@damienmortini/element-video-gl';
+
+  window.customElements.define(`my-element-name`, MyElement);
+
+</script>
+
+<my-element-name></my-element-name>
+```
