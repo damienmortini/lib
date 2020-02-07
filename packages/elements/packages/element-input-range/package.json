@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-range",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "<element-input-range> custom element.",
   "main": "index.js",
   "scripts": {
