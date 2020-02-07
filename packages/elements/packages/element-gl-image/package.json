@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-gl-image",
   "version": "0.0.1",
   "description": "<element-gl-image> custom element.",
   "main": "index.js",

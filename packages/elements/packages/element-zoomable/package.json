@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-zoomable",
   "version": "0.0.1",
   "description": "<element-zoomable> custom element.",
   "main": "index.js",

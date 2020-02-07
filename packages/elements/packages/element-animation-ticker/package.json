@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-animation-ticker",
   "version": "0.0.1",
   "description": "<element-animation-ticker> custom element.",
   "main": "index.js",

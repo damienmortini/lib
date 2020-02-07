@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-input-connector",
   "version": "0.0.1",
   "description": "<element-input-connector> custom element.",
   "main": "index.js",

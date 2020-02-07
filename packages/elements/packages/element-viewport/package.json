@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-viewport",
   "version": "0.0.1",
   "description": "<element-viewport> custom element.",
   "main": "index.js",

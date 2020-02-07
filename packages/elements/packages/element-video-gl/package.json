@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-video-gl",
   "version": "0.0.1",
   "description": "<element-video-gl> custom element.",
   "main": "index.js",

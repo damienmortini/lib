@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-view",
   "version": "0.0.1",
   "description": "<element-view> custom element.",
   "main": "index.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-input-checkbox",
   "version": "0.0.1",
   "description": "<element-input-checkbox> custom element.",
   "main": "index.js",

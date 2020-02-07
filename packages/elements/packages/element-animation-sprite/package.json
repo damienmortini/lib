@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-animation-sprite",
   "version": "0.0.1",
   "description": "<element-animation-sprite> custom element.",
   "main": "index.js",

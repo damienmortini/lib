@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-input-pad2d",
   "version": "0.0.1",
   "description": "<element-input-pad2d> custom element.",
   "main": "index.js",

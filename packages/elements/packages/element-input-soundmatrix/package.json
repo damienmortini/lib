@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/independent",
+  "name": "@damienmortini/element-input-soundmatrix",
   "version": "0.0.1",
   "description": "<element-input-soundmatrix> custom element.",
   "main": "index.js",
