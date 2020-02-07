@@ -15,7 +15,7 @@ const CACHED_DATA_URL = new Map();
   document.head.appendChild(style);
 })();
 
-window.customElements.define('dlmn-spriteanimation', class SpriteAnimationElement extends AnimationTickerElement {
+export default class SpriteAnimationElement extends AnimationTickerElement {
   constructor() {
     super({
       autoplay: false,
@@ -40,7 +40,9 @@ window.customElements.define('dlmn-spriteanimation', class SpriteAnimationElemen
       autoplay: this._autoplay,
     });
 
-    this.src = this.getAttribute('src');
+    if (this.getAttribute('src')) {
+      this.src = this.getAttribute('src');
+    }
   }
 
   connectedCallback() {
@@ -145,4 +147,4 @@ window.customElements.define('dlmn-spriteanimation', class SpriteAnimationElemen
       this.dispatchEvent(new Event('load'));
     });
   }
-});
+}

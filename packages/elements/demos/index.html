@@ -163,11 +163,11 @@
       list.insertAdjacentHTML("beforeend", `
         <li data-elementname="${elementName}">
           <h2><a href="#${elementName}">${elementName}</a></h2>
-          <p><${elementName}></${elementName}></p>
+          <p><demo-${elementName}></demo-${elementName}></p>
         </li>
       `);
       import(`./node_modules/@damienmortini/elements/src/${elementName}/index.js`).then((module) => {
-        customElements.define(elementName, module.default);
+        customElements.define(`demo-${elementName}`, module.default);
       });
     }
 

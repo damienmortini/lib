@@ -11,6 +11,12 @@ document.head.appendChild(style);
 export default class LottieAnimationElement extends HTMLElement {
   constructor() {
     super();
+
+    this.attachShadow({ mode: 'open' }).innerHTML = `
+      <style>
+      </style>
+    `;
+
     this.renderer = 'svg';
     this.loop = this.hasAttribute('loop');
     this.autoplay = this.hasAttribute('autoplay');
@@ -129,5 +135,3 @@ export default class LottieAnimationElement extends HTMLElement {
     return this._segments;
   }
 }
-
-window.customElements.define('dlmn-lottie', LottieElement);

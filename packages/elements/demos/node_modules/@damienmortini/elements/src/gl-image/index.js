@@ -163,5 +163,3 @@ export default class GLImageElement extends HTMLElement {
     this._data.removeEventListener(...args);
   }
 }
-
-window.customElements.define('dlmn-gl-img', GLImageElement);
