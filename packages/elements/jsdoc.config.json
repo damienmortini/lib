@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": "src"
+    "include": "packages"
   },
   "opts": {
     "destination": "docs",

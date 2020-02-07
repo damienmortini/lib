@@ -1,35 +1,23 @@
 {
   "name": "@damienmortini/elements",
-  "version": "0.2.9",
+  "private": true,
   "description": "Minimalist and reusable custom elements.",
-  "main": "src",
   "scripts": {
     "start": "server --path=demos",
     "docs": "jsdoc -c jsdoc.config.json",
-    "bump-patch": "npm version patch && npm publish --access=public",
-    "bump-minor": "npm version minor && npm publish --access=public",
-    "bump-major": "npm version major && npm publish --access=public",
-    "fix": "eslint src --fix",
-    "test": "eslint src"
+    "fix": "eslint packages --fix",
+    "test": "eslint packages"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/damienmortini/elements.git"
   },
-  "keywords": [
-    "custom elements",
-    "web components"
-  ],
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/damienmortini/elements/issues"
   },
   "homepage": "https://github.com/damienmortini/elements#readme",
-  "dependencies": {
-    "@damienmortini/lib": "^0.2.11",
-    "a-color-picker": "^1.2.1"
-  },
   "devDependencies": {
     "@damienmortini/server": "^1.0.12",
     "eslint": "^6.8.0",

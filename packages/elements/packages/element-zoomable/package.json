@@ -12,5 +12,13 @@
     "type": "git",
     "url": "ssh://git@github.com/damienmortini/elements.git",
     "directory": "packages/element-zoomable"
-  }
+  },
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "bugs": {
+    "url": "https://github.com/damienmortini/elements/issues"
+  },
+  "homepage": "https://github.com/damienmortini/elements#readme"
 }
