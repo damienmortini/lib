@@ -1,5 +1,6 @@
 {
+  "private": true,
   "dependencies": {
-    "@damienmortini/elements": "^0.2.9"
+    "@damienmortini/element-input-colorpicker": "0.0.2"
   }
 }
