@@ -2,9 +2,9 @@ const fs = require('fs');
 
 for (const dirent of fs.readdirSync('packages/', { withFileTypes: true })) {
   fs.writeFileSync(`packages/${dirent.name}/package.json`, `{
-  "name": "@damienmortini/${dirent.name}",
+  "name": "@damienmortini/independent",
   "version": "0.0.1",
-  "description": "",
+  "description": "<${dirent.name}> custom element.",
   "main": "index.js",
   "scripts": {
     "test": "echo \\"Error: no test specified\\" && exit 1"
@@ -21,14 +21,14 @@ for (const dirent of fs.readdirSync('packages/', { withFileTypes: true })) {
 
 ## Installation
 
-\`\`\`
+\`\`\`sh
 npm config set @damienmortini:registry https://npm.pkg.github.com
 
 npm install @damienmortini/${dirent.name}
 \`\`\`
 
 ## Usage
-\`\`\`
+\`\`\`html
 <script type="module">
 
   import MyElement from '@damienmortini/${dirent.name}';

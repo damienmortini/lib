@@ -2,14 +2,14 @@
 
 ## Installation
 
-```
+```sh
 npm config set @damienmortini:registry https://npm.pkg.github.com
 
 npm install @damienmortini/element-viewport
 ```
 
 ## Usage
-```
+```html
 <script type="module">
 
   import MyElement from '@damienmortini/element-viewport';
