@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-connector",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "<element-input-connector> custom element.",
   "main": "index.js",
   "scripts": {

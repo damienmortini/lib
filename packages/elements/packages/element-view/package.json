@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-view",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "<element-view> custom element.",
   "main": "index.js",
   "scripts": {
