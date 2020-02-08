@@ -1,5 +1,5 @@
 import Loader from '../lib/src/util/Loader.js';
-// import Lottie from '../../lottie-web'
+import '../../lottie-web/build/player/lottie.js';
 
 export default class LottieAnimationElement extends HTMLElement {
   constructor() {
@@ -9,6 +9,8 @@ export default class LottieAnimationElement extends HTMLElement {
       <style>
         :host {
           display: block;
+          width: 300px;
+          height: 150px;
         }
       </style>
     `;
@@ -20,6 +22,10 @@ export default class LottieAnimationElement extends HTMLElement {
     this.currentTime = 0;
 
     this.src = this.getAttribute('src');
+
+    this.autoplay = true;
+    this.loop = true;
+    this.src = 'node_modules/@damienmortini/element-animation-lottie/demo/data.json';
   }
 
   get src() {
@@ -40,7 +46,7 @@ export default class LottieAnimationElement extends HTMLElement {
         return;
       }
       this.animation = lottie.loadAnimation({
-        container: this,
+        container: this.shadowRoot,
         renderer: this.renderer,
         autoplay: this.autoplay,
         animationData: data,
