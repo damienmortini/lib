@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-video-gl",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "<element-video-gl> custom element.",
   "main": "index.js",
   "scripts": {

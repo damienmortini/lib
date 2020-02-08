@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-pad2d",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "<element-input-pad2d> custom element.",
   "main": "index.js",
   "scripts": {
