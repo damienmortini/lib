@@ -1,12 +1,5 @@
-import Loader from '../../../lib/src/util/Loader.js';
-
-const style = document.createElement('style');
-style.textContent = `
-  dlmn-lottie {
-    display: block;
-  }
-`;
-document.head.appendChild(style);
+import Loader from '../lib/src/util/Loader.js';
+// import Lottie from '../../lottie-web'
 
 export default class LottieAnimationElement extends HTMLElement {
   constructor() {
@@ -14,6 +7,9 @@ export default class LottieAnimationElement extends HTMLElement {
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
+        :host {
+          display: block;
+        }
       </style>
     `;
 
