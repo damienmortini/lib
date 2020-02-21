@@ -3,18 +3,19 @@ import '../../lottie-web/build/player/lottie.js';
 
 
 /**
+ * Element that plays Lottie animations
  * @example
  * <script type="module">
- *
  *   import AnimationLottieElement from '@damienmortini/element-animation-lottie';
- *
  *   window.customElements.define(`element-animation-lottie`, AnimationLottieElement);
- *
  * </script>
- *
- * <element-animation-lottie></element-animation-lottie>
+ * <element-animation-lottie src="data.json" autoplay loop></element-animation-lottie>
  */
-export default class LottieAnimationElement extends HTMLElement {
+class LottieAnimationElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime'];
+  }
+
   constructor() {
     super();
 
@@ -27,29 +28,13 @@ export default class LottieAnimationElement extends HTMLElement {
         }
       </style>
     `;
-
-    this.renderer = 'svg';
-    this.loop = this.hasAttribute('loop');
-    this.autoplay = this.hasAttribute('autoplay');
-    this.playbackRate = 1;
-    this.currentTime = 0;
-
-    this.src = this.getAttribute('src');
   }
 
-  get src() {
-    return this._src;
-  }
-
-  set src(value) {
-    if (value === this._src || !value) {
-      return;
-    }
-    this._src = value;
+  _loadSrc() {
     if (this.animation) {
       this.animation.destroy();
     }
-    const loaderPromise = this._loaderPromise = Loader.load(this._src);
+    const loaderPromise = this._loaderPromise = Loader.load(this.src);
     loaderPromise.then((data) => {
       if (loaderPromise !== this._loaderPromise) {
         return;
@@ -58,16 +43,17 @@ export default class LottieAnimationElement extends HTMLElement {
         container: this.shadowRoot,
         renderer: this.renderer,
         autoplay: this.autoplay,
+        loop: this.loop,
         animationData: data,
       });
       this.animation.addEventListener('DOMLoaded', () => {
-        if (this._segments) {
-          this.segments = this._segments;
+        if (this.segments) {
+          this.segments = this.segments;
         }
-        this.loop = this._loop;
-        this.frameRate = this._frameRate === undefined ? this.animation.frameRate : this._frameRate;
-        this.currentTime = this._currentTime;
-        this.playbackRate = this._playbackRate;
+        this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.getAttribute('starttime') || 0);
+        this.animation.frameRate = this.frameRate;
+        this.animation.setSpeed(Math.abs(this.playbackRate));
+        this.animation.setDirection(this.playbackRate);
       });
       this.animation.addEventListener('loopComplete', () => {
         this.dispatchEvent(new Event('ended'));
@@ -78,61 +64,129 @@ export default class LottieAnimationElement extends HTMLElement {
     });
   }
 
-  play() {
-    this.animation.play();
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) {
+      return;
+    }
+    switch (name) {
+      case 'src':
+        this._loadSrc();
+        break;
+      case 'loop':
+        if (this.animation) {
+          this.animation.loop = this.loop;
+        }
+        break;
+      case 'framerate':
+        if (this.animation) {
+          this.animation.frameRate = this.frameRate;
+        }
+        break;
+      case 'playbackrate':
+        if (this.animation) {
+          this.animation.setSpeed(Math.abs(this.playbackRate));
+          this.animation.setDirection(this.playbackRate);
+        }
+        break;
+      case 'starttime':
+        if (this.animation) {
+          this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](Number(newValue), false);
+        }
+        break;
+      case 'segments':
+        if (this.animation) {
+          this.animation.playSegments(JSON.parse(newValue), true);
+        }
+        break;
+    }
   }
 
-  pause() {
-    this.animation.pause();
+  /**
+   * Source of JSON data file
+   * @type {String}
+   */
+  get src() {
+    return this.getAttribute('src');
+  }
+
+  set src(value) {
+    this.setAttribute('src', value);
+  }
+
+  /**
+   * Tells if animation needs to loop
+   * @type {Boolean}
+   */
+  get loop() {
+    return this.hasAttribute('loop');
   }
 
   set loop(value) {
-    this._loop = value;
-    if (this.animation) {
-      this.animation.loop = value;
+    if (value) {
+      this.setAttribute('loop', '');
+    } else {
+      this.removeAttribute('loop');
     }
   }
 
-  get loop() {
-    return this._loop;
+  /**
+   * Autoplay animation
+   * @type {Boolean}
+   */
+  get autoplay() {
+    return this.hasAttribute('autoplay');
   }
 
-  get paused() {
-    return this.animation.isPaused;
-  }
-
-  set currentTime(value) {
-    this._currentTime = value;
-    if (this.animation) {
-      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this._currentTime, false);
+  set autoplay(value) {
+    if (value) {
+      this.setAttribute('autoplay', '');
+    } else {
+      this.removeAttribute('autoplay');
     }
   }
 
-  get currentTime() {
-    return this._currentTime;
+  /**
+   * Override the frame rate of the original animation
+   * @type {Number}
+   */
+  get frameRate() {
+    return Number(this.getAttribute('framerate')) || this.animation.frameRate;
   }
 
   set frameRate(value) {
-    this._frameRate = value;
-    if (this.animation) {
-      this.animation.frameRate = value;
-    }
+    this.setAttribute('framerate', String(value));
   }
 
-  get frameRate() {
-    return this._frameRate;
+  /**
+   * Set the playback rate of the animation (1 normal speed, -1 reverse)
+   * @type {Number}
+   */
+  get playbackRate() {
+    return Number(this.getAttribute('playbackrate') || 1);
   }
 
   set playbackRate(value) {
-    this._playbackRate = value;
-    if (this.animation) {
-      this.animation.setSpeed(Math.abs(value));
-      this.animation.setDirection(value);
-    }
+    this.setAttribute('playbackrate', String(value));
   }
 
-  get playbackRate() {
-    return this._playbackRate;
+  /**
+   * Set renderer engine
+   * @type {"svg"|"canvas"|"html"}
+   */
+  get renderer() {
+    return this.getAttribute('renderer') || 'svg';
+  }
+
+  set renderer(value) {
+    this.setAttribute('renderer', value);
+  }
+
+  /**
+   * Can contain 2 numeric values that will be used as first and last frame of the animation. Or can contain a sequence of arrays each with 2 numeric values.
+   * @type {Array}
+   */
+  get segments() {
+    return this._segments;
   }
 
   set segments(value) {
@@ -142,7 +196,43 @@ export default class LottieAnimationElement extends HTMLElement {
     }
   }
 
-  get segments() {
-    return this._segments;
+  /**
+   * Update animation current time
+   * @type {Number}
+   */
+  get currentTime() {
+    return this._currentTime;
+  }
+
+  set currentTime(value) {
+    this._currentTime = value;
+    if (this.animation) {
+      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this._currentTime, false);
+    }
+  }
+
+  /**
+   * Return true if animation is paused
+   * @readonly
+   * @type {Boolean}
+   */
+  get paused() {
+    return this.animation.isPaused;
+  }
+
+  /**
+   * Play current animation
+   */
+  play() {
+    this.animation.play();
+  }
+
+  /**
+   * Pause current animation
+   */
+  pause() {
+    this.animation.pause();
   }
 }
+
+export default LottieAnimationElement;

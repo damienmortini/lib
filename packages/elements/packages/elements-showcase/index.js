@@ -26,7 +26,7 @@ const updatePath = () => {
   const elementName = location.hash.slice(1);
   if (elementName) {
     section.classList.remove('grid');
-    iframe.contentWindow.location.replace(`${elementName}/index.html`);
+    iframe.contentWindow.location.replace(`./node_modules/@damienmortini/${elementName}/demo/index.html`);
   } else {
     section.classList.add('grid');
   }

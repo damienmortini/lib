@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: InputConnectorElement</title>
+    <title>JSDoc: Class: LottieAnimationElement</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: InputConnectorElement</h1>
+    <h1 class="page-title">Class: LottieAnimationElement</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature">(abstract) </span></span>InputConnectorElement<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>LottieAnimationElement<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Connector element used to link inputs and other connectors together</div>
+            <div class="class-description">Element that plays Lottie animations</div>
         
     
 </header>
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="InputConnectorElement"><span class="type-signature">(abstract) </span>new InputConnectorElement<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="LottieAnimationElement"><span class="type-signature"></span>new LottieAnimationElement<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -93,7 +93,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line67">line 67</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line19">line 19</a>
     </li></ul></dd>
     
 
@@ -124,10 +124,11 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>&lt;graph-connector
-   inputs="[document.getElementById('input1'), document.getElementById('input2')]"
-   outputs="[document.getElementById('output1'), document.getElementById('output2')]"
->&lt;/graph-connector></code></pre>
+    <pre class="prettyprint"><code>&lt;script type="module">
+  import AnimationLottieElement from '@damienmortini/element-animation-lottie';
+  window.customElements.define(`element-animation-lottie`, AnimationLottieElement);
+&lt;/script>
+&lt;element-animation-lottie src="data.json" autoplay loop>&lt;/element-animation-lottie></code></pre>
 
 
 
@@ -151,13 +152,13 @@
 
         
             
-<h4 class="name" id=".TYPE_BOTH"><span class="type-signature">(static, constant) </span>TYPE_BOTH<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="autoplay"><span class="type-signature"></span>autoplay<span class="type-signature"> :Boolean</span></h4>
 
 
 
 
 <div class="description">
-    Both type flag
+    Autoplay animation
 </div>
 
 
@@ -166,315 +167,7 @@
     <ul>
         <li>
             
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>3</li>
-        </ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line60">line 60</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".TYPE_INPUT"><span class="type-signature">(static, constant) </span>TYPE_INPUT<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    Input type flag
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>1</li>
-        </ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".TYPE_OUTPUT"><span class="type-signature">(static, constant) </span>TYPE_OUTPUT<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    Output type flag
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>2</li>
-        </ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line50">line 50</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".TYPE_UNDEFINED"><span class="type-signature">(static, constant) </span>TYPE_UNDEFINED<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    Undefined type flag
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>0</li>
-        </ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line30">line 30</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="inputElements"><span class="type-signature">(readonly) </span>inputElements<span class="type-signature"> :Set.&lt;HTMLInputElement></span></h4>
-
-
-
-
-<div class="description">
-    Set of input elements (non connector) only
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Set.&lt;HTMLInputElement></span>
+<span class="param-type">Boolean</span>
 
 
         </li>
@@ -513,7 +206,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line345">line 345</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line143">line 143</a>
     </li></ul></dd>
     
 
@@ -531,13 +224,13 @@
 
         
             
-<h4 class="name" id="inputs"><span class="type-signature">(readonly) </span>inputs<span class="type-signature"> :Set.&lt;(HTMLInputElement|<a href="InputConnectorElement.html">InputConnectorElement</a>)></span></h4>
+<h4 class="name" id="currentTime"><span class="type-signature"></span>currentTime<span class="type-signature"> :Number</span></h4>
 
 
 
 
 <div class="description">
-    Set of inputs
+    Update animation current time
 </div>
 
 
@@ -546,7 +239,7 @@
     <ul>
         <li>
             
-<span class="param-type">Set.&lt;(HTMLInputElement|<a href="InputConnectorElement.html">InputConnectorElement</a>)></span>
+<span class="param-type">Number</span>
 
 
         </li>
@@ -585,7 +278,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line327">line 327</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line210">line 210</a>
     </li></ul></dd>
     
 
@@ -603,13 +296,13 @@
 
         
             
-<h4 class="name" id="outputElements"><span class="type-signature">(readonly) </span>outputElements<span class="type-signature"> :Set.&lt;(HTMLInputElement)></span></h4>
+<h4 class="name" id="frameRate"><span class="type-signature"></span>frameRate<span class="type-signature"> :Number</span></h4>
 
 
 
 
 <div class="description">
-    Set of output elements (non connector) only
+    Override the frame rate of the original animation
 </div>
 
 
@@ -618,7 +311,7 @@
     <ul>
         <li>
             
-<span class="param-type">Set.&lt;(HTMLInputElement)></span>
+<span class="param-type">Number</span>
 
 
         </li>
@@ -657,7 +350,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line354">line 354</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line159">line 159</a>
     </li></ul></dd>
     
 
@@ -675,13 +368,13 @@
 
         
             
-<h4 class="name" id="outputs"><span class="type-signature">(readonly) </span>outputs<span class="type-signature"> :Set.&lt;(HTMLInputElement|<a href="InputConnectorElement.html">InputConnectorElement</a>)></span></h4>
+<h4 class="name" id="loop"><span class="type-signature"></span>loop<span class="type-signature"> :Boolean</span></h4>
 
 
 
 
 <div class="description">
-    Set of outputs
+    Tells if animation needs to loop
 </div>
 
 
@@ -690,7 +383,7 @@
     <ul>
         <li>
             
-<span class="param-type">Set.&lt;(HTMLInputElement|<a href="InputConnectorElement.html">InputConnectorElement</a>)></span>
+<span class="param-type">Boolean</span>
 
 
         </li>
@@ -729,7 +422,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line336">line 336</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -747,13 +440,13 @@
 
         
             
-<h4 class="name" id="type"><span class="type-signature">(readonly) </span>type<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="paused"><span class="type-signature">(readonly) </span>paused<span class="type-signature"> :Boolean</span></h4>
 
 
 
 
 <div class="description">
-    Type of connector as flag
+    Return true if animation is paused
 </div>
 
 
@@ -762,7 +455,7 @@
     <ul>
         <li>
             
-<span class="param-type">number</span>
+<span class="param-type">Boolean</span>
 
 
         </li>
@@ -801,7 +494,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line363">line 363</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line226">line 226</a>
     </li></ul></dd>
     
 
@@ -819,14 +512,326 @@
 
         
             
-<h4 class="name" id="value"><span class="type-signature">(readonly) </span>value<span class="type-signature"></span></h4>
+<h4 class="name" id="playbackRate"><span class="type-signature"></span>playbackRate<span class="type-signature"> :Number</span></h4>
 
 
 
 
 <div class="description">
-    Get current value stored in connector
+    Set the playback rate of the animation (1 normal speed, -1 reverse)
 </div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line171">line 171</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="renderer"><span class="type-signature"></span>renderer<span class="type-signature"> :"svg"|"canvas"|"html"</span></h4>
+
+
+
+
+<div class="description">
+    Set renderer engine
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">"svg"</span>
+|
+
+<span class="param-type">"canvas"</span>
+|
+
+<span class="param-type">"html"</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line183">line 183</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="segments"><span class="type-signature"></span>segments<span class="type-signature"> :Array</span></h4>
+
+
+
+
+<div class="description">
+    Can contain 2 numeric values that will be used as first and last frame of the animation. Or can contain a sequence of arrays each with 2 numeric values.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line195">line 195</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="src"><span class="type-signature"></span>src<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    Source of JSON data file
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">String</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line115">line 115</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="pause"><span class="type-signature"></span>pause<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Pause current animation
+</div>
+
+
+
+
+
+
 
 
 
@@ -863,7 +868,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="element-input-connector_index.js.html">element-input-connector/index.js</a>, <a href="element-input-connector_index.js.html#line318">line 318</a>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line240">line 240</a>
     </li></ul></dd>
     
 
@@ -879,9 +884,109 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
+            
+
     
 
+    
+    <h4 class="name" id="play"><span class="type-signature"></span>play<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Play current animation
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="element-animation-lottie_index.js.html">element-animation-lottie/index.js</a>, <a href="element-animation-lottie_index.js.html#line233">line 233</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 
     
