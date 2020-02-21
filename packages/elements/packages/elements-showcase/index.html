@@ -168,25 +168,20 @@
     const iframe = document.body.querySelector('iframe');
 
     for (let elementName of ELEMENTS) {
-      let data = {};
+      let preview = '';
       if (elementName instanceof Array) {
-        data = elementName[1];
+        preview = elementName[1];
         elementName = elementName[0];
       }
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <h2><a href="#${elementName}">${elementName}</a></h2>
-        <p></p>
-      `;
-      list.appendChild(li);
-      const p = li.querySelector('p');
-      const element = document.createElement(elementName);
-      p.appendChild(element);
+      const elementString = preview || `<${elementName}></${elementName}>`;
+      list.insertAdjacentHTML("beforeend", `
+        <li data-elementname="${elementName}">
+          <h2><a href="#${elementName}">${elementName}</a></h2>
+          <p>${elementString}</p>
+        </li>
+      `);
       import(`./node_modules/@damienmortini/${elementName}/index.js`).then((module) => {
         customElements.define(`${elementName}`, module.default);
-        for (const [key, value] of Object.entries(data)) {
-          element[key] = value;
-        }
       });
     }
 

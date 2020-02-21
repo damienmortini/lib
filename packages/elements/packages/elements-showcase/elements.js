@@ -1,9 +1,7 @@
 export default [
-  ['element-animation-lottie', {
-    autoplay: true,
-    loop: true,
-    src: 'node_modules/@damienmortini/element-animation-lottie/demo/data.json',
-  }],
+  ['element-animation-lottie', `
+    <element-animation-lottie autoplay loop src="node_modules/@damienmortini/element-animation-lottie/demo/data.json"></element-animation-lottie>
+  `],
   'element-animation-sprite',
   'element-animation-ticker',
   'element-gl-image',
