@@ -6,13 +6,13 @@ import '../../lottie-web/build/player/lottie.js';
  * @example
  * <script type="module">
  *
- * import MyElement from '@damienmortini/element-animation-lottie';
+ *   import AnimationLottieElement from '@damienmortini/element-animation-lottie';
  *
- * window.customElements.define(`my-element-name`, MyElement);
+ *   window.customElements.define(`element-animation-lottie`, AnimationLottieElement);
  *
  * </script>
  *
- * <my-element-name></my-element-name>
+ * <element-animation-lottie></element-animation-lottie>
  */
 export default class LottieAnimationElement extends HTMLElement {
   constructor() {
