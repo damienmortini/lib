@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-color</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      grid-template-columns: 100px 300px;
+      justify-content: center;
+      justify-items: center;
+      align-content: center;
+      align-items: center;
+    }
+
+    element-input-color {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <span>As String</span>
+  <element-input-color value="#ff0000"></element-input-color>
+  <span>As [R, G, B]</span>
+  <element-input-color value="[0, 1, 0]"></element-input-color>
+  <span>As {R, G, B}</span>
+  <element-input-color value="{r: 0, g: 0, b: 1}"></element-input-color>
+  <span>Disabled</span>
+  <element-input-color disabled></element-input-color>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-input-color`, Element);
+
+    const element = document.querySelector('element-input-color');
+    element.addEventListener('input', (event) => {
+      console.log(event);
+    });
+  </script>
+</body>
+
+</html>

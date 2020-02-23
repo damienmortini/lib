@@ -1,4 +1,8 @@
 export default class InputCheckboxElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled'];
+  }
+
   constructor() {
     super();
 
@@ -12,22 +16,29 @@ export default class InputCheckboxElement extends HTMLElement {
     `;
 
     this._input = this.shadowRoot.querySelector('input');
+  }
 
-    for (const key in HTMLInputElement.prototype) {
-      if (key in InputCheckboxElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._input[key];
-        },
-        set(value) {
-          this._input[key] = value;
-        },
-      });
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+        this.value = newValue === 'true';
+        break;
+      case 'disabled':
+        this._input.disabled = this.disabled;
+        break;
     }
+  }
 
-    this.value = this.getAttribute('value') === 'true';
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
   }
 
   get value() {
@@ -35,7 +46,7 @@ export default class InputCheckboxElement extends HTMLElement {
   }
 
   set value(value) {
-    if (value === this._input.checked) {
+    if (value === this.value) {
       return;
     }
     this._input.checked = value;

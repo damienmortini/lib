@@ -1,6 +1,10 @@
-import Color from '../../../lib/src/math/Color.js';
+import Color from '../lib/src/math/Color.js';
 
 export default class InputColorElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled'];
+  }
+
   constructor() {
     super();
 
@@ -35,25 +39,33 @@ export default class InputColorElement extends HTMLElement {
       event.stopPropagation();
       this.value = this._textInput.value;
     });
+  }
 
-    for (const key in HTMLInputElement.prototype) {
-      if (key in InputColorElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._textInput[key];
-        },
-        set(value) {
-          this._colorInput[key] = value;
-          this._textInput[key] = value;
-        },
-      });
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+        try {
+          this.value = new Function(`return ${newValue}`).apply(this);
+        } catch (error) {
+          this.value = newValue;
+        }
+        break;
+      case 'disabled':
+        this._colorInput.disabled = this.disabled;
+        this._textInput.disabled = this.disabled;
+        break;
     }
+  }
 
-    const value = this.getAttribute('value');
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
     if (value) {
-      this.value = typeof value === 'object' ? JSON.parse(value) : value;
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
     }
   }
 
@@ -62,6 +74,8 @@ export default class InputColorElement extends HTMLElement {
   }
 
   set value(value) {
+    console.log(value);
+    
     const hexValue = this._valueToHexadecimal(value);
 
     if (typeof this._value === 'object' && typeof value === 'string') {

@@ -1,4 +1,8 @@
 export default class InputButtonElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled'];
+  }
+
   constructor() {
     super();
 
@@ -20,24 +24,33 @@ export default class InputButtonElement extends HTMLElement {
       <button><slot></slot></button>
     `;
 
-    const input = this.shadowRoot.querySelector('button');
+    this._input = this.shadowRoot.querySelector('button');
+  }
 
-    for (const key in HTMLButtonElement.prototype) {
-      if (key in InputButtonElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return input[key];
-        },
-        set(value) {
-          input[key] = value;
-        },
-      });
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+        try {
+          this.value = new Function(`return ${newValue}`).apply(this);
+        } catch (error) {
+          this.value = newValue;
+        }
+        break;
+      case 'disabled':
+        this._input.disabled = this.disabled;
+        break;
     }
+  }
 
-    if (this.getAttribute('value')) {
-      this.value = JSON.parse(this.getAttribute('value'));
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
     }
   }
 

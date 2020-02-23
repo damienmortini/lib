@@ -14,19 +14,29 @@
     }
 
     body {
-      display: flex;
+      display: grid;
       justify-content: center;
-      align-items: center;
+      align-content: center;
     }
   </style>
 </head>
 
 <body>
+  <div>
+    Press me! <element-input-button onclick="this.value = Math.random()">Button</element-input-button>
+  </div>
+  <span></span>
+  <element-input-button disabled>Disabled Button</element-input-button>
+
   <script type="module">
     import Element from '../index.js';
     window.customElements.define(`element-input-button`, Element);
+
+    const buttonElement = document.querySelector('element-input-button');
+    buttonElement.addEventListener('input', (event) => {
+      document.querySelector('span').textContent = 'Output: ' + event.target.value;
+    });
   </script>
-  <element-input-button>Button</element-input-button>
 </body>
 
 </html>
