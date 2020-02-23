@@ -3,12 +3,9 @@ import '../../lottie-web/build/player/lottie.js';
 
 
 /**
- * Element that plays Lottie animations
+ * Element to plays Lottie animation
+ * @element element-animation-lottie
  * @example
- * <script type="module">
- *   import AnimationLottieElement from '@damienmortini/element-animation-lottie';
- *   window.customElements.define(`element-animation-lottie`, AnimationLottieElement);
- * </script>
  * <element-animation-lottie src="data.json" autoplay loop></element-animation-lottie>
  */
 class LottieAnimationElement extends HTMLElement {

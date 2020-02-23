@@ -3,7 +3,7 @@
   "private": true,
   "description": "Minimalist and reusable custom elements.",
   "scripts": {
-    "start": "server --path=packages/elements-showcase",
+    "start": "server --path=packages/elements-showcase --verbose",
     "docs": "jsdoc -c jsdoc.config.json",
     "fix": "eslint packages --fix",
     "test": "eslint packages"
@@ -23,6 +23,7 @@
     "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.3",
-    "lerna": "^3.20.2"
+    "lerna": "^3.20.2",
+    "web-component-analyzer": "^1.0.3"
   }
 }

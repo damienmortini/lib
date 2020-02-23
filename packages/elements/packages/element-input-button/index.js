@@ -6,7 +6,9 @@ export default class InputButtonElement extends HTMLElement {
       <style>
         :host {
           display: inline-flex;
+          min-width: 20px;
           height: 20px;
+          cursor: pointer;
         }
         button {
           flex: 1;
