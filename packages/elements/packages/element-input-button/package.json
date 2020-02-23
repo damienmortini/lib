@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-button",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "<element-input-button> custom element.",
   "main": "index.js",
   "scripts": {
