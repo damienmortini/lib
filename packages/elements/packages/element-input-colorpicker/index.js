@@ -1,4 +1,4 @@
-import '../../../../a-color-picker/dist/acolorpicker.js';
+import '../../a-color-picker/dist/acolorpicker.js';
 
 export default class InputColorPickerElement extends HTMLElement {
   static get observedAttributes() {

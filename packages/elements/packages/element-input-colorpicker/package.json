@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/damienmortini/elements/issues"
   },
-  "homepage": "https://github.com/damienmortini/elements#readme"
+  "homepage": "https://github.com/damienmortini/elements#readme",
+  "dependencies": {
+    "a-color-picker": "^1.2.1"
+  }
 }
