@@ -1,6 +1,6 @@
 export default [
   ['element-animation-lottie', `
-    <element-animation-lottie autoplay loop src="node_modules/@damienmortini/element-animation-lottie/demo/data.json"></element-animation-lottie>
+    <div style="width: 100%; height: 100%; overflow: auto;"><element-animation-lottie autoplay loop src="node_modules/@damienmortini/element-animation-lottie/demo/data.json"></element-animation-lottie></div>
   `],
   // 'element-animation-sprite',
   // 'element-animation-ticker',

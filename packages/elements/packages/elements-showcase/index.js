@@ -10,11 +10,11 @@ for (let elementName of ELEMENTS) {
     preview = elementName[1];
     elementName = elementName[0];
   }
-  const elementString = preview || `<${elementName}></${elementName}>`;
+  const elementString = preview || `<div><${elementName}></${elementName}></div>`;
   list.insertAdjacentHTML('beforeend', `
         <li data-elementname="${elementName}">
           <h2><a href="#${elementName}">${elementName}</a></h2>
-          <p>${elementString}</p>
+          ${elementString}
         </li>
       `);
   import(`./node_modules/@damienmortini/${elementName}/index.js`).then((module) => {

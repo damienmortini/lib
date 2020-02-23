@@ -74,8 +74,6 @@ export default class InputColorElement extends HTMLElement {
   }
 
   set value(value) {
-    console.log(value);
-    
     const hexValue = this._valueToHexadecimal(value);
 
     if (typeof this._value === 'object' && typeof value === 'string') {

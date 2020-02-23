@@ -1,5 +1,7 @@
 import '../../a-color-picker/dist/acolorpicker.js';
 
+const COLOR_PICKER_CSS = document.head.querySelector('style[data-source=a-color-picker]').innerHTML;
+
 export default class InputColorPickerElement extends HTMLElement {
   static get observedAttributes() {
     return ['value'];
@@ -10,8 +12,6 @@ export default class InputColorPickerElement extends HTMLElement {
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
-        @import url("/node_modules/a-color-picker/src/acolorpicker.css");
-        
         :host {
           display: inline-block;
           position: relative;
@@ -19,6 +19,12 @@ export default class InputColorPickerElement extends HTMLElement {
           height: 20px;
           margin: 4px;
         }
+
+        :host([disabled]) {
+          pointer-events: none;
+        }
+
+        ${COLOR_PICKER_CSS}
 
         #container, #color {
           width: 100%;
@@ -63,12 +69,17 @@ export default class InputColorPickerElement extends HTMLElement {
     `;
 
     const container = this.shadowRoot.querySelector('#container');
+    const colorPicker = this.shadowRoot.querySelector('#colorpicker');
 
     this._color = this.shadowRoot.querySelector('#color');
     this._colorPicker = AColorPicker.createPicker({
-      attachTo: this.shadowRoot.querySelector('#colorpicker'),
+      attachTo: colorPicker,
       showAlpha: true,
       color: 'black',
+    });
+
+    container.addEventListener('input', (event) => {
+      event.stopPropagation();
     });
 
     this._colorPicker.on('change', (target, color) => {
@@ -81,6 +92,17 @@ export default class InputColorPickerElement extends HTMLElement {
         container.blur();
       }
     });
+
+    container.addEventListener('focus', (event) => {
+      const boundingClientRect = colorPicker.getBoundingClientRect();
+      colorPicker.style.left = `${Math.max(-boundingClientRect.x + 20, 0)}px`;
+      colorPicker.style.top = `${Math.max(-boundingClientRect.y + 20, 0)}px`;
+    });
+
+    container.addEventListener('blur', (event) => {
+      colorPicker.style.top = '';
+      colorPicker.style.left = '';
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -88,6 +110,18 @@ export default class InputColorPickerElement extends HTMLElement {
       case 'value':
         this.value = newValue;
         break;
+    }
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
     }
   }
 
