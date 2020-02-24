@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-file</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <element-input-file></element-input-file>
+  <element-input-file disabled></element-input-file>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-input-file`, Element);
+
+    const element = document.querySelector('element-input-file');
+    element.addEventListener('input', (event) => {
+      console.log(event);
+    });
+  </script>
+</body>
+
+</html>

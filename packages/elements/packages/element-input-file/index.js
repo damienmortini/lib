@@ -1,4 +1,8 @@
 export default class InputFileElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled'];
+  }
+
   constructor() {
     super();
 
@@ -16,34 +20,42 @@ export default class InputFileElement extends HTMLElement {
 
     this._input = this.shadowRoot.querySelector('input');
 
-    for (const key in HTMLInputElement.prototype) {
-      if (key in InputFileElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._input[key];
-        },
-        set(value) {
-          this._input[key] = value;
-        },
-      });
-    }
-
-    const observer = new MutationObserver((mutationsList) => {
-      for (const mutation of mutationsList) {
-        if (this._input.getAttribute(mutation.attributeName) === this.getAttribute(mutation.attributeName)) {
-          return;
-        }
-        if (mutation.target === this._input) {
-          this.setAttribute(mutation.attributeName, this._input.getAttribute(mutation.attributeName));
-        } else {
-          this._input.setAttribute(mutation.attributeName, this.getAttribute(mutation.attributeName));
-        }
-      }
+    this._input.addEventListener('input', (event) => {
+      event.stopPropagation();
+      // console.log(this._input.files);
+      
+      // fetch(window.URL.createObjectURL(this._input.files[0])).then((data) => {
+      //   console.log(data);
+        
+      // });
     });
-    observer.observe(this._input, { attributes: true });
-    observer.observe(this, { attributes: true });
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+        try {
+          this.value = new Function(`return ${newValue}`).apply(this);
+        } catch (error) {
+          this.value = newValue;
+        }
+        break;
+      case 'disabled':
+        this._input.disabled = this.disabled;
+        break;
+    }
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
   }
 
   get value() {
