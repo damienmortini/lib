@@ -14,7 +14,7 @@
     "@damienmortini/element-input-connector": "^0.0.5",
     "@damienmortini/element-input-connector-linkable": "^0.0.5",
     "@damienmortini/element-input-file": "^0.0.6",
-    "@damienmortini/element-input-joystick": "^0.0.5",
+    "@damienmortini/element-input-joystick": "0.0.6",
     "@damienmortini/element-input-number": "^0.0.5",
     "@damienmortini/element-input-pad2d": "^0.0.5",
     "@damienmortini/element-input-range": "^0.0.5",
