@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-joystick</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <element-input-joystick></element-input-joystick>
+  <element-input-joystick disabled></element-input-joystick>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-input-joystick`, Element);
+
+    const element = document.querySelector('element-input-joystick');
+    element.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+  </script>
+</body>
+
+</html>

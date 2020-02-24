@@ -1,4 +1,4 @@
-import Vector2 from '../../../lib/src/math/Vector2.js';
+import Vector2 from '../lib/src/math/Vector2.js';
 
 export default class InputJoystickElement extends HTMLElement {
   constructor() {
@@ -15,6 +15,12 @@ export default class InputJoystickElement extends HTMLElement {
           cursor: pointer;
           touch-action: none;
         }
+
+        :host([disabled]) {
+          pointer-events: none;
+          opacity: .5;
+        }
+
         .outer-ring, .joystick {
           pointer-events: none;
           border-radius: 50%;
@@ -62,15 +68,27 @@ export default class InputJoystickElement extends HTMLElement {
     });
   }
 
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
+  }
+
   _onPointerMove(event) {
-    this._position.x = (event.pageX - this._boundingClientRect.left) / this._boundingClientRect.width * 2 - 1;
-    this._position.y = (event.pageY - this._boundingClientRect.top) / this._boundingClientRect.height * 2 - 1;
+    this._position.x = (event.clientX - this._boundingClientRect.left) / this._boundingClientRect.width * 2 - 1;
+    this._position.y = (event.clientY - this._boundingClientRect.top) / this._boundingClientRect.height * 2 - 1;
     if (this._position.size > 1) {
       this._position.normalize();
     }
   }
 
-  _onPointerUp(event) {
+  _onPointerUp() {
     this._pointerDowned = false;
     window.removeEventListener('pointermove', this._onPointerMoveBinded);
     window.removeEventListener('pointerup', this._onPointerUpBinded);
