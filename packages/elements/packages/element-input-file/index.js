@@ -1,3 +1,5 @@
+import Loader from '../lib/src/util/Loader.js';
+
 export default class InputFileElement extends HTMLElement {
   static get observedAttributes() {
     return ['value', 'disabled'];
@@ -22,12 +24,12 @@ export default class InputFileElement extends HTMLElement {
 
     this._input.addEventListener('input', (event) => {
       event.stopPropagation();
-      // console.log(this._input.files);
-      
-      // fetch(window.URL.createObjectURL(this._input.files[0])).then((data) => {
-      //   console.log(data);
-        
-      // });
+      Loader.load({
+        src: window.URL.createObjectURL(this._input.files[0]),
+        type: this._input.files[0].type || 'text/plain',
+      }).then((data) => {
+        this.value = data;
+      });
     });
   }
 
@@ -64,5 +66,8 @@ export default class InputFileElement extends HTMLElement {
 
   set value(value) {
     this._value = value;
+    this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
   }
 }
