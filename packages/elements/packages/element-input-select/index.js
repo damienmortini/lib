@@ -1,6 +1,6 @@
 export default class InputSelectElement extends HTMLElement {
   static get observedAttributes() {
-    return ['options', 'value'];
+    return ['options', 'value', 'disabled'];
   }
 
   constructor() {
@@ -21,43 +21,35 @@ export default class InputSelectElement extends HTMLElement {
     this._optionsMap = new Map();
 
     this._select = this.shadowRoot.querySelector('select');
-
-    this._select.addEventListener('input', (event) => {
-      event.stopPropagation();
-    });
-
-    for (const key in HTMLSelectElement.prototype) {
-      if (key in InputSelectElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._select[key];
-        },
-        set(value) {
-          this._select[key] = value;
-        },
-      });
-    }
-
-    if (this.getAttribute('value')) {
-      this.value = JSON.parse(this.getAttribute('value'));
-    }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) {
-      return;
-    }
-
     switch (name) {
       case 'options':
-        const values = new Function(`return ${newValue}`).apply(this);
-        this[name] = values;
+        this.options = new Function(`return ${newValue}`).apply(this);
         break;
       case 'value':
-        this.value = new Function(`return ${newValue}`).apply(this);
+        try {
+          this.value = new Function(`return ${newValue}`).apply(this);
+        } catch (error) {
+          this.value = newValue;
+        }
         break;
+      case 'disabled':
+        this._select.disabled = this.disabled;
+        break;
+    }
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
     }
   }
 

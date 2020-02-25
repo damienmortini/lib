@@ -1,4 +1,8 @@
 export default class InputTextElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled'];
+  }
+
   constructor() {
     super();
 
@@ -17,23 +21,27 @@ export default class InputTextElement extends HTMLElement {
     `;
 
     this._textarea = this.shadowRoot.querySelector('textarea');
+  }
 
-    for (const key in HTMLTextAreaElement.prototype) {
-      if (key in InputTextElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._textarea[key];
-        },
-        set(value) {
-          this._textarea[key] = value;
-        },
-      });
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+        this.value = newValue;
+      case 'disabled':
+        this._textarea.disabled = this.disabled;
+        break;
     }
+  }
 
-    if (this.getAttribute('value')) {
-      this.value = this.getAttribute('value');
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
     }
   }
 
@@ -42,12 +50,6 @@ export default class InputTextElement extends HTMLElement {
   }
 
   set value(value) {
-    if (this._textarea.value === value) {
-      return;
-    }
     this._textarea.value = value;
-    this.dispatchEvent(new Event('input', {
-      bubbles: true,
-    }));
   }
 }

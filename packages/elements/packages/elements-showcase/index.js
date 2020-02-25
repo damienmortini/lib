@@ -13,7 +13,7 @@ for (let elementName of ELEMENTS) {
   const elementString = preview || `<div><${elementName}></${elementName}></div>`;
   list.insertAdjacentHTML('beforeend', `
         <li data-elementname="${elementName}">
-          <h2><a href="#${elementName}">${elementName}</a></h2>
+          <h2><a href="#${elementName}">${elementName.replace('element-', '')}</a></h2>
           ${elementString}
         </li>
       `);
