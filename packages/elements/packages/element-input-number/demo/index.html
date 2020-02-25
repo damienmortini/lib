@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-number</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <element-input-number value="-1"></element-input-number>
+  <element-input-number value="4" step=".1" min="-2" max="5"></element-input-number>
+  <element-input-number value="12.2" disabled></element-input-number>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-input-number`, Element);
+
+    const element = document.querySelector('element-input-number');
+    element.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+  </script>
+</body>
+
+</html>

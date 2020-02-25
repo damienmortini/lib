@@ -1,4 +1,8 @@
 export default class InputNumberElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled', 'min', 'max', 'step'];
+  }
+
   constructor() {
     super();
 
@@ -16,24 +20,56 @@ export default class InputNumberElement extends HTMLElement {
     `;
 
     this._input = this.shadowRoot.querySelector('input');
+  }
 
-    for (const key in HTMLInputElement.prototype) {
-      if (key in InputNumberElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._input[key];
-        },
-        set(value) {
-          this._input[key] = value;
-        },
-      });
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+      case 'min':
+      case 'max':
+      case 'step':
+        this[name] = Number(newValue);
+        break;
+      case 'disabled':
+        this._input.disabled = this.disabled;
+        break;
     }
+  }
 
-    if (this.getAttribute('value')) {
-      this.value = Number(this.getAttribute('value'));
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
     }
+  }
+
+  get max() {
+    return Number(this._input.max);
+  }
+
+  set max(value) {
+    this._input.max = String(value);
+  }
+
+  get min() {
+    return Number(this._input.min);
+  }
+
+  set min(value) {
+    this._input.min = String(value);
+  }
+
+  get step() {
+    return Number(this._input.step);
+  }
+
+  set step(value) {
+    this._input.step = String(value);
   }
 
   get value() {
@@ -41,12 +77,6 @@ export default class InputNumberElement extends HTMLElement {
   }
 
   set value(value) {
-    if (this._input.valueAsNumber === value) {
-      return;
-    }
     this._input.valueAsNumber = value;
-    this.dispatchEvent(new Event('input', {
-      bubbles: true,
-    }));
   }
 }
