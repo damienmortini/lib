@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>element-input-joystick</title>
+  <title>element-input-pad2d</title>
   <style>
     html,
     body {
@@ -15,22 +15,22 @@
 
     body {
       display: grid;
+      gap: 20px;
       justify-content: center;
       align-content: center;
-      gap: 20px;
     }
   </style>
 </head>
 
 <body>
-  <element-input-joystick></element-input-joystick>
-  <element-input-joystick disabled></element-input-joystick>
+  <element-input-pad2d value="[.5, .5]"></element-input-pad2d>
+  <element-input-pad2d disabled></element-input-pad2d>
 
   <script type="module">
     import Element from '../index.js';
-    window.customElements.define(`element-input-joystick`, Element);
+    window.customElements.define(`element-input-pad2d`, Element);
 
-    const element = document.querySelector('element-input-joystick');
+    const element = document.querySelector('element-input-pad2d');
     element.addEventListener('input', (event) => {
       console.log(event.target.value);
     });

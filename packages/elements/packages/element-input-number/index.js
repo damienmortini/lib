@@ -25,10 +25,11 @@ export default class InputNumberElement extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'value':
+        this.value = Number(newValue);
       case 'min':
       case 'max':
       case 'step':
-        this[name] = Number(newValue);
+        this._input[name] = Number(newValue);
         break;
       case 'disabled':
         this._input.disabled = this.disabled;
@@ -49,27 +50,27 @@ export default class InputNumberElement extends HTMLElement {
   }
 
   get max() {
-    return Number(this._input.max);
+    return Number(this.getAttribute('max'));
   }
 
   set max(value) {
-    this._input.max = String(value);
+    this.setAttribute('max', String(value));
   }
 
   get min() {
-    return Number(this._input.min);
+    return Number(this.getAttribute('min'));
   }
 
   set min(value) {
-    this._input.min = String(value);
+    this.setAttribute('min', String(value));
   }
 
   get step() {
-    return Number(this._input.step);
+    return Number(this.getAttribute('step'));
   }
 
   set step(value) {
-    this._input.step = String(value);
+    this.setAttribute('step', String(value));
   }
 
   get value() {

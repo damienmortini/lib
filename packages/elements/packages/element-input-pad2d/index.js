@@ -1,8 +1,12 @@
 export default class InputPad2DElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['value', 'disabled'];
+  }
+
   constructor() {
     super();
 
-    this._value = [undefined, undefined];
+    this._value = [0, 0];
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -14,6 +18,11 @@ export default class InputPad2DElement extends HTMLElement {
           touch-action: none;
           background: white;
         }
+
+        :host([disabled]) {
+          opacity: .5;
+        }
+
         .pad {
           position: absolute;
           top: 0;
@@ -28,8 +37,8 @@ export default class InputPad2DElement extends HTMLElement {
         }
         .pointer {
           position: absolute;
-          top: 0;
-          left: 0;
+          top: 50%;
+          left: 50%;
           width: 4px;
           height: 4px;
           background: black;
@@ -75,8 +84,26 @@ export default class InputPad2DElement extends HTMLElement {
       window.addEventListener('pointermove', updatePointer);
       window.addEventListener('pointerup', onPointerUp);
     });
+  }
 
-    this.value = this.getAttribute('value') ? JSON.parse(this.getAttribute('value')) : [0, 0];
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'value':
+        this.value = new Function(`return ${newValue}`).apply(this);
+        break;
+    }
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
   }
 
   get value() {

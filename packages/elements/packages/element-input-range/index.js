@@ -27,6 +27,7 @@ export default class InputRangeElement extends HTMLElement {
 
     this._rangeInput = this.shadowRoot.querySelector('input[type=range]');
     this._numberInput = this.shadowRoot.querySelector('input[type=number]');
+    this._numberInput.valueAsNumber = this._rangeInput.valueAsNumber;
 
     this._rangeInput.addEventListener('input', (event) => {
       event.stopPropagation();
@@ -39,25 +40,6 @@ export default class InputRangeElement extends HTMLElement {
       this.value = this._numberInput.valueAsNumber;
       this._rangeInput.valueAsNumber = this.value;
     });
-
-    for (const key in HTMLInputElement.prototype) {
-      if (key in InputRangeElement.prototype) {
-        continue;
-      }
-      Object.defineProperty(this, key, {
-        get() {
-          return this._numberInput[key];
-        },
-        set(value) {
-          this._rangeInput[key] = value;
-          this._numberInput[key] = value;
-        },
-      });
-    }
-
-    if (this.getAttribute('value')) {
-      this.value = Number(this.getAttribute('value'));
-    }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -65,12 +47,53 @@ export default class InputRangeElement extends HTMLElement {
       case 'value':
         this.value = Number(newValue);
         break;
-      default:
-        this._rangeInput.setAttribute(name, newValue);
-        this._numberInput.setAttribute(name, newValue);
-        this._rangeInput.valueAsNumber = this.value;
+      case 'max':
+      case 'min':
+      case 'step':
+        this._rangeInput[name] = Number(newValue);
+        this._numberInput[name] = Number(newValue);
+        break;
+      case 'disabled':
+        this._rangeInput.disabled = this.disabled;
+        this._numberInput.disabled = this.disabled;
         break;
     }
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
+  }
+
+  get max() {
+    return Number(this.getAttribute('max'));
+  }
+
+  set max(value) {
+    this.setAttribute('max', String(value));
+  }
+
+  get min() {
+    return Number(this.getAttribute('min'));
+  }
+
+  set min(value) {
+    this.setAttribute('min', String(value));
+  }
+
+  get step() {
+    return Number(this.getAttribute('step'));
+  }
+
+  set step(value) {
+    this.setAttribute('step', String(value));
   }
 
   get value() {
@@ -78,9 +101,6 @@ export default class InputRangeElement extends HTMLElement {
   }
 
   set value(value) {
-    if (value === this._rangeInput.valueAsNumber && value === this._numberInput.valueAsNumber) {
-      return;
-    }
     this._rangeInput.valueAsNumber = value;
     this._numberInput.valueAsNumber = value;
     this.dispatchEvent(new Event('input', {
