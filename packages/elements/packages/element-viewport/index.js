@@ -34,7 +34,7 @@ export default class ViewportElement extends HTMLElement {
         }
 
         #content slot:focus-within {
-          z-index: 1;
+          z-index: 999999999 !important;
         }
 
         #content slot[disabled]::slotted(*), #content[disabled] slot::slotted(*) {
@@ -50,7 +50,7 @@ export default class ViewportElement extends HTMLElement {
         }
 
         #content slot::slotted(*:hover) {
-          box-shadow: 0 0 3px grey;
+          box-shadow: 0 0 0 1px lightgrey;
         }
 
         #content slot[disabled], #content[disabled] slot {
@@ -58,7 +58,7 @@ export default class ViewportElement extends HTMLElement {
         }
 
         #content slot[selected]::slotted(*) {
-          box-shadow: 0 0 3px white;
+          box-shadow: 0 0 0 1px grey;
         }
       </style>
       <slot></slot>
@@ -169,6 +169,17 @@ export default class ViewportElement extends HTMLElement {
       }
     });
 
+    const offsetZIndexesFromSlot = (slot) => {
+      const currentSlotZIndex = Number(slot.style.zIndex);
+      for (const slot of this._slots) {
+        const zIndex = Number(slot.style.zIndex);
+        if (zIndex > currentSlotZIndex) {
+          slot.style.zIndex = String(Number(slot.style.zIndex) - 1);
+        }
+      }
+      slot.style.zIndex = Number(this._slots.size - 1);
+    };
+
     const onPointerDown = (event) => {
       if (pointerEventMap.has(event.pointerId)) {
         return;
@@ -201,6 +212,10 @@ export default class ViewportElement extends HTMLElement {
       const currentElement = this._slotElementMap.get(event.currentTarget);
       if (!event.shiftKey && event.currentTarget !== this && !this._selectedElements.has(currentElement)) {
         this._selectedElements.clear();
+      }
+
+      if (event.currentTarget !== this) {
+        offsetZIndexesFromSlot(event.currentTarget);
       }
     };
 
@@ -409,6 +424,7 @@ export default class ViewportElement extends HTMLElement {
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
           node.slot = slot.name;
+          slot.style.zIndex = String(this._slots.size);
 
           const domMatrix = new DOMMatrix();
           this._slotDOMMatrixMap.set(slot, domMatrix);
