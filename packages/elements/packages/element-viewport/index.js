@@ -1,6 +1,10 @@
-import Vector2 from '../../../lib/src/math/Vector2.js';
+import Vector2 from '../lib/src/math/Vector2.js';
 
 export default class ViewportElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['centered'];
+  }
+
   constructor() {
     super();
 
@@ -10,16 +14,19 @@ export default class ViewportElement extends HTMLElement {
           display: block;
           overflow: hidden;
           touch-action: none;
+          position: relative;
         }
 
         #content {
           position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           touch-action: none;
-          left: 50%;
-          top: 50%;
         }
 
-        slot {
+        #content slot {
           position: absolute;
           display: block;
           transform-origin: top left;
@@ -299,8 +306,8 @@ export default class ViewportElement extends HTMLElement {
       }
       if (event.pointerId === pointerIds[1]) {
         if (firstClientX || firstClientY) {
-          const x = (firstClientX + event.clientX) * .5 - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5;
-          const y = (firstClientY + event.clientY) * .5 - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5;
+          const x = (firstClientX + event.clientX) * .5 - viewportBoundingClientRect.x;
+          const y = (firstClientY + event.clientY) * .5 - viewportBoundingClientRect.y;
           pinchVector.x = firstClientX - event.clientX;
           pinchVector.y = firstClientY - event.clientY;
 
@@ -357,15 +364,16 @@ export default class ViewportElement extends HTMLElement {
     this.addEventListener('pointerdown', onPointerDown);
 
     this.addEventListener('wheel', (event) => {
+      event.preventDefault();
       if (event.target !== this && event.target.scrollHeight > event.target.clientHeight) {
         return;
       }
       const viewportBoundingClientRect = this.getBoundingClientRect();
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1;
-      const x = event.clientX - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5;
-      const y = event.clientY - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5;
+      const x = event.clientX - viewportBoundingClientRect.x;
+      const y = event.clientY - viewportBoundingClientRect.y;
       zoom(scale, x, y);
-    }, { passive: true });
+    }, { passive: false });
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -388,6 +396,8 @@ export default class ViewportElement extends HTMLElement {
             continue;
           }
 
+          const viewportBoundingClientRect = this.getBoundingClientRect();
+
           let assignedElement = node;
           if (node instanceof HTMLSlotElement) {
             assignedElement = node.assignedElements({ flatten: true })[0] || node;
@@ -395,6 +405,7 @@ export default class ViewportElement extends HTMLElement {
 
           node.slot = '';
           const boundingClientRect = assignedElement.getBoundingClientRect();
+
           const slot = document.createElement('slot');
           slot.name = `viewport-slot-${this._slotUID}`;
           node.slot = slot.name;
@@ -403,7 +414,7 @@ export default class ViewportElement extends HTMLElement {
           this._slotDOMMatrixMap.set(slot, domMatrix);
           domMatrix.m11 = this._scale;
           domMatrix.m22 = this._scale;
-          this._offsetElement(slot, boundingClientRect.x, boundingClientRect.y);
+          this._offsetElement(slot, boundingClientRect.x - viewportBoundingClientRect.x, boundingClientRect.y - viewportBoundingClientRect.y);
 
           const style = getComputedStyle(assignedElement);
           slot.style.resize = style.resize;
@@ -459,6 +470,12 @@ export default class ViewportElement extends HTMLElement {
     }]);
     const observer = new MutationObserver(mutationCallback);
     observer.observe(this, { childList: true });
+  }
+
+  connectedCallback() {
+    if (this.hasAttribute('centered')) {
+      this.centerView();
+    }
   }
 
   get selectedElements() {

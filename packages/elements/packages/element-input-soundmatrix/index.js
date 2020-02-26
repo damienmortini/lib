@@ -1,19 +1,17 @@
-import LoopElement from './LoopElement.js';
-import SoundMatrix from '../audio/SoundMatrix.js';
+import AnimationTickerElement from '../element-animation-ticker/index.js';
+import SoundMatrix from '../lib/src/audio/SoundMatrix.js';
 
-(() => {
-  const style = document.createElement('style');
-  style.textContent = `
-    dlib-soundmatrix *:focus {
-      outline: none;
-    }
-  `;
-  document.head.appendChild(style);
-})();
-
-export default class SoundMatrixElement extends LoopElement {
+export default class SoundMatrixElement extends AnimationTickerElement {
   constructor({ soundMatrix = new SoundMatrix() } = {}) {
     super();
+
+    this.attachShadow({ mode: 'open' }).innerHTML = `
+      <style>
+        :host {
+          display: inline-block;
+        }
+      </style>
+    `;
 
     this.soundMatrix = soundMatrix;
 
@@ -91,5 +89,3 @@ export default class SoundMatrixElement extends LoopElement {
     }
   }
 }
-
-window.customElements.define('dlib-soundmatrix', SoundMatrixElement);

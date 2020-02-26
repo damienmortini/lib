@@ -24,7 +24,12 @@ export default [
   // 'element-menu',
   // 'element-video-gl',
   // 'element-view',
-  // 'element-viewport',
+  ['element-viewport', `
+    <element-viewport centered>
+      <div style="position: absolute; background-color: red; width: 30px; height: 30px; top: 0; left: 0;"></div>
+      <div style="position: absolute; background-color: green; width: 30px; height: 30px; border-radius: 50%; top: 30px; left: 30px;"></div>
+    </element-viewport>
+  `],
   // 'element-zoomable',
 ];
 
