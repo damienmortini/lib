@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-select-lasso</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    element-select-lasso {
+      width: 100%;
+      height: 100%;
+    }
+
+    element-select-lasso [selected] {
+      background: red;
+    }
+
+    element-select-lasso * {
+      position: absolute;
+      background: grey;
+    }
+  </style>
+</head>
+
+<body>
+  <element-select-lasso>
+    <div style="top: 50px; left: 50px; width: 100px; height: 100px;"></div>
+    <div style="top: 250px; left: 150px; width: 100px; height: 100px;"></div>
+    <div style="top: 450px; left: 350px; width: 100px; height: 100px;"></div>
+  </element-select-lasso>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-select-lasso`, Element);
+  </script>
+</body>
+
+</html>

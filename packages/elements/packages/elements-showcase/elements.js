@@ -22,6 +22,7 @@ export default [
   'element-input-text',
   // 'element-link',
   // 'element-menu',
+  'element-select-lasso',
   // 'element-video-gl',
   // 'element-view',
   ['element-viewport', `
