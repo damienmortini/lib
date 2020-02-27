@@ -157,17 +157,17 @@ export default class ViewportElement extends HTMLElement {
       firstClientY = 0;
     };
 
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Shift') {
-        content.setAttribute('disabled', '');
-      }
-    });
+    // window.addEventListener('keydown', (event) => {
+    //   if (event.key === 'Shift') {
+    //     content.setAttribute('disabled', '');
+    //   }
+    // });
 
-    window.addEventListener('keyup', (event) => {
-      if (event.key === 'Shift') {
-        content.removeAttribute('disabled');
-      }
-    });
+    // window.addEventListener('keyup', (event) => {
+    //   if (event.key === 'Shift') {
+    //     content.removeAttribute('disabled');
+    //   }
+    // });
 
     const offsetZIndexesFromSlot = (slot) => {
       const currentSlotZIndex = Number(slot.style.zIndex);
