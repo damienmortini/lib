@@ -1,4 +1,4 @@
-import Ticker from '../../../lib/src/util/Ticker.js';
+import Ticker from '../lib/src/util/Ticker.js';
 
 /**
  * @customElement
