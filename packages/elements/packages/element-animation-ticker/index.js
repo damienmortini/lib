@@ -1,100 +1,79 @@
 import Ticker from '../lib/src/util/Ticker.js';
 
+const PAUSED_BY_USER = 1;
+const PAUSED_BY_INTERSECTION = 2;
+const PAUSED_BY_VISIBILITY = 4;
+
 /**
  * @customElement
- * Element triggering a requestAnimationFrame on it's update method.
+ * Element triggering requestAnimationFrame on it's update method.
  */
 export default class AnimationTickerElement extends HTMLElement {
   constructor() {
     super();
 
-    this._paused = true;
-    this._pausedByUser = true;
-    this._pausedByBlur = false;
+    this.autoplay = false;
+
+    this._pauseFlag = PAUSED_BY_USER;
 
     this._updateBinded = this.update.bind(this);
-    this._onFocusChangeBinded = this._onFocusChange.bind(this);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this._pauseFlag |= PAUSED_BY_VISIBILITY;
+      } else {
+        this._pauseFlag &= ~PAUSED_BY_VISIBILITY;
+      }
+    });
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) {
+        this._pauseFlag |= PAUSED_BY_INTERSECTION;
+      } else {
+        this._pauseFlag &= ~PAUSED_BY_INTERSECTION;
+      }
+    });
+    observer.observe(this);
   }
 
   connectedCallback() {
-    this._autoplay = this.hasAttribute('autoplay');
-    this._background = this.hasAttribute('background');
-
-    if (!this._background) {
-      window.top.addEventListener('blur', this._onFocusChangeBinded);
-      window.top.addEventListener('focus', this._onFocusChangeBinded);
-      document.addEventListener('visibilitychange', this._onFocusChangeBinded);
-    }
-    if (this._autoplay) {
-      this.play();
+    if (this.autoplay) {
+      this._pauseFlag &= ~PAUSED_BY_USER;
     }
   }
 
   disconnectedCallback() {
-    this._pausedByBlur = true;
-    window.top.removeEventListener('blur', this._onFocusChangeBinded);
-    window.top.removeEventListener('focus', this._onFocusChangeBinded);
-    document.removeEventListener('visibilitychange', this._onFocusChangeBinded);
+    Ticker.delete(this._updateBinded);
+  }
+
+  get _pauseFlag() {
+    return this.__pauseFlag;
+  }
+
+  set _pauseFlag(value) {
+    if (this.__pauseFlag === value) {
+      return;
+    }
+    this.__pauseFlag = value;
+    if (this.__pauseFlag) {
+      Ticker.delete(this._updateBinded);
+    } else if (!this._paused) {
+      Ticker.add(this._updateBinded);
+    }
   }
 
   /**
+   * Indicating whether element should automatically play
    * @type {Boolean}
-   * @readonly
-   * @description Tells whether the element is paused
    */
-  get paused() {
-    return this._paused;
+  get autoplay() {
+    return this.hasAttribute('autoplay');
   }
 
-  get _pausedByUser() {
-    return this.__pausedByUser;
-  }
-
-  set _pausedByUser(value) {
-    this.__pausedByUser = value;
-    this._updatePlaybackState();
-  }
-
-  get _pausedByBlur() {
-    return this.__pausedByBlur;
-  }
-
-  set _pausedByBlur(value) {
-    this.__pausedByBlur = value;
-    this._updatePlaybackState();
-  }
-
-  _onFocusChange(event) {
-    switch (event.type) {
-      case 'visibilitychange':
-        if (document.visibilityState !== 'visible') {
-          this._pausedByBlur = true;
-        }
-        break;
-      case 'blur':
-        this._pausedByBlur = true;
-        break;
-      case 'focus':
-        this._pausedByBlur = false;
-        break;
-    }
-  }
-
-  _updatePlaybackState() {
-    const paused = this._pausedByUser || this._pausedByBlur;
-
-    if (paused === this._paused) {
-      return;
-    }
-
-    this._paused = paused;
-
-    if (this._paused) {
-      Ticker.delete(this._updateBinded);
-      this.dispatchEvent(new Event('pause'));
+  set autoplay(value) {
+    if (value) {
+      this.setAttribute('autoplay', '');
     } else {
-      Ticker.add(this._updateBinded);
-      this.dispatchEvent(new Event('play'));
+      this.removeAttribute('autoplay');
     }
   }
 
@@ -102,18 +81,23 @@ export default class AnimationTickerElement extends HTMLElement {
    * Play element animation
    */
   play() {
-    this._pausedByUser = false;
-    if (!window.top.document.hasFocus() && !this._background) {
-      this._pausedByBlur = true;
-      requestAnimationFrame(this._updateBinded);
-    }
+    this._pauseFlag &= ~PAUSED_BY_USER;
   }
 
   /**
    * Pause element animation
    */
   pause() {
-    this._pausedByUser = true;
+    this._pauseFlag |= PAUSED_BY_USER;
+  }
+
+  /**
+   * Tells whether the media element is paused.
+   * @type {Boolean}
+   * @readonly
+   */
+  get paused() {
+    return !!this._pauseFlag;
   }
 
   update() { }
