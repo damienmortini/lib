@@ -13,6 +13,7 @@ export default class GLTexture {
     magFilter = gl.LINEAR,
     wrapS = gl.REPEAT,
     wrapT = gl.REPEAT,
+    generateMipmap = true,
   }) {
     this.gl = gl;
     this._texture = this.gl.createTexture();
@@ -32,6 +33,10 @@ export default class GLTexture {
     this.wrapS = wrapS;
     this.wrapT = wrapT;
     this.data = data;
+
+    if (generateMipmap) {
+      this.generateMipmap();
+    }
   }
 
   generateMipmap() {
@@ -47,7 +52,6 @@ export default class GLTexture {
       this._dataWidth = this._data.width || this._data.videoWidth;
       this._dataHeight = this._data.height || this._data.videoHeight;
     }
-
 
     this.bind();
     if (this.gl instanceof WebGLRenderingContext && this._dataWidth) {
