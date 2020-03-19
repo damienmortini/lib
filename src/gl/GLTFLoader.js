@@ -4,11 +4,13 @@ import Base64 from '../math/Base64.js';
 export class GLTFLoader extends Loader {
   constructor() {
     super();
-    this.typeMap.get('json').add('gltf');
+
+    this.extensionTypeMap.set('gltf', 'application/json');
+    this.extensionTypeMap.set('glb', 'application/octet-stream');
   }
 
-  _loadFile(src, options = {}) {
-    return super._loadFile(src, options).then((response) => {
+  _loadFile(...options) {
+    return super._loadFile(...options).then((response) => {
       const rawData = response;
 
       const buffersPromises = [];

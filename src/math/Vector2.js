@@ -100,6 +100,10 @@ export default class Vector2 extends Float32Array {
     return this;
   }
 
+  rotate(vector2, value) {
+    vec2.rotate(this, this, vector2, value);
+  }
+
   lerp(vector2, value) {
     vec2.lerp(this, this, vector2, value);
   }

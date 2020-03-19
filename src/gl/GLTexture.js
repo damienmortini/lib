@@ -34,7 +34,7 @@ export default class GLTexture {
     this.wrapT = wrapT;
     this.data = data;
 
-    if (generateMipmap) {
+    if (this.data && generateMipmap) {
       this.generateMipmap();
     }
   }

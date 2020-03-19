@@ -7,6 +7,7 @@ export default class GLTFMesh extends GLMesh {
     gl,
     data,
     attributes = undefined,
+    normals = true,
     uvs = true,
   }) {
     super({
@@ -27,16 +28,18 @@ export default class GLTFMesh extends GLMesh {
     });
 
     const normalAttributeData = data.primitives[0].attributes['NORMAL'];
-    this.attributes.set('normal', {
-      buffer: new GLBuffer({
-        gl: this.gl,
-        data: normalAttributeData.bufferView.buffer,
-      }),
-      size: 3,
-      count: normalAttributeData.count,
-      offset: normalAttributeData.bufferView.byteOffset,
-      target: normalAttributeData.bufferView.target,
-    });
+    if (normals && normalAttributeData) {
+      this.attributes.set('normal', {
+        buffer: new GLBuffer({
+          gl: this.gl,
+          data: normalAttributeData.bufferView.buffer,
+        }),
+        size: 3,
+        count: normalAttributeData.count,
+        offset: normalAttributeData.bufferView.byteOffset,
+        target: normalAttributeData.bufferView.target,
+      });
+    }
 
     const uvAttributeData = data.primitives[0].attributes['TEXCOORD_0'];
     if (uvs && uvAttributeData) {
