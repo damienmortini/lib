@@ -1,0 +1,33 @@
+{
+  "name": "@damienmortini/element-gui",
+  "version": "0.0.0",
+  "description": "Simple yet limitless GUI",
+  "keywords": [
+    "javascript",
+    "gui",
+    "custom elements",
+    "web components"
+  ],
+  "author": "Damien Mortini <ddotmnn+git@gmail.com>",
+  "homepage": "https://github.com/damienmortini/elements/tree/master/packages/element-gui#readme",
+  "license": "ISC",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damienmortini/elements.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/damienmortini/elements/issues"
+  },
+  "dependencies": {
+    "@damienmortini/element-input-button": "0.0.6",
+    "@damienmortini/element-input-checkbox": "0.0.6",
+    "@damienmortini/element-input-colorpicker": "0.0.7",
+    "@damienmortini/element-input-range": "0.0.6",
+    "@damienmortini/element-input-select": "0.0.6",
+    "@damienmortini/element-input-text": "0.0.6"
+  }
+}

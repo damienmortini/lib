@@ -15,7 +15,7 @@ export default [
   'element-input-file',
   'element-input-joystick',
   'element-input-number',
-  'element-input-pad2d',
+  'element-input-pad-xy',
   'element-input-range',
   ['element-input-select', `<element-input-select value="World" options="['Hello', 'World', '!']"></element-input-select>`],
   // 'element-input-soundmatrix',

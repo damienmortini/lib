@@ -16,7 +16,7 @@
     "@damienmortini/element-input-file": "^0.0.7",
     "@damienmortini/element-input-joystick": "0.0.6",
     "@damienmortini/element-input-number": "^0.0.5",
-    "@damienmortini/element-input-pad2d": "^0.0.5",
+    "@damienmortini/element-input-pad-xy": "^0.0.5",
     "@damienmortini/element-input-range": "^0.0.5",
     "@damienmortini/element-input-select": "^0.0.5",
     "@damienmortini/element-input-soundmatrix": "^0.0.5",
