@@ -1,3 +1,5 @@
+import GUIFolderElement from './GUIFolderElement.js';
+
 import InputButtonElement from '../element-input-button/index.js';
 import InputCheckboxElement from '../element-input-checkbox/index.js';
 import InputColorPickerElement from '../element-input-colorpicker/index.js';
@@ -6,6 +8,7 @@ import InputSelectElement from '../element-input-select/index.js';
 import InputTextElement from '../element-input-text/index.js';
 
 const customElementsMap = new Map(Object.entries({
+  'gui-folder': GUIFolderElement,
   'gui-input-button': InputButtonElement,
   'gui-input-checkbox': InputCheckboxElement,
   'gui-input-color': InputColorPickerElement,
@@ -33,36 +36,17 @@ const tagNameResolvers = new Map([
 
 const valuesMap = new Map(JSON.parse(new URLSearchParams(location.hash.slice(1)).get('gui')));
 
-export default class GUIElement extends HTMLElement {
+export default class GUIElement extends GUIFolderElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: 'open' }).innerHTML = `
-      <style>
-        :host {
-          display: block;
-          color: white;
-          text-shadow: 0 0 3px black;
-          font-family: sans-serif;
-          margin: 5px;
-        }
-        :host(::-webkit-scrollbar ){ 
-          background: transparent;
-          width: 4px;
-        }
-        :host(::-webkit-scrollbar-thumb) { 
-          background: rgba(1, 1, 1, .1);
-        }
-        summary:focus {
-          outline: none;
-        }
-      </style>
-      <details open>
-        <summary>GUI</summary>
-      </details>
-    `;
+    this.shadowRoot.querySelector('style').insertAdjacentHTML('beforeend', `
+      :host {
+        max-width: 250px;
+      }
+    `);
 
-    this._container = this.shadowRoot.querySelector('details');
+    this._summary.textContent = 'GUI';
 
     this._foldersMap = new Map();
   }
@@ -105,12 +89,12 @@ export default class GUIElement extends HTMLElement {
     delete options.folder;
     delete options.reload;
 
-    let folderElement = this._container;
+    let folderElement = this;
 
     if (folder) {
       const folderNames = folder.split('/');
       let path = '';
-      let parentFolderElement = this._container;
+      let parentFolderElement = this;
       for (const folderName of folderNames) {
         if (path) {
           path += '/';
@@ -118,11 +102,8 @@ export default class GUIElement extends HTMLElement {
         path += folderName;
         folderElement = this._foldersMap.get(path);
         if (!folderElement) {
-          folderElement = document.createElement('details');
-          folderElement.open = true;
-          const summary = document.createElement('summary');
-          summary.textContent('folderName');
-          folderElement.appendChild('summary');
+          folderElement = document.createElement('gui-folder');
+          folderElement.name = folderName;
           const currentPath = path;
           folderElement.close = !(sessionStorage.getItem(`GUI[${currentPath}]`) === 'false');
           folderElement.addEventListener('toggle', (event) => {

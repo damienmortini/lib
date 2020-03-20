@@ -20,3 +20,18 @@ npm install @damienmortini/element-gui
 
 <my-element-name></my-element-name>
 ```
+
+
+Create a simple GUI Singleton
+```
+import GUIElement from '../../node_modules/@damienmortini/element-gui/index.js';
+
+customElements.define('project-gui', GUIElement);
+
+const guiElement = document.createElement('project-gui');
+guiElement.style.position = 'absolute';
+guiElement.style.top = '0';
+guiElement.style.right = '0';
+
+export default guiElement;
+```
