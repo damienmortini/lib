@@ -12,7 +12,7 @@ export default class BoxMesh {
     normals = true,
     uvs = true,
     indices = true,
-  }) {
+  } = {}) {
     const indicesArray = [];
     const verticesArray = [];
     const normalsArray = [];
@@ -40,10 +40,16 @@ export default class BoxMesh {
     }
 
     if (indices) {
-      this.indices = new Uint16Array(indicesArray);
+      if (indicesArray.length > 65536) {
+        this.indices = new Uint32Array(indicesArray);
+      } else if (indicesArray.length > 256) {
+        this.indices = new Uint16Array(indicesArray);
+      } else {
+        this.indices = new Uint8Array(indicesArray);
+      }
     }
 
-    function buildPlane(u, v, w, udir, vdir, width, height, depth, gridX, gridY, materialIndex) {
+    function buildPlane(u, v, w, udir, vdir, width, height, depth, gridX, gridY) {
       const segmentWidth = width / gridX;
       const segmentHeight = height / gridY;
 
