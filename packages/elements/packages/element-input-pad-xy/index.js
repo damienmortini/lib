@@ -66,7 +66,6 @@ export default class InputPad2DElement extends HTMLElement {
       x = Math.max(Math.min(1, x), -1);
       y = Math.max(Math.min(1, y), -1);
       this.value = [x, y];
-      this.dispatchEvent(new Event('input'));
     };
 
     const onPointerUp = (event) => {

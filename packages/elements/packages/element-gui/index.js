@@ -61,11 +61,14 @@ export default class GUIElement extends GUIFolderElement {
       console.warn(`GUI: ${JSON.stringify(options)} doesn't have any id`);
     }
 
-    const urlValue = valuesMap.get(options.id);
+    let urlValue;
 
-    if (urlValue !== undefined) {
-      if (options.object) {
-        options.object[options.key] = urlValue;
+    if (options.id) {
+      urlValue = valuesMap.get(options.id);
+      if (urlValue !== undefined) {
+        if (options.object) {
+          options.object[options.key] = urlValue;
+        }
       }
     }
 
@@ -132,7 +135,9 @@ export default class GUIElement extends GUIFolderElement {
 
     let timeout;
     element.addEventListener('input', () => {
-      valuesMap.set(options.id, element.value);
+      if (options.id) {
+        valuesMap.set(options.id, element.value);
+      }
       if (object) {
         object[key] = element.value;
       }
@@ -140,7 +145,11 @@ export default class GUIElement extends GUIFolderElement {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         const urlSearchParams = new URLSearchParams(location.hash.slice(1));
-        urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
+        if (valuesMap.size) {
+          urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
+        } else {
+          urlSearchParams.delete('gui');
+        }
         location.hash = urlSearchParams.toString();
         if (reload) {
           window.location.reload();
