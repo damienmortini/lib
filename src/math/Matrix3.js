@@ -6,6 +6,30 @@ export default class Matrix3 extends Float32Array {
     return this;
   }
 
+  set x(value) {
+    this[6] = value;
+  }
+
+  get x() {
+    return this[6];
+  }
+
+  set y(value) {
+    this[7] = value;
+  }
+
+  get y() {
+    return this[7];
+  }
+
+  set z(value) {
+    this[8] = value;
+  }
+
+  get z() {
+    return this[8];
+  }
+
   set(m00, m01, m02, m10, m11, m12, m20, m21, m22) {
     mat3.set(this, m00, m01, m02, m10, m11, m12, m20, m21, m22);
     return this;
