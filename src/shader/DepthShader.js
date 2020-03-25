@@ -31,13 +31,13 @@ export default class DepthShader {
       vec4 bumpFromDepth(sampler2D depthTexture, vec2 uv, vec2 resolution, float scale) {
         vec2 step = 1. / resolution;
           
-        float depth = texture2D(depthTexture, uv).r;
+        float depth = texture(depthTexture, uv).r;
           
         vec2 dxy = depth - vec2(
-            texture2D(depthTexture, uv + vec2(step.x, 0.)).r, 
-            texture2D(depthTexture, uv + vec2(0., step.y)).r
+            texture(depthTexture, uv + vec2(step.x, 0.)).r,
+            texture(depthTexture, uv + vec2(0., step.y)).r
         );
-          
+        
         return vec4(depth, normalize(vec3(dxy * scale / step, 1.)));
       }
     
