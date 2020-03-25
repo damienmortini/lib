@@ -19,6 +19,7 @@ export default class GLShaderTexture extends GLTexture {
     generateMipmap = false,
     uniforms = {},
     fragmentShaderChunks = [],
+    debug = false,
   }) {
     super({
       gl,
@@ -65,9 +66,11 @@ export default class GLShaderTexture extends GLTexture {
         },
       }),
     });
+
+    this.update({ uniforms, debug });
   }
 
-  update({ uniforms = {}, debug = false }) {
+  update({ uniforms = {}, debug = false } = {}) {
     const previousViewport = this.gl.getParameter(this.gl.VIEWPORT);
     this.gl.viewport(0, 0, this.width, this.height);
     this._frameBuffer.bind();
