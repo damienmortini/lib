@@ -34,6 +34,7 @@ export default class GradientNoiseShader {
       // Gradient Noise 2D             : https://www.shadertoy.com/view/XdXGW8
       // Gradient Noise 3D             : https://www.shadertoy.com/view/Xsl3Dl
       // Simplex  Noise 2D             : https://www.shadertoy.com/view/Msf3WH
+      // Wave     Noise 2D             : https://www.shadertoy.com/view/tldSRj
       
       
       vec2 gradientNoise2DHash( vec2 x )  // replace this by something better
@@ -45,15 +46,15 @@ export default class GradientNoiseShader {
       
       float gradientNoise2D( in vec2 p )
       {
-        vec2 i = floor( p );
-        vec2 f = fract( p );
+          vec2 i = floor( p );
+          vec2 f = fract( p );
         
         vec2 u = f*f*(3.0-2.0*f);
       
-        return mix( mix( dot( gradientNoise2DHash( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
-                        dot( gradientNoise2DHash( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
-                    mix( dot( gradientNoise2DHash( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
-                        dot( gradientNoise2DHash( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
+          return mix( mix( dot( gradientNoise2DHash( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
+                          dot( gradientNoise2DHash( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
+                      mix( dot( gradientNoise2DHash( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
+                          dot( gradientNoise2DHash( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
       }
     `;
   }
@@ -207,8 +208,6 @@ export default class GradientNoiseShader {
       // return value noise (in x) and its derivatives (in yzw)
       vec4 gradientDerivativesNoise3D( in vec3 x )
       {
-          x *= 10.;
-          
           // grid
           vec3 p = floor(x);
           vec3 w = fract(x);
