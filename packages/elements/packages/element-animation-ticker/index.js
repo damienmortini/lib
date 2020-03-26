@@ -3,6 +3,7 @@ import Ticker from '../lib/src/util/Ticker.js';
 const PAUSED_BY_USER = 1;
 const PAUSED_BY_INTERSECTION = 2;
 const PAUSED_BY_VISIBILITY = 4;
+const PAUSED_BY_BLUR = 8;
 
 /**
  * @customElement
@@ -33,6 +34,13 @@ export default class AnimationTickerElement extends HTMLElement {
       }
     });
     observer.observe(this);
+
+    window.addEventListener('blur', () => {
+      this._pauseFlag |= PAUSED_BY_BLUR;
+    });
+    window.addEventListener('focus', () => {
+      this._pauseFlag &= ~PAUSED_BY_BLUR;
+    });
   }
 
   connectedCallback() {
