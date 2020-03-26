@@ -13,7 +13,7 @@ export default class GLProgram extends Shader {
     transformFeedbackVaryings = undefined,
   } = { gl }) {
     super({
-      shaders: [shader],
+      ...shader,
       dataTypeConctructors: {
         Vector2,
         Vector3,
