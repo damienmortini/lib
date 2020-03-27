@@ -6,34 +6,39 @@ import Matrix4 from '../math/Matrix4.js';
 import Shader from '../3d/Shader.js';
 import GLTexture from './GLTexture.js';
 
-export default class GLProgram extends Shader {
+export default class GLProgram {
   constructor({
     gl,
-    shader = {},
+    shader = new Shader(),
     transformFeedbackVaryings = undefined,
   } = { gl }) {
-    super({
-      ...shader,
-      dataTypeConctructors: {
-        Vector2,
-        Vector3,
-        Vector4,
-        Matrix3,
-        Matrix4,
-        Texture: class extends GLTexture {
-          constructor() {
-            super({ gl });
-          }
-        },
-        TextureCube: class TextureCube { },
-      },
-    });
+    // super({
+    //   uniforms,
+    //   vertexShader,
+    //   fragmentShader,
+    //   vertexShaderChunks,
+    //   fragmentShaderChunks,
+    //   shaders,
+    //   dataTypeConctructors: {
+    //     Vector2,
+    //     Vector3,
+    //     Vector4,
+    //     Matrix3,
+    //     Matrix4,
+    //     Texture: class extends GLTexture {
+    //       constructor() {
+    //         super({ gl });
+    //       }
+    //     },
+    //     TextureCube: class TextureCube { },
+    //   },
+    // });
 
     this.gl = gl;
+
+    this._shader = shader instanceof Shader ? shader : new Shader(shader);
     this._program = gl.createProgram();
     this._attachedShaders = new Map();
-
-    const self = this;
 
     this._vertexAttribDivisor = () => { };
     const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays');
@@ -42,6 +47,8 @@ export default class GLProgram extends Shader {
     } else if (this.gl.vertexAttribDivisor) {
       this._vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl);
     }
+
+    const self = this;
 
     class Attributes extends Map {
       set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = undefined, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
@@ -74,8 +81,7 @@ export default class GLProgram extends Shader {
     }
 
     class Uniforms extends Map {
-      set(name, ...values) {
-        let value = values[0];
+      set(name, value) {
         if (value === undefined) {
           return;
         }
@@ -95,7 +101,7 @@ export default class GLProgram extends Shader {
               if (self.uniformTypes[uniformName].startsWith('sampler')) {
                 if (uniformName === name) {
                   texture = value;
-                  values = [unit];
+                  value = unit;
                   break;
                 }
                 unit++;
@@ -106,12 +112,6 @@ export default class GLProgram extends Shader {
               self.uniforms.set(`${name}.${key}`, value[key]);
             }
             return;
-          }
-          if (values.length > 1) {
-            value = self.uniforms.get(name);
-            value.set(...values);
-          } else {
-            value = values;
           }
         } else if (value[0] instanceof Object) {
           for (let i = 0; i < value.length; i++) {
@@ -126,6 +126,8 @@ export default class GLProgram extends Shader {
           return;
         }
 
+        super.set(name, texture || value);
+
         if (location === null) {
           return;
         }
@@ -133,7 +135,7 @@ export default class GLProgram extends Shader {
         const type = self.uniformTypes[name.replace(/\[.*?\]/, '')];
 
         if (type === 'float' || type === 'bool') {
-          gl.uniform1fv(location, value);
+          gl.uniform1f(location, value);
         } else if (type === 'vec2') {
           gl.uniform2fv(location, value);
         } else if (type === 'vec3') {
@@ -141,7 +143,7 @@ export default class GLProgram extends Shader {
         } else if (type === 'vec4') {
           gl.uniform4fv(location, value);
         } else if (type === 'int' || type.startsWith('sampler')) {
-          gl.uniform1iv(location, value);
+          gl.uniform1i(location, value);
         } else if (type === 'ivec2') {
           gl.uniform2iv(location, value);
         } else if (type === 'ivec3') {
@@ -153,8 +155,6 @@ export default class GLProgram extends Shader {
         } else if (type === 'mat4') {
           gl.uniformMatrix4fv(location, false, value);
         }
-
-        super.set(name, texture || value);
       }
     }
 
@@ -162,40 +162,38 @@ export default class GLProgram extends Shader {
       this.gl.transformFeedbackVaryings(this._program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS);
     }
 
-    this.vertexShader = this.vertexShader;
-    this.fragmentShader = this.fragmentShader;
+    this.attributes = new Attributes();
+    this.uniforms = new Uniforms();
+
+    this.vertexShader = this._shader.vertex;
+    this.fragmentShader = this._shader.fragment;
 
     this.use();
-
-    this.attributes = new Attributes();
-
-    const rawUniforms = this.uniforms;
-    this.uniforms = new Uniforms();
-    for (const key of Object.keys(rawUniforms)) {
-      this.uniforms.set(key, rawUniforms[key]);
+    for (const key of Object.keys(this._shader.uniforms)) {
+      this.uniforms.set(key, this._shader.uniforms[key]);
     }
   }
 
   set vertexShader(value) {
-    super.vertexShader = value;
-    if (this.gl) {
-      this._updateShader(this.gl.VERTEX_SHADER, this.vertexShader);
-    }
+    this._shader.vertex = value;
+    this._updateShader(this.gl.VERTEX_SHADER, this._shader.vertex);
   }
 
   get vertexShader() {
-    return super.vertexShader;
+    return this._shader.vertex;
   }
 
   set fragmentShader(value) {
-    super.fragmentShader = value;
-    if (this.gl) {
-      this._updateShader(this.gl.FRAGMENT_SHADER, this.fragmentShader);
-    }
+    this._shader.fragment = value;
+    this._updateShader(this.gl.FRAGMENT_SHADER, this._shader.fragment);
   }
 
   get fragmentShader() {
-    return super.fragmentShader;
+    return this._shader.fragment;
+  }
+
+  get uniformTypes() {
+    return this._shader.uniformTypes;
   }
 
   use() {
@@ -275,6 +273,11 @@ export default class GLProgram extends Shader {
 
       this._attributesLocations = new Map();
       this._uniformLocations = new Map();
+
+      this.use();
+      for (const [key, value] of this.uniforms) {
+        this.uniforms.set(key, value);
+      }
     }
   }
 }

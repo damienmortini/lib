@@ -55,7 +55,7 @@ export class Loader {
     return isArray ? Promise.all(promises) : promises[0];
   }
 
-  _loadFile({ src, type = '' }) {
+  _loadFile({ src, type = '', crossOrigin = undefined }) {
     return new Promise((resolve) => {
       if (type.startsWith('image') || type.startsWith('video') || type.startsWith('audio')) {
         resolve();
@@ -98,6 +98,7 @@ export class Loader {
       } else if (type.startsWith('image')) {
         return new Promise((resolve) => {
           const image = document.createElement('img');
+          image.crossOrigin = crossOrigin;
           image.onload = () => {
             resolve(image);
           };

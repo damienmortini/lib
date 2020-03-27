@@ -9,10 +9,11 @@ export default class GLTexture {
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
-    minFilter = gl.NEAREST_MIPMAP_LINEAR,
+    minFilter = gl.LINEAR,
     magFilter = gl.LINEAR,
-    wrapS = gl.REPEAT,
-    wrapT = gl.REPEAT,
+    wrapS = gl.CLAMP_TO_EDGE,
+    wrapT = gl.CLAMP_TO_EDGE,
+    flipY = false,
     generateMipmap = true,
   }) {
     this.gl = gl;
@@ -32,6 +33,7 @@ export default class GLTexture {
     this.magFilter = magFilter;
     this.wrapS = wrapS;
     this.wrapT = wrapT;
+    this.flipY = flipY;
     this.data = data;
 
     if (this.data && generateMipmap) {
@@ -138,6 +140,20 @@ export default class GLTexture {
 
   get wrapT() {
     return this._wrapT;
+  }
+
+  set flipY(value) {
+    if (this._flipY === value) {
+      return;
+    }
+    this._flipY = value;
+    this.bind();
+    this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this._flipY);
+    this.unbind();
+  }
+
+  get flipY() {
+    return this._flipY;
   }
 
   bind({ unit = 0 } = {}) {

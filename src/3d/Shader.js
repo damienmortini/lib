@@ -1,5 +1,5 @@
 export default class Shader {
-  static add(string = 'void main() {}', chunks) {
+  static addChunks(string = 'void main() {}', chunks) {
     for (const [key, chunk] of chunks) {
       switch (key) {
         case 'start':
@@ -15,17 +15,16 @@ export default class Shader {
           string = string.replace(key, chunk);
       }
     }
-
     return string;
   }
 
   constructor({
-    vertexShader = `#version 300 es
+    vertex = `#version 300 es
       void main() {
         gl_Position = vec4(0., 0., 0., 1.);
       }
     `,
-    fragmentShader = `#version 300 es
+    fragment = `#version 300 es
       precision highp float;
 
       out vec4 fragColor;
@@ -34,6 +33,8 @@ export default class Shader {
         fragColor = vec4(1.);
       }
     `,
+    uniforms = {},
+    chunks = null,
     dataTypeConctructors = {
       Vector2: class Vector2 extends Float32Array {
         constructor() {
@@ -63,73 +64,68 @@ export default class Shader {
       Texture: class Texture { },
       TextureCube: class TextureCube { },
     },
-    uniforms = {},
-    vertexShaderChunks = [],
-    fragmentShaderChunks = [],
-    shaders = [],
   } = {}) {
     this.uniforms = uniforms;
     this.uniformTypes = {};
 
     this._dataTypeConctructors = dataTypeConctructors;
 
-    this.vertexShader = vertexShader;
-    this.fragmentShader = fragmentShader;
-    this._vertexShaderChunks = [];
-    this._fragmentShaderChunks = [];
+    this.vertex = vertex;
+    this.fragment = fragment;
 
-    this.add({ vertexShaderChunks, fragmentShaderChunks, uniforms });
+    this._vertexChunks = [];
+    this._fragmentChunks = [];
 
-    for (const shader of shaders) {
-      this.add(shader);
+    if (chunks) {
+      this.addChunks(chunks);
     }
   }
 
-  add({ vertexShaderChunks = [], fragmentShaderChunks = [], uniforms = {} } = {}) {
-    this.vertexShader = Shader.add(this.vertexShader, vertexShaderChunks);
-    this._vertexShaderChunks.push(...vertexShaderChunks);
-    this.fragmentShader = Shader.add(this.fragmentShader, fragmentShaderChunks);
-    this._fragmentShaderChunks.push(...fragmentShaderChunks);
+  addChunks({ vertexChunks = [], fragmentChunks = [], uniforms = {} } = {}) {
+    this.vertex = Shader.addChunks(this.vertex, vertexChunks);
+    this._vertexChunks.push(...vertexChunks);
+    this.fragment = Shader.addChunks(this.fragment, fragmentChunks);
+    this._fragmentChunks.push(...fragmentChunks);
     for (const key of Object.keys(uniforms)) {
       this.uniforms[key] = uniforms[key];
     }
   }
 
-  set vertexShader(value) {
-    this._vertexShader = value;
-    this._parseUniforms(this._vertexShader);
+  set vertex(value) {
+    this._vertex = value;
+    this._parseUniforms(this._vertex);
   }
 
-  get vertexShader() {
-    return this._vertexShader;
+  get vertex() {
+    return this._vertex;
   }
 
-  set fragmentShader(value) {
-    this._fragmentShader = value;
-    this._parseUniforms(this._fragmentShader);
+  set fragment(value) {
+    this._fragment = value;
+    this._parseUniforms(this._fragment);
   }
 
-  get fragmentShader() {
-    return this._fragmentShader;
+  get fragment() {
+    return this._fragment;
   }
 
-  get vertexShaderChunks() {
-    return this._vertexShaderChunks;
+  get vertexChunks() {
+    return this._vertexChunks;
   }
 
-  get fragmentShaderChunks() {
-    return this._fragmentShaderChunks;
+  get fragmentChunks() {
+    return this._fragmentChunks;
   }
 
   _addUniform(name, type, arrayLength) {
+    this.uniformTypes[name] = type;
+
     if (this.uniforms[name] !== undefined) {
       return;
     }
 
     let value;
     let typeMatch;
-
-    this.uniformTypes[name] = type;
 
     if (/float|double/.test(type)) {
       if (isNaN(arrayLength)) {
