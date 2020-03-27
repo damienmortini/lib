@@ -10,8 +10,6 @@ export default class GUIFolderElement extends HTMLElement {
       <style>
         :host {
           display: block;
-          color: white;
-          text-shadow: 0 0 3px black;
           font-family: sans-serif;
         }
         :host(::-webkit-scrollbar ){ 
@@ -26,6 +24,9 @@ export default class GUIFolderElement extends HTMLElement {
         }
         summary:focus {
           outline: none;
+        }
+        section {
+          margin: 5px 0;
         }
         section.input {
           display: flex;

@@ -12,13 +12,16 @@ export default class InputButtonElement extends HTMLElement {
           display: inline-flex;
           min-width: 20px;
           height: 20px;
-          cursor: pointer;
         }
         button {
+          cursor: pointer;
           flex: 1;
           resize: vertical;
           width: 100%;
           height: 100%;
+          border-radius: inherit;
+          border-width: var(--border-width);
+          outline: inherit;
         }
       </style>
       <button><slot></slot></button>

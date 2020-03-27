@@ -51,6 +51,10 @@ export default class GUIElement extends GUIFolderElement {
     this._foldersMap = new Map();
   }
 
+  get folders() {
+    return this._foldersMap;
+  }
+
   add(options) {
     options = Object.assign({}, options);
 
