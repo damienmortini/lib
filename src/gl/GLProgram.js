@@ -126,6 +126,7 @@ export default class GLProgram {
           return;
         }
 
+        self._shader.uniforms[name] = texture || value;
         super.set(name, texture || value);
 
         if (location === null) {
@@ -167,11 +168,6 @@ export default class GLProgram {
 
     this.vertexShader = this._shader.vertex;
     this.fragmentShader = this._shader.fragment;
-
-    this.use();
-    for (const key of Object.keys(this._shader.uniforms)) {
-      this.uniforms.set(key, this._shader.uniforms[key]);
-    }
   }
 
   set vertexShader(value) {
@@ -275,8 +271,8 @@ export default class GLProgram {
       this._uniformLocations = new Map();
 
       this.use();
-      for (const [key, value] of this.uniforms) {
-        this.uniforms.set(key, value);
+      for (const key of Object.keys(this._shader.uniforms)) {
+        this.uniforms.set(key, this._shader.uniforms[key]);
       }
     }
   }
