@@ -53,4 +53,13 @@ export default class Color {
       parseInt(results[3], 16) / 255,
     ] : null;
   }
+
+  static rgbToHex(rgb) {
+    let hex = '#';
+    for (const component of rgb) {
+      const componentString = Math.floor(component * 255).toString(16);
+      hex += componentString.length == 1 ? '0' + componentString : componentString;
+    }
+    return hex;
+  }
 }
