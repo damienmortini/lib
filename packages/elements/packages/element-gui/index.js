@@ -112,7 +112,7 @@ export default class GUIElement extends GUIFolderElement {
           folderElement = document.createElement('gui-folder');
           folderElement.name = folderName;
           const currentPath = path;
-          folderElement.close = !(sessionStorage.getItem(`GUI[${currentPath}]`) === 'false');
+          folderElement.close = (sessionStorage.getItem(`GUI[${currentPath}]`) === 'true');
           folderElement.addEventListener('toggle', (event) => {
             sessionStorage.setItem(`GUI[${currentPath}]`, event.target.close);
           });
