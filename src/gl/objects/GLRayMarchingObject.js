@@ -127,7 +127,7 @@ export default class GLRayMarchingObject extends GLObject {
           ['sdfRayMarchSteps', sdfRayMarchSteps],
           ['sdfRayMarchPrecision', sdfRayMarchPrecision],
         ],
-        vertexShaderChunks: [
+        vertexChunks: [
           ['start', `
             in float instanceID;
             in vec3 position;
@@ -154,7 +154,7 @@ export default class GLRayMarchingObject extends GLObject {
             ${vertexCompute ? rayMarchingChunks.get('main') : ''}
           `],
         ],
-        fragmentShaderChunks: [
+        fragmentChunks: [
           ['start', `
             ${rayMarchingChunks.get('start')}
             

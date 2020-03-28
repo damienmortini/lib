@@ -16,7 +16,7 @@ export default class GLPlaneObject extends GLObject {
     program = new GLProgram({
       gl,
       shader: {
-        vertexShaderChunks: [
+        vertexChunks: [
           ['start', `
             in vec3 position;
           `],

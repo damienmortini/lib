@@ -16,8 +16,8 @@ export default class GLProgram {
     //   uniforms,
     //   vertexShader,
     //   fragmentShader,
-    //   vertexShaderChunks,
-    //   fragmentShaderChunks,
+    //   vertexChunks,
+    //   fragmentChunks,
     //   shaders,
     //   dataTypeConctructors: {
     //     Vector2,

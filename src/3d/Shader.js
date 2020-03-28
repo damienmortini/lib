@@ -33,8 +33,9 @@ export default class Shader {
         fragColor = vec4(1.);
       }
     `,
+    vertexChunks = [],
+    fragmentChunks = [],
     uniforms = {},
-    chunks = null,
     dataTypeConctructors = {
       Vector2: class Vector2 extends Float32Array {
         constructor() {
@@ -70,53 +71,26 @@ export default class Shader {
 
     this._dataTypeConctructors = dataTypeConctructors;
 
-    this._vertex = vertex;
-    this._fragment = fragment;
+    this._vertex = Shader.addChunks(vertex, vertexChunks);
+    this._fragment = Shader.addChunks(fragment, fragmentChunks);
 
-    this._parseUniforms();
-
-    this._vertexChunks = [];
-    this._fragmentChunks = [];
-
-    if (chunks) {
-      this.addChunks(chunks);
-    }
-  }
-
-  addChunks({ vertexChunks = [], fragmentChunks = [], uniforms = {} } = {}) {
-    this.vertex = Shader.addChunks(this.vertex, vertexChunks);
-    this._vertexChunks.push(...vertexChunks);
-    this.fragment = Shader.addChunks(this.fragment, fragmentChunks);
-    this._fragmentChunks.push(...fragmentChunks);
-    for (const key of Object.keys(uniforms)) {
-      this.uniforms[key] = uniforms[key];
-    }
-  }
-
-  set vertex(value) {
-    this._vertex = value;
     this._parseUniforms();
   }
 
   get vertex() {
     return this._vertex;
   }
-
-  set fragment(value) {
-    this._fragment = value;
+  set vertex(value) {
+    this._vertex = value;
     this._parseUniforms();
   }
 
   get fragment() {
     return this._fragment;
   }
-
-  get vertexChunks() {
-    return this._vertexChunks;
-  }
-
-  get fragmentChunks() {
-    return this._fragmentChunks;
+  set fragment(value) {
+    this._fragment = value;
+    this._parseUniforms();
   }
 
   _createUniform(name, type, arrayLength) {

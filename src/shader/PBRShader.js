@@ -229,8 +229,8 @@ export default class PBRShader extends Shader {
     metalness = 0,
     roughness = 0,
     uniforms = {},
-    vertexShaderChunks = [],
-    fragmentShaderChunks = [],
+    vertexChunks = [],
+    fragmentChunks = [],
     uvs = true,
     pbrDiffuseLightFromRay = undefined,
     pbrReflectionFromRay = undefined,
@@ -243,7 +243,7 @@ export default class PBRShader extends Shader {
           roughness,
         },
       }, uniforms),
-      vertexShaderChunks: [
+      vertexChunks: [
         ['start', `
             ${CameraShader.Camera}
             ${RayShader.Ray}
@@ -271,9 +271,9 @@ export default class PBRShader extends Shader {
           Ray ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
           vViewDirection = ray.direction;
         `],
-        ...vertexShaderChunks,
+        ...vertexChunks,
       ],
-      fragmentShaderChunks: [
+      fragmentChunks: [
         ['start', `
           ${LightShader.Light}
           ${RayShader.Ray}
@@ -293,7 +293,7 @@ export default class PBRShader extends Shader {
           Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
           fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
         `],
-        ...fragmentShaderChunks,
+        ...fragmentChunks,
       ],
     });
   }

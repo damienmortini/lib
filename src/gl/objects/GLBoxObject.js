@@ -18,7 +18,7 @@ export default class GLBoxObject extends GLObject {
     program = new GLProgram({
       gl,
       shader: {
-        vertexShaderChunks: [
+        vertexChunks: [
           ['start', `
             in vec3 position;
           `],

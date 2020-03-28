@@ -8,7 +8,7 @@ export default class GLGPGPUSystem {
     gl,
     data,
     maxWidth = 1024,
-    fragmentShaderChunks = [],
+    fragmentChunks = [],
   }) {
     this.gl = gl;
 
@@ -56,7 +56,7 @@ export default class GLGPGPUSystem {
           uniforms: {
             dataTexture: this._frameBufferIn.colorTextures[0],
           },
-          vertexShaderChunks: [
+          vertexChunks: [
             ['start', `
               in vec3 position;
               in vec2 uv;
@@ -69,8 +69,8 @@ export default class GLGPGPUSystem {
               vUV = uv;
             `],
           ],
-          fragmentShaderChunks: [
-            ...fragmentShaderChunks,
+          fragmentChunks: [
+            ...fragmentChunks,
             ['start', `
               uniform sampler2D dataTexture;
               in vec2 vUV;

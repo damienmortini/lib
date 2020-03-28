@@ -69,7 +69,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
             msdfTextSizes: sizes,
             msdfTextPixelRange: parseFloat(fontData.distanceField.distanceRange),
           },
-          vertexShaderChunks: [
+          vertexChunks: [
             ['start', `
               uniform vec2 msdfTextSizes[${fontData.chars.length}];
               uniform vec4 msdfTextUVRectangles[${fontData.chars.length}];
@@ -91,7 +91,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
               vMSDFTextPosition = vec2(msdfTextUVRectangle.x + msdfTextUVRectangle.z * uv.x, msdfTextUVRectangle.y + msdfTextUVRectangle.w * (1. - uv.y));
             `],
           ],
-          fragmentShaderChunks: [
+          fragmentChunks: [
             ['start', `
               uniform sampler2D msdfTextFontTexture;
               uniform float msdfTextPixelRange;
@@ -109,7 +109,7 @@ export default class GLMSDFTextObject extends GLPlaneObject {
             `],
           ],
           shaders: [shader, {
-            fragmentShaderChunks: [
+            fragmentChunks: [
               ['precision highp float;', isWebGL1 ? '#extension GL_OES_standard_derivatives : enable\nprecision highp float;' : 'precision highp float;'],
             ],
           }],

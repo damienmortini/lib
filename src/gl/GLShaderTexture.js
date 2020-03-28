@@ -18,7 +18,7 @@ export default class GLShaderTexture extends GLTexture {
     wrapT = gl.REPEAT,
     generateMipmap = false,
     uniforms = {},
-    fragmentShaderChunks = [],
+    fragmentChunks = [],
     debug = false,
   }) {
     super({
@@ -50,7 +50,7 @@ export default class GLShaderTexture extends GLTexture {
         gl: this.gl,
         shader: {
           uniforms,
-          vertexShaderChunks: [
+          vertexChunks: [
             ['start', `
               in vec3 position;
               in vec2 uv;
@@ -62,7 +62,7 @@ export default class GLShaderTexture extends GLTexture {
               vUV = uv;
             `],
           ],
-          fragmentShaderChunks,
+          fragmentChunks,
         },
       }),
     });

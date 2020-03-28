@@ -6,13 +6,12 @@ export default class BasicShader extends Shader {
     normals = false,
     uvs = false,
     uniforms = undefined,
-    vertexShaderChunks = [],
-    fragmentShaderChunks = [],
-    shaders = [],
+    vertexChunks = [],
+    fragmentChunks = [],
   } = {}) {
     super({
       uniforms,
-      vertexShaderChunks: [
+      vertexChunks: [
         ['start', `
           uniform mat4 projectionView;
           uniform mat4 transform;
@@ -33,17 +32,16 @@ export default class BasicShader extends Shader {
         ['end', `
           gl_Position = projectionView * transform * vec4(position, 1.);
         `],
-        ...vertexShaderChunks,
+        ...vertexChunks,
       ],
-      fragmentShaderChunks: [
+      fragmentChunks: [
         ['start', `
           ${positions ? 'in vec3 vPosition;' : ''}
           ${normals ? 'in vec3 vNormal;' : ''}
           ${uvs ? 'in vec2 vUV;' : ''}
         `],
-        ...fragmentShaderChunks,
+        ...fragmentChunks,
       ],
-      shaders,
     });
   }
 }
