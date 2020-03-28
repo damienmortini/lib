@@ -50,13 +50,13 @@ export default class GLTexture {
   set data(value) {
     this._data = value;
 
-    if (this._data && this._data.width) {
+    if (this._data && (this._data.length === undefined)) {
       this._dataWidth = this._data.width || this._data.videoWidth;
       this._dataHeight = this._data.height || this._data.videoHeight;
     }
 
     this.bind();
-    if (this.gl instanceof WebGLRenderingContext && this._dataWidth) {
+    if (this.gl instanceof WebGLRenderingContext && (this._data.length === undefined)) {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.format, this.type, this._data);
     } else {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this._data);
