@@ -42,7 +42,7 @@ export default class GUIElement extends GUIFolderElement {
 
     this.shadowRoot.querySelector('style').insertAdjacentHTML('beforeend', `
       :host {
-        max-width: 250px;
+        width: 250px;
       }
     `);
 
@@ -61,9 +61,9 @@ export default class GUIElement extends GUIFolderElement {
     if (options.id === undefined && options.key !== undefined) {
       options.id = `${options.folder ? options.folder + '/' : ''}${options.key}`;
     }
-    if (!options.id) {
-      console.warn(`GUI: ${JSON.stringify(options)} doesn't have any id`);
-    }
+    // if (!options.id) {
+    //   console.warn(`GUI: ${JSON.stringify(options)} doesn't have any id`);
+    // }
 
     let urlValue;
 
@@ -134,7 +134,6 @@ export default class GUIElement extends GUIFolderElement {
 
     if (urlValue !== undefined) {
       element.value = urlValue;
-      element.dispatchEvent(new Event('input'));
     }
 
     let timeout;
