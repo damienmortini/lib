@@ -70,8 +70,10 @@ export default class Shader {
 
     this._dataTypeConctructors = dataTypeConctructors;
 
-    this.vertex = vertex;
-    this.fragment = fragment;
+    this._vertex = vertex;
+    this._fragment = fragment;
+
+    this._parseUniforms();
 
     this._vertexChunks = [];
     this._fragmentChunks = [];
@@ -93,7 +95,7 @@ export default class Shader {
 
   set vertex(value) {
     this._vertex = value;
-    this._parseUniforms(this._vertex);
+    this._parseUniforms();
   }
 
   get vertex() {
@@ -102,7 +104,7 @@ export default class Shader {
 
   set fragment(value) {
     this._fragment = value;
-    this._parseUniforms(this._fragment);
+    this._parseUniforms();
   }
 
   get fragment() {
@@ -117,13 +119,7 @@ export default class Shader {
     return this._fragmentChunks;
   }
 
-  _addUniform(name, type, arrayLength) {
-    this.uniformTypes[name] = type;
-
-    if (this.uniforms[name] !== undefined) {
-      return;
-    }
-
+  _createUniform(name, type, arrayLength) {
     let value;
     let typeMatch;
 
@@ -169,48 +165,68 @@ export default class Shader {
       value = undefined;
     }
 
-    this.uniforms[name] = value;
+    return value;
   }
 
   // Parse shader strings to extract uniforms
 
-  _parseUniforms(string) {
-    const structures = new Map();
+  _parseUniforms() {
+    const newUniforms = {};
 
-    const structRegExp = /struct\s*(.*)\s*{\s*([\s\S]*?)}/g;
-    const structMemberRegExp = /^\s*(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
-    let structMatch;
-    while ((structMatch = structRegExp.exec(string))) {
-      const structName = structMatch[1];
-      const structString = structMatch[2];
+    for (const shaderString of [this.vertex, this.fragment]) {
+      const structures = new Map();
 
-      const structure = {};
-      let structMemberMatch;
-      while ((structMemberMatch = structMemberRegExp.exec(structString))) {
-        const [, type, name, arrayLengthStr] = structMemberMatch;
-        const arrayLength = parseInt(arrayLengthStr);
-        structure[name] = {
-          type,
-          arrayLength,
-        };
+      const structRegExp = /struct\s*(.*)\s*{\s*([\s\S]*?)}/g;
+      const structMemberRegExp = /^\s*(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
+      let structMatch;
+      while ((structMatch = structRegExp.exec(shaderString))) {
+        const structName = structMatch[1];
+        const structString = structMatch[2];
+
+        const structure = {};
+        let structMemberMatch;
+        while ((structMemberMatch = structMemberRegExp.exec(structString))) {
+          const [, type, name, arrayLengthStr] = structMemberMatch;
+          const arrayLength = parseInt(arrayLengthStr);
+          structure[name] = {
+            type,
+            arrayLength,
+          };
+        }
+
+        structures.set(structName, structure);
       }
 
-      structures.set(structName, structure);
+      const uniformsRegExp = /^\s*uniform (highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
+      let uniformMatch;
+      while ((uniformMatch = uniformsRegExp.exec(shaderString))) {
+        const [, , type, name, arrayLengthStr] = uniformMatch;
+
+        const structure = structures.get(type);
+        if (structure) {
+          for (const key of Object.keys(structure)) {
+            const name = `${name}.${key}`;
+            this.uniformTypes[name] = structure[key].type;
+            newUniforms[name] = this._createUniform(name, structure[key].type, structure[key].arrayLength);
+          }
+        } else {
+          this.uniformTypes[name] = type;
+          const arrayLength = parseInt(arrayLengthStr);
+          newUniforms[name] = this._createUniform(name, type, arrayLength);
+        }
+      }
     }
 
-    const uniformsRegExp = /^\s*uniform (highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
-    let uniformMatch;
-    while ((uniformMatch = uniformsRegExp.exec(string))) {
-      const [, , type, name, arrayLengthStr] = uniformMatch;
+    for (const [key, value] of Object.entries(newUniforms)) {
+      if (!(key in this.uniforms)) {
+        this.uniforms[key] = value;
+      }
+    }
 
-      const structure = structures.get(type);
-      if (structure) {
-        for (const key of Object.keys(structure)) {
-          this._addUniform(`${name}.${key}`, structure[key].type, structure[key].arrayLength);
-        }
-      } else {
-        const arrayLength = parseInt(arrayLengthStr);
-        this._addUniform(name, type, arrayLength);
+    for (const key of Object.keys(this.uniforms)) {
+      if (!(key in newUniforms)) {
+        delete this.uniforms[key];
+        delete this.uniformTypes[key];
       }
     }
   }

@@ -271,6 +271,7 @@ export default class GLProgram {
       this._uniformLocations = new Map();
 
       this.use();
+      this.uniforms.clear();
       for (const key of Object.keys(this._shader.uniforms)) {
         this.uniforms.set(key, this._shader.uniforms[key]);
       }
