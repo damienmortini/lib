@@ -4,6 +4,7 @@ const PAUSED_BY_USER = 1;
 const PAUSED_BY_INTERSECTION = 2;
 const PAUSED_BY_VISIBILITY = 4;
 const PAUSED_BY_BLUR = 8;
+const PAUSED_BY_CONNECTION = 16;
 
 /**
  * @customElement
@@ -13,11 +14,11 @@ export default class AnimationTickerElement extends HTMLElement {
   constructor() {
     super();
 
-    this.autoplay = false;
-
-    this._pauseFlag = PAUSED_BY_USER;
+    this.noautoplay = false;
 
     this._updateBinded = this.update.bind(this);
+
+    this._pauseFlag = 0;
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
@@ -44,13 +45,18 @@ export default class AnimationTickerElement extends HTMLElement {
   }
 
   connectedCallback() {
-    if (this.autoplay) {
-      this._pauseFlag &= ~PAUSED_BY_USER;
+    this._pauseFlag &= ~PAUSED_BY_CONNECTION;
+    if (!document.hasFocus()) {
+      this._pauseFlag |= PAUSED_BY_BLUR;
     }
+    if (this.noautoplay) {
+      this._pauseFlag |= PAUSED_BY_USER;
+    }
+    this.update();
   }
 
   disconnectedCallback() {
-    Ticker.delete(this._updateBinded);
+    this._pauseFlag |= PAUSED_BY_CONNECTION;
   }
 
   get _pauseFlag() {
@@ -64,7 +70,7 @@ export default class AnimationTickerElement extends HTMLElement {
     this.__pauseFlag = value;
     if (this.__pauseFlag) {
       Ticker.delete(this._updateBinded);
-    } else if (!this._paused) {
+    } else {
       Ticker.add(this._updateBinded);
     }
   }
@@ -73,15 +79,15 @@ export default class AnimationTickerElement extends HTMLElement {
    * Indicating whether element should automatically play
    * @type {Boolean}
    */
-  get autoplay() {
-    return this.hasAttribute('autoplay');
+  get noautoplay() {
+    return this.hasAttribute('noautoplay');
   }
 
-  set autoplay(value) {
+  set noautoplay(value) {
     if (value) {
-      this.setAttribute('autoplay', '');
+      this.setAttribute('noautoplay', '');
     } else {
-      this.removeAttribute('autoplay');
+      this.removeAttribute('noautoplay');
     }
   }
 

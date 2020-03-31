@@ -41,6 +41,7 @@ export default class GUIFolderElement extends HTMLElement {
         section.input label {
           overflow: hidden;
           text-overflow: ellipsis;
+          white-space: nowrap;
           padding: 0 5px;
           flex: 1;
         }
