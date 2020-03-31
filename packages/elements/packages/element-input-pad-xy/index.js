@@ -1,4 +1,4 @@
-export default class InputPad2DElement extends HTMLElement {
+export default class InputPadXYElement extends HTMLElement {
   static get observedAttributes() {
     return ['value', 'disabled'];
   }
@@ -121,3 +121,5 @@ export default class InputPad2DElement extends HTMLElement {
     }));
   }
 }
+
+customElements.define('damo-input-pad-xy', class DamoInputPadXYElement extends InputPadXYElement { });

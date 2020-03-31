@@ -1,7 +1,6 @@
 import Loader from '../lib/src/util/Loader.js';
 import '../../lottie-web/build/player/lottie.js';
 
-
 /**
  * Element to plays Lottie animation
  * @element element-animation-lottie
@@ -233,3 +232,5 @@ class LottieAnimationElement extends HTMLElement {
 }
 
 export default LottieAnimationElement;
+
+customElements.define('damo-animation-lottie', class DamoLottieAnimationElement extends LottieAnimationElement { });

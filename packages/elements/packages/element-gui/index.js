@@ -76,6 +76,10 @@ export default class GUIElement extends GUIFolderElement {
       }
     }
 
+    if (options.object) {
+      options.value = options.object[options.key];
+    }
+
     if (!options.tagName) {
       options.tagName = 'gui-input-text';
       for (const [tagName, resolve] of tagNameResolvers) {
@@ -84,10 +88,6 @@ export default class GUIElement extends GUIFolderElement {
           break;
         }
       }
-    }
-
-    if (options.object) {
-      options.value = options.object[options.key];
     }
 
     const { object, key, folder, reload } = options;
@@ -163,3 +163,5 @@ export default class GUIElement extends GUIFolderElement {
     return element;
   }
 }
+
+customElements.define('damo-gui', class DamoGUIElement extends GUIElement { });
