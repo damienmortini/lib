@@ -25,7 +25,7 @@
   "dependencies": {
     "@damienmortini/element-input-button": "^0.0.7",
     "@damienmortini/element-input-checkbox": "0.0.6",
-    "@damienmortini/element-input-colorpicker": "0.0.7",
+    "@damienmortini/element-input-color": "0.0.7",
     "@damienmortini/element-input-range": "0.0.6",
     "@damienmortini/element-input-select": "0.0.6",
     "@damienmortini/element-input-text": "0.0.6"
