@@ -9,49 +9,45 @@ export class GLTFLoader extends Loader {
     this.extensionTypeMap.set('glb', 'application/octet-stream');
   }
 
-  _loadFile(...options) {
-    return super._loadFile(...options).then((response) => {
-      const rawData = response;
+  async parse(data) {
+    const rawData = JSON.parse(JSON.stringify(data));
+    data.raw = rawData;
 
-      const buffersPromises = [];
-      for (const buffer of response.buffers) {
-        if (buffer.uri.startsWith('data')) {
-          buffersPromises.push(new Promise((resolve) => {
-            resolve(Base64.toByteArray(buffer.uri.split(',')[1]).buffer);
-          }));
-        } else {
-          buffersPromises.push(SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`));
-        }
+    const buffers = [];
+    for (const buffer of data.buffers) {
+      if (buffer.uri.startsWith('data')) {
+        buffers.push(Base64.toByteArray(buffer.uri.split(',')[1]).buffer);
+      } else {
+        buffers.push(await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`));
       }
+    }
 
-      return Promise.all(buffersPromises).then((buffers) => {
-        const data = JSON.parse(JSON.stringify(rawData));
-        data.raw = rawData;
+    for (const node of data.nodes) {
+      node.mesh = data.meshes[node.mesh];
+    }
 
-        for (const node of data.nodes) {
-          node.mesh = data.meshes[node.mesh];
+    for (const bufferView of data.bufferViews) {
+      bufferView.buffer = buffers[bufferView.buffer];
+    }
+
+    for (const accessor of data.accessors) {
+      accessor.bufferView = data.bufferViews[accessor.bufferView];
+    }
+
+    for (const mesh of data.meshes) {
+      for (const primitive of mesh.primitives) {
+        for (const key of Object.keys(primitive.attributes)) {
+          primitive.attributes[key] = data.accessors[primitive.attributes[key]];
         }
+        primitive.indices = data.accessors[primitive.indices];
+      }
+    }
 
-        for (const bufferView of data.bufferViews) {
-          bufferView.buffer = buffers[bufferView.buffer];
-        }
+    return data;
+  }
 
-        for (const accessor of data.accessors) {
-          accessor.bufferView = data.bufferViews[accessor.bufferView];
-        }
-
-        for (const mesh of data.meshes) {
-          for (const primitive of mesh.primitives) {
-            for (const key of Object.keys(primitive.attributes)) {
-              primitive.attributes[key] = data.accessors[primitive.attributes[key]];
-            }
-            primitive.indices = data.accessors[primitive.indices];
-          }
-        }
-
-        return data;
-      });
-    });
+  _loadFile(...options) {
+    return super._loadFile(...options).then(this.parse);
   }
 }
 
