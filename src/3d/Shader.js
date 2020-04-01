@@ -67,7 +67,7 @@ export default class Shader {
     },
   } = {}) {
     this.uniforms = uniforms;
-    this.uniformTypes = {};
+    this.uniformTypes = new Map();
 
     this._dataTypeConctructors = dataTypeConctructors;
 
@@ -94,6 +94,15 @@ export default class Shader {
   }
 
   _createUniform(name, type, arrayLength) {
+    if (!arrayLength) {
+      this.uniformTypes.set(name, type);
+    } else {
+      this.uniformTypes.set(name, `${type}array`);
+      for (let index = 0; index < arrayLength; index++) {
+        this.uniformTypes.set(`${name}[${index}]`, type);
+      }
+    }
+
     let value;
     let typeMatch;
 
@@ -146,6 +155,7 @@ export default class Shader {
 
   _parseUniforms() {
     const newUniforms = {};
+    this.uniformTypes.clear();
 
     for (const shaderString of [this.vertex, this.fragment]) {
       const structures = new Map();
@@ -180,11 +190,9 @@ export default class Shader {
         if (structure) {
           for (const key of Object.keys(structure)) {
             const name = `${name}.${key}`;
-            this.uniformTypes[name] = structure[key].type;
             newUniforms[name] = this._createUniform(name, structure[key].type, structure[key].arrayLength);
           }
         } else {
-          this.uniformTypes[name] = type;
           const arrayLength = parseInt(arrayLengthStr);
           newUniforms[name] = this._createUniform(name, type, arrayLength);
         }
@@ -200,7 +208,6 @@ export default class Shader {
     for (const key of Object.keys(this.uniforms)) {
       if (!(key in newUniforms)) {
         delete this.uniforms[key];
-        delete this.uniformTypes[key];
       }
     }
   }
