@@ -144,6 +144,10 @@ export default class GLProgram {
     return this._shader.uniformTypes;
   }
 
+  get textureUnits() {
+    return this._textureUnits;
+  }
+
   use() {
     this.gl.useProgram(this._program);
   }
