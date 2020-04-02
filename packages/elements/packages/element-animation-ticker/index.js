@@ -28,10 +28,16 @@ export default class AnimationTickerElement extends HTMLElement {
       }
     });
     const observer = new IntersectionObserver((entries) => {
-      if (!entries[0].isIntersecting) {
-        this._pauseFlag |= PAUSED_BY_INTERSECTION;
-      } else {
+      let isIntersecting = false;
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          isIntersecting = true;
+        }
+      }
+      if (isIntersecting) {
         this._pauseFlag &= ~PAUSED_BY_INTERSECTION;
+      } else {
+        this._pauseFlag |= PAUSED_BY_INTERSECTION;
       }
     });
     observer.observe(this);
