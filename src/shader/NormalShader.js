@@ -5,9 +5,9 @@ export default class NormalShader {
     return `
       vec3 blendNormals(vec3 n1, vec3 n2)
       {
-          vec3 t = n1.xyz + vec3(0., 0., 1.);
+          vec3 t = n1.xyz + vec3(0., 0., 0.999999);
           vec3 u = n2.xyz * vec3(-1., -1., 1.);
-          vec3 r = (t/t.z)*dot(t, u) - u;
+          vec3 r = (t / t.z) * dot(t, u) - u;
           return r;
       }
     `;
