@@ -71,7 +71,6 @@ export default class GLShaderTexture extends GLTexture {
   }
 
   update({ uniforms = {}, debug = false } = {}) {
-    const previousViewport = this.gl.getParameter(this.gl.VIEWPORT);
     this.gl.viewport(0, 0, this.width, this.height);
     this._frameBuffer.bind();
     this._quad.draw({
@@ -83,6 +82,5 @@ export default class GLShaderTexture extends GLTexture {
         uniforms,
       });
     }
-    this.gl.viewport(...previousViewport);
   }
 }
