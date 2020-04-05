@@ -56,7 +56,7 @@ export default class GLTexture {
     }
 
     this.bind();
-    if (this.gl instanceof WebGLRenderingContext && (this._data.length === undefined)) {
+    if (this.gl instanceof WebGLRenderingContext && this._data && this._data.length === undefined) {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.format, this.type, this._data);
     } else {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this._data);
