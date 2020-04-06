@@ -5,10 +5,11 @@ export default class NormalShader {
     return `
       vec3 blendNormals(vec3 n1, vec3 n2)
       {
-          vec3 t = n1.xyz + vec3(0., 0., 0.999999);
-          vec3 u = n2.xyz * vec3(-1., -1., 1.);
-          vec3 r = (t / t.z) * dot(t, u) - u;
-          return r;
+          mat3 nBasis = mat3(
+            vec3(n2.z, n2.y, -n2.x), // +90 degree rotation around y axis
+            vec3(n2.x, n2.z, -n2.y), // -90 degree rotation around x axis
+            vec3(n2.x, n2.y,  n2.z));
+          return normalize(n1.x*nBasis[0] + n1.y*nBasis[1] + n1.z*nBasis[2]);
       }
     `;
   }
