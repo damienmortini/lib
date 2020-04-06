@@ -117,12 +117,12 @@ export default class OrbitController {
     this.matrix.identity();
     this.matrix.rotateY(this._panEased);
     this.matrix.rotateX(-this._tiltEased);
-    const sinRotation = Math.sin(this._panEased);
-    const cosRotation = Math.cos(this._panEased);
+    const sinPan = Math.sin(this._panEased);
+    const cosPan = Math.cos(this._panEased);
     const cosTilt = Math.cos(this._tiltEased);
     const sinTilt = Math.sin(this._tiltEased);
-    this.matrix.x = this._distanceEased * sinRotation * cosTilt;
+    this.matrix.x = this._distanceEased * sinPan * cosTilt;
     this.matrix.y = sinTilt * this._distanceEased;
-    this.matrix.z = this._distanceEased * cosRotation * cosTilt;
+    this.matrix.z = this._distanceEased * cosPan * cosTilt;
   }
 }
