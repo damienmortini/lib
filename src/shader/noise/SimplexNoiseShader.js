@@ -1,10 +1,5 @@
 export default class SimplexNoiseShader {
-  static simplexNoise({
-    hash = `
-      p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
-      return -1.0 + 2.0*fract(sin(p)*43758.5453123);
-      `,
-  } = {}) {
+  static simplexNoise() {
     return `
       // The MIT License
       // Copyright © 2013 Inigo Quilez
@@ -30,7 +25,8 @@ export default class SimplexNoiseShader {
       
       vec2 simplexNoiseHash( vec2 p ) // replace this by something better
       {
-        ${hash}
+        p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
+        return -1.0 + 2.0*fract(sin(p)*43758.5453123);
       }
       
       float simplexNoise( in vec2 p )
