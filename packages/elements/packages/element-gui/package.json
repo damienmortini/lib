@@ -23,11 +23,11 @@
     "url": "https://github.com/damienmortini/elements/issues"
   },
   "dependencies": {
-    "@damienmortini/element-input-button": "file:../element-input-button",
-    "@damienmortini/element-input-checkbox": "file:../element-input-checkbox",
-    "@damienmortini/element-input-color": "file:../element-input-color",
-    "@damienmortini/element-input-range": "file:../element-input-range",
-    "@damienmortini/element-input-select": "file:../element-input-select",
-    "@damienmortini/element-input-text": "file:../element-input-text"
+    "@damienmortini/element-input-button": "^0.0.8",
+    "@damienmortini/element-input-checkbox": "^0.0.6",
+    "@damienmortini/element-input-color": "^0.0.7",
+    "@damienmortini/element-input-range": "^0.0.8",
+    "@damienmortini/element-input-select": "^0.0.6",
+    "@damienmortini/element-input-text": "^0.0.6"
   }
 }
