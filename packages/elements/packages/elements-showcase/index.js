@@ -17,7 +17,7 @@ for (let elementName of ELEMENTS) {
           ${elementString}
         </li>
       `);
-  import(`./node_modules/@damienmortini/${elementName}/index.js`).then((module) => {
+  import(`../../node_modules/@damienmortini/${elementName}/index.js`).then((module) => {
     customElements.define(`${elementName}`, module.default);
   });
 }
