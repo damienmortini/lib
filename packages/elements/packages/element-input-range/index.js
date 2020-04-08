@@ -33,12 +33,18 @@ export default class InputRangeElement extends HTMLElement {
       event.stopPropagation();
       this.value = this._rangeInput.valueAsNumber;
       this._numberInput.valueAsNumber = this.value;
+      this.dispatchEvent(new Event('input', {
+        bubbles: true,
+      }));
     });
 
     this._numberInput.addEventListener('input', (event) => {
       event.stopPropagation();
       this.value = this._numberInput.valueAsNumber;
       this._rangeInput.valueAsNumber = this.value;
+      this.dispatchEvent(new Event('input', {
+        bubbles: true,
+      }));
     });
   }
 
@@ -103,9 +109,6 @@ export default class InputRangeElement extends HTMLElement {
   set value(value) {
     this._rangeInput.valueAsNumber = value;
     this._numberInput.valueAsNumber = value;
-    this.dispatchEvent(new Event('input', {
-      bubbles: true,
-    }));
   }
 }
 
