@@ -46,13 +46,33 @@ export default class GUIElement extends GUIFolderElement {
       }
     `);
 
+    this.autoSaveToURL = false;
+
     this._summary.textContent = 'GUI';
 
+    this._elementDataMap = new Map();
+
     this._foldersMap = new Map();
+
+    this.addEventListener('toggle', () => {
+      this._updateFolderCloseState(this, 'GUI.close');
+    });
+  }
+
+  connectedCallback() {
+    this.close = sessionStorage.getItem(`GUI.close`) !== null;
   }
 
   get folders() {
     return this._foldersMap;
+  }
+
+  _updateFolderCloseState(folder, path) {
+    if (folder.close) {
+      sessionStorage.setItem(path, '');
+    } else {
+      sessionStorage.removeItem(path);
+    }
   }
 
   add(options) {
@@ -61,9 +81,6 @@ export default class GUIElement extends GUIFolderElement {
     if (options.id === undefined && options.key !== undefined) {
       options.id = `${options.folder ? options.folder + '/' : ''}${options.key}`;
     }
-    // if (!options.id) {
-    //   console.warn(`GUI: ${JSON.stringify(options)} doesn't have any id`);
-    // }
 
     let urlValue;
 
@@ -90,11 +107,16 @@ export default class GUIElement extends GUIFolderElement {
       }
     }
 
-    const { object, key, folder, reload } = options;
+    options.saveToURL = this.autoSaveToURL || options.saveToURL;
+
+    const { tagName, object, key, folder, reload, saveToURL, watch } = options;
+    delete options.tagName;
     delete options.object;
     delete options.key;
     delete options.folder;
     delete options.reload;
+    delete options.saveToURL;
+    delete options.watch;
 
     let folderElement = this;
 
@@ -112,9 +134,9 @@ export default class GUIElement extends GUIFolderElement {
           folderElement = document.createElement('gui-folder');
           folderElement.name = folderName;
           const currentPath = path;
-          folderElement.close = (sessionStorage.getItem(`GUI[${currentPath}]`) === 'true');
+          folderElement.close = sessionStorage.getItem(`GUI["${currentPath}"].close`) !== null;
           folderElement.addEventListener('toggle', (event) => {
-            sessionStorage.setItem(`GUI[${currentPath}]`, event.target.close);
+            this._updateFolderCloseState(event.target, `GUI["${currentPath}"].close`);
           });
           parentFolderElement.appendChild(folderElement);
           this._foldersMap.set(currentPath, folderElement);
@@ -123,12 +145,9 @@ export default class GUIElement extends GUIFolderElement {
       }
     }
 
-    const element = document.createElement(options.tagName);
-    for (const key in options) {
-      if (key === 'tagName') {
-        continue;
-      }
-      element[key] = options[key];
+    const element = document.createElement(tagName);
+    for (const [key, value] of Object.entries(options)) {
+      element[key] = value;
     }
     folderElement.appendChild(element);
 
@@ -147,20 +166,60 @@ export default class GUIElement extends GUIFolderElement {
 
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        const urlSearchParams = new URLSearchParams(location.hash.slice(1));
-        if (valuesMap.size) {
-          urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
-        } else {
-          urlSearchParams.delete('gui');
+        if (saveToURL) {
+          const urlSearchParams = new URLSearchParams(location.hash.slice(1));
+          if (valuesMap.size) {
+            urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
+          } else {
+            urlSearchParams.delete('gui');
+          }
+          location.hash = urlSearchParams.toString();
         }
-        location.hash = urlSearchParams.toString();
         if (reload) {
           window.location.reload();
         }
       }, 100);
     });
 
+    if (watch) {
+      const updateInputValue = () => {
+        if (!element.parentElement) {
+          return;
+        }
+        requestAnimationFrame(updateInputValue);
+        element.value = object[key];
+      };
+      requestAnimationFrame(updateInputValue);
+    }
+
+    if (object) {
+      this._elementDataMap.set(element, {
+        object,
+        key,
+      });
+    }
+
     return element;
+  }
+
+  _updateChildrenValues(children) {
+    for (const child of children) {
+      if (!child.parentElement) {
+        this._elementDataMap.delete(child);
+        continue;
+      }
+      const data = this._elementDataMap.get(child);
+      if ('value' in child && data) {
+        child.value = data.object[data.key];
+      }
+      if (child.children) {
+        this._updateChildrenValues(child.children);
+      }
+    }
+  }
+
+  update() {
+    this._updateChildrenValues(this.children);
   }
 }
 

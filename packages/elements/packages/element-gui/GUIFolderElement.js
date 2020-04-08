@@ -50,7 +50,7 @@ export default class GUIFolderElement extends HTMLElement {
         }
       </style>
       <slot></slot>
-      <details>
+      <details open>
         <summary></summary>
       </details>
     `;
@@ -81,7 +81,7 @@ export default class GUIFolderElement extends HTMLElement {
           node.slot = slotName;
         }
         for (const node of mutation.removedNodes) {
-          const section = this.shadowRoot.querySelector(`section#${node.slot}`)
+          const section = this.shadowRoot.querySelector(`section#${node.slot}`);
           if (section) {
             section.remove();
           };
@@ -95,22 +95,10 @@ export default class GUIFolderElement extends HTMLElement {
     const observer = new MutationObserver(mutationCallback);
     observer.observe(this, { childList: true });
 
-    this._summary.addEventListener('click', (event) => {
-      event.preventDefault();
-      if (event.target !== event.currentTarget) {
-        return;
-      }
-      this.close = !this.close;
-    });
-
     this._details.addEventListener('toggle', (event) => {
       this.close = !event.target.open;
       this.dispatchEvent(new Event(event.type, event));
     });
-  }
-
-  connectedCallback() {
-    this._details.open = !this.close;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -119,7 +107,7 @@ export default class GUIFolderElement extends HTMLElement {
         this._summary.textContent = newValue;
         break;
       case 'close':
-        this._details.open = !this.close;
+        this._details.open = newValue === null;
         break;
     }
   }
@@ -133,7 +121,7 @@ export default class GUIFolderElement extends HTMLElement {
   }
 
   get close() {
-    return this.hasAttribute('close');
+    return !this._details.open;
   }
 
   get name() {
