@@ -12,6 +12,7 @@ export default class InputButtonElement extends HTMLElement {
           display: inline-flex;
           min-width: 20px;
           height: 20px;
+          --border-width: 1px;
         }
         button {
           cursor: pointer;
