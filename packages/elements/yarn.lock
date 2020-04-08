@@ -28,10 +28,10 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.9.4.tgz#68a35e6b0319bbc014465be43828300113f2f2e8"
   integrity sha512-bC49otXX6N0/VYhgOMh4gnP26E9xnDZK3TmbNpxYzzz9BQLBosQwfyOe9/cXUU3txYhTzLCbcqd5c8y/OmCjHA==
 
-"@damienmortini/lib@^0.2.19":
-  version "0.2.19"
-  resolved "https://npm.pkg.github.com/download/@damienmortini/lib/0.2.19/bfef27375d8365a1ab2df976d45a94fb5f77be490a72e8353840c7da61203615#26cd1af20098b3c64752cbd2538fff013551d0a2"
-  integrity sha512-S5aDH/q7PiL09cU/wwmmJzmsQ1YDge33BNdSM3Htzcdv/hrXT4YS04baDyeYmntRmDdes5heLuIvZ9kcBUm+OA==
+"@damienmortini/lib@0.2.21":
+  version "0.2.21"
+  resolved "https://npm.pkg.github.com/download/@damienmortini/lib/0.2.21/7e88e3620feacf5d3befcde69469303b85a290ffc1c762d8465870cb42f5cac6#a13681eaaf8c869edb4e2a9ab90355e96c402eb0"
+  integrity sha512-jHoNWqC5a9ed7R6SWzEsGNxMLOq5zF7U8QXc8jQ4wwh7BQbi5g+5FHgxKUbOaEijNITOXAM9+rjVQEO26bHBpw==
   dependencies:
     gl-matrix "^3.1.0"
     mobile-detect "^1.4.4"
@@ -912,9 +912,9 @@
     universal-user-agent "^4.0.0"
 
 "@octokit/types@^2.0.0", "@octokit/types@^2.0.1":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@octokit/types/-/types-2.7.0.tgz#c57b75d993c2f80f4e7ed913a2f11d0502917b21"
-  integrity sha512-XGXXXccfWP+YYXNXtW7xS8b/J/EPDWfBXlMQIZWTZ7EcOA3o8ywhZqWcPb8MvbIcPP14duoIgnXpxXevNisRCQ==
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/@octokit/types/-/types-2.7.1.tgz#fbb470ca847da9f8c29ebc44e1dce75e3b73ba49"
+  integrity sha512-1c25UjziDzHqmuujfX6baw2xo/iM2iI2uEpAaREh/lYqyB5VmwW+tf+qJVQRDqjde2hlzNgE97n20wfKORiy2g==
   dependencies:
     "@types/node" ">= 8"
 
