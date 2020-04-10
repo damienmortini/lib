@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/damienmortini/elements#readme",
   "dependencies": {
-    "@damienmortini/lib": "0.2.21"
+    "@damienmortini/lib": "0.2.22"
   }
 }

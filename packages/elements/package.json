@@ -1,5 +1,6 @@
 {
   "name": "@damienmortini/elements",
+  "version": "0.0.0",
   "private": true,
   "description": "Minimalist and reusable custom elements.",
   "scripts": {
@@ -28,6 +29,6 @@
   },
   "workspaces": [
     "packages/*",
-    "../lib"
+    "../lib/packages/*"
   ]
 }
