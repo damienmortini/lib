@@ -1,5 +1,5 @@
 {
-  "name": "@damienmortini/elements",
+  "name": "elements",
   "version": "0.0.0",
   "private": true,
   "description": "Minimalist and reusable custom elements.",
