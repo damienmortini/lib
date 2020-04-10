@@ -1,39 +1,16 @@
 {
-  "name": "@damienmortini/lib",
-  "version": "0.2.21",
-  "description": "Helpers library for the web.",
-  "registry": "npm",
-  "scripts": {
-    "docs": "jsdoc -c jsdoc.config.json",
-    "fix": "eslint src --fix",
-    "test": "eslint src"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://damienmortini@github.com/damienmortini/lib.git"
-  },
-  "keywords": [
-    "math",
-    "physics",
-    "3d",
-    "web",
-    "helpers",
-    "toolkit",
-    "library"
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/damienmortini/lib/issues"
-  },
-  "homepage": "https://github.com/damienmortini/lib",
-  "dependencies": {
-    "gl-matrix": "^3.1.0",
-    "mobile-detect": "^1.4.4"
-  },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
-    "jsdoc": "^3.6.3"
-  }
+    "jsdoc": "^3.6.3",
+    "yarn": "^1.22.4"
+  },
+  "dependencies": {
+    "lerna": "^3.20.2"
+  },
+  "name": "lib"
 }
