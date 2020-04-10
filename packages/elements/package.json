@@ -3,6 +3,7 @@
   "private": true,
   "description": "Minimalist and reusable custom elements.",
   "scripts": {
+    "publish": "yarn run lerna publish",
     "start": "server --path=packages/elements-showcase --verbose",
     "docs": "jsdoc -c jsdoc.config.json",
     "fix": "eslint packages --fix",

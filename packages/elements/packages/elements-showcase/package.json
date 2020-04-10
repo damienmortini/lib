@@ -25,10 +25,8 @@
     "@damienmortini/element-link": "^0.0.6",
     "@damienmortini/element-menu": "^0.0.6",
     "@damienmortini/element-select-lasso": "^0.0.2",
-    "@damienmortini/element-video-gl": "^0.0.6",
     "@damienmortini/element-view": "^0.0.6",
-    "@damienmortini/element-viewport": "^0.0.6",
-    "@damienmortini/element-zoomable": "^0.0.6"
+    "@damienmortini/element-viewport": "^0.0.6"
   },
   "main": "index.js",
   "license": "MIT"
