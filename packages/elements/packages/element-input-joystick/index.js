@@ -1,4 +1,4 @@
-import Vector2 from '../lib/src/math/Vector2.js';
+import Vector2 from '../lib/math/Vector2.js';
 
 export default class InputJoystickElement extends HTMLElement {
   constructor() {

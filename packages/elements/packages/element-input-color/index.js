@@ -1,4 +1,4 @@
-import Color from '../lib/src/math/Color.js';
+import Color from '../lib/math/Color.js';
 
 export default class InputColorElement extends HTMLElement {
   static get observedAttributes() {

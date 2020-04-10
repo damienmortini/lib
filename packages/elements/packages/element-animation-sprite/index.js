@@ -1,6 +1,6 @@
 import AnimationTickerElement from '../animation-ticker/index.js';
-import SpriteAnimation from '../../../lib/src/abstract/SpriteAnimation.js';
-import Loader from '../../../lib/src/util/Loader.js';
+import SpriteAnimation from '../../../lib/abstract/SpriteAnimation.js';
+import Loader from '../../../lib/util/Loader.js';
 
 const CACHED_DATA_URL = new Map();
 

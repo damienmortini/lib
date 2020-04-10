@@ -1,4 +1,4 @@
-import View from '../../../lib/src/abstract/View.js';
+import View from '../../../lib/abstract/View.js';
 
 export default class ViewElement extends HTMLElement {
   constructor() {

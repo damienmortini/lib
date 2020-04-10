@@ -1,4 +1,4 @@
-import Loader from '../lib/src/util/Loader.js';
+import Loader from '../lib/util/Loader.js';
 
 export default class InputFileElement extends HTMLElement {
   static get observedAttributes() {

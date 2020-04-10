@@ -1,5 +1,5 @@
 import AnimationTickerElement from '../element-animation-ticker/index.js';
-import SoundMatrix from '../lib/src/audio/SoundMatrix.js';
+import SoundMatrix from '../lib/audio/SoundMatrix.js';
 
 export default class SoundMatrixElement extends AnimationTickerElement {
   constructor({ soundMatrix = new SoundMatrix() } = {}) {
