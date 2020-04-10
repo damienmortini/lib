@@ -26,6 +26,7 @@
     "lerna": "^3.20.2"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "../lib"
   ]
 }

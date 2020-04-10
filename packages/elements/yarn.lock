@@ -28,14 +28,6 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.9.4.tgz#68a35e6b0319bbc014465be43828300113f2f2e8"
   integrity sha512-bC49otXX6N0/VYhgOMh4gnP26E9xnDZK3TmbNpxYzzz9BQLBosQwfyOe9/cXUU3txYhTzLCbcqd5c8y/OmCjHA==
 
-"@damienmortini/lib@0.2.21":
-  version "0.2.21"
-  resolved "https://npm.pkg.github.com/download/@damienmortini/lib/0.2.21/7e88e3620feacf5d3befcde69469303b85a290ffc1c762d8465870cb42f5cac6#a13681eaaf8c869edb4e2a9ab90355e96c402eb0"
-  integrity sha512-jHoNWqC5a9ed7R6SWzEsGNxMLOq5zF7U8QXc8jQ4wwh7BQbi5g+5FHgxKUbOaEijNITOXAM9+rjVQEO26bHBpw==
-  dependencies:
-    gl-matrix "^3.1.0"
-    mobile-detect "^1.4.4"
-
 "@damienmortini/server@^1.0.12":
   version "1.0.12"
   resolved "https://npm.pkg.github.com/download/@damienmortini/server/1.0.12/0e6685048e77e71dc242e09560537e63c1dbc69cf3fa3065b6f6af9c6820e1a3#fe804dc9470d5d3c34d2ad6867b58b34411341a7"
@@ -3110,7 +3102,7 @@ jsbn@~0.1.0:
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
   integrity sha1-peZUwuWi3rXyAdls77yoDA7y9RM=
 
-jsdoc@^3.6.4:
+jsdoc@^3.6.3, jsdoc@^3.6.4:
   version "3.6.4"
   resolved "https://registry.yarnpkg.com/jsdoc/-/jsdoc-3.6.4.tgz#246b2832a0ea8b37a441b61745509cfe29e174b6"
   integrity sha512-3G9d37VHv7MFdheviDCjUfQoIjdv4TC5zTTf5G9VODLtOnVS6La1eoYBDlbWfsRT3/Xo+j2MIqki2EV12BZfwA==

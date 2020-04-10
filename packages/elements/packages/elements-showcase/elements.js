@@ -23,7 +23,6 @@ export default [
   // 'element-link',
   // 'element-menu',
   'element-select-lasso',
-  // 'element-video-gl',
   // 'element-view',
   ['element-viewport', `
     <element-viewport centered>
@@ -31,6 +30,5 @@ export default [
       <div style="position: absolute; background-color: green; width: 30px; height: 30px; border-radius: 50%; top: 30px; left: 30px;"></div>
     </element-viewport>
   `],
-  // 'element-zoomable',
 ];
 
