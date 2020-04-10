@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-joystick",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<element-input-joystick> custom element.",
   "main": "index.js",
   "scripts": {
