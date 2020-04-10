@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-ticker",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "<element-animation-ticker> custom element.",
   "main": "index.js",
   "scripts": {
