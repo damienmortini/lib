@@ -2,17 +2,10 @@
   "name": "@damienmortini/three",
   "version": "0.1.18",
   "description": "Three.js helpers",
-  "registry": "npm",
   "scripts": {
-    "docs": "jsdoc -c jsdoc.config.json",
-    "install": "node copyExamples.js",
-    "fix": "eslint src --fix",
-    "test": "eslint src"
+    "install": "node copyExamples.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://damienmortini@github.com/damienmortini/three.git"
-  },
+  "repository": "https://damienmortini@github.com/damienmortini/lib.git",
   "keywords": [
     "three",
     "3d",
@@ -22,16 +15,11 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/damienmortini/three/issues"
+    "url": "https://github.com/damienmortini/lib/issues"
   },
-  "homepage": "https://github.com/damienmortini/three",
+  "homepage": "https://github.com/damienmortini/lib",
   "dependencies": {
     "@damienmortini/lib": "0.2.21",
     "three": "0.115.0"
-  },
-  "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-google": "^0.14.0",
-    "jsdoc": "^3.6.3"
   }
 }
