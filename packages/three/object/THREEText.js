@@ -1,8 +1,8 @@
-import { Object3D } from '../../../three/src/core/Object3D.js';
-import { Mesh } from '../../../three/src/objects/Mesh.js';
-import { PlaneGeometry } from '../../../three/src/geometries/PlaneGeometry.js';
-import { Texture } from '../../../three/src/textures/Texture.js';
-import { LinearFilter } from '../../../three/src/constants.js';
+import { Object3D } from '/node_modules/three/src/core/Object3D.js';
+import { Mesh } from '/node_modules/three/src/objects/Mesh.js';
+import { PlaneGeometry } from '/node_modules/three/src/geometries/PlaneGeometry.js';
+import { Texture } from '/node_modules/three/src/textures/Texture.js';
+import { LinearFilter } from '/node_modules/three/src/constants.js';
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 

@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/damienmortini/lib",
   "dependencies": {
-    "@damienmortini/lib": "0.2.21",
+    "@damienmortini/core": "0.2.24",
     "three": "0.115.0"
   }
 }

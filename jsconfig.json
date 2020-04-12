@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "checkJs": true
+    "checkJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "/*": [
+        "*"
+      ]
+    }
   }
 }

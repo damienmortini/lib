@@ -1,7 +1,7 @@
 import THREEShaderMaterial from './THREEShaderMaterial.js';
-import RayShader from '../../lib/shader/RayShader.js';
-import LightShader from '../../lib/shader/LightShader.js';
-import PBRShader from '../../lib/shader/PBRShader.js';
+import RayShader from '../../core/shader/RayShader.js';
+import LightShader from '../../core/shader/LightShader.js';
+import PBRShader from '../../core/shader/PBRShader.js';
 import { Color, Vector3, ShaderChunk } from '../../../three/src/Three.js';
 
 export default class THREEPBRMaterial extends THREEShaderMaterial {

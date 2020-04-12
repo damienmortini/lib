@@ -1,10 +1,10 @@
-import { BackSide } from '../../../three/src/constants.js';
-import { Mesh } from '../../../three/src/objects/Mesh.js';
-import { Vector3 } from '../../../three/src/math/Vector3.js';
-import { IcosahedronBufferGeometry } from '../../../three/src/geometries/IcosahedronGeometry.js';
+import { BackSide } from '/node_modules/three/src/constants.js';
+import { Mesh } from '/node_modules/three/src/objects/Mesh.js';
+import { Vector3 } from '/node_modules/three/src/math/Vector3.js';
+import { IcosahedronBufferGeometry } from '/node_modules/three/src/geometries/IcosahedronGeometry.js';
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
-import SkyShader from '../../lib/shader/SkyShader.js';
-import GradientNoiseShader from '../../lib/shader/noise/GradientNoiseShader.js';
+import SkyShader from '../../core/shader/SkyShader.js';
+import GradientNoiseShader from '../../core/shader/noise/GradientNoiseShader.js';
 
 const skyShader = {
   uniforms: {
