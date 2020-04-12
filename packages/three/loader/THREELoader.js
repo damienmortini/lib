@@ -1,12 +1,12 @@
-import { Loader } from '../../core/util/Loader.js';
-import { TextureLoader } from '/three/src/loaders/TextureLoader.js';
+import { Loader } from '/node_modules/@damienmortini/core/util/Loader.js';
+import { TextureLoader } from '/node_modules/three/src/loaders/TextureLoader.js';
 
 import { DRACOLoader } from './_DRACOLoader.js';
 import { GLTFLoader } from './_GLTFLoader.js';
-import { Mesh } from '/three/src/objects/Mesh.js';
-import { Line } from '/three/src/objects/Line.js';
-import { LineSegments } from '/three/src/objects/LineSegments.js';
-import { Vector3 } from '/three/src/math/Vector3.js';
+import { Mesh } from '/node_modules/three/src/objects/Mesh.js';
+import { Line } from '/node_modules/three/src/objects/Line.js';
+import { LineSegments } from '/node_modules/three/src/objects/LineSegments.js';
+import { Vector3 } from '/node_modules/three/src/math/Vector3.js';
 
 function computeSceneGeometry(data, scale, offset) {
   const hasOffset = offset.lengthSq() !== 0;
@@ -25,8 +25,9 @@ function computeSceneGeometry(data, scale, offset) {
   });
 }
 
+const dracoLoader = new DRACOLoader(undefined);
 const loader = new GLTFLoader();
-loader.setDRACOLoader(new DRACOLoader(undefined));
+loader.setDRACOLoader(dracoLoader);
 
 class THREELoader extends Loader {
   constructor() {
@@ -42,7 +43,7 @@ class THREELoader extends Loader {
 
   _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
     if (type.startsWith('model')) {
-      DRACOLoader.setDecoderPath(`${this.baseURI.startsWith('/') ? '/' : ''}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : 'node_modules/three/examples/js/libs/draco/gltf/'}`);
+      dracoLoader.setDecoderPath(`/node_modules/three/examples/js/libs/draco/`);
 
       const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 

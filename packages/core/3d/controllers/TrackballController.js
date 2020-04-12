@@ -83,7 +83,7 @@ export default class TrackballController {
     this.matrix.z = 0;
 
     if (this._pointer.downed) {
-      this._velocity.copy(this._pointer.velocity).scale(.003);
+      this._velocity.copy(this._pointer.velocity).scale(.004);
     }
 
     this._velocity.lerp(this._velocityOrigin, this.rotationEaseRatio);
