@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "publish": "yarn run lerna publish"
+    "publish": "yarn run lerna publish",
+    "upgrade": "yarn upgrade-interactive --latest"
   },
   "workspaces": [
     "packages/**/*"
