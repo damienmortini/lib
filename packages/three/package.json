@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/three",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "Three.js helpers",
   "repository": "https://damienmortini@github.com/damienmortini/lib.git",
   "keywords": [
