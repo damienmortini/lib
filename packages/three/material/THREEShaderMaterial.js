@@ -1,6 +1,6 @@
-import { ShaderMaterial } from '/node_modules//three/src/materials/ShaderMaterial.js';
-import { ShaderLib } from '/node_modules//three/src/renderers/shaders/ShaderLib.js';
-import { UniformsUtils } from '/node_modules//three/src/renderers/shaders/UniformsUtils.js';
+import { ShaderMaterial } from '/node_modules/three/src/materials/ShaderMaterial.js';
+import { ShaderLib } from '/node_modules/three/src/renderers/shaders/ShaderLib.js';
+import { UniformsUtils } from '/node_modules/three/src/renderers/shaders/UniformsUtils.js';
 
 import Shader from '/node_modules/@damienmortini/core/3d/Shader.js';
 // import THREEShader from '../shader/THREEShader.js';
