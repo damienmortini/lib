@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-number",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "<element-input-number> custom element.",
   "main": "index.js",
   "scripts": {

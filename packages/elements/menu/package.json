@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-menu",
   "private": true,
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "<element-menu> custom element.",
   "main": "index.js",
   "scripts": {
