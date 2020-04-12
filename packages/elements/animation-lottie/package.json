@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-lottie",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "<element-animation-lottie> custom element.",
   "main": "index.js",
   "scripts": {
