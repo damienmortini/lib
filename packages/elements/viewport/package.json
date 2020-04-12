@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-viewport",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<element-viewport> custom element.",
   "main": "index.js",
   "scripts": {

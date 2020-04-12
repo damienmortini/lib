@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-gl-image",
   "private": true,
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<element-gl-image> custom element.",
   "main": "index.js",
   "scripts": {

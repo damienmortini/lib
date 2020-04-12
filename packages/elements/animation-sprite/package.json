@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-animation-sprite",
   "private": true,
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<element-animation-sprite> custom element.",
   "main": "index.js",
   "scripts": {
