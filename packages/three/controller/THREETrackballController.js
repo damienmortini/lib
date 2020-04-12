@@ -29,7 +29,7 @@ export default class THREETrackballController extends TrackballController {
     this.object3D.matrix.identity();
     const matrixAutoUpdate = this.object3D.matrixAutoUpdate;
     this.object3D.matrixAutoUpdate = false;
-    this.object3D.applyMatrix(this._matrix4);
+    this.object3D.applyMatrix4(this._matrix4);
     this.object3D.matrixAutoUpdate = matrixAutoUpdate;
   }
 }
