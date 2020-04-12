@@ -1,5 +1,6 @@
 {
   "name": "@damienmortini/element-link",
+  "private": true,
   "version": "0.0.7",
   "description": "<element-link> custom element.",
   "main": "index.js",

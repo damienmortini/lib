@@ -1,5 +1,6 @@
 {
   "name": "@damienmortini/element-select-lasso",
+  "private": true,
   "version": "0.0.2",
   "description": "<element-select-lasso> custom element.",
   "main": "index.js",

@@ -1,5 +1,6 @@
 {
   "name": "@damienmortini/element-input-soundmatrix",
+  "private": true,
   "version": "0.0.8",
   "description": "<element-input-soundmatrix> custom element.",
   "main": "index.js",

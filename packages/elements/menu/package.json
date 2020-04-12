@@ -1,5 +1,6 @@
 {
   "name": "@damienmortini/element-menu",
+  "private": true,
   "version": "0.0.6",
   "description": "<element-menu> custom element.",
   "main": "index.js",
