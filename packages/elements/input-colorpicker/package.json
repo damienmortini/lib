@@ -10,7 +10,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com/damienmortini/elements.git",
+    "url": "ssh://git@github.com/damienmortini/lib.git",
     "directory": "packages/element-input-colorpicker"
   },
   "keywords": [
@@ -18,9 +18,9 @@
     "web components"
   ],
   "bugs": {
-    "url": "https://github.com/damienmortini/elements/issues"
+    "url": "https://github.com/damienmortini/lib/issues"
   },
-  "homepage": "https://github.com/damienmortini/elements#readme",
+  "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
     "a-color-picker": "^1.2.1"
   }

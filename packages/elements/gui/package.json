@@ -9,18 +9,18 @@
     "web components"
   ],
   "author": "Damien Mortini <ddotmnn+git@gmail.com>",
-  "homepage": "https://github.com/damienmortini/elements/tree/master/packages/element-gui#readme",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element-gui#readme",
   "license": "ISC",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/damienmortini/elements.git"
+    "url": "git+https://github.com/damienmortini/lib.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/damienmortini/elements/issues"
+    "url": "https://github.com/damienmortini/lib/issues"
   },
   "dependencies": {
     "@damienmortini/element-input-button": "^0.0.9",
