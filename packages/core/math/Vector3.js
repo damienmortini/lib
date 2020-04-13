@@ -103,6 +103,11 @@ export default class Vector3 extends Float32Array {
     return this;
   }
 
+  applyQuaternion(quaternion) {
+    vec3.transformQuat(this, this, quaternion);
+    return this;
+  }
+
   angle(vector3) {
     return vec3.angle(this, vector3);
   }

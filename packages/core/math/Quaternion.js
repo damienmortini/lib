@@ -1,9 +1,8 @@
 import * as quat from '/node_modules/gl-matrix/esm/quat.js';
 
 export default class Quaternion extends Float32Array {
-  constructor(x = 0, y = 0, z = 0, w = 1) {
-    super(4);
-    this.set(x, y, z, w);
+  constructor(array = [0, 0, 0, 1]) {
+    super(array);
     return this;
   }
 
