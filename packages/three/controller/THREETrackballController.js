@@ -1,8 +1,8 @@
 import TrackballController from '../../core/3d/controllers/TrackballController.js';
 import Matrix4 from '../../core/math/Matrix4.js';
 
-import { Matrix4 as THREEMatrix4 } from '../../../three/src/math/Matrix4.js';
-import { Object3D } from '../../../three/src/core/Object3D.js';
+import { Matrix4 as THREEMatrix4 } from '/node_modules/three/src/math/Matrix4.js';
+import { Object3D } from '/node_modules/three/src/core/Object3D.js';
 
 export default class THREETrackballController extends TrackballController {
   constructor(object3D = new Object3D(), options) {

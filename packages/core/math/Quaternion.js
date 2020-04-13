@@ -1,4 +1,4 @@
-import * as quat from '../../../gl-matrix/esm/quat.js';
+import * as quat from '/node_modules/gl-matrix/esm/quat.js';
 
 export default class Quaternion extends Float32Array {
   constructor(x = 0, y = 0, z = 0, w = 1) {
