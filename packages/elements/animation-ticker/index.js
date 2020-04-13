@@ -7,10 +7,10 @@ const PAUSED_BY_BLUR = 8;
 const PAUSED_BY_CONNECTION = 16;
 
 /**
- * @customElement
  * Element triggering requestAnimationFrame on it's update method.
+ * @hideconstructor
  */
-export default class AnimationTickerElement extends HTMLElement {
+class AnimationTickerElement extends HTMLElement {
   constructor() {
     super();
 
@@ -82,7 +82,7 @@ export default class AnimationTickerElement extends HTMLElement {
   }
 
   /**
-   * Indicating whether element should automatically play
+   * Automatically pause element at initialization.
    * @type {Boolean}
    */
   get noautoplay() {
@@ -98,21 +98,21 @@ export default class AnimationTickerElement extends HTMLElement {
   }
 
   /**
-   * Play element animation
+   * Play element.
    */
   play() {
     this._pauseFlag &= ~PAUSED_BY_USER;
   }
 
   /**
-   * Pause element animation
+   * Pause element.
    */
   pause() {
     this._pauseFlag |= PAUSED_BY_USER;
   }
 
   /**
-   * Tells whether the media element is paused.
+   * Tells whether the element is paused.
    * @type {Boolean}
    * @readonly
    */
@@ -122,3 +122,5 @@ export default class AnimationTickerElement extends HTMLElement {
 
   update() { }
 }
+
+export default AnimationTickerElement;
