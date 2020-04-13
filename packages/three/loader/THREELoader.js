@@ -43,7 +43,7 @@ class THREELoader extends Loader {
 
   _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
     if (type.startsWith('model')) {
-      dracoLoader.setDecoderPath(`/node_modules/three/examples/js/libs/draco/`);
+      dracoLoader.setDecoderPath(`node_modules/three/examples/js/libs/draco/`);
 
       const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
