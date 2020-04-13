@@ -7,7 +7,7 @@ const PAUSED_BY_BLUR = 8;
 const PAUSED_BY_CONNECTION = 16;
 
 /**
- * Element triggering requestAnimationFrame on it's update method.
+ * Element triggering requestAnimationFrame on its update method.
  * @hideconstructor
  */
 class AnimationTickerElement extends HTMLElement {
@@ -120,6 +120,9 @@ class AnimationTickerElement extends HTMLElement {
     return !!this._pauseFlag;
   }
 
+  /**
+   * Interface method to extend where to put the code logic.
+   */
   update() { }
 }
 
