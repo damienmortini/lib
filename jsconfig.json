@@ -1,16 +1,6 @@
 {
-  "include": [
-    "node_modules/@damienmortini/**/*",
-  ],
   "compilerOptions": {
-    "moduleResolution": "node",
     "target": "esnext",
     "checkJs": true,
-    "baseUrl": ".",
-    "paths": {
-      "/*": [
-        "*"
-      ]
-    }
   }
 }
