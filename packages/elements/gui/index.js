@@ -223,4 +223,6 @@ export default class GUIElement extends GUIFolderElement {
   }
 }
 
-customElements.define('damo-gui', class DamoGUIElement extends GUIElement { });
+if (!customElements.get('damo-gui')) {
+  customElements.define('damo-gui', class DamoGUIElement extends GUIElement { });
+}

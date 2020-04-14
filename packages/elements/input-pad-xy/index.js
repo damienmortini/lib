@@ -122,4 +122,6 @@ export default class InputPadXYElement extends HTMLElement {
   }
 }
 
-customElements.define('damo-input-pad-xy', class DamoInputPadXYElement extends InputPadXYElement { });
+if (!customElements.get('damo-input-pad-xy')) {
+  customElements.define('damo-input-pad-xy', class DamoInputPadXYElement extends InputPadXYElement { });
+}
