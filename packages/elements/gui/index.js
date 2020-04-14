@@ -1,11 +1,11 @@
 import GUIFolderElement from './GUIFolderElement.js';
 
-import InputButtonElement from '/node_modules/@damienmortini/element-input-button/index.js';
-import InputCheckboxElement from '/node_modules/@damienmortini/element-input-checkbox/index.js';
-import InputColorElement from '/node_modules/@damienmortini/element-input-color/index.js';
-import InputRangeElement from '/node_modules/@damienmortini/element-input-range/index.js';
-import InputSelectElement from '/node_modules/@damienmortini/element-input-select/index.js';
-import InputTextElement from '/node_modules/@damienmortini/element-input-text/index.js';
+import InputButtonElement from '../element-input-button/index.js';
+import InputCheckboxElement from '../element-input-checkbox/index.js';
+import InputColorElement from '../element-input-color/index.js';
+import InputRangeElement from '../element-input-range/index.js';
+import InputSelectElement from '../element-input-select/index.js';
+import InputTextElement from '../element-input-text/index.js';
 
 const customElementsMap = new Map(Object.entries({
   'gui-folder': GUIFolderElement,
