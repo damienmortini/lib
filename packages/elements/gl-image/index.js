@@ -1,6 +1,6 @@
-import GLMesh from '/node_modules/@damienmortini/core/gl/GLMesh.js';
-import GLProgram from '/node_modules/@damienmortini/core/gl/GLProgram.js';
-import GLTexture from '/node_modules/@damienmortini/core/gl/GLTexture.js';
+import GLMesh from '../../core/gl/GLMesh.js';
+import GLProgram from '../../core/gl/GLProgram.js';
+import GLTexture from '../../core/gl/GLTexture.js';
 
 const style = document.createElement('style');
 style.textContent = `

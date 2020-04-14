@@ -1,4 +1,4 @@
-import Vector2 from '/node_modules/@damienmortini/core/math/Vector2.js';
+import Vector2 from '../../core/math/Vector2.js';
 
 import SelectLassoElement from '../select-lasso/index.js';
 

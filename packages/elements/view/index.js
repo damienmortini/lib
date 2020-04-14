@@ -1,4 +1,4 @@
-import View from '/node_modules/@damienmortini/core/abstract/View.js';
+import View from '../../core/abstract/View.js';
 
 export default class ViewElement extends HTMLElement {
   constructor() {

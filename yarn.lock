@@ -28,14 +28,6 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.9.4.tgz#68a35e6b0319bbc014465be43828300113f2f2e8"
   integrity sha512-bC49otXX6N0/VYhgOMh4gnP26E9xnDZK3TmbNpxYzzz9BQLBosQwfyOe9/cXUU3txYhTzLCbcqd5c8y/OmCjHA==
 
-"@damienmortini/lib@0.2.23":
-  version "0.2.23"
-  resolved "https://npm.pkg.github.com/download/@damienmortini/lib/0.2.23/eaa2059836c143ef583d0edd0d625a504a56e1d493bb5f546ec943109fa5d2fe#28332585ac240a7040d05e5c4cb1dcdaeef22422"
-  integrity sha512-T5gJqo7TGFRfsxZnG/+vnNKFTGgghQu1pVtSOOOFvxAALXCWq/Cgpr3hpdZkNNaWZxgqqErI9lC1s5WRmmBB7w==
-  dependencies:
-    gl-matrix "^3.1.0"
-    mobile-detect "^1.4.4"
-
 "@evocateur/libnpmaccess@^3.1.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@evocateur/libnpmaccess/-/libnpmaccess-3.1.2.tgz#ecf7f6ce6b004e9f942b098d92200be4a4b1c845"

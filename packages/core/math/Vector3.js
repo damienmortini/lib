@@ -1,4 +1,4 @@
-import * as vec3 from '/node_modules/gl-matrix/esm/vec3.js';
+import * as vec3 from '../../../gl-matrix/esm/vec3.js';
 
 export default class Vector3 extends Float32Array {
   constructor(array = [0, 0, 0]) {

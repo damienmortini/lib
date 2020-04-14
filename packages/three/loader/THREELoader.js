@@ -1,12 +1,12 @@
-import { Loader } from '/node_modules/@damienmortini/core/util/Loader.js';
-import { TextureLoader } from '/node_modules/three/src/loaders/TextureLoader.js';
+import { Loader } from '../../core/util/Loader.js';
+import { TextureLoader } from '../../../three/src/loaders/TextureLoader.js';
 
 import { DRACOLoader } from './_DRACOLoader.js';
 import { GLTFLoader } from './_GLTFLoader.js';
-import { Mesh } from '/node_modules/three/src/objects/Mesh.js';
-import { Line } from '/node_modules/three/src/objects/Line.js';
-import { LineSegments } from '/node_modules/three/src/objects/LineSegments.js';
-import { Vector3 } from '/node_modules/three/src/math/Vector3.js';
+import { Mesh } from '../../../three/src/objects/Mesh.js';
+import { Line } from '../../../three/src/objects/Line.js';
+import { LineSegments } from '../../../three/src/objects/LineSegments.js';
+import { Vector3 } from '../../../three/src/math/Vector3.js';
 
 function computeSceneGeometry(data, scale, offset) {
   const hasOffset = offset.lengthSq() !== 0;

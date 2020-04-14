@@ -1,4 +1,4 @@
-import Loader from '/node_modules/@damienmortini/core/util/Loader.js';
+import Loader from '../../core/util/Loader.js';
 import '../../lottie-web/build/player/lottie.js';
 
 /**

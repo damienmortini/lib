@@ -1,4 +1,4 @@
-import Signal from '/node_modules/@damienmortini/core/util/Signal.js';
+import Signal from '../../core/util/Signal.js';
 
 const CONNECTOR_ADD_SIGNAL = new Signal();
 

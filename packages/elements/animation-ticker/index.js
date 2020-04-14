@@ -1,4 +1,4 @@
-import Ticker from '/node_modules/@damienmortini/core/util/Ticker.js';
+import Ticker from '../core/util/Ticker.js';
 
 const PAUSED_BY_USER = 1;
 const PAUSED_BY_INTERSECTION = 2;
