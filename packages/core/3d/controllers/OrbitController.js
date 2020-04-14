@@ -1,6 +1,7 @@
 import Pointer from '../../input/Pointer.js';
 import Ticker from '../../util/Ticker.js';
 import Vector2 from '../../math/Vector2.js';
+import Matrix4 from '../../math/Matrix4.js';
 
 const VECTOR2 = new Vector2();
 
@@ -95,6 +96,14 @@ export default class OrbitController {
   set distance(value) {
     this._distance = value;
     this._distanceEased = value;
+  }
+
+  get panEased() {
+    return this._panEased;
+  }
+
+  get tiltEased() {
+    return this._tiltEased;
   }
 
   get distanceEased() {
