@@ -1,4 +1,4 @@
-import TrackballController from '../../core/3d/controllers/TrackballController.js';
+import TrackballController from '../../core/3d/controller/TrackballController.js';
 import Matrix4 from '../../core/math/Matrix4.js';
 
 import { Matrix4 as THREEMatrix4 } from '../../../three/src/math/Matrix4.js';

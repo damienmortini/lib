@@ -15,7 +15,7 @@ export default class TrackballController {
     zoomEaseRatio = .1,
     minDistance = 0,
     maxDistance = Infinity,
-    enabled = true,
+    disabled = false,
   } = {}) {
     this.matrix = matrix;
 
@@ -43,9 +43,9 @@ export default class TrackballController {
 
     domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: true });
 
-    this.enabled = true;
     this.update();
-    this.enabled = enabled;
+
+    this.disabled = disabled;
   }
 
   set distance(value) {
@@ -57,7 +57,7 @@ export default class TrackballController {
   }
 
   onWheel(e) {
-    if (!this.enabled) {
+    if (this.disabled) {
       return;
     }
     const scrollOffsetRatio = 1 + Math.abs(e.deltaY * this.zoomSpeed * .01);
@@ -67,7 +67,7 @@ export default class TrackballController {
   }
 
   update() {
-    if (!this.enabled) {
+    if (this.disabled) {
       return;
     }
 
