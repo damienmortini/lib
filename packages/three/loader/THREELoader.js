@@ -32,7 +32,7 @@ loader.setDRACOLoader(dracoLoader);
 class THREELoader extends Loader {
   constructor() {
     super();
-    this.dracoDecoderPath = '';
+    this.dracoDecoderPath = 'node_modules/three/examples/js/libs/draco/';
 
     this.extensionTypeMap.set('gltf', 'model/gltf+json');
     this.extensionTypeMap.set('glb', 'model/gltf-binary');
@@ -43,7 +43,7 @@ class THREELoader extends Loader {
 
   _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
     if (type.startsWith('model')) {
-      dracoLoader.setDecoderPath(`${this.baseURI.startsWith('/') ? '/' : ''}${this.dracoDecoderPath ? `${this.baseURI}${this.dracoDecoderPath}` : `node_modules/three/examples/js/libs/draco/`}`);
+      dracoLoader.setDecoderPath(`${this.baseURI}${this.dracoDecoderPath}`);
 
       const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
