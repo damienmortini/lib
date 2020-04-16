@@ -1,9 +1,5 @@
-import Pointer from '../../input/Pointer.js';
-import Ticker from '../../util/Ticker.js';
 import Vector2 from '../../math/Vector2.js';
 import Matrix4 from '../../math/Matrix4.js';
-
-const VECTOR2 = new Vector2();
 
 export default class OrbitController {
   constructor({
@@ -18,9 +14,10 @@ export default class OrbitController {
     tiltMax = Infinity,
     panMin = -Infinity,
     panMax = Infinity,
-    panEasing = .1,
-    tiltEasing = .1,
+    rotationEasing = .1,
+    rotationVelocity = .005,
     zoomEasing = .2,
+    zoomDisabled = false,
   }) {
     this.matrix = matrix;
     this.distanceMax = distanceMax;
@@ -28,10 +25,11 @@ export default class OrbitController {
     this.zoomEasing = zoomEasing;
     this.tiltMax = tiltMax;
     this.tiltMin = tiltMin;
-    this.tiltEasing = tiltEasing;
     this.panMax = panMax;
     this.panMin = panMin;
-    this.panEasing = panEasing;
+    this.rotationEasing = rotationEasing;
+    this.rotationVelocity = rotationVelocity;
+    this.zoomDisabled = zoomDisabled;
 
     this._distance = distance;
     this._tilt = tilt;
@@ -43,8 +41,10 @@ export default class OrbitController {
 
     this._multiTouchMode = false;
 
-    this._pointer = Pointer.get(domElement);
     domElement.addEventListener('wheel', (event) => {
+      if (this.zoomDisabled) {
+        return;
+      }
       if (event.deltaY < 0) {
         this._distance *= .925;
       } else {
@@ -54,27 +54,77 @@ export default class OrbitController {
     }, { passive: true });
 
     let previousSize = 0;
-
-    domElement.addEventListener('touchstart', () => {
+    let previousX = 0;
+    let previousY = 0;
+    const pointers = new Map();
+    const pinchVector = new Vector2();
+    const reset = () => {
+      pinchVector.set(0, 0);
       previousSize = 0;
-    }, { passive: true });
-    domElement.addEventListener('touchmove', (event) => {
-      if (event.touches.length > 1) {
-        this._multiTouchMode = true;
-        VECTOR2.x = event.touches[0].screenX - event.touches[1].screenX;
-        VECTOR2.y = event.touches[0].screenY - event.touches[1].screenY;
-        const size = VECTOR2.size;
-        if (previousSize) {
-          this._distance *= previousSize / size;
-          this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
-        }
-        previousSize = size;
+      previousX = 0;
+      previousY = 0;
+    };
+    const onPointerDown = (event) => {
+      if (!pointers.size) {
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointerout', onPointerUp);
       }
-    }, { passive: true });
-    domElement.addEventListener('touchend', () => {
-      previousSize = 0;
-      this._multiTouchMode = false;
-    }, { passive: true });
+      pointers.set(event.pointerId, event);
+      reset();
+    };
+    const onPointerMove = (event) => {
+      pointers.set(event.pointerId, event);
+      let x = 0;
+      let y = 0;
+      let index = 0;
+      for (const pointer of pointers.values()) {
+        if (index === 1) {
+          pinchVector.x = x - pointer.screenX;
+          pinchVector.y = y - pointer.screenY;
+        }
+        x += pointer.screenX;
+        y += pointer.screenY;
+        index++;
+      }
+      x /= pointers.size;
+      y /= pointers.size;
+
+      if (!previousX && !previousY) {
+        previousX = x;
+        previousY = y;
+        return;
+      }
+
+      const movementX = x - previousX;
+      const movementY = y - previousY;
+
+      this._pan += -movementX * rotationVelocity;
+      this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan));
+
+      this._tilt += movementY * rotationVelocity;
+      this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
+
+      previousX = x;
+      previousY = y;
+
+      const size = pinchVector.size;
+      if (previousSize && !this.zoomDisabled) {
+        this._distance *= previousSize / size;
+        this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
+      }
+      previousSize = size;
+    };
+    const onPointerUp = (event) => {
+      pointers.delete(event.pointerId);
+      reset();
+      if (!pointers.size) {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointerout', onPointerUp);
+      }
+    };
+    domElement.addEventListener('pointerdown', onPointerDown);
   }
 
   get pan() {
@@ -117,16 +167,8 @@ export default class OrbitController {
   }
 
   update() {
-    if (this._pointer.downed && !this._multiTouchMode) {
-      this._pan += -this._pointer.velocity.x * .005 * Ticker.smoothTimeScale;
-      this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan));
-
-      this._tilt += this._pointer.velocity.y * .005 * Ticker.smoothTimeScale;
-      this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
-    }
-
-    this._tiltEased += (this._tilt - this._tiltEased) * this.tiltEasing;
-    this._panEased += (this._pan - this._panEased) * this.panEasing;
+    this._tiltEased += (this._tilt - this._tiltEased) * this.rotationEasing;
+    this._panEased += (this._pan - this._panEased) * this.rotationEasing;
     this._distanceEased += (this._distance - this._distanceEased) * this.zoomEasing;
 
     this.matrix.identity();
