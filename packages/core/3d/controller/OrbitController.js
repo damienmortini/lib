@@ -66,10 +66,11 @@ export default class OrbitController {
     };
     const onPointerDown = (event) => {
       if (!pointers.size) {
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('pointerout', onPointerUp);
+        domElement.addEventListener('pointermove', onPointerMove);
+        domElement.addEventListener('pointerup', onPointerUp);
+        domElement.addEventListener('pointerout', onPointerUp);
       }
+      domElement.setPointerCapture(event.pointerId);
       pointers.set(event.pointerId, event);
       reset();
     };
@@ -117,11 +118,12 @@ export default class OrbitController {
     };
     const onPointerUp = (event) => {
       pointers.delete(event.pointerId);
+      domElement.releasePointerCapture(event.pointerId);
       reset();
       if (!pointers.size) {
-        window.removeEventListener('pointermove', onPointerMove);
-        window.removeEventListener('pointerup', onPointerUp);
-        window.removeEventListener('pointerout', onPointerUp);
+        domElement.removeEventListener('pointermove', onPointerMove);
+        domElement.removeEventListener('pointerup', onPointerUp);
+        domElement.removeEventListener('pointerout', onPointerUp);
       }
     };
     domElement.addEventListener('pointerdown', onPointerDown);
