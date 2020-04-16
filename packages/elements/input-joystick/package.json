@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-joystick",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "<element-input-joystick> custom element.",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/core": "^0.2.29"
+    "@damienmortini/core": "^0.2.30"
   }
 }
