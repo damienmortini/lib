@@ -1,4 +1,5 @@
 import * as quat from '../../../gl-matrix/esm/quat.js';
+import * as mat4 from '../../../gl-matrix/esm/mat4.js';
 
 export default class Quaternion extends Float32Array {
   constructor(array = [0, 0, 0, 1]) {
@@ -89,6 +90,11 @@ export default class Quaternion extends Float32Array {
 
   fromMatrix3(matrix3) {
     quat.fromMat3(this, matrix3);
+    return this;
+  }
+
+  fromMatrix4(matrix4) {
+    mat4.getRotation(this, matrix4);
     return this;
   }
 }

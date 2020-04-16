@@ -9,8 +9,8 @@ export default class OrbitController {
   constructor({
     matrix = new Matrix4(),
     domElement = window,
-    pan = Math.PI * .25,
-    tilt = Math.PI * .25,
+    pan = 0,
+    tilt = 0,
     distance = 1,
     distanceMin = 0,
     distanceMax = Infinity,
