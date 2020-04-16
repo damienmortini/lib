@@ -18,14 +18,20 @@ export default class OrbitController {
     tiltMax = Infinity,
     panMin = -Infinity,
     panMax = Infinity,
+    panEasing = .1,
+    tiltEasing = .1,
+    zoomEasing = .2,
   }) {
     this.matrix = matrix;
     this.distanceMax = distanceMax;
     this.distanceMin = distanceMin;
+    this.zoomEasing = zoomEasing;
     this.tiltMax = tiltMax;
     this.tiltMin = tiltMin;
+    this.tiltEasing = tiltEasing;
     this.panMax = panMax;
     this.panMin = panMin;
+    this.panEasing = panEasing;
 
     this._distance = distance;
     this._tilt = tilt;
@@ -119,9 +125,9 @@ export default class OrbitController {
       this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
     }
 
-    this._tiltEased += (this._tilt - this._tiltEased) * .2;
-    this._panEased += (this._pan - this._panEased) * .2;
-    this._distanceEased += (this._distance - this._distanceEased) * .2;
+    this._tiltEased += (this._tilt - this._tiltEased) * this.tiltEasing;
+    this._panEased += (this._pan - this._panEased) * this.panEasing;
+    this._distanceEased += (this._distance - this._distanceEased) * this.zoomEasing;
 
     this.matrix.identity();
     this.matrix.rotateY(this._panEased);
