@@ -1,5 +1,5 @@
-import Vector2 from '../../math/Vector2.js';
 import Matrix4 from '../../math/Matrix4.js';
+import GestureObserver from '../../input/GestureObserver.js';
 
 export default class OrbitController {
   constructor({
@@ -17,6 +17,7 @@ export default class OrbitController {
     rotationEasing = .1,
     rotationVelocity = .005,
     zoomEasing = .2,
+    zoomVelocity = .003,
     zoomDisabled = false,
   }) {
     this.matrix = matrix;
@@ -30,6 +31,7 @@ export default class OrbitController {
     this.rotationEasing = rotationEasing;
     this.rotationVelocity = rotationVelocity;
     this.zoomDisabled = zoomDisabled;
+    this.zoomVelocity = zoomVelocity;
 
     this._distance = distance;
     this._tilt = tilt;
@@ -53,80 +55,19 @@ export default class OrbitController {
       this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
     }, { passive: true });
 
-    let previousSize = 0;
-    let previousX = 0;
-    let previousY = 0;
-    const pointers = new Map();
-    const pinchVector = new Vector2();
-    const reset = () => {
-      pinchVector.set(0, 0);
-      previousSize = 0;
-      previousX = 0;
-      previousY = 0;
-    };
-    const onPointerDown = (event) => {
-      if (!pointers.size) {
-        domElement.addEventListener('pointermove', onPointerMove);
-        domElement.addEventListener('pointerup', onPointerUp);
-        domElement.addEventListener('pointerout', onPointerUp);
-      }
-      domElement.setPointerCapture(event.pointerId);
-      pointers.set(event.pointerId, event);
-      reset();
-    };
-    const onPointerMove = (event) => {
-      pointers.set(event.pointerId, event);
-      let x = 0;
-      let y = 0;
-      let index = 0;
-      for (const pointer of pointers.values()) {
-        if (index === 1) {
-          pinchVector.x = x - pointer.screenX;
-          pinchVector.y = y - pointer.screenY;
-        }
-        x += pointer.screenX;
-        y += pointer.screenY;
-        index++;
-      }
-      x /= pointers.size;
-      y /= pointers.size;
-
-      if (!previousX && !previousY) {
-        previousX = x;
-        previousY = y;
-        return;
-      }
-
-      const movementX = x - previousX;
-      const movementY = y - previousY;
-
-      this._pan += -movementX * rotationVelocity;
+    const gestureObserver = new GestureObserver((gesture) => {
+      this._pan += -gesture.movementX * rotationVelocity;
       this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan));
 
-      this._tilt += movementY * rotationVelocity;
+      this._tilt += gesture.movementY * rotationVelocity;
       this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
 
-      previousX = x;
-      previousY = y;
-
-      const size = pinchVector.size;
-      if (previousSize && !this.zoomDisabled) {
-        this._distance *= previousSize / size;
+      if (!this.zoomDisabled) {
+        this._distance /= 1 + gesture.scale * this.zoomVelocity;
         this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
       }
-      previousSize = size;
-    };
-    const onPointerUp = (event) => {
-      pointers.delete(event.pointerId);
-      domElement.releasePointerCapture(event.pointerId);
-      reset();
-      if (!pointers.size) {
-        domElement.removeEventListener('pointermove', onPointerMove);
-        domElement.removeEventListener('pointerup', onPointerUp);
-        domElement.removeEventListener('pointerout', onPointerUp);
-      }
-    };
-    domElement.addEventListener('pointerdown', onPointerDown);
+    });
+    gestureObserver.observe(domElement);
   }
 
   get pan() {
