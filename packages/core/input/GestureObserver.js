@@ -34,7 +34,7 @@ export default class GestureObserver {
     element.addEventListener('pointerdown', this._onPointerDownBinded);
     this._elementsData.set(element, {
       pointers: new Map(),
-      pinchVector: new Vector2(),
+      gestureVector: new Vector2(),
       previousSize: 0,
       previousX: 0,
       previousY: 0,
@@ -61,10 +61,11 @@ export default class GestureObserver {
 
   _resetElementData(element) {
     const data = this._elementsData.get(element);
-    data.pinchVector.set(0, 0);
+    data.gestureVector.set(0, 0);
     data.previousSize = 0;
     data.previousX = 0;
     data.previousY = 0;
+    data.previousRotation = 0;
   }
 
   _onPointerDown(event) {
@@ -88,8 +89,8 @@ export default class GestureObserver {
     let index = 0;
     for (const pointer of data.pointers.values()) {
       if (index === 1) {
-        data.pinchVector.x = x - pointer.screenX;
-        data.pinchVector.y = y - pointer.screenY;
+        data.gestureVector.x = x - pointer.screenX;
+        data.gestureVector.y = y - pointer.screenY;
       }
       x += pointer.screenX;
       y += pointer.screenY;
@@ -109,16 +110,25 @@ export default class GestureObserver {
     data.previousX = x;
     data.previousY = y;
 
-    const size = data.pinchVector.size;
-    const scale = data.previousSize ? (size - data.previousSize) : 0;
+    const size = data.gestureVector.size;
+    const scale = data.previousSize ? size - data.previousSize : 0;
     data.previousSize = size;
+
+    const rotation = Math.atan2(data.gestureVector.y, data.gestureVector.x);
+    let rotationDifference = data.previousRotation ? rotation - data.previousRotation : 0;
+    if (rotationDifference > Math.PI) {
+      rotationDifference -= Math.PI * 2;
+    } else if (rotationDifference < -Math.PI) {
+      rotationDifference += Math.PI * 2;
+    }
+    data.previousRotation = rotation;
 
     this._callback({
       target: event.currentTarget,
       movementX,
       movementY,
       scale,
-      rotation: 0,
+      rotation: rotationDifference,
     });
   }
 
