@@ -63,7 +63,7 @@ export default class OrbitController {
       this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
 
       if (!this.zoomDisabled) {
-        this._distance /= 1 + gesture.scale * this.zoomVelocity;
+        this._distance /= 1 + gesture.movementScale * this.zoomVelocity;
         this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
       }
     });

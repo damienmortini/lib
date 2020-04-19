@@ -6,8 +6,8 @@ export default class GestureObserver {
    * @property {HTMLElement} target - Movement on the X axis
    * @property {number} movementX - Movement on the X axis
    * @property {number} movementY - Movement on the Y axis
-   * @property {number} scale - Pinch-zoom movement
-   * @property {number} rotation - Angular movement in radians
+   * @property {number} movementScale - Pinch-zoom movement
+   * @property {number} movementRotation - Angular movement in radians
    */
   /**
    * Callback for adding two numbers.
@@ -111,15 +111,15 @@ export default class GestureObserver {
     data.previousY = y;
 
     const size = data.gestureVector.size;
-    const scale = data.previousSize ? size - data.previousSize : 0;
+    const movementScale = data.previousSize ? size - data.previousSize : 0;
     data.previousSize = size;
 
     const rotation = Math.atan2(data.gestureVector.y, data.gestureVector.x);
-    let rotationDifference = data.previousRotation ? rotation - data.previousRotation : 0;
-    if (rotationDifference > Math.PI) {
-      rotationDifference -= Math.PI * 2;
-    } else if (rotationDifference < -Math.PI) {
-      rotationDifference += Math.PI * 2;
+    let movementRotation = data.previousRotation ? rotation - data.previousRotation : 0;
+    if (movementRotation > Math.PI) {
+      movementRotation -= Math.PI * 2;
+    } else if (movementRotation < -Math.PI) {
+      movementRotation += Math.PI * 2;
     }
     data.previousRotation = rotation;
 
@@ -127,8 +127,8 @@ export default class GestureObserver {
       target: event.currentTarget,
       movementX,
       movementY,
-      scale,
-      rotation: rotationDifference,
+      movementScale,
+      movementRotation,
     });
   }
 
