@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/three",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "Three.js helpers",
   "scripts": {
     "install": "node copyExamples.js"
