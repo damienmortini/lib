@@ -30,9 +30,11 @@ function computeSceneGeometry(data, scale, offset) {
 
 const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader(undefined);
+dracoLoader.setWorkerLimit(1);
 loader.setDRACOLoader(dracoLoader);
 
 const basisLoader = new BasisTextureLoader();
+basisLoader.setWorkerLimit(1);
 {
   let renderer;
   if (window.WebGL2RenderingContext !== undefined && !/\bforcewebgl1\b/.test(window.location.search)) {
