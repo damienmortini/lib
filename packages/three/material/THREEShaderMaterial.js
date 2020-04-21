@@ -1,13 +1,15 @@
 import { ShaderMaterial } from '../../../three/src/materials/ShaderMaterial.js';
 import { ShaderLib } from '../../../three/src/renderers/shaders/ShaderLib.js';
 import { UniformsUtils } from '../../../three/src/renderers/shaders/UniformsUtils.js';
+import DEFAULT_VERTEX from '../../../three/src/renderers/shaders/ShaderChunk/default_vertex.glsl.js';
+import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js';
 
 import Shader from '../../core/3d/Shader.js';
 // import THREEShader from '../shader/THREEShader.js';
 
 export default class THREEShaderMaterial extends ShaderMaterial {
   constructor({
-    type = 'basic',
+    type = '',
     vertex = undefined,
     fragment = undefined,
     vertexChunks = [],
@@ -16,8 +18,8 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     ...options
   } = {}) {
     const shader = new Shader({
-      vertex: vertex || (type ? ShaderLib[type].vertexShader : undefined),
-      fragment: fragment || (type ? ShaderLib[type].fragmentShader : undefined),
+      vertex: vertex || (type ? ShaderLib[type].vertexShader : DEFAULT_VERTEX),
+      fragment: fragment || (type ? ShaderLib[type].fragmentShader : DEFAULT_FRAGMENT),
       uniforms,
       vertexChunks,
       fragmentChunks,
@@ -37,12 +39,11 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       fragmentShader: shader.fragment,
       vertexShader: shader.vertex,
       uniforms: {
-        ...UniformsUtils.clone(ShaderLib[type].uniforms),
+        ...(type ? UniformsUtils.clone(ShaderLib[type].uniforms) : {}),
         ...threeUniforms,
       },
       ...options,
     });
-
 
     this.lights = /lambert|phong|standard/.test(type);
 
