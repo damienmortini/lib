@@ -91,6 +91,7 @@ class SpriteAnimationElement extends AnimationTickerElement {
 
   connectedCallback() {
     super.connectedCallback();
+    this.resize();
     window.addEventListener('resize', this._resizeBinded);
   }
 
