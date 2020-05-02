@@ -4,44 +4,83 @@ import Loader from '../../core/util/Loader.js';
 
 const CACHED_DATA_URL = new Map();
 
-(() => {
-  const style = document.createElement('style');
-  style.textContent = `
-    dlmn-spriteanimation {
-      display: block;
-      position: relative;
-    }
-  `;
-  document.head.appendChild(style);
-})();
+class SpriteAnimationElement extends AnimationTickerElement {
+  static get observedAttributes() {
+    return ['src', 'loop', 'autoplay', 'playbackrate', 'framerate'];
+  }
 
-export default class SpriteAnimationElement extends AnimationTickerElement {
   constructor() {
-    super({
-      autoplay: false,
-    });
+    super();
 
-    this._autoplay = this.hasAttribute('autoplay');
+    this.attachShadow({ mode: 'open' }).innerHTML = `
+      <style>
+        :host {
+          display: block;
+          position: relative;
+        }
 
-    this._resizeBinded = this.resize.bind(this);
+        #sprite {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+      </style>
+      <div id="sprite"></div>
+    `;
+
+    this._sprite = this.shadowRoot.querySelector('#sprite');
+
     this._scale = 1;
 
-    this._sprite = document.createElement('div');
-    this._sprite.style.position = 'absolute';
-    this._sprite.style.width = '100%';
-    this._sprite.style.height = '100%';
-    this._sprite.style.top = '0';
-    this._sprite.style.left = '0';
-    this.appendChild(this._sprite);
+    this._resizeBinded = this.resize.bind(this);
 
-    this._spriteAnimation = new SpriteAnimation({
-      loop: this.hasAttribute('loop'),
-      frameRate: this.hasAttribute('framerate') ? parseFloat(this.getAttribute('framerate')) : undefined,
-      autoplay: this._autoplay,
-    });
+    this._spriteAnimation = new SpriteAnimation();
+  }
 
-    if (this.getAttribute('src')) {
-      this.src = this.getAttribute('src');
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) {
+      return;
+    }
+
+    switch (name) {
+      case 'src':
+        Loader.load(newValue).then((data) => {
+          this._spriteAnimation.data = data;
+          return Loader.load(`${/(.*[/\\]).*$/.exec(newValue)[1]}${data.meta.image}`);
+        }).then((image) => {
+          // Optimise images decoding
+          let dataUrl = CACHED_DATA_URL.get(image);
+          if (!dataUrl) {
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0);
+            dataUrl = canvas.toDataURL();
+            CACHED_DATA_URL.set(image, dataUrl);
+          }
+          this._sprite.style.backgroundImage = `url(${dataUrl})`;
+          this.resize();
+          this.update();
+          this.dispatchEvent(new Event('load'));
+        });
+        break;
+      case 'playbackrate':
+        this._spriteAnimation.playbackRate = this.playbackRate;
+        break;
+      case 'loop':
+        this._spriteAnimation.loop = this.loop;
+        break;
+      case 'framerate':
+        this._spriteAnimation.frameRate = this.frameRate;
+        break;
+      case 'autoplay':
+        if (this.autoplay) {
+          this.play();
+        }
+        break;
     }
   }
 
@@ -51,8 +90,8 @@ export default class SpriteAnimationElement extends AnimationTickerElement {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
     window.removeEventListener('resize', this._resizeBinded);
+    super.disconnectedCallback();
   }
 
   play() {
@@ -62,6 +101,7 @@ export default class SpriteAnimationElement extends AnimationTickerElement {
 
   pause() {
     this._spriteAnimation.pause();
+    super.pause();
   }
 
   update() {
@@ -78,6 +118,18 @@ export default class SpriteAnimationElement extends AnimationTickerElement {
     this.update();
   }
 
+  get autoplay() {
+    return this.hasAttribute('autoplay');
+  }
+
+  set autoplay(value) {
+    if (value) {
+      this.setAttribute('autoplay', '');
+    } else {
+      this.removeAttribute('autoplay');
+    }
+  }
+
   get duration() {
     return this._spriteAnimation.duration;
   }
@@ -92,59 +144,44 @@ export default class SpriteAnimationElement extends AnimationTickerElement {
   }
 
   get frameRate() {
-    return this._spriteAnimation.frameRate;
+    return Number(this.getAttribute('framerate'));
   }
 
   set frameRate(value) {
-    this._spriteAnimation.frameRate = value;
+    this.setAttribute('framerate', String(value));
   }
 
   get loop() {
-    return this._spriteAnimation.loop;
+    return this.hasAttribute('loop');
   }
 
   set loop(value) {
-    this._spriteAnimation.loop = value;
+    if (value) {
+      this.setAttribute('loop', '');
+    } else {
+      this.removeAttribute('loop');
+    }
   }
 
   get playbackRate() {
-    return this._spriteAnimation.playbackRate;
+    return Number(this.getAttribute('playbackrate'));
   }
 
   set playbackRate(value) {
-    this._spriteAnimation.playbackRate = value;
+    this.setAttribute('playbackrate', String(value));
   }
 
   get src() {
-    return this._src;
+    return this.getAttribute('src');
   }
 
   set src(value) {
-    this._src = value;
-
-    Loader.load(this._src).then((data) => {
-      this._spriteAnimation.data = data;
-      return Loader.load(`${/(.*[/\\]).*$/.exec(this._src)[1]}${data.meta.image}`);
-    }).then((image) => {
-      // Optimise images decoding
-      let dataUrl = CACHED_DATA_URL.get(image);
-
-      if (!dataUrl) {
-        const canvas = document.createElement('canvas');
-        canvas.width = image.width;
-        canvas.height = image.height;
-        const context = canvas.getContext('2d');
-        context.drawImage(image, 0, 0);
-        dataUrl = canvas.toDataURL();
-        CACHED_DATA_URL.set(image, dataUrl);
-      }
-
-      this._sprite.style.backgroundImage = `url(${dataUrl})`;
-
-      this.resize();
-      this.update();
-
-      this.dispatchEvent(new Event('load'));
-    });
+    this.setAttribute('src', value);
   }
+}
+
+export default SpriteAnimationElement;
+
+if (!customElements.get('damo-animation-sprite')) {
+  customElements.define('damo-animation-sprite', class DamoSpriteAnimationElement extends SpriteAnimationElement { });
 }
