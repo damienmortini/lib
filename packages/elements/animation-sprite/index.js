@@ -2,7 +2,7 @@ import AnimationTickerElement from '../element-animation-ticker/index.js';
 import SpriteAnimation from '../core/abstract/SpriteAnimation.js';
 import Loader from '../core/util/Loader.js';
 
-const CACHED_DATA_URL = new Map();
+const CACHED_DATA = new Map();
 
 class SpriteAnimationElement extends AnimationTickerElement {
   static get observedAttributes() {
@@ -39,6 +39,23 @@ class SpriteAnimationElement extends AnimationTickerElement {
     this._spriteAnimation = new SpriteAnimation();
   }
 
+  async _loadAndCacheData(newValue) {
+    const data = await Loader.load(newValue);
+    const image = await Loader.load(`${/(.*[/\\]).*$/.exec(newValue)[1]}${data.meta.image}`);
+    // Optimise images decoding
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0);
+    const dataUrl = canvas.toDataURL();
+    CACHED_DATA.set(newValue, {
+      data,
+      dataUrl,
+    });
+    return [data, dataUrl];
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) {
       return;
@@ -46,21 +63,9 @@ class SpriteAnimationElement extends AnimationTickerElement {
 
     switch (name) {
       case 'src':
-        Loader.load(newValue).then((data) => {
+        const cachedData = CACHED_DATA.get(newValue);
+        (cachedData ? Promise.resolve([cachedData.data, cachedData.dataUrl]) : this._loadAndCacheData(newValue)).then(([data, dataUrl]) => {
           this._spriteAnimation.data = data;
-          return Loader.load(`${/(.*[/\\]).*$/.exec(newValue)[1]}${data.meta.image}`);
-        }).then((image) => {
-          // Optimise images decoding
-          let dataUrl = CACHED_DATA_URL.get(image);
-          if (!dataUrl) {
-            const canvas = document.createElement('canvas');
-            canvas.width = image.width;
-            canvas.height = image.height;
-            const context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0);
-            dataUrl = canvas.toDataURL();
-            CACHED_DATA_URL.set(image, dataUrl);
-          }
           this._sprite.style.backgroundImage = `url(${dataUrl})`;
           this.resize();
           this.update();
