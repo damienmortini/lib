@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/damienmortini/lib/issues"
   },
-  "homepage": "https://github.com/damienmortini/lib#readme"
+  "homepage": "https://github.com/damienmortini/lib#readme",
+  "dependencies": {
+    "@damienmortini/core": "0.2.33",
+    "@damienmortini/element-animation-ticker": "0.0.28"
+  }
 }
