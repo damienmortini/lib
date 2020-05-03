@@ -1,12 +1,12 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.20",
+  "version": "0.0.21",
   "dependencies": {
-    "@damienmortini/element-animation-lottie": "^0.0.26",
-    "@damienmortini/element-animation-sprite": "^0.0.13",
+    "@damienmortini/element-animation-lottie": "^0.0.27",
+    "@damienmortini/element-animation-sprite": "^0.0.14",
     "@damienmortini/element-animation-ticker": "^0.0.28",
-    "@damienmortini/element-gl-view": "^0.0.1",
+    "@damienmortini/element-gl-view": "^0.0.2",
     "@damienmortini/element-input-button": "^0.0.10",
     "@damienmortini/element-input-checkbox": "^0.0.9",
     "@damienmortini/element-input-color": "^0.0.24",
