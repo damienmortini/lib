@@ -1,8 +1,7 @@
 {
-  "name": "@damienmortini/element-gl-image",
-  "private": true,
-  "version": "0.0.11",
-  "description": "<element-gl-image> custom element.",
+  "name": "@damienmortini/element-gl-view",
+  "version": "0.0.1",
+  "description": "<element-gl-view> custom element.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/damienmortini/lib.git",
-    "directory": "packages/element-gl-image"
+    "directory": "packages/element-gl-view"
   },
   "keywords": [
     "custom elements",

@@ -1,18 +1,18 @@
-# `<element-gl-video>`
+# `<element-gl-view>`
 
 ## Installation
 
 ```sh
 npm config set @damienmortini:registry https://npm.pkg.github.com
 
-npm install @damienmortini/element-gl-video
+npm install @damienmortini/element-gl-view
 ```
 
 ## Usage
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-gl-video';
+  import MyElement from '@damienmortini/element-gl-view';
 
   window.customElements.define(`my-element-name`, MyElement);
 
