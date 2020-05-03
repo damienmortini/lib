@@ -19,11 +19,23 @@ class LottieAnimationElement extends HTMLElement {
       <style>
         :host {
           display: block;
+          position: relative;
           width: 300px;
           height: 150px;
         }
+
+        #container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
       </style>
+      <div id="container"></div>
     `;
+
+    this._container = this.shadowRoot.querySelector(`#container`);
   }
 
   _loadSrc() {
@@ -36,7 +48,7 @@ class LottieAnimationElement extends HTMLElement {
         return;
       }
       this.animation = lottie.loadAnimation({
-        container: this.shadowRoot,
+        container: this._container,
         renderer: this.renderer,
         autoplay: this.autoplay,
         loop: this.loop,
