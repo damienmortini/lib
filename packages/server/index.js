@@ -25,8 +25,8 @@ for (const arg of process.argv) {
  * Create HTTP2 Server
  */
 const server = http2.createSecureServer({
-  key: fs.readFileSync(`${__dirname}/../server.key`),
-  cert: fs.readFileSync(`${__dirname}/../server.crt`),
+  key: fs.readFileSync(`${__dirname}/server.key`),
+  cert: fs.readFileSync(`${__dirname}/server.crt`),
 }, (request, response) => {
   const url = `.${request.url}`;
   if (fs.existsSync(url) && fs.statSync(url).isDirectory() && !request.url.endsWith('/')) {
@@ -69,8 +69,8 @@ server.on('listening', () => {
    * Create WebSocket server to reload page on file change
    */
   const webSocketServer = https.createServer({
-    key: fs.readFileSync(`${__dirname}/../server.key`),
-    cert: fs.readFileSync(`${__dirname}/../server.crt`),
+    key: fs.readFileSync(`${__dirname}/server.key`),
+    cert: fs.readFileSync(`${__dirname}/server.crt`),
   });
   const wss = new WebSocket.Server({ server: webSocketServer });
   webSocketServer.listen(++port);
