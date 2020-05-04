@@ -1,6 +1,6 @@
-import Vector2 from '../../core/math/Vector2.js';
+import Vector2 from '../core/math/Vector2.js';
 
-import SelectLassoElement from '../select-lasso/index.js';
+import SelectLassoElement from '../element-select-lasso/index.js';
 
 if (!customElements.get('damo-viewport-select-lasso')) {
   customElements.define('damo-viewport-select-lasso', class extends SelectLassoElement { });

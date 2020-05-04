@@ -17,7 +17,7 @@ for (let elementName of ELEMENTS) {
           ${elementString}
         </li>
       `);
-  import(`../../node_modules/@damienmortini/${elementName}/index.js`).then((module) => {
+  import(`../${elementName}/index.js`).then((module) => {
     customElements.define(`${elementName}`, module.default);
   });
 }
@@ -26,7 +26,7 @@ const updatePath = () => {
   const elementName = location.hash.slice(1);
   if (elementName) {
     section.classList.remove('grid');
-    iframe.contentWindow.location.replace(`./node_modules/@damienmortini/${elementName}/demo/index.html`);
+    iframe.contentWindow.location.replace(`../${elementName}/demo/index.html`);
   } else {
     section.classList.add('grid');
   }

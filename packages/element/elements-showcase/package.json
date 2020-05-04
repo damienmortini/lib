@@ -24,7 +24,7 @@
     "@damienmortini/element-link": "^0.0.12",
     "@damienmortini/element-menu": "^0.0.9",
     "@damienmortini/element-select-lasso": "^0.0.5",
-    "@damienmortini/element-view": "^0.0.12",
+    "@damienmortini/element-animation-view": "^0.0.12",
     "@damienmortini/element-viewport": "^0.0.13"
   },
   "main": "index.js",

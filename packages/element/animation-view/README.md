@@ -1,18 +1,18 @@
-# `<element-view>`
+# `<element-animation-view>`
 
 ## Installation
 
 ```sh
 npm config set @damienmortini:registry https://npm.pkg.github.com
 
-npm install @damienmortini/element-view
+npm install @damienmortini/element-animation-view
 ```
 
 ## Usage
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-view';
+  import MyElement from '@damienmortini/element-animation-view';
 
   window.customElements.define(`my-element-name`, MyElement);
 
