@@ -119,7 +119,7 @@ server.on('stream', (stream, headers) => {
       });
       fileContent = fileContent.replace('</body>', `
   <script>
-    const socket = new WebSocket("wss://${requestAuthority.split(':')[0]}:3001");
+    const socket = new WebSocket("wss://${requestAuthority.split(':')[0]}:${port}");
     socket.addEventListener("message", function (event) {
       window.location.reload();
     });
