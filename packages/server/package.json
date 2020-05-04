@@ -1,0 +1,27 @@
+{
+  "name": "@damienmortini/server",
+  "version": "1.0.13",
+  "description": "Simple live reloading HTTP2 server for development",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damienmortini/lib.git"
+  },
+  "keywords": [
+    "server",
+    "http2",
+    "livereload",
+    "https"
+  ],
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damienmortini/server/issues"
+  },
+  "homepage": "https://github.com/damienmortini/server#readme",
+  "bin": "index.js",
+  "dependencies": {
+    "mime-types": "^2.1.24",
+    "ws": "^7.0.0"
+  }
+}
