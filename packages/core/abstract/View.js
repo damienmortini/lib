@@ -1,46 +1,81 @@
+const SELF_HIDDEN = 1;
+const HIDDEN_BY_PARENT = 2;
+
 export default class View {
   constructor({
-    visible = true,
-    visibilityExecutor = (resolve, view) => resolve(),
+    hidden = false,
   } = {}) {
-    this.visibilityExecutor = visibilityExecutor;
-
-    this.visibilityPromise = null;
+    this._hiddenFlag = hidden ? SELF_HIDDEN : 0;
 
     this.parent = null;
     this.children = new Set();
 
-    this.visible = visible;
+    this._currentVisibilityPromise = null;
   }
 
-  set visible(value) {
-    this._selfVisible = value;
-
-    if (value === this._visible) {
-      return;
+  async _updateVisibility(hiddenFlag) {
+    if (!!hiddenFlag === this.isHidden) {
+      return this._currentVisibilityPromise || Promise.resolve();
     }
 
-    this._visible = this.parent ? this.parent.visible && value : value;
+    this._hiddenFlag = hiddenFlag;
 
     const promises = [];
 
     for (const child of this.children) {
-      const childSelfVisible = child._selfVisible;
-      child.visible = this._visible && child._selfVisible;
-      child._selfVisible = childSelfVisible;
-      promises.push(child.visibilityPromise);
+      let childPromise;
+      if (this.isHidden) {
+        childPromise = child._updateVisibility(child._hiddenFlag | HIDDEN_BY_PARENT);
+      } else {
+        childPromise = child._updateVisibility(child._hiddenFlag & ~HIDDEN_BY_PARENT);
+      }
+      promises.push(childPromise);
     }
 
-    promises.push(new Promise((resolve) => {
-      this.visibilityExecutor(resolve, this);
-    }));
+    promises.push((async () => {
+      if (this.isHidden) {
+        return this.onHide();
+      } else {
+        return this.onShow();
+      }
+    })());
 
-    this.visibilityPromise = Promise.all(promises);
+    const promise = this._currentVisibilityPromise = Promise.all(promises).then(() => {
+      if (promise !== this._currentVisibilityPromise) {
+        return new Promise(() => { });
+      }
+    });
+
+    return this._currentVisibilityPromise;
   }
 
-  get visible() {
-    return this._visible;
+  async show() {
+    return this._updateVisibility(this._hiddenFlag & ~SELF_HIDDEN);
   }
+
+  async hide() {
+    return this._updateVisibility(this._hiddenFlag | SELF_HIDDEN);
+  }
+
+  get hidden() {
+    return !!(this._hiddenFlag & SELF_HIDDEN);
+  }
+
+  set hidden(value) {
+    if (value) {
+      this.hide();
+    } else {
+      this.show();
+    }
+  }
+
+  get isHidden() {
+    return !!this._hiddenFlag;
+  }
+
+  async onShow() { }
+
+  async onHide() { }
 
   add(view) {
     if (view.parent) {
@@ -48,11 +83,14 @@ export default class View {
     }
     view.parent = this;
     this.children.add(view);
-    view.visible = this.visible && view._selfVisible;
+    if (this.isHidden) {
+      view._updateVisibility(view._hiddenFlag | HIDDEN_BY_PARENT);
+    }
   }
 
   remove(view) {
     view.parent = null;
     this.children.delete(view);
+    view._updateVisibility(view._hiddenFlag & ~HIDDEN_BY_PARENT);
   }
 }

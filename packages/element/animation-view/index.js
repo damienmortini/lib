@@ -1,50 +1,71 @@
 import View from '../core/abstract/View.js';
 
-export default class ViewElement extends HTMLElement {
+export default class ViewAnimationElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['hidden'];
+  }
+
   constructor() {
     super();
 
-    this._view = new View({
-      visible: false,
-    });
+    this._view = new View();
+
+    this._view.onShow = this.onshow.bind(this);
+    this._view.onHide = this.onhide.bind(this);
   }
 
-  get visible() {
-    return this._view.visible;
+  async onshow() { }
+
+  async onhide() { }
+
+  async show() {
+    this.hidden = false;
+    return this._view.show();
   }
 
-  set visible(value) {
-    this._view.visible = value;
+  async hide() {
+    this.hidden = true;
+    return this._view.hide();
   }
 
-  get visibilityPromise() {
-    return this._view.visibilityPromise;
+  get isHidden() {
+    return this._view.isHidden;
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) {
+      return;
+    }
+    switch (name) {
+      case 'hidden':
+        if (this.hasAttribute('hidden')) {
+          this.hide();
+        } else {
+          this.show();
+        }
+        break;
+    }
   }
 
   connectedCallback() {
     let element = this;
-    while (element.parentNode) {
-      if (element.parentNode instanceof ViewElement) {
-        element.parentNode._view.add(this._view);
+    let parentNode;
+    while (parentNode = element instanceof ShadowRoot ? element.host : element.parentNode) {
+      if (parentNode instanceof ViewAnimationElement) {
+        parentNode._view.add(this._view);
         break;
       }
-      element = element.parentNode;
+      element = parentNode;
     }
-
-    this._view.visibilityExecutor = this.visibilityExecutor.bind(this);
-
-    this.visible = this.getAttribute('visible') !== 'false';
   }
 
   disconnectedCallback() {
-    this.visible = false;
-
     if (this._view.parent) {
-      this._view.parent.remove(this);
+      this._view.parent.remove(this._view);
     }
   }
+}
 
-  visibilityExecutor(resolve, view) {
-    resolve();
-  }
+if (!customElements.get('damo-animation-view')) {
+  customElements.define('damo-animation-view', class DamoViewAnimationElement extends ViewAnimationElement { });
 }

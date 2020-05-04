@@ -19,19 +19,119 @@
       align-content: center;
       gap: 20px;
     }
+
+    custom-animation-view {
+      transition-property: transform;
+    }
+
+    #main {
+      width: 200px;
+      height: 200px;
+      background: grey;
+      transition-duration: .5s;
+    }
+
+    #main[hidden] {
+      transition-delay: .5s;
+    }
+
+    #child1 {
+      width: 80px;
+      height: 80px;
+      background: red;
+      transition-duration: .5s;
+      transition-delay: .25s;
+    }
+
+    #child2 {
+      width: 60px;
+      height: 60px;
+      background: green;
+      transition-duration: .5s;
+    }
+
+    #main:not([hidden]) #child2 {
+      transition-delay: .5s;
+    }
   </style>
 </head>
 
 <body>
-  <element-animation-view></element-animation-view>
-  <element-animation-view disabled></element-animation-view>
+  <custom-animation-view id='main'>
+    <custom-animation-view id='child1'></custom-animation-view>
+    <custom-animation-view id='child2'></custom-animation-view>
+  </custom-animation-view>
+
   <script type="module">
-    import Element from '../index.js';
-    window.customElements.define(`element-animation-view`, Element);
-    const element = document.querySelector('element-animation-view');
-    element.addEventListener('input', (event) => {
-      console.log(event.target.value);
-    });
+    import AnimationViewElement from '../index.js';
+
+    class CustomViewElement2 extends AnimationViewElement {
+      async onshow() {
+        console.log('show-custom2');
+        this.style.transform = 'scaleY(1)';
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      async onhide() {
+        console.log('hide-custom2');
+        this.style.transform = 'scaleY(0)';
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    class CustomViewElement extends AnimationViewElement {
+      constructor() {
+        super();
+
+        this.attachShadow({ mode: 'open' }).innerHTML = `
+          <style>
+            :host {
+              display: block;
+              position: relative;
+            }
+
+            custom-animation-view-2 {
+              position: absolute;
+              top: 10%;
+              left: 10%;
+              width: 80%;
+              height: 80%;
+              background: aquamarine;
+              opacity: .5;
+              transition-property: transform;
+              transition-duration: 1s;
+            }
+          </style>
+          <custom-animation-view-2></custom-animation-view-2>
+          <slot></slot>
+        `;
+      }
+
+      async onshow() {
+        console.log('show');
+        this.style.transform = 'scale(1)';
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      async onhide() {
+        console.log('hide');
+        this.style.transform = 'scale(0)';
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    window.customElements.define(`custom-animation-view`, CustomViewElement);
+    window.customElements.define(`custom-animation-view-2`, CustomViewElement2);
+
+    const element = document.body.querySelector('custom-animation-view');
+    window.onclick = () => {
+      const type = element.isHidden ? 'show' : 'hide';
+      console.log('before');
+      element[type]().then(() => {
+        console.log(`end-${type}`);
+      });
+      console.log('after');
+    }
   </script>
 </body>
 
