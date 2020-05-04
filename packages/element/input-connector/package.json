@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-input-connector",
   "private": true,
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "<element-input-connector> custom element.",
   "main": "index.js",
   "scripts": {

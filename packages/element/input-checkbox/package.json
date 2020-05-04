@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-checkbox",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<element-input-checkbox> custom element.",
   "main": "index.js",
   "scripts": {

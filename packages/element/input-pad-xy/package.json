@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-pad-xy",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "<element-input-pad-xy> custom element.",
   "main": "index.js",
   "scripts": {
