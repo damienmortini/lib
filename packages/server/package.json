@@ -1,5 +1,6 @@
 {
   "name": "@damienmortini/server",
+  "private": true,
   "version": "1.0.13",
   "description": "Simple live reloading HTTP2 server for development",
   "main": "index.js",
