@@ -29,7 +29,7 @@ export default class ViewAnimationElement extends HTMLElement {
   }
 
   get isHidden() {
-    return this._view.isHidden;
+    return this._view.isHidden || !this.isConnected;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
