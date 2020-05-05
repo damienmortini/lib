@@ -47,20 +47,27 @@ export default class ViewAnimationElement extends HTMLElement {
     }
   }
 
-  connectedCallback() {
+  _getParentViewAnimationElement() {
     let element = this;
     let parentNode;
     while (parentNode = element instanceof ShadowRoot ? element.host : element.parentNode) {
       if (parentNode instanceof ViewAnimationElement) {
-        parentNode._view.add(this._view);
-        break;
+        return parentNode;
       }
       element = parentNode;
+    }
+    return null;
+  }
+
+  connectedCallback() {
+    const parentViewAnimationElement = this._getParentViewAnimationElement();
+    if (parentViewAnimationElement) {
+      this._getParentViewAnimationElement()._view.add(this._view);
     }
   }
 
   disconnectedCallback() {
-    if (this._view.parent) {
+    if (!this._getParentViewAnimationElement() && this._view.parent) {
       this._view.parent.remove(this._view);
     }
   }

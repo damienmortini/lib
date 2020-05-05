@@ -78,6 +78,9 @@ export default class View {
   async onHide() { }
 
   add(view) {
+    if (this.children.has(view)) {
+      return;
+    }
     if (view.parent) {
       view.parent.remove(view);
     }
@@ -89,6 +92,9 @@ export default class View {
   }
 
   remove(view) {
+    if (!this.children.has(view)) {
+      return;
+    }
     view.parent = null;
     this.children.delete(view);
     view._updateVisibility(view._hiddenFlag & ~HIDDEN_BY_PARENT);
