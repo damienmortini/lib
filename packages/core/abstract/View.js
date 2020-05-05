@@ -14,7 +14,8 @@ export default class View {
   }
 
   async _updateVisibility(hiddenFlag) {
-    if (!!hiddenFlag === this.isHidden) {
+    if (!!hiddenFlag === !!this._hiddenFlag) {
+      this._hiddenFlag = hiddenFlag;
       return this._currentVisibilityPromise || Promise.resolve();
     }
 
