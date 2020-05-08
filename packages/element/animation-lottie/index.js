@@ -38,37 +38,36 @@ class LottieAnimationElement extends HTMLElement {
     this._container = this.shadowRoot.querySelector(`#container`);
   }
 
-  _loadSrc() {
+  async _load(src) {
     if (this.animation) {
       this.animation.destroy();
     }
-    const loaderPromise = this._loaderPromise = Loader.load(this.src);
-    loaderPromise.then((data) => {
-      if (loaderPromise !== this._loaderPromise) {
-        return;
+    const data = await Loader.load(src);
+    if (this.src !== src) {
+      return;
+    }
+    this.animation = lottie.loadAnimation({
+      container: this._container,
+      renderer: this.renderer,
+      autoplay: this.autoplay,
+      loop: this.loop,
+      animationData: data,
+    });
+    this.animation.addEventListener('DOMLoaded', () => {
+      if (this.segments) {
+        this.segments = this.segments;
       }
-      this.animation = lottie.loadAnimation({
-        container: this._container,
-        renderer: this.renderer,
-        autoplay: this.autoplay,
-        loop: this.loop,
-        animationData: data,
-      });
-      this.animation.addEventListener('DOMLoaded', () => {
-        if (this.segments) {
-          this.segments = this.segments;
-        }
-        this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.getAttribute('starttime') || 0);
-        this.animation.frameRate = this.frameRate;
-        this.animation.setSpeed(Math.abs(this.playbackRate));
-        this.animation.setDirection(this.playbackRate);
-      });
-      this.animation.addEventListener('loopComplete', () => {
-        this.dispatchEvent(new Event('ended'));
-      });
-      this.animation.addEventListener('complete', () => {
-        this.dispatchEvent(new Event('ended'));
-      });
+      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.getAttribute('starttime') || 0);
+      this.animation.frameRate = this.frameRate;
+      this.animation.setSpeed(Math.abs(this.playbackRate));
+      this.animation.setDirection(this.playbackRate);
+      this.dispatchEvent(new Event('load'));
+    });
+    this.animation.addEventListener('loopComplete', () => {
+      this.dispatchEvent(new Event('ended'));
+    });
+    this.animation.addEventListener('complete', () => {
+      this.dispatchEvent(new Event('ended'));
     });
   }
 
@@ -78,7 +77,7 @@ class LottieAnimationElement extends HTMLElement {
     }
     switch (name) {
       case 'src':
-        this._loadSrc();
+        this._load(newValue);
         break;
       case 'loop':
         if (this.animation) {
@@ -225,21 +224,25 @@ class LottieAnimationElement extends HTMLElement {
    * @type {Boolean}
    */
   get paused() {
-    return this.animation.isPaused;
+    return this.animation ? this.animation.isPaused : true;
   }
 
   /**
    * Play current animation
    */
   play() {
-    this.animation.play();
+    if (this.animation) {
+      this.animation.play();
+    }
   }
 
   /**
    * Pause current animation
    */
   pause() {
-    this.animation.pause();
+    if (this.animation) {
+      this.animation.pause();
+    }
   }
 }
 
