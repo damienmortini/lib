@@ -106,7 +106,13 @@ export default class Shader {
     let value;
     let typeMatch;
 
-    if (/float|double/.test(type)) {
+    if (/bool/.test(type)) {
+      if (isNaN(arrayLength)) {
+        value = false;
+      } else {
+        value = new Array(arrayLength).fill(false);
+      }
+    } else if (/float|double/.test(type)) {
       if (isNaN(arrayLength)) {
         value = 0;
       } else {
