@@ -1,6 +1,7 @@
 import AnimationTickerElement from '../element-animation-ticker/index.js';
 import Ticker from '../core/util/Ticker.js';
 
+const SIDE_MOVEMENT_SPEED = .2;
 const PADDING_RATIO = .2;
 
 class TickerTimelineElement extends AnimationTickerElement {
@@ -69,9 +70,9 @@ class TickerTimelineElement extends AnimationTickerElement {
       const padding = this._tickAreaWidth * PADDING_RATIO;
       const right = this._tickAreaWidth - padding;
       if (this._pointerOffsetX > right) {
-        currentPosition += (this._pointerOffsetX - right) * .01;
+        currentPosition += (this._pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
       } else if (this._pointerOffsetX < padding && this.shift) {
-        currentPosition += (this._pointerOffsetX - padding) * .01;
+        currentPosition += (this._pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
       }
       this.currentTime = currentPosition / this.scale;
     };
@@ -116,10 +117,10 @@ class TickerTimelineElement extends AnimationTickerElement {
     const padding = this._tickAreaWidth * PADDING_RATIO;
     const right = this._tickAreaWidth - padding;
     if (x > right) {
-      this.shift += x - right;
+      this.shift += (x - right) * SIDE_MOVEMENT_SPEED;
       x = right;
     } else if (x < padding && this.shift) {
-      this.shift += x - padding;
+      this.shift += (x - padding) * SIDE_MOVEMENT_SPEED;
       x = padding;
     } else {
       x = Math.max(0, x);
