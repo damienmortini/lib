@@ -23,6 +23,6 @@
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
     "@damienmortini/core": "^0.2.33",
-    "lottie-web": "^5.6.8"
+    "lottie-web": "^5.6.10"
   }
 }
