@@ -69,9 +69,9 @@ class TickerTimelineElement extends AnimationTickerElement {
       const padding = this._tickAreaWidth * PADDING_RATIO;
       const right = this._tickAreaWidth - padding;
       if (this._pointerOffsetX > right) {
-        currentPosition += this._pointerOffsetX - right;
+        currentPosition += (this._pointerOffsetX - right) * .01;
       } else if (this._pointerOffsetX < padding && this.shift) {
-        currentPosition += this._pointerOffsetX - padding;
+        currentPosition += (this._pointerOffsetX - padding) * .01;
       }
       this.currentTime = currentPosition / this.scale;
     };
@@ -142,9 +142,6 @@ class TickerTimelineElement extends AnimationTickerElement {
 
   set currentTime(value) {
     value = Math.max(0, value);
-    if (this._currentTime === value) {
-      return;
-    }
     this._currentTime = value;
     this._tickText.textContent = `${this._currentTime.toFixed(1)}s`;
     this._updatePositionFromCurrentTime();
