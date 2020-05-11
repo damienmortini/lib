@@ -22,6 +22,7 @@ class TickerTimelineElement extends AnimationTickerElement {
         #tick {
           pointer-events: none;
           position: absolute;
+          will-change: transform;
           left: 0;
           top: 0;
           width: 0;
@@ -40,16 +41,15 @@ class TickerTimelineElement extends AnimationTickerElement {
           box-shadow: 0 0 4px black;
         }
         #tip {
+          position: absolute;
           top: 100%;
           left: 0;
-          position: absolute;
+          border-left: 1px solid red;
         }
       </style>
       <div id="tick">
         <div id="text">100</div>
-        <svg id="tip">
-          <line stroke="red" x1="0" y1="0" x2="0" y2="1" />
-        </svg>
+        <div id="tip"></div>
       </div>
     `;
 
@@ -59,7 +59,7 @@ class TickerTimelineElement extends AnimationTickerElement {
 
     this._tick = this.shadowRoot.querySelector('#tick');
     this._tickText = this.shadowRoot.querySelector('#text');
-    this._tickLine = this.shadowRoot.querySelector('#tick line');
+    this._tickTip = this.shadowRoot.querySelector('#tip');
     this._tickAreaWidth = 0;
 
     this._pointerOffsetX = 0;
@@ -133,7 +133,7 @@ class TickerTimelineElement extends AnimationTickerElement {
 
   set tickHeight(value) {
     this._tickHeight = value;
-    this._tickLine.setAttribute('y2', `${this._tickHeight}`);
+    this._tickTip.style.height = `${this._tickHeight}px`;
   }
 
   get currentTime() {
