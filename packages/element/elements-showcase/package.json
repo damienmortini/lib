@@ -17,6 +17,7 @@
     "@damienmortini/element-input-joystick": "^0.0.25",
     "@damienmortini/element-input-number": "^0.0.10",
     "@damienmortini/element-input-pad-xy": "^0.0.13",
+    "@damienmortini/element-input-recorder": "^0.0.1",
     "@damienmortini/element-input-range": "^0.0.12",
     "@damienmortini/element-input-select": "^0.0.10",
     "@damienmortini/element-input-soundmatrix": "^0.0.13",
