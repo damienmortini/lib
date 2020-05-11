@@ -9,7 +9,7 @@ export default class SpriteAnimation {
     data = undefined,
     animation = undefined,
     playbackRate = 1,
-    frameRate = 25,
+    frameRate = 24,
     loop = false,
     autoplay = false,
   } = {}) {
