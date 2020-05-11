@@ -74,7 +74,7 @@ export default class TimelineInputElement extends HTMLElement {
     channel.keyframes = keyframes;
     this._channels.add(channel);
     this._channelsContainer.appendChild(channel);
-    this._timelineTicker.tickHeight = this._channelsContainer.clientHeight + 15;
+    this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
   }
 
   get time() {
