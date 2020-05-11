@@ -1,3 +1,5 @@
+import Ticker from '../core/util/Ticker.js';
+
 export default class TimelineInputElement extends HTMLElement {
   static get observedAttributes() {
     return [];
@@ -39,9 +41,9 @@ export default class TimelineInputElement extends HTMLElement {
         }
       </style>
       <div id="controls">
-        <button>Play</button>
-        <button>Pause</button>
-        <button>Record</button>
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <button id="record">Record</button>
       </div>
       <div id="timeline">
         <div id="tickarea">
@@ -50,36 +52,27 @@ export default class TimelineInputElement extends HTMLElement {
             <line stroke="red" x1="5" y1="5" x2="5" y2="10" />
           </svg>
         </div>
-        <div id="channels">
-          <damo-input-timeline-channel></damo-input-timeline-channel>
-          <damo-input-timeline-channel></damo-input-timeline-channel>
-          <damo-input-timeline-channel></damo-input-timeline-channel>
-        </div>
-        <button>Add channel</button>
+        <div id="channels"></div>
       </div>
     `;
 
     this._channelsContainer = this.shadowRoot.querySelector('#channels');
 
-    this._channels = [...this.shadowRoot.querySelectorAll('damo-input-timeline-channel')];
-    for (const channel of this._channels) {
-      channel.color = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
-    }
+    this._channels = new Set();
 
     this._shift = 0;
 
-    let animationFrameID = 0;
-
+    /**
+     * Header tick
+     */
     this._tickArea = this.shadowRoot.querySelector('#tickarea');
     this._tick = this.shadowRoot.querySelector('#tick');
     this._tickLine = this.shadowRoot.querySelector('#tick line');
-    this._tickLine.setAttribute('y2', `${this._channelsContainer.clientHeight + 15}`);
     this._tickAreaWidth = 0;
     this._tickX = 0;
     this._previousTickX = 0;
 
-    const animationFrame = () => {
-      animationFrameID = requestAnimationFrame(animationFrame);
+    const tickUpdate = () => {
       const padding = this._tickAreaWidth * .2;
       let x = this._tickX;
       if (x > this._tickAreaWidth - padding) {
@@ -100,14 +93,13 @@ export default class TimelineInputElement extends HTMLElement {
       this._tickArea.addEventListener('pointermove', pointerMove);
       this._tickArea.addEventListener('pointerup', pointerUp);
       this._tickArea.addEventListener('pointerout', pointerUp);
-      cancelAnimationFrame(animationFrameID);
-      animationFrame();
+      Ticker.add(tickUpdate);
     };
     const pointerMove = (event) => {
       this._tickX = event.offsetX;
     };
     const pointerUp = (event) => {
-      cancelAnimationFrame(animationFrameID);
+      Ticker.delete(tickUpdate);
       this._tickArea.releasePointerCapture(event.pointerId);
       this._tickArea.removeEventListener('pointermove', pointerMove);
       this._tickArea.removeEventListener('pointerup', pointerUp);
@@ -119,9 +111,36 @@ export default class TimelineInputElement extends HTMLElement {
       this._tickAreaWidth = entries[0].contentRect.width;
     });
     resizeObserver.observe(this._tickArea);
+
+    /**
+     * Controls
+     */
+    const playTicker = () => {
+      this._tickX++;
+      tickUpdate();
+    };
+
+    this._playButton = this.shadowRoot.querySelector('#play');
+    this._pauseButton = this.shadowRoot.querySelector('#pause');
+
+    this._playButton.addEventListener('click', () => {
+      Ticker.add(playTicker);
+    });
+    this._pauseButton.addEventListener('click', () => {
+      Ticker.delete(playTicker);
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+  }
+
+  addChannel({ name, key, color, keyframes }) {
+    const channel = document.createElement('damo-input-timeline-channel');
+    channel.color = color;
+    channel.keyframes = keyframes;
+    this._channels.add(channel);
+    this._channelsContainer.appendChild(channel);
+    this._tickLine.setAttribute('y2', `${this._channelsContainer.clientHeight + 15}`);
   }
 
   get shift() {
@@ -184,13 +203,13 @@ class ChannelTimelineInputElement extends HTMLElement {
       <canvas></canvas>
     `;
 
-    this.frameSize = 10;
-    this.startFrame = 0;
-    this.keyframes = new Set();
-    this.color = 'white';
-    this._shift = 0;
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._context = this._canvas.getContext('2d');
+    this._shift = 0;
+    this.frameSize = 10;
+    this.startFrame = 0;
+    this.color = 'white';
+    this.keyframes = new Set();
 
     const pointerDown = (event) => {
       this._canvas.setPointerCapture(event.pointerId);
@@ -220,11 +239,25 @@ class ChannelTimelineInputElement extends HTMLElement {
     const resizeObserver = new ResizeObserver((entries) => {
       this._canvas.width = entries[0].contentRect.width;
       this._canvas.height = entries[0].contentRect.height;
+      this._update();
     });
     resizeObserver.observe(this);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+  }
+
+  connectedCallback() {
+    this._update();
+  }
+
+  get keyframes() {
+    return this._keyframes;
+  }
+
+  set keyframes(value) {
+    this._keyframes = value;
+    this._update();
   }
 
   get shift() {

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-timeline</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <element-input-timeline></element-input-timeline>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-input-timeline`, Element);
+    const timelineInputElement = document.querySelector('element-input-timeline');
+    for (let index = 0; index < 5; index++) {
+      const keyframes = new Set();
+      for (let index = 0; index < 40; index++) {
+        keyframes.add(Math.floor(Math.random() * 500));
+      }
+      timelineInputElement.addChannel({
+        name: 'Rocks',
+        color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
+        keyframes,
+      });
+    }
+    // timelineInputElement.addChannel({
+    //   name: 'Lights',
+    //   color: 'blue',
+    // });
+    // timelineInputElement.addChannel({
+    //   name: 'Sky',
+    //   color: 'yellow',
+    // });
+  </script>
+</body>
+
+</html>
