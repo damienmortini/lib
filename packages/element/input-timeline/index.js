@@ -47,12 +47,12 @@ export default class TimelineInputElement extends HTMLElement {
     this._timelineTicker = this.shadowRoot.querySelector('damo-timeline-ticker');
 
     this._timelineTicker.addEventListener('shiftupdate', () => {
-      this.shift = this._timelineTicker.shift;
+      for (const channel of this._channels) {
+        channel.shift = this._timelineTicker.shift;
+      }
     });
 
     this._channels = new Set();
-
-    this._shift = 0;
 
     /**
      * Controls
@@ -61,10 +61,10 @@ export default class TimelineInputElement extends HTMLElement {
     this._pauseButton = this.shadowRoot.querySelector('#pause');
 
     this._playButton.addEventListener('click', () => {
-      this._timelineTicker.play();
+      this.play();
     });
     this._pauseButton.addEventListener('click', () => {
-      this._timelineTicker.pause();
+      this.pause();
     });
   }
 
@@ -85,31 +85,12 @@ export default class TimelineInputElement extends HTMLElement {
     this._time = value;
   }
 
-  get shift() {
-    return this._shift;
-  }
-
-  set shift(value) {
-    this._shift = Math.max(0, value);
-    for (const channel of this._channels) {
-      channel.shift = this._shift;
-    }
-  }
-
   get currentTime() {
     return this._currentTime;
   }
 
   set currentTime(value) {
     this._currentTime = value;
-  }
-
-  get data() {
-    return this._data;
-  }
-
-  set data(value) {
-    this._data = value;
   }
 
   play() {

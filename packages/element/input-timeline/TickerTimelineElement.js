@@ -1,9 +1,14 @@
 import AnimationTickerElement from '../element-animation-ticker/index.js';
 import Ticker from '../core/util/Ticker.js';
 
+const PADDING_RATIO = .2;
+
 class TickerTimelineElement extends AnimationTickerElement {
   constructor() {
     super();
+
+    this.noautoplay = true;
+
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
@@ -40,7 +45,7 @@ class TickerTimelineElement extends AnimationTickerElement {
     this._pausedBeforeInteraction = false;
     const updateCurrentTimeFromPosition = () => {
       let currentPosition = this._pointerOffsetX + this.shift;
-      const padding = this._tickAreaWidth * .2;
+      const padding = this._tickAreaWidth * PADDING_RATIO;
       const right = this._tickAreaWidth - padding;
       if (this._pointerOffsetX > right) {
         currentPosition += this._pointerOffsetX - right;
@@ -77,13 +82,17 @@ class TickerTimelineElement extends AnimationTickerElement {
     this.addEventListener('contextmenu', (event) => event.preventDefault());
     const resizeObserver = new ResizeObserver((entries) => {
       this._tickAreaWidth = entries[0].contentRect.width;
+      this._updatePositionFromCurrentTime();
     });
     resizeObserver.observe(this);
   }
 
   _updatePositionFromCurrentTime() {
+    if (!this._tickAreaWidth) {
+      return;
+    }
     let x = this.currentTime * this.scale - this.shift;
-    const padding = this._tickAreaWidth * .2;
+    const padding = this._tickAreaWidth * PADDING_RATIO;
     const right = this._tickAreaWidth - padding;
     if (x > right) {
       this.shift += x - right;
