@@ -17,20 +17,40 @@ class TickerTimelineElement extends AnimationTickerElement {
           width: 300px;
           height: 20px;
           background: grey;
+          font-family: monospace;
         }
         #tick {
           pointer-events: none;
-          margin-left: -5px;
           position: absolute;
           left: 0;
-          top: 5px;
-          width: 10px;
+          top: 0;
+          width: 0;
+          height: 100%;
+        }
+        #text {
+          position: absolute;
+          pointer-events: none;
+          user-select: none;
+          top: 2px;
+          left: 0;
+          transform: translateX(-50%);
+          background: white;
+          border-radius: 2px;
+          height: calc(100% - 4px);
+          box-shadow: 0 0 4px black;
+        }
+        #tip {
+          top: 100%;
+          left: 0;
+          position: absolute;
         }
       </style>
-      <svg id="tick">
-        <polyline fill="red" fill="none" points="0 0 5 5 10 0" />
-        <line stroke="red" x1="5" y1="5" x2="5" y2="10" />
-      </svg>
+      <div id="tick">
+        <div id="text">100</div>
+        <svg id="tip">
+          <line stroke="red" x1="0" y1="0" x2="0" y2="1" />
+        </svg>
+      </div>
     `;
 
     this.scale = 10;
@@ -38,6 +58,7 @@ class TickerTimelineElement extends AnimationTickerElement {
     this._currentTime = 0;
 
     this._tick = this.shadowRoot.querySelector('#tick');
+    this._tickText = this.shadowRoot.querySelector('#text');
     this._tickLine = this.shadowRoot.querySelector('#tick line');
     this._tickAreaWidth = 0;
 
@@ -125,6 +146,7 @@ class TickerTimelineElement extends AnimationTickerElement {
       return;
     }
     this._currentTime = value;
+    this._tickText.textContent = `${this._currentTime.toFixed(1)}s`;
     this._updatePositionFromCurrentTime();
     this.dispatchEvent(new Event('timeupdate'));
   }
