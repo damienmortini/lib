@@ -2,5 +2,11 @@
   "compilerOptions": {
     "target": "esnext",
     "checkJs": true,
-  }
+    "baseUrl": "node_modules/",
+    "rootDirs": [
+      "node_modules",
+      "packages/element",
+      "packages",
+    ],
+  },
 }

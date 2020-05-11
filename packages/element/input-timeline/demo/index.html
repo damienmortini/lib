@@ -18,6 +18,10 @@
       justify-content: center;
       align-content: center;
     }
+
+    element-input-timeline {
+      width: 500px;
+    }
   </style>
 </head>
 
@@ -39,6 +43,11 @@
         keyframes,
       });
     }
+    window.addEventListener('keydown', (event) => {
+      if (event.key === ' ') {
+        timelineInputElement[timelineInputElement.paused ? 'play' : 'pause']();
+      }
+    });
     // timelineInputElement.addChannel({
     //   name: 'Lights',
     //   color: 'blue',
