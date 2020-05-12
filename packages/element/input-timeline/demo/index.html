@@ -11,6 +11,7 @@
       width: 100%;
       height: 100%;
       margin: 0;
+      font-family: sans-serif;
     }
 
     body {
@@ -22,30 +23,50 @@
     element-input-timeline {
       width: 500px;
     }
+
+    details {
+      border: 1px dashed lightgrey;
+      width: 500px;
+      overflow: hidden;
+    }
+
+    details[open] {
+      height: 200px
+    }
   </style>
 </head>
 
 <body>
   <element-input-timeline scale="30"></element-input-timeline>
+  <details open>
+    <summary>Output</summary>
+    <div id="output"></div>
+  </details>
 
   <script type="module">
     import Element from '../index.js';
+
     window.customElements.define(`element-input-timeline`, Element);
+
     const timelineInputElement = document.querySelector('element-input-timeline');
+    const output = document.querySelector('#output');
+
     for (let index = 0; index < 10; index++) {
       const keyframes = new Set();
+      const step = .5;
       for (let index = 0; index < 40; index++) {
-        keyframes.add(Math.floor(Math.random() * 500));
+        keyframes.add(Math.floor(Math.random() * 500) * step);
       }
       timelineInputElement.addChannel({
         name: `Channel ${index + 1}`,
         color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
         keyframes,
-        step: .5,
+        step,
       });
     }
     timelineInputElement.addEventListener('input', (event) => {
       console.log(event.detail);
+      output.innerHTML = `<span style="color:${event.detail.color}">${event.detail.name}</span> @ ${event.detail.time}s<br/>${output.innerHTML}`;
     });
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {

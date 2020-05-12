@@ -74,6 +74,7 @@ export default class TimelineInputElement extends HTMLElement {
               detail: {
                 name: channel.name,
                 time: keyframe,
+                color: channel.color,
               },
             }));
           }
