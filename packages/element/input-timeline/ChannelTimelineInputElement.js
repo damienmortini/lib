@@ -25,7 +25,7 @@ class ChannelTimelineInputElement extends HTMLElement {
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._context = this._canvas.getContext('2d');
     this._shift = 0;
-    this.step = 10;
+    this._scale = 1;
     this.startFrame = 0;
     this.color = 'white';
     this.keyframes = new Set();
@@ -38,7 +38,7 @@ class ChannelTimelineInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const keyframe = Math.floor((event.offsetX + this.shift) / this.step);
+      const keyframe = Math.floor((event.offsetX + this.shift) / this.scale);
       if (event.buttons === 1) {
         this.keyframes.add(keyframe);
       } else {
@@ -85,13 +85,22 @@ class ChannelTimelineInputElement extends HTMLElement {
     this._update();
   }
 
+  get scale() {
+    return this._scale;
+  }
+
+  set scale(value) {
+    this._scale = value;
+    this._update();
+  }
+
   _update() {
     this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     this._context.fillStyle = this.color;
     this._context.beginPath();
     for (const keyframe of this.keyframes) {
-      const x = keyframe * this.step - this.shift;
-      this._context.fillRect(x, this._canvas.height * .25, this.step, this._canvas.height * .5);
+      const x = keyframe * this.scale - Math.floor(this.shift);
+      this._context.fillRect(x, this._canvas.height * .25, this.scale, this._canvas.height * .5);
     }
   }
 }

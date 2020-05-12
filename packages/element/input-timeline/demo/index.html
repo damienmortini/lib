@@ -26,13 +26,13 @@
 </head>
 
 <body>
-  <element-input-timeline></element-input-timeline>
+  <element-input-timeline scale="10"></element-input-timeline>
 
   <script type="module">
     import Element from '../index.js';
     window.customElements.define(`element-input-timeline`, Element);
     const timelineInputElement = document.querySelector('element-input-timeline');
-    for (let index = 0; index < 20; index++) {
+    for (let index = 0; index < 10; index++) {
       const keyframes = new Set();
       for (let index = 0; index < 40; index++) {
         keyframes.add(Math.floor(Math.random() * 500));
@@ -43,6 +43,9 @@
         keyframes,
       });
     }
+    timelineInputElement.addEventListener('input', (event) => {
+      console.log(event.detail);
+    });
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {
         timelineInputElement[timelineInputElement.paused ? 'play' : 'pause']();

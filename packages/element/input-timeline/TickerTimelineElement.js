@@ -21,7 +21,6 @@ class TickerTimelineElement extends AnimationTickerElement {
           font-family: monospace;
         }
         #tick {
-          pointer-events: none;
           position: absolute;
           will-change: transform;
           left: 0;
@@ -31,7 +30,6 @@ class TickerTimelineElement extends AnimationTickerElement {
         }
         #text {
           position: absolute;
-          pointer-events: none;
           user-select: none;
           top: 2px;
           left: 0;
@@ -42,6 +40,7 @@ class TickerTimelineElement extends AnimationTickerElement {
           box-shadow: 0 0 4px black;
         }
         #tip {
+          pointer-events: none;
           position: absolute;
           top: 100%;
           left: 0;
@@ -54,7 +53,7 @@ class TickerTimelineElement extends AnimationTickerElement {
       </div>
     `;
 
-    this.scale = 10;
+    this.scale = 1;
     this._shift = 0;
     this._currentTime = 0;
 
