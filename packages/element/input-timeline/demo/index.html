@@ -50,15 +50,15 @@
 
     const timelineInputElement = document.querySelector('element-input-timeline');
     const output = document.querySelector('#output');
-
-    for (let index = 0; index < 10; index++) {
+    const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light2', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
+    for (const name of channelNames) {
       const keyframes = new Set();
       const step = .5;
       for (let index = 0; index < 40; index++) {
         keyframes.add(Math.floor(Math.random() * 500) * step);
       }
       timelineInputElement.addChannel({
-        name: `Channel ${index + 1}`,
+        name,
         color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
         keyframes,
         step,
@@ -82,14 +82,6 @@
         timelineInputElement[timelineInputElement.paused ? 'play' : 'pause']();
       }
     });
-    // timelineInputElement.addChannel({
-    //   name: 'Lights',
-    //   color: 'blue',
-    // });
-    // timelineInputElement.addChannel({
-    //   name: 'Sky',
-    //   color: 'yellow',
-    // });
   </script>
 </body>
 

@@ -35,7 +35,6 @@ export default class TimelineInputElement extends HTMLElement {
       <div id="controls">
         <button id="play">Play</button>
         <button id="pause">Pause</button>
-        <button id="record">Record</button>
       </div>
       <div id="timeline">
         <damo-timeline-ticker></damo-timeline-ticker>
@@ -56,14 +55,14 @@ export default class TimelineInputElement extends HTMLElement {
       }
     });
 
-    this._timelineTicker.addEventListener('wheel', (event) => {
-      event.preventDefault();
-      if (event.deltaY < 0) {
-        this.scale *= .95;
-      } else {
-        this.scale /= .95;
-      }
-    });
+    // this._timelineTicker.addEventListener('wheel', (event) => {
+    //   event.preventDefault();
+    //   if (event.deltaY < 0) {
+    //     this.scale *= .95;
+    //   } else {
+    //     this.scale /= .95;
+    //   }
+    // });
 
     let previousTime = 0;
     this._timelineTicker.addEventListener('timeupdate', () => {
