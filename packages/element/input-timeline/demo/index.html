@@ -26,7 +26,7 @@
 </head>
 
 <body>
-  <element-input-timeline scale="10"></element-input-timeline>
+  <element-input-timeline scale="30"></element-input-timeline>
 
   <script type="module">
     import Element from '../index.js';
@@ -38,9 +38,10 @@
         keyframes.add(Math.floor(Math.random() * 500));
       }
       timelineInputElement.addChannel({
-        name: 'Rocks',
+        name: `Channel ${index + 1}`,
         color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
         keyframes,
+        step: .5,
       });
     }
     timelineInputElement.addEventListener('input', (event) => {

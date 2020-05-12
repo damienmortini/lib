@@ -106,12 +106,21 @@ class ChannelTimelineInputElement extends HTMLElement {
     this._update();
   }
 
+  get step() {
+    return this._step;
+  }
+
+  set step(value) {
+    this._step = value;
+    this._update();
+  }
+
   _update() {
     this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     this._context.fillStyle = this.color;
     this._context.beginPath();
     for (const keyframe of this.keyframes) {
-      const x = keyframe * this.scale - Math.floor(this.shift);
+      const x = keyframe * this.scale - this.shift;
       this._context.fillRect(x, this._canvas.height * .25, this.scale * this._step, this._canvas.height * .5);
     }
   }
