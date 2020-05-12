@@ -119,6 +119,23 @@ export default class TimelineInputElement extends HTMLElement {
     channel.keyframes = keyframes;
     channel.scale = this.scale;
     channel.step = step;
+    window.addEventListener('keydown', (event) => {
+      if (event.key === key) {
+        const time = Math.floor(this.currentTime / channel.step) * channel.step;
+        if (channel.keyframes.has(time)) {
+          return;
+        }
+        channel.keyframes.add(time);
+        channel._update();
+        this.dispatchEvent(new CustomEvent('input', {
+          detail: {
+            name: channel.name,
+            time: time,
+            color: channel.color,
+          },
+        }));
+      }
+    });
     this._channels.add(channel);
     this._channelsContainer.appendChild(channel);
     this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
