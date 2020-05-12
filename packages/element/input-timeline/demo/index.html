@@ -64,9 +64,18 @@
         step,
       });
     }
+    const outputDivs = [];
+    for (let index = 0; index < 10; index++) {
+      const div = document.createElement('div');
+      outputDivs.push(div);
+      output.prepend(div);
+    }
     timelineInputElement.addEventListener('input', (event) => {
-      console.log(event.detail);
-      output.innerHTML = `<span style="color:${event.detail.color}">${event.detail.name}</span> @ ${event.detail.time}s<br/>${output.innerHTML}`;
+      const div = outputDivs.shift();
+      outputDivs.push(div);
+      div.style.color = event.detail.color;
+      div.textContent = `${event.detail.name} @ ${event.detail.time}s`;
+      output.prepend(div);
     });
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {
