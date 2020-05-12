@@ -26,11 +26,15 @@ class ChannelTimelineInputElement extends HTMLElement {
     this._context = this._canvas.getContext('2d');
     this._shift = 0;
     this._scale = 1;
+    this._step = 1;
     this.startFrame = 0;
     this.color = 'white';
     this.keyframes = new Set();
 
+    let previousKeyframe = null;
+    let decimals = 0;
     const pointerDown = (event) => {
+      decimals = this._step % 1 ? String(this._step).split('.')[1].length : 0;
       this._canvas.setPointerCapture(event.pointerId);
       this._canvas.addEventListener('pointermove', pointerMove);
       this._canvas.addEventListener('pointerup', pointerUp);
@@ -38,15 +42,23 @@ class ChannelTimelineInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const keyframe = Math.floor((event.offsetX + this.shift) / this.scale);
-      if (event.buttons === 1) {
-        this.keyframes.add(keyframe);
-      } else {
-        this.keyframes.delete(keyframe);
+      const newKeyframe = Math.floor((event.offsetX + this.shift) / this._step / this.scale) * this._step;
+      previousKeyframe = previousKeyframe !== null ? previousKeyframe : newKeyframe;
+      const startKeyframe = newKeyframe > previousKeyframe ? previousKeyframe : newKeyframe;
+      const endKeyframe = newKeyframe > previousKeyframe ? newKeyframe : previousKeyframe;
+      for (let keyframe = startKeyframe; keyframe <= endKeyframe; keyframe += this._step) {
+        keyframe = Number(keyframe.toFixed(decimals));
+        if (event.buttons === 1) {
+          this.keyframes.add(keyframe);
+        } else {
+          this.keyframes.delete(keyframe);
+        }
       }
+      previousKeyframe = newKeyframe;
       this._update();
     };
     const pointerUp = (event) => {
+      previousKeyframe = null;
       this._canvas.releasePointerCapture(event.pointerId);
       this._canvas.removeEventListener('pointermove', pointerMove);
       this._canvas.removeEventListener('pointerup', pointerUp);
@@ -100,7 +112,7 @@ class ChannelTimelineInputElement extends HTMLElement {
     this._context.beginPath();
     for (const keyframe of this.keyframes) {
       const x = keyframe * this.scale - Math.floor(this.shift);
-      this._context.fillRect(x, this._canvas.height * .25, this.scale, this._canvas.height * .5);
+      this._context.fillRect(x, this._canvas.height * .25, this.scale * this._step, this._canvas.height * .5);
     }
   }
 }
