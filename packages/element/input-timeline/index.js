@@ -3,7 +3,7 @@ import './ChannelTimelineInputElement.js';
 
 export default class TimelineInputElement extends HTMLElement {
   static get observedAttributes() {
-    return [];
+    return ['scale'];
   }
 
   constructor() {
@@ -43,8 +43,18 @@ export default class TimelineInputElement extends HTMLElement {
       </div>
     `;
 
+    this._scale = 1;
     this._channelsContainer = this.shadowRoot.querySelector('#channels');
     this._timelineTicker = this.shadowRoot.querySelector('damo-timeline-ticker');
+
+    this.shadowRoot.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      if (event.deltaY < 0) {
+        this.currentTime -= 20 / this.scale;
+      } else {
+        this.currentTime += 20 / this.scale;
+      }
+    });
 
     this._timelineTicker.addEventListener('shiftupdate', () => {
       for (const channel of this._channels) {
@@ -68,13 +78,34 @@ export default class TimelineInputElement extends HTMLElement {
     });
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'scale':
+        this.scale = Number(newValue);
+        break;
+    }
+  }
+
   addChannel({ name, key, color, keyframes }) {
     const channel = document.createElement('damo-input-timeline-channel');
     channel.color = color;
     channel.keyframes = keyframes;
+    channel.scale = this.scale;
     this._channels.add(channel);
     this._channelsContainer.appendChild(channel);
     this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
+  }
+
+  get scale() {
+    return this._scale;
+  }
+
+  set scale(value) {
+    this._scale = value;
+    this._timelineTicker.scale = this._scale;
+    for (const channel of this._channels) {
+      channel.scale = this._scale;
+    }
   }
 
   get time() {
@@ -86,11 +117,11 @@ export default class TimelineInputElement extends HTMLElement {
   }
 
   get currentTime() {
-    return this._currentTime;
+    return this._timelineTicker.currentTime;
   }
 
   set currentTime(value) {
-    this._currentTime = value;
+    this._timelineTicker.currentTime = value;
   }
 
   play() {
