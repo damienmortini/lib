@@ -50,15 +50,17 @@
 
     const timelineInputElement = document.querySelector('element-input-timeline');
     const output = document.querySelector('#output');
-    const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light2', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
-    for (const name of channelNames) {
+    const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light1', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
+    const keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+    for (const [index, name] of channelNames.entries()) {
       const keyframes = new Set();
       const step = .5;
       for (let index = 0; index < 40; index++) {
-        keyframes.add(Math.floor(Math.random() * 500) * step);
+        keyframes.add(Math.floor(Math.random() * 1000) * step);
       }
       timelineInputElement.addChannel({
         name,
+        key: keys[index],
         color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
         keyframes,
         step,
