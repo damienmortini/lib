@@ -47,13 +47,39 @@ export default class TimelineInputElement extends HTMLElement {
     this._channelsContainer = this.shadowRoot.querySelector('#channels');
     this._timelineTicker = this.shadowRoot.querySelector('damo-timeline-ticker');
 
-    this.shadowRoot.addEventListener('wheel', (event) => {
+    this._channelsContainer.addEventListener('wheel', (event) => {
       event.preventDefault();
       if (event.deltaY < 0) {
         this.currentTime -= 20 / this.scale;
       } else {
         this.currentTime += 20 / this.scale;
       }
+    });
+
+    this._timelineTicker.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      if (event.deltaY < 0) {
+        this.scale *= .95;
+      } else {
+        this.scale /= .95;
+      }
+    });
+
+    let previousTime = 0;
+    this._timelineTicker.addEventListener('timeupdate', () => {
+      for (const channel of this._channels) {
+        for (const keyframe of channel.keyframes) {
+          if (keyframe >= previousTime && keyframe < this.currentTime) {
+            this.dispatchEvent(new CustomEvent('input', {
+              detail: {
+                name: channel.name,
+                time: keyframe,
+              },
+            }));
+          }
+        }
+      }
+      previousTime = this.currentTime;
     });
 
     this._timelineTicker.addEventListener('shiftupdate', () => {
@@ -86,11 +112,13 @@ export default class TimelineInputElement extends HTMLElement {
     }
   }
 
-  addChannel({ name, key, color, keyframes }) {
+  addChannel({ name, key, color, keyframes, step }) {
     const channel = document.createElement('damo-input-timeline-channel');
+    channel.name = name;
     channel.color = color;
     channel.keyframes = keyframes;
     channel.scale = this.scale;
+    channel.step = step;
     this._channels.add(channel);
     this._channelsContainer.appendChild(channel);
     this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
@@ -101,11 +129,14 @@ export default class TimelineInputElement extends HTMLElement {
   }
 
   set scale(value) {
+    // const scaleDifference = value - this._scale;
     this._scale = value;
     this._timelineTicker.scale = this._scale;
     for (const channel of this._channels) {
       channel.scale = this._scale;
     }
+    // console.log(scaleDifference);
+    // this._timelineTicker.shift += scaleDifference * this._timelineTicker.offsetWidth;
   }
 
   get time() {
