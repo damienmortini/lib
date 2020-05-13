@@ -68,8 +68,8 @@ class ChannelTimelineInputElement extends HTMLElement {
     this._canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 
     const resizeObserver = new ResizeObserver((entries) => {
-      this._canvas.width = entries[0].contentRect.width;
-      this._canvas.height = entries[0].contentRect.height;
+      this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
+      this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
       this._update();
     });
     resizeObserver.observe(this);
