@@ -30,13 +30,6 @@ export default class ArrayViewerElement extends HTMLElement {
     this._context = this._canvas.getContext('2d');
 
     this._array = [];
-
-    // const resizeObserver = new ResizeObserver((entries) => {
-    //   this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
-    //   this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
-    //   this.draw();
-    // });
-    // resizeObserver.observe(this);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -59,11 +52,15 @@ export default class ArrayViewerElement extends HTMLElement {
     context.fillRect(x, y, width, height);
   }
 
-  draw() {
-    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+  draw({
+    start = 0,
+    length = Infinity,
+  } = {}) {
+    this._context.clearRect(start, 0, length, this._canvas.height);
     let previousValue = undefined;
-    const y = this._canvas.height + (this.min !== undefined ? this.min : this._arrayMin);
-    for (let index = 0; index < this.array.length; index++) {
+    const y = this._canvas.height + (this.min !== undefined ? this.min : this._minValue);
+    length = Math.min(length, this.array.length - start);
+    for (let index = start; index < start + length; index++) {
       const value = this.array[index];
       this.drawCallback(this._context, index, y, 1, -value, previousValue, value);
       previousValue = value;
@@ -74,23 +71,21 @@ export default class ArrayViewerElement extends HTMLElement {
     if (!this.array.length) {
       return;
     }
-    let min = this.min;
-    if (this.min === undefined) {
-      this._arrayMin = Infinity;
+    if (this._min === undefined) {
+      this._minValue = Infinity;
       for (const value of this.array) {
-        this._arrayMin = Math.min(this._arrayMin, value);
+        this._minValue = Math.min(this._minValue, value);
       }
-      min = this._arrayMin;
     }
-    let max = this.max;
-    if (this.max === undefined) {
-      this._arrayMax = -Infinity;
+    if (this._max === undefined) {
+      this._maxValue = -Infinity;
       for (const value of this.array) {
-        this._arrayMax = Math.max(this._arrayMax, value);
+        this._maxValue = Math.max(this._maxValue, value);
       }
-      max = this._arrayMax;
     }
-    this._canvas.height = max - min;
+    if (this.height === undefined) {
+      this._canvas.height = this.max - this.min;
+    }
   }
 
   get array() {
@@ -99,13 +94,35 @@ export default class ArrayViewerElement extends HTMLElement {
 
   set array(value) {
     this._array = value;
-    this._canvas.width = this._array.length;
+    if (this.width === undefined) {
+      this._canvas.width = this._array.length;
+    }
     this._updateHeight();
     this.draw();
   }
 
+  get width() {
+    return this._width;
+  }
+
+  set width(value) {
+    this._width = value;
+    this._canvas.width = this._width;
+    this.draw();
+  }
+
+  get height() {
+    return this._height;
+  }
+
+  set height(value) {
+    this._height = value;
+    this._canvas.height = this._height;
+    this.draw();
+  }
+
   get min() {
-    return this._min;
+    return this._min || this._minValue;
   }
 
   set min(value) {
@@ -115,7 +132,7 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   get max() {
-    return this._max;
+    return this._max || this._maxValue;
   }
 
   set max(value) {
