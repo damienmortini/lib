@@ -1,6 +1,8 @@
+import '../element-viewer-array/index.js';
+
 export default class ArraySignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'position'];
+    return ['array', 'time', 'frequency', 'duration'];
   }
 
   constructor() {
@@ -14,8 +16,9 @@ export default class ArraySignalInputElement extends HTMLElement {
           height: 150px;
           width: 300px;
           background: lightgrey;
+          touch-action: none;
         }
-        canvas {
+        damo-viewer-array {
           position: absolute;
           top: 0;
           left: 0;
@@ -23,62 +26,61 @@ export default class ArraySignalInputElement extends HTMLElement {
           height: 100%;
         }
       </style>
-      <canvas></canvas>
+      <damo-viewer-array></damo-viewer-array>
     `;
 
     this._array = [];
 
-    this._canvas = this.shadowRoot.querySelector('canvas');
-    this._context = this._canvas.getContext('2d');
-    this._scrollLeft = 0;
-    this._zoom = 1;
-    this._step = 1;
-    this.startFrame = 0;
-    this.color = undefined;
-    this.keyframes = new Set();
+    this._viewer = this.shadowRoot.querySelector('damo-viewer-array');
 
-    let previousKeyframe = null;
-    let decimals = 0;
+    this._currentTime = 0;
+
+    this._duration = 1;
+    this._frequency = 120;
+    // this._scrollLeft = 0;
+    // this._zoom = 1;
+    this._step = 1;
+    // this.startFrame = 0;
+    // this.color = undefined;
+    // this.keyframes = new Set();
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      this._width = entries[0].contentRect.width;
+      this._height = entries[0].contentRect.height;
+    });
+    resizeObserver.observe(this);
+
+    let previousTime = null;
     const pointerDown = (event) => {
-      decimals = this._step % 1 ? String(this._step).split('.')[1].length : 0;
-      this._canvas.setPointerCapture(event.pointerId);
-      this._canvas.addEventListener('pointermove', pointerMove);
-      this._canvas.addEventListener('pointerup', pointerUp);
-      this._canvas.addEventListener('pointerout', pointerUp);
+      this._viewer.setPointerCapture(event.pointerId);
+      this._viewer.addEventListener('pointermove', pointerMove);
+      this._viewer.addEventListener('pointerup', pointerUp);
+      this._viewer.addEventListener('pointerout', pointerUp);
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const newKeyframe = Math.floor((event.offsetX + this.scrollLeft) / this._step / this.zoom) * this._step;
-      previousKeyframe = previousKeyframe !== null ? previousKeyframe : newKeyframe;
-      const startKeyframe = newKeyframe > previousKeyframe ? previousKeyframe : newKeyframe;
-      const endKeyframe = newKeyframe > previousKeyframe ? newKeyframe : previousKeyframe;
-      for (let keyframe = startKeyframe; keyframe <= endKeyframe; keyframe += this._step) {
-        keyframe = Number(keyframe.toFixed(decimals));
-        if (event.buttons === 1) {
-          this.keyframes.add(keyframe);
-        } else {
-          this.keyframes.delete(keyframe);
-        }
+      const value = (1 - event.offsetY / this._height) * (this._viewer.max - this._viewer.min) + (this._viewer.min || 0);
+      const newTime = (event.offsetX / this._width) * this.duration;
+      previousTime = previousTime !== null ? previousTime : newTime;
+      const startTime = Math.max(0, newTime > previousTime ? previousTime : newTime);
+      const endTime = newTime > previousTime ? newTime : previousTime;
+      const step = 1 / this.frequency;
+      for (let time = startTime; time <= endTime; time += step) {
+        this._setValueAt(value, time);
       }
-      previousKeyframe = newKeyframe;
-      this._update();
+      previousTime = newTime;
     };
     const pointerUp = (event) => {
-      previousKeyframe = null;
-      this._canvas.releasePointerCapture(event.pointerId);
-      this._canvas.removeEventListener('pointermove', pointerMove);
-      this._canvas.removeEventListener('pointerup', pointerUp);
-      this._canvas.removeEventListener('pointerout', pointerUp);
+      previousTime = null;
+      this._viewer.releasePointerCapture(event.pointerId);
+      this._viewer.removeEventListener('pointermove', pointerMove);
+      this._viewer.removeEventListener('pointerup', pointerUp);
+      this._viewer.removeEventListener('pointerout', pointerUp);
     };
-    this._canvas.addEventListener('pointerdown', pointerDown);
-    this._canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+    this._viewer.addEventListener('pointerdown', pointerDown);
+    this._viewer.addEventListener('contextmenu', (event) => event.preventDefault());
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
-      this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
-      this._update();
-    });
-    resizeObserver.observe(this);
+    this._updateViewerWidth();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -86,77 +88,100 @@ export default class ArraySignalInputElement extends HTMLElement {
       case 'array':
         this.array = new Function(`return ${newValue}`)();
         break;
-      case 'position':
-        this.position = Number(newValue);
+      case 'time':
+        this.currentTime = Number(newValue);
+        break;
+      case 'frequency':
+      case 'duration':
+        this[name] = Number(newValue);
         break;
     }
   }
 
-  connectedCallback() {
-    this._update();
+  // get scrollLeft() {
+  //   return this._scrollLeft;
+  // }
+
+  // set scrollLeft(value) {
+  //   this._scrollLeft = value;
+  //   this._update();
+  // }
+
+  // get zoom() {
+  //   return this._zoom;
+  // }
+
+  // set zoom(value) {
+  //   this._zoom = value;
+  //   this._update();
+  // }
+
+  // get step() {
+  //   return this._step;
+  // }
+
+  // set step(value) {
+  //   this._step = value;
+  //   this._update();
+  // }
+
+  _setValueAt(value, time) {
+    const index = Math.floor((time / this.duration) * (this._viewer.width - 1));
+    this.array[index] = value;
+    this._viewer.draw({
+      start: index,
+      length: 1,
+    });
   }
 
-  get scrollLeft() {
-    return this._scrollLeft;
+  _updateViewerWidth() {
+    this._viewer.width = this.frequency * this.duration;
   }
 
-  set scrollLeft(value) {
-    this._scrollLeft = value;
-    this._update();
+  get frequency() {
+    return this._frequency;
   }
 
-  get zoom() {
-    return this._zoom;
+  set frequency(value) {
+    this._frequency = value;
+    this._updateViewerWidth();
   }
 
-  set zoom(value) {
-    this._zoom = value;
-    this._update();
+  get duration() {
+    return this._duration;
   }
 
-  get step() {
-    return this._step;
+  set duration(value) {
+    this._duration = value;
+    this._updateViewerWidth();
   }
 
-  set step(value) {
-    this._step = value;
-    this._update();
+  get currentTime() {
+    return this._currentTime;
+  }
+
+  set currentTime(value) {
+    if (this._currentTime === value) {
+      return;
+    }
+    this._currentTime = value;
+    this.dispatchEvent(new Event('change'));
   }
 
   get array() {
-    return this._array;
+    return this._viewer.array;
   }
 
   set array(value) {
-    this._array = value;
-    this._update();
-  }
-
-  get position() {
-    return this._position;
-  }
-
-  set position(value) {
-    this._position = value;
+    this._viewer.array = value;
   }
 
   get value() {
-    return this._array[Math.floor(this._position * (this._array.length - 1))];
+    return this.array[Math.floor(this.currentTime / this.frequency)];
   }
 
   set value(value) {
-    this._array[Math.floor(this._position * (this._array.length - 1))] = value;
-    this._update();
-  }
-
-  _update() {
-    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-    this._context.fillStyle = this.color;
-    this._context.beginPath();
-    for (const value of this.array) {
-      const x = value * this.zoom - this.scrollLeft;
-      this._context.fillRect(x, this._canvas.height * .25, this.zoom * this._step, this._canvas.height * .5);
-    }
+    this._setValueAt(value, this.currentTime);
   }
 }
 
