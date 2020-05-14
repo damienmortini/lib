@@ -33,7 +33,7 @@ export default class ArraySignalInputElement extends HTMLElement {
 
     this._currentTime = 0;
     this._duration = 1;
-    this._frequency = 120;
+    this._frequency = 10;
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
@@ -53,7 +53,8 @@ export default class ArraySignalInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const value = (1 - event.offsetY / this._height) * (this.max - this.min) + (this.min || 0);
+      let value = (1 - event.offsetY / this._height) * (this.max - this.min) + (this.min || 0);
+      value = Math.max(Math.min(this.max, value), this.min);
       const newTime = (event.offsetX / this._width) * this.duration;
       previousTime = previousTime !== null ? previousTime : newTime;
       const startTime = Math.max(0, newTime > previousTime ? previousTime : newTime);
@@ -146,7 +147,7 @@ export default class ArraySignalInputElement extends HTMLElement {
   }
 
   get value() {
-    return this.array[Math.floor(this.currentTime / this.frequency)];
+    return this.array[Math.floor(this.currentTime * this.frequency)];
   }
 
   set value(value) {

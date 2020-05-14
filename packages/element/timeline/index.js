@@ -1,5 +1,4 @@
 import './TickerTimelineElement.js';
-import './ChannelTimelineInputElement.js';
 
 export default class TimelineInputElement extends HTMLElement {
   static get observedAttributes() {
@@ -19,9 +18,14 @@ export default class TimelineInputElement extends HTMLElement {
           width: 100%;
           z-index: 1;
         }
-        damo-timeline-channel {
+        #channels {
+          display: grid;
+          gap: 2px;
+          overflow: hidden;
+        }
+        ::slotted(*) {
           width: 100%;
-          margin-bottom: 2px;
+          height: 50px;
         }
       </style>
       <damo-timeline-ticker></damo-timeline-ticker>
@@ -37,9 +41,9 @@ export default class TimelineInputElement extends HTMLElement {
     this._channelsContainer.addEventListener('wheel', (event) => {
       event.preventDefault();
       if (event.deltaY < 0) {
-        this.currentTime -= 20 / this.zoom;
+        this.currentTime -= this.zoom;
       } else {
-        this.currentTime += 20 / this.zoom;
+        this.currentTime += this.zoom;
       }
     });
 
@@ -53,43 +57,57 @@ export default class TimelineInputElement extends HTMLElement {
     // });
 
     let previousTime = 0;
+    const channelsPreviousValue = new Map();
     this._timelineTicker.addEventListener('timeupdate', () => {
       for (const channel of this._channels) {
-        for (const keyframe of channel.keyframes) {
-          if (keyframe >= previousTime && keyframe < this.currentTime) {
-            this.dispatchEvent(new CustomEvent('input', {
-              detail: {
-                name: channel.name,
-                time: keyframe,
-                color: channel.color,
-              },
-            }));
-          }
-        }
+        channel.currentTime = this.currentTime;
+        console.log(channel.currentTime, channel.value);
+
+        // for (const keyframe of channel.keyframes) {
+        //   if (keyframe >= previousTime && keyframe < this.currentTime) {
+        //     this.dispatchEvent(new CustomEvent('input', {
+        //       detail: {
+        //         name: channel.name,
+        //         time: keyframe,
+        //         color: channel.color,
+        //       },
+        //     }));
+        //   }
+        // }
       }
       previousTime = this.currentTime;
     });
 
-    this._timelineTicker.addEventListener('shiftupdate', () => {
-      for (const channel of this._channels) {
-        channel.shift = this._timelineTicker.shift;
-      }
-    });
+    // this._timelineTicker.addEventListener('shiftupdate', () => {
+    //   for (const channel of this._channels) {
+    //     channel.shift = this._timelineTicker.shift;
+    //   }
+    // });
 
     this._channels = new Set();
 
-    new MutationObserver((mutationsList, observer) => {
+    const mutationCallback = (mutationsList, observer) => {
       for (const mutation of mutationsList) {
-        if (mutation.type == 'childList') {
-          this._channels.clear();
-          for (const child of this.children) {
-            if (child.position !== undefined && child.value !== undefined) {
-              this._channels.add(child);
+        for (const node of mutation.addedNodes) {
+          if (node.currentTime !== undefined && node.value !== undefined) {
+            this._channels.add(node);
+            node.currentTime = this.currentTime;
+            if (node.duration !== undefined) {
+              node.duration = this.duration;
             }
           }
         }
+        for (const node of mutation.removedNodes) {
+          this._channels.delete(node);
+        }
       }
-    }).observe(this, { childList: true });
+      this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
+    };
+    mutationCallback([{
+      addedNodes: this.children,
+      removedNodes: [],
+    }]);
+    new MutationObserver(mutationCallback).observe(this, { childList: true });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -100,34 +118,34 @@ export default class TimelineInputElement extends HTMLElement {
     }
   }
 
-  addChannel({ name, key, color, keyframes, step }) {
-    const channel = document.createElement('damo-timeline-channel');
-    channel.name = name;
-    channel.color = color;
-    channel.keyframes = keyframes;
-    channel.zoom = this.zoom;
-    channel.step = step;
-    window.addEventListener('keydown', (event) => {
-      if (event.key === key) {
-        const time = Math.floor(this.currentTime / channel.step) * channel.step;
-        if (channel.keyframes.has(time)) {
-          return;
-        }
-        channel.keyframes.add(time);
-        channel._update();
-        this.dispatchEvent(new CustomEvent('input', {
-          detail: {
-            name: channel.name,
-            time: time,
-            color: channel.color,
-          },
-        }));
-      }
-    });
-    this._channels.add(channel);
-    this._channelsContainer.appendChild(channel);
-    this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
-  }
+  // addChannel({ name, key, color, keyframes, step }) {
+  //   const channel = document.createElement('damo-timeline-channel');
+  //   channel.name = name;
+  //   channel.color = color;
+  //   channel.keyframes = keyframes;
+  //   channel.zoom = this.zoom;
+  //   channel.step = step;
+  //   window.addEventListener('keydown', (event) => {
+  //     if (event.key === key) {
+  //       const time = Math.floor(this.currentTime / channel.step) * channel.step;
+  //       if (channel.keyframes.has(time)) {
+  //         return;
+  //       }
+  //       channel.keyframes.add(time);
+  //       channel._update();
+  //       this.dispatchEvent(new CustomEvent('input', {
+  //         detail: {
+  //           name: channel.name,
+  //           time: time,
+  //           color: channel.color,
+  //         },
+  //       }));
+  //     }
+  //   });
+  //   this._channels.add(channel);
+  //   this._channelsContainer.appendChild(channel);
+  //   this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
+  // }
 
   get zoom() {
     return this._zoom;
@@ -141,20 +159,20 @@ export default class TimelineInputElement extends HTMLElement {
     }
   }
 
-  get time() {
-    return this._time;
-  }
-
-  set time(value) {
-    this._time = value;
-  }
-
   get currentTime() {
     return this._timelineTicker.currentTime;
   }
 
   set currentTime(value) {
     this._timelineTicker.currentTime = value;
+  }
+
+  get duration() {
+    return this._timelineTicker.duration;
+  }
+
+  set duration(value) {
+    this._timelineTicker.duration = value;
   }
 
   play() {
@@ -171,5 +189,5 @@ export default class TimelineInputElement extends HTMLElement {
 }
 
 if (!customElements.get('damo-timeline')) {
-  customElements.define('damo-timeline', class DamoTimelineInputElement extends TimelineInputElement { });
+  customElements.define('damo-timeline', class extends TimelineInputElement { });
 }

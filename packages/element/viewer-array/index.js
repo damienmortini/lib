@@ -72,13 +72,13 @@ export default class ArrayViewerElement extends HTMLElement {
       return;
     }
     if (this._min === undefined) {
-      this._minValue = Infinity;
+      this._minValue = 0;
       for (const value of this.array) {
         this._minValue = Math.min(this._minValue, value);
       }
     }
     if (this._max === undefined) {
-      this._maxValue = -Infinity;
+      this._maxValue = this._minValue;
       for (const value of this.array) {
         this._maxValue = Math.max(this._maxValue, value);
       }

@@ -19,6 +19,7 @@ class TickerTimelineElement extends AnimationTickerElement {
           height: 20px;
           background: grey;
           font-family: monospace;
+          touch-action: none;
         }
         #tick {
           position: absolute;
@@ -54,28 +55,32 @@ class TickerTimelineElement extends AnimationTickerElement {
     `;
 
     this.zoom = 1;
+    this._duration = 1;
     this._scrollLeft = 0;
     this._currentTime = 0;
 
     this._tick = this.shadowRoot.querySelector('#tick');
     this._tickText = this.shadowRoot.querySelector('#text');
     this._tickTip = this.shadowRoot.querySelector('#tip');
-    this._tickAreaWidth = 0;
+    this._width = 0;
 
     this._pointerOffsetX = 0;
     this._pausedBeforeInteraction = false;
     const updateCurrentTimeFromPosition = () => {
       let currentPosition = this._pointerOffsetX + this.scrollLeft;
-      const padding = this._tickAreaWidth * PADDING_RATIO;
-      const right = this._tickAreaWidth - padding;
-      if (this._pointerOffsetX > right) {
-        currentPosition += (this._pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
-      } else if (this._pointerOffsetX < padding && this.scrollLeft) {
-        currentPosition += (this._pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
-      }
-      this.currentTime = currentPosition / this.zoom;
+      const padding = this._width * PADDING_RATIO;
+      const right = this._width - padding;
+      // if (this._pointerOffsetX > right) {
+      //   currentPosition += (this._pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
+      // } else if (this._pointerOffsetX < padding && this.scrollLeft) {
+      //   currentPosition += (this._pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
+      // }
+      this.currentTime = (currentPosition / this._width) * this.duration / this.zoom;
     };
     const pointerDown = (event) => {
+      if (!(event.buttons & 1)) {
+        return;
+      }
       this.setPointerCapture(event.pointerId);
       this.addEventListener('pointermove', pointerMove);
       this.addEventListener('pointerup', pointerUp);
@@ -100,30 +105,29 @@ class TickerTimelineElement extends AnimationTickerElement {
     };
     this.addEventListener('pointerdown', pointerDown);
 
-    this.addEventListener('contextmenu', (event) => event.preventDefault());
     const resizeObserver = new ResizeObserver((entries) => {
-      this._tickAreaWidth = entries[0].contentRect.width;
+      this._width = entries[0].contentRect.width;
       this._updatePositionFromCurrentTime();
     });
     resizeObserver.observe(this);
   }
 
   _updatePositionFromCurrentTime() {
-    if (!this._tickAreaWidth) {
+    if (!this._width) {
       return;
     }
-    let x = this.currentTime * this.zoom - this.scrollLeft;
-    const padding = this._tickAreaWidth * PADDING_RATIO;
-    const right = this._tickAreaWidth - padding;
-    if (x > right) {
-      this.scrollLeft += (x - right) * SIDE_MOVEMENT_SPEED;
-      x = right;
-    } else if (x < padding && this.scrollLeft) {
-      this.scrollLeft += (x - padding) * SIDE_MOVEMENT_SPEED;
-      x = padding;
-    } else {
-      x = Math.max(0, x);
-    }
+    let x = (this.currentTime / this.duration) * this._width * this.zoom - this.scrollLeft;
+    // const padding = this._width * PADDING_RATIO;
+    // const right = this._width - padding;
+    // if (x > right) {
+    //   this.scrollLeft += (x - right) * SIDE_MOVEMENT_SPEED;
+    //   x = right;
+    // } else if (x < padding && this.scrollLeft) {
+    //   this.scrollLeft += (x - padding) * SIDE_MOVEMENT_SPEED;
+    //   x = padding;
+    // } else {
+    //   x = Math.max(0, x);
+    // }
     this._tick.style.transform = `translateX(${x}px)`;
   }
 
@@ -141,11 +145,23 @@ class TickerTimelineElement extends AnimationTickerElement {
   }
 
   set currentTime(value) {
-    value = Math.max(0, value);
+    value = Math.min(Math.max(0, value), this.duration);
     this._currentTime = value;
     this._tickText.textContent = `${this._currentTime.toFixed(1)}s`;
     this._updatePositionFromCurrentTime();
+    if (this._currentTime === this.duration) {
+      this.pause();
+    }
     this.dispatchEvent(new Event('timeupdate'));
+  }
+
+  get duration() {
+    return this._duration;
+  }
+
+  set duration(value) {
+    this._duration = value;
+    this.currentTime = Math.min(this.currentTime, this.duration);
   }
 
   get scrollLeft() {
@@ -167,5 +183,5 @@ class TickerTimelineElement extends AnimationTickerElement {
 }
 
 if (!customElements.get('damo-timeline-ticker')) {
-  customElements.define('damo-timeline-ticker', class DamoTickerTimelineElement extends TickerTimelineElement { });
+  customElements.define('damo-timeline-ticker', class extends TickerTimelineElement { });
 }
