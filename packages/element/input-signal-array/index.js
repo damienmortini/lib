@@ -1,4 +1,5 @@
 import '../element-viewer-array/index.js';
+import Ticker from '../core/util/Ticker.js';
 
 export default class ArraySignalInputElement extends HTMLElement {
   static get observedAttributes() {
@@ -32,8 +33,9 @@ export default class ArraySignalInputElement extends HTMLElement {
     this._viewer = this.shadowRoot.querySelector('damo-viewer-array');
 
     this._currentTime = 0;
-    this._duration = 1;
+    this._duration = 10;
     this._frequency = 10;
+    this._scrollLeft = 0;
     this._previousValue = undefined;
 
     const resizeObserver = new ResizeObserver((entries) => {
@@ -43,20 +45,28 @@ export default class ArraySignalInputElement extends HTMLElement {
     resizeObserver.observe(this);
 
     let previousTime = null;
-    const pointerDown = (event) => {
-      if (!(event.buttons & 1)) {
-        return;
+    let previousScrollLeft = 0;
+    let pointerOffsetX = 0;
+    let pointerOffsetY = 0;
+
+    this._snap = false;
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Shift' && !this._snap) {
+        previousTime = null;
+        this._snap = true;
       }
-      this._viewer.setPointerCapture(event.pointerId);
-      this._viewer.addEventListener('pointermove', pointerMove);
-      this._viewer.addEventListener('pointerup', pointerUp);
-      this._viewer.addEventListener('pointerout', pointerUp);
-      pointerMove(event);
-    };
-    const pointerMove = (event) => {
-      let value = (1 - event.offsetY / this._height) * (this.max - this.min) + (this.min || 0);
+    });
+    window.addEventListener('keyup', (event) => {
+      if (event.key === 'Shift') {
+        previousTime = null;
+        this._snap = false;
+      }
+    });
+
+    const setValuesFromPosition = () => {
+      let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0);
       value = Math.max(Math.min(this.max, value), this.min);
-      const newTime = (event.offsetX / this._width) * this.duration;
+      const newTime = this._snap ? this.currentTime : ((pointerOffsetX + this.scrollLeft - previousScrollLeft) / this._width) * this.duration;
       previousTime = previousTime !== null ? previousTime : newTime;
       const startTime = Math.max(0, newTime > previousTime ? previousTime : newTime);
       const endTime = newTime > previousTime ? newTime : previousTime;
@@ -68,8 +78,28 @@ export default class ArraySignalInputElement extends HTMLElement {
       this.dispatchEvent(new Event('input', {
         bubbles: true,
       }));
+      if (this._snap) {
+        this.value = value;
+      }
+    };
+    const pointerDown = (event) => {
+      if (!(event.buttons & 1)) {
+        return;
+      }
+      this._viewer.setPointerCapture(event.pointerId);
+      this._viewer.addEventListener('pointermove', pointerMove);
+      this._viewer.addEventListener('pointerup', pointerUp);
+      this._viewer.addEventListener('pointerout', pointerUp);
+      pointerMove(event);
+      Ticker.add(setValuesFromPosition);
+    };
+    const pointerMove = (event) => {
+      previousScrollLeft = this.scrollLeft;
+      pointerOffsetX = event.offsetX;
+      pointerOffsetY = event.offsetY;
     };
     const pointerUp = (event) => {
+      Ticker.delete(setValuesFromPosition);
       previousTime = null;
       this._viewer.releasePointerCapture(event.pointerId);
       this._viewer.removeEventListener('pointermove', pointerMove);
@@ -139,12 +169,12 @@ export default class ArraySignalInputElement extends HTMLElement {
       return;
     }
     this._currentTime = value;
-    if (this.value !== this._previousValue) {
+    if (this.value !== this._previousValue && !this._snap) {
       this.dispatchEvent(new Event('change', {
         bubbles: true,
       }));
+      this._previousValue = this.value;
     }
-    this._previousValue = this.value;
   }
 
   get array() {
@@ -156,11 +186,17 @@ export default class ArraySignalInputElement extends HTMLElement {
   }
 
   get value() {
-    return this.array[Math.floor(this.currentTime * this.frequency)];
+    return this.array[Math.floor((this.currentTime / this.duration) * (this._viewer.width - 1))];
   }
 
   set value(value) {
     this._setValueAt(value, this.currentTime);
+    if (this.value !== this._previousValue) {
+      this.dispatchEvent(new Event('change', {
+        bubbles: true,
+      }));
+      this._previousValue = this.value;
+    }
   }
 
   get min() {
@@ -185,6 +221,14 @@ export default class ArraySignalInputElement extends HTMLElement {
 
   set name(value) {
     this.setAttribute('name', value);
+  }
+
+  get scrollLeft() {
+    return this._scrollLeft;
+  }
+
+  set scrollLeft(value) {
+    this._scrollLeft = value;
   }
 }
 
