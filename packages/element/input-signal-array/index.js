@@ -79,7 +79,7 @@ export default class ArraySignalInputElement extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'array':
-        this.array = new Function(`return ${newValue}`)();
+        this.array = new Function(`return [${newValue}]`)();
         break;
       case 'time':
         this.currentTime = Number(newValue);
