@@ -64,17 +64,17 @@ class TickerTimelineElement extends AnimationTickerElement {
     this._tickTip = this.shadowRoot.querySelector('#tip');
     this._width = 0;
 
-    this._pointerOffsetX = 0;
-    this._pausedBeforeInteraction = false;
+    let pointerOffsetX = 0;
+    let pausedBeforeInteraction = false;
     const updateCurrentTimeFromPosition = () => {
-      let currentPosition = this._pointerOffsetX + this.scrollLeft;
+      let currentPosition = pointerOffsetX + this.scrollLeft;
       const padding = this._width * PADDING_RATIO;
       const right = this._width - padding;
-      // if (this._pointerOffsetX > right) {
-      //   currentPosition += (this._pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
-      // } else if (this._pointerOffsetX < padding && this.scrollLeft) {
-      //   currentPosition += (this._pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
-      // }
+      if (pointerOffsetX > right) {
+        currentPosition += (pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
+      } else if (pointerOffsetX < padding && this.scrollLeft) {
+        currentPosition += (pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
+      }
       this.currentTime = (currentPosition / this._width) * this.duration / this.zoom;
     };
     const pointerDown = (event) => {
@@ -86,12 +86,12 @@ class TickerTimelineElement extends AnimationTickerElement {
       this.addEventListener('pointerup', pointerUp);
       this.addEventListener('pointerout', pointerUp);
       pointerMove(event);
-      this._pausedBeforeInteraction = this.paused;
+      pausedBeforeInteraction = this.paused;
       this.pause();
       Ticker.add(updateCurrentTimeFromPosition);
     };
     const pointerMove = (event) => {
-      this._pointerOffsetX = event.offsetX;
+      pointerOffsetX = event.offsetX;
     };
     const pointerUp = (event) => {
       Ticker.delete(updateCurrentTimeFromPosition);
@@ -99,7 +99,7 @@ class TickerTimelineElement extends AnimationTickerElement {
       this.removeEventListener('pointermove', pointerMove);
       this.removeEventListener('pointerup', pointerUp);
       this.removeEventListener('pointerout', pointerUp);
-      if (!this._pausedBeforeInteraction) {
+      if (!pausedBeforeInteraction) {
         this.play();
       }
     };
@@ -117,17 +117,17 @@ class TickerTimelineElement extends AnimationTickerElement {
       return;
     }
     let x = (this.currentTime / this.duration) * this._width * this.zoom - this.scrollLeft;
-    // const padding = this._width * PADDING_RATIO;
-    // const right = this._width - padding;
-    // if (x > right) {
-    //   this.scrollLeft += (x - right) * SIDE_MOVEMENT_SPEED;
-    //   x = right;
-    // } else if (x < padding && this.scrollLeft) {
-    //   this.scrollLeft += (x - padding) * SIDE_MOVEMENT_SPEED;
-    //   x = padding;
-    // } else {
-    //   x = Math.max(0, x);
-    // }
+    const padding = this._width * PADDING_RATIO;
+    const right = this._width - padding;
+    if (x > right && (this._width * (this.zoom - 1) - this.scrollLeft)) {
+      this.scrollLeft += (x - right) * SIDE_MOVEMENT_SPEED;
+      x = right;
+    } else if (x < padding && this.scrollLeft) {
+      this.scrollLeft += (x - padding) * SIDE_MOVEMENT_SPEED;
+      x = padding;
+    } else {
+      x = Math.max(0, x);
+    }
     this._tick.style.transform = `translateX(${x}px)`;
   }
 
@@ -169,12 +169,12 @@ class TickerTimelineElement extends AnimationTickerElement {
   }
 
   set scrollLeft(value) {
-    value = Math.max(0, value);
+    value = Math.min(Math.max(0, value), this._width * (this.zoom - 1));
     if (this._scrollLeft === value) {
       return;
     }
     this._scrollLeft = value;
-    this.dispatchEvent(new Event('scrollLeftupdate'));
+    this.dispatchEvent(new Event('scroll'));
   }
 
   update() {

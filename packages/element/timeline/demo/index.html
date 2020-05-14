@@ -25,6 +25,7 @@
     }
 
     details {
+      box-sizing: border-box;
       border: 1px dashed lightgrey;
       width: 500px;
       overflow: hidden;
@@ -37,8 +38,8 @@
 </head>
 
 <body>
-  <element-timeline>
-    <damo-input-signal-array name="tree" array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2">
+  <element-timeline duration="60" zoom="6">
+    <damo-input-signal-array name="tree" frequency="100">
     </damo-input-signal-array>
     <damo-input-signal-array name="rock" array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2">
     </damo-input-signal-array>
@@ -74,25 +75,25 @@
     //     step,
     //   });
     // }
-    // const outputDivs = [];
-    // for (let index = 0; index < 10; index++) {
-    //   const div = document.createElement('div');
-    //   outputDivs.push(div);
-    //   output.prepend(div);
-    // }
-    // timelineElement.addEventListener('input', (event) => {
-    //   const div = outputDivs.shift();
-    //   outputDivs.push(div);
-    //   div.style.color = event.detail.color;
-    //   div.textContent = `${event.detail.name} @ ${event.detail.time}s`;
-    //   output.prepend(div);
-    // });
+    const outputDivs = [];
+    for (let index = 0; index < 10; index++) {
+      const div = document.createElement('div');
+      outputDivs.push(div);
+      output.prepend(div);
+    }
     timelineElement.addEventListener('change', (event) => {
-      console.log(event.target.name, event.target.value);
+      const div = outputDivs.shift();
+      outputDivs.push(div);
+      // div.style.color = event.detail.color;
+      div.textContent = `${event.target.name} @ ${event.target.value}`;
+      output.prepend(div);
     });
-    timelineElement.addEventListener('input', (event) => {
-      console.log(event.target.name, event.target.value);
-    });
+    // timelineElement.addEventListener('change', (event) => {
+    //   console.log(event.target.name, event.target.value);
+    // });
+    // timelineElement.addEventListener('input', (event) => {
+    //   console.log(event.target.name, event.target.value);
+    // });
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {
         timelineElement[timelineElement.paused ? 'play' : 'pause']();

@@ -2,7 +2,7 @@ import './TickerTimelineElement.js';
 
 export default class TimelineInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['zoom'];
+    return ['zoom', 'duration'];
   }
 
   constructor() {
@@ -19,13 +19,14 @@ export default class TimelineInputElement extends HTMLElement {
           z-index: 1;
         }
         #channels {
+          --zoom: 1;
           display: grid;
           gap: 2px;
           overflow: hidden;
         }
         ::slotted(*) {
-          width: 100%;
-          height: 50px;
+          width: calc(100% * var(--zoom));
+          height: 100px;
         }
       </style>
       <damo-timeline-ticker></damo-timeline-ticker>
@@ -47,14 +48,14 @@ export default class TimelineInputElement extends HTMLElement {
       }
     });
 
-    // this._timelineTicker.addEventListener('wheel', (event) => {
-    //   event.preventDefault();
-    //   if (event.deltaY < 0) {
-    //     this.zoom *= .95;
-    //   } else {
-    //     this.zoom /= .95;
-    //   }
-    // });
+    this._timelineTicker.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      if (event.deltaY < 0) {
+        this.zoom *= .95;
+      } else {
+        this.zoom /= .95;
+      }
+    });
 
     let previousTime = 0;
     const channelsPreviousValue = new Map();
@@ -78,11 +79,12 @@ export default class TimelineInputElement extends HTMLElement {
       previousTime = this.currentTime;
     });
 
-    // this._timelineTicker.addEventListener('shiftupdate', () => {
-    //   for (const channel of this._channels) {
-    //     channel.shift = this._timelineTicker.shift;
-    //   }
-    // });
+    this._timelineTicker.addEventListener('scroll', () => {
+      this._channelsContainer.scrollLeft = this._timelineTicker.scrollLeft;
+      for (const channel of this._channels) {
+        channel.scrollLeft = this._timelineTicker.scrollLeft;
+      }
+    });
 
     this._channels = new Set();
 
@@ -113,7 +115,8 @@ export default class TimelineInputElement extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'zoom':
-        this.zoom = Number(newValue);
+      case 'duration':
+        this[name] = Number(newValue);
         break;
     }
   }
@@ -152,11 +155,12 @@ export default class TimelineInputElement extends HTMLElement {
   }
 
   set zoom(value) {
-    this._zoom = value;
+    this._zoom = Math.max(value, 1);
     this._timelineTicker.zoom = this._zoom;
-    for (const channel of this._channels) {
-      channel.zoom = this._zoom;
-    }
+    this._channelsContainer.style.setProperty('--zoom', this._zoom);
+    // for (const channel of this._channels) {
+    //   channel.zoom = this._zoom;
+    // }
   }
 
   get currentTime() {
@@ -173,6 +177,9 @@ export default class TimelineInputElement extends HTMLElement {
 
   set duration(value) {
     this._timelineTicker.duration = value;
+    for (const channel of this._channels) {
+      channel.duration = value;
+    }
   }
 
   play() {
