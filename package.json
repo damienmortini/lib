@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "start": "nodemon node_modules/@damienmortini/server/index.js",
+    "start": "server",
     "publish": "yarn run lerna publish",
     "upgrade": "yarn upgrade-interactive --latest"
   },

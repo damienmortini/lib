@@ -3,7 +3,7 @@ import './ChannelTimelineInputElement.js';
 
 export default class TimelineInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['scale'];
+    return ['zoom'];
   }
 
   constructor() {
@@ -12,17 +12,14 @@ export default class TimelineInputElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          align-items: center;
+          display: block;
           width: 300px;
-          gap: 10px;
         }
-        #controls button {
+        <!-- #controls button {
           width: 60px;
           display: block;
           cursor: pointer;
-        }
+        } -->
         damo-timeline-ticker {
           width: 100%;
           z-index: 1;
@@ -32,35 +29,31 @@ export default class TimelineInputElement extends HTMLElement {
           margin-bottom: 2px;
         }
       </style>
-      <div id="controls">
-        <button id="play">Play</button>
-        <button id="pause">Pause</button>
-      </div>
-      <div id="timeline">
-        <damo-timeline-ticker></damo-timeline-ticker>
-        <div id="channels"></div>
+      <damo-timeline-ticker></damo-timeline-ticker>
+      <div id="channels">
+        <slot></slot>
       </div>
     `;
 
-    this._scale = 1;
+    this._zoom = 1;
     this._channelsContainer = this.shadowRoot.querySelector('#channels');
     this._timelineTicker = this.shadowRoot.querySelector('damo-timeline-ticker');
 
     this._channelsContainer.addEventListener('wheel', (event) => {
       event.preventDefault();
       if (event.deltaY < 0) {
-        this.currentTime -= 20 / this.scale;
+        this.currentTime -= 20 / this.zoom;
       } else {
-        this.currentTime += 20 / this.scale;
+        this.currentTime += 20 / this.zoom;
       }
     });
 
     // this._timelineTicker.addEventListener('wheel', (event) => {
     //   event.preventDefault();
     //   if (event.deltaY < 0) {
-    //     this.scale *= .95;
+    //     this.zoom *= .95;
     //   } else {
-    //     this.scale /= .95;
+    //     this.zoom /= .95;
     //   }
     // });
 
@@ -90,24 +83,24 @@ export default class TimelineInputElement extends HTMLElement {
 
     this._channels = new Set();
 
-    /**
-     * Controls
-     */
-    this._playButton = this.shadowRoot.querySelector('#play');
-    this._pauseButton = this.shadowRoot.querySelector('#pause');
-
-    this._playButton.addEventListener('click', () => {
-      this.play();
-    });
-    this._pauseButton.addEventListener('click', () => {
-      this.pause();
-    });
+    new MutationObserver((mutationsList, observer) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type == 'childList') {
+          this._channels.clear();
+          for (const child of this.children) {
+            if (child.position !== undefined && child.value !== undefined) {
+              this._channels.add(child);
+            }
+          }
+        }
+      }
+    }).observe(this, { childList: true });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-      case 'scale':
-        this.scale = Number(newValue);
+      case 'zoom':
+        this.zoom = Number(newValue);
         break;
     }
   }
@@ -117,7 +110,7 @@ export default class TimelineInputElement extends HTMLElement {
     channel.name = name;
     channel.color = color;
     channel.keyframes = keyframes;
-    channel.scale = this.scale;
+    channel.zoom = this.zoom;
     channel.step = step;
     window.addEventListener('keydown', (event) => {
       if (event.key === key) {
@@ -141,19 +134,16 @@ export default class TimelineInputElement extends HTMLElement {
     this._timelineTicker.tickHeight = this._channelsContainer.clientHeight;
   }
 
-  get scale() {
-    return this._scale;
+  get zoom() {
+    return this._zoom;
   }
 
-  set scale(value) {
-    // const scaleDifference = value - this._scale;
-    this._scale = value;
-    this._timelineTicker.scale = this._scale;
+  set zoom(value) {
+    this._zoom = value;
+    this._timelineTicker.zoom = this._zoom;
     for (const channel of this._channels) {
-      channel.scale = this._scale;
+      channel.zoom = this._zoom;
     }
-    // console.log(scaleDifference);
-    // this._timelineTicker.shift += scaleDifference * this._timelineTicker.offsetWidth;
   }
 
   get time() {

@@ -53,8 +53,8 @@ class TickerTimelineElement extends AnimationTickerElement {
       </div>
     `;
 
-    this.scale = 1;
-    this._shift = 0;
+    this.zoom = 1;
+    this._scrollLeft = 0;
     this._currentTime = 0;
 
     this._tick = this.shadowRoot.querySelector('#tick');
@@ -65,15 +65,15 @@ class TickerTimelineElement extends AnimationTickerElement {
     this._pointerOffsetX = 0;
     this._pausedBeforeInteraction = false;
     const updateCurrentTimeFromPosition = () => {
-      let currentPosition = this._pointerOffsetX + this.shift;
+      let currentPosition = this._pointerOffsetX + this.scrollLeft;
       const padding = this._tickAreaWidth * PADDING_RATIO;
       const right = this._tickAreaWidth - padding;
       if (this._pointerOffsetX > right) {
         currentPosition += (this._pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
-      } else if (this._pointerOffsetX < padding && this.shift) {
+      } else if (this._pointerOffsetX < padding && this.scrollLeft) {
         currentPosition += (this._pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
       }
-      this.currentTime = currentPosition / this.scale;
+      this.currentTime = currentPosition / this.zoom;
     };
     const pointerDown = (event) => {
       this.setPointerCapture(event.pointerId);
@@ -112,14 +112,14 @@ class TickerTimelineElement extends AnimationTickerElement {
     if (!this._tickAreaWidth) {
       return;
     }
-    let x = this.currentTime * this.scale - this.shift;
+    let x = this.currentTime * this.zoom - this.scrollLeft;
     const padding = this._tickAreaWidth * PADDING_RATIO;
     const right = this._tickAreaWidth - padding;
     if (x > right) {
-      this.shift += (x - right) * SIDE_MOVEMENT_SPEED;
+      this.scrollLeft += (x - right) * SIDE_MOVEMENT_SPEED;
       x = right;
-    } else if (x < padding && this.shift) {
-      this.shift += (x - padding) * SIDE_MOVEMENT_SPEED;
+    } else if (x < padding && this.scrollLeft) {
+      this.scrollLeft += (x - padding) * SIDE_MOVEMENT_SPEED;
       x = padding;
     } else {
       x = Math.max(0, x);
@@ -148,17 +148,17 @@ class TickerTimelineElement extends AnimationTickerElement {
     this.dispatchEvent(new Event('timeupdate'));
   }
 
-  get shift() {
-    return this._shift;
+  get scrollLeft() {
+    return this._scrollLeft;
   }
 
-  set shift(value) {
+  set scrollLeft(value) {
     value = Math.max(0, value);
-    if (this._shift === value) {
+    if (this._scrollLeft === value) {
       return;
     }
-    this._shift = value;
-    this.dispatchEvent(new Event('shiftupdate'));
+    this._scrollLeft = value;
+    this.dispatchEvent(new Event('scrollLeftupdate'));
   }
 
   update() {
