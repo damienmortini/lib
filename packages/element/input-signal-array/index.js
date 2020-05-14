@@ -1,4 +1,8 @@
-class ArrayInputElement extends HTMLElement {
+export default class ArraySignalInputElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['array', 'position'];
+  }
+
   constructor() {
     super();
 
@@ -7,8 +11,8 @@ class ArrayInputElement extends HTMLElement {
         :host {
           display: block;
           position: relative;
-          height: 20px;
-          width: 360px;
+          height: 150px;
+          width: 300px;
           background: lightgrey;
         }
         canvas {
@@ -22,13 +26,15 @@ class ArrayInputElement extends HTMLElement {
       <canvas></canvas>
     `;
 
+    this._array = [];
+
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._context = this._canvas.getContext('2d');
     this._scrollLeft = 0;
     this._zoom = 1;
     this._step = 1;
     this.startFrame = 0;
-    this.color = 'white';
+    this.color = undefined;
     this.keyframes = new Set();
 
     let previousKeyframe = null;
@@ -75,16 +81,18 @@ class ArrayInputElement extends HTMLElement {
     resizeObserver.observe(this);
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'array':
+        this.array = new Function(`return ${newValue}`)();
+        break;
+      case 'position':
+        this.position = Number(newValue);
+        break;
+    }
+  }
+
   connectedCallback() {
-    this._update();
-  }
-
-  get keyframes() {
-    return this._keyframes;
-  }
-
-  set keyframes(value) {
-    this._keyframes = value;
     this._update();
   }
 
@@ -115,17 +123,43 @@ class ArrayInputElement extends HTMLElement {
     this._update();
   }
 
+  get array() {
+    return this._array;
+  }
+
+  set array(value) {
+    this._array = value;
+    this._update();
+  }
+
+  get position() {
+    return this._position;
+  }
+
+  set position(value) {
+    this._position = value;
+  }
+
+  get value() {
+    return this._array[Math.floor(this._position * (this._array.length - 1))];
+  }
+
+  set value(value) {
+    this._array[Math.floor(this._position * (this._array.length - 1))] = value;
+    this._update();
+  }
+
   _update() {
     this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     this._context.fillStyle = this.color;
     this._context.beginPath();
-    for (const keyframe of this.keyframes) {
-      const x = keyframe * this.zoom - this.scrollLeft;
+    for (const value of this.array) {
+      const x = value * this.zoom - this.scrollLeft;
       this._context.fillRect(x, this._canvas.height * .25, this.zoom * this._step, this._canvas.height * .5);
     }
   }
 }
 
-if (!customElements.get('damo-input-array')) {
-  customElements.define('damo-input-array', class DamoArrayInputElement extends ArrayInputElement { });
+if (!customElements.get('damo-input-signal-array')) {
+  customElements.define('damo-input-signal-array', class DamoArraySignalInputElement extends ArraySignalInputElement { });
 }
