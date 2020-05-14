@@ -34,6 +34,7 @@ export default class ArraySignalInputElement extends HTMLElement {
     this._currentTime = 0;
     this._duration = 1;
     this._frequency = 10;
+    this._previousValue = undefined;
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
@@ -64,6 +65,9 @@ export default class ArraySignalInputElement extends HTMLElement {
         this._setValueAt(value, time);
       }
       previousTime = newTime;
+      this.dispatchEvent(new Event('input', {
+        bubbles: true,
+      }));
     };
     const pointerUp = (event) => {
       previousTime = null;
@@ -135,7 +139,12 @@ export default class ArraySignalInputElement extends HTMLElement {
       return;
     }
     this._currentTime = value;
-    this.dispatchEvent(new Event('change'));
+    if (this.value !== this._previousValue) {
+      this.dispatchEvent(new Event('change', {
+        bubbles: true,
+      }));
+    }
+    this._previousValue = this.value;
   }
 
   get array() {
@@ -168,6 +177,14 @@ export default class ArraySignalInputElement extends HTMLElement {
 
   set max(value) {
     this._viewer.max = value;
+  }
+
+  get name() {
+    return this.getAttribute('name');
+  }
+
+  set name(value) {
+    this.setAttribute('name', value);
   }
 }
 

@@ -61,7 +61,7 @@ export default class TimelineInputElement extends HTMLElement {
     this._timelineTicker.addEventListener('timeupdate', () => {
       for (const channel of this._channels) {
         channel.currentTime = this.currentTime;
-        console.log(channel.currentTime, channel.value);
+        // console.log(channel.currentTime, channel.value);
 
         // for (const keyframe of channel.keyframes) {
         //   if (keyframe >= previousTime && keyframe < this.currentTime) {
