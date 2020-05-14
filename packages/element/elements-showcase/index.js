@@ -10,7 +10,7 @@ for (let elementName of ELEMENTS) {
     preview = elementName[1];
     elementName = elementName[0];
   }
-  const elementString = preview || `<div><${elementName}></${elementName}></div>`;
+  const elementString = preview || `<${elementName}></${elementName}>`;
   list.insertAdjacentHTML('beforeend', `
         <li data-elementname="${elementName}">
           <h2><a href="#${elementName}">${elementName.replace('element-', '')}</a></h2>
