@@ -15,11 +15,6 @@ export default class TimelineInputElement extends HTMLElement {
           display: block;
           width: 300px;
         }
-        <!-- #controls button {
-          width: 60px;
-          display: block;
-          cursor: pointer;
-        } -->
         damo-timeline-ticker {
           width: 100%;
           z-index: 1;

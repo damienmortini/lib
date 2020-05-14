@@ -29,20 +29,12 @@ export default class ArraySignalInputElement extends HTMLElement {
       <damo-viewer-array></damo-viewer-array>
     `;
 
-    this._array = [];
-
     this._viewer = this.shadowRoot.querySelector('damo-viewer-array');
 
+    this._array = [];
     this._currentTime = 0;
-
     this._duration = 1;
     this._frequency = 120;
-    // this._scrollLeft = 0;
-    // this._zoom = 1;
-    this._step = 1;
-    // this.startFrame = 0;
-    // this.color = undefined;
-    // this.keyframes = new Set();
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
@@ -59,7 +51,7 @@ export default class ArraySignalInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const value = (1 - event.offsetY / this._height) * (this._viewer.max - this._viewer.min) + (this._viewer.min || 0);
+      const value = (1 - event.offsetY / this._height) * (this.max - this.min) + (this.min || 0);
       const newTime = (event.offsetX / this._width) * this.duration;
       previousTime = previousTime !== null ? previousTime : newTime;
       const startTime = Math.max(0, newTime > previousTime ? previousTime : newTime);
@@ -97,33 +89,6 @@ export default class ArraySignalInputElement extends HTMLElement {
         break;
     }
   }
-
-  // get scrollLeft() {
-  //   return this._scrollLeft;
-  // }
-
-  // set scrollLeft(value) {
-  //   this._scrollLeft = value;
-  //   this._update();
-  // }
-
-  // get zoom() {
-  //   return this._zoom;
-  // }
-
-  // set zoom(value) {
-  //   this._zoom = value;
-  //   this._update();
-  // }
-
-  // get step() {
-  //   return this._step;
-  // }
-
-  // set step(value) {
-  //   this._step = value;
-  //   this._update();
-  // }
 
   _setValueAt(value, time) {
     const index = Math.floor((time / this.duration) * (this._viewer.width - 1));
@@ -182,6 +147,22 @@ export default class ArraySignalInputElement extends HTMLElement {
 
   set value(value) {
     this._setValueAt(value, this.currentTime);
+  }
+
+  get min() {
+    return this._viewer.min;
+  }
+
+  set min(value) {
+    this._viewer.min = value;
+  }
+
+  get max() {
+    return this._viewer.max;
+  }
+
+  set max(value) {
+    this._viewer.max = value;
   }
 }
 
