@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>element-input-timeline</title>
+  <title>element-timeline</title>
   <style>
     html,
     body {
@@ -20,7 +20,7 @@
       align-content: center;
     }
 
-    element-input-timeline {
+    element-timeline {
       width: 500px;
     }
 
@@ -37,7 +37,7 @@
 </head>
 
 <body>
-  <element-input-timeline scale="30"></element-input-timeline>
+  <element-timeline scale="30"></element-timeline>
   <details open>
     <summary>Output</summary>
     <div id="output"></div>
@@ -46,9 +46,9 @@
   <script type="module">
     import Element from '../index.js';
 
-    window.customElements.define(`element-input-timeline`, Element);
+    window.customElements.define(`element-timeline`, Element);
 
-    const timelineInputElement = document.querySelector('element-input-timeline');
+    const timelineInputElement = document.querySelector('element-timeline');
     const output = document.querySelector('#output');
     const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light1', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
     const keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];

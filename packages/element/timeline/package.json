@@ -1,8 +1,8 @@
 {
-  "name": "@damienmortini/element-input-timeline",
+  "name": "@damienmortini/element-timeline",
   "private": true,
   "version": "0.0.1",
-  "description": "<element-input-timeline> custom element.",
+  "description": "<element-timeline> custom element.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/damienmortini/lib.git",
-    "directory": "packages/element-input-timeline"
+    "directory": "packages/element-timeline"
   },
   "keywords": [
     "custom elements",
