@@ -31,7 +31,6 @@ export default class ArraySignalInputElement extends HTMLElement {
 
     this._viewer = this.shadowRoot.querySelector('damo-viewer-array');
 
-    this._array = [];
     this._currentTime = 0;
     this._duration = 1;
     this._frequency = 120;
@@ -44,6 +43,9 @@ export default class ArraySignalInputElement extends HTMLElement {
 
     let previousTime = null;
     const pointerDown = (event) => {
+      if (!(event.buttons & 1)) {
+        return;
+      }
       this._viewer.setPointerCapture(event.pointerId);
       this._viewer.addEventListener('pointermove', pointerMove);
       this._viewer.addEventListener('pointerup', pointerUp);
@@ -70,7 +72,6 @@ export default class ArraySignalInputElement extends HTMLElement {
       this._viewer.removeEventListener('pointerout', pointerUp);
     };
     this._viewer.addEventListener('pointerdown', pointerDown);
-    this._viewer.addEventListener('contextmenu', (event) => event.preventDefault());
 
     this._updateViewerWidth();
   }
@@ -100,6 +101,9 @@ export default class ArraySignalInputElement extends HTMLElement {
   }
 
   _updateViewerWidth() {
+    if (!this._array) {
+      this._viewer.array = new Float32Array(this.duration * this.frequency);
+    }
     this._viewer.width = this.frequency * this.duration;
   }
 
@@ -138,7 +142,7 @@ export default class ArraySignalInputElement extends HTMLElement {
   }
 
   set array(value) {
-    this._viewer.array = value;
+    this._array = this._viewer.array = value;
   }
 
   get value() {

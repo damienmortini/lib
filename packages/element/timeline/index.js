@@ -19,7 +19,7 @@ export default class TimelineInputElement extends HTMLElement {
           width: 100%;
           z-index: 1;
         }
-        damo-input-timeline-channel {
+        damo-timeline-channel {
           width: 100%;
           margin-bottom: 2px;
         }
@@ -101,7 +101,7 @@ export default class TimelineInputElement extends HTMLElement {
   }
 
   addChannel({ name, key, color, keyframes, step }) {
-    const channel = document.createElement('damo-input-timeline-channel');
+    const channel = document.createElement('damo-timeline-channel');
     channel.name = name;
     channel.color = color;
     channel.keyframes = keyframes;
@@ -170,6 +170,6 @@ export default class TimelineInputElement extends HTMLElement {
   }
 }
 
-if (!customElements.get('damo-input-timeline')) {
-  customElements.define('damo-input-timeline', class DamoTimelineInputElement extends TimelineInputElement { });
+if (!customElements.get('damo-timeline')) {
+  customElements.define('damo-timeline', class DamoTimelineInputElement extends TimelineInputElement { });
 }

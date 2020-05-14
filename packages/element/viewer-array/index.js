@@ -83,6 +83,10 @@ export default class ArrayViewerElement extends HTMLElement {
         this._maxValue = Math.max(this._maxValue, value);
       }
     }
+    if (this._maxValue === this._minValue) {
+      this._minValue = Math.min(this._minValue, 0);
+      this._maxValue = Math.max(this._maxValue, 1);
+    }
     if (this.height === undefined) {
       this._canvas.height = this.max - this.min;
     }

@@ -1,18 +1,18 @@
-# `<element-input-timeline>`
+# `<element-timeline>`
 
 ## Installation
 
 ```sh
 npm config set @damienmortini:registry https://npm.pkg.github.com
 
-npm install @damienmortini/element-input-timeline
+npm install @damienmortini/element-timeline
 ```
 
 ## Usage
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-timeline';
+  import MyElement from '@damienmortini/element-timeline';
 
   window.customElements.define(`my-element-name`, MyElement);
 
