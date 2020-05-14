@@ -37,48 +37,53 @@
 </head>
 
 <body>
-  <element-timeline scale="30"></element-timeline>
+  <element-timeline>
+    <damo-input-signal-array array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3,3, 4, 2, 3, 4, 2"></damo-input-signal-array>
+    <damo-input-signal-array array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3,3, 4, 2, 3, 4, 2"></damo-input-signal-array>
+    <damo-input-signal-array array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3,3, 4, 2, 3, 4, 2"></damo-input-signal-array>
+  </element-timeline>
   <details open>
     <summary>Output</summary>
     <div id="output"></div>
   </details>
 
   <script type="module">
+    import '../../element-input-signal-array/index.js';
     import Element from '../index.js';
 
     window.customElements.define(`element-timeline`, Element);
 
     const timelineInputElement = document.querySelector('element-timeline');
-    const output = document.querySelector('#output');
-    const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light1', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
-    const keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
-    for (const [index, name] of channelNames.entries()) {
-      const keyframes = new Set();
-      const step = .5;
-      for (let index = 0; index < 40; index++) {
-        keyframes.add(Math.floor(Math.random() * 1000) * step);
-      }
-      timelineInputElement.addChannel({
-        name,
-        key: keys[index],
-        color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
-        keyframes,
-        step,
-      });
-    }
-    const outputDivs = [];
-    for (let index = 0; index < 10; index++) {
-      const div = document.createElement('div');
-      outputDivs.push(div);
-      output.prepend(div);
-    }
-    timelineInputElement.addEventListener('input', (event) => {
-      const div = outputDivs.shift();
-      outputDivs.push(div);
-      div.style.color = event.detail.color;
-      div.textContent = `${event.detail.name} @ ${event.detail.time}s`;
-      output.prepend(div);
-    });
+    // const output = document.querySelector('#output');
+    // const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light1', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
+    // const keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+    // for (const [index, name] of channelNames.entries()) {
+    //   const keyframes = new Set();
+    //   const step = .5;
+    //   for (let index = 0; index < 40; index++) {
+    //     keyframes.add(Math.floor(Math.random() * 1000) * step);
+    //   }
+    //   timelineInputElement.addChannel({
+    //     name,
+    //     key: keys[index],
+    //     color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
+    //     keyframes,
+    //     step,
+    //   });
+    // }
+    // const outputDivs = [];
+    // for (let index = 0; index < 10; index++) {
+    //   const div = document.createElement('div');
+    //   outputDivs.push(div);
+    //   output.prepend(div);
+    // }
+    // timelineInputElement.addEventListener('input', (event) => {
+    //   const div = outputDivs.shift();
+    //   outputDivs.push(div);
+    //   div.style.color = event.detail.color;
+    //   div.textContent = `${event.detail.name} @ ${event.detail.time}s`;
+    //   output.prepend(div);
+    // });
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {
         timelineInputElement[timelineInputElement.paused ? 'play' : 'pause']();
