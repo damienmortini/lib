@@ -6,6 +6,7 @@ export default [
   // 'element-animation-ticker',
   'element-animation-view',
   'element-gl-view',
+  'element-timeline',
   'element-input-signal-array',
   ['element-viewer-array', `<element-viewer-array array='1, 2, 5, 4, 3, 0, 1, 2, 1'></element-viewer-array>`],
   'element-input-button',

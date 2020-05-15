@@ -1,6 +1,8 @@
+import GestureObserver from '../core/input/GestureObserver.js';
+
 export default class ArrayViewerElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'min', 'max', 'step'];
+    return ['array', 'min', 'max', 'step', 'zoom', 'controls'];
   }
 
   constructor() {
@@ -13,6 +15,9 @@ export default class ArrayViewerElement extends HTMLElement {
           position: relative;
           width: 300px;
           height: 150px;
+        }
+        :host([controls]) {
+          touch-action: none;
         }
         canvas {
           position: absolute;
@@ -30,7 +35,45 @@ export default class ArrayViewerElement extends HTMLElement {
     this._context = this._canvas.getContext('2d');
 
     this._step = 1;
+    this._zoom = 1;
+    this._scrollLeft = 0;
+    this._width = 1;
     this._array = [];
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      this._width = entries[0].contentRect.width;
+      this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
+      this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
+      this.draw();
+    });
+    resizeObserver.observe(this);
+
+    this.addEventListener('wheel', (event) => {
+      if (this.controls) {
+        event.preventDefault();
+        if (event.deltaY < 0) {
+          this.zoom *= .95;
+        } else {
+          this.zoom /= .95;
+        }
+        // const newValue = Math.max(1, value);
+        // const difference = newValue - this._zoom;
+        // const widthDifference = (this._width * newValue) - this.scrollWidth;
+        // const previousScrollWidth = this.scrollWidth;
+        // console.log(this.scrollLeft + this._width, this.scrollWidth);
+
+        // let ratio = this.scrollLeft / this.scrollWidth;
+        // // ratio *= 1 + difference;
+        // console.log(ratio);
+
+        // this.scrollLeft = this.scrollWidth * ratio;
+        // // this.scrollLeft += widthDifference * .5;
+      }
+    });
+
+    this._gestureObserver = new GestureObserver((gesture) => {
+      this.scrollLeft -= gesture.movementX * devicePixelRatio;
+    }, { pointerLock: true });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -38,9 +81,13 @@ export default class ArrayViewerElement extends HTMLElement {
       case 'array':
         this.array = new Function(`return [${newValue}]`)();
         break;
+      case 'controls':
+        this._gestureObserver[newValue !== null ? 'observe' : 'unobserve'](this);
+        break;
       case 'max':
       case 'min':
       case 'step':
+      case 'zoom':
         this[name] = Number(newValue);
         break;
     }
@@ -58,13 +105,15 @@ export default class ArrayViewerElement extends HTMLElement {
     start = 0,
     length = Infinity,
   } = {}) {
-    this._context.clearRect(start, 0, length, this._canvas.height);
+    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
     let previousValue = undefined;
-    const y = this._canvas.height + (this.min !== undefined ? this.min : this._minValue);
+    const height = this._canvas.height / Math.round(this.max - this.min);
+    const y = this._canvas.height + this.min * height;
     length = Math.min(length, this.array.length - start);
+    const valueWidth = (1 / this.array.length) * this.zoom * this._canvas.width;
     for (let index = start; index < start + length; index++) {
-      const value = this.array[index] / this.step;
-      this.drawCallback(this._context, index, y, 1, -value, previousValue, value);
+      const value = Math.round(this.array[index] / this.step) * this.step;
+      this.drawCallback(this._context, index * valueWidth - this.scrollLeft * window.devicePixelRatio, y, valueWidth, -value * height, previousValue, value);
       previousValue = value;
     }
   }
@@ -89,6 +138,7 @@ export default class ArrayViewerElement extends HTMLElement {
       this._minValue = Math.min(this._minValue, 0);
       this._maxValue = Math.max(this._maxValue, 100);
     }
+    return;
     if (this.height === undefined) {
       this._canvas.height = Math.round(this.max - this.min) / this.step;
     }
@@ -100,32 +150,41 @@ export default class ArrayViewerElement extends HTMLElement {
 
   set array(value) {
     this._array = value;
-    if (this.width === undefined) {
-      this._canvas.width = this._array.length;
-    }
     this._updateHeight();
     this.draw();
   }
 
-  get width() {
-    return this._width;
+  get controls() {
+    return this.hasAttribute('controls');
   }
 
-  set width(value) {
-    this._width = value;
-    this._canvas.width = this._width;
-    this.draw();
+  set controls(value) {
+    if (value) {
+      this.setAttribute('controls', '');
+    } else {
+      this.removeAttribute('controls');
+    }
   }
 
-  get height() {
-    return this._height;
-  }
+  // get width() {
+  //   return this._width;
+  // }
 
-  set height(value) {
-    this._height = value;
-    this._canvas.height = this._height;
-    this.draw();
-  }
+  // set width(value) {
+  //   this._width = value;
+  //   this._updateWidth();
+  //   this.draw();
+  // }
+
+  // get height() {
+  //   return this._height;
+  // }
+
+  // set height(value) {
+  //   this._height = value;
+  //   this._canvas.height = this._height;
+  //   this.draw();
+  // }
 
   get min() {
     return this._min || this._minValue;
@@ -154,6 +213,28 @@ export default class ArrayViewerElement extends HTMLElement {
   set step(value) {
     this._step = value;
     this._updateHeight();
+    this.draw();
+  }
+
+  get zoom() {
+    return this._zoom;
+  }
+
+  set zoom(value) {
+    this._zoom = Math.max(1, value);
+    this.draw();
+  }
+
+  get scrollWidth() {
+    return this._width * this.zoom;
+  }
+
+  get scrollLeft() {
+    return this._scrollLeft;
+  }
+
+  set scrollLeft(value) {
+    this._scrollLeft = Math.min(this.scrollWidth - this._width, Math.max(0, value));
     this.draw();
   }
 }
