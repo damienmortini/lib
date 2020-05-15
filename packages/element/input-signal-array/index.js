@@ -82,6 +82,7 @@ export default class ArraySignalInputElement extends HTMLElement {
 
     const setValuesFromPosition = () => {
       let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0);
+      value = Math.round(value / this.step) * this.step;
       value = Math.max(Math.min(this.max, value), this.min);
       const newTime = this._snap ? this.currentTime : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.duration;
       previousTime = previousTime !== null ? previousTime : newTime;
@@ -152,15 +153,6 @@ export default class ArraySignalInputElement extends HTMLElement {
     }
   }
 
-  _setValueAt(value, time) {
-    const index = Math.floor((time / this.duration) * (this.array.length));
-    this.array[index] = value;
-    this._viewer.draw({
-      start: index,
-      length: 1,
-    });
-  }
-
   _updateViewerWidth() {
     if (!this._array) {
       this._viewer.array = new Float32Array(this.duration * this.frequency);
@@ -215,11 +207,16 @@ export default class ArraySignalInputElement extends HTMLElement {
   }
 
   get value() {
-    return this.array[Math.floor((this.currentTime / this.duration) * (this._viewer.width - 1))];
+    return this.array[Math.floor((this.currentTime / this.duration) * (this.array.length - 1))];
   }
 
   set value(value) {
-    this._setValueAt(value, this.currentTime);
+    const index = Math.floor((this.currentTime / this.duration) * (this.array.length - 1));
+    this.array[index] = value;
+    this._viewer.draw({
+      start: index,
+      length: 1,
+    });
     if (this.value !== this._previousValue) {
       this.dispatchEvent(new Event('change', {
         bubbles: true,

@@ -26,7 +26,7 @@ export default class TimelineInputElement extends HTMLElement {
         }
         ::slotted(*) {
           width: calc(100% * var(--zoom));
-          height: 100px;
+          height: 50px;
         }
       </style>
       <damo-timeline-ticker></damo-timeline-ticker>
@@ -80,7 +80,6 @@ export default class TimelineInputElement extends HTMLElement {
     });
 
     this._timelineTicker.addEventListener('scroll', () => {
-      // this._channelsContainer.scrollLeft = this._timelineTicker.scrollLeft;
       for (const channel of this._channels) {
         channel.scrollLeft = this._timelineTicker.scrollLeft;
       }
@@ -94,8 +93,12 @@ export default class TimelineInputElement extends HTMLElement {
           if (node.currentTime !== undefined && node.value !== undefined) {
             this._channels.add(node);
             node.currentTime = this.currentTime;
+            node.scrollLeft = this.scrollLeft;
             if (node.duration !== undefined) {
               node.duration = this.duration;
+            }
+            if (node.zoom !== undefined) {
+              node.zoom = this.zoom;
             }
           }
         }
