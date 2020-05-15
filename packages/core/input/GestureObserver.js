@@ -17,7 +17,9 @@ export default class GestureObserver {
   /**
    * @param {GestureObserverCallback} callback
    */
-  constructor(callback) {
+  constructor(callback, { pointerLock = false } = {}) {
+    this.pointerLock = pointerLock;
+
     this._elementsData = new Map();
     this._callback = callback;
 
@@ -76,7 +78,11 @@ export default class GestureObserver {
       element.addEventListener('pointerup', this._onPointerUpBinded);
       element.addEventListener('pointerout', this._onPointerUpBinded);
     }
-    element.setPointerCapture(event.pointerId);
+    if (this.pointerLock) {
+      element.requestPointerLock();
+    } else {
+      element.setPointerCapture(event.pointerId);
+    }
     data.pointers.set(event.pointerId, event);
     this._resetElementData(element);
   }
@@ -125,8 +131,8 @@ export default class GestureObserver {
 
     this._callback({
       target: event.currentTarget,
-      movementX,
-      movementY,
+      movementX: this.pointerLock ? event.movementX : movementX,
+      movementY: this.pointerLock ? event.movementY : movementY,
       movementScale,
       movementRotation,
     });
@@ -137,6 +143,7 @@ export default class GestureObserver {
     const data = this._elementsData.get(element);
     data.pointers.delete(event.pointerId);
     element.releasePointerCapture(event.pointerId);
+    document.exitPointerLock();
     this._resetElementData(element);
     if (!data.pointers.size) {
       element.removeEventListener('pointermove', this._onPointerMoveBinded);

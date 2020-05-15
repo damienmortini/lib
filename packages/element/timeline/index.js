@@ -80,7 +80,7 @@ export default class TimelineInputElement extends HTMLElement {
     });
 
     this._timelineTicker.addEventListener('scroll', () => {
-      this._channelsContainer.scrollLeft = this._timelineTicker.scrollLeft;
+      // this._channelsContainer.scrollLeft = this._timelineTicker.scrollLeft;
       for (const channel of this._channels) {
         channel.scrollLeft = this._timelineTicker.scrollLeft;
       }
@@ -157,10 +157,10 @@ export default class TimelineInputElement extends HTMLElement {
   set zoom(value) {
     this._zoom = Math.max(value, 1);
     this._timelineTicker.zoom = this._zoom;
-    this._channelsContainer.style.setProperty('--zoom', this._zoom);
-    // for (const channel of this._channels) {
-    //   channel.zoom = this._zoom;
-    // }
+    // this._channelsContainer.style.setProperty('--zoom', this._zoom);
+    for (const channel of this._channels) {
+      channel.zoom = this._zoom;
+    }
   }
 
   get currentTime() {
