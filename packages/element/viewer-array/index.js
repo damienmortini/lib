@@ -25,7 +25,6 @@ export default class ArrayViewerElement extends HTMLElement {
           left: 0;
           width: 100%;
           height: 100%;
-          image-rendering: pixelated;
         }
       </style>
       <canvas></canvas>
@@ -103,9 +102,9 @@ export default class ArrayViewerElement extends HTMLElement {
 
   draw({
     start = 0,
-    length = Infinity,
+    length = this.array.length,
   } = {}) {
-    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    this._context.clearRect(Math.floor((start / this.array.length) * this._canvas.width), 0, Math.ceil((length / this.array.length) * this._canvas.width), this._canvas.height);
     let previousValue = undefined;
     const height = this._canvas.height / Math.round(this.max - this.min);
     const y = this._canvas.height + this.min * height;
@@ -113,7 +112,7 @@ export default class ArrayViewerElement extends HTMLElement {
     const valueWidth = (1 / this.array.length) * this.zoom * this._canvas.width;
     for (let index = start; index < start + length; index++) {
       const value = Math.round(this.array[index] / this.step) * this.step;
-      this.drawCallback(this._context, index * valueWidth - this.scrollLeft * window.devicePixelRatio, y, valueWidth, -value * height, previousValue, value);
+      this.drawCallback(this._context, Math.floor(index * valueWidth - this.scrollLeft * window.devicePixelRatio), y, Math.ceil(valueWidth), -value * height, previousValue, value);
       previousValue = value;
     }
   }
