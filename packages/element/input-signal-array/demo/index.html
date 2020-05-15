@@ -31,6 +31,8 @@
   <element-input-signal-array duration="5"></element-input-signal-array>
   <element-input-signal-array time="2.2" frequency="4" duration="10" array="4, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 2, 0">
   </element-input-signal-array>
+  <element-input-signal-array id="stepped" max="1" step=".01" time="4" frequency="2" duration="180">
+  </element-input-signal-array>
 
   <script type="module">
     import Element from '../index.js';
@@ -41,6 +43,12 @@
       array[index] = (Math.random() * 2 - 1) * 20;
     }
     arrayInputElement.array = array;
+
+    const arrayInputElementStepped = document.querySelector('element-input-signal-array#stepped');
+    for (let index = 0; index < arrayInputElementStepped.array.length; index++) {
+      arrayInputElementStepped.array[index] = Math.random();
+    }
+    arrayInputElementStepped.draw();
   </script>
 </body>
 

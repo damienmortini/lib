@@ -3,7 +3,7 @@ import Ticker from '../core/util/Ticker.js';
 
 export default class ArraySignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'time', 'frequency', 'duration'];
+    return ['array', 'time', 'frequency', 'duration', 'min', 'max', 'step'];
   }
 
   constructor() {
@@ -121,6 +121,9 @@ export default class ArraySignalInputElement extends HTMLElement {
         break;
       case 'frequency':
       case 'duration':
+      case 'min':
+      case 'max':
+      case 'step':
         this[name] = Number(newValue);
         break;
     }
@@ -140,6 +143,10 @@ export default class ArraySignalInputElement extends HTMLElement {
       this._viewer.array = new Float32Array(this.duration * this.frequency);
     }
     this._viewer.width = this.frequency * this.duration;
+  }
+
+  draw() {
+    return this._viewer.draw();
   }
 
   get frequency() {
@@ -213,6 +220,14 @@ export default class ArraySignalInputElement extends HTMLElement {
 
   set max(value) {
     this._viewer.max = value;
+  }
+
+  get step() {
+    return this._viewer.step;
+  }
+
+  set step(value) {
+    this._viewer.step = value;
   }
 
   get name() {
