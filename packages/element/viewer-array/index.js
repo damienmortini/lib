@@ -1,6 +1,6 @@
 export default class ArrayViewerElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'min', 'max'];
+    return ['array', 'min', 'max', 'step'];
   }
 
   constructor() {
@@ -29,6 +29,7 @@ export default class ArrayViewerElement extends HTMLElement {
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._context = this._canvas.getContext('2d');
 
+    this._step = 1;
     this._array = [];
   }
 
@@ -39,6 +40,7 @@ export default class ArrayViewerElement extends HTMLElement {
         break;
       case 'max':
       case 'min':
+      case 'step':
         this[name] = Number(newValue);
         break;
     }
@@ -61,7 +63,7 @@ export default class ArrayViewerElement extends HTMLElement {
     const y = this._canvas.height + (this.min !== undefined ? this.min : this._minValue);
     length = Math.min(length, this.array.length - start);
     for (let index = start; index < start + length; index++) {
-      const value = this.array[index];
+      const value = this.array[index] / this.step;
       this.drawCallback(this._context, index, y, 1, -value, previousValue, value);
       previousValue = value;
     }
@@ -88,7 +90,7 @@ export default class ArrayViewerElement extends HTMLElement {
       this._maxValue = Math.max(this._maxValue, 100);
     }
     if (this.height === undefined) {
-      this._canvas.height = this.max - this.min;
+      this._canvas.height = Math.round(this.max - this.min) / this.step;
     }
   }
 
@@ -141,6 +143,16 @@ export default class ArrayViewerElement extends HTMLElement {
 
   set max(value) {
     this._max = value;
+    this._updateHeight();
+    this.draw();
+  }
+
+  get step() {
+    return this._step;
+  }
+
+  set step(value) {
+    this._step = value;
     this._updateHeight();
     this.draw();
   }
