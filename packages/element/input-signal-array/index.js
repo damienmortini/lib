@@ -83,12 +83,12 @@ export default class ArraySignalInputElement extends HTMLElement {
     const setValuesFromPosition = () => {
       let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0);
       value = Math.max(Math.min(this.max, value), this.min);
-      const newTime = this._snap ? this.currentTime : ((pointerOffsetX + this.scrollLeft - previousScrollLeft) / this._width) * this.duration;
+      const newTime = this._snap ? this.currentTime : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.duration;
       previousTime = previousTime !== null ? previousTime : newTime;
       const startTime = newTime > previousTime ? previousTime : newTime;
       const endTime = newTime > previousTime ? newTime : previousTime;
-      const startIndex = Math.max(0, Math.floor((startTime / this.duration) * this.array.length * this.zoom));
-      const endIndex = Math.min(this.array.length, Math.ceil((endTime / this.duration) * this.array.length * this.zoom));
+      const startIndex = Math.max(0, Math.floor((startTime / this.duration) * this.array.length));
+      const endIndex = Math.min(this.array.length, Math.ceil((endTime / this.duration) * this.array.length));
       for (let index = startIndex; index < endIndex; index++) {
         this.array[index] = value;
       }
@@ -274,6 +274,10 @@ export default class ArraySignalInputElement extends HTMLElement {
 
   set zoom(value) {
     this._viewer.zoom = value;
+  }
+
+  get scrollWidth() {
+    return this._viewer.scrollWidth;
   }
 }
 
