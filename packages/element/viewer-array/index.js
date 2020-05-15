@@ -50,7 +50,7 @@ export default class ArrayViewerElement extends HTMLElement {
     this.addEventListener('wheel', (event) => {
       if (this.controls) {
         event.preventDefault();
-        if (event.deltaY < 0) {
+        if (event.deltaY > 0) {
           this.zoom *= .95;
         } else {
           this.zoom /= .95;
@@ -133,6 +133,9 @@ export default class ArrayViewerElement extends HTMLElement {
         this._maxValue = Math.max(this._maxValue, value);
       }
     }
+    if (this._step === undefined) {
+      this._stepValue = this.max % 1 ? 1 / String(this.max).split('.')[1].length : 1;
+    }
     if (this._maxValue === this._minValue) {
       this._minValue = Math.min(this._minValue, 0);
       this._maxValue = Math.max(this._maxValue, 100);
@@ -162,7 +165,7 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   get min() {
-    return this._min || this._minValue;
+    return this._min !== undefined ? this._min : this._minValue;
   }
 
   set min(value) {
@@ -172,7 +175,7 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   get max() {
-    return this._max || this._maxValue;
+    return this._max !== undefined ? this._max : this._maxValue;
   }
 
   set max(value) {
@@ -182,7 +185,7 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   get step() {
-    return this._step;
+    return this._step !== undefined ? this._step : this._stepValue;
   }
 
   set step(value) {
@@ -196,7 +199,7 @@ export default class ArrayViewerElement extends HTMLElement {
 
   set zoom(value) {
     this._zoom = Math.max(1, value);
-    this.draw();
+    this.scrollLeft = this.scrollLeft;
   }
 
   get scrollWidth() {

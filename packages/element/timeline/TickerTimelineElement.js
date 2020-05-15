@@ -76,6 +76,7 @@ class TickerTimelineElement extends AnimationTickerElement {
         currentPosition += (pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
       }
       this.currentTime = (currentPosition / this._width) * this.duration / this.zoom;
+      this.dispatchEvent(new Event('input'));
     };
     const pointerDown = (event) => {
       if (!(event.buttons & 1)) {
@@ -146,6 +147,9 @@ class TickerTimelineElement extends AnimationTickerElement {
 
   set currentTime(value) {
     value = Math.min(Math.max(0, value), this.duration);
+    if (this.currentTime === value) {
+      return;
+    }
     this._currentTime = value;
     this._tickText.textContent = `${this._currentTime.toFixed(1)}s`;
     this._updatePositionFromCurrentTime();

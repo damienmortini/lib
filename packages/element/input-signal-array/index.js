@@ -3,7 +3,7 @@ import Ticker from '../core/util/Ticker.js';
 
 export default class ArraySignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'time', 'frequency', 'duration', 'min', 'max', 'step', 'zoom'];
+    return ['array', 'time', 'duration', 'min', 'max', 'step', 'zoom'];
   }
 
   constructor() {
@@ -33,10 +33,11 @@ export default class ArraySignalInputElement extends HTMLElement {
     this._viewer = this.shadowRoot.querySelector('damo-viewer-array');
 
     this._currentTime = 0;
-    this._duration = 10;
-    this._frequency = 10;
     this._scrollLeft = 0;
     this._previousValue = undefined;
+
+    this.duration = 1;
+    this.array = new Float32Array(100);
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
@@ -45,7 +46,6 @@ export default class ArraySignalInputElement extends HTMLElement {
     resizeObserver.observe(this);
 
     let previousTime = null;
-    let previousScrollLeft = 0;
     let pointerOffsetX = 0;
     let pointerOffsetY = 0;
 
@@ -117,7 +117,6 @@ export default class ArraySignalInputElement extends HTMLElement {
       Ticker.add(setValuesFromPosition);
     };
     const pointerMove = (event) => {
-      previousScrollLeft = this.scrollLeft;
       pointerOffsetX = event.offsetX;
       pointerOffsetY = event.offsetY;
     };
@@ -130,20 +129,16 @@ export default class ArraySignalInputElement extends HTMLElement {
       this._viewer.removeEventListener('pointerout', pointerUp);
     };
     this._viewer.addEventListener('pointerdown', pointerDown);
-
-    this._updateViewerWidth();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'array':
-        this.array = new Function(`return [${newValue}]`)();
+        this.array = new Function(`return ${newValue}`)();
         break;
       case 'time':
         this.currentTime = Number(newValue);
         break;
-      case 'frequency':
-      case 'duration':
       case 'min':
       case 'max':
       case 'step':
@@ -153,32 +148,8 @@ export default class ArraySignalInputElement extends HTMLElement {
     }
   }
 
-  _updateViewerWidth() {
-    if (!this._array) {
-      this._viewer.array = new Float32Array(this.duration * this.frequency);
-    }
-  }
-
   draw() {
     return this._viewer.draw();
-  }
-
-  get frequency() {
-    return this._frequency;
-  }
-
-  set frequency(value) {
-    this._frequency = value;
-    this._updateViewerWidth();
-  }
-
-  get duration() {
-    return this._duration;
-  }
-
-  set duration(value) {
-    this._duration = value;
-    this._updateViewerWidth();
   }
 
   get currentTime() {
