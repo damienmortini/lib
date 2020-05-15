@@ -3,7 +3,7 @@ import Ticker from '../core/util/Ticker.js';
 
 export default class ArraySignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'time', 'frequency', 'duration', 'min', 'max', 'step'];
+    return ['array', 'time', 'frequency', 'duration', 'min', 'max', 'step', 'zoom'];
   }
 
   constructor() {
@@ -50,17 +50,34 @@ export default class ArraySignalInputElement extends HTMLElement {
     let pointerOffsetY = 0;
 
     this._snap = false;
+
+    const keySet = new Set();
     window.addEventListener('keydown', (event) => {
-      if (event.key === 'Shift' && !this._snap) {
-        previousTime = null;
-        this._snap = true;
+      if (keySet.has(event.key)) {
+        return;
+      }
+      keySet.add(event.key);
+      switch (event.key) {
+        case 'Shift':
+          previousTime = null;
+          this._snap = true;
+          break;
+        case 'Control':
+          this._viewer.controls = true;
+          break;
       }
     });
     window.addEventListener('keyup', (event) => {
-      if (event.key === 'Shift') {
-        previousTime = null;
-        this._snap = false;
+      switch (event.key) {
+        case 'Shift':
+          previousTime = null;
+          this._snap = false;
+          break;
+        case 'Control':
+          this._viewer.controls = false;
+          break;
       }
+      keySet.delete(event.key);
     });
 
     const setValuesFromPosition = () => {
@@ -68,12 +85,17 @@ export default class ArraySignalInputElement extends HTMLElement {
       value = Math.max(Math.min(this.max, value), this.min);
       const newTime = this._snap ? this.currentTime : ((pointerOffsetX + this.scrollLeft - previousScrollLeft) / this._width) * this.duration;
       previousTime = previousTime !== null ? previousTime : newTime;
-      const startTime = Math.max(0, newTime > previousTime ? previousTime : newTime);
+      const startTime = newTime > previousTime ? previousTime : newTime;
       const endTime = newTime > previousTime ? newTime : previousTime;
-      const step = 1 / this.frequency;
-      for (let time = startTime; time <= endTime; time += step) {
-        this._setValueAt(value, time);
+      const startIndex = Math.max(0, Math.floor((startTime / this.duration) * this.array.length * this.zoom));
+      const endIndex = Math.min(this.array.length, Math.ceil((endTime / this.duration) * this.array.length * this.zoom));
+      for (let index = startIndex; index < endIndex; index++) {
+        this.array[index] = value;
       }
+      this._viewer.draw({
+        start: startIndex,
+        length: endIndex - startIndex,
+      });
       previousTime = newTime;
       this.dispatchEvent(new Event('input', {
         bubbles: true,
@@ -83,7 +105,7 @@ export default class ArraySignalInputElement extends HTMLElement {
       }
     };
     const pointerDown = (event) => {
-      if (!(event.buttons & 1)) {
+      if (this._viewer.controls || !(event.buttons & 1)) {
         return;
       }
       this._viewer.setPointerCapture(event.pointerId);
@@ -124,13 +146,14 @@ export default class ArraySignalInputElement extends HTMLElement {
       case 'min':
       case 'max':
       case 'step':
+      case 'zoom':
         this[name] = Number(newValue);
         break;
     }
   }
 
   _setValueAt(value, time) {
-    const index = Math.floor((time / this.duration) * (this._viewer.width - 1));
+    const index = Math.floor((time / this.duration) * (this.array.length));
     this.array[index] = value;
     this._viewer.draw({
       start: index,
@@ -142,7 +165,6 @@ export default class ArraySignalInputElement extends HTMLElement {
     if (!this._array) {
       this._viewer.array = new Float32Array(this.duration * this.frequency);
     }
-    this._viewer.width = this.frequency * this.duration;
   }
 
   draw() {
@@ -239,11 +261,19 @@ export default class ArraySignalInputElement extends HTMLElement {
   }
 
   get scrollLeft() {
-    return this._scrollLeft;
+    return this._viewer.scrollLeft;
   }
 
   set scrollLeft(value) {
-    this._scrollLeft = value;
+    this._viewer.scrollLeft = value;
+  }
+
+  get zoom() {
+    return this._viewer.zoom;
+  }
+
+  set zoom(value) {
+    this._viewer.zoom = value;
   }
 }
 
