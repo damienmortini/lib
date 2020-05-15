@@ -131,8 +131,8 @@ export default class GestureObserver {
 
     this._callback({
       target: event.currentTarget,
-      movementX: this.pointerLock ? event.movementX : movementX,
-      movementY: this.pointerLock ? event.movementY : movementY,
+      movementX: this.pointerLock ? event.movementX / devicePixelRatio : movementX,
+      movementY: this.pointerLock ? event.movementY / devicePixelRatio : movementY,
       movementScale,
       movementRotation,
     });

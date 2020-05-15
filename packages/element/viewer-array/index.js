@@ -71,7 +71,7 @@ export default class ArrayViewerElement extends HTMLElement {
     });
 
     this._gestureObserver = new GestureObserver((gesture) => {
-      this.scrollLeft -= gesture.movementX * devicePixelRatio;
+      this.scrollLeft -= gesture.movementX;
     }, { pointerLock: true });
   }
 
@@ -104,7 +104,7 @@ export default class ArrayViewerElement extends HTMLElement {
     start = 0,
     length = this.array.length,
   } = {}) {
-    this._context.clearRect(Math.floor((start / this.array.length) * this._canvas.width), 0, Math.ceil((length / this.array.length) * this._canvas.width), this._canvas.height);
+    this._context.clearRect(Math.floor((start / this.array.length) * this._canvas.width * this.zoom - this.scrollLeft * window.devicePixelRatio), 0, Math.ceil((length / this.array.length) * this._canvas.width * this.zoom), this._canvas.height);
     let previousValue = undefined;
     const height = this._canvas.height / Math.round(this.max - this.min);
     const y = this._canvas.height + this.min * height;
