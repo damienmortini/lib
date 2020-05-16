@@ -51,7 +51,7 @@ class HeadTimelineElement extends HTMLElement {
       const right = this._width - padding;
       if (pointerOffsetX > right) {
         currentPosition += (pointerOffsetX - right) * SIDE_MOVEMENT_SPEED;
-      } else if (pointerOffsetX < padding && this.scrollLeft) {
+      } else if (pointerOffsetX < padding) {
         currentPosition += (pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
       }
       this.position = (currentPosition / this._width) * this.length / this.zoom;
@@ -91,18 +91,16 @@ class HeadTimelineElement extends HTMLElement {
     if (!this._width) {
       return;
     }
-    let x = (this.position / this.length) * this._width * this.zoom - this.scrollLeft;
+    const edgeX = (this.position / this.length) * this._width * this.zoom - this.scrollLeft;
     const padding = this._width * PADDING_RATIO;
     const right = this._width - padding;
-    if (x > right && (this._width * (this.zoom - 1) - this.scrollLeft)) {
-      this.scrollLeft += (x - right) * SIDE_MOVEMENT_SPEED;
-      x = right;
-    } else if (x < padding && this.scrollLeft) {
-      this.scrollLeft += (x - padding) * SIDE_MOVEMENT_SPEED;
-      x = padding;
-    } else {
-      x = Math.max(0, x);
+    if (edgeX > right) {
+      this.scrollLeft += (edgeX - right) * SIDE_MOVEMENT_SPEED;
+    } else if (edgeX < padding) {
+      this.scrollLeft += (edgeX - padding) * SIDE_MOVEMENT_SPEED;
     }
+    let x = (this.position / this.length) * this._width * this.zoom - this.scrollLeft;
+    x = Math.min(this._width, Math.max(0, x));
     this._tick.style.transform = `translateX(${x}px) translateX(-50%)`;
   }
 
