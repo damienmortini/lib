@@ -30,8 +30,8 @@ export default class ArrayViewerElement extends HTMLElement {
       <canvas></canvas>
     `;
 
-    this._canvas = this.shadowRoot.querySelector('canvas');
-    this._context = this._canvas.getContext('2d');
+    this.canvas = this.shadowRoot.querySelector('canvas');
+    this.context = this.canvas.getContext('2d');
 
     this._step = 1;
     this._zoom = 1;
@@ -41,8 +41,8 @@ export default class ArrayViewerElement extends HTMLElement {
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
-      this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
-      this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
+      this.canvas.width = entries[0].contentRect.width * devicePixelRatio;
+      this.canvas.height = entries[0].contentRect.height * devicePixelRatio;
       this.draw();
     });
     resizeObserver.observe(this);
@@ -96,24 +96,18 @@ export default class ArrayViewerElement extends HTMLElement {
     this.draw();
   }
 
-  drawCallback(context, x, y, width, height, previousValue, value) {
-    context.fillRect(x, y, width, height);
-  }
-
   draw({
     start = 0,
     length = this.array.length,
   } = {}) {
-    this._context.clearRect(Math.floor((start / this.array.length) * this._canvas.width * this.zoom - this.scrollLeft * window.devicePixelRatio), 0, Math.ceil((length / this.array.length) * this._canvas.width * this.zoom), this._canvas.height);
-    let previousValue = undefined;
-    const height = this._canvas.height / Math.round(this.max - this.min);
-    const y = this._canvas.height + this.min * height;
+    this.context.clearRect(Math.floor((start / this.array.length) * this.canvas.width * this.zoom - this.scrollLeft * window.devicePixelRatio), 0, Math.ceil((length / this.array.length) * this.canvas.width * this.zoom), this.canvas.height);
+    const height = this.canvas.height / Math.round(this.max - this.min);
+    const y = this.canvas.height + this.min * height;
     length = Math.min(length, this.array.length - start);
-    const valueWidth = (1 / this.array.length) * this.zoom * this._canvas.width;
+    const valueWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
     for (let index = start; index < start + length; index++) {
       const value = Math.round(this.array[index] / this.step) * this.step;
-      this.drawCallback(this._context, Math.floor(index * valueWidth - this.scrollLeft * window.devicePixelRatio), y, Math.ceil(valueWidth), -value * height, previousValue, value);
-      previousValue = value;
+      this.context.fillRect(Math.floor(index * valueWidth - this.scrollLeft * window.devicePixelRatio), y, Math.ceil(valueWidth), -value * height);
     }
   }
 

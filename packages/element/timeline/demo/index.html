@@ -38,16 +38,17 @@
 </head>
 
 <body>
-  <element-timeline duration="60" zoom="6">
-    <header>Tree</header><damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array><footer>Test</footer>
+  <element-timeline length="60" zoom="6">
+    <header>Tree</header><damo-input-signal-array name="tree" step=".01" max="1" zoom="6" array="new Float32Array(1000)"></damo-input-signal-array><footer>Test</footer>
     </damo-input-signal-array>
-    <header>Rock</header><damo-input-signal-array name="rock" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    <header>Rock</header><damo-input-signal-array name="rock" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
     </damo-input-signal-array>
-    <header>Sky</header><damo-input-signal-array name="sky" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    <header>Sky</header><damo-input-signal-array name="sky" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
     </damo-input-signal-array><footer>Sky Footer</footer>
+    <header>Beat</header><damo-input-signal-beat name="beat" zoom="6" step=".01" max="1" beats="[0, .1, .4, .5, .8, .9]"></damo-input-signal-array>
+    <!-- <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
     <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
-    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
-    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
+    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array> -->
   </element-timeline>
   <details open>
     <summary>Output</summary>
@@ -55,9 +56,10 @@
   </details>
 
   <script type="module">
+    import '../../element-input-signal-beat/index.js';
     import '../../element-input-signal-array/index.js';
-    import Element from '../index.js';
 
+    import Element from '../index.js';
     window.customElements.define(`element-timeline`, Element);
 
     const timelineElement = document.querySelector('element-timeline');
