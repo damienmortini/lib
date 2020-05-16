@@ -1,7 +1,7 @@
 import Ticker from '../core/util/Ticker.js';
 
 const SIDE_MOVEMENT_SPEED = .2;
-const PADDING_RATIO = .2;
+const PADDING_RATIO = .25;
 
 class HeadTimelineElement extends HTMLElement {
   constructor() {

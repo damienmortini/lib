@@ -29,6 +29,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._context = this._canvas.getContext('2d');
 
+    this._value = NaN;
     this._position = 0;
     this._scrollLeft = 0;
     this._width = 1;
@@ -74,7 +75,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      let newbeat = (event.offsetX + this.scrollLeft) / this.max / this.zoom / this._width;
+      let newbeat = ((event.offsetX + this.scrollLeft) / this.scrollWidth) * this.max;
       if (this.step) {
         newbeat = Math.round(newbeat / this.step) * this.step;
       }
@@ -140,10 +141,6 @@ export default class BeatSignalInputElement extends HTMLElement {
     }
   }
 
-  connectedCallback() {
-    this.draw();
-  }
-
   get beats() {
     return this._beats;
   }
@@ -196,20 +193,29 @@ export default class BeatSignalInputElement extends HTMLElement {
     if (value === this._position) {
       return;
     }
+    const backward = value < this._position;
+    const start = backward ? value : this._position;
+    const end = backward ? this._position : value;
     let changed = false;
-    const start = value < this._position ? value : this._position;
-    const end = value > this._position ? value : this._position;
+    let maxBeat = -Infinity;
+    let minBeat = Infinity;
     for (const beat of this.beats) {
       if (beat >= start && beat <= end) {
         changed = true;
-        break;
+        maxBeat = Math.max(maxBeat, beat);
+        minBeat = Math.min(minBeat, beat);
       }
     }
     this._position = value;
     if (changed) {
+      this._value = backward ? minBeat : maxBeat;
       this.dispatchEvent(new Event('change', { bubbles: true }));
     }
     this.draw();
+  }
+
+  get value() {
+    return this._value;
   }
 
   get name() {
@@ -227,8 +233,8 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._context.strokeStyle = 'rgba(0, 0, 0, .2)';
     if (this.step) {
       let stepWidth = this.step / this.max * this.zoom * this._width;
-      while (stepWidth < 10) {
-        stepWidth *= 10;
+      while (stepWidth < 1) {
+        stepWidth *= 2;
       }
       for (let position = 0; position < this._width; position += stepWidth) {
         const x = position - (this.scrollLeft % stepWidth);

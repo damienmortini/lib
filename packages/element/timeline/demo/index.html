@@ -64,6 +64,8 @@
   </details>
 
   <script type="module">
+    import Ticker from '../../core/util/Ticker.js';
+
     import '../../element-input-signal-beat/index.js';
     import '../../element-input-signal-array/index.js';
 
@@ -108,15 +110,16 @@
       div.textContent = `${event.target.name} @ ${event.target.value}`;
       output.prepend(div);
     });
-    // timelineElement.addEventListener('change', (event) => {
-    //   console.log(event.target.name, event.target.value);
-    // });
-    // timelineElement.addEventListener('input', (event) => {
-    //   console.log(event.target.name, event.target.value);
-    // });
+
+    const update = () => {
+      timelineElement.position += Ticker.deltaTime;
+    }
+    Ticker.add(update);
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ') {
-        timelineElement[timelineElement.paused ? 'play' : 'pause']();
+        Ticker[Ticker.has(update) ? 'delete' : 'add'](update);
+      } else {
+        beatSignalInput.beats.add(beatSignalInput.position);
       }
     });
   </script>
