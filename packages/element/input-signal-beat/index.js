@@ -26,6 +26,8 @@ export default class BeatSignalInputElement extends HTMLElement {
       <canvas></canvas>
     `;
 
+    this.color = 'white';
+
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._context = this._canvas.getContext('2d');
 
@@ -36,17 +38,21 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._zoom = 1;
     this._max = 1;
     this._step = undefined;
-    this.startFrame = 0;
-    this.color = 'white';
+    this._decimals = 0;
 
     const drawBinded = this.draw.bind(this);
     let requestAnimationFrameID = -1;
+    const self = this;
     class Beats extends Set {
       add(value) {
         const returnValue = super.add(value);
         cancelAnimationFrame(requestAnimationFrameID);
         requestAnimationFrameID = requestAnimationFrame(drawBinded);
         return returnValue;
+      }
+      addOnStep(value) {
+        value = Math.round(value / self.step) * self.step;
+        this.add(Number(value.toFixed(self._decimals)));
       }
       delete(value) {
         const returnValue = super.delete(value);
@@ -63,10 +69,8 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._beats = new Beats();
 
     let previousbeat = null;
-    let decimals = 0;
     const preventContextMenu = (event) => event.preventDefault();
     const pointerDown = (event) => {
-      decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
       this._canvas.setPointerCapture(event.pointerId);
       this._canvas.addEventListener('pointermove', pointerMove);
       this._canvas.addEventListener('pointerup', pointerUp);
@@ -76,17 +80,16 @@ export default class BeatSignalInputElement extends HTMLElement {
     };
     const pointerMove = (event) => {
       let newbeat = ((event.offsetX + this.scrollLeft) / this.scrollWidth) * this.max;
-      if (this.step) {
-        newbeat = Math.round(newbeat / this.step) * this.step;
-      }
+      // if (this.step) {
+      //   newbeat = ;
+      // }
       previousbeat = previousbeat !== null ? previousbeat : newbeat;
       const startBeat = newbeat > previousbeat ? previousbeat : newbeat;
       const endBeat = newbeat > previousbeat ? newbeat : previousbeat;
       if (event.buttons === 1) {
         if (this.step) {
           for (let beat = startBeat; beat <= endBeat; beat += this.step) {
-            beat = Number(beat.toFixed(decimals));
-            this.beats.add(beat);
+            this.beats.addOnStep(beat);
           }
         } else {
           this.beats.add(newbeat);
@@ -173,6 +176,7 @@ export default class BeatSignalInputElement extends HTMLElement {
 
   set step(value) {
     this._step = value;
+    this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
     this.draw();
   }
 
