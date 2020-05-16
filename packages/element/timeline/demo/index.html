@@ -22,6 +22,7 @@
 
     element-timeline {
       width: 500px;
+      height: 300px;
     }
 
     details {
@@ -39,6 +40,10 @@
 
 <body>
   <element-timeline length="60" zoom="6">
+    <header>Beat</header>
+    <damo-input-signal-beat name="beat" zoom="6" step=".5" max="60">
+    </damo-input-signal-beat>
+
     <header>Tree</header>
     <damo-input-signal-array name="tree" step=".01" max="1" zoom="6" array="new Float32Array(1000)">
     </damo-input-signal-array>
@@ -53,10 +58,6 @@
     <damo-input-signal-array name="sky" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
     </damo-input-signal-array>
     <footer>Sky Footer</footer>
-
-    <header>Beat</header>
-    <damo-input-signal-beat name="beat" zoom="6" step=".5" max="60">
-    </damo-input-signal-beat>
   </element-timeline>
   <details open>
     <summary>Output</summary>

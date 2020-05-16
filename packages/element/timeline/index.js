@@ -16,6 +16,7 @@ export default class TimelineInputElement extends HTMLElement {
           grid-template-columns: auto 1fr auto;
           align-items: center;
           justify-items: center;
+          overflow: auto;
         }
         :host::before {
           content: "";
@@ -27,11 +28,12 @@ export default class TimelineInputElement extends HTMLElement {
           z-index: 1;
           grid-row: 1;
           grid-column: 2;
+          position: sticky;
+          top: 0;
         }
         ::slotted(:not(header):not(footer)) {
           grid-column: 2;
           width: 100%;
-          height: 50px;
         }
         ::slotted(:not(header):not(footer):not(:last-child)) {
           margin-bottom: 1px;
