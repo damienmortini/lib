@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-signal-beat</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+      gap: 10px;
+    }
+
+    element-input-signal-beat {
+      width: 500px;
+    }
+  </style>
+</head>
+
+<body>
+  <element-input-signal-beat></element-input-signal-beat>
+  <element-input-signal-beat step=".1"></element-input-signal-beat>
+  <element-input-signal-beat step=".01"></element-input-signal-beat>
+  <element-input-signal-beat step=".001"></element-input-signal-beat>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`element-input-signal-beat`, Element);
+
+    const element = document.querySelector('element-input-signal-beat');
+
+    for (let index = 0; index < 10; index++) {
+      element.beats.add(Math.random());
+    }
+
+    // const arrayInputElement = document.querySelector('element-input-signal-beat');
+    // const array = new Float32Array(1000);
+    // for (let index = 0; index < array.length; index++) {
+    //   array[index] = (Math.random() * 2 - 1) * 20;
+    // }
+    // arrayInputElement.array = array;
+
+    // const arrayInputElementStepped = document.querySelector('element-input-signal-beat#stepped');
+    // console.log(arrayInputElementStepped.array.length);
+
+    // for (let index = 0; index < arrayInputElementStepped.array.length; index++) {
+    //   arrayInputElementStepped.array[index] = Math.random();
+    // }
+    // arrayInputElementStepped.draw();
+  </script>
+</body>
+
+</html>

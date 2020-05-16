@@ -1,14 +1,11 @@
-import AnimationTickerElement from '../element-animation-ticker/index.js';
 import Ticker from '../core/util/Ticker.js';
 
 const SIDE_MOVEMENT_SPEED = .2;
 const PADDING_RATIO = .2;
 
-class TickerTimelineElement extends AnimationTickerElement {
+class HeadTimelineElement extends HTMLElement {
   constructor() {
     super();
-
-    this.noautoplay = true;
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -25,48 +22,30 @@ class TickerTimelineElement extends AnimationTickerElement {
           position: absolute;
           will-change: transform;
           left: 0;
-          top: 0;
-          width: 0;
           height: 100%;
-        }
-        #text {
-          position: absolute;
           user-select: none;
           top: 2px;
           left: 0;
-          transform: translateX(-50%);
+          padding: 0;
           background: white;
           border-radius: 2px;
           height: calc(100% - 4px);
           box-shadow: 0 0 4px black;
         }
-        #tip {
-          pointer-events: none;
-          position: absolute;
-          top: 100%;
-          left: 0;
-          border-left: 1px solid red;
-        }
       </style>
-      <div id="tick">
-        <div id="text">100</div>
-        <div id="tip"></div>
-      </div>
+      <div id="tick">0.00</div>
     `;
 
     this.zoom = 1;
-    this._duration = 1;
+    this._length = 1;
     this._scrollLeft = 0;
-    this._currentTime = 0;
+    this._position = 0;
 
     this._tick = this.shadowRoot.querySelector('#tick');
-    this._tickText = this.shadowRoot.querySelector('#text');
-    this._tickTip = this.shadowRoot.querySelector('#tip');
-    this._width = 0;
+    this._width = 1;
 
     let pointerOffsetX = 0;
-    let pausedBeforeInteraction = false;
-    const updateCurrentTimeFromPosition = () => {
+    const updatePositionFromPosition = () => {
       let currentPosition = pointerOffsetX + this.scrollLeft;
       const padding = this._width * PADDING_RATIO;
       const right = this._width - padding;
@@ -75,7 +54,7 @@ class TickerTimelineElement extends AnimationTickerElement {
       } else if (pointerOffsetX < padding && this.scrollLeft) {
         currentPosition += (pointerOffsetX - padding) * SIDE_MOVEMENT_SPEED;
       }
-      this.currentTime = (currentPosition / this._width) * this.duration / this.zoom;
+      this.position = (currentPosition / this._width) * this.length / this.zoom;
       this.dispatchEvent(new Event('input'));
     };
     const pointerDown = (event) => {
@@ -87,37 +66,32 @@ class TickerTimelineElement extends AnimationTickerElement {
       this.addEventListener('pointerup', pointerUp);
       this.addEventListener('pointerout', pointerUp);
       pointerMove(event);
-      pausedBeforeInteraction = this.paused;
-      this.pause();
-      Ticker.add(updateCurrentTimeFromPosition);
+      Ticker.add(updatePositionFromPosition);
     };
     const pointerMove = (event) => {
       pointerOffsetX = event.offsetX;
     };
     const pointerUp = (event) => {
-      Ticker.delete(updateCurrentTimeFromPosition);
+      Ticker.delete(updatePositionFromPosition);
       this.releasePointerCapture(event.pointerId);
       this.removeEventListener('pointermove', pointerMove);
       this.removeEventListener('pointerup', pointerUp);
       this.removeEventListener('pointerout', pointerUp);
-      if (!pausedBeforeInteraction) {
-        this.play();
-      }
     };
     this.addEventListener('pointerdown', pointerDown);
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
-      this._updatePositionFromCurrentTime();
+      this._updatePositionFromInput();
     });
     resizeObserver.observe(this);
   }
 
-  _updatePositionFromCurrentTime() {
+  _updatePositionFromInput() {
     if (!this._width) {
       return;
     }
-    let x = (this.currentTime / this.duration) * this._width * this.zoom - this.scrollLeft;
+    let x = (this.position / this.length) * this._width * this.zoom - this.scrollLeft;
     const padding = this._width * PADDING_RATIO;
     const right = this._width - padding;
     if (x > right && (this._width * (this.zoom - 1) - this.scrollLeft)) {
@@ -129,43 +103,31 @@ class TickerTimelineElement extends AnimationTickerElement {
     } else {
       x = Math.max(0, x);
     }
-    this._tick.style.transform = `translateX(${x}px)`;
+    this._tick.style.transform = `translateX(${x}px) translateX(-50%)`;
   }
 
-  get tickHeight() {
-    return this._tickHeight;
+  get position() {
+    return this._position;
   }
 
-  set tickHeight(value) {
-    this._tickHeight = value;
-    this._tickTip.style.height = `${this._tickHeight}px`;
-  }
-
-  get currentTime() {
-    return this._currentTime;
-  }
-
-  set currentTime(value) {
-    value = Math.min(Math.max(0, value), this.duration);
-    if (this.currentTime === value) {
+  set position(value) {
+    value = Math.min(Math.max(0, value), this.length);
+    if (this.position === value) {
       return;
     }
-    this._currentTime = value;
-    this._tickText.textContent = `${this._currentTime.toFixed(1)}s`;
-    this._updatePositionFromCurrentTime();
-    if (this._currentTime === this.duration) {
-      this.pause();
-    }
-    this.dispatchEvent(new Event('timeupdate'));
+    this._position = value;
+    this._tick.textContent = `${this._position.toFixed(2)}`;
+    this._updatePositionFromInput();
+    this.dispatchEvent(new Event('change'));
   }
 
-  get duration() {
-    return this._duration;
+  get length() {
+    return this._length;
   }
 
-  set duration(value) {
-    this._duration = value;
-    this.currentTime = Math.min(this.currentTime, this.duration);
+  set length(value) {
+    this._length = value;
+    this.position = Math.min(this.position, this.length);
   }
 
   get scrollLeft() {
@@ -181,11 +143,11 @@ class TickerTimelineElement extends AnimationTickerElement {
     this.dispatchEvent(new Event('scroll'));
   }
 
-  update() {
-    this.currentTime += Ticker.deltaTime;
+  get scrollWidth() {
+    return this._width * this.zoom;
   }
 }
 
-if (!customElements.get('damo-timeline-ticker')) {
-  customElements.define('damo-timeline-ticker', class extends TickerTimelineElement { });
+if (!customElements.get('damo-timeline-head')) {
+  customElements.define('damo-timeline-head', class extends HeadTimelineElement { });
 }
