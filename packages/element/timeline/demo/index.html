@@ -39,16 +39,24 @@
 
 <body>
   <element-timeline length="60" zoom="6">
-    <header>Tree</header><damo-input-signal-array name="tree" step=".01" max="1" zoom="6" array="new Float32Array(1000)"></damo-input-signal-array><footer>Test</footer>
+    <header>Tree</header>
+    <damo-input-signal-array name="tree" step=".01" max="1" zoom="6" array="new Float32Array(1000)">
     </damo-input-signal-array>
-    <header>Rock</header><damo-input-signal-array name="rock" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    <footer>Test</footer>
+
     </damo-input-signal-array>
-    <header>Sky</header><damo-input-signal-array name="sky" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
-    </damo-input-signal-array><footer>Sky Footer</footer>
-    <header>Beat</header><damo-input-signal-beat name="beat" zoom="6" step=".01" max="1" beats="[0, .1, .4, .5, .8, .9]"></damo-input-signal-array>
-    <!-- <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
-    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
-    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array> -->
+    <header>Rock</header>
+    <damo-input-signal-array name="rock" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    </damo-input-signal-array>
+
+    <header>Sky</header>
+    <damo-input-signal-array name="sky" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    </damo-input-signal-array>
+    <footer>Sky Footer</footer>
+
+    <header>Beat</header>
+    <damo-input-signal-beat name="beat" zoom="6" step=".5" max="60">
+    </damo-input-signal-beat>
   </element-timeline>
   <details open>
     <summary>Output</summary>
@@ -63,6 +71,13 @@
     window.customElements.define(`element-timeline`, Element);
 
     const timelineElement = document.querySelector('element-timeline');
+
+    const beatSignalInput = document.body.querySelector('damo-input-signal-beat');
+    for (let index = 0; index < timelineElement.length; index += 2) {
+      beatSignalInput.beats.add(index);
+      beatSignalInput.beats.add(index + .5);
+    }
+
     // const output = document.querySelector('#output');
     // const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light1', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
     // const keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];

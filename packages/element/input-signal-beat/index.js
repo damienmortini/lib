@@ -226,7 +226,10 @@ export default class BeatSignalInputElement extends HTMLElement {
 
     this._context.strokeStyle = 'rgba(0, 0, 0, .2)';
     if (this.step) {
-      const stepWidth = this.scrollWidth * this.max * this.step;
+      let stepWidth = this.step / this.max * this.zoom * this._width;
+      while (stepWidth < 10) {
+        stepWidth *= 10;
+      }
       for (let position = 0; position < this._width; position += stepWidth) {
         const x = position - (this.scrollLeft % stepWidth);
         this._context.beginPath();
@@ -237,7 +240,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     }
 
     this._context.strokeStyle = 'red';
-    const position = this.position / this.max / this.zoom * this._canvas.width;
+    const position = (this.position / this.max) * this.zoom * this._canvas.width - this.scrollLeft;
     this._context.beginPath();
     this._context.moveTo(position, 0);
     this._context.lineTo(position, this._canvas.height);
