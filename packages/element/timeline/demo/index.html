@@ -119,7 +119,7 @@
       if (event.key === ' ') {
         Ticker[Ticker.has(update) ? 'delete' : 'add'](update);
       } else {
-        beatSignalInput.beats.add(beatSignalInput.position);
+        beatSignalInput.beats.addOnStep(beatSignalInput.position);
       }
     });
   </script>
