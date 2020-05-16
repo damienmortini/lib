@@ -39,12 +39,15 @@
 
 <body>
   <element-timeline duration="60" zoom="6">
-    <damo-input-signal-array name="tree" step=".5" max="1" frequency="100">
+    <header>Tree</header><damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array><footer>Test</footer>
     </damo-input-signal-array>
-    <damo-input-signal-array name="rock" array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2">
+    <header>Rock</header><damo-input-signal-array name="rock" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
     </damo-input-signal-array>
-    <damo-input-signal-array name="sky" array="1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2">
-    </damo-input-signal-array>
+    <header>Sky</header><damo-input-signal-array name="sky" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    </damo-input-signal-array><footer>Sky Footer</footer>
+    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
+    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
+    <damo-input-signal-array name="tree" step=".01" max="1" array="new Float32Array(1000)"></damo-input-signal-array>
   </element-timeline>
   <details open>
     <summary>Output</summary>

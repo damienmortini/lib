@@ -11,20 +11,39 @@ export default class TimelineInputElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          display: block;
+          display: grid;
           width: 300px;
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          justify-items: center;
+        }
+        :host::before {
+          content: "";
+          grid-row: 1;
+          grid-row: 1;
         }
         damo-timeline-ticker {
           width: 100%;
           z-index: 1;
+          grid-area: ticker;
+          grid-row: 1;
+          grid-column: 2;
         }
-        slot {
-          display: grid;
-          gap: 2px;
-        }
-        ::slotted(*) {
-          width: calc(100% * var(--zoom));
+        ::slotted(:not(header):not(footer)) {
+          grid-column: 2;
+          width: 100%;
           height: 50px;
+        }
+        ::slotted(:not(header):not(footer):not(:last-child)) {
+          margin-bottom: 1px;
+        }
+        ::slotted(header) {
+          grid-column: 1;
+          margin-right: 5px;
+        }
+        ::slotted(footer) {
+          grid-column: 3;
+          margin-left: 5px;
         }
       </style>
       <damo-timeline-ticker></damo-timeline-ticker>
@@ -33,12 +52,12 @@ export default class TimelineInputElement extends HTMLElement {
 
     this._zoom = 1;
     this._timelineTicker = this.shadowRoot.querySelector('damo-timeline-ticker');
-    this._slot = this.shadowRoot.querySelector('slot');
+    this._timelineSlot = this.shadowRoot.querySelector('slot');
 
     this._channels = [];
 
-    this._slot.addEventListener('slotchange', (event) => {
-      this._channels = this._slot.assignedElements({ flatten: true });
+    this._timelineSlot.addEventListener('slotchange', (event) => {
+      this._channels = this._timelineSlot.assignedElements({ flatten: true });
       for (const channel of this._channels) {
         for (const key of ['duration', 'currentTime', 'scrollLeft', 'zoom']) {
           if (key in channel) {
@@ -46,10 +65,10 @@ export default class TimelineInputElement extends HTMLElement {
           }
         }
       }
-      this._timelineTicker.tickHeight = this._slot.clientHeight;
+      this._timelineTicker.tickHeight = this._timelineSlot.clientHeight;
     });
 
-    this._slot.addEventListener('wheel', (event) => {
+    this._timelineSlot.addEventListener('wheel', (event) => {
       event.preventDefault();
       if (event.deltaY < 0) {
         this.currentTime -= this.zoom;
