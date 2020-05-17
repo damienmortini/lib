@@ -146,6 +146,10 @@ export default class TimelineInputElement extends HTMLElement {
       }
     }
   }
+
+  get channels() {
+    return this._channels;
+  }
 }
 
 if (!customElements.get('damo-timeline')) {
