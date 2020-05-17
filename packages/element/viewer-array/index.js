@@ -2,7 +2,7 @@ import GestureObserver from '../core/input/GestureObserver.js';
 
 export default class ArrayViewerElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'min', 'max', 'step', 'zoom', 'controls'];
+    return ['array', 'min', 'max', 'zoom', 'controls'];
   }
 
   constructor() {
@@ -15,6 +15,7 @@ export default class ArrayViewerElement extends HTMLElement {
           position: relative;
           width: 300px;
           height: 150px;
+          background: lightgrey;
         }
         :host([controls]) {
           touch-action: none;
@@ -33,7 +34,6 @@ export default class ArrayViewerElement extends HTMLElement {
     this.canvas = this.shadowRoot.querySelector('canvas');
     this.context = this.canvas.getContext('2d');
 
-    this._step = 1;
     this._zoom = 1;
     this._scrollLeft = 0;
     this._width = 1;
@@ -85,7 +85,6 @@ export default class ArrayViewerElement extends HTMLElement {
         break;
       case 'max':
       case 'min':
-      case 'step':
       case 'zoom':
         this[name] = Number(newValue);
         break;
@@ -102,8 +101,7 @@ export default class ArrayViewerElement extends HTMLElement {
     const y = this.canvas.height + this.min * height;
     const valueWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
     for (let index = 0; index < this.array.length; index++) {
-      const value = Math.round(this.array[index] / this.step) * this.step;
-      this.context.fillRect(index * valueWidth - this.scrollLeft * window.devicePixelRatio, y, valueWidth, -value * height);
+      this.context.fillRect(index * valueWidth - this.scrollLeft * window.devicePixelRatio, y, valueWidth, -this.array[index] * height);
     }
   }
 
@@ -122,10 +120,7 @@ export default class ArrayViewerElement extends HTMLElement {
       for (const value of this.array) {
         this._maxValue = Math.max(this._maxValue, value);
       }
-    }
-    if (this._step === undefined) {
-      this._stepValue = this.max % 1 ? 1 / String(this.max).split('.')[1].length : 1;
-    }
+    }    
     if (this._maxValue === this._minValue) {
       this._minValue = Math.min(this._minValue, 0);
       this._maxValue = Math.max(this._maxValue, 100);
@@ -171,15 +166,6 @@ export default class ArrayViewerElement extends HTMLElement {
   set max(value) {
     this._max = value;
     this._updateBounds();
-    this.draw();
-  }
-
-  get step() {
-    return this._step !== undefined ? this._step : this._stepValue;
-  }
-
-  set step(value) {
-    this._step = value;
     this.draw();
   }
 
