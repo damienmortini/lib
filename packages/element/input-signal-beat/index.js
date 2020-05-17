@@ -1,6 +1,6 @@
 export default class BeatSignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['beats', 'min', 'max', 'step', 'zoom'];
+    return ['beats', 'length', 'step', 'zoom'];
   }
 
   constructor() {
@@ -36,7 +36,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._position = 0;
     this._scrollLeft = 0;
     this._zoom = 1;
-    this._max = 1;
+    this._length = 1;
     this._step = undefined;
     this._decimals = 0;
 
@@ -79,7 +79,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const newbeat = ((event.offsetX + this.scrollLeft) / this.scrollWidth) * this.max;
+      const newbeat = ((event.offsetX + this.scrollLeft) / this.scrollWidth) * this.length;
       previousbeat = previousbeat !== null ? previousbeat : newbeat;
       const startBeat = newbeat > previousbeat ? previousbeat : newbeat;
       const endBeat = newbeat > previousbeat ? newbeat : previousbeat;
@@ -132,8 +132,7 @@ export default class BeatSignalInputElement extends HTMLElement {
           this.beats.add(beat);
         }
         break;
-      case 'min':
-      case 'max':
+      case 'length':
       case 'step':
       case 'zoom':
         this[name] = Number(newValue);
@@ -177,12 +176,12 @@ export default class BeatSignalInputElement extends HTMLElement {
     this.draw();
   }
 
-  get max() {
-    return this._max;
+  get length() {
+    return this._length;
   }
 
-  set max(value) {
-    this._max = value;
+  set length(value) {
+    this._length = value;
     this.draw();
   }
 
@@ -233,7 +232,7 @@ export default class BeatSignalInputElement extends HTMLElement {
 
     this._context.strokeStyle = 'rgba(0, 0, 0, .2)';
     if (this.step) {
-      let stepWidth = this.step / this.max * this.zoom * this._canvas.width;
+      let stepWidth = this.step / this.length * this.zoom * this._canvas.width;
       while (stepWidth < 1) {
         stepWidth *= 2;
       }
@@ -247,7 +246,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     }
 
     this._context.strokeStyle = 'red';
-    const position = (this.position / this.max) * this.zoom * this._canvas.width - this.scrollLeft * devicePixelRatio;
+    const position = (this.position / this.length) * this.zoom * this._canvas.width - this.scrollLeft * devicePixelRatio;
     this._context.beginPath();
     this._context.moveTo(position, 0);
     this._context.lineTo(position, this._canvas.height);
@@ -258,7 +257,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     const size = Math.min(10, this._canvas.height * .5);
     for (const beat of this.beats) {
       this._context.resetTransform();
-      const x = (beat / this.max) * this._canvas.width * this.zoom - this.scrollLeft * devicePixelRatio;
+      const x = (beat / this.length) * this._canvas.width * this.zoom - this.scrollLeft * devicePixelRatio;
       this._context.translate(x, this._canvas.height * .5);
       this._context.rotate(Math.PI * .25);
       this._context.fillRect(-size * .5, -size * .5, size, size);

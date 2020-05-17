@@ -58,7 +58,6 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
 
     const setValuesFromPosition = () => {
       let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0);
-      value = Math.round(value / this.step) * this.step;
       value = Math.max(Math.min(this.max, value), this.min);
       const newPosition = this._snap ? this.position : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.length;
       previousPosition = previousPosition !== null ? previousPosition : newPosition;
@@ -82,7 +81,7 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
       }
     };
     const pointerDown = (event) => {
-      if (this.controls || !(event.buttons & 1)) {
+      if (this.controls || !(event.buttons & 1) || this.disabled) {
         return;
       }
       this.canvas.setPointerCapture(event.pointerId);
@@ -172,6 +171,18 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
 
   set name(value) {
     this.setAttribute('name', value);
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
   }
 }
 

@@ -16,7 +16,6 @@ export default class TimelineInputElement extends HTMLElement {
           grid-template-columns: auto 1fr auto;
           align-items: center;
           justify-items: center;
-          overflow: auto;
         }
         :host::before {
           content: "";
@@ -28,31 +27,25 @@ export default class TimelineInputElement extends HTMLElement {
           z-index: 1;
           grid-row: 1;
           grid-column: 2;
-          position: sticky;
-          top: 0;
         }
         ::slotted(:not(header):not(footer)) {
           grid-column: 2;
           width: 100%;
         }
-        ::slotted(:not(header):not(footer):not(:last-child)) {
-          margin-bottom: 1px;
-        }
         ::slotted(header) {
           grid-column: 1;
-          margin-right: 5px;
         }
         ::slotted(footer) {
           grid-column: 3;
-          margin-left: 5px;
         }
       </style>
       <damo-timeline-head></damo-timeline-head>
       <slot></slot>
     `;
 
+    this.head = this.shadowRoot.querySelector('damo-timeline-head');
+
     this._zoom = 1;
-    this._timelineHead = this.shadowRoot.querySelector('damo-timeline-head');
     this._slot = this.shadowRoot.querySelector('slot');
 
     this._channels = new Set();
@@ -77,7 +70,7 @@ export default class TimelineInputElement extends HTMLElement {
       }
     });
 
-    this._timelineHead.addEventListener('wheel', (event) => {
+    this.head.addEventListener('wheel', (event) => {
       event.preventDefault();
       if (event.deltaY > 0) {
         this.zoom *= .95;
@@ -86,7 +79,7 @@ export default class TimelineInputElement extends HTMLElement {
       }
     });
 
-    this._timelineHead.addEventListener('change', () => {
+    this.head.addEventListener('change', () => {
       for (const channel of this._channels) {
         if (channel.position !== undefined) {
           channel.position = this.position;
@@ -94,11 +87,15 @@ export default class TimelineInputElement extends HTMLElement {
       }
     });
 
-    this._timelineHead.addEventListener('scroll', () => {
-      const scrollRatio = (this._timelineHead.scrollLeft / (this._timelineHead.scrollWidth - this._timelineHead.offsetWidth));
+    this.head.addEventListener('scroll', () => {
+      const scrollRatio = (this.head.scrollLeft / (this.head.scrollWidth - this.head.offsetWidth));
       for (const channel of this._channels) {
         channel.scrollLeft = scrollRatio * (channel.scrollWidth - channel.offsetWidth);
       }
+    });
+
+    this.head.addEventListener('input', () => {
+      this.dispatchEvent(new Event('input', { bubbles: true }));
     });
   }
 
@@ -112,38 +109,41 @@ export default class TimelineInputElement extends HTMLElement {
   }
 
   get zoom() {
-    return this._zoom;
+    return this.head.zoom;
   }
 
   set zoom(value) {
-    this._zoom = Math.max(value, 1);
-    this._timelineHead.zoom = this._zoom;
+    this.head.zoom = value;
     for (const channel of this._channels) {
-      channel.zoom = this._zoom;
+      if ('zoom' in channel) {
+        channel.zoom = this.zoom;
+      }
     }
   }
 
   get position() {
-    return this._timelineHead.position;
+    return this.head.position;
   }
 
   set position(value) {
-    this._timelineHead.position = value;
+    this.head.position = value;
     for (const channel of this._channels) {
-      if (channel.position !== undefined) {
+      if ('position' in channel) {
         channel.position = this.position;
       }
     }
   }
 
   get length() {
-    return this._timelineHead.length;
+    return this.head.length;
   }
 
   set length(value) {
-    this._timelineHead.length = value;
+    this.head.length = value;
     for (const channel of this._channels) {
-      channel.length = value;
+      if ('length' in channel) {
+        channel.length = this.length;
+      }
     }
   }
 }

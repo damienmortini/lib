@@ -36,7 +36,7 @@ class HeadTimelineElement extends HTMLElement {
       <div id="tick">0.00</div>
     `;
 
-    this.zoom = 1;
+    this._zoom = 1;
     this._length = 1;
     this._scrollLeft = 0;
     this._position = 0;
@@ -126,6 +126,14 @@ class HeadTimelineElement extends HTMLElement {
   set length(value) {
     this._length = value;
     this.position = Math.min(this.position, this.length);
+  }
+
+  get zoom() {
+    return this._zoom;
+  }
+
+  set zoom(value) {
+    this._zoom = Math.max(value, 1);
   }
 
   get scrollLeft() {
