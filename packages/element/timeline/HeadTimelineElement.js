@@ -109,14 +109,14 @@ class HeadTimelineElement extends HTMLElement {
   }
 
   set position(value) {
+    const previousValue = this._position;
     value = Math.min(Math.max(0, value), this.length);
-    if (this.position === value) {
-      return;
-    }
     this._position = value;
     this._tick.textContent = `${this._position.toFixed(2)}`;
     this._updatePositionFromInput();
-    this.dispatchEvent(new Event('change'));
+    if (previousValue !== value) {
+      this.dispatchEvent(new Event('change'));
+    }
   }
 
   get length() {

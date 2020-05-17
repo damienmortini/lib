@@ -87,7 +87,11 @@ export default class TimelineInputElement extends HTMLElement {
     });
 
     this._timelineHead.addEventListener('change', () => {
-      this.position = this._timelineHead.position;
+      for (const channel of this._channels) {
+        if (channel.position !== undefined) {
+          channel.position = this.position;
+        }
+      }
     });
 
     this._timelineHead.addEventListener('scroll', () => {
@@ -127,7 +131,7 @@ export default class TimelineInputElement extends HTMLElement {
     this._timelineHead.position = value;
     for (const channel of this._channels) {
       if (channel.position !== undefined) {
-        channel.position = value;
+        channel.position = this.position;
       }
     }
   }
