@@ -84,7 +84,7 @@ export default class ArraySignalInputElement extends HTMLElement {
       let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0);
       value = Math.round(value / this.step) * this.step;
       value = Math.max(Math.min(this.max, value), this.min);
-      const newPosition = this._snap ? this.position : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.length;
+      const newPosition = this._snap ? this.position : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.length / this.zoom;
       previousPosition = previousPosition !== null ? previousPosition : newPosition;
       const startPosition = newPosition > previousPosition ? previousPosition : newPosition;
       const endPosition = newPosition > previousPosition ? newPosition : previousPosition;
@@ -143,15 +143,19 @@ export default class ArraySignalInputElement extends HTMLElement {
       case 'max':
       case 'step':
       case 'zoom':
+      case 'length':
         this[name] = Number(newValue);
         break;
     }
   }
 
   draw() {
-    this._viewer.draw();
+    this._viewer.context.clearRect(0, 0, this._viewer.canvas.width, this._viewer.canvas.height);
+    // this._viewer.draw();
     this._viewer.context.strokeStyle = 'red';
-    const position = this.position / this.length * this.zoom * this._viewer.canvas.width;
+    const position = (this.position / this.length) * this.zoom * this._viewer.canvas.width - this.scrollLeft * devicePixelRatio;
+    // console.log(this.scrollLeft);
+
     this._viewer.context.beginPath();
     this._viewer.context.moveTo(position, 0);
     this._viewer.context.lineTo(position, this._viewer.canvas.height);
@@ -201,6 +205,15 @@ export default class ArraySignalInputElement extends HTMLElement {
       }));
       this._previousValue = this.value;
     }
+  }
+
+  get length() {
+    return this._length;
+  }
+
+  set length(value) {
+    this._length = value;
+    this.draw();
   }
 
   get min() {

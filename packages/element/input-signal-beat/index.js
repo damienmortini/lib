@@ -32,6 +32,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._context = this._canvas.getContext('2d');
 
     this._value = NaN;
+    this._width = 1;
     this._position = 0;
     this._scrollLeft = 0;
     this._zoom = 1;
@@ -114,6 +115,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._canvas.addEventListener('pointerdown', pointerDown);
 
     const resizeObserver = new ResizeObserver((entries) => {
+      this._width = entries[0].contentRect.width;
       this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
       this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
       this.draw();
@@ -144,7 +146,7 @@ export default class BeatSignalInputElement extends HTMLElement {
   }
 
   get scrollWidth() {
-    return this._canvas.width / devicePixelRatio * this.zoom;
+    return this._width * this.zoom;
   }
 
   get scrollLeft() {
@@ -152,7 +154,7 @@ export default class BeatSignalInputElement extends HTMLElement {
   }
 
   set scrollLeft(value) {
-    this._scrollLeft = Math.max(0, Math.min(this.scrollWidth - this._canvas.width / devicePixelRatio, value));
+    this._scrollLeft = Math.max(0, Math.min(this.scrollWidth - this._width, value));
     this.draw();
   }
 
@@ -236,7 +238,7 @@ export default class BeatSignalInputElement extends HTMLElement {
         stepWidth *= 2;
       }
       for (let position = 0; position < this._canvas.width; position += stepWidth) {
-        const x = position - (this.scrollLeft % stepWidth);
+        const x = position - ((this.scrollLeft * devicePixelRatio) % stepWidth);
         this._context.beginPath();
         this._context.moveTo(x, 0);
         this._context.lineTo(x, this._canvas.height);
@@ -245,7 +247,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     }
 
     this._context.strokeStyle = 'red';
-    const position = (this.position / this.max) * this.zoom * this._canvas.width - this.scrollLeft;
+    const position = (this.position / this.max) * this.zoom * this._canvas.width - this.scrollLeft * devicePixelRatio;
     this._context.beginPath();
     this._context.moveTo(position, 0);
     this._context.lineTo(position, this._canvas.height);
@@ -256,7 +258,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     const size = Math.min(10, this._canvas.height * .5);
     for (const beat of this.beats) {
       this._context.resetTransform();
-      const x = (beat / this.max) * this._canvas.width * this.zoom - this.scrollLeft;
+      const x = (beat / this.max) * this._canvas.width * this.zoom - this.scrollLeft * devicePixelRatio;
       this._context.translate(x, this._canvas.height * .5);
       this._context.rotate(Math.PI * .25);
       this._context.fillRect(-size * .5, -size * .5, size, size);
