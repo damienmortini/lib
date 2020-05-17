@@ -44,9 +44,9 @@
 
 <body>
   <element-timeline length="60" zoom="6">
-    <header>Beat</header>
+    <!-- <header>Beat</header>
     <damo-input-signal-beat name="beat" zoom="6" step=".5" max="60">
-    </damo-input-signal-beat>
+    </damo-input-signal-beat> -->
 
     <header>Tree</header>
     <damo-input-signal-array name="tree" step=".01" length="60" zoom="6" array="new Float32Array(1000)">
@@ -80,11 +80,11 @@
 
     const timelineElement = document.querySelector('element-timeline');
 
-    const beatSignalInput = document.body.querySelector('damo-input-signal-beat');
-    for (let index = 0; index < timelineElement.length; index += 2) {
-      beatSignalInput.beats.add(index);
-      beatSignalInput.beats.add(index + .5);
-    }
+    // const beatSignalInput = document.body.querySelector('damo-input-signal-beat');
+    // for (let index = 0; index < timelineElement.length; index += 2) {
+    //   beatSignalInput.beats.add(index);
+    //   beatSignalInput.beats.add(index + .5);
+    // }
 
     const outputDivs = [];
     for (let index = 0; index < 10; index++) {
@@ -109,7 +109,7 @@
       if (event.key === ' ') {
         Ticker[Ticker.has(update) ? 'delete' : 'add'](update);
       } else {
-        beatSignalInput.beats.addOnStep(beatSignalInput.position);
+        // beatSignalInput.beats.addOnStep(beatSignalInput.position);
       }
     });
   </script>
