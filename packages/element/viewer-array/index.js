@@ -96,18 +96,14 @@ export default class ArrayViewerElement extends HTMLElement {
     this.draw();
   }
 
-  draw({
-    start = 0,
-    length = this.array.length,
-  } = {}) {
-    this.context.clearRect(Math.floor((start / this.array.length) * this.canvas.width * this.zoom - this.scrollLeft * window.devicePixelRatio), 0, Math.ceil((length / this.array.length) * this.canvas.width * this.zoom), this.canvas.height);
+  draw() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const height = this.canvas.height / Math.round(this.max - this.min);
     const y = this.canvas.height + this.min * height;
-    length = Math.min(length, this.array.length - start);
     const valueWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
-    for (let index = start; index < start + length; index++) {
+    for (let index = 0; index < this.array.length; index++) {
       const value = Math.round(this.array[index] / this.step) * this.step;
-      this.context.fillRect(Math.floor(index * valueWidth - this.scrollLeft * window.devicePixelRatio), y, Math.ceil(valueWidth), -value * height);
+      this.context.fillRect(index * valueWidth - this.scrollLeft * window.devicePixelRatio, y, valueWidth, -value * height);
     }
   }
 
@@ -205,7 +201,7 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   set scrollLeft(value) {
-    this._scrollLeft = Math.min(this.scrollWidth - this._width, Math.max(0, value));
+    this._scrollLeft = Math.max(0, Math.min(this.scrollWidth - this._width, value));
     this.draw();
   }
 }

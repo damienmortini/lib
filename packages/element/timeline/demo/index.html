@@ -49,17 +49,19 @@
     </damo-input-signal-beat>
 
     <header>Tree</header>
-    <damo-input-signal-array name="tree" step=".01" max="1" zoom="6" array="new Float32Array(1000)">
+    <damo-input-signal-array name="tree" step=".01" length="60" zoom="6" array="new Float32Array(1000)">
     </damo-input-signal-array>
     <footer>Test</footer>
 
     </damo-input-signal-array>
     <header>Rock</header>
-    <damo-input-signal-array name="rock" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    <damo-input-signal-array name="rock" zoom="6" length="60"
+      array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
     </damo-input-signal-array>
 
     <header>Sky</header>
-    <damo-input-signal-array name="sky" zoom="6" array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+    <damo-input-signal-array name="sky" zoom="6" length="60"
+      array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
     </damo-input-signal-array>
     <footer>Sky Footer</footer>
   </element-timeline>
@@ -69,7 +71,6 @@
   </details>
 
   <script type="module">
-    import Ticker from '../../core/util/Ticker.js';
 
     import '../../element-input-signal-beat/index.js';
     import '../../element-input-signal-array/index.js';
@@ -85,23 +86,6 @@
       beatSignalInput.beats.add(index + .5);
     }
 
-    // const output = document.querySelector('#output');
-    // const channelNames = ['Rock1', 'Rock2', 'Rock3', 'Light1', 'Light2', 'Light3', 'Sky', 'Tree1', 'Tree2', 'Player'];
-    // const keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
-    // for (const [index, name] of channelNames.entries()) {
-    //   const keyframes = new Set();
-    //   const step = .5;
-    //   for (let index = 0; index < 40; index++) {
-    //     keyframes.add(Math.floor(Math.random() * 1000) * step);
-    //   }
-    //   timelineElement.addChannel({
-    //     name,
-    //     key: keys[index],
-    //     color: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
-    //     keyframes,
-    //     step,
-    //   });
-    // }
     const outputDivs = [];
     for (let index = 0; index < 10; index++) {
       const div = document.createElement('div');
@@ -116,6 +100,7 @@
       output.prepend(div);
     });
 
+    import Ticker from '../../core/util/Ticker.js';
     const update = () => {
       timelineElement.position += Ticker.deltaTime;
     }
