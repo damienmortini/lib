@@ -1,6 +1,6 @@
 import Loader from '../core/util/Loader.js';
 
-export default class InputFileElement extends HTMLElement {
+export default class FileInputElement extends HTMLElement {
   static get observedAttributes() {
     return ['value', 'disabled'];
   }
@@ -70,4 +70,8 @@ export default class InputFileElement extends HTMLElement {
       bubbles: true,
     }));
   }
+}
+
+if (!customElements.get('damo-input-file')) {
+  customElements.define('damo-input-file', class extends FileInputElement { });
 }

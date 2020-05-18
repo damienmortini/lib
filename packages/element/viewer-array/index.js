@@ -182,7 +182,7 @@ export default class ArrayViewerElement extends HTMLElement {
 
   set zoom(value) {
     this._zoom = Math.max(1, value);
-    this.scrollLeft = this.scrollLeft;
+    this.draw();
   }
 
   get scrollWidth() {
