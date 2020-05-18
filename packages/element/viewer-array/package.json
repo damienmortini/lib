@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-viewer-array",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "<element-viewer-array> custom element.",
   "main": "index.js",
   "scripts": {
