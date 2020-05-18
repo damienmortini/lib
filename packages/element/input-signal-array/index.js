@@ -137,11 +137,14 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
   }
 
   set position(value) {
+    value = Math.min(this.length, Math.max(0, value));
     if (this._position === value) {
       return;
     }
     this._position = value;
-    this._head.style.transform = `translateX(${this._position / this.length * this._width * this.zoom - this.scrollLeft}px)`;
+    let x = this._position / this.length * this._width * this.zoom - this.scrollLeft;
+    x = Math.min(this._width, Math.max(0, x));
+    this._head.style.transform = `translateX(${x}px)`;
     const arrayValue = this.array[this._getIndexFromPosition(this.position)];
     if (arrayValue !== this._previousValue && !this._snap) {
       this.dispatchEvent(new Event('change', {
