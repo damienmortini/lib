@@ -95,13 +95,22 @@ export default class ArrayViewerElement extends HTMLElement {
     this.draw();
   }
 
-  draw() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  draw({
+    x = 0,
+    width = this.canvas.width,
+  } = {}) {
+    this.context.fillStyle = 'lightgrey';
+    this.context.fillRect(x, 0, width, this.canvas.height);
+    this.context.fillStyle = 'black';
     const height = this.canvas.height / Math.round(this.max - this.min);
-    const y = this.canvas.height + this.min * height;
+    const y = Math.round(this.canvas.height + this.min * height);
     const valueWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
     for (let index = 0; index < this.array.length; index++) {
-      this.context.fillRect(index * valueWidth - this.scrollLeft * window.devicePixelRatio, y, valueWidth, -this.array[index] * height);
+      const positionX = Math.floor(index * valueWidth - this.scrollLeft * window.devicePixelRatio);
+      if ((positionX + valueWidth < x) || (positionX > x + width)) {
+        continue;
+      }
+      this.context.fillRect(positionX, y, Math.ceil(valueWidth), Math.round(-this.array[index] * height));
     }
   }
 
@@ -120,7 +129,7 @@ export default class ArrayViewerElement extends HTMLElement {
       for (const value of this.array) {
         this._maxValue = Math.max(this._maxValue, value);
       }
-    }    
+    }
     if (this._maxValue === this._minValue) {
       this._minValue = Math.min(this._minValue, 0);
       this._maxValue = Math.max(this._maxValue, 100);
@@ -187,8 +196,16 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   set scrollLeft(value) {
-    this._scrollLeft = Math.max(0, Math.min(this.scrollWidth - this._width, value));
-    this.draw();
+    value = Math.max(0, Math.min(this.scrollWidth - this._width, value));
+    if (value === this._scrollLeft) {
+      return;
+    }
+    const offset = Math.round(this._scrollLeft * devicePixelRatio - value * devicePixelRatio);
+    this._scrollLeft = value;
+    this.context.drawImage(this.canvas, offset, 0, this.canvas.width, this.canvas.height);
+    const x = offset < 0 ? this.canvas.width + offset : 0;
+    const width = Math.abs(offset);
+    this.draw({ x, width });
   }
 }
 

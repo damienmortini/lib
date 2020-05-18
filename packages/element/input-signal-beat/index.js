@@ -254,7 +254,7 @@ export default class BeatSignalInputElement extends HTMLElement {
 
     this._context.fillStyle = this.color;
     this._context.strokeStyle = 'black';
-    const size = Math.min(10, this._canvas.height * .5);
+    const size = Math.min(10, this._canvas.height * .5) * devicePixelRatio;
     for (const beat of this.beats) {
       this._context.resetTransform();
       const x = (beat / this.length) * this._canvas.width * this.zoom - this.scrollLeft * devicePixelRatio;
