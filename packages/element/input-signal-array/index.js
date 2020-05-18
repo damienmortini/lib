@@ -9,6 +9,15 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
   constructor() {
     super();
 
+    this._head = document.createElement('div');
+    this._head.style.position = 'absolute';
+    this._head.style.willChange = 'transform';
+    this._head.style.height = '100%';
+    this._head.style.top = '0';
+    this._head.style.left = '0';
+    this._head.style.borderLeft = '1px solid red';
+    this.shadowRoot.appendChild(this._head);
+
     this._length = 1;
     this._position = 0;
     this._previousValue = undefined;
@@ -119,16 +128,6 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
     }
   }
 
-  draw() {
-    super.draw();
-    this.context.strokeStyle = 'red';
-    const position = (this.position / this.length) * this.zoom * this.canvas.width - this.scrollLeft * devicePixelRatio;
-    this.context.beginPath();
-    this.context.moveTo(position, 0);
-    this.context.lineTo(position, this.canvas.height);
-    this.context.stroke();
-  }
-
   _getIndexFromPosition(position) {
     return Math.min(this.array.length - 1, Math.max(0, Math.floor(position / this.length * this.array.length)));
   }
@@ -142,6 +141,7 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
       return;
     }
     this._position = value;
+    this._head.style.transform = `translateX(${this._position / this.length * this._width * this.zoom - this.scrollLeft}px)`;
     const arrayValue = this.array[this._getIndexFromPosition(this.position)];
     if (arrayValue !== this._previousValue && !this._snap) {
       this.dispatchEvent(new Event('change', {
@@ -149,7 +149,6 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
       }));
       this._previousValue = arrayValue;
     }
-    this.draw();
   }
 
   get value() {
