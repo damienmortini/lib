@@ -61,21 +61,13 @@ export default class TimelineInputElement extends HTMLElement {
       }
     });
 
-    this._slot.addEventListener('wheel', (event) => {
+    this.addEventListener('wheel', (event) => {
       event.preventDefault();
-      if (event.deltaY < 0) {
-        this.position -= 1 / this.zoom;
-      } else {
-        this.position += 1 / this.zoom;
+      if (Math.abs(event.deltaX)) {
+        this.position += (event.deltaX < 0 ? 1 : -1) / this.zoom;
       }
-    });
-
-    this.head.addEventListener('wheel', (event) => {
-      event.preventDefault();
-      if (event.deltaY > 0) {
-        this.zoom *= .95;
-      } else {
-        this.zoom /= .95;
+      if (Math.abs(event.deltaY)) {
+        this.zoom *= event.deltaY < 0 ? 1 / .95 : .95;
       }
     });
 
