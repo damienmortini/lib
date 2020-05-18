@@ -99,9 +99,7 @@ export default class ArrayViewerElement extends HTMLElement {
     x = 0,
     width = this.canvas.width,
   } = {}) {
-    this.context.fillStyle = 'lightgrey';
-    this.context.fillRect(x, 0, width, this.canvas.height);
-    this.context.fillStyle = 'black';
+    this.context.clearRect(x, 0, width, this.canvas.height);
     const height = this.canvas.height / Math.round(this.max - this.min);
     const y = Math.round(this.canvas.height + this.min * height);
     const valueWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
@@ -202,7 +200,9 @@ export default class ArrayViewerElement extends HTMLElement {
     }
     const offset = Math.round(this._scrollLeft * devicePixelRatio - value * devicePixelRatio);
     this._scrollLeft = value;
+    this.context.globalCompositeOperation = 'copy';
     this.context.drawImage(this.canvas, offset, 0, this.canvas.width, this.canvas.height);
+    this.context.globalCompositeOperation = 'source-over';
     const x = offset < 0 ? this.canvas.width + offset : 0;
     const width = Math.abs(offset);
     this.draw({ x, width });
