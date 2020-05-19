@@ -198,6 +198,4 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
   }
 }
 
-if (!customElements.get('damo-input-signal-array')) {
-  customElements.define('damo-input-signal-array', class DamoArraySignalInputElement extends ArraySignalInputElement { });
-}
+customElements.define('damo-input-signal-array', ArraySignalInputElement);

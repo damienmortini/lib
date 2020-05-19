@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>element-input-signal-array</title>
+  <title>damo-input-signal-array</title>
   <style>
     html,
     body {
@@ -21,31 +21,29 @@
       gap: 10px;
     }
 
-    element-input-signal-array {
+    damo-input-signal-array {
       width: 500px;
     }
   </style>
 </head>
 
 <body>
-  <element-input-signal-array duration="5" zoom="10"></element-input-signal-array>
-  <element-input-signal-array time="2.2" frequency="4" duration="10" array="[4, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 2, 0]">
-  </element-input-signal-array>
-  <element-input-signal-array id="stepped" max="1" step=".01" time="4" duration="180" array="new Float32Array(360)">
-  </element-input-signal-array>
+  <damo-input-signal-array duration="5" zoom="10"></damo-input-signal-array>
+  <damo-input-signal-array time="2.2" frequency="4" duration="10" array="[4, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 2, 0]">
+  </damo-input-signal-array>
+  <damo-input-signal-array id="stepped" max="1" step=".01" time="4" duration="180" array="new Float32Array(360)">
+  </damo-input-signal-array>
 
   <script type="module">
-    import Element from '../index.js';
-    window.customElements.define(`element-input-signal-array`, Element);
-    const arrayInputElement = document.querySelector('element-input-signal-array');
+    import '../index.js';
+    const arrayInputElement = document.querySelector('damo-input-signal-array');
     const array = new Float32Array(1000);
     for (let index = 0; index < array.length; index++) {
       array[index] = (Math.random() * 2 - 1) * 20;
     }
     arrayInputElement.array = array;
 
-    const arrayInputElementStepped = document.querySelector('element-input-signal-array#stepped');
-    console.log(arrayInputElementStepped.array.length);
+    const arrayInputElementStepped = document.querySelector('damo-input-signal-array#stepped');
 
     for (let index = 0; index < arrayInputElementStepped.array.length; index++) {
       arrayInputElementStepped.array[index] = Math.random();
