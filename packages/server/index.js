@@ -94,6 +94,7 @@ server.on('stream', (stream, headers) => {
   const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY];
   const requestScheme = headers[http2.constants.HTTP2_HEADER_SCHEME];
   const requestPath = headers[http2.constants.HTTP2_HEADER_PATH];
+  const requestRange = headers[http2.constants.HTTP2_HEADER_RANGE];
 
   const url = new URL(`${requestScheme}://${requestAuthority}${requestPath}`);
 
@@ -135,10 +136,13 @@ server.on('stream', (stream, headers) => {
       stream.end();
     }
   } else {
-    const responseMimeType = String(mimeTypes.lookup(filePath));
-    stream.respondWithFile(filePath, {
-      'content-type': responseMimeType,
-    }, {
+    const responseHeaders = {
+      'content-type': String(mimeTypes.lookup(filePath)),
+    };
+    if (requestRange) {
+      responseHeaders['Accept-Ranges'] = 'bytes';
+    }
+    stream.respondWithFile(filePath, responseHeaders, {
       onError: (error) => {
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND });
