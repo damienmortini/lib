@@ -1,4 +1,4 @@
-export default class InputNumberElement extends HTMLElement {
+export default class NumberInputElement extends HTMLElement {
   static get observedAttributes() {
     return ['value', 'disabled', 'min', 'max', 'step'];
   }
@@ -20,6 +20,10 @@ export default class InputNumberElement extends HTMLElement {
     `;
 
     this._input = this.shadowRoot.querySelector('input');
+
+    this._input.addEventListener('change', () => {
+      this.dispatchEvent(new Event('change'));
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -78,6 +82,14 @@ export default class InputNumberElement extends HTMLElement {
   }
 
   set value(value) {
+    if (value === this.value) {
+      return;
+    }
     this._input.valueAsNumber = value;
+    this.dispatchEvent(new Event('change', {
+      bubbles: true,
+    }));
   }
 }
+
+customElements.define('damo-input-number', NumberInputElement);
