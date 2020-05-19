@@ -49,6 +49,7 @@ export default class TimelineInputElement extends HTMLElement {
     this._slot = this.shadowRoot.querySelector('slot');
 
     this._channels = new Set();
+    this._elementWidth = new Map();
 
     this._slot.addEventListener('slotchange', (event) => {
       const elements = this._slot.assignedElements({ flatten: true });
@@ -57,6 +58,7 @@ export default class TimelineInputElement extends HTMLElement {
         if (element.tagName !== 'HEADER' && element.tagName !== 'FOOTER') {
           this._channels.add(element);
           element.position = this.position;
+          this._elementWidth.set(element, element.offsetWidth);
         }
       }
     });
@@ -80,15 +82,24 @@ export default class TimelineInputElement extends HTMLElement {
     });
 
     this.head.addEventListener('scroll', () => {
-      const scrollRatio = (this.head.scrollLeft / (this.head.scrollWidth - this.head.offsetWidth));
+      const scrollRatio = (this.head.scrollLeft / (this.head.scrollWidth - this._elementWidth.get(this.head)));
       for (const channel of this._channels) {
-        channel.scrollLeft = scrollRatio * (channel.scrollWidth - channel.offsetWidth);
+        channel.scrollLeft = scrollRatio * (channel.scrollWidth - this._elementWidth.get(channel));
       }
     });
 
     this.head.addEventListener('input', () => {
       this.dispatchEvent(new Event('input', { bubbles: true }));
     });
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      this._elementWidth.clear();
+      this._elementWidth.set(this.head, this.head.offsetWidth);
+      for (const channel of this._channels) {
+        this._elementWidth.set(channel, channel.offsetWidth);
+      }
+    });
+    resizeObserver.observe(this);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
