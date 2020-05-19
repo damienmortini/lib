@@ -9,14 +9,24 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
   constructor() {
     super();
 
-    this._head = document.createElement('div');
-    this._head.style.position = 'absolute';
-    this._head.style.willChange = 'transform';
-    this._head.style.height = '100%';
-    this._head.style.top = '0';
-    this._head.style.left = '0';
-    this._head.style.borderLeft = '1px solid red';
-    this.shadowRoot.appendChild(this._head);
+    const template = document.createElement('template');
+    template.innerHTML = `
+      <style>
+        :host {
+          cursor: crosshair;
+        }
+        #head {
+          position: absolute;
+          will-change: transform;
+          height: 100%;
+          top: 0;
+          left: 0;
+          border-left: 1px solid red;
+        }
+      </style>
+      <div id="head"></div>
+    `;
+    this.shadowRoot.append(template.content.cloneNode(true));
 
     this._length = 1;
     this._position = 0;
