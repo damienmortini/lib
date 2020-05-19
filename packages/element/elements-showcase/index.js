@@ -18,7 +18,7 @@ for (let elementName of ELEMENTS) {
         </li>
       `);
   import(`../${elementName}/index.js`).then((module) => {
-    customElements.define(`${elementName}`, module.default);
+    customElements.define(`${elementName}`, class extends module.default { });
   });
 }
 
