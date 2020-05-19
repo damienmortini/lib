@@ -96,20 +96,29 @@ export default class ArrayViewerElement extends HTMLElement {
   }
 
   draw({
-    x = 0,
-    width = this.canvas.width,
+    start = 0,
+    length = this.array.length,
+    offset = 0,
   } = {}) {
+    if (offset) {
+      this.context.globalCompositeOperation = 'copy';
+      this.context.drawImage(this.canvas, offset, 0, this.canvas.width, this.canvas.height);
+      this.context.globalCompositeOperation = 'source-over';
+    }
+    const x = this._getCanvasXFromIndex(start);
+    const width = this._getCanvasXFromIndex(start + length) - x;
     this.context.clearRect(x, 0, width, this.canvas.height);
     const height = this.canvas.height / Math.round(this.max - this.min);
     const y = Math.round(this.canvas.height + this.min * height);
-    const valueWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
-    for (let index = 0; index < this.array.length; index++) {
-      const positionX = Math.floor(index * valueWidth - this.scrollLeft * window.devicePixelRatio);
-      if ((positionX + valueWidth < x) || (positionX > x + width)) {
-        continue;
-      }
-      this.context.fillRect(positionX, y, Math.ceil(valueWidth), Math.round(-this.array[index] * height));
+    for (let index = start; index < start + length; index++) {
+      const x = this._getCanvasXFromIndex(index);
+      const width = this._getCanvasXFromIndex(index + 1) - x;
+      this.context.fillRect(x, y, width, Math.round(-this.array[index] * height));
     }
+  }
+
+  _getCanvasXFromIndex(index) {
+    return Math.floor(index / this.array.length * this.zoom * this.canvas.width - this.scrollLeft * window.devicePixelRatio);
   }
 
   _updateBounds() {
@@ -198,14 +207,13 @@ export default class ArrayViewerElement extends HTMLElement {
     if (value === this._scrollLeft) {
       return;
     }
-    const offset = Math.round(this._scrollLeft * devicePixelRatio - value * devicePixelRatio);
+    const offset = Math.floor(this._scrollLeft * devicePixelRatio - value * devicePixelRatio);
     this._scrollLeft = value;
-    this.context.globalCompositeOperation = 'copy';
-    this.context.drawImage(this.canvas, offset, 0, this.canvas.width, this.canvas.height);
-    this.context.globalCompositeOperation = 'source-over';
-    const x = offset < 0 ? this.canvas.width + offset : 0;
-    const width = Math.abs(offset);
-    this.draw({ x, width });
+
+    const cellWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
+    const start = Math.floor(((offset < 0 ? this.canvas.width + offset : 0) + this.scrollLeft * devicePixelRatio) / cellWidth);
+    const length = Math.ceil(Math.abs(offset) / cellWidth);
+    this.draw({ start, length: offset > 0 ? length + 1 : length, offset });
   }
 }
 

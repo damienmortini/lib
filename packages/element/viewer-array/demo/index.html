@@ -36,7 +36,7 @@
     import Element from '../index.js';
     window.customElements.define(`element-viewer-array`, Element);
     const arrayInputElement = document.querySelector('element-viewer-array');
-    const array = new Float32Array(10);
+    const array = new Float32Array(1000);
     for (let index = 0; index < array.length; index++) {
       array[index] = (Math.random() * 2 - 1) * 20;
     }
