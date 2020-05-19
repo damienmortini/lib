@@ -28,6 +28,8 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
     `;
     this.shadowRoot.append(template.content.cloneNode(true));
 
+    this._head = this.shadowRoot.querySelector('#head');
+
     this._length = 1;
     this._position = 0;
     this._previousValue = undefined;
@@ -87,7 +89,10 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
       for (let index = startIndex; index <= endIndex; index++) {
         this.array[index] = value;
       }
-      this.draw();
+      this.draw({
+        start: startIndex,
+        length: endIndex - startIndex + 1,
+      });
       previousPosition = newPosition;
       this.dispatchEvent(new Event('input', {
         bubbles: true,
