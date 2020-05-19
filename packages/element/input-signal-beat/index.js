@@ -1,6 +1,6 @@
 export default class BeatSignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['beats', 'length', 'step', 'zoom'];
+    return ['beats', 'length', 'looplength', 'step', 'zoom'];
   }
 
   constructor() {
@@ -39,22 +39,40 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._length = 1;
     this._step = 0;
     this._decimals = 0;
-    this._loopLength = 0;
+    this.loopLength = 0;
 
     const drawBinded = this.draw.bind(this);
     let requestAnimationFrameID = -1;
+    const self = this;
     class Beats extends Set {
       add(value) {
-        const returnValue = super.add(value);
+        if (self.loopLength) {
+          let position = 0;
+          while (position < self.length - self.loopLength) {
+            super.add(self._roundValueOnStep(position + (value % self.loopLength)));
+            position += self.loopLength;
+          }
+        } else {
+          super.add(self._roundValueOnStep(value));
+        }
         cancelAnimationFrame(requestAnimationFrameID);
         requestAnimationFrameID = requestAnimationFrame(drawBinded);
-        return returnValue;
+        return this;
       }
       delete(value) {
-        const returnValue = super.delete(value);
+        let somethingRemoved = false;
+        if (self.loopLength) {
+          let position = 0;
+          while (position < self.length - self.loopLength) {
+            somethingRemoved = super.delete(self._roundValueOnStep(position + (value % self.loopLength))) || somethingRemoved;
+            position += self.loopLength;
+          }
+        } else {
+          somethingRemoved = super.delete(self._roundValueOnStep(value));
+        }
         cancelAnimationFrame(requestAnimationFrameID);
         requestAnimationFrameID = requestAnimationFrame(drawBinded);
-        return returnValue;
+        return somethingRemoved;
       }
       clear() {
         super.clear();
@@ -83,8 +101,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       if (event.buttons === 1) {
         if (this.step) {
           for (let beat = startBeat; beat <= endBeat; beat += this.step) {
-            beat = Math.round(beat / this.step) * this.step;
-            beat = Number(beat.toFixed(this._decimals));
+            beat = this._roundValueOnStep(beat);
             if ((!mode && this.beats.has(beat)) || mode === 'delete') {
               mode = 'delete';
               this.beats.delete(beat);
@@ -138,12 +155,24 @@ export default class BeatSignalInputElement extends HTMLElement {
           this.beats.add(beat);
         }
         break;
+      case 'looplength':
+        this.loopLength = Number(newValue);
+        break;
       case 'length':
       case 'step':
       case 'zoom':
         this[name] = Number(newValue);
         break;
     }
+  }
+
+  _roundValueOnStep(value) {
+    if (!this.step) {
+      return value;
+    }
+    value = Math.round(value / this.step) * this.step;
+    value = Number(value.toFixed(this._decimals));
+    return value;
   }
 
   get beats() {
