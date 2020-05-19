@@ -21,7 +21,7 @@ export default class NumberInputElement extends HTMLElement {
 
     this._input = this.shadowRoot.querySelector('input');
 
-    this._input.addEventListener('change', () => {
+    this._input.addEventListener('input', () => {
       this.dispatchEvent(new Event('change'));
     });
   }
