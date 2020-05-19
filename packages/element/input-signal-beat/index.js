@@ -35,11 +35,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._width = 1;
     this._position = 0;
     this._scrollLeft = 0;
-    this._zoom = 1;
-    this._length = 1;
-    this._step = 0;
     this._decimals = 0;
-    this.loopLength = 0;
 
     const drawBinded = this.draw.bind(this);
     let requestAnimationFrameID = -1;
@@ -156,12 +152,13 @@ export default class BeatSignalInputElement extends HTMLElement {
         }
         break;
       case 'looplength':
-        this.loopLength = Number(newValue);
-        break;
       case 'length':
-      case 'step':
       case 'zoom':
-        this[name] = Number(newValue);
+        this.draw();
+        break;
+      case 'step':
+        this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
+        this.draw();
         break;
     }
   }
@@ -193,31 +190,35 @@ export default class BeatSignalInputElement extends HTMLElement {
   }
 
   get zoom() {
-    return this._zoom;
+    return Number(this.getAttribute('zoom'));
   }
 
   set zoom(value) {
-    this._zoom = value;
-    this.draw();
+    this.setAttribute('zoom', String(value));
   }
 
   get step() {
-    return this._step;
+    return Number(this.getAttribute('step'));
   }
 
   set step(value) {
-    this._step = value;
-    this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
-    this.draw();
+    this.setAttribute('step', String(value));
   }
 
   get length() {
-    return this._length;
+    return Number(this.getAttribute('length'));
   }
 
   set length(value) {
-    this._length = value;
-    this.draw();
+    this.setAttribute('length', String(value));
+  }
+
+  get loopLength() {
+    return Number(this.getAttribute('looplength'));
+  }
+
+  set loopLength(value) {
+    this.setAttribute('looplength', String(value));
   }
 
   get position() {
