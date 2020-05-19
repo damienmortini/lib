@@ -37,22 +37,18 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._scrollLeft = 0;
     this._zoom = 1;
     this._length = 1;
-    this._step = undefined;
+    this._step = 0;
     this._decimals = 0;
+    this._loopLength = 0;
 
     const drawBinded = this.draw.bind(this);
     let requestAnimationFrameID = -1;
-    const self = this;
     class Beats extends Set {
       add(value) {
         const returnValue = super.add(value);
         cancelAnimationFrame(requestAnimationFrameID);
         requestAnimationFrameID = requestAnimationFrame(drawBinded);
         return returnValue;
-      }
-      addOnStep(value) {
-        value = Math.round(value / self.step) * self.step;
-        this.add(Number(value.toFixed(self._decimals)));
       }
       delete(value) {
         const returnValue = super.delete(value);
@@ -69,6 +65,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._beats = new Beats();
 
     let previousbeat = null;
+    let mode = '';
     const preventContextMenu = (event) => event.preventDefault();
     const pointerDown = (event) => {
       this._canvas.setPointerCapture(event.pointerId);
@@ -86,7 +83,15 @@ export default class BeatSignalInputElement extends HTMLElement {
       if (event.buttons === 1) {
         if (this.step) {
           for (let beat = startBeat; beat <= endBeat; beat += this.step) {
-            this.beats.addOnStep(beat);
+            beat = Math.round(beat / this.step) * this.step;
+            beat = Number(beat.toFixed(this._decimals));
+            if ((!mode && this.beats.has(beat)) || mode === 'delete') {
+              mode = 'delete';
+              this.beats.delete(beat);
+            } else if (!mode || mode === 'add') {
+              mode = 'add';
+              this.beats.add(beat);
+            }
           }
         } else {
           this.beats.add(newbeat);
@@ -103,6 +108,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       this.dispatchEvent(new Event('input'));
     };
     const pointerUp = (event) => {
+      mode = '';
       previousbeat = null;
       this._canvas.releasePointerCapture(event.pointerId);
       this._canvas.removeEventListener('pointermove', pointerMove);
