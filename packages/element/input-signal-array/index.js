@@ -12,7 +12,7 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
     const template = document.createElement('template');
     template.innerHTML = `
       <style>
-        :host {
+        :host(:not([disabled])) {
           cursor: crosshair;
         }
         #head {
