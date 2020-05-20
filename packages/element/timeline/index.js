@@ -38,6 +38,12 @@ export default class TimelineInputElement extends HTMLElement {
         if (!('position' in element)) {
           continue;
         }
+        if ('length' in element) {
+          element.length = this.length;
+        }
+        if ('zoom' in element) {
+          element.zoom = this.zoom;
+        }
         this._channels.add(element);
         element.position = this.position;
         this._elementWidth.set(element, element.offsetWidth);
