@@ -11,35 +11,15 @@ export default class TimelineInputElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          display: grid;
+          display: block;
           width: 300px;
-          grid-template-columns: auto 1fr auto;
-          align-items: center;
-          justify-items: center;
-        }
-        :host::before {
-          content: "";
-          grid-row: 1;
-          grid-row: 1;
         }
         damo-timeline-head {
           width: 100%;
           z-index: 1;
-          grid-row: 1;
-          grid-column: 2;
-        }
-        ::slotted(:not(header):not(footer)) {
-          grid-column: 2;
-          width: 100%;
-        }
-        ::slotted(header) {
-          grid-column: 1;
-        }
-        ::slotted(footer) {
-          grid-column: 3;
         }
       </style>
-      <damo-timeline-head></damo-timeline-head>
+      <damo-timeline-head part="head"></damo-timeline-head>
       <slot></slot>
     `;
 
@@ -52,14 +32,15 @@ export default class TimelineInputElement extends HTMLElement {
     this._elementWidth = new Map();
 
     this._slot.addEventListener('slotchange', (event) => {
-      const elements = this._slot.assignedElements({ flatten: true });
+      const elements = this.querySelectorAll('*');
       this._channels.clear();
       for (const element of elements) {
-        if (element.tagName !== 'HEADER' && element.tagName !== 'FOOTER') {
-          this._channels.add(element);
-          element.position = this.position;
-          this._elementWidth.set(element, element.offsetWidth);
+        if (!('position' in element)) {
+          continue;
         }
+        this._channels.add(element);
+        element.position = this.position;
+        this._elementWidth.set(element, element.offsetWidth);
       }
     });
 
@@ -75,7 +56,7 @@ export default class TimelineInputElement extends HTMLElement {
 
     this.head.addEventListener('change', () => {
       for (const channel of this._channels) {
-        if (channel.position !== undefined) {
+        if ('position' in channel) {
           channel.position = this.position;
         }
       }

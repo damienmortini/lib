@@ -21,8 +21,26 @@
     }
 
     element-timeline {
+      display: grid;
       width: 500px;
       max-height: 300px;
+      grid-template-columns: auto 1fr auto;
+    }
+
+    element-timeline::part(head) {
+      grid-column: 2;
+    }
+
+    element-timeline section {
+      display: contents;
+    }
+
+    element-timeline header {
+      grid-column: 1;
+    }
+
+    element-timeline * {
+      width: 100%;
     }
 
     damo-input-signal-array {
@@ -47,23 +65,28 @@
     <!-- <header>Beat</header>
     <damo-input-signal-beat name="beat" zoom="6" step=".5" max="60">
     </damo-input-signal-beat> -->
+    <section>
+      <header>Tree</header>
+      <damo-input-signal-array name="tree" step=".01" length="60" zoom="6" array="new Float32Array(1000)">
+      </damo-input-signal-array>
+      <footer>Test</footer>
+    </section>
 
-    <header>Tree</header>
-    <damo-input-signal-array name="tree" step=".01" length="60" zoom="6" array="new Float32Array(1000)">
-    </damo-input-signal-array>
-    <footer>Test</footer>
+    <section>
+      </damo-input-signal-array>
+      <header>Rock</header>
+      <damo-input-signal-array name="rock" zoom="6" length="60"
+        array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+      </damo-input-signal-array>
+    </section>
 
-    </damo-input-signal-array>
-    <header>Rock</header>
-    <damo-input-signal-array name="rock" zoom="6" length="60"
-      array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
-    </damo-input-signal-array>
-
-    <header>Sky</header>
-    <damo-input-signal-array name="sky" zoom="6" length="60"
-      array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
-    </damo-input-signal-array>
-    <footer>Sky Footer</footer>
+    <section>
+      <header>Sky</header>
+      <damo-input-signal-array name="sky" zoom="6" length="60"
+        array="[1, 2, 4, 6, 3, 6, 3, 4, 7, 5, 4, 3, 3, 4, 2, 3, 4, 2]">
+      </damo-input-signal-array>
+      <footer>Sky Footer</footer>
+    </section>
   </element-timeline>
   <details open>
     <summary>Output</summary>
