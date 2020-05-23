@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-ruler</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+      gap: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <damo-input-ruler></damo-input-ruler>
+  <damo-input-ruler step=".01" max="3"></damo-input-ruler>
+  <damo-input-ruler step=".1" min="1" max="3"></damo-input-ruler>
+  <damo-input-ruler step=".03" min="-2" max="3"></damo-input-ruler>
+  <damo-input-ruler step=".01" zoom="20" min="0" max="10"></damo-input-ruler>
+
+  <script type="module">
+    import '../index.js';
+    document.body.addEventListener('input', (event) => {
+      console.log('Input:', event.target.value);
+    });
+    document.body.addEventListener('change', (event) => {
+      console.log('Change:', event.target.value);
+    });
+  </script>
+</body>
+
+</html>
