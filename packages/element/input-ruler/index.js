@@ -17,25 +17,23 @@ export default class RulerInputElement extends HTMLElement {
           display: block;
           position: relative;
           width: 300px;
-          height: 20px;
-          background: grey;
+          height: 25px;
+          background: white;
           font-family: monospace;
           touch-action: none;
-          background-size: 10% 10%, 50% 50%;
-          background-image: linear-gradient(to right, grey -.5px, transparent .5px), linear-gradient(to right, black -.5px, transparent .5px);
+          background-size: 10% 10%, 100% 100%;
+          background-image: linear-gradient(to right, lightgrey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px);
         }
         #tick {
           position: absolute;
           will-change: transform;
           left: 0;
-          height: 100%;
           user-select: none;
-          top: 2px;
+          top: 0;
           left: 0;
-          padding: 0 5px;
+          padding: 2px 5px;
           background: white;
           border-radius: 2px;
-          height: calc(100% - 4px);
           box-shadow: 0 0 4px black;
         }
       </style>
@@ -98,6 +96,7 @@ export default class RulerInputElement extends HTMLElement {
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
+      this._updateBackgroundSize();
       this._update();
     });
     resizeObserver.observe(this);
@@ -105,6 +104,11 @@ export default class RulerInputElement extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     this[name] = Number(newValue);
+  }
+
+  _updateBackgroundSize() {
+    const ratio = this._step / (this.max - this.min) * this.zoom;
+    this.style.backgroundSize = `${100 * ratio}%, ${100 * 10 * ratio}%`;
   }
 
   _update() {
@@ -159,6 +163,7 @@ export default class RulerInputElement extends HTMLElement {
       return;
     }
     this._scrollLeft = value;
+    this.style.backgroundPositionX = `${-this._scrollLeft}px`;
     this.dispatchEvent(new Event('scroll'));
   }
 
@@ -193,6 +198,7 @@ export default class RulerInputElement extends HTMLElement {
   set step(value) {
     this._step = value;
     this._decimals = this._step % 1 ? String(this.step).split('.')[1].length : 0;
+    this._updateBackgroundSize();
     this._tick.textContent = `${this._value.toFixed(this._decimals)}`;
     this.value = Math.round(this.value / this.step) * this.step;
   }
