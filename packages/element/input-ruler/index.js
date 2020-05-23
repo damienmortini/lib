@@ -1,6 +1,6 @@
 import Ticker from '../core/util/Ticker.js';
 
-const SIDE_MOVEMENT_SPEED = .2;
+const SIDE_MOVEMENT_SPEED = .02;
 const PADDING_RATIO = .25;
 
 export default class RulerInputElement extends HTMLElement {
@@ -56,9 +56,9 @@ export default class RulerInputElement extends HTMLElement {
       const right = this._width - padding;
       let speed = 0;
       if (pointerOffsetX > right && (this.scrollLeft + this._width < this.scrollWidth)) {
-        speed = (pointerOffsetX - right) / padding * .01;
+        speed = (pointerOffsetX - right) / padding * SIDE_MOVEMENT_SPEED;
       } else if (pointerOffsetX < padding && this.scrollLeft) {
-        speed = (pointerOffsetX - padding) / padding * .01;
+        speed = (pointerOffsetX - padding) / padding * SIDE_MOVEMENT_SPEED;
       }
       this.scrollLeft += speed * this.scrollWidth;
       positionRatio += speed;
