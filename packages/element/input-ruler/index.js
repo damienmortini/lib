@@ -151,6 +151,7 @@ export default class RulerInputElement extends HTMLElement {
 
   set zoom(value) {
     this._zoom = Math.max(value, 1);
+    this._updateBackgroundSize();
   }
 
   get scrollLeft() {
