@@ -5,7 +5,7 @@ const PADDING_RATIO = .1;
 
 export default class RulerInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['step', 'min', 'max', 'zoom'];
+    return ['step', 'min', 'max', 'zoom', 'noscroll'];
   }
 
   constructor() {
@@ -64,6 +64,10 @@ export default class RulerInputElement extends HTMLElement {
     this._tick = this.shadowRoot.querySelector('#tick');
     this._scroller = this.shadowRoot.querySelector('#scroller');
     this._scrollerContent = this.shadowRoot.querySelector('#content');
+
+    this._scroller.addEventListener('scroll', (event) => {
+      this.dispatchEvent(new Event('scroll', event));
+    });
 
     this._zoom = 1;
     this._step = 1;
@@ -127,7 +131,14 @@ export default class RulerInputElement extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    this[name] = Number(newValue);
+    switch (name) {
+      case 'noscroll':
+        this._scroller.style.pointerEvents = newValue === null ? '' : 'none';
+        break;
+      default:
+        this[name] = Number(newValue);
+        break;
+    }
   }
 
   _getLocalOffsetXFromValue() {
