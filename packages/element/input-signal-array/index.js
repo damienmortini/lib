@@ -12,6 +12,9 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
     const template = document.createElement('template');
     template.innerHTML = `
       <style>
+        :host {
+          overflow: hidden;
+        }
         :host(:not([disabled])) {
           cursor: crosshair;
         }
@@ -147,6 +150,11 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
     return Math.min(this.array.length - 1, Math.max(0, Math.floor(position / this.length * this.array.length)));
   }
 
+  _updateHead() {
+    const x = this._position / this.length * this._width * this.zoom - this.scrollLeft;
+    this._head.style.transform = `translateX(${x}px)`;
+  }
+
   get position() {
     return this._position;
   }
@@ -157,9 +165,7 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
       return;
     }
     this._position = value;
-    let x = this._position / this.length * this._width * this.zoom - this.scrollLeft;
-    x = Math.min(this._width, Math.max(0, x));
-    this._head.style.transform = `translateX(${x}px)`;
+    this._updateHead();
     const arrayValue = this.array[this._getIndexFromPosition(this.position)];
     if (arrayValue !== this._previousValue && !this._snap) {
       this.dispatchEvent(new Event('change', {
@@ -167,6 +173,15 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
       }));
       this._previousValue = arrayValue;
     }
+  }
+
+  get scrollLeft() {
+    return super.scrollLeft;
+  }
+
+  set scrollLeft(value) {
+    super.scrollLeft = value;
+    this._updateHead();
   }
 
   get value() {
