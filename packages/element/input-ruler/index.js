@@ -1,7 +1,7 @@
 import Ticker from '../core/util/Ticker.js';
 
 const SIDE_MOVEMENT_SPEED = .02;
-const PADDING_RATIO = .25;
+const PADDING_RATIO = .1;
 
 export default class RulerInputElement extends HTMLElement {
   static get observedAttributes() {
@@ -14,38 +14,61 @@ export default class RulerInputElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
+          --zoom: 1;
           display: block;
           position: relative;
           width: 300px;
-          height: 25px;
-          background: white;
+          height: 30px;
           font-family: monospace;
           touch-action: none;
-          background-size: 10% 10%, 100% 100%;
-          background-image: linear-gradient(to right, lightgrey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px);
+          user-select: none;
         }
         #tick {
           position: absolute;
+          pointer-events: none;
           will-change: transform;
           left: 0;
-          user-select: none;
-          top: 0;
+          top: 4px;
           left: 0;
           padding: 2px 5px;
           background: white;
           border-radius: 2px;
           box-shadow: 0 0 4px black;
         }
+        #scroller {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          overflow-x: overlay;
+          touch-action: none;
+        }
+        #content {
+          height: 100%;
+          width: calc(var(--zoom) * 100%);
+          background-size: 10% 10%, 100% 100%;
+          background-color: white;
+          background-image: linear-gradient(to right, lightgrey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px);
+        }
+        #scroller::-webkit-scrollbar {
+          background: transparent;
+          height: 2px;
+        }
+        #scroller::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, .1);
+        }
       </style>
+      <div id="scroller"><div id="content"></div></div>
       <div id="tick">0.00</div>
     `;
+
+    this._tick = this.shadowRoot.querySelector('#tick');
+    this._scroller = this.shadowRoot.querySelector('#scroller');
+    this._scrollerContent = this.shadowRoot.querySelector('#content');
 
     this._zoom = 1;
     this._step = 1;
     this._min = 0;
     this._max = 100;
-    this._scrollLeft = 0;
-    this._tick = this.shadowRoot.querySelector('#tick');
     this._width = 1;
     this.value = 0;
 
@@ -55,18 +78,15 @@ export default class RulerInputElement extends HTMLElement {
       const padding = this._width * PADDING_RATIO;
       const right = this._width - padding;
       let speed = 0;
-      if (pointerOffsetX > right && (this.scrollLeft + this._width < this.scrollWidth)) {
-        speed = (pointerOffsetX - right) / padding * SIDE_MOVEMENT_SPEED;
-      } else if (pointerOffsetX < padding && this.scrollLeft) {
-        speed = (pointerOffsetX - padding) / padding * SIDE_MOVEMENT_SPEED;
-      }
-      this.scrollLeft += speed * this.scrollWidth;
+      // if (pointerOffsetX > right && (this.scrollLeft + this._width < this.scrollWidth)) {
+      //   speed = (pointerOffsetX - right) / padding * SIDE_MOVEMENT_SPEED;
+      // } else if (pointerOffsetX < padding && this.scrollLeft) {
+      //   speed = (pointerOffsetX - padding) / padding * SIDE_MOVEMENT_SPEED;
+      // }
+      // this.scrollLeft += speed * this.scrollWidth;
       positionRatio += speed;
       const value = this.value;
       this.value = positionRatio * (this.max - this.min) + this.min;
-      let x = positionRatio * this._width * this.zoom - this.scrollLeft;
-      x = Math.min(this._width, Math.max(0, x));
-      this._tick.style.transform = `translateX(${x}px) translateX(-50%)`;
       if (value !== this.value) {
         this.dispatchEvent(new Event('input', { bubbles: true }));
       }
@@ -94,6 +114,10 @@ export default class RulerInputElement extends HTMLElement {
     };
     this.addEventListener('pointerdown', pointerDown);
 
+    this._scroller.addEventListener('scroll', () => {
+      this._update();
+    });
+
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
       this._updateBackgroundSize();
@@ -106,9 +130,15 @@ export default class RulerInputElement extends HTMLElement {
     this[name] = Number(newValue);
   }
 
+  _getLocalOffsetXFromValue() {
+    const positionRatio = (this.value - this.min) / (this.max - this.min);
+    const edgeX = positionRatio * this._width * this.zoom - this.scrollLeft;
+    console.log(edgeX);
+  }
+
   _updateBackgroundSize() {
     const ratio = this._step / (this.max - this.min) * this.zoom;
-    this.style.backgroundSize = `${100 * ratio}%, ${100 * 10 * ratio}%`;
+    this._scrollerContent.style.backgroundSize = `${ratio * this._width}px, ${10 * ratio * this._width}px`;
   }
 
   _update() {
@@ -116,15 +146,16 @@ export default class RulerInputElement extends HTMLElement {
       return;
     }
     const positionRatio = (this.value - this.min) / (this.max - this.min);
-    // const edgeX = positionRatio * this._width * this.zoom - this.scrollLeft;
-    // const padding = this._width * PADDING_RATIO;
-    // const right = this._width - padding;
+    const edgeX = positionRatio * this.scrollWidth - this.scrollLeft;
+
+    const padding = this._width * PADDING_RATIO;
+    const right = this._width - padding;
     // if (edgeX > right) {
-    //   this.scrollLeft += (edgeX - right) * SIDE_MOVEMENT_SPEED;
+    //   this.scrollLeft += (edgeX - right);
     // } else if (edgeX < padding) {
-    //   this.scrollLeft += (edgeX - padding) * SIDE_MOVEMENT_SPEED;
+    //   this.scrollLeft += (edgeX - padding);
     // }
-    let x = positionRatio * this._width * this.zoom - this.scrollLeft;
+    let x = positionRatio * this.scrollWidth - this.scrollLeft;
     x = Math.min(this._width, Math.max(0, x));
     this._tick.style.transform = `translateX(${x}px) translateX(-50%)`;
   }
@@ -151,21 +182,17 @@ export default class RulerInputElement extends HTMLElement {
 
   set zoom(value) {
     this._zoom = Math.max(value, 1);
+    this.style.setProperty('--zoom', this._zoom);
     this._updateBackgroundSize();
+    this._update();
   }
 
   get scrollLeft() {
-    return this._scrollLeft;
+    return this._scroller.scrollLeft;
   }
 
   set scrollLeft(value) {
-    value = Math.min(Math.max(0, value), this._width * (this.zoom - 1));
-    if (this._scrollLeft === value) {
-      return;
-    }
-    this._scrollLeft = value;
-    this.style.backgroundPositionX = `${-this._scrollLeft}px`;
-    this.dispatchEvent(new Event('scroll'));
+    this._scroller.scrollLeft = value;
   }
 
   get scrollWidth() {
