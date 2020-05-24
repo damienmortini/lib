@@ -51,21 +51,6 @@
 
     const container = document.body.querySelector('#container');
 
-    // const arrayInputElement = document.querySelector('element-input-signal-beat');
-    // const array = new Float32Array(1000);
-    // for (let index = 0; index < array.length; index++) {
-    //   array[index] = (Math.random() * 2 - 1) * 20;
-    // }
-    // arrayInputElement.array = array;
-
-    // const arrayInputElementStepped = document.querySelector('element-input-signal-beat#stepped');
-    // console.log(arrayInputElementStepped.array.length);
-
-    // for (let index = 0; index < arrayInputElementStepped.array.length; index++) {
-    //   arrayInputElementStepped.array[index] = Math.random();
-    // }
-    // arrayInputElementStepped.draw();
-
     window.addEventListener('wheel', (event) => {
       for (const child of container.children) {
         if (Math.abs(event.deltaY)) {
