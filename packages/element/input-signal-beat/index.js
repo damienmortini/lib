@@ -14,9 +14,12 @@ export default class BeatSignalInputElement extends HTMLElement {
           height: 20px;
           width: 300px;
           background: lightgrey;
-          overflow: overlay;
+          overflow-y: hidden;
+          overflow-x: overlay;
           contain: strict;
           color: white;
+          touch-action: none;
+          user-select: none;
         }
         :host::-webkit-scrollbar {
           background: transparent;
@@ -26,6 +29,7 @@ export default class BeatSignalInputElement extends HTMLElement {
           background: rgba(0, 0, 0, .2);
         }
         #beats {
+          pointer-events: none;
           position: relative;
           overflow: hidden;
           width: 100%;
@@ -52,7 +56,6 @@ export default class BeatSignalInputElement extends HTMLElement {
 
     this._value = NaN;
     this._length = 1;
-    this._width = 1;
     this._position = 0;
     this._decimals = 0;
 
@@ -60,14 +63,7 @@ export default class BeatSignalInputElement extends HTMLElement {
 
     const self = this;
     class Beats extends Set {
-      add(value) {
-        // if (self.loopLength) {
-        //   let position = 0;
-        //   while (position < self.length - self.loopLength) {
-        //     super.add(self._roundValueOnStep(position + (value % self.loopLength)));
-        //     position += self.loopLength;
-        //   }
-        // } else {
+      _add(value) {
         value = self._roundValueOnStep(value);
         if (this.has(value)) {
           return;
@@ -79,26 +75,41 @@ export default class BeatSignalInputElement extends HTMLElement {
         self._setElementTransformFromBeat(element, value);
         self._beatsContainer.appendChild(element);
         self._beatElements.set(value, element);
+      }
+      add(value) {
+        if (self.loopLength) {
+          let position = 0;
+          while (position < self.length - self.loopLength) {
+            this._add(position + (value % self.loopLength));
+            position += self.loopLength;
+          }
+        } else {
+          this._add(value);
+        }
         return this;
       }
-      delete(value) {
+      _delete(value) {
         value = self._roundValueOnStep(value);
-        if (!this.has(value)) {
-          return;
+        const hasElement = super.delete(value);
+        if (!hasElement) {
+          return hasElement;
         }
-        let somethingRemoved = false;
-        // if (self.loopLength) {
-        //   let position = 0;
-        //   while (position < self.length - self.loopLength) {
-        //     somethingRemoved = super.delete(self._roundValueOnStep(position + (value % self.loopLength))) || somethingRemoved;
-        //     position += self.loopLength;
-        //   }
-        // } else {
-        // }
-        somethingRemoved = super.delete(value);
         const element = self._beatElements.get(value);
         element.remove();
         self._beatElements.delete(value);
+        return hasElement;
+      }
+      delete(value) {
+        let somethingRemoved = false;
+        if (self.loopLength) {
+          let position = 0;
+          while (position < self.length - self.loopLength) {
+            somethingRemoved = this._delete(position + (value % self.loopLength)) || somethingRemoved;
+            position += self.loopLength;
+          }
+        } else {
+          somethingRemoved = this._delete(value);
+        }
         return somethingRemoved;
       }
       clear() {
@@ -162,11 +173,6 @@ export default class BeatSignalInputElement extends HTMLElement {
       });
     };
     this.addEventListener('pointerdown', pointerDown);
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      this._width = entries[0].contentRect.width;
-    });
-    resizeObserver.observe(this);
   }
 
   _setElementTransformFromBeat(element, beat) {
