@@ -14,7 +14,6 @@ export default class RulerInputElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          --zoom: 1;
           display: block;
           position: relative;
           width: 300px;
@@ -44,7 +43,6 @@ export default class RulerInputElement extends HTMLElement {
         }
         #content {
           height: 100%;
-          width: calc(var(--zoom) * 100%);
           background-size: 10% 10%, 100% 100%;
           background-color: white;
           background-image: linear-gradient(to right, lightgrey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px);
@@ -193,7 +191,7 @@ export default class RulerInputElement extends HTMLElement {
 
   set zoom(value) {
     this._zoom = Math.max(value, 1);
-    this.style.setProperty('--zoom', this._zoom);
+    this._scrollerContent.style.width = `${this._zoom * 100}%`;
     this._updateBackgroundSize();
     this._update();
   }
