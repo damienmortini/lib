@@ -66,9 +66,11 @@ export default class BeatSignalInputElement extends HTMLElement {
     this.color = 'white';
 
     this._value = NaN;
+    this._step = 1;
     this._length = 1;
     this._position = 0;
     this._decimals = 0;
+    this.loopLength = 0;
 
     this._beatElements = new Map();
 
@@ -205,6 +207,8 @@ export default class BeatSignalInputElement extends HTMLElement {
         }
         break;
       case 'looplength':
+        this.loopLength = Number(newValue);
+        break;
       case 'length':
       case 'zoom':
       case 'step':
@@ -243,14 +247,6 @@ export default class BeatSignalInputElement extends HTMLElement {
   set step(value) {
     this._step = value;
     this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
-  }
-
-  get loopLength() {
-    return this._loopLength;
-  }
-
-  set loopLength(value) {
-    this._loopLength = value;
   }
 
   get length() {
