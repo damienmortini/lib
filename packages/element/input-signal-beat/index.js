@@ -46,9 +46,20 @@ export default class BeatSignalInputElement extends HTMLElement {
           background: currentColor;
           border: 1px solid black;
         }
+        #head {
+          position: absolute;
+          will-change: transform;
+          height: 100%;
+          top: 0;
+          left: 0;
+          border-left: 1px solid red;
+        }
       </style>
+      <div id="head"></div>
       <div id="beats"></div>
     `;
+
+    this._head = this.shadowRoot.querySelector('#head');
 
     this._beatsContainer = this.shadowRoot.querySelector('#beats');
 
@@ -173,6 +184,11 @@ export default class BeatSignalInputElement extends HTMLElement {
       });
     };
     this.addEventListener('pointerdown', pointerDown);
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      this._width = entries[0].contentRect.width;
+    });
+    resizeObserver.observe(this);
   }
 
   _setElementTransformFromBeat(element, beat) {
@@ -270,6 +286,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       }
     }
     this._position = value;
+    this._head.style.transform = `translateX(${this._position / this.length * this._width * this.zoom}px)`;
     if (changed) {
       this._value = backward ? minBeat : maxBeat;
       this.dispatchEvent(new Event('change', { bubbles: true }));
