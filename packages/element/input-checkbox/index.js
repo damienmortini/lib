@@ -10,6 +10,12 @@ export default class InputCheckboxElement extends HTMLElement {
       <style>
         :host {
           display: inline-block;
+          height: 12px;
+        }
+        input {
+          margin: 0;
+          width: 100%;
+          height: 100%;
         }
       </style>
       <input type="checkbox">
@@ -55,3 +61,5 @@ export default class InputCheckboxElement extends HTMLElement {
     }));
   }
 }
+
+customElements.define('damo-input-checkbox', InputCheckboxElement);
