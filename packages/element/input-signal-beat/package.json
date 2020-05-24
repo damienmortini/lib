@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-signal-beat",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "<element-input-signal-beat> custom element.",
   "main": "index.js",
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-viewer-array",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "<element-viewer-array> custom element.",
   "main": "index.js",
   "scripts": {
