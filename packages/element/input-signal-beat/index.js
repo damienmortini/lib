@@ -84,6 +84,7 @@ export default class BeatSignalInputElement extends HTMLElement {
         super.add(value);
         const element = document.createElement('div');
         element.id = value;
+        element.style.zIndex = Math.floor(value * 65536);
         element.classList.add('beat');
         self._setElementTransformFromBeat(element, value);
         self._beatsContainer.appendChild(element);
