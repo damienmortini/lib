@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-signal-array",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "<element-input-signal-array> custom element.",
   "main": "index.js",
   "scripts": {
