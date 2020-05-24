@@ -14,66 +14,97 @@ export default class BeatSignalInputElement extends HTMLElement {
           height: 20px;
           width: 300px;
           background: lightgrey;
+          overflow: overlay;
+          contain: strict;
+          color: white;
         }
-        canvas {
-          position: absolute;
-          top: 0;
-          left: 0;
+        :host::-webkit-scrollbar {
+          background: transparent;
+          height: 2px;
+        }
+        :host::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, .2);
+        }
+        #beats {
+          position: relative;
+          overflow: hidden;
           width: 100%;
           height: 100%;
+          contain: strict;
+        }
+        .beat {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translate(-50%, -50%) rotate(45deg);
+          width: 10px;
+          height: 10px;
+          background: currentColor;
+          border: 1px solid black;
         }
       </style>
-      <canvas></canvas>
+      <div id="beats"></div>
     `;
+
+    this._beatsContainer = this.shadowRoot.querySelector('#beats');
 
     this.color = 'white';
 
-    this._canvas = this.shadowRoot.querySelector('canvas');
-    this._context = this._canvas.getContext('2d');
-
     this._value = NaN;
+    this._length = 1;
     this._width = 1;
     this._position = 0;
-    this._scrollLeft = 0;
     this._decimals = 0;
 
-    const drawBinded = this.draw.bind(this);
-    let requestAnimationFrameID = -1;
+    this._beatElements = new Map();
+
     const self = this;
     class Beats extends Set {
       add(value) {
-        if (self.loopLength) {
-          let position = 0;
-          while (position < self.length - self.loopLength) {
-            super.add(self._roundValueOnStep(position + (value % self.loopLength)));
-            position += self.loopLength;
-          }
-        } else {
-          super.add(self._roundValueOnStep(value));
+        // if (self.loopLength) {
+        //   let position = 0;
+        //   while (position < self.length - self.loopLength) {
+        //     super.add(self._roundValueOnStep(position + (value % self.loopLength)));
+        //     position += self.loopLength;
+        //   }
+        // } else {
+        value = self._roundValueOnStep(value);
+        if (this.has(value)) {
+          return;
         }
-        cancelAnimationFrame(requestAnimationFrameID);
-        requestAnimationFrameID = requestAnimationFrame(drawBinded);
+        super.add(value);
+        const element = document.createElement('div');
+        element.id = value;
+        element.classList.add('beat');
+        self._setElementTransformFromBeat(element, value);
+        self._beatsContainer.appendChild(element);
+        self._beatElements.set(value, element);
         return this;
       }
       delete(value) {
-        let somethingRemoved = false;
-        if (self.loopLength) {
-          let position = 0;
-          while (position < self.length - self.loopLength) {
-            somethingRemoved = super.delete(self._roundValueOnStep(position + (value % self.loopLength))) || somethingRemoved;
-            position += self.loopLength;
-          }
-        } else {
-          somethingRemoved = super.delete(self._roundValueOnStep(value));
+        value = self._roundValueOnStep(value);
+        if (!this.has(value)) {
+          return;
         }
-        cancelAnimationFrame(requestAnimationFrameID);
-        requestAnimationFrameID = requestAnimationFrame(drawBinded);
+        let somethingRemoved = false;
+        // if (self.loopLength) {
+        //   let position = 0;
+        //   while (position < self.length - self.loopLength) {
+        //     somethingRemoved = super.delete(self._roundValueOnStep(position + (value % self.loopLength))) || somethingRemoved;
+        //     position += self.loopLength;
+        //   }
+        // } else {
+        // }
+        somethingRemoved = super.delete(value);
+        const element = self._beatElements.get(value);
+        element.remove();
+        self._beatElements.delete(value);
         return somethingRemoved;
       }
       clear() {
-        super.clear();
-        cancelAnimationFrame(requestAnimationFrameID);
-        requestAnimationFrameID = requestAnimationFrame(drawBinded);
+        for (const value of this) {
+          this.delete(value);
+        }
       }
     };
     this._beats = new Beats();
@@ -82,10 +113,10 @@ export default class BeatSignalInputElement extends HTMLElement {
     let mode = '';
     const preventContextMenu = (event) => event.preventDefault();
     const pointerDown = (event) => {
-      this._canvas.setPointerCapture(event.pointerId);
-      this._canvas.addEventListener('pointermove', pointerMove);
-      this._canvas.addEventListener('pointerup', pointerUp);
-      this._canvas.addEventListener('pointerout', pointerUp);
+      this.setPointerCapture(event.pointerId);
+      this.addEventListener('pointermove', pointerMove);
+      this.addEventListener('pointerup', pointerUp);
+      this.addEventListener('pointerout', pointerUp);
       window.addEventListener('contextmenu', preventContextMenu);
       pointerMove(event);
     };
@@ -117,29 +148,29 @@ export default class BeatSignalInputElement extends HTMLElement {
         }
       }
       previousbeat = newbeat;
-      this.draw();
       this.dispatchEvent(new Event('input'));
     };
     const pointerUp = (event) => {
       mode = '';
       previousbeat = null;
-      this._canvas.releasePointerCapture(event.pointerId);
-      this._canvas.removeEventListener('pointermove', pointerMove);
-      this._canvas.removeEventListener('pointerup', pointerUp);
-      this._canvas.removeEventListener('pointerout', pointerUp);
+      this.releasePointerCapture(event.pointerId);
+      this.removeEventListener('pointermove', pointerMove);
+      this.removeEventListener('pointerup', pointerUp);
+      this.removeEventListener('pointerout', pointerUp);
       requestAnimationFrame(() => {
         window.removeEventListener('contextmenu', preventContextMenu);
       });
     };
-    this._canvas.addEventListener('pointerdown', pointerDown);
+    this.addEventListener('pointerdown', pointerDown);
 
     const resizeObserver = new ResizeObserver((entries) => {
       this._width = entries[0].contentRect.width;
-      this._canvas.width = entries[0].contentRect.width * devicePixelRatio;
-      this._canvas.height = entries[0].contentRect.height * devicePixelRatio;
-      this.draw();
     });
     resizeObserver.observe(this);
+  }
+
+  _setElementTransformFromBeat(element, beat) {
+    element.style.left = `${beat / this.length * 100}%`;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -154,11 +185,8 @@ export default class BeatSignalInputElement extends HTMLElement {
       case 'looplength':
       case 'length':
       case 'zoom':
-        this.draw();
-        break;
       case 'step':
-        this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
-        this.draw();
+        this[name] = Number(newValue);
         break;
     }
   }
@@ -176,49 +204,42 @@ export default class BeatSignalInputElement extends HTMLElement {
     return this._beats;
   }
 
-  get scrollWidth() {
-    return this._width * this.zoom;
-  }
-
-  get scrollLeft() {
-    return this._scrollLeft;
-  }
-
-  set scrollLeft(value) {
-    this._scrollLeft = Math.max(0, Math.min(this.scrollWidth - this._width, value));
-    this.draw();
-  }
-
   get zoom() {
-    return Number(this.getAttribute('zoom'));
+    return this._zoom;
   }
 
   set zoom(value) {
-    this.setAttribute('zoom', String(value));
+    value = Math.max(value, 1);
+    this._zoom = value;
+    this._beatsContainer.style.width = `${this._zoom * 100}%`;
   }
 
   get step() {
-    return Number(this.getAttribute('step'));
+    return this._step;
   }
 
   set step(value) {
-    this.setAttribute('step', String(value));
-  }
-
-  get length() {
-    return Number(this.getAttribute('length'));
-  }
-
-  set length(value) {
-    this.setAttribute('length', String(value));
+    this._step = value;
+    this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
   }
 
   get loopLength() {
-    return Number(this.getAttribute('looplength'));
+    return this._loopLength;
   }
 
   set loopLength(value) {
-    this.setAttribute('looplength', String(value));
+    this._loopLength = value;
+  }
+
+  get length() {
+    return this._length;
+  }
+
+  set length(value) {
+    this._length = value;
+    for (const [beat, element] of this._beatElements) {
+      this._setElementTransformFromBeat(element, beat);
+    }
   }
 
   get position() {
@@ -247,58 +268,10 @@ export default class BeatSignalInputElement extends HTMLElement {
       this._value = backward ? minBeat : maxBeat;
       this.dispatchEvent(new Event('change', { bubbles: true }));
     }
-    this.draw();
   }
 
   get value() {
     return this._value;
-  }
-
-  get name() {
-    return this.getAttribute('name');
-  }
-
-  set name(value) {
-    this.setAttribute('name', value);
-  }
-
-  draw() {
-    this._context.resetTransform();
-    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-
-    this._context.strokeStyle = 'rgba(0, 0, 0, .2)';
-    if (this.step) {
-      let stepWidth = this.step / this.length * this.zoom * this._canvas.width;
-      while (stepWidth < 1) {
-        stepWidth *= 2;
-      }
-      for (let position = 0; position < this._canvas.width; position += stepWidth) {
-        const x = position - ((this.scrollLeft * devicePixelRatio) % stepWidth);
-        this._context.beginPath();
-        this._context.moveTo(x, 0);
-        this._context.lineTo(x, this._canvas.height);
-        this._context.stroke();
-      }
-    }
-
-    this._context.strokeStyle = 'red';
-    const position = (this.position / this.length) * this.zoom * this._canvas.width - this.scrollLeft * devicePixelRatio;
-    this._context.beginPath();
-    this._context.moveTo(position, 0);
-    this._context.lineTo(position, this._canvas.height);
-    this._context.stroke();
-
-    this._context.fillStyle = this.color;
-    this._context.strokeStyle = 'black';
-    const size = Math.min(10, this._canvas.height * .5) * devicePixelRatio;
-    for (const beat of this.beats) {
-      this._context.resetTransform();
-      const x = (beat / this.length) * this._canvas.width * this.zoom - this.scrollLeft * devicePixelRatio;
-      this._context.translate(x, this._canvas.height * .5);
-      this._context.rotate(Math.PI * .25);
-      this._context.fillRect(-size * .5, -size * .5, size, size);
-      this._context.strokeRect(-size * .5, -size * .5, size, size);
-    }
   }
 }
 
