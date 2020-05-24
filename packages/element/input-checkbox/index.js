@@ -22,6 +22,7 @@ export default class InputCheckboxElement extends HTMLElement {
     `;
 
     this._input = this.shadowRoot.querySelector('input');
+    this._input.addEventListener('input', (event) => this.dispatchEvent(new Event('change', event)));
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -56,9 +57,7 @@ export default class InputCheckboxElement extends HTMLElement {
       return;
     }
     this._input.checked = value;
-    this.dispatchEvent(new Event('input', {
-      bubbles: true,
-    }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 }
 
