@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/damienmortini/lib/issues"
   },
-  "homepage": "https://github.com/damienmortini/lib#readme"
+  "homepage": "https://github.com/damienmortini/lib#readme",
+  "dependencies": {
+    "@damienmortini/element-viewer-array": "^0.0.4"
+  }
 }
