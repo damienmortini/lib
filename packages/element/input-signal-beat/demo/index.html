@@ -21,6 +21,10 @@
       gap: 10px;
     }
 
+    #container {
+      display: contents;
+    }
+
     element-input-signal-beat {
       width: 500px;
     }
@@ -28,10 +32,12 @@
 </head>
 
 <body>
-  <element-input-signal-beat></element-input-signal-beat>
-  <element-input-signal-beat step=".1"></element-input-signal-beat>
-  <element-input-signal-beat step=".01" looplength=".1"></element-input-signal-beat>
-  <element-input-signal-beat step=".001"></element-input-signal-beat>
+  <div id="container">
+    <element-input-signal-beat zoom="3" length="3"></element-input-signal-beat>
+    <element-input-signal-beat zoom="3" step=".1"></element-input-signal-beat>
+    <element-input-signal-beat zoom="3" step=".01" looplength=".1"></element-input-signal-beat>
+    <element-input-signal-beat zoom="3" step=".001"></element-input-signal-beat>
+  </div>
 
   <script type="module">
     import Element from '../index.js';
@@ -39,9 +45,11 @@
 
     const element = document.querySelector('element-input-signal-beat');
 
-    for (let index = 0; index < 10; index++) {
+    for (let index = 0; index < 1000; index++) {
       element.beats.add(Math.random());
     }
+
+    const container = document.body.querySelector('#container');
 
     // const arrayInputElement = document.querySelector('element-input-signal-beat');
     // const array = new Float32Array(1000);
@@ -57,6 +65,14 @@
     //   arrayInputElementStepped.array[index] = Math.random();
     // }
     // arrayInputElementStepped.draw();
+
+    window.addEventListener('wheel', (event) => {
+      for (const child of container.children) {
+        if (Math.abs(event.deltaY)) {
+          child.zoom *= event.deltaY < 0 ? 1 / .95 : .95;
+        }
+      }
+    });
   </script>
 </body>
 
