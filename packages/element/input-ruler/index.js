@@ -21,8 +21,10 @@ export default class RulerInputElement extends HTMLElement {
           font-family: monospace;
           touch-action: none;
           user-select: none;
+          contain: layout;
         }
         #tick {
+          contain: layout;
           position: absolute;
           pointer-events: none;
           will-change: transform;
@@ -72,6 +74,7 @@ export default class RulerInputElement extends HTMLElement {
     this._min = 0;
     this._max = 100;
     this._width = 1;
+    this._scrollLeft = 0;
     this.value = 0;
 
     let pointerOffsetX = 0;
@@ -117,6 +120,7 @@ export default class RulerInputElement extends HTMLElement {
     this.addEventListener('pointerdown', pointerDown);
 
     this._scroller.addEventListener('scroll', () => {
+      this._scrollLeft = this._scroller.scrollLeft;
       this._update();
     });
 
@@ -197,10 +201,11 @@ export default class RulerInputElement extends HTMLElement {
   }
 
   get scrollLeft() {
-    return this._scroller.scrollLeft;
+    return this._scrollLeft;
   }
 
   set scrollLeft(value) {
+    this._scrollLeft = value;
     this._scroller.scrollLeft = value;
   }
 
