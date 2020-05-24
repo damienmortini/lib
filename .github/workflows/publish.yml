@@ -14,7 +14,7 @@ jobs:
         run: |
           yarn install --production
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Push to gh-pages
         run: |
           git config --local user.email "action@github.com"
