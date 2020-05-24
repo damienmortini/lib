@@ -13,7 +13,7 @@ export default class BeatSignalInputElement extends HTMLElement {
           position: relative;
           height: 20px;
           width: 300px;
-          background: lightgrey;
+          background: white;
           overflow-y: hidden;
           overflow-x: overlay;
           contain: strict;
@@ -35,6 +35,8 @@ export default class BeatSignalInputElement extends HTMLElement {
           width: 100%;
           height: 100%;
           contain: strict;
+          background-size: 1% 1%, 10% 10%;
+          background-image: linear-gradient(to right, lightgrey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px);
         }
         .beat {
           position: absolute;
@@ -70,7 +72,7 @@ export default class BeatSignalInputElement extends HTMLElement {
     this._length = 1;
     this._position = 0;
     this._decimals = 0;
-    this.loopLength = 0;
+    this._loopLength = 0;
 
     this._beatElements = new Map();
 
@@ -165,7 +167,7 @@ export default class BeatSignalInputElement extends HTMLElement {
         } else {
           this.beats.add(newbeat);
         }
-      } else {
+      } else if (event.buttons === 2) {
         for (const beat of this.beats) {
           if (beat >= startBeat && beat <= endBeat) {
             this.beats.delete(beat);
@@ -192,6 +194,12 @@ export default class BeatSignalInputElement extends HTMLElement {
       this._width = entries[0].contentRect.width;
     });
     resizeObserver.observe(this);
+  }
+
+  _updateBackgroundSize() {
+    const ratio = this.step / this.length;
+    const loopRatio = this.loopLength / this.length;
+    this._beatsContainer.style.backgroundSize = `${ratio * 100}%, ${(loopRatio || 10) * 100}%`;
   }
 
   _setElementTransformFromBeat(element, beat) {
@@ -248,6 +256,7 @@ export default class BeatSignalInputElement extends HTMLElement {
   set step(value) {
     this._step = value;
     this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
+    this._updateBackgroundSize();
   }
 
   get length() {
@@ -259,6 +268,16 @@ export default class BeatSignalInputElement extends HTMLElement {
     for (const [beat, element] of this._beatElements) {
       this._setElementTransformFromBeat(element, beat);
     }
+    this._updateBackgroundSize();
+  }
+
+  get loopLength() {
+    return this._loopLength;
+  }
+
+  set loopLength(value) {
+    this._loopLength = value;
+    this._updateBackgroundSize();
   }
 
   get position() {

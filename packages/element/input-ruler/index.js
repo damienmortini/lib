@@ -22,6 +22,7 @@ export default class RulerInputElement extends HTMLElement {
           touch-action: none;
           user-select: none;
           contain: layout;
+          background-color: white;
         }
         #tick {
           contain: layout;
@@ -46,7 +47,6 @@ export default class RulerInputElement extends HTMLElement {
         #content {
           height: 100%;
           background-size: 10% 10%, 100% 100%;
-          background-color: white;
           background-image: linear-gradient(to right, lightgrey 0px, transparent 1px), linear-gradient(to right, black 0px, transparent 1px);
         }
         #scroller::-webkit-scrollbar {
@@ -150,7 +150,10 @@ export default class RulerInputElement extends HTMLElement {
   }
 
   _updateBackgroundSize() {
-    const ratio = this._step / (this.max - this.min) * this.zoom;
+    let ratio = this._step / (this.max - this.min) * this.zoom;
+    while (ratio < this.step) {
+      ratio *= 10;
+    }
     this._scrollerContent.style.backgroundSize = `${ratio * this._width}px, ${10 * ratio * this._width}px`;
   }
 
