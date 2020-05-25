@@ -254,9 +254,14 @@ export default class BeatSignalInputElement extends HTMLElement {
   }
 
   set step(value) {
+    const beats = new Set(this.beats);
+    this.beats.clear();
     this._step = value;
     this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
     this._updateBackgroundSize();
+    for (const beat of beats) {
+      this.beats.add(beat);
+    }
   }
 
   get length() {
