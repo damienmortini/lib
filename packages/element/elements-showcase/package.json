@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.27",
+  "version": "0.0.28",
   "dependencies": {
     "@damienmortini/element-animation-lottie": "^0.0.29",
     "@damienmortini/element-animation-sprite": "^0.0.16",
@@ -21,7 +21,7 @@
     "@damienmortini/element-input-range": "^0.0.12",
     "@damienmortini/element-input-select": "^0.0.10",
     "@damienmortini/element-input-signal-array": "^0.0.5",
-    "@damienmortini/element-input-signal-beat": "^0.0.5",
+    "@damienmortini/element-input-signal-beat": "^0.0.6",
     "@damienmortini/element-input-soundmatrix": "^0.0.13",
     "@damienmortini/element-input-text": "^0.0.10",
     "@damienmortini/element-link": "^0.0.12",
