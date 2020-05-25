@@ -175,7 +175,7 @@ export default class BeatSignalInputElement extends HTMLElement {
         }
       }
       previousbeat = newbeat;
-      this.dispatchEvent(new Event('input'));
+      this.dispatchEvent(new Event('input', { bubbles: true }));
     };
     const pointerUp = (event) => {
       mode = '';
