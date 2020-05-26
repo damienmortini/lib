@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/damienmortini/lib",
   "dependencies": {
-    "gl-matrix": "^3.1.0",
+    "gl-matrix": "^3.3.0",
     "mobile-detect": "^1.4.4"
   }
 }
