@@ -1,2 +1,6 @@
-.eslintrc
 node_modules
+
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins

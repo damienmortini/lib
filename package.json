@@ -5,7 +5,7 @@
   "scripts": {
     "start": "server",
     "publish": "yarn run lerna publish",
-    "upgrade": "yarn upgrade-interactive --latest"
+    "upgrade": "yarn upgrade-interactive"
   },
   "workspaces": [
     "packages/**/*"
@@ -14,9 +14,8 @@
     "@damienmortini/server": "^1.0.16",
     "eslint": "^7.1.0",
     "eslint-config-google": "^0.14.0",
-    "jsdoc": "^3.6.3",
+    "jsdoc": "^3.6.4",
     "lerna": "^3.22.0",
-    "nodemon": "^2.0.4",
     "yarn": "^1.22.4"
   }
 }
