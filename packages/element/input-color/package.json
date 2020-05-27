@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-color",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "description": "<element-input-color> custom element.",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/core": "^0.2.34"
+    "@damienmortini/core": "^0.2.35"
   }
 }
