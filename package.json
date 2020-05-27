@@ -2,7 +2,7 @@
   "name": "lib",
   "private": true,
   "scripts": {
-    "start": "server",
+    "start": "server --watch=packages",
     "publish": "yarn run lerna publish",
     "upgrade": "yarn upgrade-interactive"
   },
