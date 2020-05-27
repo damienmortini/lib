@@ -12,7 +12,7 @@ jobs:
           registry-url: https://npm.pkg.github.com
       - name: Install
         run: |
-          yarn install --production
+          yarn install
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Push to gh-pages
