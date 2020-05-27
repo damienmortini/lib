@@ -44,14 +44,8 @@ export default class OrbitController {
     this._multiTouchMode = false;
 
     domElement.addEventListener('wheel', (event) => {
-      if (this.zoomDisabled) {
-        return;
-      }
-      if (event.deltaY < 0) {
-        this._distance *= .925;
-      } else {
-        this._distance /= .925;
-      }
+      if (this.zoomDisabled) return;
+      this._distance *= 1 + (event.deltaY > 0 ? 1 : -1) * .05;
       this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
     }, { passive: true });
 
