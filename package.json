@@ -1,14 +1,14 @@
 {
   "name": "lib",
   "private": true,
-  "version": "0.0.0",
   "scripts": {
     "start": "server",
     "publish": "yarn run lerna publish",
     "upgrade": "yarn upgrade-interactive"
   },
   "workspaces": [
-    "packages/**/*"
+    "packages/*",
+    "packages/element/*"
   ],
   "devDependencies": {
     "@damienmortini/server": "^1.0.16",
