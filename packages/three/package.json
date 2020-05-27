@@ -3,7 +3,7 @@
   "version": "0.1.38",
   "description": "Three.js helpers",
   "scripts": {
-    "postinstall": "node copyExamples.js"
+    "prepare": "node copyExamples.js"
   },
   "repository": "https://damienmortini@github.com/damienmortini/lib.git",
   "keywords": [

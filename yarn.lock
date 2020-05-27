@@ -40,7 +40,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@damienmortini/core@^0.2.34, @damienmortini/core@workspace:packages/core":
+"@damienmortini/core@^0.2.35, @damienmortini/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@damienmortini/core@workspace:packages/core"
   dependencies:
@@ -49,37 +49,37 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-animation-lottie@^0.0.29, @damienmortini/element-animation-lottie@workspace:packages/element/animation-lottie":
+"@damienmortini/element-animation-lottie@^0.0.30, @damienmortini/element-animation-lottie@workspace:packages/element/animation-lottie":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-animation-lottie@workspace:packages/element/animation-lottie"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
     lottie-web: ^5.6.10
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-animation-sprite@^0.0.16, @damienmortini/element-animation-sprite@workspace:packages/element/animation-sprite":
+"@damienmortini/element-animation-sprite@^0.0.17, @damienmortini/element-animation-sprite@workspace:packages/element/animation-sprite":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-animation-sprite@workspace:packages/element/animation-sprite"
   dependencies:
-    "@damienmortini/core": ^0.2.34
-    "@damienmortini/element-animation-ticker": ^0.0.30
+    "@damienmortini/core": ^0.2.35
+    "@damienmortini/element-animation-ticker": ^0.0.31
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-animation-ticker@^0.0.30, @damienmortini/element-animation-ticker@workspace:packages/element/animation-ticker":
+"@damienmortini/element-animation-ticker@^0.0.31, @damienmortini/element-animation-ticker@workspace:packages/element/animation-ticker":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-animation-ticker@workspace:packages/element/animation-ticker"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-animation-view@^0.0.13, @damienmortini/element-animation-view@workspace:packages/element/animation-view":
+"@damienmortini/element-animation-view@^0.0.14, @damienmortini/element-animation-view@workspace:packages/element/animation-view":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-animation-view@workspace:packages/element/animation-view"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
   languageName: unknown
   linkType: soft
 
@@ -87,19 +87,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-elements-showcase@workspace:packages/element/elements-showcase"
   dependencies:
-    "@damienmortini/element-animation-lottie": ^0.0.29
-    "@damienmortini/element-animation-sprite": ^0.0.16
-    "@damienmortini/element-animation-ticker": ^0.0.30
-    "@damienmortini/element-animation-view": ^0.0.13
+    "@damienmortini/element-animation-lottie": ^0.0.30
+    "@damienmortini/element-animation-sprite": ^0.0.17
+    "@damienmortini/element-animation-ticker": ^0.0.31
+    "@damienmortini/element-animation-view": ^0.0.14
     "@damienmortini/element-gl-view": ^0.0.3
     "@damienmortini/element-input-button": ^0.0.11
     "@damienmortini/element-input-checkbox": ^0.0.11
-    "@damienmortini/element-input-color": ^0.0.26
+    "@damienmortini/element-input-color": ^0.0.27
     "@damienmortini/element-input-colorpicker": ^0.0.10
     "@damienmortini/element-input-connector": ^0.0.12
     "@damienmortini/element-input-connector-linkable": ^0.0.9
-    "@damienmortini/element-input-file": ^0.0.27
-    "@damienmortini/element-input-joystick": ^0.0.26
+    "@damienmortini/element-input-file": ^0.0.28
+    "@damienmortini/element-input-joystick": ^0.0.27
     "@damienmortini/element-input-number": ^0.0.12
     "@damienmortini/element-input-pad-xy": ^0.0.13
     "@damienmortini/element-input-range": ^0.0.12
@@ -128,7 +128,7 @@ __metadata:
   dependencies:
     "@damienmortini/element-input-button": ^0.0.11
     "@damienmortini/element-input-checkbox": ^0.0.11
-    "@damienmortini/element-input-color": ^0.0.26
+    "@damienmortini/element-input-color": ^0.0.27
     "@damienmortini/element-input-range": ^0.0.12
     "@damienmortini/element-input-select": ^0.0.10
     "@damienmortini/element-input-text": ^0.0.10
@@ -147,11 +147,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-input-color@^0.0.26, @damienmortini/element-input-color@workspace:packages/element/input-color":
+"@damienmortini/element-input-color@^0.0.27, @damienmortini/element-input-color@workspace:packages/element/input-color":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-input-color@workspace:packages/element/input-color"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
   languageName: unknown
   linkType: soft
 
@@ -175,19 +175,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-input-file@^0.0.27, @damienmortini/element-input-file@workspace:packages/element/input-file":
+"@damienmortini/element-input-file@^0.0.28, @damienmortini/element-input-file@workspace:packages/element/input-file":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-input-file@workspace:packages/element/input-file"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
   languageName: unknown
   linkType: soft
 
-"@damienmortini/element-input-joystick@^0.0.26, @damienmortini/element-input-joystick@workspace:packages/element/input-joystick":
+"@damienmortini/element-input-joystick@^0.0.27, @damienmortini/element-input-joystick@workspace:packages/element/input-joystick":
   version: 0.0.0-use.local
   resolution: "@damienmortini/element-input-joystick@workspace:packages/element/input-joystick"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
   languageName: unknown
   linkType: soft
 
@@ -292,7 +292,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@damienmortini/three@workspace:packages/three"
   dependencies:
-    "@damienmortini/core": ^0.2.34
+    "@damienmortini/core": ^0.2.35
     three: 0.116.1
   languageName: unknown
   linkType: soft
