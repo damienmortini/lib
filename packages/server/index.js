@@ -12,10 +12,13 @@ const os = require('os');
  */
 let verbose = false;
 let path = '';
+let watchPath = '.';
 
 for (const arg of process.argv) {
   if (arg.startsWith('--path')) {
     path = arg.split('=')[1].trim();
+  } else if (arg.startsWith('--watch')) {
+    watchPath = arg.split('=')[1].trim();
   } else if (arg === '--verbose') {
     verbose = true;
   }
@@ -75,8 +78,8 @@ server.on('listening', () => {
   const wss = new WebSocket.Server({ server: webSocketServer });
   webSocketServer.listen(++port);
 
-  fs.watch('.', { recursive: true }, (eventType, filename) => {
-    if (!filename || filename.startsWith('.git')) {
+  fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
+    if (!filename || filename.startsWith('.')) {
       return;
     }
     if (verbose) {
