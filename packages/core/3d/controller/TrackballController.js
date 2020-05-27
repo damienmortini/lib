@@ -1,34 +1,35 @@
-import Pointer from '../../input/Pointer.js';
 import Matrix4 from '../../math/Matrix4.js';
 import Vector2 from '../../math/Vector2.js';
 import Vector3 from '../../math/Vector3.js';
 import Quaternion from '../../math/Quaternion.js';
+import GestureObserver from '../../input/GestureObserver.js';
 
 export default class TrackballController {
   constructor({
     matrix = new Matrix4(),
     domElement = document.body,
-    distance = 0,
     invertRotation = true,
+    rotationVelocity = .01,
     rotationEaseRatio = .04,
-    zoomSpeed = .1,
-    zoomEaseRatio = .1,
-    minDistance = 0,
-    maxDistance = Infinity,
+    distance = 0,
+    distanceMin = 0,
+    distanceMax = Infinity,
+    zoomEaseRatio = .2,
+    zoomVelocity = .003,
+    zoomDisabled = false,
     disabled = false,
   } = {}) {
     this.matrix = matrix;
 
-    this._distance = distance;
     this.invertRotation = invertRotation;
+    this.rotationVelocity = rotationVelocity;
     this.rotationEaseRatio = rotationEaseRatio;
-    this.maxDistance = maxDistance;
-    this.minDistance = minDistance;
-    this.zoomSpeed = zoomSpeed;
+    this.distanceMax = distanceMax;
+    this.distanceMin = distanceMin;
+    this.zoomVelocity = zoomVelocity;
     this.zoomEaseRatio = zoomEaseRatio;
-
-    this._pointer = Pointer.get(domElement);
-    this._nextDistance = this._distance;
+    this.zoomDisabled = zoomDisabled;
+    this.distance = distance;
 
     this._cachedQuaternion = new Quaternion();
     this._cachedMatrix = new Matrix4();
@@ -41,29 +42,39 @@ export default class TrackballController {
     this._positionPrevious = this._position.clone();
     this._positionOffset = new Vector3();
 
-    domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: true });
-
     this.update();
 
     this.disabled = disabled;
+
+    domElement.addEventListener('wheel', (event) => {
+      if (this.zoomDisabled || this.disabled) return;
+      this._distance *= 1 + (event.deltaY > 0 ? 1 : -1) * .05;
+      this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
+    }, { passive: true });
+
+    const gestureObserver = new GestureObserver((gesture) => {
+      if (this.disabled) {
+        return;
+      }
+      this._velocity.set(gesture.movementX * this.rotationVelocity, gesture.movementY * this.rotationVelocity);
+      if (!this.zoomDisabled) {
+        this._distance /= 1 + gesture.movementScale * this.zoomVelocity;
+        this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
+      }
+    });
+    gestureObserver.observe(domElement);
   }
 
   set distance(value) {
-    this._distance = this._nextDistance = value;
+    this._distance = this._distanceEased = value;
   }
 
   get distance() {
     return this._distance;
   }
 
-  onWheel(e) {
-    if (this.disabled) {
-      return;
-    }
-    const scrollOffsetRatio = 1 + Math.abs(e.deltaY * this.zoomSpeed * .01);
-    this._nextDistance = this._nextDistance || 1;
-    this._nextDistance = e.deltaY > 0 ? this._nextDistance * scrollOffsetRatio : this._nextDistance / scrollOffsetRatio;
-    this._nextDistance = Math.max(Math.min(this._nextDistance, this.maxDistance), this.minDistance);
+  get distanceEased() {
+    return this._distanceEased;
   }
 
   update() {
@@ -74,17 +85,13 @@ export default class TrackballController {
     this._cachedMatrix.identity();
     this._cachedQuaternion.identity();
 
-    this._distance += (this._nextDistance - this._distance) * this.zoomEaseRatio;
+    this._distanceEased += (this._distance - this._distanceEased) * this.zoomEaseRatio;
 
     this._position.set(this.matrix.x, this.matrix.y, this.matrix.z).subtract(this._positionOffset);
 
     this.matrix.x = 0;
     this.matrix.y = 0;
     this.matrix.z = 0;
-
-    if (this._pointer.downed) {
-      this._velocity.copy(this._pointer.velocity).scale(.004);
-    }
 
     this._velocity.lerp(this._velocityOrigin, this.rotationEaseRatio);
 
@@ -97,7 +104,7 @@ export default class TrackballController {
 
     this._positionOffset.set(0, 0, 1);
     this._positionOffset.applyMatrix4(this.matrix);
-    this._positionOffset.scale(this._distance);
+    this._positionOffset.scale(this._distanceEased);
 
     this._cachedVector3.copy(this._position).add(this._positionOffset);
 
