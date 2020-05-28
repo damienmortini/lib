@@ -7,8 +7,8 @@ import { Color, Vector3, ShaderChunk } from '../../../three/src/Three.js';
 export default class THREEPBRMaterial extends THREEShaderMaterial {
   constructor(options = {}) {
     const webgl2 = options.webgl2 === undefined ? true : options.webgl2;
-    const vertexShaderChunks = options.vertexShaderChunks || [];
-    const fragmentShaderChunks = options.fragmentShaderChunks || [];
+    const vertexChunks = options.vertexChunks || [];
+    const fragmentChunks = options.fragmentChunks || [];
     const uniforms = options.uniforms || {};
     const pbrDiffuseLightFromRay = options.pbrDiffuseLightFromRay || (uniforms.envMap ? `
       vec4 texel = ${webgl2 ? 'textureLod' : 'textureCubeLodEXT'}(envMap, ray.direction, roughness * ${Math.log2(uniforms.envMap.image.width).toFixed(1)});
@@ -21,8 +21,8 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
 
     options = Object.assign({}, options);
 
-    delete options.vertexShaderChunks;
-    delete options.fragmentShaderChunks;
+    delete options.vertexChunks;
+    delete options.fragmentChunks;
     delete options.uniforms;
     delete options.pbrDiffuseLightFromRay;
     delete options.pbrReflectionFromRay;
@@ -85,11 +85,11 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           direction: new Vector3(),
         },
       }, uniforms),
-      vertexShader: `
+      vertex: `
         void main() {
         }
       `,
-      vertexShaderChunks: [
+      vertexChunks: [
         ['start', `
           ${RayShader.Ray}
 
@@ -120,9 +120,9 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
           vNormal = normalize(mat3(modelMatrix) * pbrNormal);
           vUv = uv;
         `],
-        ...vertexShaderChunks,
+        ...vertexChunks,
       ],
-      fragmentShaderChunks: [
+      fragmentChunks: [
         ['start', `
           ${LightShader.Light}
           ${RayShader.Ray}
@@ -150,7 +150,7 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
         ['end', `
           gl_FragColor = pbrColor;
         `],
-        ...fragmentShaderChunks,
+        ...fragmentChunks,
       ],
     }, options));
   }
