@@ -19,30 +19,33 @@ export default class GUIFolderElement extends HTMLElement {
         :host(::-webkit-scrollbar-thumb) { 
           background: rgba(1, 1, 1, .1);
         }
-        details, slot, summary {
-          padding: 5px;
+        details, summary {
+          padding: 10px;
         }
         summary:focus {
           outline: none;
         }
-        section {
-          margin: 5px 0;
-        }
-        section.input {
-          display: flex;
+        #content {
+          display: grid;
           align-items: center;
-          justify-content: space-between;
+          grid-template-columns: minmax(auto, 1fr) 2fr;
+          gap: 5px;
         }
-        section.input .input {
-          flex: 3;
-          min-width: 50%;
-          text-align: center;
+        section {
+          display: contents;
+        }
+        slot::slotted(*) {
+          width: 100%;
+          grid-column: span 2;
+        }
+        section.input slot::slotted(*) {
+          width: 100%;
+          grid-column: span 1;
         }
         section.input label {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          padding: 0 5px;
           flex: 1;
         }
         section.input label:empty {
@@ -52,11 +55,13 @@ export default class GUIFolderElement extends HTMLElement {
       <slot></slot>
       <details open>
         <summary></summary>
+        <div id="content"></div>
       </details>
     `;
 
     this._details = this.shadowRoot.querySelector('details');
     this._summary = this.shadowRoot.querySelector('summary');
+    this._content = this.shadowRoot.querySelector('#content');
 
     let slotUID = 0;
     const mutationCallback = (mutationsList) => {
@@ -66,7 +71,7 @@ export default class GUIFolderElement extends HTMLElement {
           if (!('value' in node)) {
             const slot = document.createElement('slot');
             slot.name = slotName;
-            this._details.appendChild(slot);
+            this._content.appendChild(slot);
           } else {
             const label = node.getAttribute('label') || node.label || node.getAttribute('name') || node.name || node.id || '';
             const section = document.createElement('section');
@@ -74,9 +79,9 @@ export default class GUIFolderElement extends HTMLElement {
             section.classList.add('input');
             section.innerHTML = `
               <label title="${label}">${label}</label>
-              <div class="input"><slot name="${slotName}"></slot></div>
+              <slot name="${slotName}"></slot>
             `;
-            this._details.appendChild(section);
+            this._content.appendChild(section);
           }
           node.slot = slotName;
         }

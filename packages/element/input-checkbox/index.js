@@ -10,6 +10,7 @@ export default class InputCheckboxElement extends HTMLElement {
       <style>
         :host {
           display: inline-block;
+          width: 12px;
           height: 12px;
         }
         input {
