@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-gui",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "Simple yet limitless GUI",
   "keywords": [
     "javascript",
@@ -25,7 +25,7 @@
   "dependencies": {
     "@damienmortini/element-input-button": "^0.0.11",
     "@damienmortini/element-input-checkbox": "^0.0.11",
-    "@damienmortini/element-input-color": "^0.0.28",
+    "@damienmortini/element-input-color": "^0.0.29",
     "@damienmortini/element-input-range": "^0.0.12",
     "@damienmortini/element-input-select": "^0.0.10",
     "@damienmortini/element-input-text": "^0.0.10"
