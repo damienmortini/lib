@@ -190,12 +190,12 @@ export default class Shader {
       const uniformsRegExp = /^\s*uniform (highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm;
       let uniformMatch;
       while ((uniformMatch = uniformsRegExp.exec(shaderString))) {
-        const [, , type, name, arrayLengthStr] = uniformMatch;
+        let [, , type, name, arrayLengthStr] = uniformMatch;
 
         const structure = structures.get(type);
         if (structure) {
           for (const key of Object.keys(structure)) {
-            const name = `${name}.${key}`;
+            name = `${name}.${key}`;
             newUniforms[name] = this._createUniform(name, structure[key].type, structure[key].arrayLength);
           }
         } else {
