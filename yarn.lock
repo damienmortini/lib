@@ -293,7 +293,7 @@ __metadata:
   resolution: "@damienmortini/three@workspace:packages/three"
   dependencies:
     "@damienmortini/core": ^0.2.35
-    three: 0.116.1
+    three: 0.117.0
   languageName: unknown
   linkType: soft
 
@@ -6994,10 +6994,10 @@ resolve@^1.10.0:
   languageName: node
   linkType: hard
 
-"three@npm:0.116.1":
-  version: 0.116.1
-  resolution: "three@npm:0.116.1"
-  checksum: 3/72b2df891611751ff62d1354b3219aa1dbee7266aac873afcac2b78e8ee5ed4687eeeeded1dc25839ad3946b33cb3c333ea8ae164777d7efdf0e04751f8eb4c0
+"three@npm:0.117.0":
+  version: 0.117.0
+  resolution: "three@npm:0.117.0"
+  checksum: 3/4eea929f2d4b151ae450727be5e1da620a4ff0b97f86a0942d4ba14f95e4ff79fb29ce21703bb7708dcad7c617e0627346409e1a381364c6d1d12d4e9ff96359
   languageName: node
   linkType: hard
 

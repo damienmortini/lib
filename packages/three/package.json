@@ -20,6 +20,6 @@
   "homepage": "https://github.com/damienmortini/lib",
   "dependencies": {
     "@damienmortini/core": "^0.2.35",
-    "three": "0.116.1"
+    "three": "0.117.0"
   }
 }
