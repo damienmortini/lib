@@ -27,7 +27,7 @@ export default class InputRangeElement extends HTMLElement {
 
     this._rangeInput = this.shadowRoot.querySelector('input[type=range]');
     this._numberInput = this.shadowRoot.querySelector('input[type=number]');
-    this._numberInput.valueAsNumber = this._rangeInput.valueAsNumber;
+    this._value = this._numberInput.valueAsNumber = this._rangeInput.valueAsNumber;
 
     this._rangeInput.addEventListener('input', (event) => {
       event.stopPropagation();
@@ -103,15 +103,20 @@ export default class InputRangeElement extends HTMLElement {
   }
 
   get value() {
-    return this._numberInput.valueAsNumber;
+    return this._value;
   }
 
   set value(value) {
+    if (value === this._value) {
+      return;
+    }
+    this._value = value;
     this._rangeInput.valueAsNumber = value;
     this._numberInput.valueAsNumber = value;
+    this.dispatchEvent(new Event('change', {
+      bubbles: true,
+    }));
   }
 }
 
-if (!customElements.get('damo-input-range')) {
-  customElements.define('damo-input-range', class DamoInputRangeElement extends InputRangeElement { });
-}
+customElements.define('damo-input-range', InputRangeElement);
