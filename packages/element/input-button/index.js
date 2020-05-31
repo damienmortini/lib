@@ -12,7 +12,6 @@ export default class InputButtonElement extends HTMLElement {
           display: inline-flex;
           min-width: 20px;
           height: 20px;
-          --border-width: 1px;
         }
         button {
           cursor: pointer;
@@ -20,8 +19,6 @@ export default class InputButtonElement extends HTMLElement {
           resize: vertical;
           width: 100%;
           height: 100%;
-          border-radius: inherit;
-          border-width: var(--border-width);
           outline: inherit;
         }
       </style>
