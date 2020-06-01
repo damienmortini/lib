@@ -50,6 +50,18 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     if (this.envMap) {
       this.envMap = this.envMap;
     }
+
+    for (const key of Object.keys(this.uniforms)) {
+      Object.defineProperty(this, key, {
+        configurable: true,
+        get: function () {
+          return this.uniforms[key].value;
+        },
+        set: function (value) {
+          this.uniforms[key].value = value;
+        },
+      });
+    }
   }
 
   // add({ vertexChunks, fragmentChunks, uniforms }) {
