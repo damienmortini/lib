@@ -16,8 +16,8 @@ export default class OrbitController {
     panMax = Infinity,
     rotationEasing = .1,
     rotationVelocity = .005,
-    zoomEasing = .2,
-    zoomVelocity = .003,
+    zoomEasing = .1,
+    zoomVelocity = .1,
     zoomDisabled = false,
   }) {
     this.matrix = matrix;
@@ -33,6 +33,8 @@ export default class OrbitController {
     this.zoomDisabled = zoomDisabled;
     this.zoomVelocity = zoomVelocity;
 
+    this._baseMatrix = new Matrix4(this.matrix);
+
     this._distance = distance;
     this._tilt = tilt;
     this._pan = pan;
@@ -45,7 +47,7 @@ export default class OrbitController {
 
     domElement.addEventListener('wheel', (event) => {
       if (this.zoomDisabled) return;
-      this._distance *= 1 + (event.deltaY > 0 ? 1 : -1) * .05;
+      this._distance *= 1 + event.deltaY * this.zoomVelocity * .01;
       this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
     }, { passive: true });
 
@@ -57,7 +59,7 @@ export default class OrbitController {
       this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
 
       if (!this.zoomDisabled) {
-        this._distance /= 1 + gesture.movementScale * this.zoomVelocity;
+        this._distance /= 1 + gesture.movementScale * this.zoomVelocity * .01;
         this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
       }
     });
@@ -118,5 +120,7 @@ export default class OrbitController {
     this.matrix.x = this._distanceEased * sinPan * cosTilt;
     this.matrix.y = sinTilt * this._distanceEased;
     this.matrix.z = this._distanceEased * cosPan * cosTilt;
+
+    this.matrix.multiply(this._baseMatrix);
   }
 }
