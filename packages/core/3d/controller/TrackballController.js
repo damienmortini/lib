@@ -9,13 +9,13 @@ export default class TrackballController {
     matrix = new Matrix4(),
     domElement = document.body,
     invertRotation = true,
-    rotationVelocity = .01,
-    rotationEaseRatio = .04,
+    rotationVelocity = Math.PI / 180,
+    rotationEaseRatio = .1,
     distance = 0,
     distanceMin = 0,
     distanceMax = Infinity,
-    zoomEaseRatio = .2,
-    zoomVelocity = .003,
+    zoomEaseRatio = .1,
+    zoomVelocity = .1,
     zoomDisabled = false,
     disabled = false,
   } = {}) {
@@ -48,7 +48,7 @@ export default class TrackballController {
 
     domElement.addEventListener('wheel', (event) => {
       if (this.zoomDisabled || this.disabled) return;
-      this._distance *= 1 + (event.deltaY > 0 ? 1 : -1) * .05;
+      this._distance *= 1 + event.deltaY * this.zoomVelocity * .01;
       this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
     }, { passive: true });
 
@@ -56,9 +56,10 @@ export default class TrackballController {
       if (this.disabled) {
         return;
       }
-      this._velocity.set(gesture.movementX * this.rotationVelocity, gesture.movementY * this.rotationVelocity);
+      this._velocity.x += (gesture.movementX * this.rotationVelocity - this._velocity.x) * rotationEaseRatio;
+      this._velocity.y += (gesture.movementY * this.rotationVelocity - this._velocity.y) * rotationEaseRatio;
       if (!this.zoomDisabled) {
-        this._distance /= 1 + gesture.movementScale * this.zoomVelocity;
+        this._distance /= 1 + gesture.movementScale * this.zoomVelocity * .1;
         this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
       }
     });
