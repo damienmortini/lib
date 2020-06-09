@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-sprite",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "<element-animation-sprite> custom element.",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/core": "^0.2.41",
-    "@damienmortini/element-animation-ticker": "^0.0.37"
+    "@damienmortini/core": "^0.2.42",
+    "@damienmortini/element-animation-ticker": "^0.0.38"
   }
 }
