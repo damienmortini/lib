@@ -49,6 +49,7 @@ export default class GestureObserver {
    */
   unobserve(element) {
     element.removeEventListener('pointerdown', this._onPointerDownBinded);
+    element.removeEventListener('pointermove', this._onPointerMoveBinded);
     this._elementsData.delete(element);
   }
 
@@ -141,11 +142,13 @@ export default class GestureObserver {
   _onPointerUp(event) {
     const element = event.currentTarget;
     const data = this._elementsData.get(element);
-    data.pointers.delete(event.pointerId);
+    if (data) {
+      data.pointers.delete(event.pointerId);
+      this._resetElementData(element);
+    }
     element.releasePointerCapture(event.pointerId);
     document.exitPointerLock();
-    this._resetElementData(element);
-    if (!data.pointers.size) {
+    if (!data || !data.pointers.size) {
       element.removeEventListener('pointermove', this._onPointerMoveBinded);
       element.removeEventListener('pointerup', this._onPointerUpBinded);
       element.removeEventListener('pointerout', this._onPointerUpBinded);
