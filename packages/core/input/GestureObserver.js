@@ -8,6 +8,7 @@ export default class GestureObserver {
    * @property {number} movementY - Movement on the Y axis
    * @property {number} movementScale - Pinch-zoom movement
    * @property {number} movementRotation - Angular movement in radians
+   * @property {boolean} isSwipe - Is the gesture a swipe
    */
   /**
    * Callback for adding two numbers.
@@ -33,6 +34,9 @@ export default class GestureObserver {
    * @param {HTMLElement|Window} element Element to observe
    */
   observe(element) {
+    if (this._elementsData.has(element)) {
+      return;
+    }
     element.addEventListener('pointerdown', this._onPointerDownBinded);
     this._elementsData.set(element, {
       pointers: new Map(),
@@ -40,6 +44,9 @@ export default class GestureObserver {
       previousSize: 0,
       previousX: 0,
       previousY: 0,
+      previousMovementX: 0,
+      previousMovementY: 0,
+      timeStamp: 0,
     });
   }
 
@@ -48,6 +55,9 @@ export default class GestureObserver {
    * @param {HTMLElement|Window} element Element to unobserve
    */
   unobserve(element) {
+    if (!this._elementsData.has(element)) {
+      return;
+    }
     element.removeEventListener('pointerdown', this._onPointerDownBinded);
     element.removeEventListener('pointermove', this._onPointerMoveBinded);
     this._elementsData.delete(element);
@@ -69,23 +79,25 @@ export default class GestureObserver {
     data.previousX = 0;
     data.previousY = 0;
     data.previousRotation = 0;
+    data.timeStamp = 0;
   }
 
   _onPointerDown(event) {
     const element = event.currentTarget;
     const data = this._elementsData.get(element);
-    if (!data.pointers.size) {
-      element.addEventListener('pointermove', this._onPointerMoveBinded);
-      element.addEventListener('pointerup', this._onPointerUpBinded);
-      element.addEventListener('pointerout', this._onPointerUpBinded);
-    }
     if (this.pointerLock) {
       element.requestPointerLock();
     } else {
       element.setPointerCapture(event.pointerId);
     }
-    data.pointers.set(event.pointerId, event);
     this._resetElementData(element);
+    if (!data.pointers.size) {
+      element.addEventListener('pointermove', this._onPointerMoveBinded);
+      element.addEventListener('pointerup', this._onPointerUpBinded);
+      element.addEventListener('pointerout', this._onPointerUpBinded);
+      data.timeStamp = Date.now();
+    }
+    data.pointers.set(event.pointerId, event);
   }
 
   _onPointerMove(event) {
@@ -116,6 +128,8 @@ export default class GestureObserver {
     const movementY = y - data.previousY;
     data.previousX = x;
     data.previousY = y;
+    data.previousMovementX = movementX;
+    data.previousMovementY = movementY;
 
     const size = data.gestureVector.size;
     const movementScale = data.previousSize ? size - data.previousSize : 0;
@@ -136,6 +150,7 @@ export default class GestureObserver {
       movementY: this.pointerLock ? event.movementY / devicePixelRatio : movementY,
       movementScale,
       movementRotation,
+      isSwipe: false,
     });
   }
 
@@ -143,6 +158,16 @@ export default class GestureObserver {
     const element = event.currentTarget;
     const data = this._elementsData.get(element);
     if (data) {
+      if (Date.now() - data.timeStamp < 1000) {
+        this._callback({
+          target: event.currentTarget,
+          movementX: data.previousMovementX,
+          movementY: data.previousMovementY,
+          movementScale: 0,
+          movementRotation: 0,
+          isSwipe: true,
+        });
+      }
       data.pointers.delete(event.pointerId);
       this._resetElementData(element);
     }
