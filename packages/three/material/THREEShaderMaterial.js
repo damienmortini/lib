@@ -7,6 +7,24 @@ import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/d
 import Shader from '../../core/3d/Shader.js';
 // import THREEShader from '../shader/THREEShader.js';
 
+const toWebGL1 = (source, type) => {
+  source = source.replace(/#version.*?\n/g, '');
+  source = source.replace(/\btexture\b/g, 'texture2D');
+  if (type === 'vertex') {
+    source = source.replace(/(^\s*)\bin\b/gm, '$1attribute');
+    source = source.replace(/(^\s*)\bout\b/gm, '$1varying');
+  } else {
+    source = source.replace(/(^\s*)\bin\b/gm, '$1varying');
+    const results = /out vec4 (.*?);/.exec(source);
+    if (results) {
+      const fragColorName = results[1];
+      source = source.replace(/out.*?;/, '');
+      source = source.replace(new RegExp(`\\b${fragColorName}\\b`, 'g'), 'gl_FragColor');
+    }
+  }
+  return source;
+};
+
 export default class THREEShaderMaterial extends ShaderMaterial {
   constructor({
     type = '',
@@ -36,8 +54,8 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     }
 
     super({
-      fragmentShader: shader.fragment,
-      vertexShader: shader.vertex,
+      fragmentShader: toWebGL1(shader.fragment, 'fragment'),
+      vertexShader: toWebGL1(shader.vertex, 'vertex'),
       uniforms: {
         ...(type ? UniformsUtils.clone(ShaderLib[type].uniforms) : {}),
         ...threeUniforms,
@@ -46,10 +64,6 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     });
 
     this.lights = /lambert|phong|standard/.test(type);
-
-    if (this.envMap) {
-      this.envMap = this.envMap;
-    }
 
     for (const key of Object.keys(this.uniforms)) {
       Object.defineProperty(this, key, {
@@ -62,6 +76,22 @@ export default class THREEShaderMaterial extends ShaderMaterial {
         },
       });
     }
+  }
+
+  clone() {
+    const clone = super.clone();
+    for (const key of Object.keys(clone.uniforms)) {
+      Object.defineProperty(clone, key, {
+        configurable: true,
+        get: function () {
+          return this.uniforms[key].value;
+        },
+        set: function (value) {
+          this.uniforms[key].value = value;
+        },
+      });
+    }
+    return clone;
   }
 
   // add({ vertexChunks, fragmentChunks, uniforms }) {
