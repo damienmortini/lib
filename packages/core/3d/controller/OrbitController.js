@@ -7,13 +7,16 @@ export default class OrbitController {
     domElement = window,
     pan = 0,
     tilt = 0,
+    invertRotation = true,
     distance = 1,
     distanceMin = 0,
     distanceMax = Infinity,
     tiltMin = -Infinity,
     tiltMax = Infinity,
+    tiltDisabled = false,
     panMin = -Infinity,
     panMax = Infinity,
+    panDisabled = false,
     rotationEasing = .1,
     rotationVelocity = .005,
     zoomEasing = .1,
@@ -21,19 +24,22 @@ export default class OrbitController {
     zoomDisabled = false,
   }) {
     this.matrix = matrix;
+    this.invertRotation = invertRotation;
     this.distanceMax = distanceMax;
     this.distanceMin = distanceMin;
     this.zoomEasing = zoomEasing;
     this.tiltMax = tiltMax;
     this.tiltMin = tiltMin;
+    this.tiltDisabled = tiltDisabled;
     this.panMax = panMax;
     this.panMin = panMin;
+    this.panDisabled = panDisabled;
     this.rotationEasing = rotationEasing;
     this.rotationVelocity = rotationVelocity;
     this.zoomDisabled = zoomDisabled;
     this.zoomVelocity = zoomVelocity;
 
-    this._baseMatrix = new Matrix4(this.matrix);
+    this.baseMatrix = new Matrix4(this.matrix);
 
     this._distance = distance;
     this._tilt = tilt;
@@ -52,11 +58,15 @@ export default class OrbitController {
     }, { passive: true });
 
     const gestureObserver = new GestureObserver((gesture) => {
-      this._pan += -gesture.movementX * rotationVelocity;
-      this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan));
+      if (!this.panDisabled) {
+        this._pan += (this.invertRotation ? -1 : 1) * gesture.movementX * rotationVelocity;
+        this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan));
+      }
 
-      this._tilt += gesture.movementY * rotationVelocity;
-      this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
+      if (!this.tiltDisabled) {
+        this._tilt += (this.invertRotation ? 1 : -1) * gesture.movementY * rotationVelocity;
+        this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt));
+      }
 
       if (!this.zoomDisabled) {
         this._distance /= 1 + gesture.movementScale * this.zoomVelocity * .01;
@@ -64,6 +74,8 @@ export default class OrbitController {
       }
     });
     gestureObserver.observe(domElement);
+
+    this.update();
   }
 
   get pan() {
@@ -121,6 +133,6 @@ export default class OrbitController {
     this.matrix.y = sinTilt * this._distanceEased;
     this.matrix.z = this._distanceEased * cosPan * cosTilt;
 
-    this.matrix.multiply(this._baseMatrix);
+    this.matrix.multiply(this.baseMatrix);
   }
 }
