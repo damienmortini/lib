@@ -19,8 +19,11 @@ export default class GUIFolderElement extends HTMLElement {
         :host(::-webkit-scrollbar-thumb) { 
           background: rgba(1, 1, 1, .1);
         }
-        details, summary {
-          padding: 10px;
+        details {
+          padding: 0 5px;
+        }
+        summary {
+          padding: 5px 0;
         }
         summary:focus {
           outline: none;
