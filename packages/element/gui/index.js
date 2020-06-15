@@ -82,19 +82,14 @@ export default class GUIElement extends GUIFolderElement {
       options.id = `${options.folder ? options.folder + '/' : ''}${options.key}`;
     }
 
-    let urlValue;
-
     if (options.id) {
-      urlValue = valuesMap.get(options.id);
-      if (urlValue !== undefined) {
-        if (options.object) {
-          options.object[options.key] = urlValue;
-        }
-      }
+      const urlValue = valuesMap.get(options.id);
+      if (urlValue !== undefined) options.value = urlValue;
     }
 
     if (options.object) {
-      options.value = options.object[options.key];
+      if (options.value) options.object[options.key] = options.value;
+      else options.value = options.object[options.key];
     }
 
     if (!options.tagName) {
@@ -150,10 +145,6 @@ export default class GUIElement extends GUIFolderElement {
       element[key] = value;
     }
     folderElement.appendChild(element);
-
-    if (urlValue !== undefined) {
-      element.value = urlValue;
-    }
 
     let timeout;
     element.addEventListener('input', () => {
