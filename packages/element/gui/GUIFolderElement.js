@@ -20,7 +20,7 @@ export default class GUIFolderElement extends HTMLElement {
           background: rgba(1, 1, 1, .1);
         }
         details {
-          padding: 0 5px;
+          padding-left: 10px;
         }
         summary {
           padding: 5px 0;
@@ -55,7 +55,7 @@ export default class GUIFolderElement extends HTMLElement {
         }
       </style>
       <slot></slot>
-      <details open>
+      <details>
         <summary></summary>
         <div id="content"></div>
       </details>
