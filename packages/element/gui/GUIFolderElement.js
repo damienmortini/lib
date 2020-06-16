@@ -24,6 +24,9 @@ export default class GUIFolderElement extends HTMLElement {
         }
         summary {
           padding: 5px 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         summary:focus {
           outline: none;
@@ -112,6 +115,7 @@ export default class GUIFolderElement extends HTMLElement {
     switch (name) {
       case 'name':
         this._summary.textContent = newValue;
+        this._summary.title = newValue;
         break;
       case 'open':
         this._details.open = newValue !== null;
