@@ -43,6 +43,16 @@ export default class GUIElement extends GUIFolderElement {
     this.shadowRoot.querySelector('style').insertAdjacentHTML('beforeend', `
       :host {
         width: 250px;
+        padding: 10px 0;
+        box-sizing: border-box;
+      }
+      :host::-webkit-scrollbar {
+        background: transparent;
+        height: 2px;
+        width: 2px;
+      }
+      :host::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, .2);
       }
     `);
 

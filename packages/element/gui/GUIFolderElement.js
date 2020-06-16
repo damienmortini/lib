@@ -20,7 +20,7 @@ export default class GUIFolderElement extends HTMLElement {
           background: rgba(1, 1, 1, .1);
         }
         details {
-          padding-left: 10px;
+          padding: 0 10px;
         }
         summary {
           padding: 5px 0;
