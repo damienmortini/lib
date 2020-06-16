@@ -1,6 +1,6 @@
 export default class GUIFolderElement extends HTMLElement {
   static get observedAttributes() {
-    return ['name', 'close'];
+    return ['name', 'open'];
   }
 
   constructor() {
@@ -103,7 +103,7 @@ export default class GUIFolderElement extends HTMLElement {
     observer.observe(this, { childList: true });
 
     this._details.addEventListener('toggle', (event) => {
-      this.close = !event.target.open;
+      this.open = event.target.open;
       this.dispatchEvent(new Event(event.type, event));
     });
   }
@@ -113,22 +113,22 @@ export default class GUIFolderElement extends HTMLElement {
       case 'name':
         this._summary.textContent = newValue;
         break;
-      case 'close':
-        this._details.open = newValue === null;
+      case 'open':
+        this._details.open = newValue !== null;
         break;
     }
   }
 
-  set close(value) {
+  set open(value) {
     if (value) {
-      this.setAttribute('close', '');
+      this.setAttribute('open', '');
     } else {
-      this.removeAttribute('close');
+      this.removeAttribute('open');
     }
   }
 
-  get close() {
-    return !this._details.open;
+  get open() {
+    return this._details.open;
   }
 
   get name() {

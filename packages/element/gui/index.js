@@ -55,20 +55,24 @@ export default class GUIElement extends GUIFolderElement {
     this._foldersMap = new Map();
 
     this.addEventListener('toggle', () => {
-      this._updateFolderCloseState(this, 'GUI.close');
+      if (this.open) {
+        sessionStorage.removeItem('GUI.close');
+      } else {
+        sessionStorage.setItem('GUI.close', '');
+      }
     });
   }
 
   connectedCallback() {
-    this.close = sessionStorage.getItem(`GUI.close`) !== null;
+    this.open = sessionStorage.getItem('GUI.close') === null;
   }
 
   get folders() {
     return this._foldersMap;
   }
 
-  _updateFolderCloseState(folder, path) {
-    if (folder.close) {
+  _updateFolderOpenState(folder, path) {
+    if (folder.open) {
       sessionStorage.setItem(path, '');
     } else {
       sessionStorage.removeItem(path);
@@ -129,9 +133,9 @@ export default class GUIElement extends GUIFolderElement {
           folderElement = document.createElement('gui-folder');
           folderElement.name = folderName;
           const currentPath = path;
-          folderElement.close = sessionStorage.getItem(`GUI["${currentPath}"].close`) !== null;
+          folderElement.open = sessionStorage.getItem(`GUI["${currentPath}"].open`) !== null;
           folderElement.addEventListener('toggle', (event) => {
-            this._updateFolderCloseState(event.target, `GUI["${currentPath}"].close`);
+            this._updateFolderOpenState(event.target, `GUI["${currentPath}"].open`);
           });
           parentFolderElement.appendChild(folderElement);
           this._foldersMap.set(currentPath, folderElement);
