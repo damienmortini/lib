@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>element-input-knob</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+      gap: 20px;
+    }
+
+    damo-input-knob {
+      width: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <damo-input-knob></damo-input-knob>
+  <damo-input-knob value="-1"></damo-input-knob>
+  <damo-input-knob value="4" step=".1" min="-2" max="5"></damo-input-knob>
+  <damo-input-knob value="12.2" disabled></damo-input-knob>
+
+  <script type="module">
+    import '../index.js';
+    const element = document.querySelector('damo-input-knob');
+    element.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+  </script>
+</body>
+
+</html>

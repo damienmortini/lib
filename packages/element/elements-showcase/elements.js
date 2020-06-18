@@ -14,6 +14,7 @@ export default [
   'element-input-checkbox',
   'element-input-color',
   'element-input-colorpicker',
+  'element-input-knob',
   // 'element-input-connector',
   // 'element-input-connector-linkable',
   'element-input-file',

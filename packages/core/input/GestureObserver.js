@@ -3,7 +3,7 @@ import Vector2 from '../math/Vector2.js';
 export default class GestureObserver {
   /**
    * @typedef Gesture
-   * @property {HTMLElement} target - Movement on the X axis
+   * @property {HTMLElement} target - The target DOM Element
    * @property {number} movementX - Movement on the X axis
    * @property {number} movementY - Movement on the Y axis
    * @property {number} movementScale - Pinch-zoom movement
@@ -11,7 +11,6 @@ export default class GestureObserver {
    * @property {boolean} isSwipe - Is the gesture a swipe
    */
   /**
-   * Callback for adding two numbers.
    * @callback GestureObserverCallback
    * @param {Gesture} gesture - Current gesture changes
    */
