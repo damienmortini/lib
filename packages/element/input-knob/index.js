@@ -38,6 +38,7 @@ export default class KnobInputElement extends HTMLElement {
     left: 0;
     width: 100%;
     height: 100%;
+    stroke: currentColor;
   }
 
   slot[name=thumb] div {
@@ -51,12 +52,12 @@ export default class KnobInputElement extends HTMLElement {
 </style>
 <slot name="track">
   <svg viewBox="0 0 100 100" overflow="visible">
-    <circle cx="50" cy="50" r="50" fill="transparent" stroke="black" stroke-width="1" stroke-dasharray="1 1"/>
+    <circle part="track" cx="50" cy="50" r="50" fill="transparent" stroke-width="1" stroke-linecap="round" vector-effect="non-scaling-stroke" stroke-dasharray="0 2"/>
   </svg>
 </slot>
 <slot name="track-progress">
   <svg viewBox="0 0 100 100" overflow="visible">
-    <path d="M 50 0 A 50 50 0 1 1 0 50" fill="transparent" stroke="black" stroke-width="1" />
+    <path part="track-progress" d="M 50 0 A 50 50 0 1 1 0 50" fill="transparent" vector-effect="non-scaling-stroke" stroke-width="1" />
   </svg>
 </slot>
 <slot name="thumb">
@@ -129,10 +130,10 @@ export default class KnobInputElement extends HTMLElement {
   }
 
   _update() {
-    const x = Math.sin(this.value) * this._size * .5;
-    const y = -Math.cos(this.value) * this._size * .5;
-    this._thumb.style.transform = `translate(${x}px, ${y}px)`;
-    this._trackProgressPath.setAttribute('d', `M 50 0 A 50 50 0 ${(modulo(this.value, Math.PI * 2)) > Math.PI ? 1 : 0} 1 ${x + 50} ${y + 50}`);
+    const x = Math.sin(this.value);
+    const y = -Math.cos(this.value);
+    this._thumb.style.transform = `translate(${x * this._size * .5}px, ${y * this._size * .5}px)`;
+    this._trackProgressPath.setAttribute('d', `M 50 0 A 50 50 0 ${(modulo(this.value, Math.PI * 2)) > Math.PI ? 1 : 0} 1 ${x * 50 + 50} ${y * 50 + 50}`);
   }
 
   get disabled() {
