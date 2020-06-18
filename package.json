@@ -4,7 +4,7 @@
   "scripts": {
     "start": "server --watch=packages",
     "publish": "yarn run lerna publish",
-    "upgrade": "yarn install && yarn upgrade-interactive"
+    "upgrade": "yarn install && yarn upgrade-interactive --latest"
   },
   "workspaces": [
     "packages/*",
