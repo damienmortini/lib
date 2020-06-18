@@ -11,6 +11,7 @@
     "@damienmortini/element-input-button": "^0.0.12",
     "@damienmortini/element-input-checkbox": "^0.0.12",
     "@damienmortini/element-input-color": "^0.0.36",
+    "@damienmortini/element-input-knob": "^0.0.1",
     "@damienmortini/element-input-colorpicker": "^0.0.10",
     "@damienmortini/element-input-connector": "^0.0.12",
     "@damienmortini/element-input-connector-linkable": "^0.0.9",
