@@ -14,6 +14,7 @@ export default class KnobInputElement extends HTMLElement {
     position: relative;
     width: 100px;
     height: 100px;
+    touch-action: none;
   }
   
   slot[name=track], slot[name=track-progress] {
