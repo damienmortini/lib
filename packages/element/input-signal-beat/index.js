@@ -95,7 +95,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       add(value) {
         if (self.loopLength) {
           let position = 0;
-          while (position < self.length - self.loopLength) {
+          while (position < self.length) {
             this._add(position + (value % self.loopLength));
             position += self.loopLength;
           }
@@ -119,7 +119,7 @@ export default class BeatSignalInputElement extends HTMLElement {
         let somethingRemoved = false;
         if (self.loopLength) {
           let position = 0;
-          while (position < self.length - self.loopLength) {
+          while (position < self.length) {
             somethingRemoved = this._delete(position + (value % self.loopLength)) || somethingRemoved;
             position += self.loopLength;
           }
