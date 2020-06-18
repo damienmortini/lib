@@ -1,4 +1,4 @@
-export default class InputRangeElement extends HTMLElement {
+export default class RangeInputElement extends HTMLElement {
   static get observedAttributes() {
     return ['value', 'max', 'min', 'step', 'disabled'];
   }
@@ -33,16 +33,16 @@ export default class InputRangeElement extends HTMLElement {
       event.stopPropagation();
       this.value = this._rangeInput.valueAsNumber;
       this._numberInput.valueAsNumber = this.value;
-      this.dispatchEvent(new Event('input', {
+      this.dispatchEvent(new Event('change', {
         bubbles: true,
       }));
     });
 
-    this._numberInput.addEventListener('input', (event) => {
+    this._numberInput.addEventListener('change', (event) => {
       event.stopPropagation();
       this.value = this._numberInput.valueAsNumber;
       this._rangeInput.valueAsNumber = this.value;
-      this.dispatchEvent(new Event('input', {
+      this.dispatchEvent(new Event('change', {
         bubbles: true,
       }));
     });
@@ -119,4 +119,4 @@ export default class InputRangeElement extends HTMLElement {
   }
 }
 
-customElements.define('damo-input-range', InputRangeElement);
+customElements.define('damo-input-range', RangeInputElement);
