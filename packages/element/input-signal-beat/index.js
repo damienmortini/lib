@@ -49,6 +49,7 @@ export default class BeatSignalInputElement extends HTMLElement {
           border: 1px solid black;
         }
         #head {
+          pointer-events: none;
           position: absolute;
           will-change: transform;
           height: 100%;
@@ -139,7 +140,9 @@ export default class BeatSignalInputElement extends HTMLElement {
     let previousbeat = null;
     let mode = '';
     const preventContextMenu = (event) => event.preventDefault();
+    let boundingClientRect;
     const pointerDown = (event) => {
+      boundingClientRect = this.getBoundingClientRect();
       this.setPointerCapture(event.pointerId);
       this.addEventListener('pointermove', pointerMove);
       this.addEventListener('pointerup', pointerUp);
@@ -148,7 +151,7 @@ export default class BeatSignalInputElement extends HTMLElement {
       pointerMove(event);
     };
     const pointerMove = (event) => {
-      const newbeat = ((event.offsetX + this.scrollLeft) / this.scrollWidth) * this.length;
+      const newbeat = ((event.clientX - boundingClientRect.x + this.scrollLeft) / this.scrollWidth) * this.length;
       previousbeat = previousbeat !== null ? previousbeat : newbeat;
       const startBeat = newbeat > previousbeat ? previousbeat : newbeat;
       const endBeat = newbeat > previousbeat ? newbeat : previousbeat;
