@@ -79,7 +79,7 @@ export default class KnobInputElement extends HTMLElement {
     };
     const pointerDown = (event) => {
       boundingClientRect = this.getBoundingClientRect();
-      this.setPointerCapture(event.pointerId);
+      event.target.setPointerCapture(event.pointerId);
       this.addEventListener('pointermove', pointerMove);
       this.addEventListener('pointerup', pointerUp);
       this.addEventListener('pointerout', pointerUp);
@@ -98,7 +98,7 @@ export default class KnobInputElement extends HTMLElement {
       previousAngle = angle;
     };
     const pointerUp = (event) => {
-      this.releasePointerCapture(event.pointerId);
+      event.target.releasePointerCapture(event.pointerId);
       this.removeEventListener('pointermove', pointerMove);
       this.removeEventListener('pointerup', pointerUp);
       this.removeEventListener('pointerout', pointerUp);
