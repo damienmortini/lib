@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.43",
+  "version": "0.0.44",
   "dependencies": {
     "@damienmortini/element-animation-lottie": "^0.0.40",
     "@damienmortini/element-animation-sprite": "^0.0.27",
@@ -16,7 +16,7 @@
     "@damienmortini/element-input-connector-linkable": "^0.0.9",
     "@damienmortini/element-input-file": "^0.0.38",
     "@damienmortini/element-input-joystick": "^0.0.37",
-    "@damienmortini/element-input-knob": "^0.0.3",
+    "@damienmortini/element-input-knob": "^0.0.4",
     "@damienmortini/element-input-number": "^0.0.14",
     "@damienmortini/element-input-pad-xy": "^0.0.13",
     "@damienmortini/element-input-range": "^0.0.14",
