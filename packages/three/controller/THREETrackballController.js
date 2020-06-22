@@ -5,16 +5,22 @@ import { Matrix4 as THREEMatrix4 } from '../../../three/src/math/Matrix4.js';
 import { Object3D } from '../../../three/src/core/Object3D.js';
 
 export default class THREETrackballController extends TrackballController {
-  constructor(object3D = new Object3D(), options) {
+  constructor({
+    object3D = new Object3D(),
+    ...options
+  }) {
     object3D.updateMatrix();
-    super(Object.assign({ matrix: new Matrix4(object3D.matrix.elements) }, options));
+    super({
+      matrix: new Matrix4(object3D.matrix.elements),
+      ...options,
+    });
     this._matrix4 = new THREEMatrix4();
     this.object3D = object3D;
 
-    const enabled = this.enabled;
-    this.enabled = true;
+    const disabled = this.disabled;
+    this.disabled = false;
     this.update();
-    this.enabled = enabled;
+    this.disabled = disabled;
   }
 
   update() {

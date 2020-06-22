@@ -21,6 +21,12 @@ export default class InputSelectElement extends HTMLElement {
     this._optionsMap = new Map();
 
     this._select = this.shadowRoot.querySelector('select');
+    this._select.addEventListener('change', () => this.value = this._select.value);
+    this._select.addEventListener('input', (event) => {
+      event.stopPropagation();
+      this.value = this._select.value;
+      this.dispatchEvent(new Event('input', { bubbles: true }));
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -78,10 +84,11 @@ export default class InputSelectElement extends HTMLElement {
   }
 
   set value(value) {
-    this._value = value;
     this._select.value = value;
-    this.dispatchEvent(new Event('input', {
-      bubbles: true,
-    }));
+    if (this._value === value) {
+      return;
+    }
+    this._value = value;
+    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 }

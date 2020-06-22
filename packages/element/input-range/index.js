@@ -32,8 +32,7 @@ export default class RangeInputElement extends HTMLElement {
     this._rangeInput.addEventListener('input', (event) => {
       event.stopPropagation();
       this.value = this._rangeInput.valueAsNumber;
-      this._numberInput.valueAsNumber = this.value;
-      this.dispatchEvent(new Event('change', {
+      this.dispatchEvent(new Event('input', {
         bubbles: true,
       }));
     });
@@ -41,8 +40,7 @@ export default class RangeInputElement extends HTMLElement {
     this._numberInput.addEventListener('change', (event) => {
       event.stopPropagation();
       this.value = this._numberInput.valueAsNumber;
-      this._rangeInput.valueAsNumber = this.value;
-      this.dispatchEvent(new Event('change', {
+      this.dispatchEvent(new Event('input', {
         bubbles: true,
       }));
     });
