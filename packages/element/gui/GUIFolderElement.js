@@ -56,6 +56,9 @@ export default class GUIFolderElement extends HTMLElement {
         section.input label:empty {
           display: none;
         }
+        section.input label:empty + slot::slotted(*) {
+          grid-column: span 2;
+        }
       </style>
       <slot></slot>
       <details>
