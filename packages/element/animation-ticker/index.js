@@ -14,8 +14,6 @@ class AnimationTickerElement extends HTMLElement {
   constructor() {
     super();
 
-    this.noautoplay = false;
-
     this._updateBinded = this.update.bind(this);
 
     this._pauseFlag = 0;

@@ -1,12 +1,31 @@
-import AnimationTickerElement from '../element-animation-ticker/index.js';
+import TickerAnimationElement from '../element-animation-ticker/index.js';
 import SpriteAnimation from '../core/abstract/SpriteAnimation.js';
 import Loader from '../core/util/Loader.js';
 
-const CACHED_DATA = new Map();
+const LOAD_PROMISES = new Map();
 
-class SpriteAnimationElement extends AnimationTickerElement {
+const load = async (src) => {
+  const loadPromise = LOAD_PROMISES.get(src);
+  if (loadPromise) return loadPromise;
+  const promise = (async () => {
+    const data = await Loader.load(src);
+    const image = await Loader.load(`${/(.*[/\\]).*$/.exec(src)[1]}${data.meta.image}`);
+    // Optimise images decoding
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0);
+    const dataUrl = canvas.toDataURL();
+    return [data, dataUrl];
+  })();
+  LOAD_PROMISES.set(src, promise);
+  return promise;
+};
+
+class SpriteAnimationElement extends TickerAnimationElement {
   static get observedAttributes() {
-    return ['src', 'loop', 'autoplay', 'playbackrate', 'framerate'];
+    return ['src', 'loop', 'playbackrate', 'framerate'];
   }
 
   constructor() {
@@ -33,27 +52,21 @@ class SpriteAnimationElement extends AnimationTickerElement {
     this._sprite = this.shadowRoot.querySelector('#sprite');
 
     this._scale = 1;
-
-    this._resizeBinded = this.resize.bind(this);
+    this._width = 1;
+    this._height = 1;
 
     this._spriteAnimation = new SpriteAnimation();
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      this._width = entries[0].contentRect.width;
+      this._height = entries[0].contentRect.height;
+      this._resize();
+    });
+    resizeObserver.observe(this);
   }
 
-  async _loadAndCacheData(newValue) {
-    const data = await Loader.load(newValue);
-    const image = await Loader.load(`${/(.*[/\\]).*$/.exec(newValue)[1]}${data.meta.image}`);
-    // Optimise images decoding
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0);
-    const dataUrl = canvas.toDataURL();
-    CACHED_DATA.set(newValue, {
-      data,
-      dataUrl,
-    });
-    return [data, dataUrl];
+  get ready() {
+    return this._readyPromise;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -63,11 +76,10 @@ class SpriteAnimationElement extends AnimationTickerElement {
 
     switch (name) {
       case 'src':
-        const cachedData = CACHED_DATA.get(newValue);
-        (cachedData ? Promise.resolve([cachedData.data, cachedData.dataUrl]) : this._loadAndCacheData(newValue)).then(([data, dataUrl]) => {
+        this._readyPromise = load(newValue).then(([data, dataUrl]) => {
           this._spriteAnimation.data = data;
           this._sprite.style.backgroundImage = `url(${dataUrl})`;
-          this.resize();
+          this._resize();
           this.update();
           this.dispatchEvent(new Event('load'));
         });
@@ -81,36 +93,11 @@ class SpriteAnimationElement extends AnimationTickerElement {
       case 'framerate':
         this._spriteAnimation.frameRate = this.frameRate;
         break;
-      case 'autoplay':
-        if (this.autoplay) {
-          this.play();
-        }
-        break;
     }
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.resize();
-    window.addEventListener('resize', this._resizeBinded);
-  }
-
-  disconnectedCallback() {
-    window.removeEventListener('resize', this._resizeBinded);
-    super.disconnectedCallback();
-  }
-
-  play() {
-    super.play();
-    this._spriteAnimation.play();
-  }
-
-  pause() {
-    this._spriteAnimation.pause();
-    super.pause();
-  }
-
   update() {
+    this._spriteAnimation.update();
     this._sprite.style.backgroundPosition = `left ${-this._spriteAnimation.x}px top ${-this._spriteAnimation.y}px`;
     this._sprite.style.width = `${this._spriteAnimation.width}px`;
     this._sprite.style.height = `${this._spriteAnimation.height}px`;
@@ -119,21 +106,9 @@ class SpriteAnimationElement extends AnimationTickerElement {
     this._sprite.style.transform = `translate(-50%, -50%) translate(${this._spriteAnimation.offsetX * this._scale}px, ${this._spriteAnimation.offsetY * this._scale}px) rotate(${this._spriteAnimation.rotated ? -90 : 0}deg) scale(${this._scale})`;
   }
 
-  resize() {
-    this._scale = Math.min(this.offsetWidth / this._spriteAnimation.sourceWidth, this.offsetHeight / this._spriteAnimation.sourceHeight);
+  _resize() {
+    this._scale = Math.min(this._width / this._spriteAnimation.sourceWidth, this._height / this._spriteAnimation.sourceHeight);
     this.update();
-  }
-
-  get autoplay() {
-    return this.hasAttribute('autoplay');
-  }
-
-  set autoplay(value) {
-    if (value) {
-      this.setAttribute('autoplay', '');
-    } else {
-      this.removeAttribute('autoplay');
-    }
   }
 
   get duration() {
@@ -186,8 +161,6 @@ class SpriteAnimationElement extends AnimationTickerElement {
   }
 }
 
-export default SpriteAnimationElement;
+customElements.define('damo-animation-sprite', SpriteAnimationElement);
 
-if (!customElements.get('damo-animation-sprite')) {
-  customElements.define('damo-animation-sprite', class DamoSpriteAnimationElement extends SpriteAnimationElement { });
-}
+export default SpriteAnimationElement;
