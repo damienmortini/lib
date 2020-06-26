@@ -53,7 +53,7 @@ export default class OrbitController {
 
     domElement.addEventListener('wheel', (event) => {
       if (this.zoomDisabled) return;
-      this._distance *= 1 + event.deltaY * this.zoomVelocity * .01;
+      this._distance = Math.max(this._distance, .001) * (1 + event.deltaY * this.zoomVelocity * .01);
       this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
     }, { passive: true });
 
