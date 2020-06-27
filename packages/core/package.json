@@ -2,6 +2,9 @@
   "name": "@damienmortini/core",
   "version": "0.2.46",
   "description": "Helpers library for the web.",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "https://damienmortini@github.com/damienmortini/lib.git",
   "keywords": [
     "math",

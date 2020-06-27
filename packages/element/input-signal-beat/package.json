@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-signal-beat",
   "version": "0.0.7",
   "description": "<element-input-signal-beat> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

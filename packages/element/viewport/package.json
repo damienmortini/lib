@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-viewport",
   "version": "0.0.14",
   "description": "<element-viewport> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

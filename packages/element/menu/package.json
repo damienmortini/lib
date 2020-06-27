@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.9",
   "description": "<element-menu> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

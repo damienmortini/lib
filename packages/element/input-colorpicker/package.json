@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-colorpicker",
   "version": "0.0.10",
   "description": "<element-input-colorpicker> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

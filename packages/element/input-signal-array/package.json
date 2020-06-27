@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-signal-array",
   "version": "0.0.5",
   "description": "<element-input-signal-array> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

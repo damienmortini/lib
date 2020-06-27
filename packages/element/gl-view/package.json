@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-gl-view",
   "version": "0.0.3",
   "description": "<element-gl-view> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -5,6 +5,9 @@
   "scripts": {
     "install": "node copyExamples.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "https://damienmortini@github.com/damienmortini/lib.git",
   "keywords": [
     "three",

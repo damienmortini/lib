@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-file",
   "version": "0.0.39",
   "description": "<element-input-file> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
