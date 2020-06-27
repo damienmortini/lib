@@ -3,8 +3,9 @@
   "private": true,
   "scripts": {
     "start": "server --watch=packages",
-    "publish": "yarn run lerna publish",
-    "upgrade": "yarn install && yarn upgrade-interactive --latest"
+    "version": "lerna version --conventional-commits --create-release github",
+    "publish": "lerna publish",
+    "upgrade": "yarn && yarn upgrade-interactive --latest"
   },
   "workspaces": [
     "packages/*",
