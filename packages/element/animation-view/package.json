@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-animation-view",
   "private": true,
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "<element-animation-view> custom element.",
   "publishConfig": {
     "access": "public"
@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/core": "^0.2.46"
+    "@damienmortini/core": "^0.2.47"
   }
 }

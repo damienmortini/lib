@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-gl-view",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "<element-gl-view> custom element.",
   "publishConfig": {
     "access": "public"

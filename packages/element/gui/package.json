@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-gui",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "description": "Simple yet limitless GUI",
   "keywords": [
     "javascript",
@@ -26,11 +26,11 @@
     "url": "https://github.com/damienmortini/lib/issues"
   },
   "dependencies": {
-    "@damienmortini/element-input-button": "^0.0.13",
-    "@damienmortini/element-input-checkbox": "^0.0.12",
-    "@damienmortini/element-input-color": "^0.0.38",
-    "@damienmortini/element-input-range": "^0.0.15",
-    "@damienmortini/element-input-select": "^0.0.11",
-    "@damienmortini/element-input-text": "^0.0.10"
+    "@damienmortini/element-input-button": "^0.0.14",
+    "@damienmortini/element-input-checkbox": "^0.0.13",
+    "@damienmortini/element-input-color": "^0.0.39",
+    "@damienmortini/element-input-range": "^0.0.16",
+    "@damienmortini/element-input-select": "^0.0.12",
+    "@damienmortini/element-input-text": "^0.0.11"
   }
 }
