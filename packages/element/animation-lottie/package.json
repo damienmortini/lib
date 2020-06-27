@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-lottie",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "<element-animation-lottie> custom element.",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/core": "^0.2.45",
+    "@damienmortini/core": "^0.2.46",
     "lottie-web": "^5.6.10"
   }
 }
