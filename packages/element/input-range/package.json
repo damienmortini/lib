@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-range",
   "version": "0.0.15",
   "description": "<element-input-range> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

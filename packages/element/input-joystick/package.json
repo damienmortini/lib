@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-joystick",
   "version": "0.0.38",
   "description": "<element-input-joystick> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

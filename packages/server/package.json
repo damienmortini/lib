@@ -2,6 +2,9 @@
   "name": "@damienmortini/server",
   "version": "1.0.19",
   "description": "Simple live reloading HTTP2 server for development",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "repository": {
     "type": "git",

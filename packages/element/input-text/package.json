@@ -2,6 +2,9 @@
   "name": "@damienmortini/element-input-text",
   "version": "0.0.10",
   "description": "<element-input-text> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -11,6 +11,9 @@
   "author": "Damien Mortini <ddotmnn+git@gmail.com>",
   "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element-gui#readme",
   "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "repository": {
     "type": "git",
