@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-checkbox",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "<element-input-checkbox> custom element.",
   "publishConfig": {
     "access": "public"
