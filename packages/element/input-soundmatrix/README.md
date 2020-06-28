@@ -1,20 +1,25 @@
-# `<element-input-soundmatrix>`
+# `<damo-input-soundmatrix>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-input-soundmatrix
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-input-soundmatrix/index.js"></script>
+
+<damo-input-soundmatrix></damo-input-soundmatrix>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-soundmatrix';
+  import Element from '@damienmortini/element-input-soundmatrix';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

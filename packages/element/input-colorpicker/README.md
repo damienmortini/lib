@@ -1,20 +1,25 @@
-# `<element-input-colorpicker>`
+# `<damo-input-colorpicker>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-input-colorpicker
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-input-colorpicker/index.js"></script>
+
+<damo-input-colorpicker></damo-input-colorpicker>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-colorpicker';
+  import Element from '@damienmortini/element-input-colorpicker';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

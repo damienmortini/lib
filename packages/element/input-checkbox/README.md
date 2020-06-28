@@ -1,20 +1,25 @@
-# `<element-input-checkbox>`
+# `<damo-input-checkbox>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-input-checkbox
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-input-checkbox/index.js"></script>
+
+<damo-input-checkbox></damo-input-checkbox>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-checkbox';
+  import Element from '@damienmortini/element-input-checkbox';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

@@ -1,20 +1,25 @@
-# `<element-input-connector>`
+# `<damo-input-connector>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-input-connector
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-input-connector/index.js"></script>
+
+<damo-input-connector></damo-input-connector>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-connector';
+  import Element from '@damienmortini/element-input-connector';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

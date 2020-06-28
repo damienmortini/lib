@@ -1,20 +1,25 @@
-# `<element-input-joystick>`
+# `<damo-input-joystick>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-input-joystick
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-input-joystick/index.js"></script>
+
+<damo-input-joystick></damo-input-joystick>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-joystick';
+  import Element from '@damienmortini/element-input-joystick';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

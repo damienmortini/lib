@@ -1,20 +1,25 @@
-# `<element-viewport>`
+# `<damo-viewport>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-viewport
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-viewport/index.js"></script>
+
+<damo-viewport></damo-viewport>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-viewport';
+  import Element from '@damienmortini/element-viewport';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

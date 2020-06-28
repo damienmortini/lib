@@ -1,24 +1,27 @@
-# `<element-select-lasso>` 
+# `<damo-select-lasso>`
 
 ## Installation
 
-``` sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
+```sh
 npm install @damienmortini/element-select-lasso
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-select-lasso/index.js"></script>
 
-``` html
+<damo-select-lasso></damo-select-lasso>
+```
+
+## Usage with custom name
+```html
 <script type="module">
 
-    import MyElement from '@damienmortini/element-select-lasso';
+  import Element from '@damienmortini/element-select-lasso';
 
-  window.customElements.define( `my-element-name` , MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 
 <my-element-name></my-element-name>
 ```
-

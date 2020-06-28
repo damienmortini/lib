@@ -1,20 +1,25 @@
-# `<element-gl-view>`
+# `<damo-gl-view>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-gl-view
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-gl-view/index.js"></script>
+
+<damo-gl-view></damo-gl-view>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-gl-view';
+  import Element from '@damienmortini/element-gl-view';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 
