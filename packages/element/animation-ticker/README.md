@@ -1,20 +1,25 @@
-# `<element-animation-ticker>`
+# `<damo-animation-ticker>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-animation-ticker
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-animation-ticker/index.js"></script>
+
+<damo-animation-ticker></damo-animation-ticker>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-animation-ticker';
+  import Element from '@damienmortini/element-animation-ticker';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

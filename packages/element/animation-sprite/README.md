@@ -1,20 +1,25 @@
-# `<element-animation-sprite>`
+# `<damo-animation-sprite>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-animation-sprite
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-animation-sprite/index.js"></script>
+
+<damo-animation-sprite></damo-animation-sprite>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-animation-sprite';
+  import Element from '@damienmortini/element-animation-sprite';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

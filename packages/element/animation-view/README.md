@@ -1,20 +1,25 @@
-# `<element-animation-view>`
+# `<damo-animation-view>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-animation-view
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-animation-view/index.js"></script>
+
+<damo-animation-view></damo-animation-view>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-animation-view';
+  import Element from '@damienmortini/element-animation-view';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 

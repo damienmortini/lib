@@ -1,20 +1,25 @@
-# `<element-input-ruler>`
+# `<damo-input-ruler>`
 
 ## Installation
 
 ```sh
-npm config set @damienmortini:registry https://npm.pkg.github.com
-
 npm install @damienmortini/element-input-ruler
 ```
 
-## Usage
+## Simple Usage
+```html
+<script src="node_modules/@damienmortini/element-input-ruler/index.js"></script>
+
+<damo-input-ruler></damo-input-ruler>
+```
+
+## Usage with custom name
 ```html
 <script type="module">
 
-  import MyElement from '@damienmortini/element-input-ruler';
+  import Element from '@damienmortini/element-input-ruler';
 
-  window.customElements.define(`my-element-name`, MyElement);
+  window.customElements.define('my-element-name', class extends Element { });
 
 </script>
 
