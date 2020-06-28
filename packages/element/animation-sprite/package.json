@@ -3,6 +3,9 @@
   "version": "0.0.29",
   "description": "<element-animation-sprite> custom element.",
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
