@@ -1,6 +1,6 @@
 import Vector2 from '../math/Vector2.js';
 
-export default class GestureObserver {
+class GestureObserver {
   /**
    * @typedef Gesture
    * @property {HTMLElement} target - The target DOM Element
@@ -179,3 +179,5 @@ export default class GestureObserver {
     }
   }
 }
+
+export default GestureObserver;
