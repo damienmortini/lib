@@ -3,6 +3,9 @@
   "version": "0.0.43",
   "description": "<element-animation-ticker> custom element.",
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
