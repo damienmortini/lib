@@ -5,7 +5,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://damienmortini@github.com/damienmortini/lib.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/core"
+  },
   "keywords": [
     "math",
     "physics",
@@ -17,10 +21,8 @@
   ],
   "author": "Damien Mortini",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/damienmortini/lib/issues"
-  },
-  "homepage": "https://github.com/damienmortini/lib",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/packages/core",
   "dependencies": {
     "gl-matrix": "^3.3.0",
     "mobile-detect": "^1.4.4"

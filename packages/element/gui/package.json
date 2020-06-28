@@ -8,8 +8,8 @@
     "custom elements",
     "web components"
   ],
-  "author": "Damien Mortini <ddotmnn+git@gmail.com>",
-  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element-gui#readme",
+  "author": "Damien Mortini",
+  "homepage": "https://github.com/damienmortini/lib/packages/element/gui",
   "license": "ISC",
   "publishConfig": {
     "access": "public"
@@ -17,14 +17,10 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/damienmortini/lib.git"
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/element/gui"
   },
-  "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "bugs": {
-    "url": "https://github.com/damienmortini/lib/issues"
-  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "dependencies": {
     "@damienmortini/element-input-button": "^0.0.14",
     "@damienmortini/element-input-checkbox": "^0.0.13",

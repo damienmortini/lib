@@ -6,24 +6,19 @@
     "access": "public"
   },
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Damien Mortini",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com/damienmortini/lib.git",
-    "directory": "packages/element-input-colorpicker"
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/element/input-colorpicker"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
-  "bugs": {
-    "url": "https://github.com/damienmortini/lib/issues"
-  },
-  "homepage": "https://github.com/damienmortini/lib#readme",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/packages/element/input-colorpicker",
   "dependencies": {
     "a-color-picker": "^1.2.1"
   }

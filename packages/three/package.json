@@ -8,7 +8,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://damienmortini@github.com/damienmortini/lib.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/three"
+  },
   "keywords": [
     "three",
     "3d",
@@ -17,10 +21,8 @@
   ],
   "author": "Damien Mortini",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/damienmortini/lib/issues"
-  },
-  "homepage": "https://github.com/damienmortini/lib",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/packages/three",
   "dependencies": {
     "@damienmortini/core": "^0.2.47",
     "three": "0.117.1"
