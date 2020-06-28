@@ -8,7 +8,8 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/damienmortini/lib.git"
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/server"
   },
   "keywords": [
     "server",
@@ -18,10 +19,8 @@
   ],
   "author": "Damien Mortini",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/damienmortini/server/issues"
-  },
-  "homepage": "https://github.com/damienmortini/server#readme",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/packages/server",
   "bin": "index.js",
   "dependencies": {
     "mime-types": "^2.1.27",
