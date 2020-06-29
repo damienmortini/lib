@@ -4,3 +4,5 @@ node_modules
 !.yarn/cache
 !.yarn/releases
 !.yarn/plugins
+
+lerna-debug.log
