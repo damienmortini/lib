@@ -5,7 +5,6 @@
   "scripts": {
     "start": "server --watch=packages",
     "version": "lerna version",
-    "publish": "npm run version && lerna publish from-package --yes --registry https://npm.pkg.github.com && lerna publish from-package --yes --registry https://registry.npmjs.org",
     "upgrade": "yarn && yarn upgrade-interactive --latest"
   },
   "workspaces": [
