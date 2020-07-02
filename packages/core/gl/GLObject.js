@@ -36,7 +36,7 @@ export default class GLObject {
     }
   }
 
-  draw(options) {
+  draw(options = {}) {
     options = Object.assign({ bind: true, uniforms: {} }, options);
     // Todo: Fix double call to Program.use when bind is true
     // (needed to update texture uniforms before binding them)
