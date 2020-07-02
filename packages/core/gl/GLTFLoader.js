@@ -9,13 +9,55 @@ export class GLTFLoader extends Loader {
     this.extensionTypeMap.set('glb', 'application/octet-stream');
   }
 
+  // From https://github.com/donmccurdy/glTF-Transform/blob/e4108cc/packages/core/src/io/io.ts#L32
+  static unpackGLB(glb) {
+    // Decode and verify GLB header.
+    const header = new Uint32Array(glb, 0, 3);
+    if (header[0] !== 0x46546c67) {
+      throw new Error('Invalid glTF asset.');
+    } else if (header[1] !== 2) {
+      throw new Error(`Unsupported glTF binary version, "${header[1]}".`);
+    }
+    // Decode and verify chunk headers.
+    const jsonChunkHeader = new Uint32Array(glb, 12, 2);
+    const jsonByteOffset = 20;
+    const jsonByteLength = jsonChunkHeader[0];
+    if (jsonChunkHeader[1] !== 0x4e4f534a) {
+      throw new Error('Unexpected GLB layout.');
+    }
+
+    // Decode JSON.
+    const jsonText = new TextDecoder().decode(glb.slice(jsonByteOffset, jsonByteOffset + jsonByteLength));
+    const json = JSON.parse(jsonText);
+    // JSON only
+    if (jsonByteOffset + jsonByteLength === glb.byteLength) return json;
+
+    const binaryChunkHeader = new Uint32Array(glb, jsonByteOffset + jsonByteLength, 2);
+    if (binaryChunkHeader[1] !== 0x004e4942) {
+      throw new Error('Unexpected GLB layout.');
+    }
+    // Decode content.
+    const binaryByteOffset = jsonByteOffset + jsonByteLength + 8;
+    const binaryByteLength = binaryChunkHeader[0];
+    const binary = glb.slice(binaryByteOffset, binaryByteOffset + binaryByteLength);
+    // Attach binary to buffer
+    json.buffers[0].binary = binary;
+    return json;
+  }
+
   async parse(data) {
+    if (data instanceof ArrayBuffer) {
+      data = GLTFLoader.unpackGLB(data);
+    }
+
     const rawData = JSON.parse(JSON.stringify(data));
     data.raw = rawData;
 
     const buffers = [];
     for (const buffer of data.buffers) {
-      if (buffer.uri.startsWith('data')) {
+      if (buffer.binary) {
+        buffers.push(buffer.binary);
+      } else if (buffer.uri.startsWith('data')) {
         buffers.push(Base64.toByteArray(buffer.uri.split(',')[1]).buffer);
       } else {
         buffers.push(await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`));
