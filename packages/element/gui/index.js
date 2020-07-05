@@ -102,7 +102,7 @@ export default class GUIElement extends GUIFolderElement {
     }
 
     if (options.object) {
-      if (options.value) options.object[options.key] = options.value;
+      if (options.value !== undefined) options.object[options.key] = options.value;
       else options.value = options.object[options.key];
     }
 
