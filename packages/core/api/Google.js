@@ -13,12 +13,12 @@ export default class Google {
 }
 
 export class GoogleSheets {
-  static parseJSON(json) {
-    const keyMap = new Map();
+  static parseJSON(json, { keyMap = new Map() }) {
+    const colKeyMap = new Map();
     const objectMap = new Map();
     for (const { gs$cell } of json.feed.entry) {
       if (gs$cell.row === '1') {
-        keyMap.set(gs$cell.col, gs$cell.inputValue);
+        colKeyMap.set(gs$cell.col, gs$cell.inputValue);
         continue;
       }
       let object = objectMap.get(gs$cell.row);
@@ -26,7 +26,9 @@ export class GoogleSheets {
         object = {};
         objectMap.set(gs$cell.row, object);
       }
-      object[keyMap.get(gs$cell.col)] = gs$cell.inputValue;
+      let key = colKeyMap.get(gs$cell.col);
+      key = keyMap.has(key) ? keyMap.get(key) : key;
+      object[key] = gs$cell.inputValue;
     }
     return [...objectMap.values()];
   }
