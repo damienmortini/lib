@@ -96,11 +96,6 @@ export default class GUIElement extends GUIFolderElement {
       options.id = `${options.folder ? options.folder + '/' : ''}${options.key}`;
     }
 
-    if (options.id) {
-      const urlValue = valuesMap.get(options.id);
-      if (urlValue !== undefined) options.value = urlValue;
-    }
-
     if (options.object) {
       if (options.value !== undefined) options.object[options.key] = options.value;
       else options.value = options.object[options.key];
@@ -197,6 +192,11 @@ export default class GUIElement extends GUIFolderElement {
 
     if (onchange) {
       element.onchange = onchange;
+    }
+
+    if (options.id) {
+      const urlValue = valuesMap.get(options.id);
+      if (urlValue !== undefined) element.value = urlValue;
     }
 
     folderElement.appendChild(element);
