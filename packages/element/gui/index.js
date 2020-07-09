@@ -155,18 +155,18 @@ export default class GUIElement extends GUIFolderElement {
     }
 
     const element = document.createElement(tagName);
-    for (const [key, value] of Object.entries(options)) {
-      element[key] = value;
-    }
-    folderElement.appendChild(element);
+
+    element.value = options.value;
+    delete options.value;
 
     let timeout;
-    element.addEventListener('input', () => {
-      if (options.id) {
-        valuesMap.set(options.id, element.value);
-      }
+    element.addEventListener('change', () => {
       if (object) {
         object[key] = element.value;
+      }
+
+      if (options.id) {
+        valuesMap.set(options.id, element.value);
       }
 
       clearTimeout(timeout);
@@ -185,6 +185,11 @@ export default class GUIElement extends GUIFolderElement {
         }
       }, 100);
     });
+
+    for (const [key, value] of Object.entries(options)) {
+      element[key] = value;
+    }
+    folderElement.appendChild(element);
 
     if (watch) {
       const updateInputValue = () => {
