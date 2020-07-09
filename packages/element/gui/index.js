@@ -156,8 +156,17 @@ export default class GUIElement extends GUIFolderElement {
 
     const element = document.createElement(tagName);
 
-    element.value = options.value;
+    const value = options.value;
     delete options.value;
+
+    const onchange = options.onchange;
+    delete options.onchange;
+
+    for (const [key, value] of Object.entries(options)) {
+      element[key] = value;
+    }
+
+    element.value = value;
 
     let timeout;
     element.addEventListener('change', () => {
@@ -186,9 +195,10 @@ export default class GUIElement extends GUIFolderElement {
       }, 100);
     });
 
-    for (const [key, value] of Object.entries(options)) {
-      element[key] = value;
+    if (onchange) {
+      element.onchange = onchange;
     }
+
     folderElement.appendChild(element);
 
     if (watch) {
