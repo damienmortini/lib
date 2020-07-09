@@ -67,10 +67,10 @@ export default class GLShaderTexture extends GLTexture {
       }),
     });
 
-    this.update({ uniforms, debug });
+    this.draw({ uniforms, debug });
   }
 
-  update({ uniforms = {}, debug = false } = {}) {
+  draw({ uniforms = {}, debug = false } = {}) {
     this.gl.viewport(0, 0, this.width, this.height);
     this._frameBuffer.bind();
     this._quad.draw({
@@ -78,6 +78,9 @@ export default class GLShaderTexture extends GLTexture {
     });
     this._frameBuffer.unbind();
     if (debug) {
+      if (debug instanceof Array) {
+        this.gl.viewport(debug[0], debug[1], debug[2], debug[3]);
+      }
       this._quad.draw({
         uniforms,
       });
