@@ -55,8 +55,9 @@ class AnimationTickerElement extends HTMLElement {
     }
     if (this.noautoplay) {
       this._pauseFlag |= PAUSED_BY_USER;
+    } else {
+      this.update();
     }
-    this.update();
   }
 
   disconnectedCallback() {
