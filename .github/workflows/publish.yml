@@ -16,6 +16,6 @@ jobs:
       - run: yarn run lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-      - run: yarn run lerna publish from-package --yes --registry https://npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+      - run: yarn run lerna publish from-package --yes --registry https://npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
