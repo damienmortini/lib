@@ -8,11 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          registry-url: https://registry.npmjs.org/
       - run: yarn
       - run: git stash
-      - run: yarn run lerna publish from-package --yes --registry https://registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-      - run: yarn run lerna publish from-package --yes --registry https://npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - run: yarn run lerna publish from-package --yes --registry https://registry.npmjs.org/:_authToken=${secrets.NPM_TOKEN}
+      - run: yarn run lerna publish from-package --yes --registry https://npm.pkg.github.com/:_authToken=${secrets.GITHUB_TOKEN}
