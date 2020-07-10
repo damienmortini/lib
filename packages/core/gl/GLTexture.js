@@ -9,12 +9,12 @@ export default class GLTexture {
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
-    minFilter = gl.LINEAR,
+    generateMipmap = true,
+    minFilter = generateMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
     magFilter = gl.LINEAR,
     wrapS = gl.CLAMP_TO_EDGE,
     wrapT = gl.CLAMP_TO_EDGE,
     flipY = false,
-    generateMipmap = true,
   }) {
     this.gl = gl;
     this._texture = this.gl.createTexture();

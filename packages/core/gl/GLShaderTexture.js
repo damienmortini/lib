@@ -12,11 +12,11 @@ export default class GLShaderTexture extends GLTexture {
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
-    minFilter = gl.LINEAR,
+    generateMipmap = false,
+    minFilter = generateMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
     magFilter = gl.LINEAR,
     wrapS = gl.REPEAT,
     wrapT = gl.REPEAT,
-    generateMipmap = false,
     uniforms = {},
     fragmentChunks = [],
     debug = false,
@@ -33,8 +33,10 @@ export default class GLShaderTexture extends GLTexture {
       magFilter,
       wrapS,
       wrapT,
-      generateMipmap,
+      generateMipmap: false,
     });
+
+    this._useMipmap = generateMipmap;
 
     this._frameBuffer = new GLFrameBuffer({
       gl: this.gl,
@@ -84,6 +86,9 @@ export default class GLShaderTexture extends GLTexture {
       this._quad.draw({
         uniforms,
       });
+    }
+    if (this._useMipmap) {
+      this.generateMipmap();
     }
   }
 }
