@@ -13,5 +13,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: yarn
       - run: git stash
-      - run: yarn run lerna publish from-package --yes --registry https://registry.npmjs.org/:_authToken=${secrets.NPM_TOKEN}
-      - run: yarn run lerna publish from-package --yes --registry https://npm.pkg.github.com/:_authToken=${secrets.GITHUB_TOKEN}
+      - run: yarn run lerna publish from-package --yes --registry https://registry.npmjs.org/:_authToken=${NPM_TOKEN}
+        env:
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+      - run: yarn run lerna publish from-package --yes --registry https://npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
