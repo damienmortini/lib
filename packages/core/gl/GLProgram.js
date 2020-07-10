@@ -160,6 +160,7 @@ export default class GLProgram {
     if (this.gl.getParameter(this.gl.VERSION).startsWith('WebGL 1.0')) {
       source = source.replace(/#version.*?\n/g, '');
       source = source.replace(/\btexture\b/g, 'texture2D');
+      source = source.replace(/\bflat\b/g, '');
       if (type === this.gl.VERTEX_SHADER) {
         source = source.replace(/(^\s*)\bin\b/gm, '$1attribute');
         source = source.replace(/(^\s*)\bout\b/gm, '$1varying');
