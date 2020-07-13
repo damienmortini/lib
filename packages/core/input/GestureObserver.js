@@ -17,8 +17,9 @@ class GestureObserver {
   /**
    * @param {GestureObserverCallback} callback
    */
-  constructor(callback, { pointerLock = false } = {}) {
+  constructor(callback, { pointerLock = false, pointerCapture = true } = {}) {
     this.pointerLock = pointerLock;
+    this.pointerCapture = pointerCapture;
 
     this._elementsData = new Map();
     this._callback = callback;
@@ -86,7 +87,7 @@ class GestureObserver {
     const data = this._elementsData.get(element);
     if (this.pointerLock) {
       element.requestPointerLock();
-    } else {
+    } else if (this.pointerCapture) {
       element.setPointerCapture(event.pointerId);
     }
     this._resetElementData(element);
