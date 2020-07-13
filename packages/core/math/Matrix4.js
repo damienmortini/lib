@@ -71,7 +71,7 @@ export default class Matrix4 extends Float32Array {
     return this;
   }
 
-  multiply(matrix4a, matrix4b) {
+  multiply(matrix4a, matrix4b = undefined) {
     if (matrix4b) {
       mat4.multiply(this, matrix4a, matrix4b);
     } else {
