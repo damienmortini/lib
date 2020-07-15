@@ -5,6 +5,7 @@
   "scripts": {
     "start": "server --watch=packages",
     "version": "lerna version",
+    "bump": "lerna version patch",
     "upgrade": "yarn && yarn upgrade-interactive --latest"
   },
   "workspaces": [
