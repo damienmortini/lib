@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
-const https = require('https');
-const http2 = require('http2');
-const fs = require('fs');
-const mimeTypes = require('mime-types');
-const WebSocket = require('ws');
-const os = require('os');
+import https from 'https';
+import http2 from 'http2';
+import fs from 'fs';
+import mimeTypes from 'mime-types';
+import WebSocket from 'ws';
+import os from 'os';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Extract parameters
