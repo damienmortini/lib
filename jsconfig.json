@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "module": "esnext",
     "checkJs": true,
     "baseUrl": "node_modules/",
     "rootDirs": [

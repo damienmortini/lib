@@ -1,0 +1,32 @@
+{
+  "name": "@damienmortini/generator",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Generator to create boilerplate files",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/generator"
+  },
+  "keywords": [
+    "generator",
+    "boilerplate",
+    "scaffold",
+    "yeoman",
+    "plop"
+  ],
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/packages/generator",
+  "bin": "index.js",
+  "dependencies": {
+    "fs-extra": "^9.0.1",
+    "jsdoc-to-markdown": "^6.0.1"
+  }
+}
