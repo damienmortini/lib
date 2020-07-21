@@ -55,3 +55,5 @@ export default class MenuElement extends HTMLElement {
     addOptionsTo(this._options, this._container);
   }
 }
+
+customElements.define('damo-menu', MenuElement);
