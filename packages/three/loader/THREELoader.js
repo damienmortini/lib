@@ -78,14 +78,13 @@ class THREELoader extends Loader {
     } else if (type === 'image/basis') {
       return new Promise((resolve) => {
         basisLoader.load(src, (texture) => {
-          texture.encoding = sRGBEncoding;
           resolve(texture);
         });
       });
     } else if (type.startsWith('image') || type.startsWith('video')) {
       return new Promise((resolve) => {
-        new TextureLoader().load(src, (data) => {
-          resolve(data);
+        new TextureLoader().load(src, (texture) => {
+          resolve(texture);
         });
       });
     } else {
