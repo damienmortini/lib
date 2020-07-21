@@ -9,7 +9,6 @@ import { Mesh } from '../../../three/src/objects/Mesh.js';
 import { Line } from '../../../three/src/objects/Line.js';
 import { LineSegments } from '../../../three/src/objects/LineSegments.js';
 import { Vector3 } from '../../../three/src/math/Vector3.js';
-import { sRGBEncoding } from '../../../three/src/Three.js';
 
 function computeSceneGeometry(data, scale, offset) {
   const hasOffset = offset.lengthSq() !== 0;
@@ -28,26 +27,9 @@ function computeSceneGeometry(data, scale, offset) {
   });
 }
 
-const loader = new GLTFLoader();
-const dracoLoader = new DRACOLoader(undefined);
-dracoLoader.setWorkerLimit(2);
-loader.setDRACOLoader(dracoLoader);
-
-const basisLoader = new BasisTextureLoader();
-basisLoader.setWorkerLimit(2);
-{
-  let renderer;
-  if (window.WebGL2RenderingContext !== undefined && !/\bforcewebgl1\b/.test(window.location.search)) {
-    const canvas = document.createElement('canvas');
-    renderer = new WebGLRenderer({
-      canvas: canvas,
-      context: canvas.getContext('webgl2'),
-    });
-  } else {
-    renderer = new WebGLRenderer();
-  }
-  basisLoader.detectSupport(renderer);
-}
+let gltfLoader;
+let dracoLoader;
+let basisLoader;
 
 class THREELoader extends Loader {
   constructor() {
@@ -62,20 +44,41 @@ class THREELoader extends Loader {
 
   _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
     if (type.startsWith('model')) {
-      dracoLoader.setDecoderPath(`${this.baseURI}${this.dracoDecoderPath}`);
-      basisLoader.setTranscoderPath(`${this.baseURI}${this.basisTranscoderPath}`);
-
       const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
-      loader.setPath(path);
+      if (!gltfLoader) {
+        gltfLoader = new GLTFLoader(undefined);
+        dracoLoader = new DRACOLoader(undefined);
+        dracoLoader.setWorkerLimit(2);
+        gltfLoader.setDRACOLoader(dracoLoader);
+      }
+
+      dracoLoader.setDecoderPath(`${this.baseURI}${this.dracoDecoderPath}`);
+      gltfLoader.setPath(path);
 
       return new Promise((resolve) => {
-        loader.load(file, (data) => {
+        gltfLoader.load(file, (data) => {
           computeSceneGeometry(data.scene, scale, offset);
           resolve(data);
         });
       });
     } else if (type === 'image/basis') {
+      if (!basisLoader) {
+        basisLoader = new BasisTextureLoader(undefined);
+        basisLoader.setWorkerLimit(2);
+        let renderer;
+        if (window.WebGL2RenderingContext !== undefined && !/\bforcewebgl1\b/.test(window.location.search)) {
+          const canvas = document.createElement('canvas');
+          renderer = new WebGLRenderer({
+            canvas: canvas,
+            context: canvas.getContext('webgl2'),
+          });
+        } else {
+          renderer = new WebGLRenderer();
+        }
+        basisLoader.detectSupport(renderer);
+      }
+      basisLoader.setTranscoderPath(`${this.baseURI}${this.basisTranscoderPath}`);
       return new Promise((resolve) => {
         basisLoader.load(src, (texture) => {
           resolve(texture);
