@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/three",
-  "version": "0.1.64",
+  "version": "0.1.65",
   "description": "Three.js helpers",
   "scripts": {
     "install": "node copyExamples.js"
@@ -24,7 +24,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/packages/three",
   "dependencies": {
-    "@damienmortini/core": "^0.2.55",
+    "@damienmortini/core": "^0.2.56",
     "three": "0.118.3"
   }
 }
