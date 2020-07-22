@@ -21,6 +21,6 @@
   "homepage": "https://github.com/damienmortini/lib/packages/element/animation-lottie",
   "dependencies": {
     "@damienmortini/core": "^0.2.55",
-    "lottie-web": "^5.7.0"
+    "lottie-web": "^5.7.1"
   }
 }
