@@ -41,7 +41,7 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
       `,
       vertexChunks: [
         ['start', `
-          ${options.skinning ? ShaderChunk.skinning_pars_vertex : ''}
+          ${options.skinning ? '#include <skinning_pars_vertex>' : ''}
           
           varying vec3 vPosition;
           varying vec3 vNormal;
