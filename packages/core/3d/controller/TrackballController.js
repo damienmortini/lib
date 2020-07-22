@@ -79,10 +79,6 @@ export default class TrackballController {
   }
 
   update() {
-    if (this.disabled) {
-      return;
-    }
-
     this._cachedMatrix.identity();
     this._cachedQuaternion.identity();
 
