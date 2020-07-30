@@ -16,6 +16,7 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
       `,
       vertexChunks: [
         ['start', `
+          ${options.morphTargets ? '#include <morphtarget_pars_vertex>' : ''}
           ${options.skinning ? '#include <skinning_pars_vertex>' : ''}
           
           out vec3 vPosition;
@@ -28,9 +29,13 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
         ['main', `
           vec3 transformedPosition = position;
           vec3 transformedNormal = normal;
-          
+
           ${options.skinning ? ShaderChunk.skinbase_vertex : ''}
+
+          ${options.morphTargets ? ShaderChunk.morphnormal_vertex.replace(/objectNormal/g, 'transformedNormal') : ''}
           ${options.skinning ? ShaderChunk.skinnormal_vertex.replace(/objectNormal/g, 'transformedNormal') : ''}
+          
+          ${options.morphTargets ? ShaderChunk.morphtarget_vertex.replace(/transformed/g, 'transformedPosition') : ''}
           ${options.skinning ? ShaderChunk.skinning_vertex.replace(/transformed/g, 'transformedPosition') : ''}
         `],
         ['end', `
