@@ -161,7 +161,9 @@ export default class GUIElement extends GUIFolderElement {
       element[key] = value;
     }
 
-    element.value = value;
+    if (value !== undefined) {
+      element.value = value;
+    }
 
     let timeout;
     element.addEventListener('change', () => {
