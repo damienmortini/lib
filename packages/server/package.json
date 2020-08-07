@@ -21,7 +21,7 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/packages/server",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/server",
   "bin": "index.js",
   "dependencies": {
     "mime-types": "^2.1.27",
