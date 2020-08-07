@@ -22,7 +22,7 @@ let watchPath = '.';
 for (const arg of process.argv) {
   if (arg.startsWith('--path')) {
     path = arg.split('=')[1].trim();
-  } else if (arg.startsWith('--watch')) {
+  } else if (arg.startsWith('--watchpath')) {
     watchPath = arg.split('=')[1].trim();
   } else if (arg === '--verbose') {
     verbose = true;
