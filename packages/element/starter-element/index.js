@@ -17,10 +17,6 @@ window.customElements.define('damo-starter-element', class extends HTMLElement {
           justify-content: center;
           align-items: center;
         }
-        
-        h1 {
-          font-size: 32px;
-        }
       </style>
       <h1>damo-starter-element</h1>
     `;
