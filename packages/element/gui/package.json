@@ -9,7 +9,7 @@
     "web components"
   ],
   "author": "Damien Mortini",
-  "homepage": "https://github.com/damienmortini/lib/packages/element/gui",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/gui",
   "license": "ISC",
   "publishConfig": {
     "access": "public"

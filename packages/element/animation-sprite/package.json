@@ -18,7 +18,7 @@
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/packages/element/animation-sprite",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/animation-sprite",
   "dependencies": {
     "@damienmortini/core": "^0.2.57",
     "@damienmortini/element-animation-ticker": "^0.0.53"

@@ -1,14 +1,24 @@
 {
   "name": "@damienmortini/element-starter-three",
   "private": true,
-  "version": "0.0.0",
-  "description": "starter-three",
   "main": "index.js",
   "author": "Damien Mortini",
+  "description": "<element-starter-three> custom element.",
   "dependencies": {
     "@damienmortini/core": "0.2.57",
     "@damienmortini/element-animation-ticker": "0.0.53",
     "@damienmortini/three": "0.1.66",
     "three": "^0.118.3"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/element/starter-three"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/starter-three"
 }
