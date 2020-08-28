@@ -10,7 +10,7 @@ import Scene from './Scene.js';
  * @example
  * <damo-starter-three></damo-starter-three>
  */
-export default class THREEStarter extends AnimationTickerElement {
+window.customElements.define('damo-starter-three', class extends AnimationTickerElement {
   constructor() {
     super();
 
@@ -75,6 +75,5 @@ export default class THREEStarter extends AnimationTickerElement {
     this.scene.update();
     this.renderer.render(this.scene, this.scene.camera);
   }
-}
+});
 
-window.customElements.define('damo-starter-three', THREEStarter);

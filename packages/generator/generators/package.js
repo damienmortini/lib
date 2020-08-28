@@ -1,10 +1,9 @@
 import fs from 'fs-extra';
 
 /**
- * @param {String} name Element name
+ * @param {String} name Package name
  */
 export default function (name) {
-  fs.copySync('node_modules/@damienmortini/element-starter-gl', `./packages/${name}`);
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
     name: `@damienmortini/${name}`,
     private: true,

@@ -21,8 +21,8 @@ import { dirname } from 'path';
   const params = [];
   for (const param of jsDocData[0].params) {
     params.push(await new Promise((resolve) => {
-      rl.question(`${param.description}: `, (answer) => {
-        resolve(answer);
+      rl.question(`${param.description}${param.defaultvalue ? ' [' + param.defaultvalue + ']' : ''}: `, (answer) => {
+        resolve(answer || param.defaultvalue);
       });
     }));
   }
