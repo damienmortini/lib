@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-menu",
   "private": true,
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "<element-menu> custom element.",
   "publishConfig": {
     "access": "public"
