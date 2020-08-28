@@ -12,6 +12,8 @@ export default function (name) {
       <style>
         :host {
           display: block;
+          position: relative;
+          contain: content;
         }
       </style>
       <slot></slot>
