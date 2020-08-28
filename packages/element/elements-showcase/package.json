@@ -1,9 +1,9 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.60",
+  "version": "0.0.61",
   "dependencies": {
-    "@damienmortini/element-animation-lottie": "^0.0.54",
+    "@damienmortini/element-animation-lottie": "^0.0.55",
     "@damienmortini/element-animation-sprite": "^0.0.40",
     "@damienmortini/element-animation-ticker": "^0.0.54",
     "@damienmortini/element-animation-view": "^0.0.37",
