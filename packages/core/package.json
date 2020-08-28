@@ -22,7 +22,7 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/packages/core",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/core",
   "dependencies": {
     "gl-matrix": "^3.3.0",
     "mobile-detect": "^1.4.4"

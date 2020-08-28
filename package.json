@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "server --watchpath=packages",
-    "version": "lerna version",
     "bump": "lerna version patch",
-    "upgrade": "yarn && yarn upgrade-interactive --latest"
+    "rewritepackagefiles": "node rewritepackagefiles.js",
+    "start": "server --watchpath=packages",
+    "upgrade": "yarn && yarn upgrade-interactive --latest",
+    "version": "lerna version"
   },
   "workspaces": [
     "packages/*",

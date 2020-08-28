@@ -18,7 +18,7 @@
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/packages/element/input-file",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/input-file",
   "dependencies": {
     "@damienmortini/core": "^0.2.57"
   }
