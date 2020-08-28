@@ -4,7 +4,7 @@
  * @example
  * <damo-starter-element></damo-starter-element>
  */
-export default class StarterElement extends HTMLElement {
+window.customElements.define('damo-starter-element', class extends HTMLElement {
   constructor() {
     super();
 
@@ -25,6 +25,4 @@ export default class StarterElement extends HTMLElement {
       <h1>damo-starter-element</h1>
     `;
   }
-}
-
-window.customElements.define('damo-starter-element', StarterElement);
+});
