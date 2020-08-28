@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-ticker",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "description": "<element-animation-ticker> custom element.",
   "main": "index.js",
   "publishConfig": {
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/animation-ticker",
   "dependencies": {
-    "@damienmortini/core": "^0.2.57"
+    "@damienmortini/core": "^0.2.58"
   }
 }
