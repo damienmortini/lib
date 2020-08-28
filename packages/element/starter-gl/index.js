@@ -8,7 +8,7 @@ import View from './View.js';
  * @example
  * <damo-starter-gl></damo-starter-gl>
  */
-class Main extends AnimationTickerElement {
+export default class GLStarter extends AnimationTickerElement {
   constructor() {
     super();
 
@@ -19,6 +19,9 @@ class Main extends AnimationTickerElement {
         :host {
           display: block;
           position: relative;
+          contain: content;
+          width: 300px;
+          height: 150px;
         }
         
         canvas {
@@ -53,4 +56,4 @@ class Main extends AnimationTickerElement {
   }
 }
 
-window.customElements.define('damo-starter-gl', Main);
+window.customElements.define('damo-starter-gl', GLStarter);

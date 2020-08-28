@@ -21,6 +21,8 @@ export default class ViewportElement extends HTMLElement {
           overflow: hidden;
           touch-action: none;
           position: relative;
+          width: 300px;
+          height: 150px;
         }
 
         #content {

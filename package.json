@@ -6,6 +6,7 @@
     "bump": "lerna version patch",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --watchpath=packages",
+    "update": "yarn",
     "upgrade": "yarn && yarn upgrade-interactive --latest",
     "version": "lerna version"
   },

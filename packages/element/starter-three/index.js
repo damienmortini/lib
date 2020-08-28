@@ -10,7 +10,7 @@ import Scene from './Scene.js';
  * @example
  * <damo-starter-three></damo-starter-three>
  */
-class Main extends AnimationTickerElement {
+export default class THREEStarter extends AnimationTickerElement {
   constructor() {
     super();
 
@@ -19,6 +19,9 @@ class Main extends AnimationTickerElement {
         :host {
           display: block;
           position: relative;
+          contain: content;
+          width: 300px;
+          height: 150px;
         }
         
         canvas {
@@ -74,4 +77,4 @@ class Main extends AnimationTickerElement {
   }
 }
 
-window.customElements.define('damo-starter-three', Main);
+window.customElements.define('damo-starter-three', THREEStarter);
