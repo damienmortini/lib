@@ -1,10 +1,6 @@
 import Vector2 from '../core/math/Vector2.js';
 
-import SelectLassoElement from '../element-select-lasso/index.js';
-
-if (!customElements.get('damo-viewport-select-lasso')) {
-  customElements.define('damo-viewport-select-lasso', class extends SelectLassoElement { });
-}
+import '../element-select-lasso/index.js';
 
 export default class ViewportElement extends HTMLElement {
   static get observedAttributes() {
@@ -69,7 +65,7 @@ export default class ViewportElement extends HTMLElement {
           box-shadow: 0 0 0 1px grey;
         }
       </style>
-      <damo-viewport-select-lasso></damo-viewport-select-lasso>
+      <damo-select-lasso></damo-select-lasso>
       <slot></slot>
       <div id="content"></div>
     `;
@@ -554,3 +550,5 @@ export default class ViewportElement extends HTMLElement {
     element.style.transform = domMatrix.toString();
   }
 }
+
+customElements.define('damo-viewport', ViewportElement);
