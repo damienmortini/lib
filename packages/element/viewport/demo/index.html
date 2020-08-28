@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>element-viewport</title>
+  <title>damo-viewport</title>
   <style>
     html,
     body {
@@ -19,7 +19,7 @@
       grid-template-rows: 1fr 1fr;
     }
 
-    element-viewport {
+    damo-viewport {
       width: 100%;
       height: 100%;
     }
@@ -27,16 +27,16 @@
 </head>
 
 <body>
-  <element-viewport>
+  <damo-viewport>
     <div style="position: absolute; background-color: blue; width: 100px; height: 100px;"></div>
-  </element-viewport>
-  <element-viewport centered>
+  </damo-viewport>
+  <damo-viewport centered>
     <div style="position: absolute; background-color: red; width: 100px; height: 100px; left: -50px;"></div>
     <div
       style="position: absolute; background-color: green; width: 100px; height: 100px; border-radius: 50%; top: 25px; left: 100px;">
     </div>
-  </element-viewport>
-  <element-viewport centered>
+  </damo-viewport>
+  <damo-viewport centered>
     <div
       style="position: absolute; background-color: yellow; padding: 20px; top: 50px; left: 50px; box-sizing: border-box;">
       <input type="range">
@@ -52,18 +52,17 @@
       <input type="range">
     </div>
     <div style="position: absolute; background-color: red; width: 100px; height: 100px; left: -50px;"></div>
-  </element-viewport>
-  <element-viewport centered>
+  </damo-viewport>
+  <damo-viewport centered>
     <div style="position: absolute; resize: both; background-color: red; width: 100px; height: 100px; left: -50px;">
     </div>
     <div
       style="position: absolute; background-color: green; width: 100px; height: 100px; border-radius: 50%; top: 25px; left: 100px;">
     </div>
-  </element-viewport>
+  </damo-viewport>
 
   <script type="module">
-    import Element from '../index.js';
-    window.customElements.define(`element-viewport`, Element);
+    import '../index.js';
   </script>
 </body>
 

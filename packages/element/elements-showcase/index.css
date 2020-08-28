@@ -79,7 +79,7 @@ nav li {
   justify-items: center;
 }
 
-nav li * {
+nav li>* {
   max-width: 100%;
   max-height: 100%;
 }
