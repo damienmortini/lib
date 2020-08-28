@@ -1,6 +1,5 @@
 {
   "name": "@damienmortini/element-starter-three",
-  "private": true,
   "version": "0.0.1",
   "main": "index.js",
   "author": "Damien Mortini",
