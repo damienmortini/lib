@@ -28,6 +28,29 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.10.1.tgz#2e142c27ca58aa2c7b119d09269b702c8bbad28c"
   integrity sha512-AUTksaz3FqugBkbTZ1i+lDLG5qy8hIzCaAxEtttU6C0BtZZU9pkNZtWSVAht4EW9kl46YBiyTGMp9xTTGqViNg==
 
+"@damienmortini/core@0.2.57":
+  version "0.2.57"
+  resolved "https://npm.pkg.github.com/download/@damienmortini/core/0.2.57/070389b415953f913c7443d4db00e3c4b72a458bfbc0ccae1a7e466e122c7e59#51e72d7dabc698297c91678f50e007b086788df5"
+  integrity sha512-EwDSjVT+z/rXN1TRICSAoSb5pZhPw6My3wswzThyTz83skm09HYSqvkMZI+/KXKG6F5ELPf5RunGgKej3WK6pw==
+  dependencies:
+    gl-matrix "^3.3.0"
+    mobile-detect "^1.4.4"
+
+"@damienmortini/element-animation-ticker@0.0.53":
+  version "0.0.53"
+  resolved "https://npm.pkg.github.com/download/@damienmortini/element-animation-ticker/0.0.53/3427e9454deea7d78164072dab1d6d2bebd1dcde0e7359797d97c1dae4995f5a#75388777cdfb702a3a14b4a9272dc4bab49e587f"
+  integrity sha512-8Zka6p4w4oKbLyknHJqPCRLDacngwaphAwmX5mHa1qApOlqRz1uqiSdxdgzY1D0JWVP/wtckCGbvwUdCxEMuqQ==
+  dependencies:
+    "@damienmortini/core" "^0.2.57"
+
+"@damienmortini/three@0.1.66":
+  version "0.1.66"
+  resolved "https://npm.pkg.github.com/download/@damienmortini/three/0.1.66/ac02f19dc6ebc82cee7132f5619d30d9f311f08d339b2a945a115ebd7cdaf2b5#cf9dd9512fdc11645277abb97a6072effdf99681"
+  integrity sha512-kO3STnNmlBO4SlmWvzGHVL/oT0lgdNpB3yyvNgZSQ1+wz+7i93tKsCBuEw+8sMecvL8JP+1xBqLfOeRx4hNBDA==
+  dependencies:
+    "@damienmortini/core" "^0.2.57"
+    three "0.118.3"
+
 "@evocateur/libnpmaccess@^3.1.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@evocateur/libnpmaccess/-/libnpmaccess-3.1.2.tgz#ecf7f6ce6b004e9f942b098d92200be4a4b1c845"
@@ -5595,6 +5618,11 @@ thenify-all@^1.0.0:
   integrity sha1-5p44obq+lpsBCCB5eLn2K4hgSDk=
   dependencies:
     any-promise "^1.0.0"
+
+three@0.118.3, three@^0.118.3:
+  version "0.118.3"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.118.3.tgz#c0bf8c10a68155478f12f4ccac2ff979526a4a0a"
+  integrity sha512-ijECXrNzDkHieoeh2H69kgawTGH8DiamhR4uBN8jEM7VHSKvfTdEvOoHsA8Aq7dh7PHAxhlqBsN5arBI3KixSw==
 
 three@0.119.1:
   version "0.119.1"

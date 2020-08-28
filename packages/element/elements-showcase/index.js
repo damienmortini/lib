@@ -4,13 +4,8 @@ const section = document.body.querySelector('section');
 const list = document.body.querySelector('nav ul');
 const iframe = document.body.querySelector('iframe');
 
-for (let elementName of ELEMENTS) {
-  let preview = '';
-  if (elementName instanceof Array) {
-    preview = elementName[1];
-    elementName = elementName[0];
-  }
-  const elementString = preview || `<${elementName}></${elementName}>`;
+for (const [elementName, { previewHTML, demo }] of ELEMENTS) {
+  const elementString = previewHTML || `<${elementName}></${elementName}>`;
   list.insertAdjacentHTML('beforeend', `
         <li data-elementname="${elementName}">
           <h2><a href="#${elementName}">${elementName.replace('element-', '')}</a></h2>
