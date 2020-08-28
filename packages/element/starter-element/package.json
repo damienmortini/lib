@@ -1,6 +1,5 @@
 {
   "name": "@damienmortini/element-starter-element",
-  "private": true,
   "version": "0.0.1",
   "description": "<damo-starter-element> custom element.",
   "main": "index.js",
