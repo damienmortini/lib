@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-viewport",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "<element-viewport> custom element.",
   "publishConfig": {
     "access": "public"
