@@ -5,7 +5,9 @@ import fs from 'fs-extra';
  * @param {String} [template=element] Template name
  */
 export default function (name, template) {
-  fs.copySync(`node_modules/@damienmortini/element-starter-${template}`, `./packages/${name}`);
+  fs.copySync(`node_modules/@damienmortini/element-starter-${template}`, `./packages/${name}`, {
+    dereference: true,
+  });
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
     name: `@damienmortini/${name}`,
     private: true,
