@@ -1,16 +1,4 @@
-import {
-  Mesh,
-  OrthographicCamera,
-  PlaneBufferGeometry,
-  Vector2,
-  DataTexture,
-  RGBAFormat,
-  FloatType,
-  WebGLRenderer,
-  WebGLRenderTarget,
-  Scene,
-  NearestFilter,
-} from '../../../three/src/Three.js';
+import { Mesh, OrthographicCamera, PlaneBufferGeometry, Vector2, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat } from '../../../three/src/Three.js';
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 
@@ -20,15 +8,16 @@ export default class THREEGPGPUSystem {
   constructor({
     data,
     renderer,
-    uniforms = new Map(),
-    size = 1,
-    fragmentShaderChunks = [],
+    uniforms = {},
+    stride = 1,
+    fragmentChunks = [],
     format = RGBAFormat,
     debug = false,
   }) {
     this._renderer = renderer;
+    this._stride = stride;
 
-    const channels = format === RGBAFormat ? 4 : 3;
+    const channels = format === RGBFormat ? 3 : 4;
     const length = data.length / channels;
     this._width = Math.min(length, MAX_WIDTH);
     this._height = Math.ceil(length / MAX_WIDTH);
@@ -64,50 +53,41 @@ export default class THREEGPGPUSystem {
     this._webglRenderTargetIn.texture.generateMipmaps = false;
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
 
-    const createDataChunks = () => {
-      let str = '\n';
-      for (let i = 0; i < size; i++) {
-        str += `vec4 dataChunk${i} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / (dataTextureSize - 1.));\n`;
-      }
-      return str;
-    };
-
     this._quad = new Mesh(new PlaneBufferGeometry(2, 2), new THREEShaderMaterial({
-      uniforms: Object.assign({
-        dataTextureSize: new Vector2(this._width, this._height),
+      uniforms: {
         dataTexture,
-      }, uniforms),
-      fragmentShader: `
+        ...uniforms,
+      },
+      fragment: `
         void main() {
           gl_FragColor = vec4(0.);
         }
       `,
-      vertexShaderChunks: [
+      vertexChunks: [
         ['start',
-          'varying vec2 vUv;',
+          'out vec2 vUV;',
         ],
         ['main',
-          'vUv = uv;',
+          'vUV = uv;',
         ],
       ],
-      fragmentShaderChunks: [
-        ...fragmentShaderChunks,
-        ['start', `
-          uniform sampler2D dataTexture;
-          uniform vec2 dataTextureSize;
-          varying vec2 vUv;
-        `],
-        ['main', `
-          vec2 dataPosition = floor(vUv * (dataTextureSize - 1.) + .5);
-          float chunkOffset = mod(dataPosition.x, ${size}.);
-          dataPosition.x -= chunkOffset;
-          ${createDataChunks()}
-        `],
+      fragmentChunks: [
+        ...fragmentChunks,
+        ...this.dataChunks,
+        ['start', 'in vec2 vUV;'],
       ],
     }));
     this.scene.add(this._quad);
 
     this.update();
+  }
+
+  get onBeforeRender() {
+    return this._quad.onBeforeRender;
+  }
+
+  set onBeforeRender(value) {
+    this._quad.onBeforeRender = value;
   }
 
   get material() {
@@ -124,6 +104,28 @@ export default class THREEGPGPUSystem {
 
   get dataTexture() {
     return this._quad.material.dataTexture;
+  }
+
+  get dataChunks() {
+    let dataChunksString = '\n';
+    for (let i = 0; i < this._stride; i++) {
+      dataChunksString += `vec4 dataChunk${i + 1} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / (vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT) - 1.));\n`;
+    }
+
+    return [
+      ['start', `
+        #define DATA_TEXTURE_WIDTH ${this.width.toFixed(1)}
+        #define DATA_TEXTURE_HEIGHT ${this.height.toFixed(1)}
+
+        uniform highp sampler2D dataTexture;
+      `],
+      ['main', `
+        vec2 dataPosition = floor(vUV * (vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT) - 1.) + .5);
+        float chunkOffset = mod(dataPosition.x, ${this._stride}.);
+        dataPosition.x -= chunkOffset;
+        ${dataChunksString}
+      `],
+    ];
   }
 
   update() {

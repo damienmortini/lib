@@ -25,6 +25,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/master/packages/three",
   "dependencies": {
     "@damienmortini/core": "^0.2.58",
-    "three": "0.120.0"
+    "three": "0.120.1"
   }
 }
