@@ -1,8 +1,6 @@
-import { Mesh, OrthographicCamera, PlaneBufferGeometry, Vector2, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat } from '../../../three/src/Three.js';
+import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat } from '../../../three/src/Three.js';
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
-
-const MAX_WIDTH = 2048;
 
 export default class THREEGPGPUSystem {
   constructor({
@@ -18,9 +16,10 @@ export default class THREEGPGPUSystem {
     this._stride = stride;
 
     const channels = format === RGBFormat ? 3 : 4;
-    const length = data.length / channels;
-    this._width = Math.min(length, MAX_WIDTH);
-    this._height = Math.ceil(length / MAX_WIDTH);
+    const dataSize = data.length / channels / stride;
+    const size = Math.ceil(Math.sqrt(dataSize));
+    this._width = size * stride;
+    this._height = size;
 
     const finalData = new Float32Array(this._width * this._height * channels);
     finalData.set(data);
@@ -109,7 +108,7 @@ export default class THREEGPGPUSystem {
   get dataChunks() {
     let dataChunksString = '\n';
     for (let i = 0; i < this._stride; i++) {
-      dataChunksString += `vec4 dataChunk${i + 1} = texture2D(dataTexture, vec2(dataPosition.x + ${i}., dataPosition.y) / (vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT) - 1.));\n`;
+      dataChunksString += `vec4 dataChunk${i + 1} = texture2D(dataTexture, vec2(dataPosition.x + ${i}. + .5, dataPosition.y + .5) / vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT));\n`;
     }
 
     return [
@@ -120,7 +119,7 @@ export default class THREEGPGPUSystem {
         uniform highp sampler2D dataTexture;
       `],
       ['main', `
-        vec2 dataPosition = floor(vUV * (vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT) - 1.) + .5);
+        vec2 dataPosition = floor(vUV * vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT));
         float chunkOffset = mod(dataPosition.x, ${this._stride}.);
         dataPosition.x -= chunkOffset;
         ${dataChunksString}
