@@ -12,7 +12,7 @@ export default class DatatextureShader {
   static getTextureDataChunkFromIndex() {
     return `
       vec4 getTextureDataChunkFromIndex(sampler2D dataTexture, int index, int chunkIndex, int stride, vec2 textureSize) {
-        vec2 uv = vec2(mod(float(index), textureSize.x) / textureSize.x, floor(float(index) / textureSize.x) / textureSize.y);
+        vec2 uv = vec2(mod(float(index * stride), textureSize.x) / textureSize.x, floor(float(index * stride) / textureSize.x) / textureSize.y);
         return getTextureDataChunkFromUV(dataTexture, uv, chunkIndex, stride, textureSize);
       }
     `;
