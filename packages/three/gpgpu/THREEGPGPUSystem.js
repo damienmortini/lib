@@ -3,6 +3,8 @@ import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat,
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 import DatatextureShader from '../../core/shader/DataTextureShader.js';
 
+let DEBUG_RENDERER;
+
 export default class THREEGPGPUSystem {
   constructor({
     data,
@@ -19,20 +21,20 @@ export default class THREEGPGPUSystem {
     const channels = format === RGBFormat ? 3 : 4;
     const dataSize = data.length / channels / stride;
     const size = Math.ceil(Math.sqrt(dataSize));
-    this._width = size * stride;
-    this._height = size;
+    this._dataTextureWidth = size * stride;
+    this._dataTextureHeight = size;
 
     this.debug = debug;
 
-    const finalData = new Float32Array(this._width * this._height * channels);
+    const finalData = new Float32Array(this._dataTextureWidth * this._dataTextureHeight * channels);
     finalData.set(data);
-    const dataTexture = new DataTexture(finalData, this._width, this._height, format, FloatType);
+    const dataTexture = new DataTexture(finalData, this._dataTextureWidth, this._dataTextureHeight, format, FloatType);
     dataTexture.needsUpdate = true;
 
     this.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     this.scene = new Scene();
 
-    this._webglRenderTargetIn = new WebGLRenderTarget(this._width, this._height, {
+    this._webglRenderTargetIn = new WebGLRenderTarget(this._dataTextureWidth, this._dataTextureHeight, {
       minFilter: NearestFilter,
       magFilter: NearestFilter,
       format,
@@ -64,8 +66,8 @@ export default class THREEGPGPUSystem {
       fragmentChunks: [
         ...fragmentChunks,
         ['start', `
-          #define DATA_TEXTURE_WIDTH ${this.width.toFixed(1)}
-          #define DATA_TEXTURE_HEIGHT ${this.height.toFixed(1)}
+          #define DATA_TEXTURE_WIDTH ${this.dataTextureWidth.toFixed(1)}
+          #define DATA_TEXTURE_HEIGHT ${this.dataTextureHeight.toFixed(1)}
 
           uniform highp sampler2D dataTexture;
           
@@ -105,39 +107,21 @@ export default class THREEGPGPUSystem {
     return this._quad.material;
   }
 
-  get width() {
-    return this._width;
+  get dataTextureWidth() {
+    return this._dataTextureWidth;
   }
 
-  get height() {
-    return this._height;
+  get dataTextureHeight() {
+    return this._dataTextureHeight;
+  }
+
+  get dataTextureSize() {
+    return [this._dataTextureWidth, this._dataTextureHeight];
   }
 
   get dataTexture() {
     return this._quad.material.dataTexture;
   }
-
-  // get dataChunks() {
-  //   let dataChunksString = '\n';
-  //   for (let i = 0; i < this._stride; i++) {
-  //     dataChunksString += `vec4 dataChunk${i + 1} = texture2D(dataTexture, vec2(dataPosition.x + ${i}. + .5, dataPosition.y + .5) / vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT));\n`;
-  //   }
-
-  //   return [
-  //     ['start', `
-  //       #define DATA_TEXTURE_WIDTH ${this.width.toFixed(1)}
-  //       #define DATA_TEXTURE_HEIGHT ${this.height.toFixed(1)}
-
-  //       uniform highp sampler2D dataTexture;
-  //     `],
-  //     ['main', `
-  //       vec2 dataPosition = floor(vUV * vec2(DATA_TEXTURE_WIDTH, DATA_TEXTURE_HEIGHT));
-  //       float chunkOffset = mod(dataPosition.x, ${this._stride}.);
-  //       dataPosition.x -= chunkOffset;
-  //       ${dataChunksString}
-  //     `],
-  //   ];
-  // }
 
   get stride() {
     return this._stride;
@@ -149,18 +133,20 @@ export default class THREEGPGPUSystem {
 
   set debug(value) {
     this._debug = value;
-    if (!this._debugRenderer) {
-      this._debugRenderer = new WebGLRenderer();
-      document.body.appendChild(this._debugRenderer.domElement);
-      this._debugRenderer.setSize(this._width, this._height, false);
-      this._debugRenderer.domElement.style.position = 'absolute';
-      this._debugRenderer.domElement.style.bottom = '0';
-      this._debugRenderer.domElement.style.left = '0';
-      this._debugRenderer.domElement.style.width = '100%';
-      this._debugRenderer.domElement.style.height = '25%';
-      this._debugRenderer.domElement.style.imageRendering = 'pixelated';
+    if (this._debug && !DEBUG_RENDERER) {
+      DEBUG_RENDERER = new WebGLRenderer();
+      document.body.appendChild(DEBUG_RENDERER.domElement);
+      DEBUG_RENDERER.setSize(this._dataTextureWidth, this._dataTextureHeight, false);
+      DEBUG_RENDERER.domElement.style.position = 'absolute';
+      DEBUG_RENDERER.domElement.style.bottom = '0';
+      DEBUG_RENDERER.domElement.style.left = '0';
+      DEBUG_RENDERER.domElement.style.width = '100%';
+      DEBUG_RENDERER.domElement.style.height = '25%';
+      DEBUG_RENDERER.domElement.style.imageRendering = 'pixelated';
     }
-    this._debugRenderer.domElement.hidden = !this._debug;
+    if (DEBUG_RENDERER) {
+      DEBUG_RENDERER.domElement.hidden = !this._debug;
+    }
   }
 
   update() {
@@ -170,10 +156,10 @@ export default class THREEGPGPUSystem {
     this._renderer.render(this.scene, this.camera);
 
     if (this.debug) {
-      this._debugRenderer.setRenderTarget(this._webglRenderTargetOut);
-      this._debugRenderer.render(this.scene, this.camera);
-      this._debugRenderer.setRenderTarget(null);
-      this._debugRenderer.render(this.scene, this.camera);
+      DEBUG_RENDERER.setRenderTarget(this._webglRenderTargetOut);
+      DEBUG_RENDERER.render(this.scene, this.camera);
+      DEBUG_RENDERER.setRenderTarget(null);
+      DEBUG_RENDERER.render(this.scene, this.camera);
     }
 
     [this._webglRenderTargetIn, this._webglRenderTargetOut] = [this._webglRenderTargetOut, this._webglRenderTargetIn];
