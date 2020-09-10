@@ -3,6 +3,7 @@
 import https from 'https';
 import http2 from 'http2';
 import fs from 'fs';
+import chokidar from 'chokidar';
 import mimeTypes from 'mime-types';
 import WebSocket from 'ws';
 import os from 'os';
@@ -83,12 +84,9 @@ server.on('listening', () => {
   const wss = new WebSocket.Server({ server: webSocketServer });
   webSocketServer.listen(++port);
 
-  fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
-    if (!filename || filename.startsWith('.')) {
-      return;
-    }
+  chokidar.watch(watchPath).on('change', (path) => {
     if (verbose) {
-      console.log(`${filename} just changed, reload.`);
+      console.log(`${path} just changed, reload.`);
     }
     for (const client of wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
