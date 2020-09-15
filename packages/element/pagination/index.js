@@ -19,6 +19,7 @@ window.customElements.define('damo-pagination', class extends HTMLElement {
 </style>
 <slot></slot>`;
 
+    this._selectedIndex = 0;
     this._slottedElements = [];
 
     const slot = this.shadowRoot.querySelector('slot');
@@ -56,6 +57,7 @@ window.customElements.define('damo-pagination', class extends HTMLElement {
   }
 
   set selectedIndex(value) {
+    value = Math.max(0, Math.min(value, this.options.length - 1));
     if (value === this._selectedIndex) {
       return;
     }
