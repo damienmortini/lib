@@ -71,7 +71,7 @@ export default class OrbitController {
           this._distance /= 1 + gesture.movementScale * this.zoomVelocity * .01;
           this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance));
         }
-      });
+      }, { pointerCapture: true });
       gestureObserver.observe(domElement);
     }
 
