@@ -17,7 +17,7 @@ class GestureObserver {
   /**
    * @param {GestureObserverCallback} callback
    */
-  constructor(callback, { pointerLock = false, pointerCapture = true } = {}) {
+  constructor(callback, { pointerLock = false, pointerCapture = false } = {}) {
     this.pointerLock = pointerLock;
     this.pointerCapture = pointerCapture;
 

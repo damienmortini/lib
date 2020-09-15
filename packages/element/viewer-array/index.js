@@ -72,7 +72,7 @@ export default class ArrayViewerElement extends HTMLElement {
 
     this._gestureObserver = new GestureObserver((gesture) => {
       this.scrollLeft -= gesture.movementX;
-    }, { pointerLock: true });
+    }, { pointerLock: true, pointerCapture: true });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
