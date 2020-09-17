@@ -1,4 +1,5 @@
 import { Object3D, BufferGeometry, BufferAttribute, MeshBasicMaterial, AnimationMixer, DataTexture, MathUtils, RGBAFormat, FloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js';
+import TransformShader from '../../core/shader/TransformShader.js';
 import Ticker from '../../core/util/Ticker.js';
 import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js';
 import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js';
@@ -88,10 +89,10 @@ export default class THREEMotionVectorObject extends Object3D {
     }
 
     this._positionVelocitySystem = new THREEGPGPUSystem({
-      data: new Float32Array((3 + 3) * this._pointCount),
-      stride: 2,
+      data: new Float32Array((4 * 3) * this._pointCount),
+      stride: 3,
       renderer: renderer,
-      format: RGBFormat,
+      format: RGBAFormat,
       uniforms: {
         pointsTextureSize: this.pointTextureSize,
         pointPositionTexture: this.pointTextures.get('position'),
@@ -110,6 +111,8 @@ export default class THREEMotionVectorObject extends Object3D {
           uniform highp sampler2D boneTexture;
           uniform int boneTextureSize;
 
+          ${TransformShader.quaternionFromMatrix()}
+
           mat4 getBoneMatrix( const in float i ) {
             float j = i * 4.0;
             float x = mod( j, float( boneTextureSize ) );
@@ -127,7 +130,7 @@ export default class THREEMotionVectorObject extends Object3D {
         `],
         ['end', `
           vec3 previousPosition = getDataChunk(0).xyz;
-          float chunkIndex = float(getChunkIndex());
+          int chunkIndex = getChunkIndex();
 
           float pointID = float(getDataIndex());
 
@@ -148,25 +151,34 @@ export default class THREEMotionVectorObject extends Object3D {
           mat4 boneMatZ = getBoneMatrix( skinIndex.z );
           mat4 boneMatW = getBoneMatrix( skinIndex.w );
 
-          vec4 skinVertex = vec4( position, 1.0 );
-          vec4 skinned = vec4( 0.0 );
-          skinned += boneMatX * skinVertex * skinWeight.x;
-          skinned += boneMatY * skinVertex * skinWeight.y;
-          skinned += boneMatZ * skinVertex * skinWeight.z;
-          skinned += boneMatW * skinVertex * skinWeight.w;
-          
-          position = skinned.xyz;
+          vec4 data;
+          if(chunkIndex < 2) {
+            vec4 skinVertex = vec4( position, 1.0 );
+            vec4 skinned = vec4( 0.0 );
+            skinned += boneMatX * skinVertex * skinWeight.x;
+            skinned += boneMatY * skinVertex * skinWeight.y;
+            skinned += boneMatZ * skinVertex * skinWeight.z;
+            skinned += boneMatW * skinVertex * skinWeight.w;
+            
+            position = skinned.xyz;
 
-          mat4 skinMatrix = mat4(0.);
-          skinMatrix += skinWeight.x * boneMatX;
-          skinMatrix += skinWeight.y * boneMatY;
-          skinMatrix += skinWeight.z * boneMatZ;
-          skinMatrix += skinWeight.w * boneMatW;
-          normal = vec4(skinMatrix * vec4(normal, 0.)).xyz;
+            vec3 velocity = position - previousPosition;
 
-          vec3 velocity = position - previousPosition;
-
-          gl_FragColor = vec4(mix(position, velocity, chunkIndex), 1.);
+            if(chunkIndex == 0) {
+              data = vec4(position, 0.);
+            } else if(chunkIndex == 1) {
+              data = vec4(velocity, 0.);
+            }
+          } else if(chunkIndex == 2) {
+            mat4 rotationMatrix = mat4(0.);
+            rotationMatrix += skinWeight.x * boneMatX;
+            rotationMatrix += skinWeight.y * boneMatY;
+            rotationMatrix += skinWeight.z * boneMatZ;
+            rotationMatrix += skinWeight.w * boneMatW;
+            vec4 quaternion = quaternionFromMatrix(rotationMatrix);
+            data = quaternion;
+          }
+          gl_FragColor = data;
         `],
       ],
     });
