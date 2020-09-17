@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-lottie",
-  "version": "0.0.57",
+  "version": "0.0.58",
   "description": "<element-animation-lottie> custom element.",
   "main": "index.js",
   "publishConfig": {
@@ -20,7 +20,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/animation-lottie",
   "dependencies": {
-    "@damienmortini/core": "^0.2.60",
+    "@damienmortini/core": "^0.2.61",
     "lottie-web": "^5.7.3"
   }
 }
