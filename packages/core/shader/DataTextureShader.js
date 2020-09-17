@@ -1,4 +1,4 @@
-export default class DatatextureShader {
+export default class DataTextureShader {
   static getTextureDataChunkFromUV() {
     return `
       vec4 getTextureDataChunkFromUV(sampler2D dataTexture, vec2 uv, int chunkIndex, int stride, vec2 textureSize) {
