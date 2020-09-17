@@ -17,32 +17,54 @@ export default class TransformShader {
     `;
   }
 
+  // https://twistedpairdevelopment.wordpress.com/2013/02/11/rotating-a-vector-by-a-quaternion-in-glsl/
+  static rotatePositionWithQuaternion() {
+    return `
+      vec3 rotatePositionWithQuaternion( vec3 position, vec4 quaternion )
+      {
+        return position + 2.0 * cross( cross( position, quaternion.xyz ) + quaternion.w * position, quaternion.xyz );
+      }
+    `;
+  }
+
   static quaternionFromMatrix() {
     return `
-      vec4 quaternionFromMatrix(mat4 a) {
-        float fTrace = m[0] + m[4] + m[8];
-        float fRoot;
-        if (fTrace > 0.0) {
-          fRoot = sqrt(fTrace + 1.0);
-          out[3] = 0.5 * fRoot;
-          fRoot = 0.5 / fRoot;
-          out[0] = (m[5] - m[7]) * fRoot;
-          out[1] = (m[6] - m[2]) * fRoot;
-          out[2] = (m[1] - m[3]) * fRoot;
-        } else {
-          uint i = 0;
-          if (m[4] > m[0]) i = 1;
-          if (m[8] > m[i * 3 + i]) i = 2;
-          float j = (i + 1) % 3;
-          float k = (i + 2) % 3;
-          fRoot = sqrt(m[i * 3 + i] - m[j * 3 + j] - m[k * 3 + k] + 1.0);
-          out[i] = 0.5 * fRoot;
-          fRoot = 0.5 / fRoot;
-          out[3] = (m[j * 3 + k] - m[k * 3 + j]) * fRoot;
-          out[j] = (m[j * 3 + i] + m[i * 3 + j]) * fRoot;
-          out[k] = (m[k * 3 + i] + m[i * 3 + k]) * fRoot;
+      vec4 quaternionFromMatrix(mat4 m) {
+        float tr = m[0][0] + m[1][1] + m[2][2];
+        vec4 q = vec4(0.);
+        if (tr > 0.)
+        {
+          float s = sqrt(tr + 1.0) * 2.; // S=4*qw 
+          q.w = 0.25 * s;
+          q.x = (m[2][1] - m[1][2]) / s;
+          q.y = (m[0][2] - m[2][0]) / s;
+          q.z = (m[1][0] - m[0][1]) / s;
         }
-        return out;
+        else if ((m[0][0] > m[1][1]) && (m[0][0] > m[2][2]))
+        {
+          float s = sqrt(1.0 + m[0][0] - m[1][1] - m[2][2]) * 2.; // S=4*qx 
+          q.w = (m[2][1] - m[1][2]) / s;
+          q.x = 0.25 * s;
+          q.y = (m[0][1] + m[1][0]) / s;
+          q.z = (m[0][2] + m[2][0]) / s;
+        }
+        else if (m[1][1] > m[2][2])
+        {
+          float s = sqrt(1.0 + m[1][1] - m[0][0] - m[2][2]) * 2.; // S=4*qy
+          q.w = (m[0][2] - m[2][0]) / s;
+          q.x = (m[0][1] + m[1][0]) / s;
+          q.y = 0.25 * s;
+          q.z = (m[1][2] + m[2][1]) / s;
+        }
+        else
+        {
+          float s = sqrt(1.0 + m[2][2] - m[0][0] - m[1][1]) * 2.; // S=4*qz
+          q.w = (m[1][0] - m[0][1]) / s;
+          q.x = (m[0][2] + m[2][0]) / s;
+          q.y = (m[1][2] + m[2][1]) / s;
+          q.z = 0.25 * s;
+        }
+        return q;
       }
     `;
   }
