@@ -79,26 +79,26 @@ export default class THREEMotionVectorObject extends Object3D {
     this._animationAction = this._animationMixer.clipAction(this._animationClip);
     this._animationAction.play();
 
-    this._pointTextures = new Map();
-    this._pointTextureSize = Math.ceil(Math.sqrt(this._pointCount));
+    const pointTextures = new Map();
+    const pointTextureSize = Math.ceil(Math.sqrt(this._pointCount));
     for (const [name, attributeData] of pointsAttributes) {
-      const textureData = new Float32Array(this._pointTextureSize * this._pointTextureSize * attributeData.size);
+      const textureData = new Float32Array(pointTextureSize * pointTextureSize * attributeData.size);
       textureData.set(attributeData.data);
-      const texture = new DataTexture(textureData, this._pointTextureSize, this._pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
-      this._pointTextures.set(name, texture);
+      const texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
+      pointTextures.set(name, texture);
     }
 
-    this._positionVelocitySystem = new THREEGPGPUSystem({
+    this._gpgpuSystem = new THREEGPGPUSystem({
       data: new Float32Array((4 * 3) * this._pointCount),
       stride: 3,
       renderer: renderer,
       format: RGBAFormat,
       uniforms: {
-        pointsTextureSize: this.pointTextureSize,
-        pointPositionTexture: this.pointTextures.get('position'),
-        pointSkinIndexTexture: this.pointTextures.get('skinIndex'),
-        pointSkinWeightTexture: this.pointTextures.get('skinWeight'),
-        pointNormalTexture: this.pointTextures.get('normal'),
+        pointsTextureSize: pointTextureSize,
+        pointPositionTexture: pointTextures.get('position'),
+        pointSkinIndexTexture: pointTextures.get('skinIndex'),
+        pointSkinWeightTexture: pointTextures.get('skinWeight'),
+        pointNormalTexture: pointTextures.get('normal'),
       },
       fragmentChunks: [
         ['start', `
@@ -182,9 +182,9 @@ export default class THREEMotionVectorObject extends Object3D {
         `],
       ],
     });
-    this._positionVelocitySystem.onBeforeRender = () => {
-      this._positionVelocitySystem.material.boneTexture = this.boneTexture;
-      this._positionVelocitySystem.material.boneTextureSize = this.boneTextureSize;
+    this._gpgpuSystem.onBeforeRender = () => {
+      this._gpgpuSystem.material.boneTexture = this._skeleton.boneTexture;
+      this._gpgpuSystem.material.boneTextureSize = this._skeleton.boneTextureSize;
     };
   }
 
@@ -192,40 +192,16 @@ export default class THREEMotionVectorObject extends Object3D {
     return this._pointCount;
   }
 
-  get pointTextureSize() {
-    return this._pointTextureSize;
+  get dataTexture() {
+    return this._gpgpuSystem.dataTexture;
   }
 
-  get pointTextures() {
-    return this._pointTextures;
+  get dataTextureStride() {
+    return this._gpgpuSystem.stride;
   }
 
-  get boneTexture() {
-    return this._skeleton.boneTexture;
-  }
-
-  get boneTextureSize() {
-    return this._skeleton.boneTextureSize;
-  }
-
-  get positionVelocityDataTexture() {
-    return this._positionVelocitySystem.dataTexture;
-  }
-
-  get positionVelocityDataTextureStride() {
-    return this._positionVelocitySystem.stride;
-  }
-
-  get positionVelocityDataTextureWidth() {
-    return this._positionVelocitySystem.dataTextureWidth;
-  }
-
-  get positionVelocityDataTextureHeight() {
-    return this._positionVelocitySystem.dataTextureHeight;
-  }
-
-  get positionVelocityDataTextureSize() {
-    return [this._positionVelocitySystem.dataTextureWidth, this._positionVelocitySystem.dataTextureHeight];
+  get dataTextureSize() {
+    return this._gpgpuSystem.dataTextureSize;
   }
 
   get meshVisible() {
@@ -250,9 +226,9 @@ export default class THREEMotionVectorObject extends Object3D {
       this._skeleton.update();
     }
     if (!this._initialized) {
-      this._positionVelocitySystem.update();
+      this._gpgpuSystem.update();
       this._initialized = true;
     }
-    this._positionVelocitySystem.update();
+    this._gpgpuSystem.update();
   }
 }
