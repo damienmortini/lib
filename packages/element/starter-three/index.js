@@ -1,6 +1,6 @@
 import AnimationTickerElement from '../../@damienmortini/element-animation-ticker/index.js';
 
-import { WebGLRenderer } from '../../three/src/renderers/WebGLRenderer.js';
+import { WebGLRenderer, WebGL1Renderer } from '../three/src/Three.js';
 
 import Scene from './Scene.js';
 
@@ -37,25 +37,11 @@ window.customElements.define('damo-starter-three', class extends AnimationTicker
 
     this.canvas = this.shadowRoot.querySelector('canvas');
 
-    if (window.WebGL2RenderingContext !== undefined && !/\bforcewebgl1\b/.test(window.location.search)) {
-      this.renderer = new WebGLRenderer({
-        canvas: this.canvas,
-        context: this.canvas.getContext('webgl2', {
-          alpha: false,
-          powerPreference: 'high-performance',
-          antialias: true,
-        }),
-      });
-    } else {
-      this.renderer = new WebGLRenderer({
-        canvas: this.canvas,
-        powerPreference: 'high-performance',
-        antialias: true,
-      });
-    }
-    if (/\bdev\b/.test(window.location.search)) {
-      this.renderer.debug.checkShaderErrors = true;
-    }
+    this.renderer = new (/\bforcewebgl1\b/.test(window.location.search) ? WebGL1Renderer : WebGLRenderer)({
+      canvas: this.canvas,
+      powerPreference: 'high-performance',
+      antialias: true,
+    });
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
     this.scene = new Scene({ canvas: this.canvas });
