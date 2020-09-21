@@ -1,4 +1,4 @@
-import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat } from '../../../three/src/Three.js';
+import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat, HalfFloatType } from '../../../three/src/Three.js';
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 import DatatextureShader from '../../core/shader/DataTextureShader.js';
@@ -40,7 +40,7 @@ export default class THREEGPGPUSystem {
       format,
       stencilBuffer: false,
       depthBuffer: false,
-      type: FloatType,
+      type: renderer.capabilities.isWebGL2 ? FloatType : HalfFloatType, // Half float for iOS
     });
     this._webglRenderTargetIn.texture.generateMipmaps = false;
     this._webglRenderTargetOut = this._webglRenderTargetIn.clone();
