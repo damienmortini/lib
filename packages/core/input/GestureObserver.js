@@ -172,7 +172,9 @@ class GestureObserver {
       this._resetElementData(element);
     }
     element.releasePointerCapture(event.pointerId);
-    document.exitPointerLock();
+    if (document.exitPointerLock) {
+      document.exitPointerLock();
+    }
     if (!data || !data.pointers.size) {
       element.removeEventListener('pointermove', this._onPointerMoveBinded);
       element.removeEventListener('pointerup', this._onPointerUpBinded);
