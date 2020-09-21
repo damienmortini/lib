@@ -23,6 +23,8 @@ export default class OrbitController {
     zoomVelocity = .1,
     zoomDisabled = false,
   }) {
+    this._selfMatrix = new Matrix4();
+
     this.matrix = matrix;
     this.invertRotation = invertRotation;
     this.distanceMax = distanceMax;
@@ -123,15 +125,20 @@ export default class OrbitController {
     this._panEased += (this._pan - this._panEased) * this.rotationEasing;
     this._distanceEased += (this._distance - this._distanceEased) * this.zoomEasing;
 
-    this.matrix.identity();
-    this.matrix.rotateY(this._panEased);
-    this.matrix.rotateX(-this._tiltEased);
+    this._selfMatrix.invert();
+    this.matrix.multiply(this._selfMatrix);
+
+    this._selfMatrix.identity();
+    this._selfMatrix.rotateY(this._panEased);
+    this._selfMatrix.rotateX(-this._tiltEased);
     const sinPan = Math.sin(this._panEased);
     const cosPan = Math.cos(this._panEased);
     const cosTilt = Math.cos(this._tiltEased);
     const sinTilt = Math.sin(this._tiltEased);
-    this.matrix.x = this._distanceEased * sinPan * cosTilt;
-    this.matrix.y = sinTilt * this._distanceEased;
-    this.matrix.z = this._distanceEased * cosPan * cosTilt;
+    this._selfMatrix.x = this._distanceEased * sinPan * cosTilt;
+    this._selfMatrix.y = sinTilt * this._distanceEased;
+    this._selfMatrix.z = this._distanceEased * cosPan * cosTilt;
+
+    this.matrix.multiply(this._selfMatrix);
   }
 }
