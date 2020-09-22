@@ -10,6 +10,9 @@ import { Line } from '../../../three/src/objects/Line.js';
 import { LineSegments } from '../../../three/src/objects/LineSegments.js';
 import { Vector3 } from '../../../three/src/math/Vector3.js';
 
+import './meshoptimizerdecoder/meshopt_decoder.js';
+import { EXT_meshopt_compression } from './meshoptimizerdecoder/THREE.EXT_meshopt_compression.js';
+
 function computeSceneGeometry(data, scale, offset) {
   const hasOffset = offset.lengthSq() !== 0;
   data.traverse((object3D) => {
@@ -31,6 +34,8 @@ let gltfLoader;
 let dracoLoader;
 let basisLoader;
 
+let meshOptimizerInitialized = false;
+
 class THREELoader extends Loader {
   constructor() {
     super();
@@ -42,7 +47,7 @@ class THREELoader extends Loader {
     this.extensionTypeMap.set('basis', 'image/basis');
   }
 
-  _loadFile({ src, type, scale = 1, offset = new Vector3() }) {
+  _loadFile({ src, type, scale = 1, offset = new Vector3(), meshOptimizer = false }) {
     if (type.startsWith('model')) {
       const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
 
@@ -51,6 +56,15 @@ class THREELoader extends Loader {
         dracoLoader = new DRACOLoader(undefined);
         dracoLoader.setWorkerLimit(2);
         gltfLoader.setDRACOLoader(dracoLoader);
+      }
+
+      if (meshOptimizer && !meshOptimizerInitialized) {
+        gltfLoader.register(function (parser) {
+          const res = new EXT_meshopt_compression(parser, MeshoptDecoder);
+          res.name = "MESHOPT_compression";
+          return res;
+        });
+        meshOptimizerInitialized = true;
       }
 
       dracoLoader.setDecoderPath(`${this.baseURI}${this.dracoDecoderPath}`);
