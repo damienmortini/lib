@@ -7,8 +7,8 @@ import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js';
 export default class THREEMotionVectorObject extends Object3D {
   constructor({
     renderer,
-    pointsAttributes,
     gltfData,
+    pointsAttributes = undefined,
     material = new THREEShaderMaterial({
       skinning: true,
       type: 'basic',
@@ -34,6 +34,15 @@ export default class THREEMotionVectorObject extends Object3D {
       }
     });
     this._mesh.visible = false;
+    if (!pointsAttributes) {
+      pointsAttributes = new Map();
+      for (const [name, value] of Object.entries(this._mesh.geometry.attributes)) {
+        pointsAttributes.set(name, {
+          data: value.array,
+          size: value.itemSize,
+        });
+      }
+    }
     this.add(object);
 
     this._skeleton = this._mesh.skeleton;
@@ -58,11 +67,11 @@ export default class THREEMotionVectorObject extends Object3D {
 
     const geometry = new BufferGeometry();
 
-    for (const [name, data] of pointsAttributes) {
+    for (const [name, attributeData] of pointsAttributes) {
       if (!this._pointCount) {
-        this._pointCount = data.data.length / data.size;
+        this._pointCount = attributeData.data.length / attributeData.size;
       }
-      geometry.setAttribute(name, new BufferAttribute(data.data, data.size));
+      geometry.setAttribute(name, new BufferAttribute(attributeData.data, attributeData.size));
     }
 
     this._points = new Points(geometry, material);
