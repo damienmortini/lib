@@ -1,7 +1,8 @@
-import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat, HalfFloatType } from '../../../three/src/Three.js';
+import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat, HalfFloatType,MathUtils } from '../../../three/src/Three.js';
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 import DatatextureShader from '../../core/shader/DataTextureShader.js';
+import Float16 from '../../core/math/Float16.js';
 
 let DEBUG_RENDERER;
 
@@ -20,15 +21,20 @@ export default class THREEGPGPUSystem {
 
     const channels = format === RGBFormat ? 3 : 4;
     const dataSize = data.length / channels / stride;
-    const size = Math.ceil(Math.sqrt(dataSize));
-    this._dataTextureWidth = size * stride;
-    this._dataTextureHeight = size;
+    const width = MathUtils.ceilPowerOfTwo(Math.sqrt(dataSize));
+    this._dataTextureWidth = width * stride;
+    this._dataTextureHeight = MathUtils.ceilPowerOfTwo(dataSize / width);
 
     this.debug = debug;
 
     const finalData = new Float32Array(this._dataTextureWidth * this._dataTextureHeight * channels);
     finalData.set(data);
-    const dataTexture = new DataTexture(finalData, this._dataTextureWidth, this._dataTextureHeight, format, FloatType);
+    let dataTexture;
+    // if (renderer.capabilities.isWebGL2) {
+      dataTexture = new DataTexture(finalData, this._dataTextureWidth, this._dataTextureHeight, format, FloatType);
+    // } else {
+      // dataTexture = new DataTexture(Float16.fromFloat32Array(finalData), this._dataTextureWidth, this._dataTextureHeight, format, HalfFloatType);
+    // }
     dataTexture.needsUpdate = true;
 
     this.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
