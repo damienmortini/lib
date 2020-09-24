@@ -1,8 +1,9 @@
-import { Object3D, BufferGeometry, BufferAttribute, MeshBasicMaterial, AnimationMixer, DataTexture, MathUtils, RGBAFormat, FloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js';
+import { Object3D, BufferGeometry, BufferAttribute, AnimationMixer, DataTexture, MathUtils, RGBAFormat, FloatType, HalfFloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js';
 import TransformShader from '../../core/shader/TransformShader.js';
 import Ticker from '../../core/util/Ticker.js';
 import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js';
 import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js';
+import Float16 from '../../core/math/Float16.js';
 
 export default class THREEMotionVectorObject extends Object3D {
   constructor({
@@ -36,7 +37,8 @@ export default class THREEMotionVectorObject extends Object3D {
         this._mesh = object;
       }
     });
-    this._mesh.visible = false;
+    // this._mesh.visible = false;
+    this._mesh.scale.set(0, 0, 0);
     if (!pointsAttributes) {
       pointsAttributes = new Map();
       for (const [name, value] of Object.entries(this._mesh.geometry.attributes)) {
@@ -70,18 +72,23 @@ export default class THREEMotionVectorObject extends Object3D {
     // Create bonesTexture manually
     // https://github.com/mrdoob/three.js/blob/cd41804aa436bb2cfd79797c04985f75c4c63e63/src/renderers/WebGLRenderer.js#L1632
 
-    let size = Math.sqrt(this._skeleton.bones.length * 4); // 4 pixels needed for 1 matrix
-    size = MathUtils.ceilPowerOfTwo(size);
-    size = Math.max(size, 4);
+    // let size = Math.sqrt(this._skeleton.bones.length * 4); // 4 pixels needed for 1 matrix
+    // size = MathUtils.ceilPowerOfTwo(size);
+    // size = Math.max(size, 4);
 
-    const boneMatrices = new Float32Array(size * size * 4); // 4 floats per RGBA pixel
-    boneMatrices.set(this._skeleton.boneMatrices); // copy current values
+    // const boneMatrices = new Float32Array(size * size * 4); // 4 floats per RGBA pixel
+    // boneMatrices.set(this._skeleton.boneMatrices); // copy current values
 
-    const boneTexture = new DataTexture(boneMatrices, size, size, RGBAFormat, FloatType);
+    // let boneTexture;
+    // if (renderer.capabilities.isWebGL2) {
+    //   boneTexture = new DataTexture(boneMatrices, size, size, RGBAFormat, FloatType);
+    // } else {
+    //   boneTexture = new DataTexture(Float16.fromFloat32Array(boneMatrices), size, size, RGBAFormat, HalfFloatType);
+    // }
 
-    this._skeleton.boneMatrices = boneMatrices;
-    this._skeleton.boneTexture = boneTexture;
-    this._skeleton.boneTextureSize = size;
+    // this._skeleton.boneMatrices = boneMatrices;
+    // this._skeleton.boneTexture = boneTexture;
+    // this._skeleton.boneTextureSize = size;
 
     //
 
@@ -110,7 +117,12 @@ export default class THREEMotionVectorObject extends Object3D {
     for (const [name, attributeData] of pointsAttributes) {
       const textureData = new Float32Array(pointTextureSize * pointTextureSize * attributeData.size);
       textureData.set(attributeData.data);
-      const texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
+      let texture;
+      // if (renderer.capabilities.isWebGL2) {
+        texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
+      // } else {
+        // texture = new DataTexture(Float16.fromFloat32Array(textureData), pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, HalfFloatType);
+      // }
       pointTextures.set(name, texture);
     }
 
