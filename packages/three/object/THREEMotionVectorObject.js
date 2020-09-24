@@ -21,8 +21,11 @@ export default class THREEMotionVectorObject extends Object3D {
         `],
       ],
     }),
+    pointCount = undefined,
   }) {
     super();
+
+    this._pointCount = pointCount;
 
     this._initialized = false;
 
@@ -44,6 +47,23 @@ export default class THREEMotionVectorObject extends Object3D {
       }
     }
     this.add(object);
+
+    if (this._pointCount) {
+      for (const attributeData of pointsAttributes.values()) {
+        const newArray = new attributeData.data.constructor(this._pointCount * attributeData.size);
+        const stride = attributeData.size;
+        const difference = Math.floor(attributeData.data.length / newArray.length);
+        for (let index = 0; index < this._pointCount; index++) {
+          for (let componentIndex = 0; componentIndex < stride; componentIndex++) {
+            newArray[index * stride + componentIndex] = attributeData.data[index * stride * difference + componentIndex];
+          }
+        }
+        attributeData.data = newArray;
+      }
+    } else {
+      const firstAttribute = pointsAttributes.values().next().value;
+      this._pointCount = firstAttribute.data.length / firstAttribute.size;
+    }
 
     this._skeleton = this._mesh.skeleton;
 
@@ -68,9 +88,6 @@ export default class THREEMotionVectorObject extends Object3D {
     const geometry = new BufferGeometry();
 
     for (const [name, attributeData] of pointsAttributes) {
-      if (!this._pointCount) {
-        this._pointCount = attributeData.data.length / attributeData.size;
-      }
       geometry.setAttribute(name, new BufferAttribute(attributeData.data, attributeData.size));
     }
 
