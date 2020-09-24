@@ -258,8 +258,19 @@ export default class THREEMotionVectorObject extends Object3D {
     this._points.visible = value;
   }
 
+  get currentTime() {
+    return this._animationMixer.time;
+  }
+
+  set currentTime(value) {
+    if (value >= this._animationClip.duration) {
+      value = this._animationClip.duration;
+    }
+    this._animationMixer.setTime(Math.min(value, this._animationClip.duration - .01));
+    this.update();
+  }
+
   update() {
-    this._animationMixer.update(Ticker.deltaTime);
     if (!this._points.visible && !this._mesh.visible) {
       this._skeleton.update();
     }
