@@ -266,10 +266,10 @@ export default class THREEMotionVectorObject extends Object3D {
       }
     }
     this._animationMixer.setTime(Math.min(value, this._animationClip.duration - .01));
-    this.update();
+    this._update();
   }
 
-  update() {
+  _update() {
     if (!this._points.visible && !this._mesh.visible) {
       this._skeleton.update();
     }
