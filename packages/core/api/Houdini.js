@@ -8,7 +8,9 @@ const attributesNameMap = new Map([
 
 const attributesTypedArrayMap = new Map([
   ['fpreal32', Float32Array],
-  ['int32', Uint16Array],
+  ['int8', Int8Array],
+  ['int16', Int16Array],
+  ['int32', Int32Array],
 ]);
 
 export default class Houdini {
