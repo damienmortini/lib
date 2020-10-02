@@ -1,9 +1,7 @@
-import { Object3D, BufferGeometry, BufferAttribute, AnimationMixer, DataTexture, MathUtils, RGBAFormat, FloatType, HalfFloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js';
+import { Object3D, BufferGeometry, BufferAttribute, AnimationMixer, DataTexture, RGBAFormat, FloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js';
 import TransformShader from '../../core/shader/TransformShader.js';
-import Ticker from '../../core/util/Ticker.js';
 import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js';
 import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js';
-import Float16 from '../../core/math/Float16.js';
 
 export default class THREEMotionVectorObject extends Object3D {
   constructor({
@@ -25,6 +23,8 @@ export default class THREEMotionVectorObject extends Object3D {
     pointCount = undefined,
   }) {
     super();
+
+    this.loop = false;
 
     this._pointCount = pointCount;
 
@@ -117,12 +117,7 @@ export default class THREEMotionVectorObject extends Object3D {
     for (const [name, attributeData] of pointsAttributes) {
       const textureData = new Float32Array(pointTextureSize * pointTextureSize * attributeData.size);
       textureData.set(attributeData.data);
-      let texture;
-      // if (renderer.capabilities.isWebGL2) {
-        texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
-      // } else {
-        // texture = new DataTexture(Float16.fromFloat32Array(textureData), pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, HalfFloatType);
-      // }
+      const texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
       pointTextures.set(name, texture);
     }
 
@@ -264,7 +259,11 @@ export default class THREEMotionVectorObject extends Object3D {
 
   set currentTime(value) {
     if (value >= this._animationClip.duration) {
-      value = this._animationClip.duration;
+      if (this.loop) {
+        value = 0;
+      } else {
+        value = this._animationClip.duration;
+      }
     }
     this._animationMixer.setTime(Math.min(value, this._animationClip.duration - .01));
     this.update();
