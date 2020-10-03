@@ -3,7 +3,8 @@
   "version": "0.1.79",
   "description": "Three.js helpers",
   "scripts": {
-    "install": "node copyExamples.js"
+    "install": "npm run copyexamples",
+    "copyexamples": "node copyExamples.js"
   },
   "publishConfig": {
     "access": "public"
