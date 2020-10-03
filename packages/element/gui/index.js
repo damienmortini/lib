@@ -161,16 +161,29 @@ export default class GUIElement extends GUIFolderElement {
       element[key] = value;
     }
 
+    // Set value
     if (value !== undefined) {
       element.value = value;
     }
 
-    let timeout;
     element.addEventListener('change', () => {
       if (object) {
         object[key] = element.value;
       }
+    });
 
+    if (onchange) {
+      element.onchange = onchange;
+    }
+
+    if (options.id) {
+      const urlValue = valuesMap.get(options.id);
+      if (urlValue !== undefined) element.value = urlValue;
+    }
+
+    // Update URL params and reload if needed
+    let timeout;
+    element.addEventListener('change', () => {
       if (options.id) {
         valuesMap.set(options.id, element.value);
       }
@@ -192,17 +205,7 @@ export default class GUIElement extends GUIFolderElement {
       }, 100);
     });
 
-    if (onchange) {
-      element.onchange = onchange;
-    }
-
-    if (options.id) {
-      const urlValue = valuesMap.get(options.id);
-      if (urlValue !== undefined) element.value = urlValue;
-    }
-
-    folderElement.appendChild(element);
-
+    // Watch value change
     if (watch) {
       const updateInputValue = () => {
         if (!element.parentElement) {
@@ -220,6 +223,8 @@ export default class GUIElement extends GUIFolderElement {
         key,
       });
     }
+
+    folderElement.appendChild(element);
 
     return element;
   }
