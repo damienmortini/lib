@@ -15,7 +15,7 @@ import {
 	Vector2,
 	Vector3,
 	Vector4
-} from "../../../three/src/Three.js";
+} from "../../../../three/src/Three.js";
 
 var Lensflare = function () {
 

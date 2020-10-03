@@ -2,9 +2,9 @@ import { Loader } from '../../core/util/Loader.js';
 import { WebGLRenderer } from '../../../three/src/renderers/WebGLRenderer.js';
 import { TextureLoader } from '../../../three/src/loaders/TextureLoader.js';
 
-import { BasisTextureLoader } from './_BasisTextureLoader.js';
-import { DRACOLoader } from './_DRACOLoader.js';
-import { GLTFLoader } from './_GLTFLoader.js';
+import { BasisTextureLoader } from '../examples/loaders/BasisTextureLoader.js';
+import { DRACOLoader } from '../examples/loaders/DRACOLoader.js';
+import { GLTFLoader } from '../examples/loaders/GLTFLoader.js';
 import { Mesh } from '../../../three/src/objects/Mesh.js';
 import { Line } from '../../../three/src/objects/Line.js';
 import { LineSegments } from '../../../three/src/objects/LineSegments.js';

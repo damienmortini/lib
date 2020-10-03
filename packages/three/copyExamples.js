@@ -1,14 +1,15 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 
 const files = new Map([
-  [require.resolve('three/examples/jsm/loaders/BasisTextureLoader.js'), './loader/_BasisTextureLoader.js'],
-  [require.resolve('three/examples/jsm/loaders/GLTFLoader.js'), './loader/_GLTFLoader.js'],
-  [require.resolve('three/examples/jsm/loaders/DRACOLoader.js'), './loader/_DRACOLoader.js'],
-  [require.resolve('three/examples/jsm/objects/Lensflare.js'), './object/_Lensflare.js'],
+  [require.resolve('three/examples/jsm/loaders/BasisTextureLoader.js'), './examples/loaders/BasisTextureLoader.js'],
+  [require.resolve('three/examples/jsm/loaders/GLTFLoader.js'), './examples/loaders/GLTFLoader.js'],
+  [require.resolve('three/examples/jsm/loaders/DRACOLoader.js'), './examples/loaders/DRACOLoader.js'],
+  [require.resolve('three/examples/jsm/objects/Lensflare.js'), './examples/objects/Lensflare.js'],
+  [require.resolve('three/examples/jsm/utils/BufferGeometryUtils.js'), './examples/utils/BufferGeometryUtils.js'],
 ]);
 for (const [source, destination] of files) {
-  fs.copyFileSync(source, destination);
+  fs.copySync(source, destination);
   const data = fs.readFileSync(destination, 'utf-8');
-  const newValue = data.replace('../../../build/three.module.js', '../../../three/src/Three.js');
+  const newValue = data.replace('../../../build/three.module.js', '../../../../three/src/Three.js');
   fs.writeFileSync(destination, newValue, 'utf-8');
 }

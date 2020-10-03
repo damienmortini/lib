@@ -77,7 +77,6 @@ export default class OrbitController {
       gestureObserver.observe(domElement);
     }
 
-
     this.update();
   }
 
@@ -86,6 +85,7 @@ export default class OrbitController {
   }
 
   set pan(value) {
+    value = Math.max(this.panMin, Math.min(this.panMax, value));
     this._pan = value;
     this._panEased = value;
   }
@@ -95,6 +95,7 @@ export default class OrbitController {
   }
 
   set tilt(value) {
+    value = Math.max(this.tiltMin, Math.min(this.tiltMax, value));
     this._tilt = value;
     this._tiltEased = value;
   }
@@ -104,6 +105,7 @@ export default class OrbitController {
   }
 
   set distance(value) {
+    value = Math.max(this.distanceMin, Math.min(this.distanceMax, value));
     this._distance = value;
     this._distanceEased = value;
   }
