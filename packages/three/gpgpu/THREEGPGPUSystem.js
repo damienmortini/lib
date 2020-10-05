@@ -97,8 +97,6 @@ export default class THREEGPGPUSystem {
       ],
     }));
     this.scene.add(this._quad);
-
-    this.update();
   }
 
   get onBeforeRender() {
