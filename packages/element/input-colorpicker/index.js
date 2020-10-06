@@ -59,6 +59,8 @@ export default class InputColorPickerElement extends HTMLElement {
 
         :host(:focus-within) #colorpicker {
           display: block;
+          left: var(--offset-left);
+          top: var(--offset-top);
         }
       </style>
       <div id="container" tabindex="-1">
@@ -94,14 +96,11 @@ export default class InputColorPickerElement extends HTMLElement {
     });
 
     container.addEventListener('focus', (event) => {
+      colorPicker.style.setProperty('--offset-top', '');
+      colorPicker.style.setProperty('--offset-left', '');
       const boundingClientRect = colorPicker.getBoundingClientRect();
-      colorPicker.style.left = boundingClientRect.x + 20 < 0 ? `${-boundingClientRect.x + 20}px` : '';
-      colorPicker.style.top = boundingClientRect.y + 20 < 0 ? `${-boundingClientRect.y + 20}px` : '';
-    });
-
-    container.addEventListener('blur', (event) => {
-      colorPicker.style.top = '';
-      colorPicker.style.left = '';
+      colorPicker.style.setProperty('--offset-left', boundingClientRect.x < 0 ? `${-boundingClientRect.x + 20}px` : '');
+      colorPicker.style.setProperty('--offset-top', boundingClientRect.y < 0 ? `${-boundingClientRect.y + 40}px` : '');
     });
   }
 
