@@ -17,7 +17,6 @@ export default class InputColorPickerElement extends HTMLElement {
           position: relative;
           width: 20px;
           height: 20px;
-          margin: 4px;
         }
 
         :host([disabled]) {
@@ -85,6 +84,7 @@ export default class InputColorPickerElement extends HTMLElement {
     this._colorPicker.on('change', (target, color) => {
       this.value = target.color;
       this.dispatchEvent(new Event('input'));
+      this.dispatchEvent(new Event('change'));
     });
 
     this.addEventListener('keyup', (event) => {
@@ -95,8 +95,8 @@ export default class InputColorPickerElement extends HTMLElement {
 
     container.addEventListener('focus', (event) => {
       const boundingClientRect = colorPicker.getBoundingClientRect();
-      colorPicker.style.left = `${Math.max(-boundingClientRect.x + 20, 0)}px`;
-      colorPicker.style.top = `${Math.max(-boundingClientRect.y + 20, 0)}px`;
+      colorPicker.style.left = boundingClientRect.x + 20 < 0 ? `${-boundingClientRect.x + 20}px` : '';
+      colorPicker.style.top = boundingClientRect.y + 20 < 0 ? `${-boundingClientRect.y + 20}px` : '';
     });
 
     container.addEventListener('blur', (event) => {
@@ -135,3 +135,5 @@ export default class InputColorPickerElement extends HTMLElement {
     this._colorPicker.setColor(this._value, true);
   }
 }
+
+customElements.define('damo-input-colorpicker', InputColorPickerElement);
