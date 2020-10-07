@@ -7,7 +7,7 @@ import { UnsignedShortType } from '../../../three/src/constants.js';
 import { Scene } from '../../../three/src/scenes/Scene.js';
 import { OrthographicCamera } from '../../../three/src/cameras/OrthographicCamera.js';
 import { Mesh } from '../../../three/src/objects/Mesh.js';
-import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneGeometry.js';
+import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneBufferGeometry.js';
 
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {
