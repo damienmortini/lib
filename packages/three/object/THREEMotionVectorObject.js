@@ -35,6 +35,7 @@ export default class THREEMotionVectorObject extends Object3D {
     object.traverse((object) => {
       if (object.skeleton) {
         this._mesh = object;
+        this._mesh.frustumCulled = false;
       }
     });
     // this._mesh.visible = false;
@@ -104,6 +105,7 @@ export default class THREEMotionVectorObject extends Object3D {
     this._points.bindMatrix = new Matrix4();
     this._points.bindMatrixInverse = new Matrix4();
     this._points.visible = false;
+    this._points.frustumCulled = false;
     this.add(this._points);
 
     const animation = gltfData.animations[0];
