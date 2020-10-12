@@ -1,6 +1,6 @@
 import Ticker from './Ticker.js';
 
-const animate = (object, keyframes, { duration = 0, delay = 0, easing = (x) => x } = {}) => {
+const animate = (object, keyframes, { duration = 0, delay = 0, easing = (x) => x, onupdate = () => { } } = {}) => {
   let finishedResolve;
   const finished = new Promise((resolve) => finishedResolve = resolve);
   let time = 0;
@@ -26,6 +26,8 @@ const animate = (object, keyframes, { duration = 0, delay = 0, easing = (x) => x
     for (const [key, value] of keyframesMap) {
       object[key] = (value[1] - value[0]) * progress + value[0];
     }
+
+    onupdate();
 
     if (progress === 1) {
       finishedResolve();
