@@ -33,7 +33,10 @@ const animate = (object, keyframes, { duration = 0, delay = 0, easing = (x) => x
       finishedResolve();
     }
   };
+
+  update();
   Ticker.add(update);
+
   return {
     finished,
   };
