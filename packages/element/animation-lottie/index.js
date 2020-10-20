@@ -248,6 +248,4 @@ class LottieAnimationElement extends HTMLElement {
 
 export default LottieAnimationElement;
 
-if (!customElements.get('damo-animation-lottie')) {
-  customElements.define('damo-animation-lottie', class DamoLottieAnimationElement extends LottieAnimationElement { });
-}
+customElements.define('damo-animation-lottie', LottieAnimationElement);
