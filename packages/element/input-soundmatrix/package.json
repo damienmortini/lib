@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-input-soundmatrix",
   "private": true,
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "<element-input-soundmatrix> custom element.",
   "publishConfig": {
     "access": "public"
