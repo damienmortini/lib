@@ -9,8 +9,8 @@ export default class GLTexture {
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
-    generateMipmap = true,
-    minFilter = generateMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
+    autoGenerateMipmap = true,
+    minFilter = autoGenerateMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
     magFilter = gl.LINEAR,
     wrapS = gl.CLAMP_TO_EDGE,
     wrapT = gl.CLAMP_TO_EDGE,
@@ -25,6 +25,7 @@ export default class GLTexture {
     this._target = target;
     this._unit = 0;
 
+    this.autoGenerateMipmap = autoGenerateMipmap;
     this.level = level;
     this.internalFormat = internalFormat;
     this.format = format;
@@ -35,10 +36,6 @@ export default class GLTexture {
     this.wrapT = wrapT;
     this.flipY = flipY;
     this.data = data;
-
-    if (this.data && generateMipmap) {
-      this.generateMipmap();
-    }
   }
 
   generateMipmap() {
@@ -60,6 +57,9 @@ export default class GLTexture {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.format, this.type, this._data);
     } else {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this._data || null);
+    }
+    if (this.autoGenerateMipmap) {
+      this.gl.generateMipmap(this._target);
     }
     this.unbind();
   }
