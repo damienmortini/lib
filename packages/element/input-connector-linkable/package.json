@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-input-connector-linkable",
   "private": true,
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "<element-input-connector-linkable> custom element.",
   "publishConfig": {
     "access": "public"

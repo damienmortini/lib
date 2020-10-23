@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-file",
-  "version": "0.0.62",
+  "version": "0.0.63",
   "description": "<element-input-file> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/input-file",
   "dependencies": {
-    "@damienmortini/core": "^0.2.69"
+    "@damienmortini/core": "^0.2.70"
   }
 }
