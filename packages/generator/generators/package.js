@@ -7,6 +7,6 @@ export default function (name) {
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
     name: `@damienmortini/${name}`,
     private: true,
-    version: '0.0.1',
+    version: '0.0.0',
   }, null, 2));
 };
