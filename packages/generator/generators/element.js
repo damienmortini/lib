@@ -11,7 +11,7 @@ export default function (name, template) {
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
     name: `@damienmortini/${name}`,
     private: true,
-    version: '0.0.1',
+    version: '0.0.0',
   }, null, 2));
   let indexFileContent = fs.readFileSync(`./packages/${name}/index.js`, { encoding: 'utf-8' });
   indexFileContent = indexFileContent.replace(new RegExp(`damo-starter-${template}`, 'g'), name);
