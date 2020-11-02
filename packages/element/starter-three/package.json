@@ -8,7 +8,7 @@
     "@damienmortini/core": "^0.2.70",
     "@damienmortini/element-animation-ticker": "^0.0.66",
     "@damienmortini/three": "^0.1.87",
-    "three": "^0.121.1"
+    "three": "^0.122.0"
   },
   "publishConfig": {
     "access": "public"
