@@ -166,11 +166,10 @@ export default class GUIElement extends GUIFolderElement {
       element.value = value;
     }
 
-    element.addEventListener('change', () => {
-      if (object) {
-        object[key] = element.value;
-      }
-    });
+    const onElementChange = () => {
+      if (object) object[key] = element.value;
+    };
+    element.addEventListener('change', onElementChange);
 
     if (onchange) {
       element.onchange = onchange;
@@ -212,7 +211,9 @@ export default class GUIElement extends GUIFolderElement {
           return;
         }
         requestAnimationFrame(updateInputValue);
+        element.removeEventListener('change', onElementChange);
         element.value = object[key];
+        element.addEventListener('change', onElementChange);
       };
       requestAnimationFrame(updateInputValue);
     }
