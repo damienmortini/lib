@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/core",
-  "version": "0.2.70",
+  "version": "0.2.71",
   "description": "Helpers library for the web.",
   "publishConfig": {
     "access": "public"
