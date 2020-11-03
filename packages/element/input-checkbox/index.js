@@ -62,4 +62,6 @@ export default class InputCheckboxElement extends HTMLElement {
   }
 }
 
-customElements.define('damo-input-checkbox', InputCheckboxElement);
+if (!customElements.get('damo-input-checkbox')) {
+  customElements.define('damo-input-checkbox', InputCheckboxElement);
+}
