@@ -117,4 +117,6 @@ export default class RangeInputElement extends HTMLElement {
   }
 }
 
-customElements.define('damo-input-range', RangeInputElement);
+if (!customElements.get('damo-input-range')) {
+  customElements.define('damo-input-range', RangeInputElement);
+}
