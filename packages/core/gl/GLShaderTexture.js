@@ -2,6 +2,7 @@ import GLTexture from './GLTexture.js';
 import GLFrameBuffer from './GLFrameBuffer.js';
 import GLProgram from './GLProgram.js';
 import GLPlaneObject from './objects/GLPlaneObject.js';
+import Shader from '../3d/Shader.js';
 
 export default class GLShaderTexture extends GLTexture {
   constructor({
@@ -12,8 +13,8 @@ export default class GLShaderTexture extends GLTexture {
     internalFormat = gl.RGBA8 || gl.RGBA,
     format = gl.RGBA,
     type = gl.UNSIGNED_BYTE,
-    generateMipmap = false,
-    minFilter = generateMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
+    autoGenerateMipmap = false,
+    minFilter = autoGenerateMipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
     magFilter = gl.LINEAR,
     wrapS = gl.REPEAT,
     wrapT = gl.REPEAT,
@@ -33,10 +34,10 @@ export default class GLShaderTexture extends GLTexture {
       magFilter,
       wrapS,
       wrapT,
-      generateMipmap: false,
+      autoGenerateMipmap: false,
     });
 
-    this._useMipmap = generateMipmap;
+    this._autoGenerateMipmap = autoGenerateMipmap;
 
     this._frameBuffer = new GLFrameBuffer({
       gl: this.gl,
@@ -50,7 +51,7 @@ export default class GLShaderTexture extends GLTexture {
       uvs: true,
       program: new GLProgram({
         gl: this.gl,
-        shader: {
+        shader: new Shader({
           uniforms,
           vertexChunks: [
             ['start', `
@@ -65,11 +66,15 @@ export default class GLShaderTexture extends GLTexture {
             `],
           ],
           fragmentChunks,
-        },
+        }),
       }),
     });
 
     this.draw({ uniforms, debug });
+  }
+
+  get program() {
+    return this._quad.program;
   }
 
   draw({ uniforms = {}, debug = false } = {}) {
@@ -87,7 +92,7 @@ export default class GLShaderTexture extends GLTexture {
         uniforms,
       });
     }
-    if (this._useMipmap) {
+    if (this._autoGenerateMipmap) {
       this.generateMipmap();
     }
   }
