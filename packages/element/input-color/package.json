@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-color",
-  "version": "0.0.63",
+  "version": "0.0.64",
   "description": "<element-input-color> custom element.",
   "publishConfig": {
     "access": "public"
