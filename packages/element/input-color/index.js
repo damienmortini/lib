@@ -33,11 +33,17 @@ export default class InputColorElement extends HTMLElement {
     this._colorInput.addEventListener('input', (event) => {
       event.stopPropagation();
       this.value = this._colorInput.value;
+      this.dispatchEvent(new Event('input', {
+        bubbles: true,
+      }));
     });
 
     this._textInput.addEventListener('input', (event) => {
       event.stopPropagation();
       this.value = this._textInput.value;
+      this.dispatchEvent(new Event('input', {
+        bubbles: true,
+      }));
     });
   }
 
@@ -100,7 +106,7 @@ export default class InputColorElement extends HTMLElement {
     this._textInput.value = typeof value === 'string' ? value : hexValue;
     this._colorInput.value = hexValue;
 
-    this.dispatchEvent(new Event('input', {
+    this.dispatchEvent(new Event('change', {
       bubbles: true,
     }));
   }
