@@ -42,5 +42,8 @@ export default class PointerEventPolyfill {
     element.addEventListener('touchstart', transformEvent);
     element.addEventListener('touchmove', transformEvent);
     element.addEventListener('touchend', transformEvent);
+
+    element.setPointerCapture = () => { };
+    element.releasePointerCapture = () => { };
   }
 }
