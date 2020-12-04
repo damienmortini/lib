@@ -5,6 +5,7 @@ const PAUSED_BY_INTERSECTION = 2;
 const PAUSED_BY_VISIBILITY = 4;
 const PAUSED_BY_BLUR = 8;
 const PAUSED_BY_CONNECTION = 16;
+const PAUSED_BY_DOCUMENT_VISIBILITY = 32;
 
 /**
  * Element triggering requestAnimationFrame on its update method.
@@ -46,12 +47,19 @@ class AnimationTickerElement extends HTMLElement {
     window.addEventListener('focus', () => {
       this._pauseFlag &= ~PAUSED_BY_BLUR;
     });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
+      } else {
+        this._pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY;
+      }
+    });
   }
 
   connectedCallback() {
     this._pauseFlag &= ~PAUSED_BY_CONNECTION;
-    if (!document.hasFocus()) {
-      this._pauseFlag |= PAUSED_BY_BLUR;
+    if (document.hidden) {
+      this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
     }
     if (this.noautoplay) {
       this._pauseFlag |= PAUSED_BY_USER;
