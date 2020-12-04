@@ -5,7 +5,6 @@ import DEFAULT_VERTEX from '../../../three/src/renderers/shaders/ShaderChunk/def
 import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js';
 
 import Shader from '../../core/3d/Shader.js';
-// import THREEShader from '../shader/THREEShader.js';
 
 const toWebGL1 = (source, type) => {
   source = source.replace(/#version.*?\n/g, '');
@@ -93,49 +92,4 @@ export default class THREEShaderMaterial extends ShaderMaterial {
     }
     return clone;
   }
-
-  // add({ vertexChunks, fragmentChunks, uniforms }) {
-  //   this._shader.add({ vertexChunks, fragmentChunks, uniforms });
-
-  //   this.fragmentShader = this._shader.fragmentShader;
-  //   this.vertexShader = this._shader.vertexShader;
-
-  //   for (const name in this._shader.uniforms) {
-  //     const key = name; // Firefox fix
-  //     this.uniforms[key] = this._shader.uniforms[key];
-
-  //     let setter;
-  //     if (key === 'envMap') {
-  //       setter = function (value) {
-  //         if (value && value.generateMipmaps && value.image) {
-  //           this.maxMipLevel = Math.log2(Math.max(value.image.width, value.image.height));
-  //         }
-  //         this.uniforms[key].value = value;
-  //       };
-  //     } else {
-  //       setter = function (value) {
-  //         this.uniforms[key].value = value;
-  //       };
-  //     }
-
-  //     Object.defineProperty(this, key, {
-  //       configurable: true,
-  //       get: function () {
-  //         return this.uniforms[key].value;
-  //       },
-  //       set: setter,
-  //     });
-  //   }
-
-  //   // if (["boneTexture", "boneTextureSize"].includes(key)) {
-  //   //   continue;
-  //   // }
-
-  //   delete this.uniforms.boneTexture;
-  //   delete this.uniforms.boneTextureSize;
-  //   delete this.uniforms.bindMatrix;
-  //   delete this.uniforms.bindMatrixInverse;
-
-  //   this.needsUpdate = true;
-  // }
 }
