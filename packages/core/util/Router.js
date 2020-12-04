@@ -2,22 +2,22 @@ import Signal from './Signal.js';
 
 export class Router {
   constructor() {
-    this._routeChangeSignal = new Signal();
-    this._currentPage = '';
+    this._stateChangeSignal = new Signal();
+    this._pathname = window.location.pathname;
   }
 
-  get routeChangeSignal() {
-    return this._routeChangeSignal;
+  get stateChangeSignal() {
+    return this._stateChangeSignal;
   }
 
-  get currentPage() {
-    return this._currentPage;
+  get pathname() {
+    return this._pathname;
   }
 
-  set currentPage(value) {
-    this._currentPage = value;
-    history.pushState({ pageName: this._currentPage }, '', this._currentPage || '/');
-    this._routeChangeSignal.dispatch({ pageName: this._currentPage });
+  set pathname(value) {
+    this._pathname = value;
+    history.pushState({ pathname: this._pathname }, '', this._pathname || '/');
+    this._stateChangeSignal.dispatch({ pathname: this._pathname });
   }
 }
 
