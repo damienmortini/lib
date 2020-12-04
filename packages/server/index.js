@@ -107,12 +107,16 @@ server.on('stream', (stream, headers) => {
   let filePath = `.${url.pathname}`;
 
   /**
+   * Rewrite to root if url doesn't exist and isn't a file
+   */
+  if (!/\.[^\/]*$/.test(filePath) && !fs.existsSync(filePath)) {
+    filePath = './';
+  }
+
+  /**
    * If path is a directory then set index.html file by default
    */
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-    if (!filePath.endsWith('/')) {
-      return;
-    }
     filePath += 'index.html';
   }
 
