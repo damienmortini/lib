@@ -8,10 +8,13 @@ export default function (name, template) {
   fs.copySync(`node_modules/@damienmortini/element-starter-${template}`, `./packages/${name}`, {
     dereference: true,
   });
+  const packageData = fs.readJSONSync(`./packages/${name}/package.json`);
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
     name: `@damienmortini/${name}`,
     private: true,
     version: '0.0.0',
+    dependencies: packageData.dependencies,
+    devDependencies: packageData.devDependencies,
   }, null, 2));
   let indexFileContent = fs.readFileSync(`./packages/${name}/index.js`, { encoding: 'utf-8' });
   indexFileContent = indexFileContent.replace(new RegExp(`damo-starter-${template}`, 'g'), name);
