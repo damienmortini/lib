@@ -98,6 +98,25 @@ export class GLTFLoader extends Loader {
       }
     }
 
+    if (data.animations) {
+      const animationData = new Map();
+      for (const animation of data.animations) {
+        for (const sampler of animation.samplers) {
+          for (const type of ['input', 'output']) {
+            if (!animationData.get(sampler[type])) {
+              const bufferView = data.bufferViews[sampler[type]];
+              animationData.set(sampler[type], new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT));
+            }
+            sampler[type] = animationData.get(sampler[type]);
+          }
+        }
+        for (const channel of animation.channels) {
+          channel.sampler = animation.samplers[channel.sampler];
+          channel.target.node = data.nodes[channel.target.node];
+        }
+      }
+    }
+
     return data;
   }
 
