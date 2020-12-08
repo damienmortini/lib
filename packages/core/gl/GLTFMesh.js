@@ -2,59 +2,45 @@ import GLBuffer from './GLBuffer.js';
 import GLMesh from './GLMesh.js';
 import GLVertexAttribute from './GLVertexAttribute.js';
 
+const ATTRIBUTE_NAME_MAP = new Map([
+  ['POSITION', 'position'],
+  ['NORMAL', 'normal'],
+  ['TEXCOORD_0', 'uv'],
+  ['WEIGHTS_0', 'weight'],
+  ['JOINTS_0', 'joint'],
+]);
+
+const ATTRIBUTE_TYPE_SIZE_MAP = new Map([
+  ['SCALAR', 1],
+  ['VEC2', 2],
+  ['VEC3', 3],
+  ['VEC4', 4],
+  ['MAT2', 4],
+  ['MAT3', 9],
+  ['MAT4', 16],
+]);
+
 export default class GLTFMesh extends GLMesh {
   constructor({
     gl,
     data,
-    attributes = undefined,
-    normals = true,
-    uvs = true,
   }) {
     super({
       gl,
-      attributes,
     });
 
-    const positionAttributeData = data.primitives[0].attributes['POSITION'];
-    this.attributes.set('position', {
-      buffer: new GLBuffer({
-        gl: this.gl,
-        data: positionAttributeData.bufferView.buffer,
-      }),
-      size: 3,
-      count: positionAttributeData.count,
-      offset: positionAttributeData.bufferView.byteOffset,
-      target: positionAttributeData.bufferView.target,
-    });
-
-    const normalAttributeData = data.primitives[0].attributes['NORMAL'];
-    if (normals && normalAttributeData) {
-      this.attributes.set('normal', {
+    for (const [attributeName, attribute] of Object.entries(data.primitives[0].attributes)) {
+      this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName), {
         buffer: new GLBuffer({
           gl: this.gl,
-          data: normalAttributeData.bufferView.buffer,
+          data: attribute.bufferView.buffer,
         }),
-        size: 3,
-        count: normalAttributeData.count,
-        offset: normalAttributeData.bufferView.byteOffset,
-        target: normalAttributeData.bufferView.target,
+        size: ATTRIBUTE_TYPE_SIZE_MAP.get(attribute.type),
+        count: attribute.count,
+        offset: attribute.bufferView.byteOffset,
+        target: attribute.bufferView.target,
       });
     }
-
-    const uvAttributeData = data.primitives[0].attributes['TEXCOORD_0'];
-    if (uvs && uvAttributeData) {
-      this.attributes.set('uv', {
-        buffer: new GLBuffer({
-          gl: this.gl,
-          data: uvAttributeData.bufferView.buffer,
-        }),
-        size: 2,
-        count: uvAttributeData.count,
-        offset: uvAttributeData.bufferView.byteOffset,
-        target: uvAttributeData.bufferView.target,
-      });
-    }
-
     const indices = data.primitives[0].indices;
 
     if (indices) {
