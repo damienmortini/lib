@@ -1,6 +1,6 @@
 import Ticker from '../core/util/Ticker.js';
 
-const PAUSED_BY_USER = 1;
+const PAUSED_BY_ACTION = 1;
 const PAUSED_BY_INTERSECTION = 2;
 const PAUSED_BY_VISIBILITY = 4;
 const PAUSED_BY_BLUR = 8;
@@ -61,9 +61,7 @@ class AnimationTickerElement extends HTMLElement {
     if (document.hidden) {
       this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
     }
-    if (this.noautoplay) {
-      this._pauseFlag |= PAUSED_BY_USER;
-    } else {
+    if (!(this._pauseFlag & PAUSED_BY_ACTION)) {
       this.update();
     }
   }
@@ -89,33 +87,17 @@ class AnimationTickerElement extends HTMLElement {
   }
 
   /**
-   * Automatically pause element at initialization.
-   * @type {Boolean}
-   */
-  get noautoplay() {
-    return this.hasAttribute('noautoplay');
-  }
-
-  set noautoplay(value) {
-    if (value) {
-      this.setAttribute('noautoplay', '');
-    } else {
-      this.removeAttribute('noautoplay');
-    }
-  }
-
-  /**
    * Play element.
    */
   play() {
-    this._pauseFlag &= ~PAUSED_BY_USER;
+    this._pauseFlag &= ~PAUSED_BY_ACTION;
   }
 
   /**
    * Pause element.
    */
   pause() {
-    this._pauseFlag |= PAUSED_BY_USER;
+    this._pauseFlag |= PAUSED_BY_ACTION;
   }
 
   /**
