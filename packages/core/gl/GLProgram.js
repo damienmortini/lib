@@ -34,21 +34,19 @@ export default class GLProgram {
         buffer.bind();
         if (location === undefined) {
           location = gl.getAttribLocation(self._program, name);
-          if (location === -1) {
-            console.warn(`Attribute "${name}" is missing or never used`);
-          }
           self._attributesLocations.set(name, location);
         }
-        gl.enableVertexAttribArray(location);
-
-        if (type === gl.FLOAT || type === gl.HALF_FLOAT) {
-          gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
-        } else {
-          gl.vertexAttribIPointer(location, size, type, normalized, stride, offset);
+        if (location !== -1) {
+          gl.enableVertexAttribArray(location);
+          if (type === gl.FLOAT || type === gl.HALF_FLOAT) {
+            gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+          } else {
+            gl.vertexAttribIPointer(location, size, type, normalized, stride, offset);
+          }
+          self._vertexAttribDivisor(location, divisor);
         }
 
         buffer.unbind();
-        self._vertexAttribDivisor(location, divisor);
         super.set(name, { buffer, size, type, normalized, stride, offset });
       }
     }
