@@ -1,7 +1,7 @@
 import GLTexture from './GLTexture.js';
 import GLFrameBuffer from './GLFrameBuffer.js';
 import GLProgram from './GLProgram.js';
-import GLPlaneObject from './objects/GLPlaneObject.js';
+import GLPlaneObject from './object/GLPlaneObject.js';
 import Shader from '../3d/Shader.js';
 
 export default class GLShaderTexture extends GLTexture {
