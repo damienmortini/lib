@@ -1,6 +1,6 @@
 import GLFrameBuffer from './GLFrameBuffer.js';
 import GLTexture from './GLTexture.js';
-import GLPlaneObject from './objects/GLPlaneObject.js';
+import GLPlaneObject from './object/GLPlaneObject.js';
 import GLProgram from './GLProgram.js';
 
 export default class GLGPGPUSystem {
