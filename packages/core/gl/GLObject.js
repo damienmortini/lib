@@ -37,12 +37,12 @@ export default class GLObject {
   }
 
   draw(options = {}) {
-    options = Object.assign({ bind: true, uniforms: {} }, options);
+    options = Object.assign({ bind: false, uniforms: {} }, options);
     // Todo: Fix double call to Program.use when bind is true
     // (needed to update texture uniforms before binding them)
     this.program.use();
-    for (const key of Object.keys(options.uniforms)) {
-      this.program.uniforms.set(key, options.uniforms[key]);
+    for (const [key, value] of Object.entries(options.uniforms)) {
+      this.program.uniforms.set(key, value);
     }
     if (options.bind) {
       this.bind();
