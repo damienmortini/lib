@@ -66,12 +66,21 @@ export class GLTFLoader extends Loader {
 
     for (const node of data.nodes) {
       if (node.mesh !== undefined) node.mesh = data.meshes[node.mesh];
+      if (node.skin !== undefined) node.skin = data.skins[node.skin];
       if (node.children) {
         for (let index = 0; index < node.children.length; index++) {
           node.children[index] = data.nodes[node.children[index]];
         }
       }
     }
+
+    for (const scene of data.scenes) {
+      for (let index = 0; index < scene.nodes.length; index++) {
+        scene.nodes[index] = data.nodes[scene.nodes[index]];
+      }
+    }
+
+    data.scene = data.scenes[data.scene];
 
     if (data.skins) {
       for (const skin of data.skins) {
