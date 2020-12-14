@@ -1,37 +1,19 @@
 import Ticker from './Ticker.js';
 
-const keyframesSetObjectMap = new Map();
-
-const animate = (object, keyframes, { duration = 0, delay = 0, easing = (x) => x, onupdate = () => { } } = {}) => {
+const animate = (target, keyframes, { duration = 0, delay = 0, easing = (x) => x, onupdate = () => { }, fill = 'none' } = {}) => {
   let finishedResolve;
   const finished = new Promise((resolve) => finishedResolve = resolve);
   let time = 0;
   const keyframesMap = new Map(Object.entries(keyframes));
+
   /**
-   * Set init value as current value if it doesn't exist
+   * Set init value as undefined if it doesn't exist
    */
   for (const [key, value] of keyframesMap) {
     if (!(value instanceof Array)) {
-      keyframesMap.set(key, [object[key], value]);
+      keyframesMap.set(key, [undefined, value]);
     }
   }
-  /**
-   * Overwrite keyframes
-   */
-  let keyframesSet = keyframesSetObjectMap.get(object);
-  if (!keyframesSet) {
-    keyframesSet = new Set();
-    keyframesSetObjectMap.set(object, keyframesSet);
-  }
-  for (const key of keyframesMap.keys()) {
-    for (const previousKeyframes of keyframesSet) {
-      previousKeyframes.delete(key);
-      if (!previousKeyframes.size) {
-        keyframesSet.delete(previousKeyframes);
-      }
-    }
-  }
-  keyframesSet.add(keyframesMap);
 
   /**
    * Update loop
@@ -41,24 +23,29 @@ const animate = (object, keyframes, { duration = 0, delay = 0, easing = (x) => x
     time += Ticker.deltaTime * 1000;
 
     let progress;
-    if (time >= delay + duration) {
+    let needsUpdate = true;
+    if (time <= delay) {
+      progress = 0;
+      needsUpdate = (fill === 'both' || fill === 'backwards');
+    } else if (time >= delay + duration) {
       progress = 1;
     } else {
       progress = Math.max(time - delay, 0) / duration;
       progress = easing(progress);
     }
 
-    for (const [key, value] of keyframesMap) {
-      object[key] = (value[1] - value[0]) * progress + value[0];
+    if (needsUpdate) {
+      for (const [key, value] of keyframesMap) {
+        if (value[0] === undefined) value[0] = target[key];
+        target[key] = (value[1] - value[0]) * progress + value[0];
+      }
     }
 
     onupdate();
 
     if (progress === 1) {
-      Ticker.delete(update);
-      keyframesSet.delete(keyframesMap);
-      if (!keyframesSet.size) {
-        keyframesSetObjectMap.delete(object);
+      if (fill !== 'both' && fill !== 'forwards') {
+        Ticker.delete(update);
       }
       finishedResolve();
     }
