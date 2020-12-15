@@ -20,7 +20,7 @@ const animate = (target, keyframes, { duration = 0, delay = 0, easing = (x) => x
    */
   const update = () => {
     duration = duration || 1;
-    time += Ticker.deltaTime * 1000;
+    time += Ticker.deltaTime;
 
     let progress;
     let needsUpdate = true;
