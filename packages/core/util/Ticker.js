@@ -1,6 +1,6 @@
 import Signal from './Signal.js';
 
-const DELTA_TIME_BASE = 1 / 60;
+const DELTA_TIME_BASE = 1000 / 60;
 
 class Ticker extends Signal {
   constructor() {
@@ -8,7 +8,7 @@ class Ticker extends Signal {
 
     this._updateBinded = this._update.bind(this);
 
-    this.time = window.performance.now() * .001;
+    this.time = window.performance.now();
     this.reset();
 
     document.addEventListener('visibilitychange', () => {
@@ -19,7 +19,7 @@ class Ticker extends Signal {
   }
 
   reset() {
-    this._previousTime = window.performance.now() * .001;
+    this._previousTime = window.performance.now();
     this.deltaTime = DELTA_TIME_BASE;
     this.smoothDeltatime = this.deltaTime;
     this.timeScale = 1;
@@ -29,7 +29,7 @@ class Ticker extends Signal {
   _update() {
     requestAnimationFrame(this._updateBinded);
 
-    this.time = window.performance.now() * 0.001;
+    this.time = window.performance.now();
     this.deltaTime = this.time - this._previousTime;
     this.smoothDeltatime += (this.deltaTime - this.smoothDeltatime) * .05;
     this.timeScale = this.deltaTime / DELTA_TIME_BASE;
