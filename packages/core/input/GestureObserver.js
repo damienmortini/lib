@@ -24,9 +24,9 @@ class GestureObserver {
     this._elementsData = new Map();
     this._callback = callback;
 
-    this._onPointerDownBinded = this._onPointerDown.bind(this);
-    this._onPointerMoveBinded = this._onPointerMove.bind(this);
-    this._onPointerUpBinded = this._onPointerUp.bind(this);
+    this._onPointerDownBound = this._onPointerDown.bind(this);
+    this._onPointerMoveBound = this._onPointerMove.bind(this);
+    this._onPointerUpBound = this._onPointerUp.bind(this);
   }
 
   /**
@@ -37,7 +37,7 @@ class GestureObserver {
     if (this._elementsData.has(element)) {
       return;
     }
-    element.addEventListener('pointerdown', this._onPointerDownBinded);
+    element.addEventListener('pointerdown', this._onPointerDownBound);
     this._elementsData.set(element, {
       pointers: new Map(),
       gestureVector: new Vector2(),
@@ -58,8 +58,8 @@ class GestureObserver {
     if (!this._elementsData.has(element)) {
       return;
     }
-    element.removeEventListener('pointerdown', this._onPointerDownBinded);
-    element.removeEventListener('pointermove', this._onPointerMoveBinded);
+    element.removeEventListener('pointerdown', this._onPointerDownBound);
+    element.removeEventListener('pointermove', this._onPointerMoveBound);
     this._elementsData.delete(element);
   }
 
@@ -92,9 +92,9 @@ class GestureObserver {
     }
     this._resetElementData(element);
     if (!data.pointers.size) {
-      element.addEventListener('pointermove', this._onPointerMoveBinded);
-      element.addEventListener('pointerup', this._onPointerUpBinded);
-      element.addEventListener('pointerout', this._onPointerUpBinded);
+      element.addEventListener('pointermove', this._onPointerMoveBound);
+      element.addEventListener('pointerup', this._onPointerUpBound);
+      element.addEventListener('pointerout', this._onPointerUpBound);
       data.timeStamp = Date.now();
     }
     data.pointers.set(event.pointerId, event);
@@ -176,9 +176,9 @@ class GestureObserver {
       document.exitPointerLock();
     }
     if (!data || !data.pointers.size) {
-      element.removeEventListener('pointermove', this._onPointerMoveBinded);
-      element.removeEventListener('pointerup', this._onPointerUpBinded);
-      element.removeEventListener('pointerout', this._onPointerUpBinded);
+      element.removeEventListener('pointermove', this._onPointerMoveBound);
+      element.removeEventListener('pointerup', this._onPointerUpBound);
+      element.removeEventListener('pointerout', this._onPointerUpBound);
     }
   }
 }

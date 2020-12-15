@@ -6,7 +6,7 @@ export default class GLViewElement extends HTMLElement {
   constructor() {
     super();
 
-    this._resizeBinded = this.resize.bind(this);
+    this._resizeBound = this.resize.bind(this);
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -105,12 +105,12 @@ export default class GLViewElement extends HTMLElement {
   }
 
   connectedCallback() {
-    window.addEventListener('resize', this._resizeBinded);
+    window.addEventListener('resize', this._resizeBound);
   }
 
   disconnectedCallback() {
     this.gl.getExtension('WEBGL_lose_context').loseContext();
-    window.removeEventListener('resize', this._resizeBinded);
+    window.removeEventListener('resize', this._resizeBound);
   }
 
   draw() {

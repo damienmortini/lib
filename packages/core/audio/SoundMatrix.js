@@ -52,7 +52,7 @@ export default class SoundMatrix extends Map {
 
   play() {
     clearInterval(this._intervalId);
-    this._intervalId = setInterval(this._updateBinded = this._updateBinded || this._update.bind(this), 60000 / this.bpm);
+    this._intervalId = setInterval(this._updateBound = this._updateBound || this._update.bind(this), 60000 / this.bpm);
   }
 
   stop() {

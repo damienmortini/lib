@@ -29,7 +29,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
     this.addEventListener('pointerdown', this._onPointerDown);
 
-    this._onWindowPointerUpBinded = this._onWindowPointerUp.bind(this);
+    this._onWindowPointerUpBound = this._onWindowPointerUp.bind(this);
   }
 
   connectedCallback() {
@@ -40,7 +40,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
   disconnectedCallback() {
     this.removeEventListener('connected', this._onConnected);
-    window.removeEventListener('pointerup', this._onWindowPointerUpBinded);
+    window.removeEventListener('pointerup', this._onWindowPointerUpBound);
     CONNECTORS.delete(this);
     super.disconnectedCallback();
   }
@@ -62,7 +62,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
     }
     activeConnector = this;
 
-    window.addEventListener('pointerup', this._onWindowPointerUpBinded, { passive: false });
+    window.addEventListener('pointerup', this._onWindowPointerUpBound, { passive: false });
 
     this.dispatchEvent(new CustomEvent('connectorlink', {
       composed: true,
@@ -95,7 +95,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
       return;
     }
 
-    window.removeEventListener('pointerup', this._onWindowPointerUpBinded);
+    window.removeEventListener('pointerup', this._onWindowPointerUpBound);
 
     if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== InputConnectorLinkableElement.TYPE_BOTH)) {
       activeConnector = null;

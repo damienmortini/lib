@@ -100,8 +100,8 @@ class InputConnectorElement extends HTMLElement {
       </slot>
     `;
 
-    this._onInputChangeBinded = this._onInputChange.bind(this);
-    this._checkConnectionBinded = this._checkConnection.bind(this);
+    this._onInputChangeBound = this._onInputChange.bind(this);
+    this._checkConnectionBound = this._checkConnection.bind(this);
 
     this._inputElementInputs = new Set();
     this._connectorElementInputs = new Set();
@@ -126,7 +126,7 @@ class InputConnectorElement extends HTMLElement {
         } else {
           self._inputElementInputs.add(value);
         }
-        value.addEventListener('input', self._onInputChangeBinded);
+        value.addEventListener('input', self._onInputChangeBound);
         self._updateConnectedStatus();
         if (!(value instanceof InputConnectorElement)) {
           self.dispatchEvent(new InputEvent('input'));
@@ -138,7 +138,7 @@ class InputConnectorElement extends HTMLElement {
         if (!returnValue) {
           return;
         }
-        value.removeEventListener('input', self._onInputChangeBinded);
+        value.removeEventListener('input', self._onInputChangeBound);
         if (value instanceof InputConnectorElement) {
           self._connectorElementInputs.delete(value);
           value.outputs.delete(self);
@@ -269,11 +269,11 @@ class InputConnectorElement extends HTMLElement {
 
   connectedCallback() {
     CONNECTOR_ADD_SIGNAL.dispatch(this);
-    CONNECTOR_ADD_SIGNAL.add(this._checkConnectionBinded);
+    CONNECTOR_ADD_SIGNAL.add(this._checkConnectionBound);
   }
 
   disconnectedCallback() {
-    CONNECTOR_ADD_SIGNAL.delete(this._checkConnectionBinded);
+    CONNECTOR_ADD_SIGNAL.delete(this._checkConnectionBound);
     if (this.type & InputConnectorElement.TYPE_INPUT) {
       this.inputs.clear();
     }

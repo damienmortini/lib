@@ -6,7 +6,7 @@ class Ticker extends Signal {
   constructor() {
     super();
 
-    this._updateBinded = this._update.bind(this);
+    this._updateBound = this._update.bind(this);
 
     this.time = window.performance.now();
     this.reset();
@@ -27,7 +27,7 @@ class Ticker extends Signal {
   }
 
   _update() {
-    requestAnimationFrame(this._updateBinded);
+    requestAnimationFrame(this._updateBound);
 
     this.time = window.performance.now();
     this.deltaTime = this.time - this._previousTime;
