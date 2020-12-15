@@ -15,7 +15,7 @@ class AnimationTickerElement extends HTMLElement {
   constructor() {
     super();
 
-    this._updateBinded = this.update.bind(this);
+    this._updateBound = this.update.bind(this);
 
     this._pauseFlag = 0;
 
@@ -80,9 +80,9 @@ class AnimationTickerElement extends HTMLElement {
     }
     this.__pauseFlag = value;
     if (this.__pauseFlag) {
-      Ticker.delete(this._updateBinded);
+      Ticker.delete(this._updateBound);
     } else {
-      Ticker.add(this._updateBinded);
+      Ticker.add(this._updateBound);
     }
   }
 

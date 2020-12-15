@@ -13,7 +13,7 @@ export default class SpriteAnimation {
     loop = false,
     autoplay = false,
   } = {}) {
-    this._updateBinded = this.update.bind(this);
+    this._updateBound = this.update.bind(this);
 
     this._sprite = new Sprite();
 
@@ -119,11 +119,11 @@ export default class SpriteAnimation {
   }
 
   play() {
-    Ticker.add(this._updateBinded);
+    Ticker.add(this._updateBound);
   }
 
   pause() {
-    Ticker.delete(this._updateBinded);
+    Ticker.delete(this._updateBound);
   }
 
   set currentTime(value) {

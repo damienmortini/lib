@@ -54,12 +54,12 @@ export default class Pointer extends Vector2 {
 
     this._preventMouseTypeChange = false;
 
-    this._onPointerMoveBinded = this._onPointerMove.bind(this);
-    this._onPointerDownBinded = this._onPointerDown.bind(this);
-    this._onPointerUpBinded = this._onPointerUp.bind(this);
+    this._onPointerMoveBound = this._onPointerMove.bind(this);
+    this._onPointerDownBound = this._onPointerDown.bind(this);
+    this._onPointerUpBound = this._onPointerUp.bind(this);
 
-    this._updateBinded = this._update.bind(this);
-    this._resizeBinded = this.resize.bind(this);
+    this._updateBound = this._update.bind(this);
+    this._resizeBound = this.resize.bind(this);
 
     this._position = new Vector2();
 
@@ -177,26 +177,26 @@ export default class Pointer extends Vector2 {
     this.disable();
     this.resize();
     if (this.type === Pointer.TOUCH_TYPE) {
-      this._domElement.addEventListener('touchmove', this._onPointerMoveBinded, { passive: true });
-      window.addEventListener('touchend', this._onPointerUpBinded, { passive: true });
+      this._domElement.addEventListener('touchmove', this._onPointerMoveBound, { passive: true });
+      window.addEventListener('touchend', this._onPointerUpBound, { passive: true });
     } else {
-      this._domElement.addEventListener('mousedown', this._onPointerDownBinded);
-      window.addEventListener('mouseup', this._onPointerUpBinded);
+      this._domElement.addEventListener('mousedown', this._onPointerDownBound);
+      window.addEventListener('mouseup', this._onPointerUpBound);
     }
-    this._domElement.addEventListener('touchstart', this._onPointerDownBinded, { passive: true });
-    this._domElement.addEventListener('mousemove', this._onPointerMoveBinded);
-    window.addEventListener('resize', this._resizeBinded);
-    Ticker.add(this._updateBinded = this._updateBinded || this._update.bind(this));
+    this._domElement.addEventListener('touchstart', this._onPointerDownBound, { passive: true });
+    this._domElement.addEventListener('mousemove', this._onPointerMoveBound);
+    window.addEventListener('resize', this._resizeBound);
+    Ticker.add(this._updateBound = this._updateBound || this._update.bind(this));
   }
 
   disable() {
-    Ticker.delete(this._updateBinded);
-    this._domElement.removeEventListener('touchstart', this._onPointerDownBinded);
-    this._domElement.removeEventListener('mousedown', this._onPointerDownBinded);
-    this._domElement.removeEventListener('touchmove', this._onPointerMoveBinded);
-    this._domElement.removeEventListener('mousemove', this._onPointerMoveBinded);
-    window.removeEventListener('touchend', this._onPointerUpBinded);
-    window.removeEventListener('mouseup', this._onPointerUpBinded);
-    window.removeEventListener('resize', this._resizeBinded);
+    Ticker.delete(this._updateBound);
+    this._domElement.removeEventListener('touchstart', this._onPointerDownBound);
+    this._domElement.removeEventListener('mousedown', this._onPointerDownBound);
+    this._domElement.removeEventListener('touchmove', this._onPointerMoveBound);
+    this._domElement.removeEventListener('mousemove', this._onPointerMoveBound);
+    window.removeEventListener('touchend', this._onPointerUpBound);
+    window.removeEventListener('mouseup', this._onPointerUpBound);
+    window.removeEventListener('resize', this._resizeBound);
   }
 }

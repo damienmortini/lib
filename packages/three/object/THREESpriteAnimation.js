@@ -68,11 +68,11 @@ export default class THREESpriteAnimation extends THREESprite {
   }
 
   play() {
-    Ticker.add(this._updateBinded = this._updateBinded || this.update.bind(this));
+    Ticker.add(this._updateBound = this._updateBound || this.update.bind(this));
   }
 
   stop() {
-    Ticker.delete(this._updateBinded);
+    Ticker.delete(this._updateBound);
   }
 
   set progress(value) {

@@ -54,14 +54,14 @@ export default class InputJoystickElement extends HTMLElement {
     this._lerpedPosition = new Vector2();
     this._origin = new Vector2();
 
-    this._onPointerMoveBinded = this._onPointerMove.bind(this);
-    this._onPointerUpBinded = this._onPointerUp.bind(this);
-    this._updateBinded = this._update.bind(this);
+    this._onPointerMoveBound = this._onPointerMove.bind(this);
+    this._onPointerUpBound = this._onPointerUp.bind(this);
+    this._updateBound = this._update.bind(this);
 
     this.addEventListener('pointerdown', (event) => {
       this._boundingClientRect = this.getBoundingClientRect();
-      window.addEventListener('pointermove', this._onPointerMoveBinded, { passive: false });
-      window.addEventListener('pointerup', this._onPointerUpBinded);
+      window.addEventListener('pointermove', this._onPointerMoveBound, { passive: false });
+      window.addEventListener('pointerup', this._onPointerUpBound);
       this._pointerDowned = true;
       this._onPointerMove(event);
       this._update();
@@ -90,8 +90,8 @@ export default class InputJoystickElement extends HTMLElement {
 
   _onPointerUp() {
     this._pointerDowned = false;
-    window.removeEventListener('pointermove', this._onPointerMoveBinded);
-    window.removeEventListener('pointerup', this._onPointerUpBinded);
+    window.removeEventListener('pointermove', this._onPointerMoveBound);
+    window.removeEventListener('pointerup', this._onPointerUpBound);
     this.dispatchEvent(new CustomEvent('input', {
       detail: [0, 0],
     }));
@@ -105,7 +105,7 @@ export default class InputJoystickElement extends HTMLElement {
   }
 
   _update() {
-    this._animationFrameID = requestAnimationFrame(this._updateBinded);
+    this._animationFrameID = requestAnimationFrame(this._updateBound);
 
     if (!this._pointerDowned) {
       this._position.set(0, 0);

@@ -59,18 +59,18 @@ export default class LinkElement extends HTMLElement {
     this._hitTestPath = this.shadowRoot.querySelector('path.hit-test');
     this._scaleMarker = this.shadowRoot.querySelector('#scale-marker');
 
-    this._updateBinded = this._update.bind(this);
+    this._updateBound = this._update.bind(this);
 
     this.input = null;
     this.output = null;
   }
 
   connectedCallback() {
-    Ticker.add(this._updateBinded);
+    Ticker.add(this._updateBound);
   }
 
   disconnectedCallback() {
-    Ticker.delete(this._updateBinded);
+    Ticker.delete(this._updateBound);
   }
 
   get input() {

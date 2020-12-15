@@ -20,10 +20,10 @@ export default class SoundMatrixElement extends AnimationTickerElement {
 
   set soundMatrix(value) {
     if (this._soundMatrix) {
-      this._soundMatrix.onBeat.delete(this._onBeatBinded);
+      this._soundMatrix.onBeat.delete(this._onBeatBound);
     }
     this._soundMatrix = value;
-    this._soundMatrix.onBeat.add(this._onBeatBinded = this._onBeat.bind(this));
+    this._soundMatrix.onBeat.add(this._onBeatBound = this._onBeat.bind(this));
   }
 
   get soundMatrix() {

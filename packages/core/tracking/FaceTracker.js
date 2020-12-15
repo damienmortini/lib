@@ -65,7 +65,7 @@ export default class FaceTracker {
     this._lastComputedFrame = -1;
     this._currentFrame = 0;
 
-    Ticker.add(this._updateBinded = this._updateBinded || this._update.bind(this));
+    Ticker.add(this._updateBound = this._updateBound || this._update.bind(this));
   }
 
   get indices() {
