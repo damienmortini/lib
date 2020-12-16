@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/generator",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "Generator to create boilerplate files",
   "type": "module",
   "publishConfig": {
@@ -26,8 +26,8 @@
   "bin": "index.js",
   "dependencies": {
     "@damienmortini/element-starter-element": "^0.0.4",
-    "@damienmortini/element-starter-gl": "^0.0.21",
-    "@damienmortini/element-starter-three": "^0.0.28",
+    "@damienmortini/element-starter-gl": "^0.0.22",
+    "@damienmortini/element-starter-three": "^0.0.29",
     "fs-extra": "^9.0.1",
     "jsdoc-to-markdown": "^6.0.1"
   }
