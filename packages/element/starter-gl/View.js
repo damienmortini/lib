@@ -37,8 +37,6 @@ export default class View {
 
     this.object = new GLBoxObject({
       gl: this.gl,
-      width: 1,
-      height: 1,
       normals: true,
       program: new GLProgram({
         gl: this.gl,

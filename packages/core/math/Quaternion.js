@@ -74,6 +74,10 @@ export default class Quaternion extends Float32Array {
     return this;
   }
 
+  slerp(quaternion, value) {
+    return quat.slerp(this, this, quaternion, value);
+  }
+
   normalize(quaternion = this) {
     quat.normalize(this, this);
     return this;
