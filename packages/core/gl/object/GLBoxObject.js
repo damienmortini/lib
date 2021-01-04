@@ -6,12 +6,12 @@ import GLProgram from '../GLProgram.js';
 export default class GLBoxObject extends GLObject {
   constructor({
     gl,
-    width = undefined,
-    height = undefined,
-    depth = undefined,
-    widthSegments = undefined,
-    heightSegments = undefined,
-    depthSegments = undefined,
+    width = 1,
+    height = 1,
+    depth = 1,
+    widthSegments = 1,
+    heightSegments = 1,
+    depthSegments = 1,
     normals = false,
     uvs = false,
     attributes = {},
