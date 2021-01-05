@@ -22,7 +22,7 @@ export class Loader {
     this.baseURI = '';
   }
 
-  load(values) {
+  async load(values) {
     const isArray = values instanceof Array;
 
     if (!isArray) {
@@ -55,7 +55,7 @@ export class Loader {
     return isArray ? Promise.all(promises) : promises[0];
   }
 
-  _loadFile({ src, type = '', crossOrigin = undefined }) {
+  async _loadFile({ src, type = '', crossOrigin = undefined }) {
     return new Promise((resolve) => {
       if (type.startsWith('image') || type.startsWith('video') || type.startsWith('audio')) {
         resolve();
