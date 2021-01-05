@@ -13,7 +13,6 @@ export default class GLTFAnimation {
   }) {
     this._channels = data.channels;
     this._nodeTransformMap = new Map();
-    this._nodeNameTransformMap = new Map();
     this._duration = 0;
 
     for (const channel of data.channels) {
@@ -21,12 +20,15 @@ export default class GLTFAnimation {
       if (!transform) {
         transform = new Matrix4();
         this._nodeTransformMap.set(channel.target.node, transform);
-        this._nodeNameTransformMap.set(channel.target.node.name, transform);
       }
       this._duration = Math.max(this._duration, channel.sampler.input[channel.sampler.input.length - 1]);
     }
 
     this.currentTime = 0;
+  }
+
+  get nodeTransformMap() {
+    return this._nodeTransformMap;
   }
 
   get duration() {
