@@ -153,6 +153,11 @@ export class GLTFLoader extends Loader {
       finalData.nodes.push(node);
       nodesMap.set(nodeData, node);
     }
+    for (const node of nodesMap.values()) {
+      for (let index = 0; index < node.children.length; index++) {
+        node.children[index] = nodesMap.get(node.children[index]);
+      }
+    }
 
     // Animations
     const animationsMap = new Map();
