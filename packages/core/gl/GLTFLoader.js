@@ -1,5 +1,9 @@
 import SingletonLoader, { Loader } from '../util/Loader.js';
 import Base64 from '../math/Base64.js';
+import GLTFMesh from './GLTFMesh.js';
+import GLTFNode from './GLTFNode.js';
+import GLTFAnimation from './GLTFAnimation.js';
+import GLTFScene from './GLTFScene.js';
 
 export class GLTFLoader extends Loader {
   constructor() {
@@ -129,8 +133,69 @@ export class GLTFLoader extends Loader {
     return data;
   }
 
-  _loadFile(...options) {
-    return super._loadFile(...options).then(this.parse);
+  build({ gl, data }) {
+    const finalData = {};
+
+    // Meshes
+    const meshesMap = new Map();
+    finalData.meshes = [];
+    for (const meshData of data.meshes) {
+      const mesh = new GLTFMesh({ gl, data: meshData });
+      finalData.meshes.push(mesh);
+      meshesMap.set(meshData, mesh);
+    }
+
+    // Nodes
+    const nodesMap = new Map();
+    finalData.nodes = [];
+    for (const nodeData of data.nodes) {
+      const node = new GLTFNode({ gl, data: { ...nodeData, mesh: meshesMap.get(nodeData.mesh) } });
+      finalData.nodes.push(node);
+      nodesMap.set(nodeData, node);
+    }
+
+    // Animations
+    const animationsMap = new Map();
+    finalData.animations = [];
+    for (const rawAnimationData of data.animations) {
+      const animationData = { ...rawAnimationData };
+      animationData.channels = [...animationData.channels];
+      for (let index = 0; index < animationData.channels.length; index++) {
+        const channel = { ...animationData.channels[index] };
+        channel.target = { ...channel.target, node: nodesMap.get(channel.target.node) };
+        animationData.channels[index] = channel;
+      }
+      const animation = new GLTFAnimation({ data: animationData });
+      animationsMap.set(rawAnimationData, animation);
+      finalData.animations.push(animation);
+    }
+
+    // Scenes
+    const scenesMap = new Map();
+    finalData.scenes = [];
+    for (const rawSceneData of data.scenes) {
+      const sceneData = { ...rawSceneData };
+      sceneData.nodes = [...sceneData.nodes];
+      for (let index = 0; index < sceneData.nodes.length; index++) {
+        sceneData.nodes[index] = nodesMap.get(sceneData.nodes[index]);
+      }
+      const scene = new GLTFScene({ data: sceneData });
+      scenesMap.set(rawSceneData, scene);
+      finalData.scenes.push(scene);
+    }
+
+    finalData.scene = scenesMap.get(data.scene);
+
+    return finalData;
+  }
+
+  async _loadFile(options) {
+    let data = await super._loadFile(options);
+    data = await this.parse(data);
+    if (options.gl) {
+      data = this.build({ gl: options.gl, data });
+    }
+    return data;
   }
 }
 
