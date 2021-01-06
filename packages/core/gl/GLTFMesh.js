@@ -29,6 +29,8 @@ export default class GLTFMesh extends GLMesh {
       gl,
     });
 
+    this.name = data.name;
+
     for (const [attributeName, attribute] of Object.entries(data.primitives[0].attributes)) {
       this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName), {
         buffer: new GLBuffer({
