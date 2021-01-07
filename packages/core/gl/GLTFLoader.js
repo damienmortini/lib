@@ -4,6 +4,7 @@ import GLTFMesh from './GLTFMesh.js';
 import GLTFNode from './GLTFNode.js';
 import GLTFAnimation from './GLTFAnimation.js';
 import GLTFScene from './GLTFScene.js';
+import GLTFSkin from './GLTFSkin.js';
 
 export class GLTFLoader extends Loader {
   constructor() {
@@ -91,6 +92,7 @@ export class GLTFLoader extends Loader {
 
     if (data.skins) {
       for (const skin of data.skins) {
+        skin.inverseBindMatrices = data.accessors[skin.inverseBindMatrices];
         for (let index = 0; index < skin.joints.length; index++) {
           skin.joints[index] = data.nodes[skin.joints[index]];
         }
@@ -154,21 +156,35 @@ export class GLTFLoader extends Loader {
       data.nodes[index] = node;
     }
     for (let index = 0; index < data.nodes.length; index++) {
-      const rawNodeData = data.raw.nodes[index];
-      if (rawNodeData.children) {
-        const nodeData = data.nodes[index];
-        for (let index = 0; index < nodeData.children.length; index++) {
-          nodeData.children[index] = data.nodes[rawNodeData.children[index]];
+      const nodeRawData = data.raw.nodes[index];
+      if (nodeRawData.children) {
+        const node = data.nodes[index];
+        for (let index = 0; index < node.children.length; index++) {
+          node.children[index] = data.nodes[nodeRawData.children[index]];
         }
       }
+    }
+
+    // Skins
+    for (let index = 0; index < data.skins.length; index++) {
+      const skinData = data.skins[index];
+      const skinRawData = data.raw.skins[index];
+      for (let index = 0; index < skinData.joints.length; index++) {
+        skinData.joints[index] = data.nodes[skinRawData.joints[index]];
+      }
+      const skin = new GLTFSkin({ gl, data: skinData });
+      data.skins[index] = skin;
+    }
+    for (let index = 0; index < data.nodes.length; index++) {
+      data.nodes[index].skin = data.skins[data.raw.nodes[index].skin];
     }
 
     // Animations
     for (let index = 0; index < data.animations.length; index++) {
       const animationData = data.animations[index];
-      const rawAnimationData = data.raw.animations[index];
+      const animationRawData = data.raw.animations[index];
       for (let index = 0; index < animationData.channels.length; index++) {
-        animationData.channels[index].target.node = data.nodes[rawAnimationData.channels[index].target.node];
+        animationData.channels[index].target.node = data.nodes[animationRawData.channels[index].target.node];
       }
       const animation = new GLTFAnimation({ data: animationData });
       data.animations[index] = animation;
@@ -177,9 +193,9 @@ export class GLTFLoader extends Loader {
     // Scenes
     for (let index = 0; index < data.scenes.length; index++) {
       const sceneData = data.scenes[index];
-      const rawSceneData = data.raw.scenes[index];
+      const sceneRawData = data.raw.scenes[index];
       for (let index = 0; index < sceneData.nodes.length; index++) {
-        sceneData.nodes[index] = data.nodes[rawSceneData.nodes[index]];
+        sceneData.nodes[index] = data.nodes[sceneRawData.nodes[index]];
       }
       const scene = new GLTFScene({ data: sceneData });
       data.scenes[index] = scene;

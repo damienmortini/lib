@@ -48,15 +48,13 @@ export default class GLTFScene {
       this._traverseAndUpdateTransforms(node);
     }
     for (const node of this._flattenedNodes) {
-      if (node.object) {
-        node.object.draw({
-          bind: true,
-          uniforms: {
-            ...uniforms,
-            transform: this._nodeFinalTransformMap.get(node),
-          },
-        });
-      }
+      node.draw({
+        bind: true,
+        uniforms: {
+          ...uniforms,
+          transform: this._nodeFinalTransformMap.get(node),
+        },
+      });
     }
   }
 }
