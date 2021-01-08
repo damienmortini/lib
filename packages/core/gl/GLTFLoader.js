@@ -177,19 +177,23 @@ export class GLTFLoader extends Loader {
         data.skins[index] = skin;
       }
       for (let index = 0; index < data.nodes.length; index++) {
-        data.nodes[index].skin = data.skins[data.raw.nodes[index].skin];
+        if (data.raw.nodes[index].skin !== undefined) {
+          data.nodes[index].skin = data.skins[data.raw.nodes[index].skin];
+        }
       }
     }
 
     // Animations
-    for (let index = 0; index < data.animations.length; index++) {
-      const animationData = data.animations[index];
-      const animationRawData = data.raw.animations[index];
-      for (let index = 0; index < animationData.channels.length; index++) {
-        animationData.channels[index].target.node = data.nodes[animationRawData.channels[index].target.node];
+    if (data.animations) {
+      for (let index = 0; index < data.animations.length; index++) {
+        const animationData = data.animations[index];
+        const animationRawData = data.raw.animations[index];
+        for (let index = 0; index < animationData.channels.length; index++) {
+          animationData.channels[index].target.node = data.nodes[animationRawData.channels[index].target.node];
+        }
+        const animation = new GLTFAnimation({ data: animationData });
+        data.animations[index] = animation;
       }
-      const animation = new GLTFAnimation({ data: animationData });
-      data.animations[index] = animation;
     }
 
     // Scenes

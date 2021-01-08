@@ -5,7 +5,7 @@ export default class GLProgram {
     gl,
     shader = new Shader(),
     transformFeedbackVaryings = undefined,
-  } = { gl }) {
+  }) {
     this.gl = gl;
 
     this._shader = shader instanceof Shader ? shader : new Shader(shader);
@@ -41,7 +41,7 @@ export default class GLProgram {
           if (type === gl.FLOAT || type === gl.HALF_FLOAT) {
             gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
           } else {
-            gl.vertexAttribIPointer(location, size, type, normalized, stride, offset);
+            gl.vertexAttribIPointer(location, size, type, stride, offset);
           }
           self._vertexAttribDivisor(location, divisor);
         }
