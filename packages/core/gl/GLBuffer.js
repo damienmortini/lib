@@ -4,7 +4,7 @@ export default class GLBuffer {
     data = null,
     target = gl.ARRAY_BUFFER,
     usage = gl.STATIC_DRAW,
-  } = { gl }) {
+  }) {
     this.gl = gl;
     this.target = target;
     this.usage = usage;

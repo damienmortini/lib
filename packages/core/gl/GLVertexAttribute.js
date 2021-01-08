@@ -1,5 +1,26 @@
 import GLBuffer from './GLBuffer.js';
 
+const TYPE_ARRAY_MAP = new Map([
+  [WebGLRenderingContext.BYTE, Int8Array],
+  [WebGLRenderingContext.UNSIGNED_BYTE, Uint8Array],
+  [WebGLRenderingContext.SHORT, Int16Array],
+  [WebGLRenderingContext.UNSIGNED_SHORT, Uint16Array],
+  [WebGLRenderingContext.INT, Int32Array],
+  [WebGLRenderingContext.UNSIGNED_INT, Uint32Array],
+  [WebGLRenderingContext.FLOAT, Float32Array],
+]);
+
+const ARRAY_TYPE_MAP = new Map([
+  [Int8Array, WebGLRenderingContext.BYTE],
+  [Uint8Array, WebGLRenderingContext.UNSIGNED_BYTE],
+  [Int16Array, WebGLRenderingContext.SHORT],
+  [Uint16Array, WebGLRenderingContext.UNSIGNED_SHORT],
+  [Int32Array, WebGLRenderingContext.INT],
+  [Uint32Array, WebGLRenderingContext.UNSIGNED_INT],
+  [Float32Array, WebGLRenderingContext.FLOAT],
+  [Float64Array, WebGLRenderingContext.FLOAT],
+]);
+
 export default class GLVertexAttribute {
   constructor({
     gl,
@@ -8,11 +29,11 @@ export default class GLVertexAttribute {
       gl,
     }),
     size = 1,
-    type = undefined,
+    type = ARRAY_TYPE_MAP.get(data?.constructor),
     offset = 0,
     normalized = false,
     stride = 0,
-    count = undefined,
+    count = data?.length / size || 1,
     divisor = 0,
   }) {
     this.gl = gl;
@@ -30,43 +51,12 @@ export default class GLVertexAttribute {
     }
   }
 
-  set count(value) {
-    this._count = value;
-  }
-
-  get count() {
-    return this._count === undefined ? this.data.length / this.size : this._count;
-  }
-
-  set type(value) {
-    this._type = value;
-  }
-
-  get type() {
-    return this._type || this._dataType;
-  }
-
   set data(value) {
+    this._data = value;
     this.buffer.data = value;
-
-    if (this.data instanceof Float32Array || this.data instanceof Float64Array) {
-      this._dataType = this.gl.FLOAT;
-    } else if (this.data instanceof Int8Array) {
-      this._dataType = this.gl.BYTE;
-    } else if (this.data instanceof Int16Array) {
-      this._dataType = this.gl.SHORT;
-    } else if (this.data instanceof Int32Array) {
-      this._dataType = this.gl.INT;
-    } else if (this.data instanceof Uint8Array) {
-      this._dataType = this.gl.UNSIGNED_BYTE;
-    } else if (this.data instanceof Uint16Array) {
-      this._dataType = this.gl.UNSIGNED_SHORT;
-    } else if (this.data instanceof Uint32Array) {
-      this._dataType = this.gl.UNSIGNED_INT;
-    }
   }
 
   get data() {
-    return this.buffer.data;
+    return this._data ?? new (TYPE_ARRAY_MAP.get(this.type))(this.buffer.data, this.offset, this.count * this.size);
   }
 }

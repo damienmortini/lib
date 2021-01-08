@@ -32,17 +32,19 @@ export default class GLTFMesh extends GLMesh {
     this.name = data.name;
 
     for (const [attributeName, attribute] of Object.entries(data.primitives[0].attributes)) {
-      this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName), {
+      this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName), new GLVertexAttribute({
+        gl: this.gl,
         buffer: new GLBuffer({
           gl: this.gl,
           data: attribute.bufferView.buffer,
         }),
         size: ATTRIBUTE_TYPE_SIZE_MAP.get(attribute.type),
+        type: attribute.componentType,
         count: attribute.count,
-        offset: attribute.bufferView.byteOffset,
-        target: attribute.bufferView.target,
-      });
+        offset: attribute.byteOffset + attribute.bufferView.byteOffset,
+      }));
     }
+
     const indices = data.primitives[0].indices;
 
     if (indices) {

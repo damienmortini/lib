@@ -72,6 +72,14 @@ export class GLTFLoader extends Loader {
       }
     }
 
+    for (const bufferView of data.bufferViews) {
+      bufferView.buffer = buffers[bufferView.buffer];
+    }
+
+    for (const accessor of data.accessors) {
+      accessor.bufferView = data.bufferViews[accessor.bufferView];
+    }
+
     for (const node of data.nodes) {
       if (node.mesh !== undefined) node.mesh = data.meshes[node.mesh];
       if (node.skin !== undefined) node.skin = data.skins[node.skin];
@@ -99,14 +107,6 @@ export class GLTFLoader extends Loader {
       }
     }
 
-    for (const bufferView of data.bufferViews) {
-      bufferView.buffer = buffers[bufferView.buffer];
-    }
-
-    for (const accessor of data.accessors) {
-      accessor.bufferView = data.bufferViews[accessor.bufferView];
-    }
-
     for (const mesh of data.meshes) {
       for (const primitive of mesh.primitives) {
         for (const key of Object.keys(primitive.attributes)) {
@@ -122,7 +122,7 @@ export class GLTFLoader extends Loader {
         for (const sampler of animation.samplers) {
           for (const type of ['input', 'output']) {
             if (!animationData.get(sampler[type])) {
-              const bufferView = data.bufferViews[sampler[type]];
+              const bufferView = data.accessors[sampler[type]].bufferView;
               animationData.set(sampler[type], new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT));
             }
             sampler[type] = animationData.get(sampler[type]);
@@ -166,17 +166,19 @@ export class GLTFLoader extends Loader {
     }
 
     // Skins
-    for (let index = 0; index < data.skins.length; index++) {
-      const skinData = data.skins[index];
-      const skinRawData = data.raw.skins[index];
-      for (let index = 0; index < skinData.joints.length; index++) {
-        skinData.joints[index] = data.nodes[skinRawData.joints[index]];
+    if (data.skins) {
+      for (let index = 0; index < data.skins.length; index++) {
+        const skinData = data.skins[index];
+        const skinRawData = data.raw.skins[index];
+        for (let index = 0; index < skinData.joints.length; index++) {
+          skinData.joints[index] = data.nodes[skinRawData.joints[index]];
+        }
+        const skin = new GLTFSkin({ gl, data: skinData });
+        data.skins[index] = skin;
       }
-      const skin = new GLTFSkin({ gl, data: skinData });
-      data.skins[index] = skin;
-    }
-    for (let index = 0; index < data.nodes.length; index++) {
-      data.nodes[index].skin = data.skins[data.raw.nodes[index].skin];
+      for (let index = 0; index < data.nodes.length; index++) {
+        data.nodes[index].skin = data.skins[data.raw.nodes[index].skin];
+      }
     }
 
     // Animations
