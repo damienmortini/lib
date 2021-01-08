@@ -40,8 +40,9 @@ export default class GLTFMesh extends GLMesh {
         }),
         size: ATTRIBUTE_TYPE_SIZE_MAP.get(attribute.type),
         type: attribute.componentType,
+        stride: attribute.bufferView.byteStride,
         count: attribute.count,
-        offset: attribute.byteOffset + attribute.bufferView.byteOffset,
+        offset: (attribute.byteOffset || 0) + attribute.bufferView.byteOffset,
       }));
     }
 
