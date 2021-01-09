@@ -108,4 +108,9 @@ export default class Matrix4 extends Float32Array {
     mat4.invert(this, matrix4);
     return this;
   }
+
+  transpose(matrix4 = this) {
+    mat4.transpose(this, matrix4);
+    return this;
+  }
 }

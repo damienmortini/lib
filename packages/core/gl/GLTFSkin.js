@@ -10,8 +10,10 @@ export default class GLTFSkin {
     this.joints = data.joints;
 
     this.jointMatrices = [];
+    this.jointNormalMatrices = [];
     for (let index = 0; index < this.joints.length; index++) {
       this.jointMatrices.push(new Matrix4(this.joints[index].transform));
+      this.jointNormalMatrices.push(new Matrix4());
     }
 
     const bufferView = data.inverseBindMatrices.bufferView;
@@ -32,18 +34,13 @@ export default class GLTFSkin {
     this.updateJointsTexture();
   }
 
-  updateJointMatrix(index, jointWorldTransform, parentJointWorldTransform) {
-    const matrix = this.jointMatrices[index];
-    matrix.multiply(jointWorldTransform, this.inverseBindMatrices.slice(index * 16, index * 16 + 16));
+  updateJointMatrix(index, jointWorldTransform) {
+    const jointMatrix = this.jointMatrices[index];
+    jointMatrix.multiply(jointWorldTransform, this.inverseBindMatrices.slice(index * 16, index * 16 + 16));
 
-    // mat4.mul(jointMatrix, node.worldTransform, ibm);
-    // mat4.mul(jointMatrix, parentNode.inverseWorldTransform, jointMatrix);
-    // this.jointMatrices.push(jointMatrix);
-
-    // let normalMatrix = mat4.create();
-    // mat4.invert(normalMatrix, jointMatrix);
-    // mat4.transpose(normalMatrix, normalMatrix);
-    // this.jointNormalMatrices.push(normalMatrix);
+    const normalMatrix = this.jointNormalMatrices[index];
+    normalMatrix.invert(jointMatrix);
+    normalMatrix.transpose();
   }
 
   updateJointsTexture() {
