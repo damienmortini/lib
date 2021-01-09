@@ -60,6 +60,7 @@ export default class GLTFScene {
         const joint = skin.joints[index];
         skin.updateJointMatrix(index, this._nodeWorldTransformMap.get(joint));
       }
+      skin.updateJointsTexture();
     }
     for (const node of this._flattenedNodes) {
       node.updateSkin();

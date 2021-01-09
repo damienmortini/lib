@@ -53,6 +53,10 @@ export default class GLTexture {
     }
 
     this.bind();
+    // As another texture upload may have changed pixelStorei
+    // parameters, make sure they are correct
+    this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+
     if (this.gl instanceof WebGLRenderingContext && this._data && this._data.length === undefined) {
       this.gl.texImage2D(this._target, this.level, this.internalFormat, this.format, this.type, this._data);
     } else {
