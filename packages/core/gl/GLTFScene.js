@@ -8,8 +8,8 @@ export default class GLTFScene {
 
     this._flattenedNodes = new Set();
 
-    this._nodeFinalTransformMap = new Map();
-    this._nodePathMap = new Map();
+    this._nodeWorldTransformMap = new Map();
+    this._nodeParentWorldTransformMap = new Map();
 
     const traverse = (children) => {
       for (const child of children) {
@@ -22,37 +22,59 @@ export default class GLTFScene {
 
     traverse(this.nodes);
 
+    this._skins = new Set();
     for (const node of this._flattenedNodes) {
-      this._nodeFinalTransformMap.set(node, new Matrix4());
+      if (node.skin !== undefined) {
+        this._skins.add(node.skin);
+      }
+      this._nodeWorldTransformMap.set(node, new Matrix4());
     }
   }
 
   _traverseAndUpdateTransforms(node) {
     for (const child of node.children) {
-      const parentTransform = this._nodeFinalTransformMap.get(node);
-      const childTransform = this._nodeFinalTransformMap.get(child);
-      childTransform.multiply(parentTransform, childTransform);
+      const parentWorldTransform = this._nodeWorldTransformMap.get(node);
+      const childWorldTransform = this._nodeWorldTransformMap.get(child);
+      childWorldTransform.multiply(parentWorldTransform, childWorldTransform);
+      this._nodeParentWorldTransformMap.set(child, parentWorldTransform);
       this._traverseAndUpdateTransforms(child);
     }
   }
 
-  draw({ uniforms = {}, animations = [] } = {}) {
+  updateAndDraw({ uniforms = {}, animations = [] } = {}) {
+    this.update({ animations });
+    this.draw({ uniforms });
+  }
+
+  update({ animations = [] } = {}) {
     for (const node of this._flattenedNodes) {
       let animationTransform = null;
       for (const animation of animations) {
         animationTransform = animation.nodeTransformMap.get(node) || animationTransform;
       }
-      this._nodeFinalTransformMap.get(node).copy(animationTransform || node.transform);
+      this._nodeWorldTransformMap.get(node).copy(animationTransform || node.transform);
     }
     for (const node of this.nodes) {
       this._traverseAndUpdateTransforms(node);
     }
+    for (const skin of this._skins) {
+      for (let index = 0; index < skin.joints.length; index++) {
+        const joint = skin.joints[index];
+        skin.updateJointMatrix(index, this._nodeWorldTransformMap.get(joint), this._nodeParentWorldTransformMap.get(joint));
+      }
+    }
+    for (const node of this.nodes) {
+      node.updateSkin();
+    }
+  }
+
+  draw({ uniforms = {} } = {}) {
     for (const node of this._flattenedNodes) {
       node.draw({
         bind: true,
         uniforms: {
           ...uniforms,
-          transform: this._nodeFinalTransformMap.get(node),
+          transform: this._nodeWorldTransformMap.get(node),
         },
       });
     }

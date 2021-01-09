@@ -60,7 +60,7 @@ export default class Camera {
   }
 
   get projectionView() {
-    return this._projectionView.set(this.projection).multiply(this.inverseTransform);
+    return this._projectionView.copy(this.projection).multiply(this.inverseTransform);
   }
 
   _updateProjection() {

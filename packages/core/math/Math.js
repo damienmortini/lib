@@ -3,7 +3,7 @@ export function modulo(x, y) {
 }
 
 export function threshold(from, to, value) {
-  return Math.max(0, Math.min(1, (value - from) / (to - from)));
+  return Math.max(0, Math.min(1, (value - from) / (to - from))) || 0;
 }
 
 export function smoothstep(from, to, value) {
