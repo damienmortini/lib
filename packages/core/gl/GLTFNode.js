@@ -19,8 +19,8 @@ export default class GLTFNode {
     this.children = data.children || [];
     this.skin = data.skin;
 
-    if (data.translation) {
-      this.transform.translate(data.translation);
+    if (data.scale) {
+      this.transform.scale(data.scale);
     }
 
     if (data.rotation) {
@@ -29,8 +29,8 @@ export default class GLTFNode {
       this.transform.multiply(MATRIX4);
     }
 
-    if (data.scale) {
-      this.transform.scale(data.scale);
+    if (data.translation) {
+      this.transform.translate(data.translation);
     }
 
     if (data.mesh) {

@@ -31,8 +31,8 @@ export default class GLTFScene {
   }
 
   _traverseAndUpdateTransforms(node) {
+    const parentWorldTransform = this._nodeWorldTransformMap.get(node);
     for (const child of node.children) {
-      const parentWorldTransform = this._nodeWorldTransformMap.get(node);
       const childWorldTransform = this._nodeWorldTransformMap.get(child);
       childWorldTransform.multiply(parentWorldTransform, childWorldTransform);
       this._traverseAndUpdateTransforms(child);
