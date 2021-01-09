@@ -121,26 +121,27 @@ export default class GLTFNode {
           }),
         }),
       });
-    } else {
-      this._object = new GLBoxObject({
-        gl,
-        width: .1,
-        height: .2,
-        depth: .1,
-        normals: true,
-        program: new GLProgram({
-          gl,
-          shader: new BasicShader({
-            normals: true,
-            fragmentChunks: [
-              ['end', `
-              fragColor = vec4(vNormal * .5 + .5, 1.);
-            `],
-            ],
-          }),
-        }),
-      });
     }
+    // else {
+    //   this._object = new GLBoxObject({
+    //     gl,
+    //     width: .1,
+    //     height: .2,
+    //     depth: .1,
+    //     normals: true,
+    //     program: new GLProgram({
+    //       gl,
+    //       shader: new BasicShader({
+    //         normals: true,
+    //         fragmentChunks: [
+    //           ['end', `
+    //           fragColor = vec4(vNormal * .5 + .5, 1.);
+    //         `],
+    //         ],
+    //       }),
+    //     }),
+    //   });
+    // }
   }
 
   draw(...args) {
