@@ -4,7 +4,7 @@ export default class DataTextureShader {
       vec4 getTextureDataChunkFromUV(sampler2D dataTexture, vec2 uv, int chunkIndex, int stride, vec2 textureSize) {
         vec2 strideScale = vec2(float(stride), 1.);
         vec2 dataPosition = floor(uv * textureSize / strideScale) * strideScale;
-        return texture2D(dataTexture, vec2(dataPosition.x + float(chunkIndex) + .5, dataPosition.y + .5) / textureSize);
+        return texture(dataTexture, vec2(dataPosition.x + float(chunkIndex) + .5, dataPosition.y + .5) / textureSize);
       }
     `;
   }

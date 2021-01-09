@@ -1,6 +1,7 @@
 import Matrix4 from '../math/Matrix4.js';
 import Quaternion from '../math/Quaternion.js';
 import BasicShader from '../shader/BasicShader.js';
+import DataTextureShader from '../shader/DataTextureShader.js';
 import GLObject from './GLObject.js';
 import GLProgram from './GLProgram.js';
 import GLBoxObject from './object/GLBoxObject.js';
@@ -40,64 +41,50 @@ export default class GLTFNode {
           gl,
           shader: new BasicShader({
             normals: true,
+            uvs: true,
             uniforms: {
               transform: this.transform,
             },
             vertexChunks: [
               ['start', `
-                uniform highp sampler2D jointInverseBindMatricesTexture;
-                uniform mat4 jointMatrices[${this.skin.joints.length}];
-                uniform mat4 jointNormalMatrices[${this.skin.joints.length}];
-                uniform int jointInverseBindMatricesTextureWidth;
-                uniform int jointInverseBindMatricesTextureHeight;
+                uniform highp sampler2D jointMatricesTexture;
+                uniform vec2 jointMatricesTextureSize;
 
                 in uvec4 joint;
-                // in vec4 joint;
                 in vec4 weight;
 
                 flat out uvec4 vJoint;
-                // out vec4 vJoint;
                 out vec4 vWeight;
 
-                // mat4 getBoneMatrix(const in float i) {
-                //   return jointMatrices[int(i)];
+                ${DataTextureShader.getTextureDataChunkFromUV()}
+                ${DataTextureShader.getTextureDataChunkFromIndex()}
 
-                //   float j = i * 4.0;
-                //   float x = mod(j, float(jointInverseBindMatricesTextureWidth));
-                //   float y = floor(j / float(jointInverseBindMatricesTextureWidth));
-                //   float dx = 1.0 / float(jointInverseBindMatricesTextureWidth);
-                //   float dy = 1.0 / float(jointInverseBindMatricesTextureHeight);
-                //   y = dy * (y + 0.5);
-                //   vec4 v1 = texture(jointInverseBindMatricesTexture, vec2(dx * (x + 0.5), y));
-                //   vec4 v2 = texture(jointInverseBindMatricesTexture, vec2(dx * (x + 1.5), y));
-                //   vec4 v3 = texture(jointInverseBindMatricesTexture, vec2(dx * (x + 2.5), y));
-                //   vec4 v4 = texture(jointInverseBindMatricesTexture, vec2(dx * (x + 3.5), y));
-                //   mat4 bone = mat4(v1, v2, v3, v4);
-                //   return bone;
-                // }
+                mat4 getJointMatrix(int index, int matrixID) {                  
+                  vec4 v1 = getTextureDataChunkFromIndex(jointMatricesTexture, index, 0 + matrixID * 4, 8, jointMatricesTextureSize);
+                  vec4 v2 = getTextureDataChunkFromIndex(jointMatricesTexture, index, 1 + matrixID * 4, 8, jointMatricesTextureSize);
+                  vec4 v3 = getTextureDataChunkFromIndex(jointMatricesTexture, index, 2 + matrixID * 4, 8, jointMatricesTextureSize);
+                  vec4 v4 = getTextureDataChunkFromIndex(jointMatricesTexture, index, 3 + matrixID * 4, 8, jointMatricesTextureSize);
+                  mat4 jointMatrix = mat4(v1, v2, v3, v4);
+                  return jointMatrix;
+                }
               `],
               ['main', `
                 vec3 position = position;
                 vec3 normal = normal;
 
-                // mat4 skinMatrix = mat4(1.0, 0.0, 0.0, 0.0,  // 1. column
-                //   0.0, 1.0, 0.0, 0.0,  // 2. column
-                //   0.0, 0.0, 1.0, 0.0,  // 3. column
-                //   0.0, 0.0, 0.0, 1.0);
-
                 mat4 skinMatrix =
-                  weight.x * jointMatrices[joint.x] +
-                  weight.y * jointMatrices[joint.y] +
-                  weight.z * jointMatrices[joint.z] +
-                  weight.w * jointMatrices[joint.w];
-                position = (skinMatrix * vec4(position, 1.0)).xyz;
+                  weight.x * getJointMatrix(int(joint.x), 0) +
+                  weight.y * getJointMatrix(int(joint.y), 0) +
+                  weight.z * getJointMatrix(int(joint.z), 0) +
+                  weight.w * getJointMatrix(int(joint.w), 0);
+                position = (skinMatrix * vec4(position, 1.)).xyz;
 
                 mat4 skinNormalMatrix =
-                  weight.x * jointNormalMatrices[joint.x] +
-                  weight.y * jointNormalMatrices[joint.y] +
-                  weight.z * jointNormalMatrices[joint.z] +
-                  weight.w * jointNormalMatrices[joint.w];
-                normal = (skinNormalMatrix * vec4(normal, 1.0)).xyz;
+                  weight.x * getJointMatrix(int(joint.x), 1) +
+                  weight.y * getJointMatrix(int(joint.y), 1) +
+                  weight.z * getJointMatrix(int(joint.z), 1) +
+                  weight.w * getJointMatrix(int(joint.w), 1);
+                normal = (skinNormalMatrix * vec4(normal, 1.)).xyz;
 
                 vJoint = joint;
                 vWeight = weight;
@@ -105,12 +92,17 @@ export default class GLTFNode {
             ],
             fragmentChunks: [
               ['start', `
+                uniform highp sampler2D jointMatricesTexture;
+                uniform vec2 jointMatricesTextureSize;
+
                 flat in uvec4 vJoint;
-                // in vec4 vJoint;
                 in vec4 vWeight;
               `],
               ['end', `
                 fragColor = vec4(vNormal * .5 + .5, 1.);
+                // fragColor = vec4(vUV, 0., 1.);
+                // fragColor = .5 + texture(jointMatricesTexture, vUV);
+                // fragColor = vec4(jointMatricesTextureSize, 0., 1.);
                 // fragColor = vWeight;
                 // fragColor = vec4(vJoint);
                 // fragColor = vec4(vec3(vJoint.y), 1.);
@@ -156,5 +148,7 @@ export default class GLTFNode {
     this._object.program.use();
     this._object.program.uniforms.set('jointMatrices', this.skin.jointMatrices);
     this._object.program.uniforms.set('jointNormalMatrices', this.skin.jointNormalMatrices);
+    this._object.program.uniforms.set('jointMatricesTexture', this.skin.jointMatricesTexture);
+    this._object.program.uniforms.set('jointMatricesTextureSize', this.skin.jointMatricesTextureSize);
   }
 }

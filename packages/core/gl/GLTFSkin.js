@@ -19,16 +19,22 @@ export default class GLTFSkin {
     const bufferView = data.inverseBindMatrices.bufferView;
     this.inverseBindMatrices = new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT);
 
-    const width = Math.max(4, Math.pow(2, Math.ceil(Math.log(Math.sqrt(this.joints.length * 4)) / Math.LN2)));
+    let width = Math.max(4, Math.pow(2, Math.ceil(Math.log(Math.sqrt(this.joints.length * 4)) / Math.LN2)));
     const height = Math.pow(2, Math.ceil(Math.log(this.joints.length * 4 / width) / Math.LN2));
-    this.jointInverseBindMatricesTexture = new GLTexture({
+    width *= 2;
+    this._jointMatricesData = new Float32Array(width * height * 4);
+    this.jointMatricesTextureSize = [width, height];
+    this.jointMatricesTexture = new GLTexture({
       gl,
-      data: new Float32Array(this.inverseBindMatrices),
+      data: this._jointMatricesData,
       autoGenerateMipmap: false,
       type: gl.FLOAT,
       internalFormat: gl.RGBA32F || gl.RGBA,
+      minFilter: gl.NEAREST,
+      magFilter: gl.NEAREST,
       width,
       height,
+      flipY: false,
     });
 
     this.updateJointsTexture();
@@ -44,10 +50,11 @@ export default class GLTFSkin {
   }
 
   updateJointsTexture() {
-    const data = this.jointInverseBindMatricesTexture.data;
-    for (let index = 0; index < this.joints.length; index++) {
-      data.set(this.joints[index].transform, index * 16);
+    const data = this.jointMatricesTexture.data;
+    for (let index = 0; index < this.jointMatrices.length; index++) {
+      data.set(this.jointMatrices[index], index * 32);
+      data.set(this.jointNormalMatrices[index], index * 32 + 16);
     }
-    this.jointInverseBindMatricesTexture.data = data;
+    this.jointMatricesTexture.data = data;
   }
 }
