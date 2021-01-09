@@ -9,7 +9,6 @@ export default class GLTFScene {
     this._flattenedNodes = new Set();
 
     this._nodeWorldTransformMap = new Map();
-    this._nodeParentWorldTransformMap = new Map();
 
     const traverse = (children) => {
       for (const child of children) {
@@ -36,7 +35,6 @@ export default class GLTFScene {
       const parentWorldTransform = this._nodeWorldTransformMap.get(node);
       const childWorldTransform = this._nodeWorldTransformMap.get(child);
       childWorldTransform.multiply(parentWorldTransform, childWorldTransform);
-      this._nodeParentWorldTransformMap.set(child, parentWorldTransform);
       this._traverseAndUpdateTransforms(child);
     }
   }
@@ -60,10 +58,10 @@ export default class GLTFScene {
     for (const skin of this._skins) {
       for (let index = 0; index < skin.joints.length; index++) {
         const joint = skin.joints[index];
-        skin.updateJointMatrix(index, this._nodeWorldTransformMap.get(joint), this._nodeParentWorldTransformMap.get(joint));
+        skin.updateJointMatrix(index, this._nodeWorldTransformMap.get(joint));
       }
     }
-    for (const node of this.nodes) {
+    for (const node of this._flattenedNodes) {
       node.updateSkin();
     }
   }
