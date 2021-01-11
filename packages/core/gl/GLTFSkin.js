@@ -9,11 +9,11 @@ export default class GLTFSkin {
     this.name = data.name;
     this.joints = data.joints;
 
-    this.jointMatrices = [];
-    this.jointNormalMatrices = [];
+    this._jointMatrices = [];
+    this._jointNormalMatrices = [];
     for (let index = 0; index < this.joints.length; index++) {
-      this.jointMatrices.push(new Matrix4(this.joints[index].transform));
-      this.jointNormalMatrices.push(new Matrix4());
+      this._jointMatrices.push(new Matrix4(this.joints[index].transform));
+      this._jointNormalMatrices.push(new Matrix4());
     }
 
     const bufferView = data.inverseBindMatrices.bufferView;
@@ -41,19 +41,19 @@ export default class GLTFSkin {
   }
 
   updateJointMatrix(index, jointWorldTransform) {
-    const jointMatrix = this.jointMatrices[index];
+    const jointMatrix = this._jointMatrices[index];
     jointMatrix.multiply(jointWorldTransform, this.inverseBindMatrices.slice(index * 16, index * 16 + 16));
 
-    const normalMatrix = this.jointNormalMatrices[index];
+    const normalMatrix = this._jointNormalMatrices[index];
     normalMatrix.invert(jointMatrix);
     normalMatrix.transpose();
   }
 
   updateJointsTexture() {
     const data = this.jointMatricesTexture.data;
-    for (let index = 0; index < this.jointMatrices.length; index++) {
-      data.set(this.jointMatrices[index], index * 32);
-      data.set(this.jointNormalMatrices[index], index * 32 + 16);
+    for (let index = 0; index < this._jointMatrices.length; index++) {
+      data.set(this._jointMatrices[index], index * 32);
+      data.set(this._jointNormalMatrices[index], index * 32 + 16);
     }
     this.jointMatricesTexture.data = data;
   }
