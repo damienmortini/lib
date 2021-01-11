@@ -34,7 +34,9 @@ export default class GLTFScene {
     const parentWorldTransform = this._nodeWorldTransformMap.get(node);
     for (const child of node.children) {
       const childWorldTransform = this._nodeWorldTransformMap.get(child);
-      childWorldTransform.multiply(parentWorldTransform, childWorldTransform);
+      if (child.skin?.name !== node.name) { // fix for skin matrix applied twice, might need more fine tuning
+        childWorldTransform.multiply(parentWorldTransform, childWorldTransform);
+      }
       this._traverseAndUpdateTransforms(child);
     }
   }
