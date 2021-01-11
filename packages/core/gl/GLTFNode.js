@@ -146,8 +146,6 @@ export default class GLTFNode {
       return;
     }
     this._object.program.use();
-    this._object.program.uniforms.set('jointMatrices', this.skin.jointMatrices);
-    this._object.program.uniforms.set('jointNormalMatrices', this.skin.jointNormalMatrices);
     this._object.program.uniforms.set('jointMatricesTexture', this.skin.jointMatricesTexture);
     this._object.program.uniforms.set('jointMatricesTextureSize', this.skin.jointMatricesTextureSize);
   }
