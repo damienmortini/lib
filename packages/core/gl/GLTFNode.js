@@ -30,7 +30,9 @@ export default class GLTFNode {
     MATRIX4.fromQuaternion(QUATERNION);
     this.matrix.multiply(MATRIX4);
 
-    this.matrix.translate(this.translation);
+    this.matrix.x = this.translation[0];
+    this.matrix.y = this.translation[1];
+    this.matrix.z = this.translation[2];
   }
 
   draw(...args) {
