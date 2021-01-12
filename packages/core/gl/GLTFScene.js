@@ -52,7 +52,7 @@ export default class GLTFScene {
       for (const animation of animations) {
         animationTransform = animation.nodeTransformMap.get(node) || animationTransform;
       }
-      this._nodeWorldTransformMap.get(node).copy(animationTransform || node.transform);
+      this._nodeWorldTransformMap.get(node).copy(animationTransform || node.matrix);
     }
     for (const node of this.nodes) {
       this._traverseAndUpdateTransforms(node);

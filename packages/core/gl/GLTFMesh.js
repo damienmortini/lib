@@ -1,65 +1,32 @@
-import GLBuffer from './GLBuffer.js';
-import GLMesh from './GLMesh.js';
-import GLVertexAttribute from './GLVertexAttribute.js';
+import GLTFPrimitive from './GLTFPrimitive.js';
 
-const ATTRIBUTE_NAME_MAP = new Map([
-  ['POSITION', 'position'],
-  ['NORMAL', 'normal'],
-  ['TEXCOORD_0', 'uv'],
-  ['WEIGHTS_0', 'weight'],
-  ['JOINTS_0', 'joint'],
-]);
-
-const ATTRIBUTE_TYPE_SIZE_MAP = new Map([
-  ['SCALAR', 1],
-  ['VEC2', 2],
-  ['VEC3', 3],
-  ['VEC4', 4],
-  ['MAT2', 4],
-  ['MAT3', 9],
-  ['MAT4', 16],
-]);
-
-export default class GLTFMesh extends GLMesh {
+export default class GLTFMesh {
   constructor({
     gl,
     data,
   }) {
-    super({
-      gl,
-    });
-
     this.name = data.name;
+    this.morphWeights = data.weights;
 
-    for (const [attributeName, attribute] of Object.entries(data.primitives[0].attributes)) {
-      this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName), new GLVertexAttribute({
-        gl: this.gl,
-        buffer: new GLBuffer({
-          gl: this.gl,
-          data: attribute.bufferView.buffer,
-        }),
-        size: ATTRIBUTE_TYPE_SIZE_MAP.get(attribute.type),
-        type: attribute.componentType,
-        stride: attribute.bufferView.byteStride,
-        count: attribute.count,
-        offset: (attribute.byteOffset || 0) + attribute.bufferView.byteOffset,
-      }));
-    }
-
-    const indices = data.primitives[0].indices;
-
-    if (indices) {
-      this.indices = new GLVertexAttribute({
-        gl: this.gl,
-        buffer: new GLBuffer({
-          gl: this.gl,
-          data: indices.bufferView.buffer,
-          target: this.gl.ELEMENT_ARRAY_BUFFER,
-        }),
-        type: indices.componentType,
-        offset: indices.bufferView.byteOffset,
-        count: indices.count,
+    this.primitives = [];
+    for (const primitiveData of data.primitives) {
+      const primitive = new GLTFPrimitive({
+        gl,
+        data: primitiveData,
       });
+      this.primitives.push(primitive);
+    }
+  }
+
+  draw(...args) {
+    for (const primitive of this.primitives) {
+      primitive.draw(...args);
+    }
+  }
+
+  updateSkin(skin) {
+    for (const primitive of this.primitives) {
+      primitive.updateSkin(skin);
     }
   }
 }

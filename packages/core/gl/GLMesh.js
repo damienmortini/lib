@@ -4,13 +4,14 @@ import GLVertexAttribute from './GLVertexAttribute.js';
 export default class GLMesh {
   constructor({
     gl,
-    positions = undefined,
-    normals = undefined,
-    uvs = undefined,
+    positions = null,
+    normals = null,
+    uvs = null,
     attributes = {},
-    indices = undefined,
+    indices = null,
   }) {
     this.gl = gl;
+    this.indices = null;
 
     this.gl.getExtension('OES_element_index_uint');
 
@@ -25,7 +26,7 @@ export default class GLMesh {
       this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl);
     }
 
-    this.attributes = new Map(attributes.entries ? attributes : Object.entries(attributes));
+    this.attributes = new Map(attributes instanceof Map ? attributes : Object.entries(attributes));
 
     if (positions) {
       this.attributes.set('position', new GLVertexAttribute({
@@ -57,7 +58,7 @@ export default class GLMesh {
       }
     }
 
-    if (indices && !(this.indices instanceof GLVertexAttribute)) {
+    if (indices) {
       this.indices = new GLVertexAttribute(Object.assign({
         gl: this.gl,
         buffer: new GLBuffer({
