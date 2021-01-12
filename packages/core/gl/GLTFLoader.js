@@ -112,6 +112,13 @@ export class GLTFLoader extends Loader {
         for (const key of Object.keys(primitive.attributes)) {
           primitive.attributes[key] = data.accessors[primitive.attributes[key]];
         }
+        if (primitive.targets) {
+          for (const target of primitive.targets) {
+            if (target.POSITION !== undefined) target.POSITION = data.accessors[target.POSITION];
+            if (target.NORMAL !== undefined) target.NORMAL = data.accessors[target.NORMAL];
+            if (target.TANGENT !== undefined) target.TANGENT = data.accessors[target.TANGENT];
+          }
+        }
         primitive.indices = data.accessors[primitive.indices];
       }
     }
