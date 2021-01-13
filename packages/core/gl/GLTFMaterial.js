@@ -31,9 +31,20 @@ const SKIN_SHADER = {
 const MORPH_TARGET_SHADER = {
   vertexChunks: [
     ['start', `
-      
+      uniform float morphTargetWeights[4];
+
+      in vec3 morphTargetPosition0;
+      in vec3 morphTargetPosition1;
+      in vec3 morphTargetPosition2;
+      in vec3 morphTargetPosition3;
+
+      in vec3 morphTargetNormal0;
+      in vec3 morphTargetNormal1;
+      in vec3 morphTargetNormal2;
+      in vec3 morphTargetNormal3;
     `],
     ['main', `
+      position += morphTargetPosition0;
     `],
   ],
 };
@@ -53,6 +64,7 @@ export default class GLTFMaterial {
         normals: true,
         uvs: true,
         vertexChunks: [
+          ...(morphTargets ? MORPH_TARGET_SHADER.vertexChunks : []),
           ...(skin ? SKIN_SHADER.vertexChunks : []),
           ['main', `
             vec3 position = position;

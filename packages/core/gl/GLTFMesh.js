@@ -6,7 +6,7 @@ export default class GLTFMesh {
     data,
   }) {
     this.name = data.name;
-    this.morphWeights = data.weights;
+    this.weights = data.weights;
 
     this.primitives = [];
     for (const primitiveData of data.primitives) {

@@ -50,7 +50,7 @@ export default class GLTFScene {
     for (const node of this._flattenedNodes) {
       let animationTransform = null;
       for (const animation of animations) {
-        animationTransform = animation.nodeTransformMap.get(node) || animationTransform;
+        animationTransform = animation.nodePropertiesMap.get(node)?.transform || animationTransform;
       }
       this._nodeWorldTransformMap.get(node).copy(animationTransform || node.matrix);
     }
