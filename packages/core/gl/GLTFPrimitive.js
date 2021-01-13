@@ -27,7 +27,7 @@ export default class GLTFPrimitive {
     gl,
     data,
   }) {
-    this.material = new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargets: !!data.targets });
+    this.material = new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargetsNumber: data.targets?.length });
     // this.material = data.material ?? new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargets: !!data.targets });
     this.attributes = new Map();
     this.indices = null;

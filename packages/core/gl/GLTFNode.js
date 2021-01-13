@@ -35,6 +35,14 @@ export default class GLTFNode {
     this.matrix.z = this.translation[2];
   }
 
+  get weights() {
+    return this.mesh?.weights;
+  }
+
+  set weights(value) {
+    if (this.mesh) this.mesh.weights = value;
+  }
+
   draw(...args) {
     if (!this.mesh) return;
     this.mesh.draw(...args);
