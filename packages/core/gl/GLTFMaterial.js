@@ -12,31 +12,18 @@ const SKIN_SHADER = {
       in uvec4 joint;
       in vec4 weight;
 
-      flat out uvec4 vJoint;
-      out vec4 vWeight;
-
       ${DataTextureShader.getTextureDataChunkFromUV()}
       ${DataTextureShader.getTextureDataChunkFromIndex()}
 
       ${SkinShader.getJointMatrix()}
+      ${SkinShader.getSkinMatrix()}
     `],
     ['main', `
-      mat4 skinMatrix =
-        weight.x * getJointMatrix(int(joint.x), 0, jointMatricesTexture, jointMatricesTextureSize) +
-        weight.y * getJointMatrix(int(joint.y), 0, jointMatricesTexture, jointMatricesTextureSize) +
-        weight.z * getJointMatrix(int(joint.z), 0, jointMatricesTexture, jointMatricesTextureSize) +
-        weight.w * getJointMatrix(int(joint.w), 0, jointMatricesTexture, jointMatricesTextureSize);
+      mat4 skinMatrix = getSkinMatrix(ivec4(joint), weight, jointMatricesTexture, jointMatricesTextureSize, 0, 8);
       position = (skinMatrix * vec4(position, 1.)).xyz;
 
-      mat4 skinNormalMatrix =
-        weight.x * getJointMatrix(int(joint.x), 1, jointMatricesTexture, jointMatricesTextureSize) +
-        weight.y * getJointMatrix(int(joint.y), 1, jointMatricesTexture, jointMatricesTextureSize) +
-        weight.z * getJointMatrix(int(joint.z), 1, jointMatricesTexture, jointMatricesTextureSize) +
-        weight.w * getJointMatrix(int(joint.w), 1, jointMatricesTexture, jointMatricesTextureSize);
+      mat4 skinNormalMatrix = getSkinMatrix(ivec4(joint), weight, jointMatricesTexture, jointMatricesTextureSize, 1, 8);
       normal = (skinNormalMatrix * vec4(normal, 1.)).xyz;
-
-      vJoint = joint;
-      vWeight = weight;
     `],
   ],
 };
@@ -44,6 +31,7 @@ const SKIN_SHADER = {
 const MORPH_TARGET_SHADER = {
   vertexChunks: [
     ['start', `
+      
     `],
     ['main', `
     `],
