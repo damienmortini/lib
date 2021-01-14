@@ -1,5 +1,9 @@
 import * as mat4 from '../../../gl-matrix/esm/mat4.js';
 
+const TRANSLATION_IDENTITY = new Float32Array(3);
+const ROTATION_IDENTITY = new Float32Array([0, 0, 0, 1]);
+const SCALE_IDENTITY = new Float32Array([1, 1, 1]);
+
 export default class Matrix4 extends Float32Array {
   constructor(array = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {
     super(array);
@@ -87,7 +91,12 @@ export default class Matrix4 extends Float32Array {
     return this;
   }
 
-  fromPerspective({ fov, aspectRatio, near, far }) {
+  fromTranslationRotationScale(translation = TRANSLATION_IDENTITY, rotation = ROTATION_IDENTITY, scale = SCALE_IDENTITY) {
+    mat4.fromRotationTranslationScale(this, rotation, translation, scale);
+    return this;
+  }
+
+  fromPerspective(fov, aspectRatio, near, far) {
     mat4.perspective(this, fov, aspectRatio, near, far);
     return this;
   }

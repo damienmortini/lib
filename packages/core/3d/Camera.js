@@ -64,7 +64,7 @@ export default class Camera {
   }
 
   _updateProjection() {
-    this._projection.fromPerspective(this);
+    this._projection.fromPerspective(this.fov, this.aspectRatio, this.near, this.far);
   }
 }
 

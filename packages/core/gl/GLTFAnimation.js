@@ -1,11 +1,6 @@
-import Matrix4 from '../math/Matrix4.js';
 import Quaternion from '../math/Quaternion.js';
 import { threshold } from '../math/Math.js';
 import Vector3 from '../math/Vector3.js';
-
-const QUATERNION = new Quaternion();
-const MATRIX4 = new Matrix4();
-const VECTOR3 = new Vector3();
 
 export default class GLTFAnimation {
   constructor({
@@ -23,9 +18,11 @@ export default class GLTFAnimation {
       }
       switch (channel.target.path) {
         case 'translation':
-        case 'rotation':
         case 'scale':
-          if (!nodeProperties.transform) nodeProperties.transform = new Matrix4();
+          nodeProperties[channel.target.path] = new Vector3();
+          break;
+        case 'rotation':
+          nodeProperties.rotation = new Quaternion();
           break;
         case 'weights':
           nodeProperties.weights = new Array(channel.target.node.weights.length).fill(0);
@@ -69,27 +66,14 @@ export default class GLTFAnimation {
       }
       const previousIndex = !nextIndex ? 0 : nextIndex - 1;
       const alpha = threshold(inputArray[previousIndex], inputArray[nextIndex], this._currentTime);
-      if (channel.target.path === 'translation' || channel.target.path === 'rotation' || channel.target.path === 'scale') {
-        const transform = nodeProperties.transform;
-        if (channel.target.path === 'translation') {
-          const previousValue = outputArray.subarray(previousIndex * 3, previousIndex * 3 + 3);
-          const nextValue = outputArray.subarray(nextIndex * 3, nextIndex * 3 + 3);
-          VECTOR3.copy(previousValue).lerp(nextValue, alpha);
-          transform.x = VECTOR3[0];
-          transform.y = VECTOR3[1];
-          transform.z = VECTOR3[2];
-        } else if (channel.target.path === 'rotation') {
-          const previousValue = outputArray.subarray(previousIndex * 4, previousIndex * 4 + 4);
-          const nextValue = outputArray.subarray(nextIndex * 4, nextIndex * 4 + 4);
-          QUATERNION.copy(previousValue).slerp(nextValue, alpha);
-          MATRIX4.fromQuaternion(QUATERNION);
-          transform.multiply(MATRIX4);
-        } else if (channel.target.path === 'scale') {
-          const previousValue = outputArray.subarray(previousIndex * 3, previousIndex * 3 + 3);
-          const nextValue = outputArray.subarray(nextIndex * 3, nextIndex * 3 + 3);
-          VECTOR3.copy(previousValue).lerp(nextValue, alpha);
-          transform.scale(VECTOR3);
-        }
+      if (channel.target.path === 'translation' || channel.target.path === 'scale') {
+        const previousValue = outputArray.subarray(previousIndex * 3, previousIndex * 3 + 3);
+        const nextValue = outputArray.subarray(nextIndex * 3, nextIndex * 3 + 3);
+        nodeProperties[channel.target.path].copy(previousValue).lerp(nextValue, alpha);
+      } else if (channel.target.path === 'rotation') {
+        const previousValue = outputArray.subarray(previousIndex * 4, previousIndex * 4 + 4);
+        const nextValue = outputArray.subarray(nextIndex * 4, nextIndex * 4 + 4);
+        nodeProperties.rotation.copy(previousValue).slerp(nextValue, alpha);
       } else if (channel.target.path === 'weights') {
         const length = nodeProperties.weights.length;
         const previousValue = outputArray.subarray(previousIndex * length, previousIndex * length + length);
