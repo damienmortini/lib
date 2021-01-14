@@ -4,7 +4,6 @@ import Vector3 from '../math/Vector3.js';
 
 export default class GLTFNode {
   constructor({
-    gl,
     data,
   }) {
     this.name = data.name;
