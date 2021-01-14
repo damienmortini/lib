@@ -5,6 +5,7 @@ import GLTFNode from './GLTFNode.js';
 import GLTFAnimation from './GLTFAnimation.js';
 import GLTFScene from './GLTFScene.js';
 import GLTFSkin from './GLTFSkin.js';
+import GLTFAccessor from './GLTFAccessor.js';
 
 export class GLTFLoader extends Loader {
   constructor() {
@@ -148,9 +149,24 @@ export class GLTFLoader extends Loader {
   async build({ gl, data }) {
     data = await this.parse(data);
 
+    // Accessors
+    const accessorsDataMap = new Map();
+    for (let index = 0; index < data.accessors.length; index++) {
+      const accessorData = data.accessors[index];
+      const accessor = new GLTFAccessor({ data: accessorData });
+      data.accessors[index] = accessor;
+      accessorsDataMap.set(accessorData, accessor);
+    }
+
     // Meshes
     for (let index = 0; index < data.meshes.length; index++) {
       const meshData = data.meshes[index];
+      for (const primitiveData of meshData.primitives) {
+        for (const [key, accessorData] of Object.entries(primitiveData.attributes)) {
+          primitiveData.attributes[key] = accessorsDataMap.get(accessorData);
+        }
+        primitiveData.indices = accessorsDataMap.get(primitiveData.indices);
+      }
       const mesh = new GLTFMesh({ gl, data: meshData });
       data.meshes[index] = mesh;
     }
@@ -159,7 +175,7 @@ export class GLTFLoader extends Loader {
     for (let index = 0; index < data.nodes.length; index++) {
       const nodeData = data.nodes[index];
       nodeData.mesh = data.meshes[data.raw.nodes[index].mesh];
-      const node = new GLTFNode({ gl, data: nodeData });
+      const node = new GLTFNode({ data: nodeData });
       data.nodes[index] = node;
     }
     for (let index = 0; index < data.nodes.length; index++) {
@@ -180,7 +196,7 @@ export class GLTFLoader extends Loader {
         for (let index = 0; index < skinData.joints.length; index++) {
           skinData.joints[index] = data.nodes[skinRawData.joints[index]];
         }
-        const skin = new GLTFSkin({ gl, data: skinData });
+        const skin = new GLTFSkin({ data: skinData });
         data.skins[index] = skin;
       }
       for (let index = 0; index < data.nodes.length; index++) {

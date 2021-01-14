@@ -24,39 +24,39 @@ const ARRAY_TYPE_MAP = new Map([
 export default class GLVertexAttribute {
   constructor({
     gl,
-    data = undefined,
+    data = null,
     buffer = new GLBuffer({
       gl,
+      data,
     }),
     size = 1,
-    type = ARRAY_TYPE_MAP.get(data?.constructor),
-    offset = 0,
+    componentType = ARRAY_TYPE_MAP.get(data?.constructor),
+    byteOffset = 0,
     normalized = false,
-    stride = 0,
+    byteStride = 0,
     count = data?.length / size || 1,
     divisor = 0,
   }) {
     this.gl = gl;
     this.buffer = buffer;
     this.size = size;
-    this.type = type;
-    this.offset = offset;
+    this.componentType = componentType;
+    this.byteOffset = byteOffset;
     this.normalized = normalized;
-    this.stride = stride;
+    this.byteStride = byteStride;
     this.count = count;
     this.divisor = divisor;
-
-    if (data) {
-      this.data = data;
-    }
-  }
-
-  set data(value) {
-    this._data = value;
-    this.buffer.data = value;
   }
 
   get data() {
-    return this._data ?? new (TYPE_ARRAY_MAP.get(this.type))(this.buffer.data, this.offset, this.count * this.size);
+    return this.buffer.data;
+  }
+
+  set data(value) {
+    this.buffer.data = value;
+  }
+
+  get typedArray() {
+    return new (TYPE_ARRAY_MAP.get(this.componentType))(this.buffer.data, this.byteOffset, this.count * this.size);
   }
 }

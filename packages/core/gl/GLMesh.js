@@ -73,8 +73,8 @@ export default class GLMesh {
     mode = this.gl.TRIANGLES,
     elements = !!this.indices,
     count = elements ? this.indices.count : this.attributes.get('position').count,
-    offset = this.indices ? this.indices.offset : 0,
-    type = elements ? this.indices.type : null,
+    offset = this.indices ? this.indices.byteOffset : 0,
+    type = elements ? this.indices.componentType : null,
     first = 0,
     instanceCount = undefined,
   } = {}) {

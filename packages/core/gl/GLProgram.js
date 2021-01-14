@@ -24,7 +24,7 @@ export default class GLProgram {
     const self = this;
 
     class Attributes extends Map {
-      set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = undefined, type = gl.FLOAT, normalized = false, stride = 0, offset = 0, divisor = 0 } = {}) {
+      set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = undefined, componentType = gl.FLOAT, normalized = false, byteStride = 0, byteOffset = 0, divisor = 0 } = {}) {
         if (name instanceof Map) {
           for (const [key, value] of name) {
             this.set(key, value);
@@ -38,16 +38,16 @@ export default class GLProgram {
         }
         if (location !== -1) {
           gl.enableVertexAttribArray(location);
-          if (type === gl.FLOAT || type === gl.HALF_FLOAT) {
-            gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+          if (componentType === gl.FLOAT || componentType === gl.HALF_FLOAT) {
+            gl.vertexAttribPointer(location, size, componentType, normalized, byteStride, byteOffset);
           } else {
-            gl.vertexAttribIPointer(location, size, type, stride, offset);
+            gl.vertexAttribIPointer(location, size, componentType, byteStride, byteOffset);
           }
           self._vertexAttribDivisor(location, divisor);
         }
 
         buffer.unbind();
-        super.set(name, { buffer, size, type, normalized, stride, offset });
+        super.set(name, { buffer, size, componentType, normalized, byteStride, byteOffset });
       }
     }
 

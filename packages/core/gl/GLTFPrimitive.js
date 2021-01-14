@@ -12,16 +12,6 @@ const ATTRIBUTE_NAME_MAP = new Map([
   ['JOINTS_0', 'joint'],
 ]);
 
-const ATTRIBUTE_TYPE_SIZE_MAP = new Map([
-  ['SCALAR', 1],
-  ['VEC2', 2],
-  ['VEC3', 3],
-  ['VEC4', 4],
-  ['MAT2', 4],
-  ['MAT3', 9],
-  ['MAT4', 16],
-]);
-
 export default class GLTFPrimitive {
   constructor({
     gl,
@@ -29,8 +19,10 @@ export default class GLTFPrimitive {
   }) {
     this.material = new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargetsNumber: data.targets?.length });
     // this.material = data.material ?? new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargets: !!data.targets });
-    this.attributes = new Map();
-    this.indices = null;
+    this.attributes = data.attributes;
+    this.indices = data.indices;
+    this.computedAttributes = new Map();
+    this.computedIndices = null;
 
     const targetAttributes = new Map();
     if (data.targets) {
@@ -43,38 +35,37 @@ export default class GLTFPrimitive {
     }
 
     for (const [attributeName, attribute] of [...Object.entries(data.attributes), ...targetAttributes]) {
-      this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName) ?? attributeName, new GLVertexAttribute({
+      this.computedAttributes.set(ATTRIBUTE_NAME_MAP.get(attributeName) ?? attributeName, attribute);
+    }
+
+    const vertexAttributes = new Map();
+    for (const [attributeName, attribute] of this.computedAttributes) {
+      vertexAttributes.set(attributeName, new GLVertexAttribute({
         gl,
+        ...attribute,
         buffer: new GLBuffer({
           gl,
-          data: attribute.bufferView.buffer,
+          data: attribute.buffer,
         }),
-        size: ATTRIBUTE_TYPE_SIZE_MAP.get(attribute.type),
-        type: attribute.componentType,
-        stride: attribute.bufferView.byteStride,
-        count: attribute.count,
-        offset: (attribute.byteOffset || 0) + attribute.bufferView.byteOffset,
       }));
     }
 
     if (data.indices) {
-      this.indices = new GLVertexAttribute({
+      this.computedIndices = new GLVertexAttribute({
         gl,
+        ...data.indices,
         buffer: new GLBuffer({
           gl,
-          data: data.indices.bufferView.buffer,
+          data: data.indices.buffer,
           target: gl.ELEMENT_ARRAY_BUFFER,
         }),
-        type: data.indices.componentType,
-        offset: data.indices.bufferView.byteOffset,
-        count: data.indices.count,
       });
     }
 
     this._mesh = new GLMesh({
       gl,
-      attributes: this.attributes,
-      indices: this.indices,
+      attributes: vertexAttributes,
+      indices: this.computedIndices,
     });
 
     this._object = new GLObject({
