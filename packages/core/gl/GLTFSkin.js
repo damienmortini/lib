@@ -1,9 +1,7 @@
 import Matrix4 from '../math/Matrix4.js';
-import GLTexture from './GLTexture.js';
 
 export default class GLTFSkin {
   constructor({
-    gl,
     data,
   }) {
     this.name = data.name;
@@ -22,27 +20,13 @@ export default class GLTFSkin {
     let width = Math.max(4, Math.pow(2, Math.ceil(Math.log(Math.sqrt(this.joints.length * 4)) / Math.LN2)));
     const height = Math.pow(2, Math.ceil(Math.log(this.joints.length * 4 / width) / Math.LN2));
     width *= 2;
-    this._jointMatricesData = new Float32Array(width * height * 4);
+    this.jointMatricesTextureData = new Float32Array(width * height * 4);
     this.jointMatricesTextureSize = [width, height];
-    this.jointMatricesTexture = new GLTexture({
-      gl,
-      data: this._jointMatricesData,
-      autoGenerateMipmap: false,
-      type: gl.FLOAT,
-      internalFormat: gl.RGBA32F || gl.RGBA,
-      minFilter: gl.NEAREST,
-      magFilter: gl.NEAREST,
-      width,
-      height,
-      flipY: false,
-    });
 
-    this.updateJointsTexture();
+    this.updateJointsTextureData();
   }
 
-  updateJointsTexture() {
-    const data = this.jointMatricesTexture.data;
-
+  updateJointsTextureData() {
     for (let index = 0; index < this._jointMatrices.length; index++) {
       const jointMatrix = this._jointMatrices[index];
       jointMatrix.multiply(this.joints[index].worldTransform, this.inverseBindMatrices.slice(index * 16, index * 16 + 16));
@@ -51,10 +35,8 @@ export default class GLTFSkin {
       normalMatrix.invert(jointMatrix);
       normalMatrix.transpose();
 
-      data.set(this._jointMatrices[index], index * 32);
-      data.set(this._jointNormalMatrices[index], index * 32 + 16);
+      this.jointMatricesTextureData.set(this._jointMatrices[index], index * 32);
+      this.jointMatricesTextureData.set(this._jointNormalMatrices[index], index * 32 + 16);
     }
-
-    this.jointMatricesTexture.data = data;
   }
 }
