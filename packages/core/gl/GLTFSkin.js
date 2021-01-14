@@ -40,21 +40,21 @@ export default class GLTFSkin {
     this.updateJointsTexture();
   }
 
-  updateJointMatrix(index, jointWorldTransform) {
-    const jointMatrix = this._jointMatrices[index];
-    jointMatrix.multiply(jointWorldTransform, this.inverseBindMatrices.slice(index * 16, index * 16 + 16));
-
-    const normalMatrix = this._jointNormalMatrices[index];
-    normalMatrix.invert(jointMatrix);
-    normalMatrix.transpose();
-  }
-
   updateJointsTexture() {
     const data = this.jointMatricesTexture.data;
+
     for (let index = 0; index < this._jointMatrices.length; index++) {
+      const jointMatrix = this._jointMatrices[index];
+      jointMatrix.multiply(this.joints[index].worldTransform, this.inverseBindMatrices.slice(index * 16, index * 16 + 16));
+
+      const normalMatrix = this._jointNormalMatrices[index];
+      normalMatrix.invert(jointMatrix);
+      normalMatrix.transpose();
+
       data.set(this._jointMatrices[index], index * 32);
       data.set(this._jointNormalMatrices[index], index * 32 + 16);
     }
+
     this.jointMatricesTexture.data = data;
   }
 }

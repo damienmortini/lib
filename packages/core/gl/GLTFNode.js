@@ -17,6 +17,10 @@ export default class GLTFNode {
     if (!data.matrix) {
       this.updateMatrix();
     }
+
+    this.worldTransform = new Matrix4();
+    this.inverseWorldTransform = new Matrix4();
+    this.normalMatrix = new Matrix4();
   }
 
   updateMatrix() {
@@ -29,17 +33,5 @@ export default class GLTFNode {
 
   set weights(value) {
     if (this.mesh) this.mesh.weights = value;
-  }
-
-  draw(...args) {
-    if (!this.mesh) return;
-    this.mesh.draw(...args);
-  }
-
-  updateSkin() {
-    if (!this.skin || !this.mesh) {
-      return;
-    }
-    this.mesh.updateSkin(this.skin);
   }
 }

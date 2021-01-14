@@ -83,14 +83,4 @@ export default class GLTFPrimitive {
       program: this.material.program,
     });
   }
-
-  draw(...args) {
-    this._object.draw(...args);
-  }
-
-  updateSkin(skin) {
-    this.material.program.use();
-    this.material.program.uniforms.set('jointMatricesTexture', skin.jointMatricesTexture);
-    this.material.program.uniforms.set('jointMatricesTextureSize', skin.jointMatricesTextureSize);
-  }
 }
