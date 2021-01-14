@@ -17,16 +17,4 @@ export default class GLTFMesh {
       this.primitives.push(primitive);
     }
   }
-
-  draw(...args) {
-    for (const primitive of this.primitives) {
-      primitive.draw(...args);
-    }
-  }
-
-  updateSkin(skin) {
-    for (const primitive of this.primitives) {
-      primitive.updateSkin(skin);
-    }
-  }
 }
