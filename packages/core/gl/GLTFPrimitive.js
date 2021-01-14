@@ -1,8 +1,4 @@
-import GLBuffer from './GLBuffer.js';
-import GLMesh from './GLMesh.js';
-import GLObject from './GLObject.js';
 import GLTFMaterial from './GLTFMaterial.js';
-import GLVertexAttribute from './GLVertexAttribute.js';
 
 const ATTRIBUTE_NAME_MAP = new Map([
   ['POSITION', 'position'],
@@ -22,7 +18,6 @@ export default class GLTFPrimitive {
     this.attributes = data.attributes;
     this.indices = data.indices;
     this.computedAttributes = new Map();
-    this.computedIndices = null;
 
     const targetAttributes = new Map();
     if (data.targets) {
@@ -37,41 +32,5 @@ export default class GLTFPrimitive {
     for (const [attributeName, attribute] of [...Object.entries(data.attributes), ...targetAttributes]) {
       this.computedAttributes.set(ATTRIBUTE_NAME_MAP.get(attributeName) ?? attributeName, attribute);
     }
-
-    const vertexAttributes = new Map();
-    for (const [attributeName, attribute] of this.computedAttributes) {
-      vertexAttributes.set(attributeName, new GLVertexAttribute({
-        gl,
-        ...attribute,
-        buffer: new GLBuffer({
-          gl,
-          data: attribute.buffer,
-        }),
-      }));
-    }
-
-    if (data.indices) {
-      this.computedIndices = new GLVertexAttribute({
-        gl,
-        ...data.indices,
-        buffer: new GLBuffer({
-          gl,
-          data: data.indices.buffer,
-          target: gl.ELEMENT_ARRAY_BUFFER,
-        }),
-      });
-    }
-
-    this._mesh = new GLMesh({
-      gl,
-      attributes: vertexAttributes,
-      indices: this.computedIndices,
-    });
-
-    this._object = new GLObject({
-      gl,
-      mesh: this._mesh,
-      program: this.material.program,
-    });
   }
 }
