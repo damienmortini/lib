@@ -6,10 +6,13 @@ export default class GLTFAnimation {
   constructor({
     data,
   }) {
-    this._channels = data.channels;
+    this.name = data.name;
+    this.channels = data.channels;
+    this.samplers = data.samplers;
+
     this._duration = 0;
 
-    for (const channel of data.channels) {
+    for (const channel of this.channels) {
       this._duration = Math.max(this._duration, channel.sampler.input[channel.sampler.input.length - 1]);
     }
 
@@ -31,7 +34,7 @@ export default class GLTFAnimation {
     this._currentTime = value;
     NODES_NEEDING_MATRIX_UPDATE.clear();
 
-    for (const channel of this._channels) {
+    for (const channel of this.channels) {
       const node = channel.target.node;
       const inputArray = channel.sampler.input;
       const outputArray = channel.sampler.output;
@@ -63,7 +66,7 @@ export default class GLTFAnimation {
     }
 
     for (const node of NODES_NEEDING_MATRIX_UPDATE) {
-      node.matrix.fromTranslationRotationScale(node.translation, node.rotation, node.scale);
+      if (node.matrix) node.matrix.fromTranslationRotationScale(node.translation, node.rotation, node.scale);
     }
   }
 }
