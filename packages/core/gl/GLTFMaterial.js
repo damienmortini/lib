@@ -49,12 +49,36 @@ const MORPH_TARGET_SHADER = {
   ],
 };
 
+const buildMorphTargetChunks = (morphTargetsNumber) => {
+  let startChunk = `
+uniform float morphTargetWeights[${morphTargetsNumber}];
+`;
+  for (let index = 0; index < morphTargetsNumber; index++) {
+    startChunk += `
+in vec3 morphTargetPosition${index};
+in vec3 morphTargetNormal${index};
+`;
+  }
+
+  let mainChunk = '';
+  for (let index = 0; index < morphTargetsNumber; index++) {
+    mainChunk += `
+position += morphTargetWeights[${index}] * morphTargetPosition${index};
+normal += morphTargetWeights[${index}] * morphTargetNormal${index};
+`;
+  }
+  return [
+    ['start', startChunk],
+    ['main', mainChunk],
+  ];
+};
+
 export default class GLTFMaterial {
   constructor({
     gl,
     data = null,
     skin = false,
-    morphTargets = false,
+    morphTargetsNumber = 0,
   }) {
     this.name = data?.name;
 
@@ -64,7 +88,7 @@ export default class GLTFMaterial {
         normals: true,
         uvs: true,
         vertexChunks: [
-          ...(morphTargets ? MORPH_TARGET_SHADER.vertexChunks : []),
+          ...(morphTargetsNumber ? buildMorphTargetChunks(morphTargetsNumber) : []),
           ...(skin ? SKIN_SHADER.vertexChunks : []),
           ['main', `
             vec3 position = position;

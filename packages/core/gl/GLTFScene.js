@@ -76,12 +76,14 @@ export default class GLTFScene {
 
   draw({ uniforms = {} } = {}) {
     for (const node of this._flattenedNodes) {
+      uniforms = {
+        transform: this._nodeWorldTransformMap.get(node),
+        ...uniforms,
+      };
+      if (node.weights) uniforms.morphTargetWeights = node.weights;
       node.draw({
         bind: true,
-        uniforms: {
-          ...uniforms,
-          transform: this._nodeWorldTransformMap.get(node),
-        },
+        uniforms,
       });
     }
   }
