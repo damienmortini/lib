@@ -48,16 +48,7 @@ export default class GLTFScene {
 
   update({ animations = [] } = {}) {
     for (const node of this._flattenedNodes) {
-      const transform = this._nodeWorldTransformMap.get(node).copy(node.matrix);
-      for (const animation of animations) {
-        const nodeProperties = animation.nodePropertiesMap.get(node);
-        if (!nodeProperties) {
-          continue;
-        }
-        if (nodeProperties.translation || nodeProperties.rotation || nodeProperties.scale) {
-          transform.fromTranslationRotationScale(nodeProperties.translation, nodeProperties.rotation, nodeProperties.scale);
-        }
-      }
+      this._nodeWorldTransformMap.get(node).copy(node.matrix);
     }
     for (const node of this.nodes) {
       this._traverseAndUpdateTransforms(node);
@@ -76,14 +67,13 @@ export default class GLTFScene {
 
   draw({ uniforms = {} } = {}) {
     for (const node of this._flattenedNodes) {
-      uniforms = {
-        transform: this._nodeWorldTransformMap.get(node),
-        ...uniforms,
-      };
-      if (node.weights) uniforms.morphTargetWeights = node.weights;
       node.draw({
         bind: true,
-        uniforms,
+        uniforms: {
+          transform: this._nodeWorldTransformMap.get(node),
+          ...(node.weights ? { morphTargetWeights: node.weights } : null),
+          ...uniforms,
+        },
       });
     }
   }
