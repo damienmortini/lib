@@ -2,9 +2,6 @@ import Matrix4 from '../math/Matrix4.js';
 import Quaternion from '../math/Quaternion.js';
 import Vector3 from '../math/Vector3.js';
 
-const QUATERNION = new Quaternion();
-const MATRIX4 = new Matrix4();
-
 export default class GLTFNode {
   constructor({
     gl,
@@ -24,15 +21,7 @@ export default class GLTFNode {
   }
 
   updateMatrix() {
-    this.matrix.scale(this.scale);
-
-    QUATERNION.copy(this.rotation);
-    MATRIX4.fromQuaternion(QUATERNION);
-    this.matrix.multiply(MATRIX4);
-
-    this.matrix.x = this.translation[0];
-    this.matrix.y = this.translation[1];
-    this.matrix.z = this.translation[2];
+    this.matrix.fromTranslationRotationScale(this.translation, this.rotation, this.scale);
   }
 
   get weights() {

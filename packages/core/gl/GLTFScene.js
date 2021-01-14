@@ -48,11 +48,16 @@ export default class GLTFScene {
 
   update({ animations = [] } = {}) {
     for (const node of this._flattenedNodes) {
-      let animationTransform = null;
+      const transform = this._nodeWorldTransformMap.get(node).copy(node.matrix);
       for (const animation of animations) {
-        animationTransform = animation.nodePropertiesMap.get(node)?.transform || animationTransform;
+        const nodeProperties = animation.nodePropertiesMap.get(node);
+        if (!nodeProperties) {
+          continue;
+        }
+        if (nodeProperties.translation || nodeProperties.rotation || nodeProperties.scale) {
+          transform.fromTranslationRotationScale(nodeProperties.translation, nodeProperties.rotation, nodeProperties.scale);
+        }
       }
-      this._nodeWorldTransformMap.get(node).copy(animationTransform || node.matrix);
     }
     for (const node of this.nodes) {
       this._traverseAndUpdateTransforms(node);
