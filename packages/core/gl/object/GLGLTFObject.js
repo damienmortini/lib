@@ -1,5 +1,9 @@
+import GLBuffer from '../GLBuffer.js';
+import GLMesh from '../GLMesh.js';
+import GLObject from '../GLObject.js';
 import GLTexture from '../GLTexture.js';
 import GLTFLoader from '../GLTFLoader.js';
+import GLVertexAttribute from '../GLVertexAttribute.js';
 
 export default class GLGLTFObject {
   constructor({
@@ -12,6 +16,7 @@ export default class GLGLTFObject {
     this._currentTime = 0;
     this._duration = 0;
     this._skinTextures = new Map();
+    this._primitiveObjects = new Map();
 
     this.ready = this._load(src);
   }
@@ -40,6 +45,40 @@ export default class GLGLTFObject {
         flipY: false,
       });
       this._skinTextures.set(skin, texture);
+    }
+
+    for (const mesh of this.gltf.meshes) {
+      for (const primitive of mesh.primitives) {
+        const vertexAttributes = new Map();
+        for (const [attributeName, attribute] of primitive.computedAttributes) {
+          vertexAttributes.set(attributeName, new GLVertexAttribute({
+            gl: this.gl,
+            ...attribute,
+            buffer: new GLBuffer({
+              gl: this.gl,
+              data: attribute.buffer,
+            }),
+          }));
+        }
+
+        this._primitiveObjects.set(primitive, new GLObject({
+          gl: this.gl,
+          mesh: new GLMesh({
+            gl: this.gl,
+            attributes: vertexAttributes,
+            indices: primitive.indices ? new GLVertexAttribute({
+              gl: this.gl,
+              ...primitive.indices,
+              buffer: new GLBuffer({
+                gl: this.gl,
+                data: primitive.indices.buffer,
+                target: this.gl.ELEMENT_ARRAY_BUFFER,
+              }),
+            }) : null,
+          }),
+          program: primitive.material.program,
+        }));
+      }
     }
   }
 
@@ -74,8 +113,7 @@ export default class GLGLTFObject {
 
     for (const node of scene.flattenedNodesWithMesh) {
       for (const primitive of node.mesh.primitives) {
-        const object = primitive._object;
-        // const object = this._primitiveObjectMap.get(primitive);
+        const object = this._primitiveObjects.get(primitive);
         object.draw({
           bind: true,
           uniforms: {
