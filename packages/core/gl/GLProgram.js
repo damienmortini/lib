@@ -24,7 +24,7 @@ export default class GLProgram {
     const self = this;
 
     class Attributes extends Map {
-      set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = undefined, componentType = gl.FLOAT, normalized = false, byteStride = 0, byteOffset = 0, divisor = 0 } = {}) {
+      set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = 1, componentType = gl.FLOAT, normalized = false, byteStride = 0, byteOffset = 0, divisor = 0 } = {}) {
         if (name instanceof Map) {
           for (const [key, value] of name) {
             this.set(key, value);

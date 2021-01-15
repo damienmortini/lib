@@ -1,5 +1,3 @@
-import GLTFMaterial from './GLTFMaterial.js';
-
 const ATTRIBUTE_NAME_MAP = new Map([
   ['POSITION', 'position'],
   ['NORMAL', 'normal'],
@@ -10,11 +8,8 @@ const ATTRIBUTE_NAME_MAP = new Map([
 
 export default class GLTFPrimitive {
   constructor({
-    gl,
     data,
   }) {
-    this.material = new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargetsNumber: data.targets?.length });
-    // this.material = data.material ?? new GLTFMaterial({ gl, skin: !!data.attributes['JOINTS_0'], morphTargets: !!data.targets });
     this.attributes = data.attributes;
     this.indices = data.indices;
     this.computedAttributes = new Map();

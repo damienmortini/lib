@@ -2,7 +2,6 @@ import GLTFPrimitive from './GLTFPrimitive.js';
 
 export default class GLTFMesh {
   constructor({
-    gl,
     data,
   }) {
     this.name = data.name;
@@ -11,7 +10,6 @@ export default class GLTFMesh {
     this.primitives = [];
     for (const primitiveData of data.primitives) {
       const primitive = new GLTFPrimitive({
-        gl,
         data: primitiveData,
       });
       this.primitives.push(primitive);
