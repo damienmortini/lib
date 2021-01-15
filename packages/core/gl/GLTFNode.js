@@ -19,10 +19,15 @@ export default class GLTFNode {
     }
 
     this.worldTransform = new Matrix4();
+    this.normalMatrix = this.mesh ? new Matrix4() : null;
   }
 
   updateMatrix() {
     this.matrix.fromTranslationRotationScale(this.translation, this.rotation, this.scale);
+  }
+
+  updateNormalMatrix() {
+    if (this.normalMatrix) this.normalMatrix.copy(this.worldTransform).invert().transpose();
   }
 
   get weights() {

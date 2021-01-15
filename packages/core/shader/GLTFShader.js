@@ -14,6 +14,7 @@ export default class GLTFShader extends Shader {
         ['start', `
           uniform mat4 projectionView;
           uniform mat4 transform;
+          uniform mat4 normalMatrix;
           uniform vec3 cameraPosition;
           uniform bool skinned;
           
@@ -51,7 +52,7 @@ export default class GLTFShader extends Shader {
         `],
         ['main', `
           vec3 position = position;
-          vec3 normal = normalize(mat3(transform) * normal);
+          vec3 normal = normal;
 
           position += morphTargetWeights[0] * morphTargetPosition0;
           position += morphTargetWeights[1] * morphTargetPosition1;
@@ -69,6 +70,8 @@ export default class GLTFShader extends Shader {
             mat4 skinNormalMatrix = getSkinMatrix(ivec4(joint), weight, jointMatricesTexture, jointMatricesTextureSize, 1, 8);
             normal = (skinNormalMatrix * vec4(normal, 1.)).xyz;
           }
+
+          normal = normalize((normalMatrix * vec4(normal, 1.)).xyz);
 
           vec3 worldPosition = (transform * vec4(position, 1.)).xyz;
         `],
