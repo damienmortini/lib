@@ -6,6 +6,7 @@ import GLTFAnimation from './GLTFAnimation.js';
 import GLTFScene from './GLTFScene.js';
 import GLTFSkin from './GLTFSkin.js';
 import GLTFAccessor from './GLTFAccessor.js';
+import GLTFMaterial from './GLTFMaterial.js';
 
 export class GLTFLoader extends Loader {
   constructor() {
@@ -99,12 +100,10 @@ export class GLTFLoader extends Loader {
 
     data.scene = data.scenes[data.scene];
 
-    if (data.skins) {
-      for (const skin of data.skins) {
-        skin.inverseBindMatrices = data.accessors[skin.inverseBindMatrices];
-        for (let index = 0; index < skin.joints.length; index++) {
-          skin.joints[index] = data.nodes[skin.joints[index]];
-        }
+    for (const skin of data.skins ?? []) {
+      skin.inverseBindMatrices = data.accessors[skin.inverseBindMatrices];
+      for (let index = 0; index < skin.joints.length; index++) {
+        skin.joints[index] = data.nodes[skin.joints[index]];
       }
     }
 
@@ -121,25 +120,24 @@ export class GLTFLoader extends Loader {
           }
         }
         primitive.indices = data.accessors[primitive.indices];
+        primitive.material = data.materials[primitive.material];
       }
     }
 
-    if (data.animations) {
-      const animationData = new Map();
-      for (const animation of data.animations) {
-        for (const sampler of animation.samplers) {
-          for (const type of ['input', 'output']) {
-            if (!animationData.get(sampler[type])) {
-              const bufferView = data.accessors[sampler[type]].bufferView;
-              animationData.set(sampler[type], new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT));
-            }
-            sampler[type] = animationData.get(sampler[type]);
+    const animationData = new Map();
+    for (const animation of data.animations ?? []) {
+      for (const sampler of animation.samplers) {
+        for (const type of ['input', 'output']) {
+          if (!animationData.get(sampler[type])) {
+            const bufferView = data.accessors[sampler[type]].bufferView;
+            animationData.set(sampler[type], new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT));
           }
+          sampler[type] = animationData.get(sampler[type]);
         }
-        for (const channel of animation.channels) {
-          channel.sampler = animation.samplers[channel.sampler];
-          channel.target.node = data.nodes[channel.target.node];
-        }
+      }
+      for (const channel of animation.channels) {
+        channel.sampler = animation.samplers[channel.sampler];
+        channel.target.node = data.nodes[channel.target.node];
       }
     }
 
@@ -158,10 +156,21 @@ export class GLTFLoader extends Loader {
       accessorsDataMap.set(accessorData, accessor);
     }
 
+    // Materials
+    if (data.materials) {
+      for (let index = 0; index < data.materials.length; index++) {
+        const material = new GLTFMaterial({ data: data.materials[index] });
+        data.materials[index] = material;
+      }
+    }
+
     // Meshes
     for (let index = 0; index < data.meshes.length; index++) {
       const meshData = data.meshes[index];
-      for (const primitiveData of meshData.primitives) {
+      const meshRawData = data.raw.meshes[index];
+      for (let index = 0; index < meshData.primitives.length; index++) {
+        const primitiveData = meshData.primitives[index];
+        const primitiveRawData = meshRawData.primitives[index];
         for (const [key, accessorData] of Object.entries(primitiveData.attributes)) {
           primitiveData.attributes[key] = accessorsDataMap.get(accessorData);
         }
@@ -173,6 +182,7 @@ export class GLTFLoader extends Loader {
           }
         }
         primitiveData.indices = accessorsDataMap.get(primitiveData.indices);
+        primitiveData.material = data.materials[primitiveRawData.material];
       }
       const mesh = new GLTFMesh({ data: meshData });
       data.meshes[index] = mesh;
