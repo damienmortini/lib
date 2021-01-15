@@ -1,6 +1,8 @@
+import GLTFShader from '../../shader/GLTFShader.js';
 import GLBuffer from '../GLBuffer.js';
 import GLMesh from '../GLMesh.js';
 import GLObject from '../GLObject.js';
+import GLProgram from '../GLProgram.js';
 import GLTexture from '../GLTexture.js';
 import GLTFLoader from '../GLTFLoader.js';
 import GLVertexAttribute from '../GLVertexAttribute.js';
@@ -15,15 +17,15 @@ export default class GLGLTFObject {
 
     this._currentTime = 0;
     this._duration = 0;
-    this._skinTextures = new Map();
-    this._primitiveObjects = new Map();
+    this._skinTextureMap = new Map();
+    this._materialProgramMap = new Map();
+    this._primitiveObjectMap = new Map();
 
     this.ready = this._load(src);
   }
 
   async _load(src) {
     this.gltf = await GLTFLoader.load({
-      gl: this.gl,
       src,
     });
 
@@ -44,7 +46,31 @@ export default class GLGLTFObject {
         height: skin.jointMatricesTextureSize[1],
         flipY: false,
       });
-      this._skinTextures.set(skin, texture);
+      this._skinTextureMap.set(skin, texture);
+    }
+
+    const defaultProgram = new GLProgram({
+      gl: this.gl,
+      shader: new GLTFShader({
+        fragmentChunks: [
+          ['end', `
+            fragColor = vec4(vNormal * .5 + .5, 1.);
+          `],
+        ],
+      }),
+    });
+    for (const material of this.gltf.materials ?? []) {
+      const program = new GLProgram({
+        gl: this.gl,
+        shader: new GLTFShader({
+          fragmentChunks: [
+            ['end', `
+              fragColor = vec4(vNormal * .5 + .5, 1.);
+            `],
+          ],
+        }),
+      });
+      this._materialProgramMap.set(material, program);
     }
 
     for (const mesh of this.gltf.meshes) {
@@ -61,7 +87,14 @@ export default class GLGLTFObject {
           }));
         }
 
-        this._primitiveObjects.set(primitive, new GLObject({
+        if (!vertexAttributes.has('joint')) {
+          vertexAttributes.set('joint', new GLVertexAttribute({
+            gl: this.gl,
+            componentType: this.gl.UNSIGNED_INT,
+          }));
+        }
+
+        this._primitiveObjectMap.set(primitive, new GLObject({
           gl: this.gl,
           mesh: new GLMesh({
             gl: this.gl,
@@ -76,7 +109,7 @@ export default class GLGLTFObject {
               }),
             }) : null,
           }),
-          program: primitive.material.program,
+          program: defaultProgram,
         }));
       }
     }
@@ -108,12 +141,12 @@ export default class GLGLTFObject {
 
     for (const skin of this.gltf.skins ?? []) {
       skin.updateJointsTextureData();
-      this._skinTextures.get(skin).data = skin.jointMatricesTextureData;
+      this._skinTextureMap.get(skin).data = skin.jointMatricesTextureData;
     }
 
     for (const node of scene.flattenedNodesWithMesh) {
       for (const primitive of node.mesh.primitives) {
-        const object = this._primitiveObjects.get(primitive);
+        const object = this._primitiveObjectMap.get(primitive);
         object.draw({
           bind: true,
           uniforms: {
@@ -121,7 +154,8 @@ export default class GLGLTFObject {
             normalMatrix: node.normalMatrix,
             ...(node.weights ? { morphTargetWeights: node.weights } : null),
             ...(node.skin ? {
-              jointMatricesTexture: this._skinTextures.get(node.skin),
+              skinned: true,
+              jointMatricesTexture: this._skinTextureMap.get(node.skin),
               jointMatricesTextureSize: node.skin.jointMatricesTextureSize,
             } : null),
             ...uniforms,

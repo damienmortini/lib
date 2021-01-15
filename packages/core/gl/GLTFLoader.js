@@ -146,7 +146,7 @@ export class GLTFLoader extends Loader {
     return data;
   }
 
-  async build({ gl, data }) {
+  async build({ data }) {
     data = await this.parse(data);
 
     // Accessors
@@ -165,9 +165,16 @@ export class GLTFLoader extends Loader {
         for (const [key, accessorData] of Object.entries(primitiveData.attributes)) {
           primitiveData.attributes[key] = accessorsDataMap.get(accessorData);
         }
+        if (primitiveData.targets) {
+          for (const target of primitiveData.targets) {
+            if (target.POSITION) target.POSITION = accessorsDataMap.get(target.POSITION);
+            if (target.NORMAL) target.NORMAL = accessorsDataMap.get(target.NORMAL);
+            if (target.TANGENT) target.TANGENT = accessorsDataMap.get(target.TANGENT);
+          }
+        }
         primitiveData.indices = accessorsDataMap.get(primitiveData.indices);
       }
-      const mesh = new GLTFMesh({ gl, data: meshData });
+      const mesh = new GLTFMesh({ data: meshData });
       data.meshes[index] = mesh;
     }
 
@@ -237,7 +244,7 @@ export class GLTFLoader extends Loader {
 
   async _loadFile(options) {
     const data = await super._loadFile(options);
-    return options.gl ? await this.build({ gl: options.gl, data }) : await this.parse(data);
+    return options.parseOnly ? await this.parse(data) : await this.build({ data });
   }
 }
 
