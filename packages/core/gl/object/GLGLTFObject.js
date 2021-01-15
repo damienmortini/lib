@@ -1,4 +1,3 @@
-import Matrix4 from '../../math/Matrix4.js';
 import GLTFShader from '../../shader/GLTFShader.js';
 import GLBuffer from '../GLBuffer.js';
 import GLMesh from '../GLMesh.js';
