@@ -1,6 +1,5 @@
 import LightShader from './LightShader.js';
 import RayShader from './RayShader.js';
-import CameraShader from './CameraShader.js';
 import Shader from '../3d/Shader.js';
 
 export default class PBRShader extends Shader {
@@ -245,10 +244,7 @@ export default class PBRShader extends Shader {
       }, uniforms),
       vertexChunks: [
         ['start', `
-            ${CameraShader.Camera}
-            ${RayShader.Ray}
-            
-            uniform Camera camera;
+            uniform vec3 cameraPosition;
             uniform mat4 projectionView;
             uniform mat4 transform;
     
@@ -260,16 +256,16 @@ export default class PBRShader extends Shader {
             out vec3 vNormal;
             ${uvs ? 'out vec2 vUV;' : ''}
             out vec3 vViewDirection;
-    
-            ${RayShader.rayFromCamera()}
          `],
         ['end', `
           ${uvs ? 'vUV = uv;' : ''}
-          gl_Position = camera.projectionView * transform * vec4(position, 1.);
+
+          vec3 worldPosition = (transform * vec4(position, 1.)).xyz;
+          gl_Position = projectionView * vec4(worldPosition, 1.);
+
           vPosition = position;
           vNormal = mat3(transform) * normal;
-          Ray ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
-          vViewDirection = ray.direction;
+          vViewDirection = normalize(worldPosition - cameraPosition);
         `],
         ...vertexChunks,
       ],
