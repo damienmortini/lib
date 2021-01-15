@@ -1,3 +1,4 @@
+import Matrix4 from '../../math/Matrix4.js';
 import GLTFShader from '../../shader/GLTFShader.js';
 import GLBuffer from '../GLBuffer.js';
 import GLMesh from '../GLMesh.js';
@@ -5,15 +6,18 @@ import GLObject from '../GLObject.js';
 import GLProgram from '../GLProgram.js';
 import GLTexture from '../GLTexture.js';
 import GLTFLoader from '../GLTFLoader.js';
+import GLTFNode from '../GLTFNode.js';
 import GLVertexAttribute from '../GLVertexAttribute.js';
 
-export default class GLGLTFObject {
+export default class GLLGTFObject extends GLTFNode {
   constructor({
     gl,
     src,
   }) {
+    super();
+
     this.gl = gl;
-    this.gltf = null;
+    this._gltf = null;
 
     this._currentTime = 0;
     this._duration = 0;
@@ -25,15 +29,15 @@ export default class GLGLTFObject {
   }
 
   async _load(src) {
-    this.gltf = await GLTFLoader.load({
+    this._gltf = await GLTFLoader.load({
       src,
     });
 
-    for (const animation of this.gltf.animations) {
+    for (const animation of this._gltf.animations) {
       this._duration = Math.max(this._duration, animation.duration);
     }
 
-    for (const skin of this.gltf.skins ?? []) {
+    for (const skin of this._gltf.skins ?? []) {
       const texture = new GLTexture({
         gl: this.gl,
         data: skin.jointMatricesData,
@@ -59,7 +63,7 @@ export default class GLGLTFObject {
         ],
       }),
     });
-    for (const material of this.gltf.materials ?? []) {
+    for (const material of this._gltf.materials ?? []) {
       const program = new GLProgram({
         gl: this.gl,
         shader: new GLTFShader({
@@ -73,7 +77,7 @@ export default class GLGLTFObject {
       this._materialProgramMap.set(material, program);
     }
 
-    for (const mesh of this.gltf.meshes) {
+    for (const mesh of this._gltf.meshes) {
       for (const primitive of mesh.primitives) {
         const vertexAttributes = new Map();
         for (const [attributeName, attribute] of primitive.computedAttributes) {
@@ -113,6 +117,10 @@ export default class GLGLTFObject {
         }));
       }
     }
+
+    const scene = this._gltf.scene ?? this._gltf.scenes[0];
+    this.children = scene.nodes;
+    scene.nodes = [this];
   }
 
   get duration() {
@@ -125,21 +133,21 @@ export default class GLGLTFObject {
 
   set currentTime(value) {
     this._currentTime = value;
-    for (const animation of this.gltf?.animations ?? []) {
+    for (const animation of this._gltf?.animations ?? []) {
       animation.currentTime = this._currentTime;
     }
   }
 
   draw({ uniforms }) {
-    if (!this.gltf) {
+    if (!this._gltf) {
       return;
     }
 
-    const scene = this.gltf.scene ?? this.gltf.scenes[0];
+    const scene = this._gltf.scene ?? this._gltf.scenes[0];
 
     scene.updateWorldTransforms();
 
-    for (const skin of this.gltf.skins ?? []) {
+    for (const skin of this._gltf.skins ?? []) {
       skin.updateJointsTextureData();
       this._skinTextureMap.get(skin).data = skin.jointMatricesTextureData;
     }

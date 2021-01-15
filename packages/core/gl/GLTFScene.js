@@ -30,7 +30,7 @@ export default class GLTFScene {
 
   _traverseAndUpdateTransforms(node) {
     for (const child of node.children) {
-      if (child.skin?.name !== node.name) { // fix for skin matrix applied twice, might need more fine tuning
+      if (node.name === undefined || child.skin?.name !== node.name) { // fix for skin matrix applied twice, might need more fine tuning
         child.worldTransform.multiply(node.worldTransform, child.matrix);
       }
       this._traverseAndUpdateTransforms(child);
