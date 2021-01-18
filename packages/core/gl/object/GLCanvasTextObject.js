@@ -1,4 +1,4 @@
-import GLMesh from '../GLMesh.js';
+import GLGeometry from '../GLGeometry.js';
 import GLProgram from '../GLProgram.js';
 import GLTexture from '../GLTexture.js';
 import Matrix4 from '../../math/Matrix4.js';
@@ -61,7 +61,7 @@ export default class GLCanvasTextObject {
       minFilter: this.gl.LINEAR,
     });
 
-    this.mesh = new GLMesh({
+    this.geometry = new GLGeometry({
       gl: this.gl,
       attributes: [
         ['position', {
@@ -187,14 +187,14 @@ export default class GLCanvasTextObject {
 
   draw({ projectionView = undefined } = {}) {
     this.program.use();
-    this.program.attributes.set(this.mesh.attributes);
+    this.program.attributes.set(this.geometry.attributes);
     if (projectionView) {
       this.program.uniforms.set('projectionView', projectionView);
     }
     this.program.uniforms.set('scaleOffset', this._scaleOffset);
     this.program.uniforms.set('transform', this.transform);
     this._texture.bind();
-    this.mesh.draw({
+    this.geometry.draw({
       mode: this.gl.TRIANGLE_STRIP,
       count: 4,
     });

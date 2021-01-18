@@ -204,8 +204,8 @@ export default class GLMSDFTextObject extends GLPlaneObject {
       }
     }
 
-    this.mesh.attributes.get('msdfTextGlyphIndex').data = glyphIndexes;
-    this.mesh.attributes.get('msdfTextGlyphPosition').data = glyphPositions;
+    this.geometry.attributes.get('msdfTextGlyphIndex').data = glyphIndexes;
+    this.geometry.attributes.get('msdfTextGlyphPosition').data = glyphPositions;
   }
 
   draw(options) {

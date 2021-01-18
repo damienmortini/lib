@@ -1,6 +1,6 @@
-import PlaneMesh from '../../3d/mesh/PlaneMesh.js';
+import PlaneGeometry from '../../3d/geometry/PlaneGeometry.js';
 import GLObject from '../GLObject.js';
-import GLMesh from '../GLMesh.js';
+import GLGeometry from '../GLGeometry.js';
 import GLProgram from '../GLProgram.js';
 import Shader from '../../3d/Shader.js';
 
@@ -30,10 +30,10 @@ export default class GLPlaneObject extends GLObject {
   }) {
     super({
       gl,
-      mesh: new GLMesh(Object.assign({
+      geometry: new GLGeometry(Object.assign({
         gl,
         attributes,
-      }, new PlaneMesh({
+      }, new PlaneGeometry({
         width,
         height,
         columns,

@@ -1,4 +1,4 @@
-export default class PlaneMesh {
+export default class PlaneGeometry {
   constructor({
     width = 1,
     height = 1,

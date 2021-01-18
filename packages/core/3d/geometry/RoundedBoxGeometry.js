@@ -1,11 +1,11 @@
 // Adapted from Marcin Ignac https://github.com/vorg/primitive-rounded-cube
 
-import BoxMesh from './BoxMesh.js';
+import BoxGeometry from './BoxGeometry.js';
 import Vector3 from '../../math/Vector3.js';
 
 const VECTOR3 = new Vector3();
 
-export default class RoundedBoxMesh extends BoxMesh {
+export default class RoundedBoxGeometry extends BoxGeometry {
   constructor({
     width = 1,
     height = 1,

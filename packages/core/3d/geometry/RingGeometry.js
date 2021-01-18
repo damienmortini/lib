@@ -3,7 +3,7 @@
 import Vector3 from '../../math/Vector3.js';
 import Vector2 from '../../math/Vector2.js';
 
-export default class RingMesh {
+export default class RingGeometry {
   constructor({
     innerRadius = .5,
     outerRadius = 1,

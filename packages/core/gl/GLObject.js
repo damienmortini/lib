@@ -4,16 +4,16 @@ import GLTexture from './GLTexture.js';
 export default class GLObject {
   constructor({
     gl,
-    mesh = undefined,
+    geometry = undefined,
     program = undefined,
     vertexArray = new GLVertexArray({
       gl,
-      mesh,
+      geometry,
       program,
     }),
   }) {
     this.gl = gl;
-    this.mesh = mesh;
+    this.geometry = geometry;
     this.program = program;
     this.vertexArray = vertexArray;
 
@@ -47,7 +47,7 @@ export default class GLObject {
     if (options.bind) {
       this.bind();
     }
-    this.mesh.draw(options);
+    this.geometry.draw(options);
     if (options.bind) {
       this.unbind();
     }
