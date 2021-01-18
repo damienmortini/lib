@@ -8,7 +8,7 @@ import GLTFLoader from '../GLTFLoader.js';
 import GLTFNode from '../GLTFNode.js';
 import GLVertexAttribute from '../GLVertexAttribute.js';
 
-export default class GLLGTFObject extends GLTFNode {
+export default class GLGLTFObject extends GLTFNode {
   constructor({
     gl,
     src,

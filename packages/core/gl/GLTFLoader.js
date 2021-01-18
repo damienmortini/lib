@@ -120,7 +120,7 @@ export class GLTFLoader extends Loader {
           }
         }
         primitive.indices = data.accessors[primitive.indices];
-        primitive.material = data.materials[primitive.material];
+        if (primitive.material !== undefined) primitive.material = data.materials[primitive.material];
       }
     }
 
@@ -182,7 +182,7 @@ export class GLTFLoader extends Loader {
           }
         }
         primitiveData.indices = accessorsDataMap.get(primitiveData.indices);
-        primitiveData.material = data.materials[primitiveRawData.material];
+        if (primitiveData.material !== undefined) primitiveData.material = data.materials[primitiveRawData.material];
       }
       const mesh = new GLTFMesh({ data: meshData });
       data.meshes[index] = mesh;
