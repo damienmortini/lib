@@ -12,12 +12,27 @@ export default class GLGLTFObject extends GLTFNode {
   constructor({
     gl,
     src,
+    program = new GLProgram({
+      gl,
+      shader: new GLTFShader({
+        fragmentChunks: [
+          ['end', `
+            fragColor = vec4(vNormal * .5 + .5, 1.);
+          `],
+        ],
+      }),
+    }),
   }) {
     super();
 
     this.gl = gl;
-    this._gltf = null;
+    this.program = program;
 
+    this.meshes = new Map();
+    this.programs = new Map();
+    this.animations = new Map();
+
+    this._gltf = null;
     this._currentTime = 0;
     this._duration = 0;
     this._skinTextureMap = new Map();
@@ -32,8 +47,9 @@ export default class GLGLTFObject extends GLTFNode {
       src,
     });
 
-    for (const animation of this._gltf.animations) {
+    for (const [index, animation] of this._gltf.animations?.entries() ?? []) {
       this._duration = Math.max(this._duration, animation.duration);
+      this.animations.set(animation.name ?? index, animation);
     }
 
     for (const skin of this._gltf.skins ?? []) {
@@ -52,17 +68,7 @@ export default class GLGLTFObject extends GLTFNode {
       this._skinTextureMap.set(skin, texture);
     }
 
-    const defaultProgram = new GLProgram({
-      gl: this.gl,
-      shader: new GLTFShader({
-        fragmentChunks: [
-          ['end', `
-            fragColor = vec4(vNormal * .5 + .5, 1.);
-          `],
-        ],
-      }),
-    });
-    for (const material of this._gltf.materials ?? []) {
+    for (const [index, material] of this._gltf.materials?.entries() ?? []) {
       const program = new GLProgram({
         gl: this.gl,
         shader: new GLTFShader({
@@ -74,9 +80,11 @@ export default class GLGLTFObject extends GLTFNode {
         }),
       });
       this._materialProgramMap.set(material, program);
+      this.programs.set(material.name ?? index, program);
     }
 
-    for (const mesh of this._gltf.meshes) {
+    for (const [index, mesh] of this._gltf.meshes?.entries()) {
+      const meshObject = { name: mesh.name, primitives: [] };
       for (const primitive of mesh.primitives) {
         const vertexAttributes = new Map();
         for (const [attributeName, attribute] of primitive.computedAttributes) {
@@ -97,7 +105,7 @@ export default class GLGLTFObject extends GLTFNode {
           }));
         }
 
-        this._primitiveObjectMap.set(primitive, new GLObject({
+        const object = new GLObject({
           gl: this.gl,
           mesh: new GLMesh({
             gl: this.gl,
@@ -112,9 +120,13 @@ export default class GLGLTFObject extends GLTFNode {
               }),
             }) : null,
           }),
-          program: defaultProgram,
-        }));
+          program: this.program,
+        });
+
+        this._primitiveObjectMap.set(primitive, object);
+        meshObject.primitives.push(object);
       }
+      this.meshes.set(mesh.name ?? index, meshObject);
     }
 
     const scene = this._gltf.scene ?? this._gltf.scenes[0];
