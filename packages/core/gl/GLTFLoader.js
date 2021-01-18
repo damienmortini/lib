@@ -124,15 +124,10 @@ export class GLTFLoader extends Loader {
       }
     }
 
-    const animationData = new Map();
     for (const animation of data.animations ?? []) {
       for (const sampler of animation.samplers) {
         for (const type of ['input', 'output']) {
-          if (!animationData.get(sampler[type])) {
-            const bufferView = data.accessors[sampler[type]].bufferView;
-            animationData.set(sampler[type], new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT));
-          }
-          sampler[type] = animationData.get(sampler[type]);
+          sampler[type] = data.accessors[sampler[type]];
         }
       }
       for (const channel of animation.channels) {
@@ -230,6 +225,11 @@ export class GLTFLoader extends Loader {
         const animationRawData = data.raw.animations[index];
         for (let index = 0; index < animationData.channels.length; index++) {
           animationData.channels[index].target.node = data.nodes[animationRawData.channels[index].target.node];
+        }
+        for (const sampler of animationData.samplers) {
+          for (const type of ['input', 'output']) {
+            sampler[type] = accessorsDataMap.get(sampler[type]).typedArray;
+          }
         }
         const animation = new GLTFAnimation({ data: animationData });
         data.animations[index] = animation;

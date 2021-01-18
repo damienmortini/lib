@@ -18,7 +18,6 @@ const TYPE_ARRAY_MAP = new Map([
   [WebGLRenderingContext.FLOAT, Float32Array],
 ]);
 
-
 export default class GLTFAccessor {
   constructor({
     data,
@@ -33,6 +32,8 @@ export default class GLTFAccessor {
     this.max = data.max;
     this.min = data.min;
     this.size = ATTRIBUTE_TYPE_SIZE_MAP.get(this.type);
+
+    this._typedArray = null;
   }
 
   get buffer() {
@@ -40,6 +41,9 @@ export default class GLTFAccessor {
   }
 
   get typedArray() {
-    return new (TYPE_ARRAY_MAP.get(this.componentType))(this.buffer, this.byteOffset, this.count * this.size);
+    if (!this._typedArray) {
+      this._typedArray = new (TYPE_ARRAY_MAP.get(this.componentType))(this.buffer, this.byteOffset, this.count * this.size);
+    }
+    return this._typedArray;
   }
 }
