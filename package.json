@@ -16,9 +16,9 @@
   ],
   "devDependencies": {
     "@damienmortini/server": "^1.0.16",
-    "eslint": "^7.13.0",
+    "eslint": "^7.18.0",
     "eslint-config-google": "^0.14.0",
-    "fast-glob": "^3.2.4",
+    "fast-glob": "^3.2.5",
     "jsdoc": "^3.6.6",
     "lerna": "^3.22.0",
     "yarn": "^1.22.10"
