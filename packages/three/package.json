@@ -27,6 +27,6 @@
   "dependencies": {
     "@damienmortini/core": "^0.2.76",
     "fs-extra": "^9.0.1",
-    "three": "0.123.0"
+    "three": "0.124.0"
   }
 }
