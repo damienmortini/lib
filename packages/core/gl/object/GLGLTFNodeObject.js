@@ -1,6 +1,6 @@
 import GLTFShader from '../../shader/GLTFShader.js';
 import GLBuffer from '../GLBuffer.js';
-import GLMesh from '../GLMesh.js';
+import GLGeometry from '../GLGeometry.js';
 import GLObject from '../GLObject.js';
 import GLProgram from '../GLProgram.js';
 import GLTexture from '../GLTexture.js';
@@ -64,7 +64,7 @@ export default class GLGLTFNodeObject extends GLTFNode {
 
       this.primitives.push(new GLObject({
         gl: this.gl,
-        mesh: new GLMesh({
+        geometry: new GLGeometry({
           gl: this.gl,
           attributes: vertexAttributes,
           indices: primitive.indices ? new GLVertexAttribute({

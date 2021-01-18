@@ -1,6 +1,6 @@
 // From https://github.com/mrdoob/three.js/blob/master/src/geometries/BoxGeometry.js
 
-export default class BoxMesh {
+export default class BoxGeometry {
   constructor({
     width = 1,
     height = 1,

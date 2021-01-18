@@ -1,7 +1,7 @@
 import GLBuffer from './GLBuffer.js';
 import GLVertexAttribute from './GLVertexAttribute.js';
 
-export default class GLMesh {
+export default class GLGeometry {
   constructor({
     gl,
     positions = null,

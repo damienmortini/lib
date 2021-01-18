@@ -1,6 +1,6 @@
-import BoxMesh from '../../3d/mesh/BoxMesh.js';
+import BoxGeometry from '../../3d/geometry/BoxGeometry.js';
 import GLObject from '../GLObject.js';
-import GLMesh from '../GLMesh.js';
+import GLGeometry from '../GLGeometry.js';
 import GLProgram from '../GLProgram.js';
 import CameraShader from '../../shader/CameraShader.js';
 import RayShader from '../../shader/RayShader.js';
@@ -11,11 +11,11 @@ export default class GLRayMarchingObject extends GLObject {
     gl,
     sdfObjects = [],
     shaders = [],
-    meshDefinition = 10,
+    geometryDefinition = 10,
     sdfRayMarchSteps = 64,
     sdfRayMarchPrecision = 0.001,
     vertexCompute = false,
-  } = { gl }) {
+  }) {
     const instanceIDs = new Float32Array(sdfObjects.length);
     for (let index = 0; index < instanceIDs.length; index++) {
       instanceIDs[index] = index;
@@ -102,7 +102,7 @@ export default class GLRayMarchingObject extends GLObject {
 
     super({
       gl,
-      mesh: new GLMesh(Object.assign({
+      geometry: new GLGeometry(Object.assign({
         gl,
         attributes: [
           ['instanceID', {
@@ -111,13 +111,13 @@ export default class GLRayMarchingObject extends GLObject {
             divisor: 1,
           }],
         ],
-      }, new BoxMesh({
+      }, new BoxGeometry({
         width: 1,
         height: 1,
         depth: 1,
-        widthSegments: meshDefinition,
-        heightSegments: meshDefinition,
-        depthSegments: meshDefinition,
+        widthSegments: geometryDefinition,
+        heightSegments: geometryDefinition,
+        depthSegments: geometryDefinition,
         normals: false,
         uvs: false,
       }))),

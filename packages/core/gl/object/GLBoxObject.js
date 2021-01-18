@@ -1,6 +1,6 @@
-import BoxMesh from '../../3d/mesh/BoxMesh.js';
+import BoxGeometry from '../../3d/geometry/BoxGeometry.js';
 import GLObject from '../GLObject.js';
-import GLMesh from '../GLMesh.js';
+import GLGeometry from '../GLGeometry.js';
 import GLProgram from '../GLProgram.js';
 
 export default class GLBoxObject extends GLObject {
@@ -31,10 +31,10 @@ export default class GLBoxObject extends GLObject {
   }) {
     super({
       gl,
-      mesh: new GLMesh(Object.assign({
+      geometry: new GLGeometry(Object.assign({
         gl,
         attributes,
-      }, new BoxMesh({
+      }, new BoxGeometry({
         width,
         height,
         depth,
