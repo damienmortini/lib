@@ -3,12 +3,12 @@ import RayShader from './RayShader.js';
 import Shader from '../3d/Shader.js';
 
 export default class PBRShader extends Shader {
-  static get PhysicallyBasedMaterial() {
+  static get MetallicRoughnessMaterial() {
     return `
-    struct PhysicallyBasedMaterial
+    struct MetallicRoughnessMaterial
     {
       vec4 baseColor;
-      float metalness;
+      float metallic;
       float roughness;
     };
     `;
@@ -69,7 +69,7 @@ export default class PBRShader extends Shader {
         float LdotH;                  // cos angle between light direction and half vector
         float VdotH;                  // cos angle between view direction and half vector
         float perceptualRoughness;    // roughness value, as authored by the model creator (input to shader)
-        float metalness;              // metallic value at the surface
+        float metallic;              // metallic value at the surface
         vec3 reflectance0;            // full reflectance color (normal incidence angle)
         vec3 reflectance90;           // reflectance color at grazing angle
         float alphaRoughness;         // roughness mapped to a more linear change in the roughness (proposed by [2])
@@ -146,14 +146,14 @@ export default class PBRShader extends Shader {
       Light light,
       vec3 position,
       vec3 normal,
-      PhysicallyBasedMaterial material
+      MetallicRoughnessMaterial material
     )
     {
         // Metallic and Roughness material properties are packed together
         // In glTF, these factors can be specified by fixed scalar values
         // or from a metallic-roughness map
         float perceptualRoughness = material.roughness;
-        float metallic = material.metalness;
+        float metallic = material.metallic;
 
         perceptualRoughness = clamp(perceptualRoughness, c_MinRoughness, 1.0);
         metallic = clamp(metallic, 0.0, 1.0);
@@ -181,7 +181,7 @@ export default class PBRShader extends Shader {
         vec3 v = -viewDirection;                          // Vector from surface point to camera
         vec3 l = normalize(-light.direction);             // Vector from surface point to light
         vec3 h = normalize(l+v);                          // Half vector between both l and v
-        vec3 reflection = -normalize(reflect(v, n));
+        vec3 reflection = normalize(reflect(viewDirection, normal));
 
         float NdotL = clamp(dot(n, l), 0.001, 1.0);
         float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
@@ -225,7 +225,7 @@ export default class PBRShader extends Shader {
 
   constructor({
     baseColor = [1, 1, 1, 1],
-    metalness = 0,
+    metallic = 0,
     roughness = 0,
     uniforms = {},
     vertexChunks = [],
@@ -238,7 +238,7 @@ export default class PBRShader extends Shader {
       uniforms: Object.assign({
         material: {
           baseColor,
-          metalness,
+          metallic,
           roughness,
         },
       }, uniforms),
@@ -273,9 +273,9 @@ export default class PBRShader extends Shader {
         ['start', `
           ${LightShader.Light}
           ${RayShader.Ray}
-          ${PBRShader.PhysicallyBasedMaterial}
+          ${PBRShader.MetallicRoughnessMaterial}
   
-          uniform PhysicallyBasedMaterial material;
+          uniform MetallicRoughnessMaterial material;
           uniform Light light;
   
           in vec3 vPosition;
