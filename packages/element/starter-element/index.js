@@ -11,11 +11,8 @@ window.customElements.define('damo-starter-element', class extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          display: grid;
+          display: block;
           position: relative;
-          contain: content;
-          justify-content: center;
-          align-items: center;
         }
       </style>
       <h1>damo-starter-element</h1>
