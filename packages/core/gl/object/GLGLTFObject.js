@@ -99,9 +99,11 @@ export default class GLGLTFObject extends GLTFNode {
         }
 
         if (!vertexAttributes.has('joint')) {
+          const count = primitive.computedAttributes.get('position').count;
           vertexAttributes.set('joint', new GLVertexAttribute({
             gl: this.gl,
             componentType: this.gl.UNSIGNED_INT,
+            data: new Uint8Array(count * 4),
           }));
         }
 
