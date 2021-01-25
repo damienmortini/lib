@@ -6,18 +6,44 @@ export default class GLObject {
     gl,
     geometry = undefined,
     program = undefined,
-    vertexArray = new GLVertexArray({
-      gl,
-      geometry,
-      program,
-    }),
   }) {
     this.gl = gl;
+    this._vertexArrays = new Map();
+    this._boundTextures = new Set();
+
     this.geometry = geometry;
     this.program = program;
-    this.vertexArray = vertexArray;
+  }
 
-    this._boundTextures = new Set();
+  get program() {
+    return this._program;
+  }
+
+  set program(value) {
+    this._program = value;
+    const programsMap = this._vertexArrays.get(this.geometry);
+    if (!programsMap.get(this._program)) {
+      programsMap.set(this._program, new GLVertexArray({
+        gl: this.gl,
+        geometry: this.geometry,
+        program: this.program,
+      }));
+    };
+  }
+
+  get geometry() {
+    return this._geometry;
+  }
+
+  set geometry(value) {
+    this._geometry = value;
+    if (!this._vertexArrays.has(this.geometry)) {
+      this._vertexArrays.set(this.geometry, new Map());
+    }
+  }
+
+  get vertexArray() {
+    return this._vertexArrays.get(this.geometry).get(this.program);
   }
 
   bind() {

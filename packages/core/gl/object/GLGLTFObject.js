@@ -25,19 +25,19 @@ export default class GLGLTFObject extends GLTFNode {
   }) {
     super();
 
-    this.gl = gl;
-    this.program = program;
-
-    this.meshes = new Map();
-    this.programs = new Map();
-    this.animations = new Map();
-
     this._gltf = null;
     this._currentTime = 0;
     this._duration = 0;
     this._skinTextureMap = new Map();
     this._materialProgramMap = new Map();
     this._primitiveObjectMap = new Map();
+
+    this.gl = gl;
+    this.program = program;
+
+    this.meshes = new Map();
+    this.programs = new Map();
+    this.animations = new Map();
 
     this.ready = this._load(src);
   }
@@ -148,6 +148,17 @@ export default class GLGLTFObject extends GLTFNode {
     this._currentTime = value;
     for (const animation of this._gltf?.animations ?? []) {
       animation.currentTime = this._currentTime;
+    }
+  }
+
+  get program() {
+    return this._program;
+  }
+
+  set program(value) {
+    this._program = value;
+    for (const object of this._primitiveObjectMap.values()) {
+      object.program = this._program;
     }
   }
 
