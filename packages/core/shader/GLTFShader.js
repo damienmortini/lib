@@ -45,10 +45,11 @@ export default class GLTFShader extends Shader {
           ${SkinShader.getJointMatrix()}
           ${SkinShader.getSkinMatrix()}
           
-          out vec3 vViewDirection;
           out vec3 vPosition;
           out vec3 vNormal;
           out vec2 vUV;
+          out vec3 vViewDirection;
+          out vec3 vWorldPosition;
         `],
         ['main', `
           vec3 position = position;
@@ -78,6 +79,7 @@ export default class GLTFShader extends Shader {
         ['end', `
           gl_Position = projectionView * vec4(worldPosition, 1.);
           
+          vWorldPosition = worldPosition;
           vPosition = position;
           vNormal = normal;
           vUV = uv;
@@ -91,6 +93,7 @@ export default class GLTFShader extends Shader {
           in vec3 vNormal;
           in vec2 vUV;
           in vec3 vViewDirection;
+          in vec3 vWorldPosition;
         `],
         ...fragmentChunks,
       ],
