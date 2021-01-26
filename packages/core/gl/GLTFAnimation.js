@@ -43,7 +43,7 @@ export default class GLTFAnimation {
       }
       const previousIndex = !nextIndex ? 0 : nextIndex - 1;
       const keyDelta = inputArray[nextIndex] - inputArray[previousIndex];
-      const alpha = (this._currentTime - inputArray[previousIndex]) / keyDelta;
+      const alpha = (this._currentTime - inputArray[previousIndex]) / keyDelta || 0;
       const targetArray = node[channel.target.path];
       const length = targetArray.length;
 
