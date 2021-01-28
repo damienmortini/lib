@@ -7,6 +7,8 @@ import InputRangeElement from '../element-input-range/index.js';
 import InputSelectElement from '../element-input-select/index.js';
 import InputTextElement from '../element-input-text/index.js';
 
+const STORAGE_ID = 'GUI.data';
+
 const customElementsMap = new Map(Object.entries({
   'gui-folder': GUIFolderElement,
   'gui-input-button': InputButtonElement,
@@ -34,7 +36,11 @@ const tagNameResolvers = new Map([
   ['gui-input-checkbox', (attributes) => typeof attributes.value === 'boolean'],
 ]);
 
-const valuesMap = new Map(JSON.parse(new URLSearchParams(location.hash.slice(1)).get('gui')));
+const valuesMap = new Map([
+  ...JSON.parse(localStorage.getItem(STORAGE_ID)) ?? [],
+  ...JSON.parse(sessionStorage.getItem(STORAGE_ID)) ?? [],
+  ...JSON.parse(new URLSearchParams(location.hash.slice(1)).get('gui')) ?? [],
+]);
 
 export default class GUIElement extends GUIFolderElement {
   constructor() {
@@ -113,12 +119,14 @@ export default class GUIElement extends GUIFolderElement {
 
     options.saveToURL = this.autoSaveToURL || options.saveToURL;
 
-    const { tagName, object, key, folder, reload, saveToURL, watch } = options;
+    const { tagName, object, key, folder, reload, saveToLocalStorage, saveToSessionStorage, saveToURL, watch } = options;
     delete options.tagName;
     delete options.object;
     delete options.key;
     delete options.folder;
     delete options.reload;
+    delete options.saveToLocalStorage;
+    delete options.saveToSessionStorage;
     delete options.saveToURL;
     delete options.watch;
 
@@ -191,12 +199,17 @@ export default class GUIElement extends GUIFolderElement {
       timeout = setTimeout(() => {
         if (saveToURL) {
           const urlSearchParams = new URLSearchParams(location.hash.slice(1));
-          if (valuesMap.size) {
-            urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
-          } else {
-            urlSearchParams.delete('gui');
-          }
+          if (valuesMap.size) urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
+          else urlSearchParams.delete('gui');
           location.hash = urlSearchParams.toString();
+        }
+        if (saveToSessionStorage) {
+          if (valuesMap.size) sessionStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]));
+          else sessionStorage.removeItem(STORAGE_ID);
+        }
+        if (saveToLocalStorage) {
+          if (valuesMap.size) localStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]));
+          else localStorage.removeItem(STORAGE_ID);
         }
         if (reload) {
           window.location.reload();
