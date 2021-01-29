@@ -152,7 +152,7 @@ server.on('stream', (stream, headers) => {
     if (requestRange) {
       responseHeaders['Accept-Ranges'] = 'bytes';
     }
-    stream.respondWithFile(filePath, responseHeaders, {
+    stream.respondWithFile(decodeURIComponent(filePath), responseHeaders, {
       onError: (error) => {
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND });
