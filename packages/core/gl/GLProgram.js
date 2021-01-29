@@ -8,6 +8,7 @@ export default class GLProgram {
   }) {
     this.gl = gl;
 
+    this._webGL1 = this.gl.getParameter(this.gl.VERSION).startsWith('WebGL 1.0');
     this._shader = shader instanceof Shader ? shader : new Shader(shader);
     this._program = gl.createProgram();
     this._attachedShaders = new Map();
@@ -38,7 +39,8 @@ export default class GLProgram {
         }
         if (location !== -1) {
           gl.enableVertexAttribArray(location);
-          if (componentType === gl.FLOAT || componentType === gl.HALF_FLOAT) {
+          if (self._webGL1 || componentType === gl.FLOAT || componentType === gl.HALF_FLOAT) {
+            if (componentType === gl.UNSIGNED_INT) componentType = gl.FLOAT;
             gl.vertexAttribPointer(location, size, componentType, normalized, byteStride, byteOffset);
           } else {
             gl.vertexAttribIPointer(location, size, componentType, byteStride, byteOffset);
@@ -155,9 +157,10 @@ export default class GLProgram {
       return;
     }
 
-    if (this.gl.getParameter(this.gl.VERSION).startsWith('WebGL 1.0')) {
+    if (this._webGL1) {
       source = source.replace(/#version.*?\n/g, '');
       source = source.replace(/\btexture\b/g, 'texture2D');
+      source = source.replace(/\buvec(.)\b/g, 'vec$1');
       source = source.replace(/\bflat\b/g, '');
       if (type === this.gl.VERTEX_SHADER) {
         source = source.replace(/(^\s*)\bin\b/gm, '$1attribute');
