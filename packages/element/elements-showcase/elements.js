@@ -6,7 +6,7 @@ export default [
   // 'damo-animation-sprite',
   // 'damo-animation-ticker',
   ['damo-animation-view', {}],
-  ['damo-gl-view', {}],
+  ['damo-glslcanvas', {}],
   ['damo-input-signal-array', {}],
   ['damo-input-signal-beat', {}],
   ['damo-viewer-array', {
