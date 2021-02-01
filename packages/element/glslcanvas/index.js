@@ -42,7 +42,7 @@ export default class GLSLCanvasElement extends HTMLElement {
       this.canvas.height = height * window.devicePixelRatio;
 
       this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-      this.object.program.uniforms.set('glslCanvasSize', [this.canvas.width, this.canvas.height]);
+      this.object.program.uniforms.set('glslCanvasSize', [width, height]);
       this.draw();
     });
     resizeObserver.observe(this.canvas);
@@ -97,9 +97,9 @@ export default class GLSLCanvasElement extends HTMLElement {
     return this.object.program.uniforms;
   }
 
-  draw() {
+  draw(options) {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    this.object.draw();
+    this.object.draw(options);
   }
 }
 
