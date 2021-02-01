@@ -1,4 +1,3 @@
-import GLBuffer from './GLBuffer.js';
 import GLVertexAttribute from './GLVertexAttribute.js';
 
 export default class GLGeometry {
@@ -59,13 +58,11 @@ export default class GLGeometry {
     }
 
     if (indices) {
-      this.indices = new GLVertexAttribute(Object.assign({
+      this.indices = new GLVertexAttribute({
         gl: this.gl,
-        buffer: new GLBuffer({
-          gl: this.gl,
-          target: this.gl.ELEMENT_ARRAY_BUFFER,
-        }),
-      }, indices.length !== undefined ? { data: indices } : indices));
+        data: indices,
+        target: this.gl.ELEMENT_ARRAY_BUFFER,
+      });
     }
   }
 
