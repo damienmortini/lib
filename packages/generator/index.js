@@ -18,18 +18,23 @@ import { dirname } from 'path';
     output: process.stdout,
   });
 
-  const params = [];
-  for (const param of jsDocData[0].params) {
-    params.push(await new Promise((resolve) => {
-      rl.question(`${param.description}${param.defaultvalue ? ' [' + param.defaultvalue + ']' : ''}: `, (answer) => {
-        resolve(answer || param.defaultvalue);
+  const options = {
+    scope: /(?!.*@)(.*?)[\\/]/.exec(process.cwd())[1],
+  };
+  for (const parameter of jsDocData[0].params) {
+    if (!parameter.description) continue;
+    const name = parameter.name.split('.')[1];
+    const defaultValue = options[name] ?? parameter.defaultvalue;
+    options[name] = await new Promise((resolve) => {
+      rl.question(`${parameter.description}${defaultValue ? ' [' + (defaultValue) + ']' : ''}: `, (answer) => {
+        resolve(answer || defaultValue);
       });
-    }));
+    });
   }
 
   rl.close();
 
   import(`./generators/${generatorName}.js`).then((value) => {
-    value.default(...params);
+    value.default(options);
   });
 })();

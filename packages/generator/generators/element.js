@@ -1,16 +1,18 @@
 import fs from 'fs-extra';
 
 /**
- * @param {String} name Element name
- * @param {String} [template=element] Template name
+ * @param {Object} object
+ * @param {String} object.name Element name
+ * @param {String} [object.scope=damienmortini] Package scope
+ * @param {String} [object.template=element] Template name
  */
-export default function (name, template) {
+export default function ({ name, scope = 'damienmortini', template = 'element' }) {
   fs.copySync(`node_modules/@damienmortini/element-starter-${template}`, `./packages/${name}`, {
     dereference: true,
   });
   const packageData = fs.readJSONSync(`./packages/${name}/package.json`);
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
-    name: `@damienmortini/${name}`,
+    name: `@${scope}/${name}`,
     private: true,
     version: '0.0.0',
     dependencies: packageData.dependencies,

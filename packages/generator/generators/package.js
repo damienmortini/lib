@@ -1,11 +1,13 @@
 import fs from 'fs-extra';
 
 /**
- * @param {String} name Package name
+ * @param {Object} object
+ * @param {String} object.name Element name
+ * @param {String} [object.scope=damienmortini] Package scope
  */
-export default function (name) {
+export default function ({ name, scope = 'damienmortini' }) {
   fs.outputFileSync(`./packages/${name}/package.json`, JSON.stringify({
-    name: `@damienmortini/${name}`,
+    name: `@${scope}/${name}`,
     private: true,
     version: '0.0.0',
   }, null, 2));
