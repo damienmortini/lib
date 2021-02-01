@@ -25,10 +25,6 @@ export default class GLVertexAttribute {
   constructor({
     gl,
     data = null,
-    buffer = new GLBuffer({
-      gl,
-      data,
-    }),
     size = 1,
     componentType = ARRAY_TYPE_MAP.get(data?.constructor),
     byteOffset = 0,
@@ -36,9 +32,10 @@ export default class GLVertexAttribute {
     byteStride = 0,
     count = data?.length / size || 1,
     divisor = 0,
+    target = gl.ARRAY_BUFFER,
+    usage = gl.STATIC_DRAW,
   }) {
     this.gl = gl;
-    this.buffer = buffer;
     this.size = size;
     this.componentType = componentType;
     this.byteOffset = byteOffset;
@@ -46,6 +43,17 @@ export default class GLVertexAttribute {
     this.byteStride = byteStride;
     this.count = count;
     this.divisor = divisor;
+
+    this._buffer = new GLBuffer({
+      gl,
+      data,
+      target,
+      usage,
+    });
+  }
+
+  get buffer() {
+    return this._buffer;
   }
 
   get data() {

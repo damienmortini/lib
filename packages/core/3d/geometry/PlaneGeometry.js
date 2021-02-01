@@ -50,7 +50,7 @@ export default class PlaneGeometry {
     }
 
     if (indices) {
-      this.indices = new Uint16Array(columns * rows * 6);
+      this.indices = new Uint8Array(columns * rows * 6);
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < columns; i++) {
           const a = i + xSegments * j;

@@ -18,7 +18,6 @@ export default class GLBuffer {
 
   set data(value) {
     this._data = value;
-
     this.bind();
     this.gl.bufferData(this.target, this._data, this.usage);
     this.unbind();
