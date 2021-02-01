@@ -7,7 +7,7 @@
     "@damienmortini/element-animation-sprite": "^0.0.68",
     "@damienmortini/element-animation-ticker": "^0.0.82",
     "@damienmortini/element-animation-view": "^0.0.64",
-    "@damienmortini/element-gl-view": "^0.0.8",
+    "@damienmortini/element-glslcanvas": "^0.0.1",
     "@damienmortini/element-input-button": "^0.0.17",
     "@damienmortini/element-input-checkbox": "^0.0.17",
     "@damienmortini/element-input-color": "^0.0.78",
