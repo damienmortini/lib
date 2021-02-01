@@ -1,23 +1,23 @@
-# `<damo-gl-view>`
+# `<damo-glslcanvas>`
 
 ## Installation
 
 ```sh
-npm install @damienmortini/element-gl-view
+npm install @damienmortini/element-glslcanvas
 ```
 
 ## Simple Usage
 ```html
-<script src="node_modules/@damienmortini/element-gl-view/index.js"></script>
+<script src="node_modules/@damienmortini/element-glslcanvas/index.js"></script>
 
-<damo-gl-view></damo-gl-view>
+<damo-glslcanvas></damo-glslcanvas>
 ```
 
 ## Usage with custom name
 ```html
 <script type="module">
 
-  import Element from '@damienmortini/element-gl-view';
+  import Element from '@damienmortini/element-glslcanvas';
 
   window.customElements.define('my-element-name', class extends Element { });
 
