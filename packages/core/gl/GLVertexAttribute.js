@@ -25,7 +25,6 @@ export default class GLVertexAttribute {
   constructor({
     gl,
     data = null,
-    buffer = null,
     target = gl.ARRAY_BUFFER,
     size = 1,
     componentType = ARRAY_TYPE_MAP.get(data?.constructor),
@@ -36,11 +35,7 @@ export default class GLVertexAttribute {
     divisor = 0,
   }) {
     this.gl = gl;
-    this.buffer = data ? new GLBuffer({
-      gl,
-      data,
-      target,
-    }) : buffer;
+    this.data = data;
     this.size = size;
     this.componentType = componentType;
     this.byteOffset = byteOffset;
@@ -48,14 +43,16 @@ export default class GLVertexAttribute {
     this.byteStride = byteStride;
     this.count = count;
     this.divisor = divisor;
+
+    this._buffer = data instanceof GLBuffer ? data : new GLBuffer({
+      gl,
+      data,
+      target,
+    });
   }
 
-  get data() {
-    return this.buffer.data;
-  }
-
-  set data(value) {
-    this.buffer.data = value;
+  get buffer() {
+    return this._buffer;
   }
 
   get typedArray() {

@@ -91,10 +91,7 @@ export default class GLGLTFObject extends GLTFNode {
           vertexAttributes.set(attributeName, new GLVertexAttribute({
             gl: this.gl,
             ...attribute,
-            buffer: new GLBuffer({
-              gl: this.gl,
-              data: attribute.buffer,
-            }),
+            data: attribute.buffer,
           }));
         }
 
