@@ -59,23 +59,18 @@ export class GLTFLoader extends Loader {
 
     data = { ...JSON.parse(JSON.stringify(data)), raw: data };
 
-    for (let index = 0; index < data.buffers.length; index++) {
-      data.buffers[index] = data.raw.buffers[index];
-    }
-
-    const buffers = [];
-    for (const buffer of data.buffers) {
+    for (const [index, buffer] of data.raw.buffers.entries()) {
       if (buffer.binary) {
-        buffers.push(buffer.binary);
+        data.buffers[index] = buffer.binary;
       } else if (buffer.uri.startsWith('data')) {
-        buffers.push(Base64.toByteArray(buffer.uri.split(',')[1]).buffer);
+        data.buffers[index] = Base64.toByteArray(buffer.uri.split(',')[1]).buffer;
       } else {
-        buffers.push(await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`));
+        data.buffers[index] = await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`);
       }
     }
 
     for (const bufferView of data.bufferViews) {
-      bufferView.buffer = buffers[bufferView.buffer];
+      bufferView.buffer = data.buffers[bufferView.buffer];
     }
 
     for (const accessor of data.accessors) {

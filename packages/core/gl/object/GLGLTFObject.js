@@ -47,6 +47,15 @@ export default class GLGLTFObject extends GLTFNode {
       src,
     });
 
+    const bufferViewBufferMap = new Map();
+    for (const bufferView of this._gltf.bufferViews) {
+      bufferViewBufferMap.set(bufferView, new GLBuffer({
+        gl: this.gl,
+        data: bufferView.buffer,
+        target: bufferView.target,
+      }));
+    }
+
     for (const [index, animation] of this._gltf.animations?.entries() ?? []) {
       this._duration = Math.max(this._duration, animation.duration);
       this.animations.set(animation.name ?? index, animation);
@@ -91,7 +100,7 @@ export default class GLGLTFObject extends GLTFNode {
           vertexAttributes.set(attributeName, new GLVertexAttribute({
             gl: this.gl,
             ...attribute,
-            data: attribute.buffer,
+            data: bufferViewBufferMap.get(attribute.bufferView),
           }));
         }
 
@@ -112,7 +121,7 @@ export default class GLGLTFObject extends GLTFNode {
             indices: primitive.indices ? new GLVertexAttribute({
               gl: this.gl,
               ...primitive.indices,
-              data: primitive.indices.buffer,
+              data: bufferViewBufferMap.get(primitive.indices.bufferView),
               target: this.gl.ELEMENT_ARRAY_BUFFER,
             }) : null,
           }),
