@@ -60,8 +60,8 @@ export default class GLGeometry {
     if (indices) {
       this.indices = new GLVertexAttribute({
         gl: this.gl,
-        data: indices,
         target: this.gl.ELEMENT_ARRAY_BUFFER,
+        ...(indices.length !== undefined ? { data: indices } : indices),
       });
     }
   }
