@@ -12,16 +12,7 @@ export default class GLGLTFObject extends GLTFNode {
   constructor({
     gl,
     src,
-    program = new GLProgram({
-      gl,
-      shader: new GLTFShader({
-        fragmentChunks: [
-          ['end', `
-            fragColor = vec4(vNormal * .5 + .5, 1.);
-          `],
-        ],
-      }),
-    }),
+    program = null,
   }) {
     super();
 
@@ -77,19 +68,21 @@ export default class GLGLTFObject extends GLTFNode {
       this._skinTextureMap.set(skin, texture);
     }
 
-    for (const [index, material] of this._gltf.materials?.entries() ?? []) {
-      const program = new GLProgram({
-        gl: this.gl,
-        shader: new GLTFShader({
-          fragmentChunks: [
-            ['end', `
-              fragColor = vec4(vNormal * .5 + .5, 1.);
-            `],
-          ],
-        }),
-      });
-      this._materialProgramMap.set(material, program);
-      this.programs.set(material.name ?? index, program);
+    if (!this.program) {
+      for (const [index, material] of this._gltf.materials?.entries() ?? []) {
+        const program = new GLProgram({
+          gl: this.gl,
+          shader: new GLTFShader({
+            fragmentChunks: [
+              ['end', `
+                fragColor = vec4(vNormal * .5 + .5, 1.);
+              `],
+            ],
+          }),
+        });
+        this._materialProgramMap.set(material, program);
+        this.programs.set(material.name ?? index, program);
+      }
     }
 
     for (const [index, mesh] of this._gltf.meshes?.entries()) {
