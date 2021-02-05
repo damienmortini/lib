@@ -15,6 +15,7 @@ export class Router {
   }
 
   set pathname(value) {
+    if (this._pathname === value) return;
     this._pathname = value;
     history.pushState({ pathname: this._pathname }, '', this._pathname || '/');
     this._stateChangeSignal.dispatch({ pathname: this._pathname });
