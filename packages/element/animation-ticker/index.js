@@ -3,9 +3,8 @@ import Ticker from '../core/util/Ticker.js';
 const PAUSED_BY_ACTION = 1;
 const PAUSED_BY_INTERSECTION = 2;
 const PAUSED_BY_VISIBILITY = 4;
-const PAUSED_BY_BLUR = 8;
-const PAUSED_BY_CONNECTION = 16;
-const PAUSED_BY_DOCUMENT_VISIBILITY = 32;
+const PAUSED_BY_CONNECTION = 8;
+const PAUSED_BY_DOCUMENT_VISIBILITY = 16;
 
 /**
  * Element triggering requestAnimationFrame on its update method.
@@ -41,12 +40,6 @@ class AnimationTickerElement extends HTMLElement {
     });
     observer.observe(this);
 
-    window.addEventListener('blur', () => {
-      this._pauseFlag |= PAUSED_BY_BLUR;
-    });
-    window.addEventListener('focus', () => {
-      this._pauseFlag &= ~PAUSED_BY_BLUR;
-    });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
