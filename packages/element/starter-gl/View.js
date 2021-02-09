@@ -64,6 +64,7 @@ export default class View {
     this.cameraController.update();
 
     this.object.draw({
+      bind: true,
       uniforms: {
         projectionView: this.camera.projectionView,
       },
