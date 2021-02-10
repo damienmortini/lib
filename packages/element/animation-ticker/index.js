@@ -2,9 +2,8 @@ import Ticker from '../core/util/Ticker.js';
 
 const PAUSED_BY_ACTION = 1;
 const PAUSED_BY_INTERSECTION = 2;
-const PAUSED_BY_VISIBILITY = 4;
+const PAUSED_BY_DOCUMENT_VISIBILITY = 4;
 const PAUSED_BY_CONNECTION = 8;
-const PAUSED_BY_DOCUMENT_VISIBILITY = 16;
 
 /**
  * Element triggering requestAnimationFrame on its update method.
@@ -18,13 +17,6 @@ class AnimationTickerElement extends HTMLElement {
 
     this._pauseFlag = 0;
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this._pauseFlag |= PAUSED_BY_VISIBILITY;
-      } else {
-        this._pauseFlag &= ~PAUSED_BY_VISIBILITY;
-      }
-    });
     const observer = new IntersectionObserver((entries) => {
       let isIntersecting = false;
       for (const entry of entries) {
