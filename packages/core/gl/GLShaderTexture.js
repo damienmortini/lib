@@ -37,6 +37,7 @@ export default class GLShaderTexture extends GLTexture {
       autoGenerateMipmap: false,
     });
 
+    this._debug = debug;
     this._autoGenerateMipmap = autoGenerateMipmap;
 
     this._frameBuffer = new GLFrameBuffer({
@@ -48,7 +49,6 @@ export default class GLShaderTexture extends GLTexture {
       gl: this.gl,
       width: 2,
       height: 2,
-      uvs: true,
       program: new GLProgram({
         gl: this.gl,
         shader: new Shader({
@@ -56,16 +56,17 @@ export default class GLShaderTexture extends GLTexture {
           vertexChunks: [
             ['start', `
               in vec3 position;
-              in vec2 uv;
-
-              out vec2 vUV;
+              out vec2 vPosition;
             `],
             ['end', `
               gl_Position = vec4(position, 1.);
-              vUV = uv;
+              vPosition = position.xy;
             `],
           ],
-          fragmentChunks,
+          fragmentChunks: [
+            ...fragmentChunks,
+            ['start', `in vec2 vPosition;`],
+          ],
         }),
       }),
     });
@@ -77,10 +78,11 @@ export default class GLShaderTexture extends GLTexture {
     return this._quad.program;
   }
 
-  draw({ uniforms = {}, debug = false } = {}) {
+  draw({ uniforms = {}, debug = this._debug } = {}) {
     this.gl.viewport(0, 0, this.width, this.height);
     this._frameBuffer.bind();
     this._quad.draw({
+      bind: true,
       uniforms,
     });
     this._frameBuffer.unbind();
@@ -89,6 +91,7 @@ export default class GLShaderTexture extends GLTexture {
         this.gl.viewport(debug[0], debug[1], debug[2], debug[3]);
       }
       this._quad.draw({
+        bind: true,
         uniforms,
       });
     }
