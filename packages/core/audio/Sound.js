@@ -10,10 +10,18 @@ export default class Sound extends Audio {
   }
 
   constructor({ src }) {
-    super(`${Sound.baseURI}${src}`);
+    if (src instanceof Array) {
+      super();
+      for (const url of src) {
+        const source = document.createElement('source');
+        source.src = `${Sound.baseURI}${url}`;
+        this.appendChild(source);
+      }
+    } else {
+      super(`${Sound.baseURI}${src}`);
+    }
 
     const load = () => {
-      window.removeEventListener('click', load);
       const paused = this.paused;
       this.play().then(() => {
         if (paused && !this.autoplay) {
@@ -22,7 +30,7 @@ export default class Sound extends Audio {
       });
     };
 
-    window.addEventListener('click', load);
+    window.addEventListener('pointerup', load, { once: true });
   }
 
   play() {
