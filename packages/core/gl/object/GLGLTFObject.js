@@ -89,7 +89,7 @@ export default class GLGLTFObject extends GLTFNode {
       const meshObject = { name: mesh.name, primitives: [] };
       for (const primitive of mesh.primitives) {
         const vertexAttributes = new Map();
-        for (const [attributeName, attribute] of primitive.computedAttributes) {
+        for (const [attributeName, attribute] of primitive.attributes) {
           vertexAttributes.set(attributeName, new GLVertexAttribute({
             gl: this.gl,
             ...attribute,
@@ -98,7 +98,7 @@ export default class GLGLTFObject extends GLTFNode {
         }
 
         if (!vertexAttributes.has('joint')) {
-          const count = primitive.computedAttributes.get('position').count;
+          const count = primitive.attributes.get('position').count;
           vertexAttributes.set('joint', new GLVertexAttribute({
             gl: this.gl,
             componentType: this.gl.UNSIGNED_INT,
@@ -127,9 +127,10 @@ export default class GLGLTFObject extends GLTFNode {
       this.meshes.set(mesh.name ?? index, meshObject);
     }
 
-    const scene = this._gltf.scene ?? this._gltf.scenes[0];
-    this.children = scene.nodes;
-    scene.nodes = [this];
+    this._scene = this._gltf.scene ?? this._gltf.scenes[0];
+
+    this.children = this._scene.nodes;
+    this._scene.nodes = [this];
   }
 
   get duration() {
@@ -158,21 +159,27 @@ export default class GLGLTFObject extends GLTFNode {
     }
   }
 
+  get flattenedChildren() {
+    return this._scene.flattenedNodes;
+  }
+
+  get flattenedChildrenWithMesh() {
+    return this._scene.flattenedNodesWithMesh;
+  }
+
   draw({ uniforms }) {
     if (!this._gltf) {
       return;
     }
 
-    const scene = this._gltf.scene ?? this._gltf.scenes[0];
-
-    scene.updateWorldTransforms();
+    this._scene.updateWorldTransforms();
 
     for (const skin of this._gltf.skins ?? []) {
       skin.updateJointsTextureData();
       this._skinTextureMap.get(skin).data = skin.jointMatricesTextureData;
     }
 
-    for (const node of scene.flattenedNodesWithMesh) {
+    for (const node of this._scene.flattenedNodesWithMesh) {
       for (const primitive of node.mesh.primitives) {
         const object = this._primitiveObjectMap.get(primitive);
         object.draw({
