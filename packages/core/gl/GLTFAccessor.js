@@ -23,7 +23,7 @@ export default class GLTFAccessor {
     data,
   }) {
     this.bufferView = data.bufferView;
-    this.byteOffset = (data.byteOffset || 0) + data.bufferView.byteOffset;
+    this.byteOffset = (data.byteOffset ?? 0) + data.bufferView.byteOffset;
     this.byteStride = data.bufferView.byteStride ?? 0;
     this.componentType = data.componentType;
     this.normalized = data.normalized ?? false;
@@ -41,9 +41,21 @@ export default class GLTFAccessor {
   }
 
   get typedArray() {
-    if (!this._typedArray) {
-      this._typedArray = new (TYPE_ARRAY_MAP.get(this.componentType))(this.buffer, this.byteOffset, this.count * this.size);
+    if (this._typedArray) return this._typedArray;
+
+    const TypedArrayConstructor = TYPE_ARRAY_MAP.get(this.componentType);
+    this._typedArray = new TypedArrayConstructor(this.count * this.size);
+
+    const stride = this.byteStride || this.size * TypedArrayConstructor.BYTES_PER_ELEMENT;
+    const dataView = new DataView(this.buffer, this.byteOffset);
+
+    const dataViewFunction = dataView[`get${TypedArrayConstructor.name.replace('Array', '')}`].bind(dataView);
+
+    for (let index = 0; index < this._typedArray.length; index++) {
+      const offset = Math.floor(index / this.size) * stride + (index % this.size) * TypedArrayConstructor.BYTES_PER_ELEMENT;
+      this._typedArray[index] = dataViewFunction(offset, true);
     }
+
     return this._typedArray;
   }
 }
