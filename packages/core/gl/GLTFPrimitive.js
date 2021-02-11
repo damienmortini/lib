@@ -10,9 +10,8 @@ export default class GLTFPrimitive {
   constructor({
     data,
   }) {
-    this.attributes = data.attributes;
+    this.attributes = new Map();
     this.indices = data.indices;
-    this.computedAttributes = new Map();
 
     const targetAttributes = new Map();
     if (data.targets) {
@@ -25,7 +24,7 @@ export default class GLTFPrimitive {
     }
 
     for (const [attributeName, attribute] of [...Object.entries(data.attributes), ...targetAttributes]) {
-      this.computedAttributes.set(ATTRIBUTE_NAME_MAP.get(attributeName) ?? attributeName, attribute);
+      this.attributes.set(ATTRIBUTE_NAME_MAP.get(attributeName) ?? attributeName, attribute);
     }
   }
 }

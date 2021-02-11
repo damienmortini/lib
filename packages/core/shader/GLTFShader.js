@@ -52,36 +52,36 @@ export default class GLTFShader extends Shader {
           out vec3 vWorldPosition;
         `],
         ['main', `
-          vec3 position = position;
-          vec3 normal = normal;
+          vec3 gltfPosition = position;
+          vec3 gltfNormal = normal;
 
-          position += morphTargetWeights[0] * morphTargetPosition0;
-          position += morphTargetWeights[1] * morphTargetPosition1;
-          position += morphTargetWeights[2] * morphTargetPosition2;
-          position += morphTargetWeights[3] * morphTargetPosition3;
-          normal += morphTargetWeights[0] * morphTargetNormal0;
-          normal += morphTargetWeights[1] * morphTargetNormal1;
-          normal += morphTargetWeights[2] * morphTargetNormal2;
-          normal += morphTargetWeights[3] * morphTargetNormal3;
+          gltfPosition += morphTargetWeights[0] * morphTargetPosition0;
+          gltfPosition += morphTargetWeights[1] * morphTargetPosition1;
+          gltfPosition += morphTargetWeights[2] * morphTargetPosition2;
+          gltfPosition += morphTargetWeights[3] * morphTargetPosition3;
+          gltfNormal += morphTargetWeights[0] * morphTargetNormal0;
+          gltfNormal += morphTargetWeights[1] * morphTargetNormal1;
+          gltfNormal += morphTargetWeights[2] * morphTargetNormal2;
+          gltfNormal += morphTargetWeights[3] * morphTargetNormal3;
           
           if(skinned) {
             mat4 skinMatrix = getSkinMatrix(ivec4(joint), weight, jointMatricesTexture, jointMatricesTextureSize, 0, 8);
-            position = (skinMatrix * vec4(position, 1.)).xyz;
+            gltfPosition = (skinMatrix * vec4(gltfPosition, 1.)).xyz;
 
             mat4 skinNormalMatrix = getSkinMatrix(ivec4(joint), weight, jointMatricesTexture, jointMatricesTextureSize, 1, 8);
-            normal = (skinNormalMatrix * vec4(normal, 1.)).xyz;
+            gltfNormal = (skinNormalMatrix * vec4(gltfNormal, 1.)).xyz;
           }
 
-          normal = normalize((normalMatrix * vec4(normal, 1.)).xyz);
+          gltfNormal = normalize((normalMatrix * vec4(gltfNormal, 1.)).xyz);
 
-          vec3 worldPosition = (transform * vec4(position, 1.)).xyz;
+          vec3 worldPosition = (transform * vec4(gltfPosition, 1.)).xyz;
         `],
         ['end', `
           gl_Position = projectionView * vec4(worldPosition, 1.);
           
           vWorldPosition = worldPosition;
-          vPosition = position;
-          vNormal = normal;
+          vPosition = gltfPosition;
+          vNormal = gltfNormal;
           vUV = uv;
           vViewDirection = normalize(worldPosition - cameraPosition);
         `],
