@@ -122,4 +122,14 @@ export default class Matrix4 extends Float32Array {
     mat4.transpose(this, matrix4);
     return this;
   }
+
+  lookAt(eye, center, up) {
+    mat4.lookAt(this, eye, center, up);
+    return this;
+  }
+
+  targetTo(eye, center, up) {
+    mat4.targetTo(this, eye, center, up);
+    return this;
+  }
 }
