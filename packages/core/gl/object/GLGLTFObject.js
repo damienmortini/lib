@@ -167,7 +167,12 @@ export default class GLGLTFObject extends GLTFNode {
     return this._scene.flattenedNodesWithMesh;
   }
 
-  draw({ uniforms }) {
+  updateAndDraw({ uniforms }) {
+    this.update();
+    this.draw({ uniforms });
+  }
+
+  update() {
     if (!this._gltf) {
       return;
     }
@@ -177,6 +182,12 @@ export default class GLGLTFObject extends GLTFNode {
     for (const skin of this._gltf.skins ?? []) {
       skin.updateJointsTextureData();
       this._skinTextureMap.get(skin).data = skin.jointMatricesTextureData;
+    }
+  }
+
+  draw({ uniforms }) {
+    if (!this._gltf) {
+      return;
     }
 
     for (const node of this._scene.flattenedNodesWithMesh) {
