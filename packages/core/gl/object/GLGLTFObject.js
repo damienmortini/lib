@@ -167,7 +167,7 @@ export default class GLGLTFObject extends GLTFNode {
     return this._scene.flattenedNodesWithMesh;
   }
 
-  updateAndDraw({ uniforms }) {
+  updateAndDraw({ uniforms = {} } = {}) {
     this.update();
     this.draw({ uniforms });
   }
@@ -185,7 +185,7 @@ export default class GLGLTFObject extends GLTFNode {
     }
   }
 
-  draw({ uniforms }) {
+  draw({ uniforms = {} } = {}) {
     if (!this._gltf) {
       return;
     }
