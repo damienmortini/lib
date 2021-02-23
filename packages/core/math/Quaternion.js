@@ -79,7 +79,7 @@ export default class Quaternion extends Float32Array {
   }
 
   normalize(quaternion = this) {
-    quat.normalize(this, this);
+    quat.normalize(this, quaternion);
     return this;
   }
 
@@ -99,6 +99,21 @@ export default class Quaternion extends Float32Array {
 
   fromMatrix4(matrix4) {
     mat4.getRotation(this, matrix4);
+    return this;
+  }
+
+  fromAxisAngle(axis, angle) {
+    quat.setAxisAngle(this, axis, angle);
+    return this;
+  }
+
+  betweenVectors(vector3a, vector3b) {
+    quat.rotationTo(this, vector3a, vector3b);
+    return this;
+  }
+
+  computeW(quaternion = this) {
+    quat.calculateW(this, quaternion);
     return this;
   }
 }

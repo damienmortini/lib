@@ -98,6 +98,11 @@ export default class Vector3 extends Float32Array {
     return vec3.exactEquals(this, vector3);
   }
 
+  applyMatrix3(matrix3) {
+    vec3.transformMat3(this, this, matrix3);
+    return this;
+  }
+
   applyMatrix4(matrix4) {
     vec3.transformMat4(this, this, matrix4);
     return this;
