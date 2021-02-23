@@ -14,7 +14,7 @@ export default class GLTFShader extends Shader {
         ['start', `
           uniform mat4 projectionView;
           uniform mat4 transform;
-          uniform mat4 normalMatrix;
+          uniform mat3 normalMatrix;
           uniform vec3 cameraPosition;
           uniform bool skinned;
           
@@ -72,7 +72,7 @@ export default class GLTFShader extends Shader {
             gltfNormal = (skinNormalMatrix * vec4(gltfNormal, 1.)).xyz;
           }
 
-          gltfNormal = normalize((normalMatrix * vec4(gltfNormal, 1.)).xyz);
+          gltfNormal = normalize(normalMatrix * gltfNormal);
 
           vec3 worldPosition = (transform * vec4(gltfPosition, 1.)).xyz;
         `],

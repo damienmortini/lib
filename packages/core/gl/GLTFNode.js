@@ -1,4 +1,5 @@
 import Matrix4 from '../math/Matrix4.js';
+import Matrix3 from '../math/Matrix3.js';
 import Quaternion from '../math/Quaternion.js';
 import Vector3 from '../math/Vector3.js';
 
@@ -19,7 +20,7 @@ export default class GLTFNode {
     }
 
     this.worldTransform = new Matrix4();
-    this.normalMatrix = this.mesh ? new Matrix4() : null;
+    this.normalMatrix = this.mesh ? new Matrix3() : null;
   }
 
   updateMatrix() {
@@ -27,7 +28,7 @@ export default class GLTFNode {
   }
 
   updateNormalMatrix() {
-    if (this.normalMatrix) this.normalMatrix.copy(this.worldTransform).invert().transpose();
+    if (this.normalMatrix) this.normalMatrix.normalMatrixFromTransform(this.worldTransform);
   }
 
   get weights() {

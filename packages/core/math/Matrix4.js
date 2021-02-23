@@ -92,7 +92,7 @@ export default class Matrix4 extends Float32Array {
   }
 
   fromTranslationRotationScale(translation = TRANSLATION_IDENTITY, rotation = ROTATION_IDENTITY, scale = SCALE_IDENTITY) {
-    mat4.fromRotationTranslationScale(this, rotation, translation, scale);
+    mat4.fromRotationTranslationScale(this, rotation, translation, typeof scale === 'number' ? [scale, scale, scale] : scale);
     return this;
   }
 

@@ -80,17 +80,12 @@ export default class Matrix3 extends Float32Array {
   }
 
   fromBasis(vector3a, vector3b, vector3c) {
-    this.set(
-        vector3a[0],
-        vector3a[1],
-        vector3a[2],
-        vector3b[0],
-        vector3b[1],
-        vector3b[2],
-        vector3c[0],
-        vector3c[1],
-        vector3c[2],
-    );
+    this.set(vector3a[0], vector3a[1], vector3a[2], vector3b[0], vector3b[1], vector3b[2], vector3c[0], vector3c[1], vector3c[2]);
+    return this;
+  }
+
+  normalMatrixFromTransform(matrix4) {
+    mat3.normalFromMat4(this, matrix4);
     return this;
   }
 
