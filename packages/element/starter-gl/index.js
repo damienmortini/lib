@@ -12,8 +12,6 @@ window.customElements.define('damo-starter-gl', class extends AnimationTickerEle
   constructor() {
     super();
 
-    this.autoplay = true;
-
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
