@@ -1,11 +1,11 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.103",
+  "version": "0.0.104",
   "dependencies": {
     "@damienmortini/element-animation-lottie": "^0.0.90",
-    "@damienmortini/element-animation-sprite": "^0.0.77",
-    "@damienmortini/element-animation-ticker": "^0.0.91",
+    "@damienmortini/element-animation-sprite": "^0.0.78",
+    "@damienmortini/element-animation-ticker": "^0.0.92",
     "@damienmortini/element-animation-view": "^0.0.72",
     "@damienmortini/element-glslcanvas": "^0.0.9",
     "@damienmortini/element-input-button": "^0.0.17",
