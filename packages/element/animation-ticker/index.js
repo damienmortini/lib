@@ -95,7 +95,7 @@ class AnimationTickerElement extends HTMLElement {
   }
 
   /**
-   * Interface method to extend where to put the code logic.
+   * Update loop method
    */
   update() { }
 }
