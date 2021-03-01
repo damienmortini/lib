@@ -185,7 +185,7 @@ export default class GLGLTFObject extends GLTFNode {
     }
   }
 
-  draw({ uniforms = {} } = {}) {
+  draw(options) {
     if (!this._gltf) {
       return;
     }
@@ -195,6 +195,7 @@ export default class GLGLTFObject extends GLTFNode {
         const object = this._primitiveObjectMap.get(primitive);
         object.draw({
           bind: true,
+          ...options,
           uniforms: {
             transform: node.worldTransform,
             normalMatrix: node.normalMatrix,
@@ -204,7 +205,7 @@ export default class GLGLTFObject extends GLTFNode {
               jointMatricesTexture: this._skinTextureMap.get(node.skin),
               jointMatricesTextureSize: node.skin.jointMatricesTextureSize,
             } : null),
-            ...uniforms,
+            ...options.uniforms,
           },
         });
       }
