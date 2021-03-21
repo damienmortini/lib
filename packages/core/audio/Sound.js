@@ -1,11 +1,15 @@
 import Ticker from '../../core/util/Ticker.js';
 
 let baseURI = '';
+let muted = false;
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
+const mainGainNode = audioContext.createGain();
+mainGainNode.connect(audioContext.destination);
+
 window.addEventListener('pointerup', () => {
-  audioContext.resume();
+  if (audioContext.state !== 'running') audioContext.resume();
 });
 
 export default class Sound {
@@ -17,6 +21,15 @@ export default class Sound {
     baseURI = value;
   }
 
+  static get muted() {
+    return muted;
+  }
+
+  static set muted(value) {
+    muted = value;
+    mainGainNode.gain.value = muted ? 0 : 1;
+  }
+
   constructor({ src }) {
     this.paused = true;
     this.allowMultiplePlayback = false;
@@ -25,7 +38,7 @@ export default class Sound {
     this._currentTime = 0;
 
     this._gainNode = audioContext.createGain();
-    this._gainNode.connect(audioContext.destination);
+    this._gainNode.connect(mainGainNode);
 
     this._updateBound = this._update.bind(this);
 
