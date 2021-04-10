@@ -1,17 +1,36 @@
 import Ticker from './Ticker.js';
 
+const targetComputedKeyframesMap = new Map();
+
 const animate = (target, keyframes, { duration = 0, delay = 0, easing = (x) => x, onupdate = () => { }, fill = 'none' } = {}) => {
+  let time = 0;
+
   let finishedResolve;
   const finished = new Promise((resolve) => finishedResolve = resolve);
-  let time = 0;
-  const keyframesMap = new Map(Object.entries(keyframes));
+
+  // Get target computed keyframes Set
+  let targetComputedKeyframes = targetComputedKeyframesMap.get(target);
+  if (!targetComputedKeyframes) {
+    targetComputedKeyframes = new Set();
+    targetComputedKeyframesMap.set(target, targetComputedKeyframes);
+  }
+
+  const computedKeyframes = new Map(Object.entries(keyframes));
+
+  for (const previousComputedKeyframes of targetComputedKeyframes) {
+    for (const key of computedKeyframes.keys()) {
+      previousComputedKeyframes.delete(key);
+    }
+  }
+
+  targetComputedKeyframes.add(computedKeyframes);
 
   /**
-   * Set init value as undefined if it doesn't exist
+   * Set init value as current value if it doesn't exist
    */
-  for (const [key, value] of keyframesMap) {
+  for (const [key, value] of computedKeyframes) {
     if (!(value instanceof Array)) {
-      keyframesMap.set(key, [undefined, value]);
+      computedKeyframes.set(key, [target[key], value]);
     }
   }
 
@@ -35,8 +54,7 @@ const animate = (target, keyframes, { duration = 0, delay = 0, easing = (x) => x
     }
 
     if (needsUpdate) {
-      for (const [key, value] of keyframesMap) {
-        if (value[0] === undefined) value[0] = target[key];
+      for (const [key, value] of computedKeyframes) {
         target[key] = (value[1] - value[0]) * progress + value[0];
       }
     }
