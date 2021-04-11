@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-starter-gl",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "<damo-starter-gl> custom element.",
   "main": "index.js",
   "author": "Damien Mortini",
