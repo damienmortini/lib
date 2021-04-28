@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-glslcanvas",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "<element-glslcanvas> custom element.",
   "publishConfig": {
     "access": "public"
