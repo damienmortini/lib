@@ -24,14 +24,9 @@ export default class GLSLCanvasElement extends HTMLElement {
 
     this.canvas = this.shadowRoot.querySelector('canvas');
 
-    const webGLOptions = {
-      antialias: true,
-      premultipliedAlpha: false,
-    };
-
-    this.gl = this.canvas.getContext('webgl2', webGLOptions);
+    this.gl = this.canvas.getContext('webgl2');
     if (!this.gl) {
-      this.gl = this.canvas.getContext('webgl', webGLOptions) || this.canvas.getContext('experimental-webgl', webGLOptions);
+      this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
     }
 
     const resizeObserver = new ResizeObserver((entries) => {
