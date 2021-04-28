@@ -5,6 +5,10 @@ export default class Vector2 extends Float32Array {
     return vec2.distance(vector2a, vector2b);
   }
 
+  /**
+   * Creates an instance of Vector2.
+   * @param {Array | Float32Array} array
+   */
   constructor(array = [0, 0]) {
     super(array);
     return this;
