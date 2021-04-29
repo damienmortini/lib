@@ -9,7 +9,7 @@ import '../../lottie-web/build/player/lottie.js';
  */
 class LottieAnimationElement extends HTMLElement {
   static get observedAttributes() {
-    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime'];
+    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime', 'segments'];
   }
 
   constructor() {
@@ -102,7 +102,8 @@ class LottieAnimationElement extends HTMLElement {
         break;
       case 'segments':
         if (this.animation) {
-          this.animation.playSegments(this.segments, true);
+          if (this.segments) this.animation.playSegments(this.segments, true);
+          else this.animation.resetSegments(true);
         }
         break;
     }
