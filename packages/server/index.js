@@ -117,7 +117,7 @@ server.on('stream', (stream, headers) => {
    * If path is a directory then set index.html file by default
    */
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-    filePath += 'index.html';
+    filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
   }
 
   /**
