@@ -1,5 +1,4 @@
-import Loader from '../core/util/Loader.js';
-import '../../lottie-web/build/player/lottie.js';
+import '../../lottie-web/build/player/lottie.min.js';
 
 /**
  * Element to plays Lottie animation
@@ -42,16 +41,12 @@ class LottieAnimationElement extends HTMLElement {
     if (this.animation) {
       this.animation.destroy();
     }
-    const data = await Loader.load(src);
-    if (this.src !== src) {
-      return;
-    }
     this.animation = lottie.loadAnimation({
       container: this._container,
       renderer: this.renderer,
       autoplay: this.autoplay,
       loop: this.loop,
-      animationData: data,
+      path: src,
     });
     this.animation.addEventListener('DOMLoaded', () => {
       if (this.segments) {

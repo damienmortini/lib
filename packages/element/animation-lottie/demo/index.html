@@ -28,6 +28,26 @@
 <body>
   <script type="module" src="../index.js"></script>
   <damo-animation-lottie loop autoplay src="bodymovin.json"></damo-animation-lottie>
+
+  <script>
+    const lottieAnimationElement = document.body.querySelector('damo-animation-lottie');
+    document.body.addEventListener('drop', (event) => {
+      event.preventDefault();
+      const file = event.dataTransfer.items[0].getAsFile();
+      if (!file) {
+        return;
+      }
+      const reader = new FileReader()
+      reader.addEventListener("load", function () {
+        lottieAnimationElement.src = reader.result;
+      });
+      reader.readAsDataURL(file)
+    });
+
+    document.body.addEventListener('dragover', (event) => {
+      event.preventDefault();
+    });
+  </script>
 </body>
 
 </html>
