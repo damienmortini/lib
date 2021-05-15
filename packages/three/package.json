@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/three",
-  "version": "0.1.118",
+  "version": "0.1.119",
   "description": "Three.js helpers",
   "scripts": {
     "install": "npm run copyexamples",
@@ -25,7 +25,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/master/packages/three",
   "dependencies": {
-    "@damienmortini/core": "^0.2.96",
+    "@damienmortini/core": "^0.2.97",
     "fs-extra": "^10.0.0",
     "three": "0.128.0"
   }
