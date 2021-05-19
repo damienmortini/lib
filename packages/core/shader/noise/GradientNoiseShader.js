@@ -35,12 +35,12 @@ export const gradientNoise2D = () => {
       // Simplex  Noise 2D             : https://www.shadertoy.com/view/Msf3WH
       // Wave     Noise 2D             : https://www.shadertoy.com/view/tldSRj
       
-      
-      vec2 gradientNoise2DHash( vec2 x )  // replace this by something better
+      // https://www.shadertoy.com/view/4djSRW
+      vec2 gradientNoise2DHash(vec2 p)
       {
-          const vec2 k = vec2( 0.3183099, 0.3678794 );
-          x = x*k + k.yx;
-          return -1.0 + 2.0*fract( 16.0 * k*fract( x.x*x.y*(x.x+x.y)) );
+        vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+          p3 += dot(p3, p3.yzx+33.33);
+          return fract((p3.xx+p3.yz)*p3.zy);
       }
       
       float gradientNoise2D( in vec2 p )
@@ -78,12 +78,12 @@ export const gradientDerivativesNoise2D = () => {
       // Gradient Noise 3D             : https://www.shadertoy.com/view/Xsl3Dl
       // Simplex  Noise 2D             : https://www.shadertoy.com/view/Msf3WH
       
-      
-      vec2 gradientDerivativesNoise2DHash( in vec2 x )  // replace this by something better
+      // https://www.shadertoy.com/view/4djSRW
+      vec2 gradientDerivativesNoise2DHash(vec2 p)
       {
-          const vec2 k = vec2( 0.3183099, 0.3678794 );
-          x = x*k + k.yx;
-          return -1.0 + 2.0*fract( 16.0 * k*fract( x.x*x.y*(x.x+x.y)) );
+        vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+          p3 += dot(p3, p3.yzx+33.33);
+          return fract((p3.xx+p3.yz)*p3.zy);
       }
       
       
