@@ -1,8 +1,12 @@
+const element = document.createElement('br');
+element.style.display = 'none';
+document.body.appendChild(element);
+
 export default class Color {
   static styleToRGBA(value) {
-    document.head.style.color = value;
+    element.style.color = value;
 
-    const results = /rgba?\s*\(\s*(\d*),\s*(\d*)\s*,\s*(\d*)\s*(,\s*([.\d]*))?\s*\)/.exec(getComputedStyle(document.head).getPropertyValue('color'));
+    const results = /rgba?\s*\(\s*(\d*),\s*(\d*)\s*,\s*(\d*)\s*(,\s*([.\d]*))?\s*\)/.exec(getComputedStyle(element).getPropertyValue('color'));
     return results ? [
       parseInt(results[1]) / 255,
       parseInt(results[2]) / 255,
