@@ -126,16 +126,12 @@ export default class GUIFolderElement extends HTMLElement {
     }
   }
 
-  set open(value) {
-    if (value) {
-      this.setAttribute('open', '');
-    } else {
-      this.removeAttribute('open');
-    }
+  get open() {
+    return this.hasAttribute('open');
   }
 
-  get open() {
-    return this._details.open;
+  set open(value) {
+    this.toggleAttribute('open', value);
   }
 
   get name() {

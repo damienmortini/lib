@@ -6,7 +6,9 @@ import InputColorElement from '../element-input-color/index.js';
 import InputRangeElement from '../element-input-range/index.js';
 import InputSelectElement from '../element-input-select/index.js';
 import InputTextElement from '../element-input-text/index.js';
+import { GUIServer } from './GUIServer.js';
 
+const GUIGlobalServer = new GUIServer();
 const STORAGE_ID = 'GUI.data';
 
 const customElementsMap = new Map(Object.entries({
@@ -43,6 +45,10 @@ const valuesMap = new Map([
 ]);
 
 export default class GUIElement extends GUIFolderElement {
+  static get observedAttributes() {
+    return ['id', ...GUIFolderElement.observedAttributes];
+  }
+
   constructor() {
     super();
 
@@ -77,6 +83,16 @@ export default class GUIElement extends GUIFolderElement {
         sessionStorage.setItem('GUI.close', '');
       }
     });
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    super.attributeChangedCallback(name, oldValue, newValue);
+    switch (name) {
+      case 'id':
+        GUIGlobalServer.unregister(oldValue);
+        GUIGlobalServer.register(newValue, this);
+        break;
+    }
   }
 
   connectedCallback() {
@@ -267,3 +283,5 @@ export default class GUIElement extends GUIFolderElement {
 if (!customElements.get('damo-gui')) {
   customElements.define('damo-gui', class DamoGUIElement extends GUIElement { });
 }
+
+export { GUIGlobalServer };
