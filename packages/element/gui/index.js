@@ -200,33 +200,35 @@ export default class GUIElement extends GUIFolderElement {
     }
 
     if (options.id) {
-      const urlValue = valuesMap.get(options.id);
-      if (urlValue !== undefined) element.value = urlValue;
+      const savedValue = valuesMap.get(options.id);
+      if (savedValue !== undefined) element.value = savedValue;
     }
 
     // Update URL params and reload if needed
-    let timeout;
-    element.addEventListener('change', () => {
+    const saveValue = () => {
       if (options.id) {
         valuesMap.set(options.id, element.value);
       }
-
+      if (saveToURL) {
+        const urlSearchParams = new URLSearchParams(location.hash.slice(1));
+        if (valuesMap.size) urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
+        else urlSearchParams.delete('gui');
+        location.hash = urlSearchParams.toString();
+      }
+      if (saveToSessionStorage) {
+        if (valuesMap.size) sessionStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]));
+        else sessionStorage.removeItem(STORAGE_ID);
+      }
+      if (saveToLocalStorage) {
+        if (valuesMap.size) localStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]));
+        else localStorage.removeItem(STORAGE_ID);
+      }
+    };
+    let timeout;
+    element.addEventListener('change', () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        if (saveToURL) {
-          const urlSearchParams = new URLSearchParams(location.hash.slice(1));
-          if (valuesMap.size) urlSearchParams.set('gui', JSON.stringify([...valuesMap]));
-          else urlSearchParams.delete('gui');
-          location.hash = urlSearchParams.toString();
-        }
-        if (saveToSessionStorage) {
-          if (valuesMap.size) sessionStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]));
-          else sessionStorage.removeItem(STORAGE_ID);
-        }
-        if (saveToLocalStorage) {
-          if (valuesMap.size) localStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]));
-          else localStorage.removeItem(STORAGE_ID);
-        }
+        saveValue();
         if (reload) {
           window.location.reload();
         }
@@ -235,13 +237,18 @@ export default class GUIElement extends GUIFolderElement {
 
     // Watch value change
     if (watch) {
-      const updateInputValue = () => {
+      let savedTime = 0;
+      const updateInputValue = (time) => {
         if (!element.parentElement) {
           return;
         }
         requestAnimationFrame(updateInputValue);
         element.removeEventListener('change', onElementChange);
         element.value = object[key];
+        if (time - savedTime > 100) {
+          saveValue();
+          savedTime = time;
+        }
         element.addEventListener('change', onElementChange);
       };
       requestAnimationFrame(updateInputValue);
