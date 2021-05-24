@@ -17,6 +17,8 @@ export default class InputPadXYElement extends HTMLElement {
           height: 100px;
           touch-action: none;
           background: white;
+          overflow: hidden;
+          contain: content;
         }
 
         :host([disabled]) {
@@ -56,6 +58,14 @@ export default class InputPadXYElement extends HTMLElement {
     this._pad = this.shadowRoot.querySelector('.pad');
     this._pointer = this.shadowRoot.querySelector('.pointer');
 
+    const resizeObserver = new ResizeObserver((entries) => {
+      this._width = entries[0].contentRect.width;
+      this._height = entries[0].contentRect.height;
+
+      this._updatePointer();
+    });
+    resizeObserver.observe(this);
+
     const pointerDownPosition = [0, 0];
     const pointerDownScreenPosition = [0, 0];
 
@@ -72,7 +82,6 @@ export default class InputPadXYElement extends HTMLElement {
       updatePointer(event);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointermove', updatePointer);
-      this.dispatchEvent(new Event('change'));
     };
 
     this._pad.addEventListener('pointerdown', (event) => {
@@ -105,6 +114,10 @@ export default class InputPadXYElement extends HTMLElement {
     }
   }
 
+  _updatePointer() {
+    this._pointer.style.transform = `translate(${this._value[0] * this._width * .5}px, ${-this._value[1] * this._height * .5}px)`;
+  }
+
   get value() {
     return this._value;
   }
@@ -114,9 +127,11 @@ export default class InputPadXYElement extends HTMLElement {
       return;
     }
     this._value = value;
-    this._pointer.style.left = `${(this._value[0] * .5 + .5) * 100}%`;
-    this._pointer.style.top = `${(-this._value[1] * .5 + .5) * 100}%`;
+    this._updatePointer();
     this.dispatchEvent(new Event('input', {
+      bubbles: true,
+    }));
+    this.dispatchEvent(new Event('change', {
       bubbles: true,
     }));
   }
