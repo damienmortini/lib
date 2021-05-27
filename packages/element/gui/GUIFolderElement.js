@@ -111,6 +111,9 @@ export default class GUIFolderElement extends HTMLElement {
             `;
             const fragment = template.content.firstElementChild.cloneNode(true);
             const resetButton = fragment.querySelector('.reset');
+            if (JSON.stringify(node.defaultValue) !== JSON.stringify(node.value)) {
+              resetButton.toggleAttribute('disabled', false);
+            }
             node.addEventListener('change', () => {
               resetButton.toggleAttribute('disabled', false);
             });
