@@ -34,7 +34,7 @@ export default class GUIFolderElement extends HTMLElement {
         #content {
           display: grid;
           align-items: center;
-          grid-template-columns: minmax(auto, 1fr) 2fr;
+          grid-template-columns: minmax(auto, 1fr) 2fr 10px;
           gap: 5px;
         }
         section {
@@ -42,7 +42,7 @@ export default class GUIFolderElement extends HTMLElement {
         }
         slot::slotted(*) {
           width: 100%;
-          grid-column: span 2;
+          grid-column: span 3;
         }
         section.input slot::slotted(*) {
           width: 100%;
@@ -57,7 +57,21 @@ export default class GUIFolderElement extends HTMLElement {
           display: none;
         }
         section.input label:empty + slot::slotted(*) {
-          grid-column: span 2;
+          grid-column: span 3;
+        }
+        .reset {
+          cursor: pointer;
+          height: 100%;
+          width: 100%;
+          transition: opacity .4s;
+        }
+        .reset[disabled] {
+          pointer-events: none;
+          opacity: 0;
+        }
+        .reset svg {
+          height: 100%;
+          width: 100%;
         }
       </style>
       <slot></slot>
@@ -82,14 +96,34 @@ export default class GUIFolderElement extends HTMLElement {
             this._content.appendChild(slot);
           } else {
             const label = node.getAttribute('label') || node.label || node.getAttribute('name') || node.name || node.id || '';
-            const section = document.createElement('section');
-            section.id = slotName;
-            section.classList.add('input');
-            section.innerHTML = `
-              <label title="${label}">${label}</label>
-              <slot name="${slotName}"></slot>
+            const template = document.createElement('template');
+            template.innerHTML = `
+              <section class="input" id="${slotName}">
+                <label title="${label}">${label}</label>
+                <slot name="${slotName}"></slot>
+                <div class="reset" disabled title="Reset">
+                  <svg viewBox="0 0 10 10">
+                    <line x1="1" y1="1" x2="9" y2="9" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-linecap="round" />
+                    <line x1="9" y1="1" x2="1" y2="9" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-linecap="round" />
+                  </svg>
+                </div>
+              </section>
             `;
-            this._content.appendChild(section);
+            const fragment = template.content.firstElementChild.cloneNode(true);
+            const resetButton = fragment.querySelector('.reset');
+            node.addEventListener('change', () => {
+              resetButton.toggleAttribute('disabled', false);
+            });
+            resetButton.addEventListener('click', () => {
+              this.dispatchEvent(new CustomEvent('reset', {
+                detail: {
+                  node,
+                },
+                bubbles: true,
+              }));
+              resetButton.toggleAttribute('disabled', true);
+            });
+            this._content.appendChild(fragment);
           }
           node.slot = slotName;
         }
