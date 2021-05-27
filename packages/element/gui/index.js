@@ -76,6 +76,11 @@ export default class GUIElement extends GUIFolderElement {
 
     this._foldersMap = new Map();
 
+    this.addEventListener('reset', (event) => {
+      const node = event.detail.node;
+      if (node.defaultValue !== undefined) node.value = node.defaultValue;
+    });
+
     this.addEventListener('toggle', () => {
       if (this.open) {
         sessionStorage.removeItem('GUI.close');
@@ -188,6 +193,7 @@ export default class GUIElement extends GUIFolderElement {
     // Set value
     if (value !== undefined) {
       element.value = value;
+      element.defaultValue = value;
     }
 
     const onElementChange = () => {
