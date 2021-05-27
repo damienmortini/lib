@@ -140,13 +140,12 @@ export const gradientNoise3D = () => {
       //===============================================================================================
       //===============================================================================================
 
-      vec3 gradientNoise3DHash( vec3 p ) // replace this by something better
+      // https://www.shadertoy.com/view/4djSRW
+      vec3 gradientNoise3DHash( vec3 p )
       {
-        p = vec3( dot(p,vec3(127.1,311.7, 74.7)),
-              dot(p,vec3(269.5,183.3,246.1)),
-              dot(p,vec3(113.5,271.9,124.6)));
-
-        return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+        p = fract(p * vec3(.1031, .1030, .0973));
+        p += dot(p, p.yxz+33.33);
+        return fract((p.xxy + p.yxx)*p.zyx);
       }
 
       float gradientNoise3D( in vec3 p )
@@ -170,11 +169,9 @@ export const gradientNoise3D = () => {
 
 export const gradientDerivativesNoise3D = ({
   hash = `
-      p = vec3( dot(p,vec3(127.1,311.7, 74.7)),
-        dot(p,vec3(269.5,183.3,246.1)),
-        dot(p,vec3(113.5,271.9,124.6)));
-
-      return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+      p = fract(p * vec3(.1031, .1030, .0973));
+      p += dot(p, p.yxz+33.33);
+      return fract((p.xxy + p.yxx)*p.zyx);
     `,
 } = {}) => {
   return `
