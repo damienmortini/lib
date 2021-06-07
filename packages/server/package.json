@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/server",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "description": "Simple live reloading HTTP2 server for development",
   "publishConfig": {
     "access": "public"
