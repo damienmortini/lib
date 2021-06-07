@@ -213,7 +213,8 @@ export default class GUIElement extends GUIFolderElement {
     // Update URL params and reload if needed
     const saveValue = () => {
       if (options.id) {
-        valuesMap.set(options.id, element.value);
+        if (JSON.stringify(element.value) === JSON.stringify(element.defaultValue)) valuesMap.delete(options.id);
+        else valuesMap.set(options.id, element.value);
       }
       if (saveToURL) {
         const urlSearchParams = new URLSearchParams(location.hash.slice(1));
@@ -243,19 +244,12 @@ export default class GUIElement extends GUIFolderElement {
 
     // Watch value change
     if (watch) {
-      let savedTime = 0;
       const updateInputValue = (time) => {
         if (!element.parentElement) {
           return;
         }
         requestAnimationFrame(updateInputValue);
-        element.removeEventListener('change', onElementChange);
         element.value = object[key];
-        if (time - savedTime > 100) {
-          saveValue();
-          savedTime = time;
-        }
-        element.addEventListener('change', onElementChange);
       };
       requestAnimationFrame(updateInputValue);
     }
