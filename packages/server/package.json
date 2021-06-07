@@ -26,6 +26,6 @@
   "dependencies": {
     "chokidar": "^3.5.1",
     "mime-types": "^2.1.30",
-    "ws": "^7.4.5"
+    "ws": "^7.4.6"
   }
 }
