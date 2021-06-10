@@ -57,7 +57,7 @@ export default class GUIFolderElement extends HTMLElement {
           display: none;
         }
         section.input label:empty + slot::slotted(*) {
-          grid-column: span 3;
+          grid-column: span 2;
         }
         .reset {
           cursor: pointer;
@@ -95,7 +95,7 @@ export default class GUIFolderElement extends HTMLElement {
             slot.name = slotName;
             this._content.appendChild(slot);
           } else {
-            const label = node.getAttribute('label') || node.label || node.getAttribute('name') || node.name || node.id || '';
+            const label = node.getAttribute('label') ?? node.label ?? node.getAttribute('name') ?? node.name ?? node.id ?? '';
             const template = document.createElement('template');
             template.innerHTML = `
               <section class="input" id="${slotName}">
