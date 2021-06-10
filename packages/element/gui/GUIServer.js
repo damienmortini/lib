@@ -1,17 +1,28 @@
+const guiServers = new Map();
+
 export class GUIServer {
-  constructor() {
-    this._guiElements = new Map();
+  static get(value) {
+    let guiServer = guiServers.get(value);
+    if (!guiServer) guiServer = new GUIServer({ name: value });
+    return guiServer;
   }
 
-  register(id, guiElement) {
-    this._guiElements.set(id, guiElement);
+  constructor({ name = undefined } = {}) {
+    if (name) guiServers.set(name, this);
+    this._guiElements = new Set();
   }
 
-  unregister(id) {
-    this._guiElements.delete(id);
+  register(guiElement) {
+    this._guiElements.add(guiElement);
   }
 
-  addTo(name, options) {
-    this._guiElements.get(name)?.add(options);
+  unregister(guiElement) {
+    this._guiElements.delete(guiElement);
+  }
+
+  add(options) {
+    for (const guiElement of this._guiElements) {
+      guiElement.add(options);
+    }
   }
 }
