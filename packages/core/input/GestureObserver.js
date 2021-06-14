@@ -132,7 +132,7 @@ class GestureObserver {
     data.previousMovementY = movementY;
 
     const size = data.gestureVector.size;
-    const movementScale = data.previousSize ? size - data.previousSize : 0;
+    const movementScale = data.previousSize ? size / data.previousSize : 1;
     data.previousSize = size;
 
     const rotation = Math.atan2(data.gestureVector.y, data.gestureVector.x);
@@ -163,7 +163,7 @@ class GestureObserver {
           target: event.currentTarget,
           movementX: data.previousMovementX,
           movementY: data.previousMovementY,
-          movementScale: 0,
+          movementScale: 1,
           movementRotation: 0,
           isSwipe: true,
         });
