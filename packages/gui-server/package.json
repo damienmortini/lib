@@ -1,0 +1,17 @@
+{
+  "name": "@damienmortini/gui-server",
+  "version": "0.0.0",
+  "author": "Damien Mortini",
+  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/gui-server",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/gui-server"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues"
+}

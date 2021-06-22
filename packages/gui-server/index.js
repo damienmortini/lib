@@ -1,6 +1,6 @@
 const guiServers = new Map();
 
-export class GUIServer {
+export default class GUIServer {
   static get(value) {
     let guiServer = guiServers.get(value);
     if (!guiServer) guiServer = new GUIServer({ name: value });
@@ -12,11 +12,11 @@ export class GUIServer {
     this._guiElements = new Set();
   }
 
-  register(guiElement) {
+  connect(guiElement) {
     this._guiElements.add(guiElement);
   }
 
-  unregister(guiElement) {
+  disconnect(guiElement) {
     this._guiElements.delete(guiElement);
   }
 
