@@ -77,7 +77,7 @@ export default class GUIElement extends GUIFolderElement {
 
     this.addEventListener('reset', (event) => {
       const node = event.detail.node;
-      if (node.defaultValue !== undefined) node.value = node.defaultValue;
+      if ('defaultValue' in node) node.value = node.defaultValue;
     });
 
     this.addEventListener('toggle', () => {
@@ -189,8 +189,7 @@ export default class GUIElement extends GUIFolderElement {
       element[key] = value;
     }
 
-    // Set value
-    if (value !== undefined) {
+    if ('value' in element) {
       element.value = value;
       element.defaultValue = value;
     }
