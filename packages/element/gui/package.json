@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-gui",
   "version": "0.0.111",
-  "description": "Simple yet limitless GUI",
+  "description": "GUI element",
   "keywords": [
     "javascript",
     "gui",

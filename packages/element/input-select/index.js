@@ -84,10 +84,10 @@ export default class InputSelectElement extends HTMLElement {
   }
 
   set value(value) {
-    this._select.value = value;
     if (this._value === value) {
       return;
     }
+    this._select.value = value;
     this._value = value;
     this.dispatchEvent(new Event('change', { bubbles: true }));
   }
