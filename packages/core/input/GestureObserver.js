@@ -6,9 +6,12 @@ class GestureObserver {
    * @property {HTMLElement} target - The target DOM Element
    * @property {number} movementX - Movement on the X axis
    * @property {number} movementY - Movement on the Y axis
+   * @property {number} offsetX - Offset between gesture start and gesture end on the X axis
+   * @property {number} offsetY - Offset between gesture start and gesture end on the Y axis
    * @property {number} movementScale - Pinch-zoom movement
    * @property {number} movementRotation - Angular movement in radians
-   * @property {boolean} isSwipe - Is the gesture a swipe
+   * @property {number} duration - Duration of the gesture
+   * @property {boolean} finished - Is the gesture finished
    */
   /**
    * @callback GestureObserverCallback
@@ -44,9 +47,11 @@ class GestureObserver {
       previousSize: 0,
       previousX: 0,
       previousY: 0,
+      offsetX: 0,
+      offsetY: 0,
       previousMovementX: 0,
       previousMovementY: 0,
-      timeStamp: 0,
+      startTimeStamp: 0,
     });
   }
 
@@ -72,14 +77,13 @@ class GestureObserver {
     }
   }
 
-  _resetElementData(element) {
+  _resetElementPreviousData(element) {
     const data = this._elementsData.get(element);
     data.gestureVector.set(0, 0);
     data.previousSize = 0;
     data.previousX = 0;
     data.previousY = 0;
     data.previousRotation = 0;
-    data.timeStamp = 0;
   }
 
   _onPointerDown(event) {
@@ -90,12 +94,14 @@ class GestureObserver {
     } else if (this.pointerCapture) {
       element.setPointerCapture(event.pointerId);
     }
-    this._resetElementData(element);
+    this._resetElementPreviousData(element);
     if (!data.pointers.size) {
       element.addEventListener('pointermove', this._onPointerMoveBound);
       element.addEventListener('pointerup', this._onPointerUpBound);
       element.addEventListener('pointerout', this._onPointerUpBound);
-      data.timeStamp = Date.now();
+      data.startTimeStamp = Date.now();
+      data.offsetX = 0;
+      data.offsetY = 0;
     }
     data.pointers.set(event.pointerId, event);
   }
@@ -144,42 +150,47 @@ class GestureObserver {
     }
     data.previousRotation = rotation;
 
+    data.offsetX += movementX;
+    data.offsetY += movementY;
+
     this._callback({
       target: event.currentTarget,
       movementX: this.pointerLock ? event.movementX / devicePixelRatio : movementX,
       movementY: this.pointerLock ? event.movementY / devicePixelRatio : movementY,
+      offsetX: data.offsetX,
+      offsetY: data.offsetY,
       movementScale,
       movementRotation,
-      isSwipe: false,
+      duration: Date.now() - data.startTimeStamp,
+      finished: false,
     });
   }
 
   _onPointerUp(event) {
     const element = event.currentTarget;
     const data = this._elementsData.get(element);
-    if (data) {
-      if (Date.now() - data.timeStamp < 1000) {
-        this._callback({
-          target: event.currentTarget,
-          movementX: data.previousMovementX,
-          movementY: data.previousMovementY,
-          movementScale: 1,
-          movementRotation: 0,
-          isSwipe: true,
-        });
-      }
-      data.pointers.delete(event.pointerId);
-      this._resetElementData(element);
-    }
+    data.pointers.delete(event.pointerId);
     element.releasePointerCapture(event.pointerId);
     if (document.exitPointerLock) {
       document.exitPointerLock();
     }
     if (!data || !data.pointers.size) {
+      this._callback({
+        target: event.currentTarget,
+        movementX: 0,
+        movementY: 0,
+        movementScale: 1,
+        movementRotation: 0,
+        offsetX: data.offsetX,
+        offsetY: data.offsetY,
+        duration: Date.now() - data.startTimeStamp,
+        finished: true,
+      });
       element.removeEventListener('pointermove', this._onPointerMoveBound);
       element.removeEventListener('pointerup', this._onPointerUpBound);
       element.removeEventListener('pointerout', this._onPointerUpBound);
     }
+    this._resetElementPreviousData(element);
   }
 }
 
