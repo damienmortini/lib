@@ -27,6 +27,7 @@
     "@damienmortini/element-input-color": "^0.0.96",
     "@damienmortini/element-input-range": "^0.0.20",
     "@damienmortini/element-input-select": "^0.0.16",
-    "@damienmortini/element-input-text": "^0.0.14"
+    "@damienmortini/element-input-text": "^0.0.14",
+    "@damienmortini/gui-server": "^0.0.1"
   }
 }
