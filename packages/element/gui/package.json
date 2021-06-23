@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-gui",
-  "version": "0.0.113",
+  "version": "0.0.114",
   "description": "GUI element",
   "keywords": [
     "javascript",
@@ -28,6 +28,6 @@
     "@damienmortini/element-input-range": "^0.0.20",
     "@damienmortini/element-input-select": "^0.0.17",
     "@damienmortini/element-input-text": "^0.0.14",
-    "@damienmortini/gui-server": "^0.0.1"
+    "@damienmortini/gui-server": "^0.0.2"
   }
 }
