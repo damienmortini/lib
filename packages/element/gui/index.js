@@ -6,7 +6,6 @@ import InputColorElement from '../element-input-color/index.js';
 import InputRangeElement from '../element-input-range/index.js';
 import InputSelectElement from '../element-input-select/index.js';
 import InputTextElement from '../element-input-text/index.js';
-import GUIServer from '../gui-server/index.js';
 
 const STORAGE_ID = 'GUI.data';
 
@@ -44,10 +43,6 @@ const valuesMap = new Map([
 ]);
 
 export default class GUIElement extends GUIFolderElement {
-  static get observedAttributes() {
-    return ['server', ...GUIFolderElement.observedAttributes];
-  }
-
   constructor() {
     super();
 
@@ -87,16 +82,10 @@ export default class GUIElement extends GUIFolderElement {
         sessionStorage.setItem('GUI.close', '');
       }
     });
-  }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    super.attributeChangedCallback(name, oldValue, newValue);
-    switch (name) {
-      case 'server':
-        GUIServer.get(oldValue)?.disconnect(this);
-        GUIServer.get(newValue).connect(this);
-        break;
-    }
+    window.addEventListener('damoguiadd', (event) => {
+      this.add(event.detail.options);
+    });
   }
 
   connectedCallback() {
