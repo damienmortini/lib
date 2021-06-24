@@ -69,6 +69,26 @@ export default class TransformShader {
     `;
   }
 
+  static matrixFromQuaternion() {
+    return `
+      mat3 matrixFromQuaternion(vec4 quaternion) {
+        float x2 = quaternion.x + quaternion.x;
+        float y2 = quaternion.y + quaternion.y;
+        float z2 = quaternion.z + quaternion.z;
+        float xx = quaternion.x * x2;
+        float yx = quaternion.y * x2;
+        float yy = quaternion.y * y2;
+        float zx = quaternion.z * x2;
+        float zy = quaternion.z * y2;
+        float zz = quaternion.z * z2;
+        float wx = quaternion.w * x2;
+        float wy = quaternion.w * y2;
+        float wz = quaternion.w * z2;
+        return mat3(1. - yy - zz, yx - wz, zx + wy, yx + wz, 1. - xx - zz, zy - wx, zx - wy, zy + wx, 1. - xx - yy);
+      }
+    `;
+  }
+
   static matrixFromRotation() {
     return `
       mat3 matrixFromRotation(vec3 eulerRotation) {
