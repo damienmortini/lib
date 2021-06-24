@@ -71,9 +71,9 @@ export default class InputSelectElement extends HTMLElement {
       const optionElement = document.createElement('option');
       optionElement.value = index;
       optionElement.text = JSON.stringify(option);
-      optionElement.selected = option === this.value;
       this._select.add(optionElement);
     }
+    this._select.selectedIndex = this._options.indexOf(this.value);
   }
 
   get value() {
