@@ -5,6 +5,7 @@
     "node": true
   },
   "extends": [
+    "eslint:recommended",
     "google"
   ],
   "globals": {
@@ -21,6 +22,10 @@
     "object-curly-spacing": [
       2,
       "always"
+    ],
+    "semi": [
+      "error",
+      "never"
     ],
     "space-before-function-paren": [
       2,
