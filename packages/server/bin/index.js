@@ -21,6 +21,7 @@ for (const arg of process.argv) {
 
 new Server({
   path,
+  watch: !!watchPath,
   watchPath,
   verbose,
 })
