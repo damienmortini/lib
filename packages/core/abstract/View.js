@@ -1,77 +1,77 @@
-const SELF_HIDDEN = 1;
-const HIDDEN_BY_PARENT = 2;
+const SELF_HIDDEN = 1
+const HIDDEN_BY_PARENT = 2
 
 export default class View {
   constructor({
     hidden = false,
   } = {}) {
-    this._hiddenFlag = hidden ? SELF_HIDDEN : 0;
+    this._hiddenFlag = hidden ? SELF_HIDDEN : 0
 
-    this.parent = null;
-    this.children = new Set();
+    this.parent = null
+    this.children = new Set()
 
-    this._currentVisibilityPromise = null;
+    this._currentVisibilityPromise = null
   }
 
   async _updateVisibility(hiddenFlag) {
     if (!!hiddenFlag === !!this._hiddenFlag) {
-      this._hiddenFlag = hiddenFlag;
-      return this._currentVisibilityPromise || Promise.resolve();
+      this._hiddenFlag = hiddenFlag
+      return this._currentVisibilityPromise || Promise.resolve()
     }
 
-    this._hiddenFlag = hiddenFlag;
+    this._hiddenFlag = hiddenFlag
 
-    const promises = [];
+    const promises = []
 
     for (const child of this.children) {
-      let childPromise;
+      let childPromise
       if (this.isHidden) {
-        childPromise = child._updateVisibility(child._hiddenFlag | HIDDEN_BY_PARENT);
+        childPromise = child._updateVisibility(child._hiddenFlag | HIDDEN_BY_PARENT)
       } else {
-        childPromise = child._updateVisibility(child._hiddenFlag & ~HIDDEN_BY_PARENT);
+        childPromise = child._updateVisibility(child._hiddenFlag & ~HIDDEN_BY_PARENT)
       }
-      promises.push(childPromise);
+      promises.push(childPromise)
     }
 
     promises.push((async () => {
       if (this.isHidden) {
-        return this.onHide();
+        return this.onHide()
       } else {
-        return this.onShow();
+        return this.onShow()
       }
-    })());
+    })())
 
     const promise = this._currentVisibilityPromise = Promise.all(promises).then(() => {
       if (promise !== this._currentVisibilityPromise) {
-        return new Promise(() => { });
+        return new Promise(() => { })
       }
-    });
+    })
 
-    return this._currentVisibilityPromise;
+    return this._currentVisibilityPromise
   }
 
   async show() {
-    return this._updateVisibility(this._hiddenFlag & ~SELF_HIDDEN);
+    return this._updateVisibility(this._hiddenFlag & ~SELF_HIDDEN)
   }
 
   async hide() {
-    return this._updateVisibility(this._hiddenFlag | SELF_HIDDEN);
+    return this._updateVisibility(this._hiddenFlag | SELF_HIDDEN)
   }
 
   get hidden() {
-    return !!(this._hiddenFlag & SELF_HIDDEN);
+    return !!(this._hiddenFlag & SELF_HIDDEN)
   }
 
   set hidden(value) {
     if (value) {
-      this.hide();
+      this.hide()
     } else {
-      this.show();
+      this.show()
     }
   }
 
   get isHidden() {
-    return !!this._hiddenFlag;
+    return !!this._hiddenFlag
   }
 
   async onShow() { }
@@ -80,24 +80,24 @@ export default class View {
 
   add(view) {
     if (this.children.has(view)) {
-      return;
+      return
     }
     if (view.parent) {
-      view.parent.remove(view);
+      view.parent.remove(view)
     }
-    view.parent = this;
-    this.children.add(view);
+    view.parent = this
+    this.children.add(view)
     if (this.isHidden) {
-      view._updateVisibility(view._hiddenFlag | HIDDEN_BY_PARENT);
+      view._updateVisibility(view._hiddenFlag | HIDDEN_BY_PARENT)
     }
   }
 
   remove(view) {
     if (!this.children.has(view)) {
-      return;
+      return
     }
-    view.parent = null;
-    this.children.delete(view);
-    view._updateVisibility(view._hiddenFlag & ~HIDDEN_BY_PARENT);
+    view.parent = null
+    this.children.delete(view)
+    view._updateVisibility(view._hiddenFlag & ~HIDDEN_BY_PARENT)
   }
 }

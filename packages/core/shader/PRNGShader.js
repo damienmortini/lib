@@ -16,6 +16,6 @@ export default class PRNGShader {
       float random(vec4 n) {
         return random(vec2(random(n.xyz), n.w));
       }
-    `;
+    `
   }
 }

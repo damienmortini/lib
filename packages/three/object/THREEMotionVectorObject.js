@@ -1,7 +1,7 @@
-import { Object3D, BufferGeometry, BufferAttribute, AnimationMixer, DataTexture, RGBAFormat, FloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js';
-import TransformShader from '../../core/shader/TransformShader.js';
-import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js';
-import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js';
+import { Object3D, BufferGeometry, BufferAttribute, AnimationMixer, DataTexture, RGBAFormat, FloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js'
+import TransformShader from '../../core/shader/TransformShader.js'
+import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js'
+import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js'
 
 export default class THREEMotionVectorObject extends Object3D {
   constructor({
@@ -22,53 +22,53 @@ export default class THREEMotionVectorObject extends Object3D {
     }),
     pointCount = undefined,
   }) {
-    super();
+    super()
 
-    this.loop = false;
+    this.loop = false
 
-    this._pointCount = pointCount;
+    this._pointCount = pointCount
 
-    this._initialized = false;
+    this._initialized = false
 
-    const object = gltfData.scene;
-    this._mesh = object;
+    const object = gltfData.scene
+    this._mesh = object
     object.traverse((object) => {
       if (object.skeleton) {
-        this._mesh = object;
-        this._mesh.frustumCulled = false;
+        this._mesh = object
+        this._mesh.frustumCulled = false
       }
-    });
+    })
     // this._mesh.visible = false;
-    this._mesh.scale.set(0, 0, 0);
+    this._mesh.scale.set(0, 0, 0)
     if (!pointsAttributes) {
-      pointsAttributes = new Map();
+      pointsAttributes = new Map()
       for (const [name, value] of Object.entries(this._mesh.geometry.attributes)) {
         pointsAttributes.set(name, {
           data: value.array,
           size: value.itemSize,
-        });
+        })
       }
     }
-    this.add(object);
+    this.add(object)
 
     if (this._pointCount) {
       for (const attributeData of pointsAttributes.values()) {
-        const newArray = new attributeData.data.constructor(this._pointCount * attributeData.size);
-        const stride = attributeData.size;
-        const difference = Math.floor(attributeData.data.length / newArray.length);
+        const newArray = new attributeData.data.constructor(this._pointCount * attributeData.size)
+        const stride = attributeData.size
+        const difference = Math.floor(attributeData.data.length / newArray.length)
         for (let index = 0; index < this._pointCount; index++) {
           for (let componentIndex = 0; componentIndex < stride; componentIndex++) {
-            newArray[index * stride + componentIndex] = attributeData.data[index * stride * difference + componentIndex];
+            newArray[index * stride + componentIndex] = attributeData.data[index * stride * difference + componentIndex]
           }
         }
-        attributeData.data = newArray;
+        attributeData.data = newArray
       }
     } else {
-      const firstAttribute = pointsAttributes.values().next().value;
-      this._pointCount = firstAttribute.data.length / firstAttribute.size;
+      const firstAttribute = pointsAttributes.values().next().value
+      this._pointCount = firstAttribute.data.length / firstAttribute.size
     }
 
-    this._skeleton = this._mesh.skeleton;
+    this._skeleton = this._mesh.skeleton
 
     // Create bonesTexture manually
     // https://github.com/mrdoob/three.js/blob/cd41804aa436bb2cfd79797c04985f75c4c63e63/src/renderers/WebGLRenderer.js#L1632
@@ -93,34 +93,34 @@ export default class THREEMotionVectorObject extends Object3D {
 
     //
 
-    const geometry = new BufferGeometry();
+    const geometry = new BufferGeometry()
 
     for (const [name, attributeData] of pointsAttributes) {
-      geometry.setAttribute(name, new BufferAttribute(attributeData.data, attributeData.size));
+      geometry.setAttribute(name, new BufferAttribute(attributeData.data, attributeData.size))
     }
 
-    this._points = new Points(geometry, material);
-    this._points.isSkinnedMesh = true;
-    this._points.skeleton = this._skeleton;
-    this._points.bindMatrix = new Matrix4();
-    this._points.bindMatrixInverse = new Matrix4();
-    this._points.visible = false;
-    this._points.frustumCulled = false;
-    this.add(this._points);
+    this._points = new Points(geometry, material)
+    this._points.isSkinnedMesh = true
+    this._points.skeleton = this._skeleton
+    this._points.bindMatrix = new Matrix4()
+    this._points.bindMatrixInverse = new Matrix4()
+    this._points.visible = false
+    this._points.frustumCulled = false
+    this.add(this._points)
 
-    const animation = gltfData.animations[0];
-    this._animationMixer = new AnimationMixer(object);
-    this._animationClip = animation;
-    this._animationAction = this._animationMixer.clipAction(this._animationClip);
-    this._animationAction.play();
+    const animation = gltfData.animations[0]
+    this._animationMixer = new AnimationMixer(object)
+    this._animationClip = animation
+    this._animationAction = this._animationMixer.clipAction(this._animationClip)
+    this._animationAction.play()
 
-    const pointTextures = new Map();
-    const pointTextureSize = Math.ceil(Math.sqrt(this._pointCount));
+    const pointTextures = new Map()
+    const pointTextureSize = Math.ceil(Math.sqrt(this._pointCount))
     for (const [name, attributeData] of pointsAttributes) {
-      const textureData = new Float32Array(pointTextureSize * pointTextureSize * attributeData.size);
-      textureData.set(attributeData.data);
-      const texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType);
-      pointTextures.set(name, texture);
+      const textureData = new Float32Array(pointTextureSize * pointTextureSize * attributeData.size)
+      textureData.set(attributeData.data)
+      const texture = new DataTexture(textureData, pointTextureSize, pointTextureSize, attributeData.size === 3 ? RGBFormat : RGBAFormat, FloatType)
+      pointTextures.set(name, texture)
     }
 
     this._gpgpuSystem = new THREEGPGPUSystem({
@@ -216,69 +216,69 @@ export default class THREEMotionVectorObject extends Object3D {
           gl_FragColor = data;
         `],
       ],
-    });
+    })
     this._gpgpuSystem.onBeforeRender = () => {
-      this._gpgpuSystem.material.boneTexture = this._skeleton.boneTexture;
-      this._gpgpuSystem.material.boneTextureSize = this._skeleton.boneTextureSize;
-    };
+      this._gpgpuSystem.material.boneTexture = this._skeleton.boneTexture
+      this._gpgpuSystem.material.boneTextureSize = this._skeleton.boneTextureSize
+    }
   }
 
   get pointCount() {
-    return this._pointCount;
+    return this._pointCount
   }
 
   get dataTexture() {
-    return this._gpgpuSystem.dataTexture;
+    return this._gpgpuSystem.dataTexture
   }
 
   get dataTextureStride() {
-    return this._gpgpuSystem.stride;
+    return this._gpgpuSystem.stride
   }
 
   get dataTextureSize() {
-    return this._gpgpuSystem.dataTextureSize;
+    return this._gpgpuSystem.dataTextureSize
   }
 
   get meshVisible() {
-    return this._mesh.visible;
+    return this._mesh.visible
   }
 
   set meshVisible(value) {
-    this._mesh.visible = value;
+    this._mesh.visible = value
   }
 
   get pointsVisible() {
-    return this._points.visible;
+    return this._points.visible
   }
 
   set pointsVisible(value) {
-    this._points.visible = value;
+    this._points.visible = value
   }
 
   get currentTime() {
-    return this._animationMixer.time;
+    return this._animationMixer.time
   }
 
   set currentTime(value) {
     if (value >= this._animationClip.duration) {
       if (this.loop) {
-        value = 0;
+        value = 0
       } else {
-        value = this._animationClip.duration;
+        value = this._animationClip.duration
       }
     }
-    this._animationMixer.setTime(Math.min(value, this._animationClip.duration - .01));
-    this._update();
+    this._animationMixer.setTime(Math.min(value, this._animationClip.duration - .01))
+    this._update()
   }
 
   _update() {
     if (!this._points.visible && !this._mesh.visible) {
-      this._skeleton.update();
+      this._skeleton.update()
     }
     if (!this._initialized) {
-      this._gpgpuSystem.update();
-      this._initialized = true;
+      this._gpgpuSystem.update()
+      this._initialized = true
     }
-    this._gpgpuSystem.update();
+    this._gpgpuSystem.update()
   }
 }

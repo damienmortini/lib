@@ -466,7 +466,7 @@ float srnoise(vec2 pos, float rot) {
 float snoise(vec2 pos) {
   return srnoise(pos, 0.0);
 }
-    `;
+    `
   }
 
   static noise3D() {
@@ -574,6 +574,6 @@ float snoise(vec2 pos) {
       return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), 
                                     dot(p2,x2), dot(p3,x3) ) );
       }
-    `;
+    `
   }
 }

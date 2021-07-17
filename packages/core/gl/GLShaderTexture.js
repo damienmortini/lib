@@ -1,8 +1,8 @@
-import GLTexture from './GLTexture.js';
-import GLFrameBuffer from './GLFrameBuffer.js';
-import GLProgram from './GLProgram.js';
-import GLPlaneObject from './object/GLPlaneObject.js';
-import Shader from '../3d/Shader.js';
+import GLTexture from './GLTexture.js'
+import GLFrameBuffer from './GLFrameBuffer.js'
+import GLProgram from './GLProgram.js'
+import GLPlaneObject from './object/GLPlaneObject.js'
+import Shader from '../3d/Shader.js'
 
 export default class GLShaderTexture extends GLTexture {
   constructor({
@@ -35,15 +35,15 @@ export default class GLShaderTexture extends GLTexture {
       wrapS,
       wrapT,
       autoGenerateMipmap: false,
-    });
+    })
 
-    this._debug = debug;
-    this._autoGenerateMipmap = autoGenerateMipmap;
+    this._debug = debug
+    this._autoGenerateMipmap = autoGenerateMipmap
 
     this._frameBuffer = new GLFrameBuffer({
       gl: this.gl,
       colorTextures: [this],
-    });
+    })
 
     this._quad = new GLPlaneObject({
       gl: this.gl,
@@ -69,34 +69,34 @@ export default class GLShaderTexture extends GLTexture {
           ],
         }),
       }),
-    });
+    })
 
-    this.draw({ uniforms, debug });
+    this.draw({ uniforms, debug })
   }
 
   get program() {
-    return this._quad.program;
+    return this._quad.program
   }
 
   draw({ uniforms = {}, debug = this._debug } = {}) {
-    this.gl.viewport(0, 0, this.width, this.height);
-    this._frameBuffer.bind();
+    this.gl.viewport(0, 0, this.width, this.height)
+    this._frameBuffer.bind()
     this._quad.draw({
       bind: true,
       uniforms,
-    });
-    this._frameBuffer.unbind();
+    })
+    this._frameBuffer.unbind()
     if (debug) {
       if (debug instanceof Array) {
-        this.gl.viewport(debug[0], debug[1], debug[2], debug[3]);
+        this.gl.viewport(debug[0], debug[1], debug[2], debug[3])
       }
       this._quad.draw({
         bind: true,
         uniforms,
-      });
+      })
     }
     if (this._autoGenerateMipmap) {
-      this.generateMipmap();
+      this.generateMipmap()
     }
   }
 }

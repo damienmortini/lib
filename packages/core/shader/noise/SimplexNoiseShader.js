@@ -44,5 +44,5 @@ export const simplexNoise = () => {
       vec3  n = h*h*h*h*vec3( dot(a,simplexNoiseHash(i+0.0)), dot(b,simplexNoiseHash(i+o)), dot(c,simplexNoiseHash(i+1.0)));
         return dot( n, vec3(70.0) );
     }
-  `;
-};
+  `
+}

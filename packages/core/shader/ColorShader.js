@@ -12,7 +12,7 @@ export default class ColorShader {
                     (maxc-minc)/(1.0-abs(minc+maxc-1.0) + 0.000001),  // S
                     (minc+maxc)*0.5 );                           // L
       }
-    `;
+    `
   }
 
   static hslToRGB() {
@@ -21,7 +21,7 @@ export default class ColorShader {
         vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
         return c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0));
       }
-    `;
+    `
   }
 
   static rgbToHSV() {
@@ -34,7 +34,7 @@ export default class ColorShader {
         float d = q.x - min(q.w, q.y);
         return vec3(abs(q.z + (q.w - q.y) / (6.0*d+0.000001)), d / (q.x+0.000001), q.x);
       }
-    `;
+    `
   }
 
   static hsvToRGB() {
@@ -44,6 +44,6 @@ export default class ColorShader {
         vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
         return c.z * mix( vec3(1.0), rgb, c.y);
       }
-    `;
+    `
   }
 }

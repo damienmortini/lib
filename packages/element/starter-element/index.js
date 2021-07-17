@@ -6,7 +6,7 @@
  */
 window.customElements.define('damo-starter-element', class extends HTMLElement {
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -16,6 +16,6 @@ window.customElements.define('damo-starter-element', class extends HTMLElement {
         }
       </style>
       <h1>damo-starter-element</h1>
-    `;
+    `
   }
-});
+})

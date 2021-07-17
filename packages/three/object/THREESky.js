@@ -1,10 +1,10 @@
-import { BackSide } from '../../../three/src/constants.js';
-import { Mesh } from '../../../three/src/objects/Mesh.js';
-import { Vector3 } from '../../../three/src/math/Vector3.js';
-import { IcosahedronBufferGeometry } from '../../../three/src/geometries/IcosahedronGeometry.js';
-import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
-import SkyShader from '../../core/shader/SkyShader.js';
-import GradientNoiseShader from '../../core/shader/noise/GradientNoiseShader.js';
+import { BackSide } from '../../../three/src/constants.js'
+import { Mesh } from '../../../three/src/objects/Mesh.js'
+import { Vector3 } from '../../../three/src/math/Vector3.js'
+import { IcosahedronBufferGeometry } from '../../../three/src/geometries/IcosahedronGeometry.js'
+import THREEShaderMaterial from '../material/THREEShaderMaterial.js'
+import SkyShader from '../../core/shader/SkyShader.js'
+import GradientNoiseShader from '../../core/shader/noise/GradientNoiseShader.js'
 
 const skyShader = {
   uniforms: {
@@ -95,7 +95,7 @@ const skyShader = {
       gl_FragColor = vec4(skyColor, 1.);
     `],
   ],
-};
+}
 
 export default class Sky extends Mesh {
   constructor({
@@ -106,174 +106,174 @@ export default class Sky extends Mesh {
       type: 'basic',
       side: BackSide,
       shaders,
-    }, skyShader)));
+    }, skyShader)))
 
-    this._radius = radius;
+    this._radius = radius
 
-    this.sunInclination = Math.PI * .5;
-    this.sunAzimuth = 0;
+    this.sunInclination = Math.PI * .5
+    this.sunAzimuth = 0
 
-    this.moonInclination = Math.PI * .5;
-    this.moonAzimuth = Math.PI;
+    this.moonInclination = Math.PI * .5
+    this.moonAzimuth = Math.PI
   }
 
   get radius() {
-    return this._radius;
+    return this._radius
   }
 
   _updatePositionFromInclinationAzimuth(position, inclination, azimuth) {
-    const theta = inclination;
-    const phi = azimuth + Math.PI * .5;
-    position.x = this._radius * Math.cos(phi) * Math.cos(theta);
-    position.y = this._radius * Math.sin(theta);
-    position.z = this._radius * Math.sin(phi) * Math.cos(theta);
+    const theta = inclination
+    const phi = azimuth + Math.PI * .5
+    position.x = this._radius * Math.cos(phi) * Math.cos(theta)
+    position.y = this._radius * Math.sin(theta)
+    position.z = this._radius * Math.sin(phi) * Math.cos(theta)
   }
 
   get displaySun() {
-    return this.material.displaySun === 1;
+    return this.material.displaySun === 1
   }
 
   set displaySun(value) {
-    this.material.displaySun = value ? 1 : 0;
+    this.material.displaySun = value ? 1 : 0
   }
 
   get displayMoon() {
-    return this.material.displayMoon === 1;
+    return this.material.displayMoon === 1
   }
 
   set displayMoon(value) {
-    this.material.displayMoon = value ? 1 : 0;
+    this.material.displayMoon = value ? 1 : 0
   }
 
   get sunInclination() {
-    return this._sunInclination;
+    return this._sunInclination
   }
 
   set sunInclination(value) {
-    this._sunInclination = value;
-    this._updatePositionFromInclinationAzimuth(this.sunPosition, this.sunInclination, this.sunAzimuth);
+    this._sunInclination = value
+    this._updatePositionFromInclinationAzimuth(this.sunPosition, this.sunInclination, this.sunAzimuth)
   }
 
   get sunAzimuth() {
-    return this._sunAzimuth;
+    return this._sunAzimuth
   }
 
   set sunAzimuth(value) {
-    this._sunAzimuth = value;
-    this._updatePositionFromInclinationAzimuth(this.sunPosition, this.sunInclination, this.sunAzimuth);
+    this._sunAzimuth = value
+    this._updatePositionFromInclinationAzimuth(this.sunPosition, this.sunInclination, this.sunAzimuth)
   }
 
   get sunPosition() {
-    return this.material.sunPosition;
+    return this.material.sunPosition
   }
 
   set sunPosition(value) {
-    this.material.sunPosition = value;
+    this.material.sunPosition = value
   }
 
   get sunRayleigh() {
-    return this.material.sunRayleigh;
+    return this.material.sunRayleigh
   }
 
   set sunRayleigh(value) {
-    this.material.sunRayleigh = value;
+    this.material.sunRayleigh = value
   }
 
   get sunTurbidity() {
-    return this.material.sunTurbidity;
+    return this.material.sunTurbidity
   }
 
   set sunTurbidity(value) {
-    this.material.sunTurbidity = value;
+    this.material.sunTurbidity = value
   }
 
   get sunLuminance() {
-    return this.material.sunLuminance;
+    return this.material.sunLuminance
   }
 
   set sunLuminance(value) {
-    this.material.sunLuminance = value;
+    this.material.sunLuminance = value
   }
 
   get sunMieCoefficient() {
-    return this.material.sunMieCoefficient;
+    return this.material.sunMieCoefficient
   }
 
   set sunMieCoefficient(value) {
-    this.material.sunMieCoefficient = value;
+    this.material.sunMieCoefficient = value
   }
 
   get sunMieDirectionalG() {
-    return this.material.sunMieDirectionalG;
+    return this.material.sunMieDirectionalG
   }
 
   set sunMieDirectionalG(value) {
-    this.material.sunMieDirectionalG = value;
+    this.material.sunMieDirectionalG = value
   }
 
   get moonInclination() {
-    return this._moonInclination;
+    return this._moonInclination
   }
 
   set moonInclination(value) {
-    this._moonInclination = value;
-    this._updatePositionFromInclinationAzimuth(this.moonPosition, this.moonInclination, this.moonAzimuth);
+    this._moonInclination = value
+    this._updatePositionFromInclinationAzimuth(this.moonPosition, this.moonInclination, this.moonAzimuth)
   }
 
   get moonAzimuth() {
-    return this._moonAzimuth;
+    return this._moonAzimuth
   }
 
   set moonAzimuth(value) {
-    this._moonAzimuth = value;
-    this._updatePositionFromInclinationAzimuth(this.moonPosition, this.moonInclination, this.moonAzimuth);
+    this._moonAzimuth = value
+    this._updatePositionFromInclinationAzimuth(this.moonPosition, this.moonInclination, this.moonAzimuth)
   }
 
   get moonPosition() {
-    return this.material.moonPosition;
+    return this.material.moonPosition
   }
 
   set moonPosition(value) {
-    this.material.moonPosition = value;
+    this.material.moonPosition = value
   }
 
   get moonRayleigh() {
-    return this.material.moonRayleigh;
+    return this.material.moonRayleigh
   }
 
   set moonRayleigh(value) {
-    this.material.moonRayleigh = value;
+    this.material.moonRayleigh = value
   }
 
   get moonTurbidity() {
-    return this.material.moonTurbidity;
+    return this.material.moonTurbidity
   }
 
   set moonTurbidity(value) {
-    this.material.moonTurbidity = value;
+    this.material.moonTurbidity = value
   }
 
   get moonLuminance() {
-    return this.material.moonLuminance;
+    return this.material.moonLuminance
   }
 
   set moonLuminance(value) {
-    this.material.moonLuminance = value;
+    this.material.moonLuminance = value
   }
 
   get moonMieCoefficient() {
-    return this.material.moonMieCoefficient;
+    return this.material.moonMieCoefficient
   }
 
   set moonMieCoefficient(value) {
-    this.material.moonMieCoefficient = value;
+    this.material.moonMieCoefficient = value
   }
 
   get moonMieDirectionalG() {
-    return this.material.moonMieDirectionalG;
+    return this.material.moonMieDirectionalG
   }
 
   set moonMieDirectionalG(value) {
-    this.material.moonMieDirectionalG = value;
+    this.material.moonMieDirectionalG = value
   }
 }

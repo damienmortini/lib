@@ -9,7 +9,7 @@ export default class SkinShader {
         mat4 jointMatrix = mat4(v1, v2, v3, v4);
         return jointMatrix;
       }
-    `;
+    `
   }
 
   static getSkinMatrix() {
@@ -20,6 +20,6 @@ export default class SkinShader {
         jointWeights.z * getJointMatrix(int(jointIndexes.z), jointMatrixChunkIndex, jointMatricesTexture, jointMatricesTextureSize, jointMatricesTextureStride) +
         jointWeights.w * getJointMatrix(int(jointIndexes.w), jointMatrixChunkIndex, jointMatricesTexture, jointMatricesTextureSize, jointMatricesTextureStride);
       }
-    `;
+    `
   }
 }

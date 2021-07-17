@@ -8,6 +8,6 @@ export default class LightShader {
         vec3 direction;
         float intensity;
       };
-    `;
+    `
   }
 }

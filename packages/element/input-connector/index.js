@@ -1,6 +1,6 @@
-import Signal from '../../core/util/Signal.js';
+import Signal from '../../core/util/Signal.js'
 
-const CONNECTOR_ADD_SIGNAL = new Signal();
+const CONNECTOR_ADD_SIGNAL = new Signal()
 
 /**
  * Connector element used to link inputs and other connectors together
@@ -18,7 +18,7 @@ class InputConnectorElement extends HTMLElement {
    * @constant {Array.<String>}
    */
   static get observedAttributes() {
-    return ['input', 'output', 'connected'];
+    return ['input', 'output', 'connected']
   }
 
   /**
@@ -28,7 +28,7 @@ class InputConnectorElement extends HTMLElement {
    * @default 0
    */
   static get TYPE_UNDEFINED() {
-    return 0;
+    return 0
   }
 
   /**
@@ -38,7 +38,7 @@ class InputConnectorElement extends HTMLElement {
    * @default 1
    */
   static get TYPE_INPUT() {
-    return 1;
+    return 1
   }
 
   /**
@@ -48,7 +48,7 @@ class InputConnectorElement extends HTMLElement {
    * @default 2
    */
   static get TYPE_OUTPUT() {
-    return 2;
+    return 2
   }
 
   /**
@@ -58,14 +58,14 @@ class InputConnectorElement extends HTMLElement {
    * @default 3
    */
   static get TYPE_BOTH() {
-    return 3;
+    return 3
   }
 
   /**
    * @abstract
    */
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <slot>
@@ -98,75 +98,75 @@ class InputConnectorElement extends HTMLElement {
           <circle cx="2.5" cy="2.5" r="2" stroke-dasharray="1 1" class="outside"/>
         </svg>
       </slot>
-    `;
+    `
 
-    this._onInputChangeBound = this._onInputChange.bind(this);
-    this._checkConnectionBound = this._checkConnection.bind(this);
+    this._onInputChangeBound = this._onInputChange.bind(this)
+    this._checkConnectionBound = this._checkConnection.bind(this)
 
-    this._inputElementInputs = new Set();
-    this._connectorElementInputs = new Set();
+    this._inputElementInputs = new Set()
+    this._connectorElementInputs = new Set()
 
-    this._inputElementOutputs = new Set();
-    this._connectorElementOutputs = new Set();
+    this._inputElementOutputs = new Set()
+    this._connectorElementOutputs = new Set()
 
-    const self = this;
+    const self = this
 
     this._inputs = new class extends Set {
       add(value) {
         if (this.has(value) || self === value) {
-          return this;
+          return this
         }
-        super.add(value);
+        super.add(value)
         if (value.value !== undefined) {
-          self._value = value.value;
+          self._value = value.value
         }
         if (value instanceof InputConnectorElement) {
-          self._connectorElementInputs.add(value);
-          value.outputs.add(self);
+          self._connectorElementInputs.add(value)
+          value.outputs.add(self)
         } else {
-          self._inputElementInputs.add(value);
+          self._inputElementInputs.add(value)
         }
-        value.addEventListener('input', self._onInputChangeBound);
-        self._updateConnectedStatus();
+        value.addEventListener('input', self._onInputChangeBound)
+        self._updateConnectedStatus()
         if (!(value instanceof InputConnectorElement)) {
-          self.dispatchEvent(new InputEvent('input'));
+          self.dispatchEvent(new InputEvent('input'))
         }
-        return this;
+        return this
       }
       delete(value) {
-        const returnValue = super.delete(value);
+        const returnValue = super.delete(value)
         if (!returnValue) {
-          return;
+          return
         }
-        value.removeEventListener('input', self._onInputChangeBound);
+        value.removeEventListener('input', self._onInputChangeBound)
         if (value instanceof InputConnectorElement) {
-          self._connectorElementInputs.delete(value);
-          value.outputs.delete(self);
+          self._connectorElementInputs.delete(value)
+          value.outputs.delete(self)
         } else {
-          self._inputElementInputs.delete(value);
+          self._inputElementInputs.delete(value)
         }
-        self._updateConnectedStatus();
-        return returnValue;
+        self._updateConnectedStatus()
+        return returnValue
       }
       clear() {
         for (const value of this) {
-          this.delete(value);
+          this.delete(value)
         }
       }
-    };
+    }
 
     this._outputs = new class extends Set {
       add(value) {
         if (this.has(value) || self === value) {
-          return this;
+          return this
         }
-        super.add(value);
+        super.add(value)
         if (value instanceof InputConnectorElement) {
           if (self.value !== undefined) {
-            value._value = self.value;
+            value._value = self.value
           }
-          self._connectorElementOutputs.add(value);
-          value.inputs.add(self);
+          self._connectorElementOutputs.add(value)
+          value.inputs.add(self)
           self.dispatchEvent(new CustomEvent('connected', {
             bubbles: true,
             composed: true,
@@ -174,30 +174,30 @@ class InputConnectorElement extends HTMLElement {
               input: self,
               output: value,
             },
-          }));
+          }))
         } else {
           if (self.value !== undefined) {
-            value.value = self.value;
+            value.value = self.value
           }
-          self._inputElementOutputs.add(value);
+          self._inputElementOutputs.add(value)
         }
-        self._updateConnectedStatus();
+        self._updateConnectedStatus()
         if (value instanceof InputConnectorElement) {
-          self.dispatchEvent(new InputEvent('input'));
+          self.dispatchEvent(new InputEvent('input'))
         }
-        return this;
+        return this
       }
       delete(value) {
-        const returnValue = super.delete(value);
+        const returnValue = super.delete(value)
         if (!returnValue) {
-          return;
+          return
         }
-        self._connectorElementOutputs.delete(value);
-        self._inputElementOutputs.delete(value);
+        self._connectorElementOutputs.delete(value)
+        self._inputElementOutputs.delete(value)
         if (value instanceof InputConnectorElement) {
-          value.inputs.delete(self);
+          value.inputs.delete(self)
         }
-        self._updateConnectedStatus();
+        self._updateConnectedStatus()
         if (value instanceof InputConnectorElement) {
           self.dispatchEvent(new CustomEvent('disconnected', {
             bubbles: true,
@@ -206,108 +206,108 @@ class InputConnectorElement extends HTMLElement {
               input: self,
               output: value,
             },
-          }));
+          }))
         }
-        return returnValue;
+        return returnValue
       }
       clear() {
         for (const value of this) {
-          this.delete(value);
+          this.delete(value)
         }
       }
-    };
+    }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) {
-      return;
+      return
     }
 
     switch (name) {
       case 'input':
-        const inputIds = newValue.split(' ');
+        const inputIds = newValue.split(' ')
         for (const inputId of inputIds) {
-          const input = this.getRootNode().querySelector(`#${inputId}`);
+          const input = this.getRootNode().querySelector(`#${inputId}`)
           requestAnimationFrame(() => {
             if (input instanceof InputConnectorElement) {
-              return;
+              return
             }
             if (input) {
-              this.inputs.add(input);
+              this.inputs.add(input)
             }
-          });
+          })
         }
-        break;
+        break
       case 'output':
-        const outputIds = newValue.split(' ');
+        const outputIds = newValue.split(' ')
         for (const outputId of outputIds) {
-          const output = this.getRootNode().querySelector(`#${outputId}`);
+          const output = this.getRootNode().querySelector(`#${outputId}`)
           if (output) {
             requestAnimationFrame(() => {
-              this.outputs.add(output);
-            });
+              this.outputs.add(output)
+            })
           }
         }
-        break;
+        break
       case 'connected':
         if (!this.connected) {
-          this._connectorElementInputs.clear();
-          this._connectorElementOutputs.clear();
+          this._connectorElementInputs.clear()
+          this._connectorElementOutputs.clear()
         }
-        break;
+        break
     }
   }
 
   _checkConnection(connector) {
     if (!this.getAttribute('output')) {
-      return;
+      return
     }
     if (this.getAttribute('output').split(' ').includes(connector.id)) {
-      this.outputs.add(connector);
+      this.outputs.add(connector)
     }
   }
 
   connectedCallback() {
-    CONNECTOR_ADD_SIGNAL.dispatch(this);
-    CONNECTOR_ADD_SIGNAL.add(this._checkConnectionBound);
+    CONNECTOR_ADD_SIGNAL.dispatch(this)
+    CONNECTOR_ADD_SIGNAL.add(this._checkConnectionBound)
   }
 
   disconnectedCallback() {
-    CONNECTOR_ADD_SIGNAL.delete(this._checkConnectionBound);
+    CONNECTOR_ADD_SIGNAL.delete(this._checkConnectionBound)
     if (this.type & InputConnectorElement.TYPE_INPUT) {
-      this.inputs.clear();
+      this.inputs.clear()
     }
     if (this.type & InputConnectorElement.TYPE_OUTPUT) {
-      this.outputs.clear();
+      this.outputs.clear()
     }
   }
 
   set connected(value) {
     if (value) {
-      this.setAttribute('connected', '');
+      this.setAttribute('connected', '')
     } else {
-      this.removeAttribute('connected');
+      this.removeAttribute('connected')
     }
   }
 
   get connected() {
-    return this.hasAttribute('connected');
+    return this.hasAttribute('connected')
   }
 
   _onInputChange(event) {
-    this._value = event.target.value;
+    this._value = event.target.value
     for (const output of this.outputs) {
       if (!(output instanceof InputConnectorElement)) {
-        output.value = this._value;
+        output.value = this._value
       }
     }
-    this.dispatchEvent(new InputEvent('input'));
+    this.dispatchEvent(new InputEvent('input'))
   }
 
   _updateConnectedStatus() {
-    this.connected = !!this._connectorElementInputs.size || !!this._connectorElementOutputs.size;
+    this.connected = !!this._connectorElementInputs.size || !!this._connectorElementOutputs.size
     for (const output of this._inputElementOutputs) {
-      output.disabled = this.connected;
+      output.disabled = this.connected
     }
   }
 
@@ -316,7 +316,7 @@ class InputConnectorElement extends HTMLElement {
    * @readonly
    */
   get value() {
-    return this._value;
+    return this._value
   }
 
   /**
@@ -325,7 +325,7 @@ class InputConnectorElement extends HTMLElement {
    * @type {Set.<HTMLInputElement|InputConnectorElement>}
    */
   get inputs() {
-    return this._inputs;
+    return this._inputs
   }
 
   /**
@@ -334,7 +334,7 @@ class InputConnectorElement extends HTMLElement {
    * @type {Set.<(HTMLInputElement|InputConnectorElement)>}
    */
   get outputs() {
-    return this._outputs;
+    return this._outputs
   }
 
   /**
@@ -343,7 +343,7 @@ class InputConnectorElement extends HTMLElement {
    * @type {Set.<HTMLInputElement>}
    */
   get inputElements() {
-    return this._inputElementInputs;
+    return this._inputElementInputs
   }
 
   /**
@@ -352,7 +352,7 @@ class InputConnectorElement extends HTMLElement {
    * @type {Set.<(HTMLInputElement)>}
    */
   get outputElements() {
-    return this._inputElementOutputs;
+    return this._inputElementOutputs
   }
 
   /**
@@ -361,8 +361,8 @@ class InputConnectorElement extends HTMLElement {
    * @type {number}
    */
   get type() {
-    return +!!this._inputElementInputs.size << 1 | +!!this._inputElementOutputs.size;
+    return +!!this._inputElementInputs.size << 1 | +!!this._inputElementOutputs.size
   }
 }
 
-export default InputConnectorElement;
+export default InputConnectorElement

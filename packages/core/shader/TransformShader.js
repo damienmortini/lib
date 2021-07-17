@@ -14,7 +14,7 @@ export default class TransformShader {
         mat2 m = mat2(c, -s, s, c);
         return m * position;
       }
-    `;
+    `
   }
 
   // https://twistedpairdevelopment.wordpress.com/2013/02/11/rotating-a-vector-by-a-quaternion-in-glsl/
@@ -24,7 +24,7 @@ export default class TransformShader {
       {
         return position + 2.0 * cross( cross( position, quaternion.xyz ) + quaternion.w * position, quaternion.xyz );
       }
-    `;
+    `
   }
 
   static quaternionFromMatrix() {
@@ -66,7 +66,7 @@ export default class TransformShader {
         }
         return q;
       }
-    `;
+    `
   }
 
   static matrixFromQuaternion() {
@@ -86,7 +86,7 @@ export default class TransformShader {
         float wz = quaternion.w * z2;
         return mat3(1. - yy - zz, yx - wz, zx + wy, yx + wz, 1. - xx - zz, zy - wx, zx - wy, zy + wx, 1. - xx - yy);
       }
-    `;
+    `
   }
 
   static matrixFromRotation() {
@@ -109,6 +109,6 @@ export default class TransformShader {
 
         return mat3(c * e, af + be * d, bf - ae * d, - c * f, ae - bf * d, be + af * d, d, - b * c, a * c);
       }
-    `;
+    `
   }
 }

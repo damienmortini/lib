@@ -1,6 +1,6 @@
-import Shader from '../3d/Shader.js';
-import DataTextureShader from './DataTextureShader.js';
-import SkinShader from './SkinShader.js';
+import Shader from '../3d/Shader.js'
+import DataTextureShader from './DataTextureShader.js'
+import SkinShader from './SkinShader.js'
 
 export default class GLTFShader extends Shader {
   constructor({
@@ -97,6 +97,6 @@ export default class GLTFShader extends Shader {
         `],
         ...fragmentChunks,
       ],
-    });
+    })
   }
 }

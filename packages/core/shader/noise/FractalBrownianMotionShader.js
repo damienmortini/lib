@@ -25,6 +25,6 @@ export default class FractalBrownianMotionShader {
         }
         return vec4( a, d );
       }
-    `;
+    `
   }
 }

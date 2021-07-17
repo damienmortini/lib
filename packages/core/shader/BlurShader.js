@@ -17,6 +17,6 @@ export default class BlurShader {
         color += texture(textureToBlur, uv - (off3 / resolution)) * 0.010381362401148057;
         return color;
       }
-    `;
+    `
   }
 }

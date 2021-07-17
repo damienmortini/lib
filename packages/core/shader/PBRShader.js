@@ -1,6 +1,6 @@
-import LightShader from './LightShader.js';
-import RayShader from './RayShader.js';
-import Shader from '../3d/Shader.js';
+import LightShader from './LightShader.js'
+import RayShader from './RayShader.js'
+import Shader from '../3d/Shader.js'
 
 export default class PBRShader extends Shader {
   static get MetallicRoughnessMaterial() {
@@ -11,7 +11,7 @@ export default class PBRShader extends Shader {
       float metallic;
       float roughness;
     };
-    `;
+    `
   }
 
   static computePBRColor({
@@ -220,7 +220,7 @@ export default class PBRShader extends Shader {
 
         return vec4(color, baseColor.a);
       }
-    `;
+    `
   }
 
   constructor({
@@ -291,6 +291,6 @@ export default class PBRShader extends Shader {
         `],
         ...fragmentChunks,
       ],
-    });
+    })
   }
 }

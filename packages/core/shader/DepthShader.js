@@ -8,7 +8,7 @@ export default class DepthShader {
         comp -= comp.xxyz * bitMsk;
         return comp;
       }
-    `;
+    `
   }
 
   static unpack() {
@@ -17,7 +17,7 @@ export default class DepthShader {
         const vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1);
         return dot(packedDepth, bitShifts);
       }
-    `;
+    `
   }
 
   static bumpFromDepth({
@@ -53,6 +53,6 @@ export default class DepthShader {
           
         return vec4(depth, normalize(vec3(dxy * scale / step, 1.)));
       }
-    `;
+    `
   }
 }

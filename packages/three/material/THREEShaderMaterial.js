@@ -1,28 +1,28 @@
-import { ShaderMaterial } from '../../../three/src/materials/ShaderMaterial.js';
-import { ShaderLib } from '../../../three/src/renderers/shaders/ShaderLib.js';
-import { UniformsUtils } from '../../../three/src/renderers/shaders/UniformsUtils.js';
-import DEFAULT_VERTEX from '../../../three/src/renderers/shaders/ShaderChunk/default_vertex.glsl.js';
-import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js';
+import { ShaderMaterial } from '../../../three/src/materials/ShaderMaterial.js'
+import { ShaderLib } from '../../../three/src/renderers/shaders/ShaderLib.js'
+import { UniformsUtils } from '../../../three/src/renderers/shaders/UniformsUtils.js'
+import DEFAULT_VERTEX from '../../../three/src/renderers/shaders/ShaderChunk/default_vertex.glsl.js'
+import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js'
 
-import Shader from '../../core/3d/Shader.js';
+import Shader from '../../core/3d/Shader.js'
 
 const toWebGL1 = (source, type) => {
-  source = source.replace(/#version.*?\n/g, '');
-  source = source.replace(/\btexture\b/g, 'texture2D');
+  source = source.replace(/#version.*?\n/g, '')
+  source = source.replace(/\btexture\b/g, 'texture2D')
   if (type === 'vertex') {
-    source = source.replace(/(^\s*)\bin\b/gm, '$1attribute');
-    source = source.replace(/(^\s*)\bout\b/gm, '$1varying');
+    source = source.replace(/(^\s*)\bin\b/gm, '$1attribute')
+    source = source.replace(/(^\s*)\bout\b/gm, '$1varying')
   } else {
-    source = source.replace(/(^\s*)\bin\b/gm, '$1varying');
-    const results = /out vec4 (.*?);/.exec(source);
+    source = source.replace(/(^\s*)\bin\b/gm, '$1varying')
+    const results = /out vec4 (.*?);/.exec(source)
     if (results) {
-      const fragColorName = results[1];
-      source = source.replace(/out.*?;/, '');
-      source = source.replace(new RegExp(`\\b${fragColorName}\\b`, 'g'), 'gl_FragColor');
+      const fragColorName = results[1]
+      source = source.replace(/out.*?;/, '')
+      source = source.replace(new RegExp(`\\b${fragColorName}\\b`, 'g'), 'gl_FragColor')
     }
   }
-  return source;
-};
+  return source
+}
 
 export default class THREEShaderMaterial extends ShaderMaterial {
   constructor({
@@ -40,16 +40,16 @@ export default class THREEShaderMaterial extends ShaderMaterial {
       uniforms,
       vertexChunks,
       fragmentChunks,
-    });
+    })
 
-    const threeUniforms = {};
+    const threeUniforms = {}
     for (const [key, value] of Object.entries(shader.uniforms)) {
       if (value.value !== undefined) {
-        continue;
+        continue
       }
       threeUniforms[key] = {
         value,
-      };
+      }
     }
 
     super({
@@ -60,36 +60,36 @@ export default class THREEShaderMaterial extends ShaderMaterial {
         ...threeUniforms,
       },
       ...options,
-    });
+    })
 
-    this.lights = /lambert|phong|standard/.test(type);
+    this.lights = /lambert|phong|standard/.test(type)
 
     for (const key of Object.keys(this.uniforms)) {
       Object.defineProperty(this, key, {
         configurable: true,
         get: function () {
-          return this.uniforms[key].value;
+          return this.uniforms[key].value
         },
         set: function (value) {
-          this.uniforms[key].value = value;
+          this.uniforms[key].value = value
         },
-      });
+      })
     }
   }
 
   clone() {
-    const clone = super.clone();
+    const clone = super.clone()
     for (const key of Object.keys(clone.uniforms)) {
       Object.defineProperty(clone, key, {
         configurable: true,
         get: function () {
-          return this.uniforms[key].value;
+          return this.uniforms[key].value
         },
         set: function (value) {
-          this.uniforms[key].value = value;
+          this.uniforms[key].value = value
         },
-      });
+      })
     }
-    return clone;
+    return clone
   }
 }

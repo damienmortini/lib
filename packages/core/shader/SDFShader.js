@@ -6,7 +6,7 @@ export default class SDFShader {
         vec4 coord;
         vec4 material;
       };
-    `;
+    `
   }
 
   static sdfBox() {
@@ -14,7 +14,7 @@ export default class SDFShader {
       Voxel sdfBox(vec3 position, vec3 box, vec4 material) {
         return Voxel(vec4(position, length(max(abs(position) - box, 0.0))), material);
       }
-    `;
+    `
   }
 
   static sdfEllipsoid() {
@@ -22,7 +22,7 @@ export default class SDFShader {
       Voxel sdfEllipsoid(vec3 position, vec3 box, vec4 material) {
         return Voxel(vec4(position, (length(position / box) - 1.0) * min(min(box.x, box.y), box.z)), material);
       }
-    `;
+    `
   }
 
   static sdfSphere() {
@@ -30,7 +30,7 @@ export default class SDFShader {
       Voxel sdfSphere(vec3 position, float radius, vec4 material) {
         return Voxel(vec4(position, length(position) - radius), material);
       }
-    `;
+    `
   }
 
   static sdfSmoothMin() {
@@ -43,7 +43,7 @@ export default class SDFShader {
     
         return Voxel(coord, material);
       }
-    `;
+    `
   }
 
   static sdfMin() {
@@ -56,7 +56,7 @@ export default class SDFShader {
         return voxel2;
       }
     }
-    `;
+    `
   }
 
   static sdfTransform() {
@@ -65,7 +65,7 @@ export default class SDFShader {
       position = inverse(transform) * position;
       return position;
     }
-    `;
+    `
   }
 
   static sdfSubstraction() {
@@ -76,7 +76,7 @@ export default class SDFShader {
         voxel1.material = mix(voxel1.material, voxel2.material, step(voxel1.coord.w, -voxel2.coord.w));
         return voxel1;
       }
-    `;
+    `
   }
 
   static sdfRepeat() {
@@ -92,7 +92,7 @@ export default class SDFShader {
       vec3 sdfRepeat(vec3 p, vec3 c) {
         return mod(p,c) - 0.5 * c;
       }
-    `;
+    `
   }
 
   // http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
@@ -114,7 +114,7 @@ export default class SDFShader {
           }
           return normalize(n);
         }
-      `;
+      `
     } else {
       return `
         vec3 ${name}(vec3 position, float epsilon)
@@ -125,7 +125,7 @@ export default class SDFShader {
                               k.yxy*${mapName}( position + k.yxy*epsilon ).coord.w + 
                               k.xxx*${mapName}( position + k.xxx*epsilon ).coord.w );
         }
-      `;
+      `
     }
   }
 
@@ -157,7 +157,7 @@ export default class SDFShader {
 
         return voxel;
       }
-    `;
+    `
   }
 }
 

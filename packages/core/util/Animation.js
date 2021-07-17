@@ -1,36 +1,36 @@
-import Ticker from './Ticker.js';
+import Ticker from './Ticker.js'
 
-const targetComputedKeyframesMap = new Map();
+const targetComputedKeyframesMap = new Map()
 
 const animate = (target, keyframes, { duration = 0, delay = 0, easing = (x) => x, onupdate = () => { }, fill = 'none' } = {}) => {
-  let time = 0;
+  let time = 0
 
-  let finishedResolve;
-  const finished = new Promise((resolve) => finishedResolve = resolve);
+  let finishedResolve
+  const finished = new Promise((resolve) => finishedResolve = resolve)
 
   // Get target computed keyframes Set
-  let targetComputedKeyframes = targetComputedKeyframesMap.get(target);
+  let targetComputedKeyframes = targetComputedKeyframesMap.get(target)
   if (!targetComputedKeyframes) {
-    targetComputedKeyframes = new Set();
-    targetComputedKeyframesMap.set(target, targetComputedKeyframes);
+    targetComputedKeyframes = new Set()
+    targetComputedKeyframesMap.set(target, targetComputedKeyframes)
   }
 
-  const computedKeyframes = new Map(Object.entries(keyframes));
+  const computedKeyframes = new Map(Object.entries(keyframes))
 
   for (const previousComputedKeyframes of targetComputedKeyframes) {
     for (const key of computedKeyframes.keys()) {
-      previousComputedKeyframes.delete(key);
+      previousComputedKeyframes.delete(key)
     }
   }
 
-  targetComputedKeyframes.add(computedKeyframes);
+  targetComputedKeyframes.add(computedKeyframes)
 
   /**
    * Set init value as current value if it doesn't exist
    */
   for (const [key, value] of computedKeyframes) {
     if (!(value instanceof Array)) {
-      computedKeyframes.set(key, [target[key], value]);
+      computedKeyframes.set(key, [target[key], value])
     }
   }
 
@@ -38,47 +38,47 @@ const animate = (target, keyframes, { duration = 0, delay = 0, easing = (x) => x
    * Update loop
    */
   const update = () => {
-    duration = duration || 1;
-    time += Ticker.deltaTime;
+    duration = duration || 1
+    time += Ticker.deltaTime
 
-    let progress;
-    let needsUpdate = true;
+    let progress
+    let needsUpdate = true
     if (time <= delay) {
-      progress = 0;
-      needsUpdate = (fill === 'both' || fill === 'backwards');
+      progress = 0
+      needsUpdate = (fill === 'both' || fill === 'backwards')
     } else if (time >= delay + duration) {
-      progress = 1;
+      progress = 1
     } else {
-      progress = Math.max(time - delay, 0) / duration;
-      progress = easing(progress);
+      progress = Math.max(time - delay, 0) / duration
+      progress = easing(progress)
     }
 
     if (needsUpdate) {
       for (const [key, value] of computedKeyframes) {
-        target[key] = (value[1] - value[0]) * progress + value[0];
+        target[key] = (value[1] - value[0]) * progress + value[0]
       }
     }
 
-    onupdate();
+    onupdate()
 
     if (progress === 1) {
       if (fill !== 'both' && fill !== 'forwards') {
-        Ticker.delete(update);
+        Ticker.delete(update)
       }
-      finishedResolve();
+      finishedResolve()
     }
-  };
+  }
 
-  update();
-  Ticker.add(update);
+  update()
+  Ticker.add(update)
 
   return {
     finished,
     cancel: () => {
-      Ticker.delete(update);
+      Ticker.delete(update)
     },
-  };
-};
+  }
+}
 
 
-export { animate };
+export { animate }

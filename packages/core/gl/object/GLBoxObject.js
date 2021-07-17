@@ -1,7 +1,7 @@
-import BoxGeometry from '../../3d/geometry/BoxGeometry.js';
-import GLObject from '../GLObject.js';
-import GLGeometry from '../GLGeometry.js';
-import GLProgram from '../GLProgram.js';
+import BoxGeometry from '../../3d/geometry/BoxGeometry.js'
+import GLObject from '../GLObject.js'
+import GLGeometry from '../GLGeometry.js'
+import GLProgram from '../GLProgram.js'
 
 export default class GLBoxObject extends GLObject {
   constructor({
@@ -45,6 +45,6 @@ export default class GLBoxObject extends GLObject {
         uvs,
       }))),
       program,
-    });
+    })
   }
 }

@@ -1,8 +1,8 @@
-import PlaneGeometry from '../../3d/geometry/PlaneGeometry.js';
-import GLObject from '../GLObject.js';
-import GLGeometry from '../GLGeometry.js';
-import GLProgram from '../GLProgram.js';
-import Shader from '../../3d/Shader.js';
+import PlaneGeometry from '../../3d/geometry/PlaneGeometry.js'
+import GLObject from '../GLObject.js'
+import GLGeometry from '../GLGeometry.js'
+import GLProgram from '../GLProgram.js'
+import Shader from '../../3d/Shader.js'
 
 export default class GLPlaneObject extends GLObject {
   constructor({
@@ -42,6 +42,6 @@ export default class GLPlaneObject extends GLObject {
         uvs,
       }))),
       program,
-    });
+    })
   }
 }

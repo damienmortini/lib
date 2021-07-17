@@ -4,6 +4,6 @@ export default class GUIServer {
       detail: {
         options,
       },
-    }));
+    }))
   }
 }
