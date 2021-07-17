@@ -60,17 +60,17 @@ export default class OrbitController {
 
       const gestureObserver = new GestureObserver((gesture) => {
         if (!this.panDisabled) {
-          this._pan += (this.invertRotation ? -1 : 1) * gesture.movementX * rotationVelocity
+          this._pan += (this.invertRotation ? -1 : 1) * gesture.movementX * this.rotationVelocity
           this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan))
         }
 
         if (!this.tiltDisabled) {
-          this._tilt += (this.invertRotation ? 1 : -1) * gesture.movementY * rotationVelocity
+          this._tilt += (this.invertRotation ? 1 : -1) * gesture.movementY * this.rotationVelocity
           this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt))
         }
 
         if (!this.zoomDisabled) {
-          this._distance /= 1 + gesture.movementScale * this.zoomVelocity * .01
+          this._distance *= 1 + (1 - gesture.movementScale) * this.zoomVelocity * 10
           this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance))
         }
       }, { pointerCapture: true })
