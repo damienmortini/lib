@@ -1,10 +1,10 @@
-import GLPlaneObject from '../core/gl/object/GLPlaneObject.js';
-import GLProgram from '../core/gl/GLProgram.js';
-import Shader from '../core/3d/Shader.js';
+import GLPlaneObject from '../core/gl/object/GLPlaneObject.js'
+import GLProgram from '../core/gl/GLProgram.js'
+import Shader from '../core/3d/Shader.js'
 
 export default class GLSLCanvasElement extends HTMLElement {
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -20,42 +20,42 @@ export default class GLSLCanvasElement extends HTMLElement {
         }
       </style>
       <canvas></canvas>
-    `;
+    `
 
-    this.canvas = this.shadowRoot.querySelector('canvas');
+    this.canvas = this.shadowRoot.querySelector('canvas')
 
-    this.gl = this.canvas.getContext('webgl2');
+    this.gl = this.canvas.getContext('webgl2')
     if (!this.gl) {
-      this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
+      this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')
     }
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width;
-      const height = entries[0].contentRect.height;
+      const width = entries[0].contentRect.width
+      const height = entries[0].contentRect.height
 
-      this.canvas.width = width * window.devicePixelRatio;
-      this.canvas.height = height * window.devicePixelRatio;
+      this.canvas.width = width * window.devicePixelRatio
+      this.canvas.height = height * window.devicePixelRatio
 
-      this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-      this.object.program.uniforms.set('glslCanvasSize', [width, height]);
-      this.draw();
-    });
-    resizeObserver.observe(this.canvas);
+      this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
+      this.object.program.uniforms.set('glslCanvasSize', [width, height])
+      this.draw()
+    })
+    resizeObserver.observe(this.canvas)
 
     this.object = new GLPlaneObject({
       gl: this.gl,
       width: 2,
       height: 2,
-    });
-    this.object.bind();
+    })
+    this.object.bind()
   }
 
   get shader() {
-    return this._shader;
+    return this._shader
   }
 
   set shader(value) {
-    this._shader = value;
+    this._shader = value
     this.object.program = new GLProgram({
       gl: this.gl,
       shader: new Shader({
@@ -83,19 +83,19 @@ export default class GLSLCanvasElement extends HTMLElement {
           `],
         ],
       }),
-    });
-    this.object.bind();
-    this.draw();
+    })
+    this.object.bind()
+    this.draw()
   }
 
   get uniforms() {
-    return this.object.program.uniforms;
+    return this.object.program.uniforms
   }
 
   draw(options) {
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    this.object.draw(options);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
+    this.object.draw(options)
   }
 }
 
-customElements.define('damo-glslcanvas', GLSLCanvasElement);
+customElements.define('damo-glslcanvas', GLSLCanvasElement)

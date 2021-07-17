@@ -4,21 +4,21 @@ export default class GLVertexArray {
     geometry = undefined,
     program = undefined,
   }) {
-    this.gl = gl;
+    this.gl = gl
 
-    const extension = gl.getExtension('OES_vertex_array_object');
+    const extension = gl.getExtension('OES_vertex_array_object')
     if (extension) {
-      this.gl.createVertexArray = extension.createVertexArrayOES.bind(extension);
-      this.gl.bindVertexArray = extension.bindVertexArrayOES.bind(extension);
+      this.gl.createVertexArray = extension.createVertexArrayOES.bind(extension)
+      this.gl.bindVertexArray = extension.bindVertexArrayOES.bind(extension)
     }
 
-    this._vertexArray = this.gl.createVertexArray();
+    this._vertexArray = this.gl.createVertexArray()
 
     if (geometry && program) {
       this.add({
         geometry,
         program,
-      });
+      })
     }
   }
 
@@ -26,19 +26,19 @@ export default class GLVertexArray {
     geometry = undefined,
     program = undefined,
   } = {}) {
-    this.bind();
-    program.attributes.set(geometry.attributes);
+    this.bind()
+    program.attributes.set(geometry.attributes)
     if (geometry.indices) {
-      geometry.indices.buffer.bind();
+      geometry.indices.buffer.bind()
     }
-    this.unbind();
+    this.unbind()
   }
 
   bind() {
-    this.gl.bindVertexArray(this._vertexArray);
+    this.gl.bindVertexArray(this._vertexArray)
   }
 
   unbind() {
-    this.gl.bindVertexArray(null);
+    this.gl.bindVertexArray(null)
   }
 }

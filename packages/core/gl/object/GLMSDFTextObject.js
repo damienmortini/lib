@@ -1,9 +1,9 @@
 // Work with https://github.com/soimy/msdf-bmfont-xml
 
-import GLTexture from '../GLTexture.js';
-import GLPlaneObject from './GLPlaneObject.js';
-import GLProgram from '../GLProgram.js';
-import BasicShader from '../../shader/BasicShader.js';
+import GLTexture from '../GLTexture.js'
+import GLPlaneObject from './GLPlaneObject.js'
+import GLProgram from '../GLProgram.js'
+import BasicShader from '../../shader/BasicShader.js'
 
 export default class GLMSDFTextObject extends GLPlaneObject {
   constructor({
@@ -19,21 +19,21 @@ export default class GLMSDFTextObject extends GLPlaneObject {
     attributes = {},
     shader = undefined,
   }) {
-    const isWebGL1 = gl instanceof WebGLRenderingContext;
+    const isWebGL1 = gl instanceof WebGLRenderingContext
 
-    const glyphsData = new Map();
-    const uvRectangles = [];
-    const sizes = [];
-    const fontScale = fontSize / fontData.info.size;
+    const glyphsData = new Map()
+    const uvRectangles = []
+    const sizes = []
+    const fontScale = fontSize / fontData.info.size
 
     for (const [index, glyphData] of fontData.chars.entries()) {
-      uvRectangles.push([glyphData.x / fontImage.width, glyphData.y / fontImage.height, glyphData.width / fontImage.width, glyphData.height / fontImage.height]);
-      sizes.push([glyphData.width, glyphData.height]);
-      glyphData._glyphIndex = index;
-      glyphsData.set(glyphData.char, glyphData);
+      uvRectangles.push([glyphData.x / fontImage.width, glyphData.y / fontImage.height, glyphData.width / fontImage.width, glyphData.height / fontImage.height])
+      sizes.push([glyphData.width, glyphData.height])
+      glyphData._glyphIndex = index
+      glyphsData.set(glyphData.char, glyphData)
     }
 
-    gl.getExtension('OES_standard_derivatives');
+    gl.getExtension('OES_standard_derivatives')
 
     super({
       gl,
@@ -115,100 +115,100 @@ export default class GLMSDFTextObject extends GLPlaneObject {
           }],
         }),
       }),
-    });
+    })
 
-    this._isWebGL1 = isWebGL1;
-    this._glyphsData = glyphsData;
-    this._glyphsNumber = 0;
-    this._lineHeight = fontData.common.lineHeight;
-    this._distanceFieldRange = parseFloat(fontData.distanceField.distanceRange);
-    this._fontScale = fontScale;
+    this._isWebGL1 = isWebGL1
+    this._glyphsData = glyphsData
+    this._glyphsNumber = 0
+    this._lineHeight = fontData.common.lineHeight
+    this._distanceFieldRange = parseFloat(fontData.distanceField.distanceRange)
+    this._fontScale = fontScale
 
-    this.maxWidth = maxWidth;
-    this.textAlign = textAlign;
-    this.verticalAlign = verticalAlign;
-    this.fillStyle = fillStyle;
-    this.textContent = textContent;
+    this.maxWidth = maxWidth
+    this.textAlign = textAlign
+    this.verticalAlign = verticalAlign
+    this.fillStyle = fillStyle
+    this.textContent = textContent
   }
 
   get textContent() {
-    return this._textContent;
+    return this._textContent
   }
 
   set textContent(value) {
-    this._textContent = value;
+    this._textContent = value
 
-    const glyphIndexes = new (this._isWebGL1 ? Float32Array : Int8Array)(this._textContent.length);
-    const glyphPositions = new Float32Array(this._textContent.length * 2);
+    const glyphIndexes = new (this._isWebGL1 ? Float32Array : Int8Array)(this._textContent.length)
+    const glyphPositions = new Float32Array(this._textContent.length * 2)
 
-    let lineXOffset = 0;
-    let lineYOffset = 0;
+    let lineXOffset = 0
+    let lineYOffset = 0
 
-    let lineLastWordXOffset = 0;
-    let lineFirstWordFirstGlyphId = 0;
-    let lineLastWordFirstGlyphId = 0;
+    let lineLastWordXOffset = 0
+    let lineFirstWordFirstGlyphId = 0
+    let lineLastWordFirstGlyphId = 0
 
-    let needsLineBreak = false;
+    let needsLineBreak = false
 
     for (let index = 0; index < this._textContent.length; index++) {
-      let glyph = this._textContent[index];
+      let glyph = this._textContent[index]
 
-      const lineBreak = glyph === '\n';
+      const lineBreak = glyph === '\n'
 
       if (lineBreak) {
-        glyph = ' ';
+        glyph = ' '
       }
 
-      const glyphData = this._glyphsData.get(glyph);
+      const glyphData = this._glyphsData.get(glyph)
 
-      glyphIndexes[index] = glyphData._glyphIndex;
+      glyphIndexes[index] = glyphData._glyphIndex
 
-      glyphPositions[index * 2] = lineXOffset + glyphData.width * .5 + glyphData.xoffset;
-      glyphPositions[index * 2 + 1] = -glyphData.height * .5 - glyphData.yoffset - lineYOffset;
+      glyphPositions[index * 2] = lineXOffset + glyphData.width * .5 + glyphData.xoffset
+      glyphPositions[index * 2 + 1] = -glyphData.height * .5 - glyphData.yoffset - lineYOffset
 
       if ((needsLineBreak || lineXOffset > this.maxWidth / this._fontScale) && lineLastWordFirstGlyphId !== lineFirstWordFirstGlyphId) {
-        needsLineBreak = false;
+        needsLineBreak = false
         if (this.textAlign === 'center') {
           for (let textAlignIndex = lineFirstWordFirstGlyphId; textAlignIndex < lineLastWordFirstGlyphId; textAlignIndex++) {
-            glyphPositions[textAlignIndex * 2] -= lineLastWordXOffset * .5;
+            glyphPositions[textAlignIndex * 2] -= lineLastWordXOffset * .5
           }
         }
 
-        lineXOffset = 0;
-        lineYOffset += this._lineHeight;
-        index = lineLastWordFirstGlyphId;
-        lineFirstWordFirstGlyphId = lineLastWordFirstGlyphId;
+        lineXOffset = 0
+        lineYOffset += this._lineHeight
+        index = lineLastWordFirstGlyphId
+        lineFirstWordFirstGlyphId = lineLastWordFirstGlyphId
 
-        continue;
+        continue
       }
 
       if (glyph === ' ') {
-        lineLastWordXOffset = lineXOffset;
-        lineLastWordFirstGlyphId = index;
+        lineLastWordXOffset = lineXOffset
+        lineLastWordFirstGlyphId = index
       }
 
-      lineXOffset += glyphData.xadvance;
+      lineXOffset += glyphData.xadvance
 
-      needsLineBreak = lineBreak;
+      needsLineBreak = lineBreak
     }
 
     if (this.textAlign === 'center') {
       for (let textAlignIndex = lineFirstWordFirstGlyphId; textAlignIndex < this._textContent.length; textAlignIndex++) {
-        glyphPositions[textAlignIndex * 2] -= lineXOffset * .5;
+        glyphPositions[textAlignIndex * 2] -= lineXOffset * .5
       }
     }
 
     if (this.verticalAlign === 'middle') {
       for (let index = 0; index < glyphPositions.length; index += 2) {
-        glyphPositions[index + 1] += lineYOffset * .5 + (this._lineHeight) * .5 + this._distanceFieldRange;
+        glyphPositions[index + 1] += lineYOffset * .5 + (this._lineHeight) * .5 + this._distanceFieldRange
       }
     }
 
-    this.geometry.attributes.get('msdfTextGlyphIndex').data = glyphIndexes;
-    this.geometry.attributes.get('msdfTextGlyphPosition').data = glyphPositions;
+    this.geometry.attributes.get('msdfTextGlyphIndex').data = glyphIndexes
+    this.geometry.attributes.get('msdfTextGlyphPosition').data = glyphPositions
   }
 
   draw(options) {
-    super.draw(Object.assign({ instanceCount: this._textContent.length }, options));
+    super.draw(Object.assign({ instanceCount: this._textContent.length }, options))
   }
 }

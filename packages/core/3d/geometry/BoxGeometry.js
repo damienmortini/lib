@@ -13,109 +13,109 @@ export default class BoxGeometry {
     uvs = true,
     indices = true,
   } = {}) {
-    const indicesArray = [];
-    const verticesArray = [];
-    const normalsArray = [];
-    const uvsArray = [];
+    const indicesArray = []
+    const verticesArray = []
+    const normalsArray = []
+    const uvsArray = []
 
-    let numberOfVertices = 0;
+    let numberOfVertices = 0
 
-    buildPlane('z', 'y', 'x', - 1, - 1, depth, height, width, depthSegments, heightSegments);
-    buildPlane('z', 'y', 'x', 1, - 1, depth, height, - width, depthSegments, heightSegments);
-    buildPlane('x', 'z', 'y', 1, 1, width, depth, height, widthSegments, depthSegments);
-    buildPlane('x', 'z', 'y', 1, - 1, width, depth, - height, widthSegments, depthSegments);
-    buildPlane('x', 'y', 'z', 1, - 1, width, height, depth, widthSegments, heightSegments);
-    buildPlane('x', 'y', 'z', - 1, - 1, width, height, - depth, widthSegments, heightSegments);
+    buildPlane('z', 'y', 'x', - 1, - 1, depth, height, width, depthSegments, heightSegments)
+    buildPlane('z', 'y', 'x', 1, - 1, depth, height, - width, depthSegments, heightSegments)
+    buildPlane('x', 'z', 'y', 1, 1, width, depth, height, widthSegments, depthSegments)
+    buildPlane('x', 'z', 'y', 1, - 1, width, depth, - height, widthSegments, depthSegments)
+    buildPlane('x', 'y', 'z', 1, - 1, width, height, depth, widthSegments, heightSegments)
+    buildPlane('x', 'y', 'z', - 1, - 1, width, height, - depth, widthSegments, heightSegments)
 
     if (positions) {
-      this.positions = new Float32Array(verticesArray);
+      this.positions = new Float32Array(verticesArray)
     }
 
     if (normals) {
-      this.normals = new Float32Array(normalsArray);
+      this.normals = new Float32Array(normalsArray)
     }
 
     if (uvs) {
-      this.uvs = new Float32Array(uvsArray);
+      this.uvs = new Float32Array(uvsArray)
     }
 
     if (indices) {
       if (indicesArray.length > 65536) {
-        this.indices = new Uint32Array(indicesArray);
+        this.indices = new Uint32Array(indicesArray)
       } else if (indicesArray.length > 256) {
-        this.indices = new Uint16Array(indicesArray);
+        this.indices = new Uint16Array(indicesArray)
       } else {
-        this.indices = new Uint8Array(indicesArray);
+        this.indices = new Uint8Array(indicesArray)
       }
     }
 
     function buildPlane(u, v, w, udir, vdir, width, height, depth, gridX, gridY) {
-      const segmentWidth = width / gridX;
-      const segmentHeight = height / gridY;
+      const segmentWidth = width / gridX
+      const segmentHeight = height / gridY
 
-      const widthHalf = width / 2;
-      const heightHalf = height / 2;
-      const depthHalf = depth / 2;
+      const widthHalf = width / 2
+      const heightHalf = height / 2
+      const depthHalf = depth / 2
 
-      const gridX1 = gridX + 1;
-      const gridY1 = gridY + 1;
+      const gridX1 = gridX + 1
+      const gridY1 = gridY + 1
 
-      let vertexCounter = 0;
+      let vertexCounter = 0
 
-      let ix; let iy;
+      let ix; let iy
 
       const vector = {
         x: 0,
         y: 0,
         z: 0,
-      };
+      }
 
       for (iy = 0; iy < gridY1; iy++) {
-        const y = iy * segmentHeight - heightHalf;
+        const y = iy * segmentHeight - heightHalf
 
         for (ix = 0; ix < gridX1; ix++) {
-          const x = ix * segmentWidth - widthHalf;
+          const x = ix * segmentWidth - widthHalf
 
-          vector[u] = x * udir;
-          vector[v] = y * vdir;
-          vector[w] = depthHalf;
+          vector[u] = x * udir
+          vector[v] = y * vdir
+          vector[w] = depthHalf
 
           if (positions) {
-            verticesArray.push(vector.x, vector.y, vector.z);
+            verticesArray.push(vector.x, vector.y, vector.z)
           }
 
-          vector[u] = 0;
-          vector[v] = 0;
-          vector[w] = depth > 0 ? 1 : - 1;
+          vector[u] = 0
+          vector[v] = 0
+          vector[w] = depth > 0 ? 1 : - 1
 
           if (normals) {
-            normalsArray.push(vector.x, vector.y, vector.z);
+            normalsArray.push(vector.x, vector.y, vector.z)
           }
 
           if (uvs) {
-            uvsArray.push(ix / gridX);
-            uvsArray.push(1 - (iy / gridY));
+            uvsArray.push(ix / gridX)
+            uvsArray.push(1 - (iy / gridY))
           }
 
-          vertexCounter += 1;
+          vertexCounter += 1
         }
       }
 
       if (indices) {
         for (iy = 0; iy < gridY; iy++) {
           for (ix = 0; ix < gridX; ix++) {
-            const a = numberOfVertices + ix + gridX1 * iy;
-            const b = numberOfVertices + ix + gridX1 * (iy + 1);
-            const c = numberOfVertices + (ix + 1) + gridX1 * (iy + 1);
-            const d = numberOfVertices + (ix + 1) + gridX1 * iy;
+            const a = numberOfVertices + ix + gridX1 * iy
+            const b = numberOfVertices + ix + gridX1 * (iy + 1)
+            const c = numberOfVertices + (ix + 1) + gridX1 * (iy + 1)
+            const d = numberOfVertices + (ix + 1) + gridX1 * iy
 
-            indicesArray.push(a, b, d);
-            indicesArray.push(b, c, d);
+            indicesArray.push(a, b, d)
+            indicesArray.push(b, c, d)
           }
         }
       }
 
-      numberOfVertices += vertexCounter;
+      numberOfVertices += vertexCounter
     }
   }
 }

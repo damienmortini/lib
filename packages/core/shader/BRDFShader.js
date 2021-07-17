@@ -18,7 +18,7 @@ export default class BRDFShader {
         float NdotH = clamp(dot(normal, h), 0.0, 1.0);
         return brdfDistributionGGX(NdotH, roughness);
       }
-    `;
+    `
   }
 
   static brdfVisibilityGGX() {
@@ -42,7 +42,7 @@ export default class BRDFShader {
         float NdotL = 1. - clamp(dot(normal, -lightDirection), 0.0, 1.0);
         return brdfVisibilityGGX(NdotV, NdotL, roughness);
       }
-    `;
+    `
   }
 
   // TODO finalize
@@ -72,7 +72,7 @@ export default class BRDFShader {
         float VdotH = clamp(dot(-viewDirection, h), 0.0, 1.0);
         return brdfFresnel(f0, VdotH);
       }
-    `;
+    `
   }
 
   // TODO finalize
@@ -91,7 +91,7 @@ export default class BRDFShader {
       float brdfDiffuse(float roughness, float NdotV, float NdotL, float LdotH) {
 
       }
-    `;
+    `
   }
 
   // TODO finalize
@@ -106,6 +106,6 @@ export default class BRDFShader {
         float F = brdfFresnel(viewDirection, lightDirection, metalness);
         return (D * V) * F;
       }
-    `;
+    `
   }
 }

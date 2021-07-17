@@ -18,7 +18,7 @@ export default class AntialiasGLSL {
         v_rgbSE = (fragCoord + vec2(1.0, 1.0)) * inverseVP;
         v_rgbM = vec2(fragCoord * inverseVP);
       }
-    `;
+    `
   }
 
   static fragment() {
@@ -84,6 +84,6 @@ export default class AntialiasGLSL {
         color = vec4(rgbB, texColor.a);
         return color;
       }
-    `;
+    `
   }
 }

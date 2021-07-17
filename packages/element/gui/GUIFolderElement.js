@@ -1,10 +1,10 @@
 export default class GUIFolderElement extends HTMLElement {
   static get observedAttributes() {
-    return ['name', 'open'];
+    return ['name', 'open']
   }
 
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -79,24 +79,24 @@ export default class GUIFolderElement extends HTMLElement {
         <summary></summary>
         <div id="content"></div>
       </details>
-    `;
+    `
 
-    this._details = this.shadowRoot.querySelector('details');
-    this._summary = this.shadowRoot.querySelector('summary');
-    this._content = this.shadowRoot.querySelector('#content');
+    this._details = this.shadowRoot.querySelector('details')
+    this._summary = this.shadowRoot.querySelector('summary')
+    this._content = this.shadowRoot.querySelector('#content')
 
-    let slotUID = 0;
+    let slotUID = 0
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
-          const slotName = `node-slot-${++slotUID}`;
+          const slotName = `node-slot-${++slotUID}`
           if (!('value' in node)) {
-            const slot = document.createElement('slot');
-            slot.name = slotName;
-            this._content.appendChild(slot);
+            const slot = document.createElement('slot')
+            slot.name = slotName
+            this._content.appendChild(slot)
           } else {
-            const label = node.getAttribute('label') ?? node.label ?? node.getAttribute('name') ?? node.name ?? node.id ?? '';
-            const template = document.createElement('template');
+            const label = node.getAttribute('label') ?? node.label ?? node.getAttribute('name') ?? node.name ?? node.id ?? ''
+            const template = document.createElement('template')
             template.innerHTML = `
               <section class="input" id="${slotName}">
                 <label title="${label}">${label}</label>
@@ -108,74 +108,74 @@ export default class GUIFolderElement extends HTMLElement {
                   </svg>
                 </div>
               </section>
-            `;
-            const fragment = template.content.firstElementChild.cloneNode(true);
-            const resetButton = fragment.querySelector('.reset');
+            `
+            const fragment = template.content.firstElementChild.cloneNode(true)
+            const resetButton = fragment.querySelector('.reset')
             if (JSON.stringify(node.defaultValue) !== JSON.stringify(node.value)) {
-              resetButton.toggleAttribute('disabled', false);
+              resetButton.toggleAttribute('disabled', false)
             }
             node.addEventListener('change', () => {
-              resetButton.toggleAttribute('disabled', false);
-            });
+              resetButton.toggleAttribute('disabled', false)
+            })
             resetButton.addEventListener('click', () => {
               this.dispatchEvent(new CustomEvent('reset', {
                 detail: {
                   node,
                 },
                 bubbles: true,
-              }));
-              resetButton.toggleAttribute('disabled', true);
-            });
-            this._content.appendChild(fragment);
+              }))
+              resetButton.toggleAttribute('disabled', true)
+            })
+            this._content.appendChild(fragment)
           }
-          node.slot = slotName;
+          node.slot = slotName
         }
         for (const node of mutation.removedNodes) {
-          const section = this.shadowRoot.querySelector(`section#${node.slot}`);
+          const section = this.shadowRoot.querySelector(`section#${node.slot}`)
           if (section) {
-            section.remove();
-          };
+            section.remove()
+          }
         }
       }
-    };
+    }
     mutationCallback([{
       addedNodes: this.children,
       removedNodes: [],
-    }]);
-    const observer = new MutationObserver(mutationCallback);
-    observer.observe(this, { childList: true });
+    }])
+    const observer = new MutationObserver(mutationCallback)
+    observer.observe(this, { childList: true })
 
     this._details.addEventListener('toggle', (event) => {
-      this.open = event.target.open;
-      this.dispatchEvent(new Event(event.type, event));
-    });
+      this.open = event.target.open
+      this.dispatchEvent(new Event(event.type, event))
+    })
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'name':
-        this._summary.textContent = newValue;
-        this._summary.title = newValue;
-        break;
+        this._summary.textContent = newValue
+        this._summary.title = newValue
+        break
       case 'open':
-        this._details.open = newValue !== null;
-        break;
+        this._details.open = newValue !== null
+        break
     }
   }
 
   get open() {
-    return this.hasAttribute('open');
+    return this.hasAttribute('open')
   }
 
   set open(value) {
-    this.toggleAttribute('open', value);
+    this.toggleAttribute('open', value)
   }
 
   get name() {
-    return this.getAttribute('name');
+    return this.getAttribute('name')
   }
 
   set name(value) {
-    this.setAttribute('name', value);
+    this.setAttribute('name', value)
   }
 }

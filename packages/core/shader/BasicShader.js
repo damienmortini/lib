@@ -1,4 +1,4 @@
-import Shader from '../3d/Shader.js';
+import Shader from '../3d/Shader.js'
 
 export default class BasicShader extends Shader {
   constructor({
@@ -42,6 +42,6 @@ export default class BasicShader extends Shader {
         `],
         ...fragmentChunks,
       ],
-    });
+    })
   }
 }

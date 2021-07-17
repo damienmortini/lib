@@ -5,26 +5,26 @@ export default class GLBuffer {
     target = gl.ARRAY_BUFFER,
     usage = gl.STATIC_DRAW,
   }) {
-    this.gl = gl;
-    this.target = target;
-    this.usage = usage;
+    this.gl = gl
+    this.target = target
+    this.usage = usage
 
-    this._buffer = this.gl.createBuffer();
+    this._buffer = this.gl.createBuffer()
 
     if (data) {
-      this.data = data;
+      this.data = data
     }
   }
 
   set data(value) {
-    this._data = value;
-    this.bind();
-    this.gl.bufferData(this.target, this._data, this.usage);
-    this.unbind();
+    this._data = value
+    this.bind()
+    this.gl.bufferData(this.target, this._data, this.usage)
+    this.unbind()
   }
 
   get data() {
-    return this._data;
+    return this._data
   }
 
   bind({
@@ -34,11 +34,11 @@ export default class GLBuffer {
     size = undefined,
   } = {}) {
     if (index === undefined) {
-      this.gl.bindBuffer(target, this._buffer);
+      this.gl.bindBuffer(target, this._buffer)
     } else if (size === undefined) {
-      this.gl.bindBufferBase(target, index, this._buffer);
+      this.gl.bindBufferBase(target, index, this._buffer)
     } else {
-      this.gl.bindBufferRange(target, index, this._buffer, offset, size);
+      this.gl.bindBufferRange(target, index, this._buffer, offset, size)
     }
   }
 
@@ -49,11 +49,11 @@ export default class GLBuffer {
     size = undefined,
   } = {}) {
     if (index === undefined) {
-      this.gl.bindBuffer(target, null);
+      this.gl.bindBuffer(target, null)
     } else if (size === undefined) {
-      this.gl.bindBufferBase(target, index, null);
+      this.gl.bindBufferBase(target, index, null)
     } else {
-      this.gl.bindBufferRange(target, index, null, offset, size);
+      this.gl.bindBufferRange(target, index, null, offset, size)
     }
   }
 }

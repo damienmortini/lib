@@ -1,12 +1,12 @@
-import { modulo } from '../core/math/Math.js';
+import { modulo } from '../core/math/Math.js'
 
 export default class KnobInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['value', 'max', 'min', 'step', 'disabled'];
+    return ['value', 'max', 'min', 'step', 'disabled']
   }
 
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `<style>
   :host {
@@ -63,130 +63,130 @@ export default class KnobInputElement extends HTMLElement {
 </slot>
 <slot name="thumb">
   <div></div>
-</slot>`;
+</slot>`
 
-    this._value = 0;
-    this._size = 1;
-    this._thumb = this.shadowRoot.querySelector('slot[name=thumb]');
-    this._trackProgressPath = this.shadowRoot.querySelector('slot[name=track-progress] path');
+    this._value = 0
+    this._size = 1
+    this._thumb = this.shadowRoot.querySelector('slot[name=thumb]')
+    this._trackProgressPath = this.shadowRoot.querySelector('slot[name=track-progress] path')
 
-    let boundingClientRect;
-    let previousAngle = 0;
+    let boundingClientRect
+    let previousAngle = 0
     const getAngleFromPointerEvent = (event) => {
-      const x = event.clientX - boundingClientRect.x - boundingClientRect.width * .5;
-      const y = event.clientY - boundingClientRect.y - boundingClientRect.height * .5;
-      return Math.atan2(-x, y) + Math.PI;
-    };
+      const x = event.clientX - boundingClientRect.x - boundingClientRect.width * .5
+      const y = event.clientY - boundingClientRect.y - boundingClientRect.height * .5
+      return Math.atan2(-x, y) + Math.PI
+    }
     const pointerDown = (event) => {
-      boundingClientRect = this.getBoundingClientRect();
-      event.target.setPointerCapture(event.pointerId);
-      this.addEventListener('pointermove', pointerMove);
-      this.addEventListener('pointerup', pointerUp);
-      this.addEventListener('pointerout', pointerUp);
-      previousAngle = this.value;
-    };
+      boundingClientRect = this.getBoundingClientRect()
+      event.target.setPointerCapture(event.pointerId)
+      this.addEventListener('pointermove', pointerMove)
+      this.addEventListener('pointerup', pointerUp)
+      this.addEventListener('pointerout', pointerUp)
+      previousAngle = this.value
+    }
     const pointerMove = (event) => {
-      const angle = getAngleFromPointerEvent(event);
-      let angleDifference = angle - previousAngle;
+      const angle = getAngleFromPointerEvent(event)
+      let angleDifference = angle - previousAngle
       if (angleDifference > Math.PI) {
-        angleDifference -= Math.PI * 2;
+        angleDifference -= Math.PI * 2
       }
       if (angleDifference < -Math.PI) {
-        angleDifference += Math.PI * 2;
+        angleDifference += Math.PI * 2
       }
-      this.value += angleDifference;
-      previousAngle = angle;
-    };
+      this.value += angleDifference
+      previousAngle = angle
+    }
     const pointerUp = (event) => {
-      event.target.releasePointerCapture(event.pointerId);
-      this.removeEventListener('pointermove', pointerMove);
-      this.removeEventListener('pointerup', pointerUp);
-      this.removeEventListener('pointerout', pointerUp);
-    };
-    this.addEventListener('pointerdown', pointerDown);
+      event.target.releasePointerCapture(event.pointerId)
+      this.removeEventListener('pointermove', pointerMove)
+      this.removeEventListener('pointerup', pointerUp)
+      this.removeEventListener('pointerout', pointerUp)
+    }
+    this.addEventListener('pointerdown', pointerDown)
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width;
-      const height = entries[0].contentRect.height;
-      this._size = width < height ? width : height;
-      this._update();
-    });
-    resizeObserver.observe(this);
+      const width = entries[0].contentRect.width
+      const height = entries[0].contentRect.height
+      this._size = width < height ? width : height
+      this._update()
+    })
+    resizeObserver.observe(this)
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'value':
-        this.value = Number(newValue);
-        break;
+        this.value = Number(newValue)
+        break
       case 'max':
       case 'min':
       case 'step':
         // TODO
-        break;
+        break
       case 'disabled':
         // TODO
-        break;
+        break
     }
   }
 
   _update() {
-    const x = Math.sin(this.value);
-    const y = -Math.cos(this.value);
-    this._thumb.style.transform = `translate(${x * this._size * .5}px, ${y * this._size * .5}px)`;
-    this._trackProgressPath.setAttribute('d', `M 50 0 A 50 50 0 ${(modulo(this.value, Math.PI * 2)) > Math.PI ? 1 : 0} 1 ${x * 50 + 50} ${y * 50 + 50}`);
+    const x = Math.sin(this.value)
+    const y = -Math.cos(this.value)
+    this._thumb.style.transform = `translate(${x * this._size * .5}px, ${y * this._size * .5}px)`
+    this._trackProgressPath.setAttribute('d', `M 50 0 A 50 50 0 ${(modulo(this.value, Math.PI * 2)) > Math.PI ? 1 : 0} 1 ${x * 50 + 50} ${y * 50 + 50}`)
   }
 
   get disabled() {
-    return this.hasAttribute('disabled');
+    return this.hasAttribute('disabled')
   }
 
   set disabled(value) {
     if (value) {
-      this.setAttribute('disabled', '');
+      this.setAttribute('disabled', '')
     } else {
-      this.removeAttribute('disabled');
+      this.removeAttribute('disabled')
     }
   }
 
   get max() {
-    return Number(this.getAttribute('max'));
+    return Number(this.getAttribute('max'))
   }
 
   set max(value) {
-    this.setAttribute('max', String(value));
+    this.setAttribute('max', String(value))
   }
 
   get min() {
-    return Number(this.getAttribute('min'));
+    return Number(this.getAttribute('min'))
   }
 
   set min(value) {
-    this.setAttribute('min', String(value));
+    this.setAttribute('min', String(value))
   }
 
   get step() {
-    return Number(this.getAttribute('step'));
+    return Number(this.getAttribute('step'))
   }
 
   set step(value) {
-    this.setAttribute('step', String(value));
+    this.setAttribute('step', String(value))
   }
 
   get value() {
-    return this._value;
+    return this._value
   }
 
   set value(value) {
     if (value === this._value) {
-      return;
+      return
     }
-    this._value = value;
-    this._update();
+    this._value = value
+    this._update()
     this.dispatchEvent(new Event('change', {
       bubbles: true,
-    }));
+    }))
   }
 }
 
-customElements.define('damo-input-knob', KnobInputElement);
+customElements.define('damo-input-knob', KnobInputElement)

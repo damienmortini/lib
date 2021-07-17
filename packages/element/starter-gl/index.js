@@ -1,6 +1,6 @@
-import AnimationTickerElement from '../../@damienmortini/element-animation-ticker/index.js';
+import AnimationTickerElement from '../../@damienmortini/element-animation-ticker/index.js'
 
-import View from './View.js';
+import View from './View.js'
 
 /**
  * Entry point element
@@ -10,7 +10,7 @@ import View from './View.js';
  */
 window.customElements.define('damo-starter-gl', class extends AnimationTickerElement {
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -31,25 +31,25 @@ window.customElements.define('damo-starter-gl', class extends AnimationTickerEle
         }
       </style>
       <canvas></canvas>
-    `;
+    `
 
-    this.canvas = this.shadowRoot.querySelector('canvas');
+    this.canvas = this.shadowRoot.querySelector('canvas')
 
-    this.view = new View({ canvas: this.canvas });
+    this.view = new View({ canvas: this.canvas })
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width;
-      const height = entries[0].contentRect.height;
+      const width = entries[0].contentRect.width
+      const height = entries[0].contentRect.height
 
-      this.canvas.width = width * window.devicePixelRatio;
-      this.canvas.height = height * window.devicePixelRatio;
+      this.canvas.width = width * window.devicePixelRatio
+      this.canvas.height = height * window.devicePixelRatio
 
-      this.view.resize(width, height);
-    });
-    resizeObserver.observe(this.canvas);
+      this.view.resize(width, height)
+    })
+    resizeObserver.observe(this.canvas)
   }
 
   update() {
-    this.view.update();
+    this.view.update()
   }
-});
+})

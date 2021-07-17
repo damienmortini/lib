@@ -1,14 +1,14 @@
-import '../../a-color-picker/dist/acolorpicker.js';
+import '../../a-color-picker/dist/acolorpicker.js'
 
-const COLOR_PICKER_CSS = document.head.querySelector('style[data-source=a-color-picker]').innerHTML;
+const COLOR_PICKER_CSS = document.head.querySelector('style[data-source=a-color-picker]').innerHTML
 
 export default class InputColorPickerElement extends HTMLElement {
   static get observedAttributes() {
-    return ['value'];
+    return ['value']
   }
 
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -67,72 +67,72 @@ export default class InputColorPickerElement extends HTMLElement {
         <div id="color"></div>
         <div id="colorpicker"></div>
       </div>
-    `;
+    `
 
-    const container = this.shadowRoot.querySelector('#container');
-    const colorPicker = this.shadowRoot.querySelector('#colorpicker');
+    const container = this.shadowRoot.querySelector('#container')
+    const colorPicker = this.shadowRoot.querySelector('#colorpicker')
 
-    this._color = this.shadowRoot.querySelector('#color');
+    this._color = this.shadowRoot.querySelector('#color')
     this._colorPicker = AColorPicker.createPicker({
       attachTo: colorPicker,
       showAlpha: true,
       color: 'black',
-    });
+    })
 
     container.addEventListener('input', (event) => {
-      event.stopPropagation();
-    });
+      event.stopPropagation()
+    })
 
     this._colorPicker.on('change', (target, color) => {
-      this.value = target.color;
-      this.dispatchEvent(new Event('input'));
-      this.dispatchEvent(new Event('change'));
-    });
+      this.value = target.color
+      this.dispatchEvent(new Event('input'))
+      this.dispatchEvent(new Event('change'))
+    })
 
     this.addEventListener('keyup', (event) => {
       if (event.key.toLowerCase() === 'escape') {
-        container.blur();
+        container.blur()
       }
-    });
+    })
 
     container.addEventListener('focus', (event) => {
-      colorPicker.style.setProperty('--offset-top', '');
-      colorPicker.style.setProperty('--offset-left', '');
-      const boundingClientRect = colorPicker.getBoundingClientRect();
-      colorPicker.style.setProperty('--offset-left', boundingClientRect.x < 0 ? `${-boundingClientRect.x + 20}px` : '');
-      colorPicker.style.setProperty('--offset-top', boundingClientRect.y < 0 ? `${-boundingClientRect.y + 40}px` : '');
-    });
+      colorPicker.style.setProperty('--offset-top', '')
+      colorPicker.style.setProperty('--offset-left', '')
+      const boundingClientRect = colorPicker.getBoundingClientRect()
+      colorPicker.style.setProperty('--offset-left', boundingClientRect.x < 0 ? `${-boundingClientRect.x + 20}px` : '')
+      colorPicker.style.setProperty('--offset-top', boundingClientRect.y < 0 ? `${-boundingClientRect.y + 40}px` : '')
+    })
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'value':
-        this.value = newValue;
-        break;
+        this.value = newValue
+        break
     }
   }
 
   get disabled() {
-    return this.hasAttribute('disabled');
+    return this.hasAttribute('disabled')
   }
 
   set disabled(value) {
     if (value) {
-      this.setAttribute('disabled', '');
+      this.setAttribute('disabled', '')
     } else {
-      this.removeAttribute('disabled');
+      this.removeAttribute('disabled')
     }
   }
 
   get value() {
-    return this._value;
+    return this._value
   }
 
   set value(value) {
-    this._value = value;
-    this._color.style.color = this._value;
-    this._colorPicker.setColor(this._value, true);
+    this._value = value
+    this._color.style.color = this._value
+    this._colorPicker.setColor(this._value, true)
   }
 }
 
-customElements.define('damo-input-colorpicker', InputColorPickerElement);
+customElements.define('damo-input-colorpicker', InputColorPickerElement)

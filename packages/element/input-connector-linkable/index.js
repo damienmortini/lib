@@ -1,15 +1,15 @@
-import InputConnectorElement from '../input-connector/index.js';
+import InputConnectorElement from '../input-connector/index.js'
 
-const CONNECTORS = new Set();
+const CONNECTORS = new Set()
 
-let activeConnector = null;
+let activeConnector = null
 
 /**
  * Handle connector elements linking
  */
 class InputConnectorLinkableElement extends InputConnectorElement {
   constructor() {
-    super();
+    super()
 
     this.shadowRoot.querySelector('slot style').insertAdjacentHTML('beforeend', `
       :host {
@@ -25,24 +25,24 @@ class InputConnectorLinkableElement extends InputConnectorElement {
       :host([connected]) {
         background: orange;
       }
-    `);
+    `)
 
-    this.addEventListener('pointerdown', this._onPointerDown);
+    this.addEventListener('pointerdown', this._onPointerDown)
 
-    this._onWindowPointerUpBound = this._onWindowPointerUp.bind(this);
+    this._onWindowPointerUpBound = this._onWindowPointerUp.bind(this)
   }
 
   connectedCallback() {
-    super.connectedCallback();
-    CONNECTORS.add(this);
-    this.addEventListener('connected', this._onConnected);
+    super.connectedCallback()
+    CONNECTORS.add(this)
+    this.addEventListener('connected', this._onConnected)
   }
 
   disconnectedCallback() {
-    this.removeEventListener('connected', this._onConnected);
-    window.removeEventListener('pointerup', this._onWindowPointerUpBound);
-    CONNECTORS.delete(this);
-    super.disconnectedCallback();
+    this.removeEventListener('connected', this._onConnected)
+    window.removeEventListener('pointerup', this._onWindowPointerUpBound)
+    CONNECTORS.delete(this)
+    super.disconnectedCallback()
   }
 
   _onConnected(event) {
@@ -53,16 +53,16 @@ class InputConnectorLinkableElement extends InputConnectorElement {
         input: this,
         output: event.detail.output,
       },
-    }));
+    }))
   }
 
   _onPointerDown() {
     if (activeConnector) {
-      return;
+      return
     }
-    activeConnector = this;
+    activeConnector = this
 
-    window.addEventListener('pointerup', this._onWindowPointerUpBound, { passive: false });
+    window.addEventListener('pointerup', this._onWindowPointerUpBound, { passive: false })
 
     this.dispatchEvent(new CustomEvent('connectorlink', {
       composed: true,
@@ -71,34 +71,34 @@ class InputConnectorLinkableElement extends InputConnectorElement {
         input: this,
         output: undefined,
       },
-    }));
+    }))
   }
 
   _onWindowPointerUp(event) {
     if (!activeConnector) {
-      return;
+      return
     }
 
-    let hitConnector;
+    let hitConnector
 
     for (const connector of CONNECTORS) {
-      const boundingClientRect = connector.getBoundingClientRect();
+      const boundingClientRect = connector.getBoundingClientRect()
       if (event.clientX > boundingClientRect.x &&
         event.clientX < boundingClientRect.x + boundingClientRect.width &&
         event.clientY > boundingClientRect.y &&
         event.clientY < boundingClientRect.y + boundingClientRect.height) {
-        hitConnector = connector;
+        hitConnector = connector
       }
     }
 
     if (hitConnector === activeConnector) {
-      return;
+      return
     }
 
-    window.removeEventListener('pointerup', this._onWindowPointerUpBound);
+    window.removeEventListener('pointerup', this._onWindowPointerUpBound)
 
     if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== InputConnectorLinkableElement.TYPE_BOTH)) {
-      activeConnector = null;
+      activeConnector = null
       this.dispatchEvent(new CustomEvent('connectorlink', {
         composed: true,
         bubbles: true,
@@ -106,17 +106,17 @@ class InputConnectorLinkableElement extends InputConnectorElement {
           input: null,
           output: null,
         },
-      }));
-      return;
+      }))
+      return
     }
 
-    const inputConnector = activeConnector.type & InputConnectorLinkableElement.TYPE_INPUT || hitConnector.type & InputConnectorLinkableElement.TYPE_OUTPUT ? hitConnector : activeConnector;
-    const outputConnector = inputConnector === activeConnector ? hitConnector : activeConnector;
+    const inputConnector = activeConnector.type & InputConnectorLinkableElement.TYPE_INPUT || hitConnector.type & InputConnectorLinkableElement.TYPE_OUTPUT ? hitConnector : activeConnector
+    const outputConnector = inputConnector === activeConnector ? hitConnector : activeConnector
 
-    inputConnector.outputs.add(outputConnector);
+    inputConnector.outputs.add(outputConnector)
 
-    activeConnector = null;
+    activeConnector = null
   }
 }
 
-export default InputConnectorLinkableElement;
+export default InputConnectorLinkableElement

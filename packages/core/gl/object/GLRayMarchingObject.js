@@ -1,10 +1,10 @@
-import BoxGeometry from '../../3d/geometry/BoxGeometry.js';
-import GLObject from '../GLObject.js';
-import GLGeometry from '../GLGeometry.js';
-import GLProgram from '../GLProgram.js';
-import CameraShader from '../../shader/CameraShader.js';
-import RayShader from '../../shader/RayShader.js';
-import SDFShader from '../../shader/SDFShader.js';
+import BoxGeometry from '../../3d/geometry/BoxGeometry.js'
+import GLObject from '../GLObject.js'
+import GLGeometry from '../GLGeometry.js'
+import GLProgram from '../GLProgram.js'
+import CameraShader from '../../shader/CameraShader.js'
+import RayShader from '../../shader/RayShader.js'
+import SDFShader from '../../shader/SDFShader.js'
 
 export default class GLRayMarchingObject extends GLObject {
   constructor({
@@ -16,41 +16,41 @@ export default class GLRayMarchingObject extends GLObject {
     sdfRayMarchPrecision = 0.001,
     vertexCompute = false,
   }) {
-    const instanceIDs = new Float32Array(sdfObjects.length);
+    const instanceIDs = new Float32Array(sdfObjects.length)
     for (let index = 0; index < instanceIDs.length; index++) {
-      instanceIDs[index] = index;
+      instanceIDs[index] = index
     }
 
     let mapChunk = `
       SDFObject sdfObject;
       vec3 objectPosition;
-    `;
+    `
     for (const [i, sdfObject] of sdfObjects.entries()) {
-      sdfObject.shape = sdfObject.shape === undefined ? 'sphere' : sdfObject.shape;
-      sdfObject.size = sdfObject.size === undefined ? 1 : sdfObject.size;
-      sdfObject.blend = sdfObject.blend === undefined ? 0 : sdfObject.blend;
-      sdfObject.material = sdfObject.material === undefined ? [1, 1, 1, 1] : sdfObject.material;
-      sdfObject.spherical = sdfObject.spherical === undefined ? sdfObject.shape === 'sphere' ? 1 : 0 : sdfObject.spherical;
+      sdfObject.shape = sdfObject.shape === undefined ? 'sphere' : sdfObject.shape
+      sdfObject.size = sdfObject.size === undefined ? 1 : sdfObject.size
+      sdfObject.blend = sdfObject.blend === undefined ? 0 : sdfObject.blend
+      sdfObject.material = sdfObject.material === undefined ? [1, 1, 1, 1] : sdfObject.material
+      sdfObject.spherical = sdfObject.spherical === undefined ? sdfObject.shape === 'sphere' ? 1 : 0 : sdfObject.spherical
       mapChunk += `
         sdfObject = sdfObjects[${i}];
         objectPosition = position - sdfObject.position;
-      `;
+      `
       switch (sdfObject.shape) {
         case 'sphere':
           mapChunk += `
             voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, sdfObject.size * .5, sdfObject.material), sdfObject.blend * sdfObject.size);
-          `;
-          break;
+          `
+          break
         case 'box':
           mapChunk += `
             voxel = sdfSmoothMin(voxel, sdfBox(objectPosition, vec3(sdfObject.size * .5), sdfObject.material), sdfObject.blend * sdfObject.size);
-          `;
-          break;
+          `
+          break
         default:
           mapChunk += `
             voxel = sdfSmoothMin(voxel, ${sdfObject.shape}, sdfObject.blend * sdfObject.size);
-          `;
-          break;
+          `
+          break
       }
     }
 
@@ -98,7 +98,7 @@ export default class GLRayMarchingObject extends GLObject {
         normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
         normal = mix(normal, vec3(0.), step(camera.far, voxel.coord.w));
       `],
-    ]);
+    ])
 
     super({
       gl,
@@ -172,12 +172,12 @@ export default class GLRayMarchingObject extends GLObject {
         ],
         shaders,
       }),
-    });
+    })
 
-    this.sdfObjects = sdfObjects;
+    this.sdfObjects = sdfObjects
   }
 
   draw(options) {
-    super.draw(Object.assign({ instanceCount: this.sdfObjects.length }, options));
+    super.draw(Object.assign({ instanceCount: this.sdfObjects.length }, options))
   }
 }

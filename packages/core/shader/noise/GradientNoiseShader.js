@@ -55,8 +55,8 @@ export const gradientNoise2D = () => {
                       mix( dot( gradientNoise2DHash( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
                           dot( gradientNoise2DHash( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
       }
-    `;
-};
+    `
+}
 
 export const gradientDerivativesNoise2D = () => {
   return `
@@ -117,8 +117,8 @@ export const gradientDerivativesNoise2D = () => {
                       ga + u.x*(gb-ga) + u.y*(gc-ga) + u.x*u.y*(ga-gb-gc+gd) +  // derivatives
                       du * (u.yx*(va-vb-vc+vd) + vec2(vb,vc) - va));
       }
-    `;
-};
+    `
+}
 
 export const gradientNoise3D = () => {
   return `
@@ -164,8 +164,8 @@ export const gradientNoise3D = () => {
                           mix( dot( gradientNoise3DHash( i + vec3(0.0,1.0,1.0) ), f - vec3(0.0,1.0,1.0) ), 
                                 dot( gradientNoise3DHash( i + vec3(1.0,1.0,1.0) ), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z );
       }
-    `;
-};
+    `
+}
 
 export const gradientDerivativesNoise3D = ({
   hash = `
@@ -243,6 +243,6 @@ export const gradientDerivativesNoise3D = ({
                       ga + u.x*(gb-ga) + u.y*(gc-ga) + u.z*(ge-ga) + u.x*u.y*(ga-gb-gc+gd) + u.y*u.z*(ga-gc-ge+gg) + u.z*u.x*(ga-gb-ge+gf) + (-ga+gb+gc-gd+ge-gf-gg+gh)*u.x*u.y*u.z +   // derivatives
                       du * (vec3(vb,vc,ve) - va + u.yzx*vec3(va-vb-vc+vd,va-vc-ve+vg,va-vb-ve+vf) + u.zxy*vec3(va-vb-ve+vf,va-vb-vc+vd,va-vc-ve+vg) + u.yzx*u.zxy*(-va+vb+vc-vd+ve-vf-vg+vh) ));
       }
-    `;
-};
+    `
+}
 

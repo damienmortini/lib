@@ -1,8 +1,8 @@
-import { Scene } from '../../../three/src/scenes/Scene.js';
-import { Mesh } from '../../../three/src/objects/Mesh.js';
-import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneBufferGeometry.js';
-import { WebGLRenderTarget } from '../../../three/src/renderers/WebGLRenderTarget.js';
-import { OrthographicCamera } from '../../../three/src/cameras/OrthographicCamera.js';
+import { Scene } from '../../../three/src/scenes/Scene.js'
+import { Mesh } from '../../../three/src/objects/Mesh.js'
+import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneBufferGeometry.js'
+import { WebGLRenderTarget } from '../../../three/src/renderers/WebGLRenderTarget.js'
+import { OrthographicCamera } from '../../../three/src/cameras/OrthographicCamera.js'
 
 export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
   constructor({
@@ -36,28 +36,28 @@ export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
       depthBuffer,
       stencilBuffer,
       depthTexture,
-    });
+    })
 
-    this.renderer = renderer;
+    this.renderer = renderer
 
-    this._scene = new Scene();
-    this._camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this._scene = new Scene()
+    this._camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
 
-    this._quad = new Mesh(new PlaneBufferGeometry(2, 2), material);
-    this._scene.add(this._quad);
+    this._quad = new Mesh(new PlaneBufferGeometry(2, 2), material)
+    this._scene.add(this._quad)
   }
 
   get material() {
-    return this._quad.material;
+    return this._quad.material
   }
 
   set material(value) {
-    this._quad.material = value;
+    this._quad.material = value
   }
 
   render() {
-    this.renderer.setRenderTarget(this);
-    this.renderer.render(this._scene, this._camera);
-    this.renderer.setRenderTarget(null);
+    this.renderer.setRenderTarget(this)
+    this.renderer.render(this._scene, this._camera)
+    this.renderer.setRenderTarget(null)
   }
 }

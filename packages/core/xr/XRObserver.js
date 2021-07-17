@@ -1,14 +1,14 @@
 export default class XRObserver {
   constructor(callback) {
-    this._callback = callback;
+    this._callback = callback
   }
 
   async observe(gl) {
     // const session = await navigator.xr.requestSession('inline');
     const session = await navigator.xr.requestSession('immersive-ar', {
       requiredFeatures: ['local', 'local-floor'],
-    });
-    const referenceSpace = await session.requestReferenceSpace('local-floor');
+    })
+    const referenceSpace = await session.requestReferenceSpace('local-floor')
 
     // const sessionEvent = (event) => {
     //   console.log(event);
@@ -21,7 +21,7 @@ export default class XRObserver {
     // session.addEventListener('squeezeend', sessionEvent);
     // session.addEventListener('end', sessionEvent);
 
-    session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+    session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) })
 
 
     // const session = await navigator.xr.requestSession('immersive-vr');
@@ -35,10 +35,10 @@ export default class XRObserver {
       // if (session.inputSources.length) {
       //   console.log(session.inputSources[0]);
       // }
-      const viewerPose = frame.getViewerPose(referenceSpace);
-      this._callback({ time, frame, session, viewerPose });
-      session.requestAnimationFrame(update);
-    };
-    session.requestAnimationFrame(update);
+      const viewerPose = frame.getViewerPose(referenceSpace)
+      this._callback({ time, frame, session, viewerPose })
+      session.requestAnimationFrame(update)
+    }
+    session.requestAnimationFrame(update)
   }
 }

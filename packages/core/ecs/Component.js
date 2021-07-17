@@ -1,38 +1,38 @@
-import Signal from '../util/Signal.js';
+import Signal from '../util/Signal.js'
 
-const STATIC_ON_ADD_MAP = new Map();
-const STATIC_ON_REMOVE_MAP = new Map();
+const STATIC_ON_ADD_MAP = new Map()
+const STATIC_ON_REMOVE_MAP = new Map()
 
 export default class Component {
   static get onAdd() {
-    let signal = STATIC_ON_ADD_MAP.get(this);
+    let signal = STATIC_ON_ADD_MAP.get(this)
     if (!signal) {
-      signal = new Signal();
-      STATIC_ON_ADD_MAP.set(this, signal);
+      signal = new Signal()
+      STATIC_ON_ADD_MAP.set(this, signal)
     }
-    return signal;
+    return signal
   }
 
   static get onRemove() {
-    let signal = STATIC_ON_REMOVE_MAP.get(this);
+    let signal = STATIC_ON_REMOVE_MAP.get(this)
     if (!signal) {
-      signal = new Signal();
-      STATIC_ON_REMOVE_MAP.set(this, signal);
+      signal = new Signal()
+      STATIC_ON_REMOVE_MAP.set(this, signal)
     }
-    return signal;
+    return signal
   }
 
   constructor(entity, { require = [] } = {}) {
-    this.entity = entity;
+    this.entity = entity
 
-    this.active = true;
+    this.active = true
 
-    this.onAdd = new Signal();
-    this.onRemove = new Signal();
+    this.onAdd = new Signal()
+    this.onRemove = new Signal()
 
     for (const component of require) {
       if (!this.entity.hasComponent(component)) {
-        console.error(this.entity + ' needs component ' + component);
+        console.error(this.entity + ' needs component ' + component)
       }
     }
   }

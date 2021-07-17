@@ -1,10 +1,10 @@
 export default class BeatSignalInputElement extends HTMLElement {
   static get observedAttributes() {
-    return ['beats', 'length', 'looplength', 'step', 'zoom'];
+    return ['beats', 'length', 'looplength', 'step', 'zoom']
   }
 
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -60,268 +60,268 @@ export default class BeatSignalInputElement extends HTMLElement {
       </style>
       <div id="head"></div>
       <div id="beats"></div>
-    `;
+    `
 
-    this._head = this.shadowRoot.querySelector('#head');
+    this._head = this.shadowRoot.querySelector('#head')
 
-    this._beatsContainer = this.shadowRoot.querySelector('#beats');
+    this._beatsContainer = this.shadowRoot.querySelector('#beats')
 
-    this.color = 'white';
+    this.color = 'white'
 
-    this._value = NaN;
-    this._step = 1;
-    this._length = 1;
-    this._position = 0;
-    this._decimals = 0;
-    this._loopLength = 0;
+    this._value = NaN
+    this._step = 1
+    this._length = 1
+    this._position = 0
+    this._decimals = 0
+    this._loopLength = 0
 
-    this._beatElements = new Map();
+    this._beatElements = new Map()
 
-    const self = this;
+    const self = this
     class Beats extends Set {
       _add(value) {
-        value = self._roundValueOnStep(value);
+        value = self._roundValueOnStep(value)
         if (this.has(value)) {
-          return;
+          return
         }
-        super.add(value);
-        const element = document.createElement('div');
-        element.id = value;
-        element.style.zIndex = Math.floor(value * 65536);
-        element.classList.add('beat');
-        self._setElementTransformFromBeat(element, value);
-        self._beatsContainer.appendChild(element);
-        self._beatElements.set(value, element);
+        super.add(value)
+        const element = document.createElement('div')
+        element.id = value
+        element.style.zIndex = Math.floor(value * 65536)
+        element.classList.add('beat')
+        self._setElementTransformFromBeat(element, value)
+        self._beatsContainer.appendChild(element)
+        self._beatElements.set(value, element)
       }
       add(value) {
         if (self.loopLength) {
-          let position = 0;
+          let position = 0
           while (position < self.length) {
-            this._add(position + (value % self.loopLength));
-            position += self.loopLength;
+            this._add(position + (value % self.loopLength))
+            position += self.loopLength
           }
         } else {
-          this._add(value);
+          this._add(value)
         }
-        return this;
+        return this
       }
       _delete(value) {
-        value = self._roundValueOnStep(value);
-        const hasElement = super.delete(value);
+        value = self._roundValueOnStep(value)
+        const hasElement = super.delete(value)
         if (!hasElement) {
-          return hasElement;
+          return hasElement
         }
-        const element = self._beatElements.get(value);
-        element.remove();
-        self._beatElements.delete(value);
-        return hasElement;
+        const element = self._beatElements.get(value)
+        element.remove()
+        self._beatElements.delete(value)
+        return hasElement
       }
       delete(value) {
-        let somethingRemoved = false;
+        let somethingRemoved = false
         if (self.loopLength) {
-          let position = 0;
+          let position = 0
           while (position < self.length) {
-            somethingRemoved = this._delete(position + (value % self.loopLength)) || somethingRemoved;
-            position += self.loopLength;
+            somethingRemoved = this._delete(position + (value % self.loopLength)) || somethingRemoved
+            position += self.loopLength
           }
         } else {
-          somethingRemoved = this._delete(value);
+          somethingRemoved = this._delete(value)
         }
-        return somethingRemoved;
+        return somethingRemoved
       }
       clear() {
         for (const value of this) {
-          this.delete(value);
+          this.delete(value)
         }
       }
-    };
-    this._beats = new Beats();
+    }
+    this._beats = new Beats()
 
-    let previousbeat = null;
-    let mode = '';
-    const preventContextMenu = (event) => event.preventDefault();
-    let boundingClientRect;
+    let previousbeat = null
+    let mode = ''
+    const preventContextMenu = (event) => event.preventDefault()
+    let boundingClientRect
     const pointerDown = (event) => {
-      boundingClientRect = this.getBoundingClientRect();
-      this.setPointerCapture(event.pointerId);
-      this.addEventListener('pointermove', pointerMove);
-      this.addEventListener('pointerup', pointerUp);
-      this.addEventListener('pointerout', pointerUp);
-      window.addEventListener('contextmenu', preventContextMenu);
-      pointerMove(event);
-    };
+      boundingClientRect = this.getBoundingClientRect()
+      this.setPointerCapture(event.pointerId)
+      this.addEventListener('pointermove', pointerMove)
+      this.addEventListener('pointerup', pointerUp)
+      this.addEventListener('pointerout', pointerUp)
+      window.addEventListener('contextmenu', preventContextMenu)
+      pointerMove(event)
+    }
     const pointerMove = (event) => {
-      const newbeat = ((event.clientX - boundingClientRect.x + this.scrollLeft) / this.scrollWidth) * this.length;
-      previousbeat = previousbeat !== null ? previousbeat : newbeat;
-      const startBeat = newbeat > previousbeat ? previousbeat : newbeat;
-      const endBeat = newbeat > previousbeat ? newbeat : previousbeat;
+      const newbeat = ((event.clientX - boundingClientRect.x + this.scrollLeft) / this.scrollWidth) * this.length
+      previousbeat = previousbeat !== null ? previousbeat : newbeat
+      const startBeat = newbeat > previousbeat ? previousbeat : newbeat
+      const endBeat = newbeat > previousbeat ? newbeat : previousbeat
       if (event.buttons === 1) {
         if (this.step) {
           for (let beat = startBeat; beat <= endBeat; beat += this.step) {
-            beat = this._roundValueOnStep(beat);
+            beat = this._roundValueOnStep(beat)
             if ((!mode && this.beats.has(beat)) || mode === 'delete') {
-              mode = 'delete';
-              this.beats.delete(beat);
+              mode = 'delete'
+              this.beats.delete(beat)
             } else if (!mode || mode === 'add') {
-              mode = 'add';
-              this.beats.add(beat);
+              mode = 'add'
+              this.beats.add(beat)
             }
           }
         } else {
-          this.beats.add(newbeat);
+          this.beats.add(newbeat)
         }
       } else if (event.buttons === 2) {
         for (const beat of this.beats) {
           if (beat >= startBeat && beat <= endBeat) {
-            this.beats.delete(beat);
+            this.beats.delete(beat)
           }
         }
       }
-      previousbeat = newbeat;
-      this.dispatchEvent(new Event('input', { bubbles: true }));
-    };
+      previousbeat = newbeat
+      this.dispatchEvent(new Event('input', { bubbles: true }))
+    }
     const pointerUp = (event) => {
-      mode = '';
-      previousbeat = null;
-      this.releasePointerCapture(event.pointerId);
-      this.removeEventListener('pointermove', pointerMove);
-      this.removeEventListener('pointerup', pointerUp);
-      this.removeEventListener('pointerout', pointerUp);
+      mode = ''
+      previousbeat = null
+      this.releasePointerCapture(event.pointerId)
+      this.removeEventListener('pointermove', pointerMove)
+      this.removeEventListener('pointerup', pointerUp)
+      this.removeEventListener('pointerout', pointerUp)
       requestAnimationFrame(() => {
-        window.removeEventListener('contextmenu', preventContextMenu);
-      });
-    };
-    this.addEventListener('pointerdown', pointerDown);
+        window.removeEventListener('contextmenu', preventContextMenu)
+      })
+    }
+    this.addEventListener('pointerdown', pointerDown)
 
     const resizeObserver = new ResizeObserver((entries) => {
-      this._width = entries[0].contentRect.width;
-    });
-    resizeObserver.observe(this);
+      this._width = entries[0].contentRect.width
+    })
+    resizeObserver.observe(this)
   }
 
   _updateBackgroundSize() {
-    const ratio = this.step / this.length;
-    const loopRatio = this.loopLength / this.length;
-    this._beatsContainer.style.backgroundSize = `${ratio * 100}%, ${(loopRatio || 10) * 100}%`;
+    const ratio = this.step / this.length
+    const loopRatio = this.loopLength / this.length
+    this._beatsContainer.style.backgroundSize = `${ratio * 100}%, ${(loopRatio || 10) * 100}%`
   }
 
   _setElementTransformFromBeat(element, beat) {
-    element.style.left = `${beat / this.length * 100}%`;
+    element.style.left = `${beat / this.length * 100}%`
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'beats':
-        const newBeats = new Function(`return ${newValue}`)();
-        this.beats.clear();
+        const newBeats = new Function(`return ${newValue}`)()
+        this.beats.clear()
         for (const beat of newBeats) {
-          this.beats.add(beat);
+          this.beats.add(beat)
         }
-        break;
+        break
       case 'looplength':
-        this.loopLength = Number(newValue);
-        break;
+        this.loopLength = Number(newValue)
+        break
       case 'length':
       case 'zoom':
       case 'step':
-        this[name] = Number(newValue);
-        break;
+        this[name] = Number(newValue)
+        break
     }
   }
 
   _roundValueOnStep(value) {
     if (!this.step) {
-      return value;
+      return value
     }
-    value = Math.round(value / this.step) * this.step;
-    value = Number(value.toFixed(this._decimals));
-    return value;
+    value = Math.round(value / this.step) * this.step
+    value = Number(value.toFixed(this._decimals))
+    return value
   }
 
   get beats() {
-    return this._beats;
+    return this._beats
   }
 
   get zoom() {
-    return this._zoom;
+    return this._zoom
   }
 
   set zoom(value) {
-    value = Math.max(value, 1);
-    this._zoom = value;
-    this._beatsContainer.style.width = `${this._zoom * 100}%`;
+    value = Math.max(value, 1)
+    this._zoom = value
+    this._beatsContainer.style.width = `${this._zoom * 100}%`
   }
 
   get step() {
-    return this._step;
+    return this._step
   }
 
   set step(value) {
-    const beats = new Set(this.beats);
-    this.beats.clear();
-    this._step = value;
-    this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0;
-    this._updateBackgroundSize();
+    const beats = new Set(this.beats)
+    this.beats.clear()
+    this._step = value
+    this._decimals = this.step % 1 ? String(this.step).split('.')[1].length : 0
+    this._updateBackgroundSize()
     for (const beat of beats) {
-      this.beats.add(beat);
+      this.beats.add(beat)
     }
   }
 
   get length() {
-    return this._length;
+    return this._length
   }
 
   set length(value) {
-    this._length = value;
+    this._length = value
     for (const [beat, element] of this._beatElements) {
-      this._setElementTransformFromBeat(element, beat);
+      this._setElementTransformFromBeat(element, beat)
     }
-    this._updateBackgroundSize();
+    this._updateBackgroundSize()
   }
 
   get loopLength() {
-    return this._loopLength;
+    return this._loopLength
   }
 
   set loopLength(value) {
-    this._loopLength = value;
-    this._updateBackgroundSize();
+    this._loopLength = value
+    this._updateBackgroundSize()
   }
 
   get position() {
-    return this._position;
+    return this._position
   }
 
   set position(value) {
     if (value === this._position) {
-      return;
+      return
     }
-    const backward = value < this._position;
-    const start = backward ? value : this._position;
-    const end = backward ? this._position : value;
-    let changed = false;
-    let maxBeat = -Infinity;
-    let minBeat = Infinity;
+    const backward = value < this._position
+    const start = backward ? value : this._position
+    const end = backward ? this._position : value
+    let changed = false
+    let maxBeat = -Infinity
+    let minBeat = Infinity
     for (const beat of this.beats) {
       if (beat >= start && beat <= end) {
-        changed = true;
-        maxBeat = Math.max(maxBeat, beat);
-        minBeat = Math.min(minBeat, beat);
+        changed = true
+        maxBeat = Math.max(maxBeat, beat)
+        minBeat = Math.min(minBeat, beat)
       }
     }
-    this._position = value;
-    this._head.style.transform = `translateX(${this._position / this.length * this._width * this.zoom}px)`;
+    this._position = value
+    this._head.style.transform = `translateX(${this._position / this.length * this._width * this.zoom}px)`
     if (changed) {
-      this._value = backward ? minBeat : maxBeat;
-      this.dispatchEvent(new Event('change', { bubbles: true }));
+      this._value = backward ? minBeat : maxBeat
+      this.dispatchEvent(new Event('change', { bubbles: true }))
     }
   }
 
   get value() {
-    return this._value;
+    return this._value
   }
 }
 
 if (!customElements.get('damo-input-signal-beat')) {
-  customElements.define('damo-input-signal-beat', class extends BeatSignalInputElement { });
+  customElements.define('damo-input-signal-beat', class extends BeatSignalInputElement { })
 }

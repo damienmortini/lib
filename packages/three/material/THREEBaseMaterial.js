@@ -1,5 +1,5 @@
-import THREEShaderMaterial from './THREEShaderMaterial.js';
-import { ShaderChunk } from '../../../three/src/Three.js';
+import THREEShaderMaterial from './THREEShaderMaterial.js'
+import { ShaderChunk } from '../../../three/src/Three.js'
 
 export default class THREEBaseMaterial extends THREEShaderMaterial {
   constructor({
@@ -63,6 +63,6 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
         ...fragmentChunks,
       ],
       ...options,
-    });
+    })
   }
 }

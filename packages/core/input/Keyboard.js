@@ -1,15 +1,15 @@
-const downedKeys = new Set();
+const downedKeys = new Set()
 
 export default class Keyboard {
   static get downedKeys() {
-    return downedKeys;
+    return downedKeys
   }
 }
 
 window.addEventListener('keydown', (e) => {
-  downedKeys.add(e.key);
-});
+  downedKeys.add(e.key)
+})
 
 window.addEventListener('keyup', (e) => {
-  downedKeys.delete(e.key);
-});
+  downedKeys.delete(e.key)
+})

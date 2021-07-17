@@ -1,9 +1,9 @@
-import Ticker from '../core/util/Ticker.js';
+import Ticker from '../core/util/Ticker.js'
 
-const PAUSED_BY_ACTION = 1;
-const PAUSED_BY_INTERSECTION = 2;
-const PAUSED_BY_DOCUMENT_VISIBILITY = 4;
-const PAUSED_BY_CONNECTION = 8;
+const PAUSED_BY_ACTION = 1
+const PAUSED_BY_INTERSECTION = 2
+const PAUSED_BY_DOCUMENT_VISIBILITY = 4
+const PAUSED_BY_CONNECTION = 8
 
 /**
  * Element triggering requestAnimationFrame on its update method.
@@ -11,63 +11,63 @@ const PAUSED_BY_CONNECTION = 8;
  */
 class AnimationTickerElement extends HTMLElement {
   constructor() {
-    super();
+    super()
 
-    this._updateBound = this.update.bind(this);
+    this._updateBound = this.update.bind(this)
 
-    this._pauseFlag = 0;
+    this._pauseFlag = 0
 
     const observer = new IntersectionObserver((entries) => {
-      let isIntersecting = false;
+      let isIntersecting = false
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          isIntersecting = true;
+          isIntersecting = true
         }
       }
       if (isIntersecting) {
-        this._pauseFlag &= ~PAUSED_BY_INTERSECTION;
+        this._pauseFlag &= ~PAUSED_BY_INTERSECTION
       } else {
-        this._pauseFlag |= PAUSED_BY_INTERSECTION;
+        this._pauseFlag |= PAUSED_BY_INTERSECTION
       }
-    });
-    observer.observe(this);
+    })
+    observer.observe(this)
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
+        this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
       } else {
-        this._pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY;
+        this._pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY
       }
-    });
+    })
   }
 
   connectedCallback() {
-    this._pauseFlag &= ~PAUSED_BY_CONNECTION;
+    this._pauseFlag &= ~PAUSED_BY_CONNECTION
     if (document.hidden) {
-      this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
+      this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
     }
     if (!(this._pauseFlag & PAUSED_BY_ACTION)) {
-      this.update();
+      this.update()
     }
   }
 
   disconnectedCallback() {
-    this._pauseFlag |= PAUSED_BY_CONNECTION;
+    this._pauseFlag |= PAUSED_BY_CONNECTION
   }
 
   get _pauseFlag() {
-    return this.__pauseFlag;
+    return this.__pauseFlag
   }
 
   set _pauseFlag(value) {
     if (this.__pauseFlag === value) {
-      return;
+      return
     }
-    this.__pauseFlag = value;
+    this.__pauseFlag = value
     if (this.__pauseFlag) {
-      Ticker.delete(this._updateBound);
+      Ticker.delete(this._updateBound)
     } else {
-      Ticker.add(this._updateBound);
+      Ticker.add(this._updateBound)
     }
   }
 
@@ -75,14 +75,14 @@ class AnimationTickerElement extends HTMLElement {
    * Play element.
    */
   play() {
-    this._pauseFlag &= ~PAUSED_BY_ACTION;
+    this._pauseFlag &= ~PAUSED_BY_ACTION
   }
 
   /**
    * Pause element.
    */
   pause() {
-    this._pauseFlag |= PAUSED_BY_ACTION;
+    this._pauseFlag |= PAUSED_BY_ACTION
   }
 
   /**
@@ -91,7 +91,7 @@ class AnimationTickerElement extends HTMLElement {
    * @readonly
    */
   get paused() {
-    return !!this._pauseFlag;
+    return !!this._pauseFlag
   }
 
   /**
@@ -100,4 +100,4 @@ class AnimationTickerElement extends HTMLElement {
   update() { }
 }
 
-export default AnimationTickerElement;
+export default AnimationTickerElement

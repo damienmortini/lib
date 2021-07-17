@@ -1,17 +1,17 @@
-import View from '../core/abstract/View.js';
+import View from '../core/abstract/View.js'
 
 export default class ViewAnimationElement extends HTMLElement {
   static get observedAttributes() {
-    return ['hidden'];
+    return ['hidden']
   }
 
   constructor() {
-    super();
+    super()
 
-    this._view = new View();
+    this._view = new View()
 
-    this._view.onShow = this.onshow.bind(this);
-    this._view.onHide = this.onhide.bind(this);
+    this._view.onShow = this.onshow.bind(this)
+    this._view.onHide = this.onhide.bind(this)
   }
 
   async onshow() { }
@@ -19,60 +19,60 @@ export default class ViewAnimationElement extends HTMLElement {
   async onhide() { }
 
   async show() {
-    this.hidden = false;
-    return this._view.show();
+    this.hidden = false
+    return this._view.show()
   }
 
   async hide() {
-    this.hidden = true;
-    return this._view.hide();
+    this.hidden = true
+    return this._view.hide()
   }
 
   get isHidden() {
-    return this._view.isHidden || !this.isConnected;
+    return this._view.isHidden || !this.isConnected
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) {
-      return;
+      return
     }
     switch (name) {
       case 'hidden':
         if (this.hasAttribute('hidden')) {
-          this.hide();
+          this.hide()
         } else {
-          this.show();
+          this.show()
         }
-        break;
+        break
     }
   }
 
   _getParentViewAnimationElement() {
-    let element = this;
-    let parentNode;
+    let element = this
+    let parentNode
     while (parentNode = element instanceof ShadowRoot ? element.host : element.parentNode) {
       if (parentNode instanceof ViewAnimationElement) {
-        return parentNode;
+        return parentNode
       }
-      element = parentNode;
+      element = parentNode
     }
-    return null;
+    return null
   }
 
   connectedCallback() {
-    const parentViewAnimationElement = this._getParentViewAnimationElement();
+    const parentViewAnimationElement = this._getParentViewAnimationElement()
     if (parentViewAnimationElement) {
-      this._getParentViewAnimationElement()._view.add(this._view);
+      this._getParentViewAnimationElement()._view.add(this._view)
     }
   }
 
   disconnectedCallback() {
     if (!this._getParentViewAnimationElement() && this._view.parent) {
-      this._view.parent.remove(this._view);
+      this._view.parent.remove(this._view)
     }
   }
 }
 
 if (!customElements.get('damo-animation-view')) {
-  customElements.define('damo-animation-view', class DamoViewAnimationElement extends ViewAnimationElement { });
+  customElements.define('damo-animation-view', class DamoViewAnimationElement extends ViewAnimationElement { })
 }

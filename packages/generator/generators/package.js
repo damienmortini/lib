@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import fs from 'fs-extra'
 
 /**
  * @param {Object} object
@@ -10,5 +10,5 @@ export default function ({ name, scope = 'damienmortini' }) {
     name: `@${scope}/${name}`,
     private: true,
     version: '0.0.0',
-  }, null, 2));
-};
+  }, null, 2))
+}

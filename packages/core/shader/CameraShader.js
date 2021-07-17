@@ -12,6 +12,6 @@ export default class CameraShader {
         mat4 projection;
         mat4 projectionView;
       };
-    `;
+    `
   }
 }

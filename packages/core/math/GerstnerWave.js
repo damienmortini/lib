@@ -1,6 +1,6 @@
-import Vector2 from './Vector2.js';
+import Vector2 from './Vector2.js'
 
-const POSITION = new Vector2();
+const POSITION = new Vector2()
 
 export default class GerstnerWave {
   static compute({
@@ -12,21 +12,21 @@ export default class GerstnerWave {
     wavelength = 1,
     speed = Math.sqrt(9.8 / (2. * Math.PI / wavelength)),
   }) {
-    POSITION.set(x, y);
+    POSITION.set(x, y)
 
-    const wavenumber = 2. * Math.PI / wavelength;
-    const amplitude = steepness / wavenumber;
+    const wavenumber = 2. * Math.PI / wavelength
+    const amplitude = steepness / wavenumber
 
-    const f = wavenumber * (POSITION.dot(direction) - speed * time);
+    const f = wavenumber * (POSITION.dot(direction) - speed * time)
 
-    const cosf = Math.cos(f);
-    const sinf = Math.sin(f);
+    const cosf = Math.cos(f)
+    const sinf = Math.sin(f)
 
     return [
       amplitude * direction[0] * cosf,
       amplitude * sinf,
       amplitude * direction[1] * cosf,
-    ];
+    ]
   }
 
   constructor({
@@ -35,13 +35,13 @@ export default class GerstnerWave {
     wavelength = 1,
     speed = Math.sqrt(9.8 / (2. * Math.PI / wavelength)),
   }) {
-    this.direction = direction;
-    this.steepness = steepness;
-    this.wavelength = wavelength;
-    this.speed = speed;
+    this.direction = direction
+    this.steepness = steepness
+    this.wavelength = wavelength
+    this.speed = speed
   }
 
   get wavenumber() {
-    return 2 * Math.PI / this.wavelength;
+    return 2 * Math.PI / this.wavelength
   }
 }

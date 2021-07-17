@@ -1,4 +1,4 @@
-import GLVertexAttribute from './GLVertexAttribute.js';
+import GLVertexAttribute from './GLVertexAttribute.js'
 
 export default class GLGeometry {
   constructor({
@@ -9,30 +9,30 @@ export default class GLGeometry {
     attributes = {},
     indices = null,
   }) {
-    this.gl = gl;
-    this.indices = null;
+    this.gl = gl
+    this.indices = null
 
-    this.gl.getExtension('OES_element_index_uint');
+    this.gl.getExtension('OES_element_index_uint')
 
-    this._drawElementsInstanced = () => { };
-    this._drawArraysInstanced = () => { };
-    const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays');
+    this._drawElementsInstanced = () => { }
+    this._drawArraysInstanced = () => { }
+    const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays')
     if (instancedArraysExtension) {
-      this._drawElementsInstanced = instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension);
-      this._drawArraysInstanced = instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension);
+      this._drawElementsInstanced = instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension)
+      this._drawArraysInstanced = instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension)
     } else if (this.gl.drawElementsInstanced) {
-      this._drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl);
-      this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl);
+      this._drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl)
+      this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl)
     }
 
-    this.attributes = new Map(attributes instanceof Map ? attributes : Object.entries(attributes));
+    this.attributes = new Map(attributes instanceof Map ? attributes : Object.entries(attributes))
 
     if (positions) {
       this.attributes.set('position', new GLVertexAttribute({
         gl,
         data: positions,
         size: 3,
-      }));
+      }))
     }
 
     if (normals) {
@@ -40,7 +40,7 @@ export default class GLGeometry {
         gl,
         data: normals,
         size: 3,
-      }));
+      }))
     }
 
     if (uvs) {
@@ -48,12 +48,12 @@ export default class GLGeometry {
         gl,
         data: uvs,
         size: 2,
-      }));
+      }))
     }
 
     for (const [key, value] of this.attributes) {
       if (!(value instanceof GLVertexAttribute)) {
-        this.attributes.set(key, new GLVertexAttribute(Object.assign({ gl }, value)));
+        this.attributes.set(key, new GLVertexAttribute(Object.assign({ gl }, value)))
       }
     }
 
@@ -62,7 +62,7 @@ export default class GLGeometry {
         gl: this.gl,
         target: this.gl.ELEMENT_ARRAY_BUFFER,
         ...(indices.length !== undefined ? { data: indices } : indices),
-      });
+      })
     }
   }
 
@@ -77,15 +77,15 @@ export default class GLGeometry {
   } = {}) {
     if (elements) {
       if (instanceCount !== undefined) {
-        this._drawElementsInstanced(mode, count, type, offset, instanceCount);
+        this._drawElementsInstanced(mode, count, type, offset, instanceCount)
       } else {
-        this.gl.drawElements(mode, count, type, offset);
+        this.gl.drawElements(mode, count, type, offset)
       }
     } else {
       if (instanceCount !== undefined) {
-        this._drawArraysInstanced(mode, first, count, instanceCount);
+        this._drawArraysInstanced(mode, first, count, instanceCount)
       } else {
-        this.gl.drawArrays(mode, first, count);
+        this.gl.drawArrays(mode, first, count)
       }
     }
   }

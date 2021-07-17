@@ -1,12 +1,12 @@
-import GestureObserver from '../core/input/GestureObserver.js';
+import GestureObserver from '../core/input/GestureObserver.js'
 
 export default class ArrayViewerElement extends HTMLElement {
   static get observedAttributes() {
-    return ['array', 'min', 'max', 'zoom', 'controls'];
+    return ['array', 'min', 'max', 'zoom', 'controls']
   }
 
   constructor() {
-    super();
+    super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -29,31 +29,31 @@ export default class ArrayViewerElement extends HTMLElement {
         }
       </style>
       <canvas></canvas>
-    `;
+    `
 
-    this.canvas = this.shadowRoot.querySelector('canvas');
-    this.context = this.canvas.getContext('2d');
+    this.canvas = this.shadowRoot.querySelector('canvas')
+    this.context = this.canvas.getContext('2d')
 
-    this._zoom = 1;
-    this._scrollLeft = 0;
-    this._width = 1;
-    this._array = [];
+    this._zoom = 1
+    this._scrollLeft = 0
+    this._width = 1
+    this._array = []
 
     const resizeObserver = new ResizeObserver((entries) => {
-      this._width = entries[0].contentRect.width;
-      this.canvas.width = entries[0].contentRect.width * devicePixelRatio;
-      this.canvas.height = entries[0].contentRect.height * devicePixelRatio;
-      this.draw();
-    });
-    resizeObserver.observe(this);
+      this._width = entries[0].contentRect.width
+      this.canvas.width = entries[0].contentRect.width * devicePixelRatio
+      this.canvas.height = entries[0].contentRect.height * devicePixelRatio
+      this.draw()
+    })
+    resizeObserver.observe(this)
 
     this.addEventListener('wheel', (event) => {
       if (this.controls) {
-        event.preventDefault();
+        event.preventDefault()
         if (event.deltaY > 0) {
-          this.zoom *= .95;
+          this.zoom *= .95
         } else {
-          this.zoom /= .95;
+          this.zoom /= .95
         }
         // const newValue = Math.max(1, value);
         // const difference = newValue - this._zoom;
@@ -68,31 +68,31 @@ export default class ArrayViewerElement extends HTMLElement {
         // this.scrollLeft = this.scrollWidth * ratio;
         // // this.scrollLeft += widthDifference * .5;
       }
-    });
+    })
 
     this._gestureObserver = new GestureObserver((gesture) => {
-      this.scrollLeft -= gesture.movementX;
-    }, { pointerLock: true, pointerCapture: true });
+      this.scrollLeft -= gesture.movementX
+    }, { pointerLock: true, pointerCapture: true })
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'array':
-        this.array = new Function(`return ${newValue}`)();
-        break;
+        this.array = new Function(`return ${newValue}`)()
+        break
       case 'controls':
-        this._gestureObserver[newValue !== null ? 'observe' : 'unobserve'](this);
-        break;
+        this._gestureObserver[newValue !== null ? 'observe' : 'unobserve'](this)
+        break
       case 'max':
       case 'min':
       case 'zoom':
-        this[name] = Number(newValue);
-        break;
+        this[name] = Number(newValue)
+        break
     }
   }
 
   connectedCallback() {
-    this.draw();
+    this.draw()
   }
 
   draw({
@@ -101,122 +101,122 @@ export default class ArrayViewerElement extends HTMLElement {
     offset = 0,
   } = {}) {
     if (offset) {
-      this.context.globalCompositeOperation = 'copy';
-      this.context.drawImage(this.canvas, offset, 0, this.canvas.width, this.canvas.height);
-      this.context.globalCompositeOperation = 'source-over';
+      this.context.globalCompositeOperation = 'copy'
+      this.context.drawImage(this.canvas, offset, 0, this.canvas.width, this.canvas.height)
+      this.context.globalCompositeOperation = 'source-over'
     }
-    const x = this._getCanvasXFromIndex(start);
-    const width = this._getCanvasXFromIndex(start + length) - x;
-    this.context.clearRect(x, 0, width, this.canvas.height);
-    const height = this.canvas.height / Math.round(this.max - this.min);
-    const y = Math.round(this.canvas.height + this.min * height);
+    const x = this._getCanvasXFromIndex(start)
+    const width = this._getCanvasXFromIndex(start + length) - x
+    this.context.clearRect(x, 0, width, this.canvas.height)
+    const height = this.canvas.height / Math.round(this.max - this.min)
+    const y = Math.round(this.canvas.height + this.min * height)
     for (let index = start; index < start + length; index++) {
-      const x = this._getCanvasXFromIndex(index);
-      const width = this._getCanvasXFromIndex(index + 1) - x;
-      this.context.fillRect(x, y, width, Math.round(-this.array[index] * height));
+      const x = this._getCanvasXFromIndex(index)
+      const width = this._getCanvasXFromIndex(index + 1) - x
+      this.context.fillRect(x, y, width, Math.round(-this.array[index] * height))
     }
   }
 
   _getCanvasXFromIndex(index) {
-    return Math.floor(index / this.array.length * this.zoom * this.canvas.width - this.scrollLeft * window.devicePixelRatio);
+    return Math.floor(index / this.array.length * this.zoom * this.canvas.width - this.scrollLeft * window.devicePixelRatio)
   }
 
   _updateBounds() {
     if (!this.array.length) {
-      return;
+      return
     }
     if (this._min === undefined) {
-      this._minValue = 0;
+      this._minValue = 0
       for (const value of this.array) {
-        this._minValue = Math.min(this._minValue, value);
+        this._minValue = Math.min(this._minValue, value)
       }
     }
     if (this._max === undefined) {
-      this._maxValue = this._minValue;
+      this._maxValue = this._minValue
       for (const value of this.array) {
-        this._maxValue = Math.max(this._maxValue, value);
+        this._maxValue = Math.max(this._maxValue, value)
       }
     }
     if (this._maxValue === this._minValue) {
-      this._minValue = Math.min(this._minValue, 0);
-      this._maxValue = Math.max(this._maxValue, 100);
+      this._minValue = Math.min(this._minValue, 0)
+      this._maxValue = Math.max(this._maxValue, 100)
     }
   }
 
   get array() {
-    return this._array;
+    return this._array
   }
 
   set array(value) {
-    this._array = value;
-    this._updateBounds();
-    this.draw();
+    this._array = value
+    this._updateBounds()
+    this.draw()
   }
 
   get controls() {
-    return this.hasAttribute('controls');
+    return this.hasAttribute('controls')
   }
 
   set controls(value) {
     if (value) {
-      this.setAttribute('controls', '');
+      this.setAttribute('controls', '')
     } else {
-      this.removeAttribute('controls');
+      this.removeAttribute('controls')
     }
   }
 
   get min() {
-    return this._min !== undefined ? this._min : this._minValue;
+    return this._min !== undefined ? this._min : this._minValue
   }
 
   set min(value) {
-    this._min = value;
-    this._updateBounds();
-    this.draw();
+    this._min = value
+    this._updateBounds()
+    this.draw()
   }
 
   get max() {
-    return this._max !== undefined ? this._max : this._maxValue;
+    return this._max !== undefined ? this._max : this._maxValue
   }
 
   set max(value) {
-    this._max = value;
-    this._updateBounds();
-    this.draw();
+    this._max = value
+    this._updateBounds()
+    this.draw()
   }
 
   get zoom() {
-    return this._zoom;
+    return this._zoom
   }
 
   set zoom(value) {
-    this._zoom = Math.max(1, value);
-    this.draw();
+    this._zoom = Math.max(1, value)
+    this.draw()
   }
 
   get scrollWidth() {
-    return this._width * this.zoom;
+    return this._width * this.zoom
   }
 
   get scrollLeft() {
-    return this._scrollLeft;
+    return this._scrollLeft
   }
 
   set scrollLeft(value) {
-    value = Math.max(0, Math.min(this.scrollWidth - this._width, value));
+    value = Math.max(0, Math.min(this.scrollWidth - this._width, value))
     if (value === this._scrollLeft) {
-      return;
+      return
     }
-    const offset = Math.floor(this._scrollLeft * devicePixelRatio - value * devicePixelRatio);
-    this._scrollLeft = value;
+    const offset = Math.floor(this._scrollLeft * devicePixelRatio - value * devicePixelRatio)
+    this._scrollLeft = value
 
-    const cellWidth = (1 / this.array.length) * this.zoom * this.canvas.width;
-    const start = Math.floor(((offset < 0 ? this.canvas.width + offset : 0) + this.scrollLeft * devicePixelRatio) / cellWidth);
-    const length = Math.ceil(Math.abs(offset) / cellWidth);
-    this.draw({ start, length: offset > 0 ? length + 1 : length, offset });
+    const cellWidth = (1 / this.array.length) * this.zoom * this.canvas.width
+    const start = Math.floor(((offset < 0 ? this.canvas.width + offset : 0) + this.scrollLeft * devicePixelRatio) / cellWidth)
+    const length = Math.ceil(Math.abs(offset) / cellWidth)
+    this.draw({ start, length: offset > 0 ? length + 1 : length, offset })
   }
 }
 
 if (!customElements.get('damo-viewer-array')) {
-  customElements.define('damo-viewer-array', class extends ArrayViewerElement { });
+  customElements.define('damo-viewer-array', class extends ArrayViewerElement { })
 }
