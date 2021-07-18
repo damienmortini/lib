@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-ruler",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "<element-input-ruler> custom element.",
   "publishConfig": {
     "access": "public"

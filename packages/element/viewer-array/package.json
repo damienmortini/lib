@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-viewer-array",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<element-viewer-array> custom element.",
   "publishConfig": {
     "access": "public"
