@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-pagination",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Damien Mortini",
   "publishConfig": {
     "access": "public"

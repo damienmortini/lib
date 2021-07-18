@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-knob",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "<element-input-knob> custom element.",
   "publishConfig": {
     "access": "public"
