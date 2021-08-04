@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.124",
+  "version": "0.0.125",
   "dependencies": {
     "@damienmortini/element-animation-lottie": "^0.0.105",
     "@damienmortini/element-animation-sprite": "^0.0.89",
@@ -29,7 +29,7 @@
     "@damienmortini/element-menu": "^0.0.15",
     "@damienmortini/element-select-lasso": "^0.0.10",
     "@damienmortini/element-viewer-array": "^0.0.10",
-    "@damienmortini/element-viewport": "^0.0.21"
+    "@damienmortini/element-viewport": "^0.0.22"
   },
   "publishConfig": {
     "access": "public"
