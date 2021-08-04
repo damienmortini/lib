@@ -1,6 +1,6 @@
 import Vector2 from '../core/math/Vector2.js'
 
-import '../element-select-lasso/index.js'
+// import '../element-select-lasso/index.js'
 
 export default class ViewportElement extends HTMLElement {
   static get observedAttributes() {
@@ -10,65 +10,56 @@ export default class ViewportElement extends HTMLElement {
   constructor() {
     super()
 
-    this.attachShadow({ mode: 'open' }).innerHTML = `
-      <style>
-        :host {
-          display: block;
-          overflow: hidden;
-          touch-action: none;
-          position: relative;
-          width: 300px;
-          height: 150px;
-        }
+    this.attachShadow({ mode: 'open' }).innerHTML = `<style>
+  :host {
+    display: block;
+    overflow: hidden;
+    touch-action: none;
+    position: relative;
+    width: 300px;
+    height: 150px;
+  }
 
-        #content {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          touch-action: none;
-        }
+  #content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
 
-        #content slot {
-          position: absolute;
-          display: block;
-          transform-origin: top left;
-          box-sizing: border-box;
-        }
+  #content slot {
+    position: absolute;
+    display: block;
+    transform-origin: top left;
+    box-sizing: border-box;
+  }
 
-        #content slot:focus-within {
-          z-index: 999999999 !important;
-        }
+  #content slot:focus-within {
+    z-index: 999999999 !important;
+  }
 
-        #content slot[disabled]::slotted(*), #content[disabled] slot::slotted(*) {
-          pointer-events: none;
-        }
+  #content slot[disabled],
+  #content[disabled] slot {
+    pointer-events: none;
+  }
 
-        #content slot::slotted(*) {
-          transform: none !important;
-          top: 0 !important;
-          left: 0 !important;
-          user-select: none;
-          box-sizing: border-box;
-        }
+  #content slot::slotted(*) {
+    transform: none !important;
+    top: 0 !important;
+    left: 0 !important;
+    user-select: none;
+    box-sizing: border-box;
+  }
 
-        #content slot::slotted(*:hover) {
-          box-shadow: 0 0 0 1px lightgrey;
-        }
-
-        #content slot[disabled], #content[disabled] slot {
-          will-change: transform;
-        }
-
-        #content slot[selected]::slotted(*) {
-          box-shadow: 0 0 0 1px grey;
-        }
-      </style>
-      <damo-select-lasso></damo-select-lasso>
-      <slot></slot>
-      <div id="content"></div>
-    `
+  #content slot {
+    will-change: transform;
+  }
+</style>
+<!-- <damo-select-lasso></damo-select-lasso> -->
+<slot></slot>
+<div id="content"></div>`
 
     this._scale = 1
 
@@ -83,16 +74,14 @@ export default class ViewportElement extends HTMLElement {
     this._slotUID = 0
     this._slots = new Set()
 
-    const self = this
-
     this._selectedElements = new class extends Set {
       add(value) {
-        self._elementSlotMap.get(value).setAttribute('selected', '')
+        value.toggleAttribute('selected')
         return super.add(value)
       }
 
       delete(value) {
-        self._elementSlotMap.get(value).removeAttribute('selected')
+        value.removeAttribute('selected')
         return super.delete(value)
       }
 
@@ -230,7 +219,7 @@ export default class ViewportElement extends HTMLElement {
       }
 
       actioned = true
-      content.setAttribute('disabled', '')
+      content.toggleAttribute('disabled', true)
 
       pointerEventMap.set(event.pointerId, event)
       const pointerIds = [...pointerEventMap.keys()]
@@ -395,6 +384,8 @@ export default class ViewportElement extends HTMLElement {
       zoom(scale, x, y)
     }, { passive: false })
 
+    let initialized = false
+    let initializeRAF = -1
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const style = getComputedStyle(entry.target)
@@ -406,16 +397,19 @@ export default class ViewportElement extends HTMLElement {
           slot.style.height = `${entry.contentRect.height}px`
         }
       }
+      if (!initialized) {
+        cancelAnimationFrame(initializeRAF)
+        initializeRAF = requestAnimationFrame(() => {
+          if (this.hasAttribute('centered')) this.centerView()
+          initialized = true
+        })
+      }
     })
 
     // Mutation Observer
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
-          if (!(node instanceof HTMLElement)) {
-            continue
-          }
-
           const viewportBoundingClientRect = this.getBoundingClientRect()
 
           let assignedElement = node
@@ -491,12 +485,6 @@ export default class ViewportElement extends HTMLElement {
     }])
     const observer = new MutationObserver(mutationCallback)
     observer.observe(this, { childList: true })
-  }
-
-  connectedCallback() {
-    if (this.hasAttribute('centered')) {
-      this.centerView()
-    }
   }
 
   get selectedElements() {
