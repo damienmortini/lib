@@ -31,7 +31,6 @@ export default class ViewportElement extends HTMLElement {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    will-change: transform;
   }
 
   #container slot::slotted(*) {
@@ -96,6 +95,7 @@ export default class ViewportElement extends HTMLElement {
     const elementGestureObserver = new GestureObserver((gesture) => {
       if (gesture.state === 'finishing') resizingElements.delete(gesture.target)
       if (resizingElements.has(gesture.target)) return
+      if (gesture.pointers.size > 1) isViewportInteracting = true
       if (isViewportInteracting) return
       const target = gesture.event.target
       if (
