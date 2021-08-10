@@ -4,6 +4,10 @@ class GestureObserver {
   /**
    * @typedef Gesture
    * @property {HTMLElement} target - The target DOM Element
+   * @property {Map<number, PointerEvent>} pointers - Map of active pointers
+   * @property {Event} event - Event that triggered the gesture
+   * @property {number} x - Gesture position on the X axis
+   * @property {number} y - Gesture position on the Y axis
    * @property {number} movementX - Movement on the X axis
    * @property {number} movementY - Movement on the Y axis
    * @property {number} offsetX - Offset between gesture start and gesture end on the X axis
@@ -11,7 +15,7 @@ class GestureObserver {
    * @property {number} movementScale - Pinch-zoom movement
    * @property {number} movementRotation - Angular movement in radians
    * @property {number} duration - Duration of the gesture
-   * @property {boolean} finished - Is the gesture finished
+   * @property {("starting"|"moving"|"finishing")} state - State of the gesture
    */
   /**
    * @callback GestureObserverCallback
@@ -95,15 +99,30 @@ class GestureObserver {
       element.setPointerCapture(event.pointerId)
     }
     this._resetElementPreviousData(element)
-    if (!data.pointers.size) {
+    data.pointers.set(event.pointerId, event)
+    if (data.pointers.size === 1) {
       element.addEventListener('pointermove', this._onPointerMoveBound)
       element.addEventListener('pointerup', this._onPointerUpBound)
       element.addEventListener('pointerout', this._onPointerUpBound)
       data.startTimeStamp = Date.now()
       data.offsetX = 0
       data.offsetY = 0
+      this._callback({
+        event,
+        pointers: data.pointers,
+        target: event.currentTarget,
+        movementX: 0,
+        movementY: 0,
+        x: event.clientX,
+        y: event.clientY,
+        offsetX: 0,
+        offsetY: 0,
+        movementScale: 1,
+        movementRotation: 0,
+        duration: 0,
+        state: 'starting',
+      })
     }
-    data.pointers.set(event.pointerId, event)
   }
 
   _onPointerMove(event) {
@@ -114,11 +133,11 @@ class GestureObserver {
     let index = 0
     for (const pointer of data.pointers.values()) {
       if (index === 1) {
-        data.gestureVector.x = x - pointer.screenX
-        data.gestureVector.y = y - pointer.screenY
+        data.gestureVector.x = x - pointer.clientX
+        data.gestureVector.y = y - pointer.clientY
       }
-      x += pointer.screenX
-      y += pointer.screenY
+      x += pointer.clientX
+      y += pointer.clientY
       index++
     }
     x /= data.pointers.size
@@ -154,15 +173,19 @@ class GestureObserver {
     data.offsetY += movementY
 
     this._callback({
+      event,
+      pointers: data.pointers,
       target: event.currentTarget,
       movementX: this.pointerLock ? event.movementX / devicePixelRatio : movementX,
       movementY: this.pointerLock ? event.movementY / devicePixelRatio : movementY,
+      x,
+      y,
       offsetX: data.offsetX,
       offsetY: data.offsetY,
       movementScale,
       movementRotation,
       duration: Date.now() - data.startTimeStamp,
-      finished: false,
+      state: 'moving',
     })
   }
 
@@ -176,15 +199,19 @@ class GestureObserver {
     }
     if (!data || !data.pointers.size) {
       this._callback({
+        event,
+        pointers: data.pointers,
         target: event.currentTarget,
         movementX: 0,
         movementY: 0,
         movementScale: 1,
         movementRotation: 0,
+        x: data.previousX,
+        y: data.previousY,
         offsetX: data.offsetX,
         offsetY: data.offsetY,
         duration: Date.now() - data.startTimeStamp,
-        finished: true,
+        state: 'finishing',
       })
       element.removeEventListener('pointermove', this._onPointerMoveBound)
       element.removeEventListener('pointerup', this._onPointerUpBound)
