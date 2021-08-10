@@ -41,36 +41,36 @@ export default class ViewportElement extends HTMLElement {
 <slot></slot>
 <div id="container"></div>`
 
-    this._scale = 1
+    this.zoom = 1
 
-    this._elementSlotMap = new Map()
-    this._slotDOMMatrixMap = new Map()
-
+    const elementSlotMap = new Map()
+    const slotDOMMatrixMap = new Map()
     const container = this.shadowRoot.querySelector('#container')
-    this._slotUID = 0
-    this._slots = new Set()
+    const slots = new Set()
+    const zoomMatrix = new DOMMatrix()
+    const resizingElements = new Set()
 
+    let slotUID = 0
     let viewportBoundingClientRect = this.getBoundingClientRect()
 
-    const zoomMatrix = new DOMMatrix()
     const zoom = (scale, x, y) => {
       if (scale === 1) return
-      this._scale *= scale
+      this.zoom *= scale
 
       zoomMatrix.m11 = scale
       zoomMatrix.m22 = scale
       zoomMatrix.m41 = -x * (scale - 1)
       zoomMatrix.m42 = -y * (scale - 1)
 
-      for (const slot of this._slots) {
-        const domMatrix = this._slotDOMMatrixMap.get(slot)
+      for (const slot of slots) {
+        const domMatrix = slotDOMMatrixMap.get(slot)
         domMatrix.preMultiplySelf(zoomMatrix)
         slot.style.transform = domMatrix.toString()
       }
     }
 
     const offsetSlot = (slot, offsetX, offsetY) => {
-      const domMatrix = this._slotDOMMatrixMap.get(slot)
+      const domMatrix = slotDOMMatrixMap.get(slot)
       domMatrix.m41 += offsetX
       domMatrix.m42 += offsetY
       slot.style.transform = domMatrix.toString()
@@ -88,12 +88,14 @@ export default class ViewportElement extends HTMLElement {
       if (!isViewportInteracting) return
       if (gesture.state === 'starting') viewportBoundingClientRect = this.getBoundingClientRect()
       zoom(gesture.movementScale, gesture.x - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5, gesture.y - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5)
-      for (const slot of this._slots) {
+      for (const slot of slots) {
         offsetSlot(slot, gesture.movementX, gesture.movementY)
       }
     }).observe(this)
 
     const elementGestureObserver = new GestureObserver((gesture) => {
+      if (gesture.state === 'finishing') resizingElements.delete(gesture.target)
+      if (resizingElements.has(gesture.target)) return
       if (isViewportInteracting) return
       const target = gesture.event.target
       if (
@@ -106,9 +108,7 @@ export default class ViewportElement extends HTMLElement {
     }, { pointerCapture: true })
 
     this.addEventListener('wheel', (event) => {
-      if (event.target !== this && event.target.scrollHeight > event.target.clientHeight) {
-        return
-      }
+      if (event.target !== this && event.target.scrollHeight > event.target.clientHeight) return
       viewportBoundingClientRect = this.getBoundingClientRect()
       const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1
       const x = event.clientX - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5
@@ -116,31 +116,42 @@ export default class ViewportElement extends HTMLElement {
       zoom(scale, x, y)
     }, { passive: false })
 
+
+    const initializingElements = new Set()
+    const resizeObserver = new ResizeObserver((entries) => {
+      const node = entries[0].target
+      if (!initializingElements.has(node)) resizingElements.add(node)
+      else initializingElements.delete(node)
+    })
+
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
           const slot = document.createElement('slot')
-          slot.name = `viewport-slot-${this._slotUID}`
+          slot.name = `viewport-slot-${slotUID}`
           node.slot = slot.name
 
           const domMatrix = new DOMMatrix()
-          this._slotDOMMatrixMap.set(slot, domMatrix)
-          domMatrix.m11 = this._scale
-          domMatrix.m22 = this._scale
+          slotDOMMatrixMap.set(slot, domMatrix)
+          domMatrix.m11 = this.zoom
+          domMatrix.m22 = this.zoom
 
-          this._elementSlotMap.set(node, slot)
+          elementSlotMap.set(node, slot)
           container.appendChild(slot)
-          this._slotUID++
-          this._slots.add(slot)
+          slotUID++
+          slots.add(slot)
           elementGestureObserver.observe(node)
+          initializingElements.add(node)
+          resizeObserver.observe(node)
         }
         for (const node of mutation.removedNodes) {
-          const slot = this._elementSlotMap.get(node)
-          this._elementSlotMap.delete(node)
+          const slot = elementSlotMap.get(node)
+          elementSlotMap.delete(node)
           if (!slot) continue
           node.slot = ''
           elementGestureObserver.unobserve(node)
-          this._slots.delete(slot)
+          resizeObserver.unobserve(node)
+          slots.delete(slot)
           slot.remove()
         }
       }
