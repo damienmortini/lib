@@ -8,7 +8,7 @@ import '../../lottie-web/build/player/lottie.min.js'
  */
 class LottieAnimationElement extends HTMLElement {
   static get observedAttributes() {
-    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime', 'segments']
+    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime', 'segments', 'customizable']
   }
 
   constructor() {
@@ -66,6 +66,24 @@ class LottieAnimationElement extends HTMLElement {
     })
   }
 
+  #onDrop = (event) => {
+    event.preventDefault();
+    const file = event.dataTransfer.items[0].getAsFile();
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader()
+    reader.addEventListener("load", () => {
+      this.src = reader.result;
+    });
+    reader.readAsDataURL(file)
+  }
+
+  #onDragOver = (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) {
       return
@@ -99,6 +117,15 @@ class LottieAnimationElement extends HTMLElement {
         if (this.animation) {
           if (this.segments) this.animation.playSegments(this.segments, true)
           else this.animation.resetSegments(true)
+        }
+        break
+      case 'customizable':
+        if (newValue !== null) {
+          this.addEventListener('drop', this.#onDrop)
+          this.addEventListener('dragover', this.#onDragOver)
+        } else {
+          this.removeEventListener('drop', this.#onDrop)
+          this.removeEventListener('dragover', this.#onDragOver)
         }
         break
     }
