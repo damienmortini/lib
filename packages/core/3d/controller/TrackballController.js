@@ -59,7 +59,7 @@ export default class TrackballController {
       this._velocity.x += (gesture.movementX * this.rotationVelocity - this._velocity.x) * rotationEaseRatio
       this._velocity.y += (gesture.movementY * this.rotationVelocity - this._velocity.y) * rotationEaseRatio
       if (!this.zoomDisabled) {
-        this._distance /= 1 + gesture.movementScale * this.zoomVelocity * .1
+        this._distance *= 1 + (1 - gesture.movementScale) * this.zoomVelocity * 10
         this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance))
       }
     }, { pointerCapture: true })

@@ -1,6 +1,6 @@
-export default [
+export default new Map([
   ['damo-animation-lottie', {
-    previewHTML: `<damo-animation-lottie autoplay loop src="../element-animation-lottie/demo/data.json"></damo-animation-lottie>`,
+    preview: `<damo-animation-lottie autoplay loop src="../element-animation-lottie/demo/data.json"></damo-animation-lottie>`,
     demo: './demo/index.html',
   }],
   // 'damo-animation-sprite',
@@ -10,7 +10,7 @@ export default [
   ['damo-input-signal-array', {}],
   ['damo-input-signal-beat', {}],
   ['damo-viewer-array', {
-    previewHTML: `<damo-viewer-array array='[1, 2, 5, 4, 3, 0, 1, 2, 1]'></damo-viewer-array>`,
+    preview: `<damo-viewer-array array='[1, 2, 5, 4, 3, 0, 1, 2, 1]'></damo-viewer-array>`,
   }],
   ['damo-input-ruler', {}],
   ['damo-input-button', {}],
@@ -26,7 +26,7 @@ export default [
   ['damo-input-pad-xy', {}],
   ['damo-input-range', {}],
   ['damo-input-select', {
-    previewHTML: `<damo-input-select value="World" options="['Hello', 'World', '!']"></damo-input-select>`,
+    preview: `<damo-input-select value="World" options="['Hello', 'World', '!']"></damo-input-select>`,
   }],
   // 'damo-input-soundmatrix',
   ['damo-input-text', {}],
@@ -35,14 +35,25 @@ export default [
   ['damo-select-lasso', {}],
   ['damo-starter-element', {}],
   ['damo-starter-gl', {}],
-  ['damo-starter-three', {}],
+  ['damo-starter-three', {
+    demo: `
+      <style>
+        damo-starter-three {
+          width: 100%;
+          height: 100%;
+          touch-action: none;
+        }
+      </style>
+      <damo-starter-three></damo-starter-three>  
+    `,
+  }],
   ['damo-viewport', {
-    previewHTML: `<damo-viewport centered>
+    preview: `<damo-viewport centered>
   <div style="position: absolute; background-color: red; width: 30px; height: 30px; top: 0; left: 0;"></div>
   <div
     style="position: absolute; background-color: green; width: 30px; height: 30px; border-radius: 50%; top: 30px; left: 30px;">
   </div>
 </damo-viewport>`,
   }],
-]
+])
 
