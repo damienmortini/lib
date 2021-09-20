@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-gui",
-  "version": "0.0.118",
+  "version": "0.0.119",
   "description": "GUI element",
   "keywords": [
     "javascript",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@damienmortini/element-input-button": "^0.0.18",
     "@damienmortini/element-input-checkbox": "^0.0.18",
-    "@damienmortini/element-input-color": "^0.0.99",
+    "@damienmortini/element-input-color": "^0.0.100",
     "@damienmortini/element-input-range": "^0.0.21",
     "@damienmortini/element-input-select": "^0.0.19",
     "@damienmortini/element-input-text": "^0.0.15",
