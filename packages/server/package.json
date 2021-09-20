@@ -25,7 +25,7 @@
   "bin": "bin/index.js",
   "dependencies": {
     "chokidar": "^3.5.2",
-    "mime-types": "^2.1.31",
-    "ws": "^8.0.0"
+    "mime-types": "^2.1.32",
+    "ws": "^8.2.2"
   }
 }
