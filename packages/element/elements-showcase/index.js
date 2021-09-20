@@ -2,10 +2,10 @@ import ELEMENTS from './elements.js'
 
 const section = document.body.querySelector('section')
 const list = document.body.querySelector('nav ul')
-const iframe = document.body.querySelector('iframe')
+const main = document.body.querySelector('main')
 
-for (const [elementName, { previewHTML, demo }] of ELEMENTS) {
-  const elementString = previewHTML || `<${elementName}></${elementName}>`
+for (const [elementName, { preview }] of ELEMENTS) {
+  const elementString = preview || `<${elementName}></${elementName}>`
   list.insertAdjacentHTML('beforeend', `
         <li data-elementname="${elementName}">
           <h2><a href="#${elementName}">${elementName.replace('damo-', '')}</a></h2>
@@ -19,7 +19,7 @@ const updatePath = () => {
   const elementName = location.hash.slice(1)
   if (elementName) {
     section.classList.remove('grid')
-    iframe.contentWindow.location.replace(`../${elementName.replace('damo-', 'element-')}/demo/index.html`)
+    main.innerHTML = ELEMENTS.get(elementName).demo || `<${elementName}></${elementName}>`
   } else {
     section.classList.add('grid')
   }

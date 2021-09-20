@@ -3,7 +3,7 @@ import http2 from 'http2'
 import fs from 'fs'
 import chokidar from 'chokidar'
 import mimeTypes from 'mime-types'
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import os from 'os'
 
 import { fileURLToPath } from 'url'
@@ -62,7 +62,7 @@ export default class Server {
         key: fs.readFileSync(`${directoryName}/server.key`),
         cert: fs.readFileSync(`${directoryName}/server.crt`),
       })
-      this._wss = new WebSocket.Server({ server: webSocketServer })
+      this._wss = new WebSocketServer({ server: webSocketServer })
       webSocketServer.listen(++port)
 
       if (watch) {
