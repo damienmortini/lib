@@ -1,7 +1,7 @@
 export default new Map([
   ['damo-animation-lottie', {
-    preview: `<damo-animation-lottie autoplay loop src="../element-animation-lottie/demo/data.json"></damo-animation-lottie>`,
-    demo: './demo/index.html',
+    preview: `<damo-animation-lottie autoplay loop src="assets/data.json"></damo-animation-lottie>`,
+    demo: `<damo-animation-lottie style="width: 80%; height: 80%" customizable loop autoplay src="assets/bodymovin.json"></damo-animation-lottie>`,
   }],
   // 'damo-animation-sprite',
   // 'damo-animation-ticker',
