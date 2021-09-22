@@ -18,7 +18,7 @@
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/element/viewport",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/viewport",
   "dependencies": {
     "@damienmortini/core": "^0.2.106"
   }

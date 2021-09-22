@@ -23,7 +23,7 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/three",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/three",
   "dependencies": {
     "@damienmortini/core": "^0.2.106",
     "fs-extra": "^10.0.0",

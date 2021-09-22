@@ -2,7 +2,7 @@
   "name": "@damienmortini/gui-server",
   "version": "0.0.3",
   "author": "Damien Mortini",
-  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/gui-server",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gui-server",
   "license": "ISC",
   "publishConfig": {
     "access": "public"
