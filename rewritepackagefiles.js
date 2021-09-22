@@ -24,7 +24,7 @@ for (const result of fastGlob.sync([
       directory,
     },
     bugs: 'https://github.com/damienmortini/lib/issues',
-    homepage: `https://github.com/damienmortini/lib/tree/master/${directory}`,
+    homepage: `https://github.com/damienmortini/lib/tree/main/${directory}`,
   };
   fs.writeFileSync(filePath, `${JSON.stringify(packageData, null, 2)}\n`);
 }

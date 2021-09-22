@@ -21,7 +21,7 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/master/packages/server",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/server",
   "bin": "bin/index.js",
   "dependencies": {
     "chokidar": "^3.5.2",
