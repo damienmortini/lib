@@ -10,6 +10,6 @@ const files = new Map([
 for (const [source, destination] of files) {
   fs.copySync(source, destination)
   const data = fs.readFileSync(destination, 'utf-8')
-  const newValue = data.replace('../../../build/three.module.js', '../../../../three/src/Three.js')
+  const newValue = data.replace('from \'three\'', 'from \'../../../../three/src/Three.js\'')
   fs.writeFileSync(destination, newValue, 'utf-8')
 }
