@@ -15,7 +15,7 @@ import {
 	RGB_PVRTC_4BPPV1_Format,
 	RGB_S3TC_DXT1_Format,
 	UnsignedByteType
-} from 'three';
+} from '../../../../three/src/Three.js';
 
 /**
  * Loader for Basis Universal GPU Texture Codec.
