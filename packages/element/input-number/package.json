@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-number",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "<element-input-number> custom element.",
   "publishConfig": {
     "access": "public"

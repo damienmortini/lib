@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-pad-xy",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "<element-input-pad-xy> custom element.",
   "publishConfig": {
     "access": "public"
