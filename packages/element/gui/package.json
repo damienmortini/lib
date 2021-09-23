@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-gui",
-  "version": "0.0.119",
+  "version": "0.0.120",
   "description": "GUI element",
   "keywords": [
     "javascript",
@@ -22,12 +22,12 @@
   },
   "bugs": "https://github.com/damienmortini/lib/issues",
   "dependencies": {
-    "@damienmortini/element-input-button": "^0.0.18",
-    "@damienmortini/element-input-checkbox": "^0.0.18",
-    "@damienmortini/element-input-color": "^0.0.100",
-    "@damienmortini/element-input-range": "^0.0.21",
-    "@damienmortini/element-input-select": "^0.0.19",
-    "@damienmortini/element-input-text": "^0.0.15",
-    "@damienmortini/gui-server": "^0.0.3"
+    "@damienmortini/element-input-button": "^0.0.19",
+    "@damienmortini/element-input-checkbox": "^0.0.19",
+    "@damienmortini/element-input-color": "^0.0.101",
+    "@damienmortini/element-input-range": "^0.0.22",
+    "@damienmortini/element-input-select": "^0.0.20",
+    "@damienmortini/element-input-text": "^0.0.16",
+    "@damienmortini/gui-server": "^0.0.4"
   }
 }

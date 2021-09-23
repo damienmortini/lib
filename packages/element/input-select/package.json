@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-select",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "<element-input-select> custom element.",
   "publishConfig": {
     "access": "public"

@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-range",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "<element-input-range> custom element.",
   "publishConfig": {
     "access": "public"
