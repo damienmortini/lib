@@ -74,7 +74,7 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
         ['start', `
           ${LightShader.Light}
           ${RayShader.Ray}
-          ${PBRShader.PhysicallyBasedMaterial}
+          ${PBRShader.MetallicRoughnessMaterial}
           
           uniform vec3 baseColor;
           uniform float metalness;
@@ -94,7 +94,7 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
         `],
         ['main', `
           ${uniforms.map ? 'vec4 mapTexel = texture2D(map, vUv);' : ''}
-          vec4 pbrColor = computePBRColor(vViewDirection, light, vPosition, vNormal, PhysicallyBasedMaterial(vec4(${uniforms.map ? 'baseColor * mapTexel.rgb' : 'baseColor'}, ${uniforms.map ? 'opacity * mapTexel.a' : 'opacity'}), metalness, roughness));
+          vec4 pbrColor = computePBRColor(vViewDirection, light, vPosition, vNormal, MetallicRoughnessMaterial(vec4(${uniforms.map ? 'baseColor * pow(mapTexel.rgb, vec3(2.2))' : 'baseColor'}, ${uniforms.map ? 'opacity * mapTexel.a' : 'opacity'}), metalness, roughness));
         `],
         ['end', `
           gl_FragColor = pbrColor;
