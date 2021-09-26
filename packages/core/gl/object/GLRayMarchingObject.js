@@ -5,22 +5,19 @@ import GLProgram from '../GLProgram.js'
 import CameraShader from '../../shader/CameraShader.js'
 import RayShader from '../../shader/RayShader.js'
 import SDFShader from '../../shader/SDFShader.js'
+import Shader from '../../3d/Shader.js'
 
 export default class GLRayMarchingObject extends GLObject {
   constructor({
     gl,
     sdfObjects = [],
-    shaders = [],
+    vertexChunks = [],
+    fragmentChunks = [],
     geometryDefinition = 10,
     sdfRayMarchSteps = 64,
     sdfRayMarchPrecision = 0.001,
     vertexCompute = false,
   }) {
-    const instanceIDs = new Float32Array(sdfObjects.length)
-    for (let index = 0; index < instanceIDs.length; index++) {
-      instanceIDs[index] = index
-    }
-
     let mapChunk = `
       SDFObject sdfObject;
       vec3 objectPosition;
@@ -102,82 +99,79 @@ export default class GLRayMarchingObject extends GLObject {
 
     super({
       gl,
-      geometry: new GLGeometry(Object.assign({
+      geometry: new GLGeometry({
         gl,
-        attributes: [
-          ['instanceID', {
-            data: instanceIDs,
-            size: 1,
-            divisor: 1,
-          }],
-        ],
-      }, new BoxGeometry({
-        width: 1,
-        height: 1,
-        depth: 1,
-        widthSegments: geometryDefinition,
-        heightSegments: geometryDefinition,
-        depthSegments: geometryDefinition,
-        normals: false,
-        uvs: false,
-      }))),
+        ...new BoxGeometry({
+          width: 1,
+          height: 1,
+          depth: 1,
+          widthSegments: geometryDefinition,
+          heightSegments: geometryDefinition,
+          depthSegments: geometryDefinition,
+          normals: false,
+          uvs: false,
+        }),
+      }),
       program: new GLProgram({
         gl,
-        uniforms: [
-          ['sdfRayMarchSteps', sdfRayMarchSteps],
-          ['sdfRayMarchPrecision', sdfRayMarchPrecision],
-        ],
-        vertexChunks: [
-          ['start', `
-            in float instanceID;
-            in vec3 position;
-
-            ${rayMarchingChunks.get('start')}
-
-            ${vertexCompute ? rayMarchingChunks.get('compute') : ''}
-            
-            out vec3 normal;
-            out Ray ray;
-            ${vertexCompute ? 'out Voxel voxel;' : ''}
-          `],
-          ['end', `
-            SDFObject sdfObject = sdfObjects[int(instanceID)];
-
-            vec3 position = position;
-            position = mix(position, normalize(position) * .5, sdfObject.spherical);
-            position *= sdfObject.size + sdfObject.blend * sdfObject.size;
-            position += sdfObject.position;
-            gl_Position = camera.projectionView * vec4(position, 1.);
-
-            ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
-
-            ${vertexCompute ? rayMarchingChunks.get('main') : ''}
-          `],
-        ],
-        fragmentChunks: [
-          ['start', `
-            ${rayMarchingChunks.get('start')}
-            
-            ${!vertexCompute ? rayMarchingChunks.get('compute') : ''}
-
-            in Ray ray;
-            in vec3 normal;
-            ${vertexCompute ? 'in Voxel voxel;' : ''}
-          `],
-          ['end', `
-            ${!vertexCompute ? 'Voxel voxel = Voxel(vec4(0.), vec4(0.));\nvec3 normal = normal;\n' + rayMarchingChunks.get('main') : ''}
-
-            fragColor = voxel.material;
-          `],
-        ],
-        shaders,
+        shader: new Shader({
+          uniforms: {
+            'sdfRayMarchSteps': sdfRayMarchSteps,
+            'sdfRayMarchPrecision': sdfRayMarchPrecision,
+          },
+          vertexChunks: [
+            ['start', `
+              in vec3 position;
+  
+              ${rayMarchingChunks.get('start')}
+  
+              ${vertexCompute ? rayMarchingChunks.get('compute') : ''}
+              
+              out vec3 normal;
+              out Ray ray;
+              ${vertexCompute ? 'out Voxel voxel;' : ''}
+            `],
+            ['end', `
+              SDFObject sdfObject = sdfObjects[gl_InstanceID];
+  
+              vec3 position = position;
+              position = mix(position, normalize(position) * .5, sdfObject.spherical);
+              position *= sdfObject.size + sdfObject.blend * sdfObject.size;
+              position += sdfObject.position;
+              gl_Position = camera.projectionView * vec4(position, 1.);
+  
+              ray = rayFromCamera(gl_Position.xy / gl_Position.w, camera);
+  
+              ${vertexCompute ? rayMarchingChunks.get('main') : ''}
+            `],
+            ...vertexChunks,
+          ],
+          fragmentChunks: [
+            ['start', `
+              ${rayMarchingChunks.get('start')}
+              
+              ${!vertexCompute ? rayMarchingChunks.get('compute') : ''}
+  
+              in Ray ray;
+              in vec3 normal;
+              ${vertexCompute ? 'in Voxel voxel;' : ''}
+            `],
+            ['end', `
+              ${!vertexCompute ? 'Voxel voxel = Voxel(vec4(0.), vec4(0.));\nvec3 normal = normal;\n' + rayMarchingChunks.get('main') : ''}
+  
+              fragColor = voxel.material;
+              // fragColor = vec4(1.);
+            `],
+            ...fragmentChunks,
+          ],
+        }),
       }),
     })
 
     this.sdfObjects = sdfObjects
   }
 
-  draw(options) {
-    super.draw(Object.assign({ instanceCount: this.sdfObjects.length }, options))
+  draw({ bind = false, uniforms = {}, ...options } = {}) {
+    super.draw({ bind, instanceCount: this.sdfObjects.length, uniforms: { sdfObjects: this.sdfObjects, ...uniforms }, ...options })
   }
 }

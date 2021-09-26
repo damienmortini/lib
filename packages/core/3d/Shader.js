@@ -180,7 +180,7 @@ export default class Shader {
           const arrayLength = parseInt(arrayLengthStr)
           structure[name] = {
             type,
-            arrayLength,
+            ...(arrayLength ? { arrayLength } : {}),
           }
         }
 
@@ -193,13 +193,22 @@ export default class Shader {
         let [, , type, name, arrayLengthStr] = uniformMatch
 
         const structure = structures.get(type)
+        const arrayLength = parseInt(arrayLengthStr)
         if (structure) {
-          for (const key of Object.keys(structure)) {
-            name = `${name}.${key}`
-            newUniforms[name] = this._createUniform(name, structure[key].type, structure[key].arrayLength)
+          if (arrayLength) {
+            for (let index = 0; index < arrayLength; index++) {
+              for (const key of Object.keys(structure)) {
+                const uniformName = `${name}[${index}].${key}`
+                newUniforms[uniformName] = this._createUniform(uniformName, structure[key].type, structure[key].arrayLength)
+              }
+            }
+          } else {
+            for (const key of Object.keys(structure)) {
+              const uniformName = `${name}.${key}`
+              newUniforms[uniformName] = this._createUniform(uniformName, structure[key].type, structure[key].arrayLength)
+            }
           }
         } else {
-          const arrayLength = parseInt(arrayLengthStr)
           newUniforms[name] = this._createUniform(name, type, arrayLength)
         }
       }
