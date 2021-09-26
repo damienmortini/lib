@@ -1,70 +1,78 @@
 import Matrix4 from '../math/Matrix4.js'
 
 export default class Camera {
+  #near
+  #far
+  #aspectRatio
+  #fov
+  #inverseTransform
+  #projection
+  #projectionView
+
   constructor({ near = 0.01, far = 1000, aspectRatio = 1, fov = Math.PI / 3 } = {}) {
-    this._near = near
-    this._far = far
-    this._aspectRatio = aspectRatio
-    this._fov = fov
+    this.#near = near
+    this.#far = far
+    this.#aspectRatio = aspectRatio
+    this.#fov = fov
 
     this.transform = new Matrix4()
-    this._inverseTransform = new Matrix4()
-    this._projection = new Matrix4()
-    this._projectionView = new Matrix4()
+    this.#inverseTransform = new Matrix4()
+    this.#projection = new Matrix4()
+    this.#projectionView = new Matrix4()
 
-    this._updateProjection()
+    this.#updateProjection()
   }
 
   set near(value) {
-    this._near = value
-    this._updateProjection()
+    this.#near = value
+    this.#updateProjection()
   }
 
   get near() {
-    return this._near
+    return this.#near
   }
 
   set far(value) {
-    this._far = value
-    this._updateProjection()
+    this.#far = value
+    this.#updateProjection()
   }
 
   get far() {
-    return this._far
+    return this.#far
   }
 
   set fov(value) {
-    this._fov = value
-    this._updateProjection()
+    this.#fov = value
+    this.#updateProjection()
   }
 
   get fov() {
-    return this._fov
+    return this.#fov
   }
 
   set aspectRatio(value) {
-    this._aspectRatio = value
-    this._updateProjection()
+    this.#aspectRatio = value
+    this.#updateProjection()
   }
 
   get aspectRatio() {
-    return this._aspectRatio
+    return this.#aspectRatio
   }
 
   get inverseTransform() {
-    return this._inverseTransform.invert(this.transform)
+    return this.#inverseTransform.invert(this.transform)
   }
 
   get projection() {
-    return this._projection
+    return this.#projection
   }
 
   get projectionView() {
-    return this._projectionView.copy(this.projection).multiply(this.inverseTransform)
+    return this.#projectionView.copy(this.projection).multiply(this.inverseTransform)
   }
 
-  _updateProjection() {
-    this._projection.fromPerspective(this.fov, this.aspectRatio, this.near, this.far)
+  #updateProjection() {
+    this.#projection.fromPerspective(this.fov, this.aspectRatio, this.near, this.far)
   }
 }
 

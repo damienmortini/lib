@@ -54,6 +54,21 @@ export default class GLProgram {
     }
 
     const uploadUniform = (name, value) => {
+      if (value === undefined) {
+        return
+      }
+
+      const type = self.uniformTypes.get(name)
+
+      if (value instanceof Object && !type) {
+        for (const key of [...Object.keys(value), ...Object.keys(Object.getPrototypeOf(value))]) {
+          uploadUniform(value[0] !== undefined ? `${name}[${key}]` : `${name}.${key}`, value[key])
+        }
+        return
+      }
+
+      self._shader.uniforms[name] = value
+
       let location = self._uniformLocations.get(name)
       if (location === undefined) {
         location = gl.getUniformLocation(self._program, name)
@@ -63,7 +78,6 @@ export default class GLProgram {
       if (location === null) {
         return
       }
-      const type = self.uniformTypes.get(name)
 
       if (type === 'float' || type === 'bool') {
         gl.uniform1f(location, value)
@@ -87,27 +101,13 @@ export default class GLProgram {
         gl.uniformMatrix4fv(location, false, value)
       } else if (type.startsWith('sampler')) {
         gl.uniform1i(location, self._textureUnits.get(name))
-      } else if (type.endsWith('array')) {
-        for (let i = 0; i < value.length; i++) {
-          uploadUniform(`${name}[${i}]`, value[i])
-        }
-      } else if (value instanceof Object) {
-        for (const key of Object.keys(value)) {
-          uploadUniform(`${name}.${key}`, value[key])
-        }
       }
     }
 
     class Uniforms extends Map {
       set(name, value) {
-        if (value === undefined) {
-          return
-        }
-
         uploadUniform(name, value)
-
-        self._shader.uniforms[name] = value
-        super.set(name, value)
+        return super.set(name, value)
       }
     }
 
