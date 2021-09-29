@@ -89,6 +89,8 @@ export default class GLProgram {
         gl.uniform4fv(location, value)
       } else if (type === 'int') {
         gl.uniform1i(location, value)
+      } else if (type === 'uint') {
+        gl.uniform1ui(location, value)
       } else if (type === 'ivec2') {
         gl.uniform2iv(location, value)
       } else if (type === 'ivec3') {
