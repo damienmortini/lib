@@ -167,7 +167,7 @@ export default class Shader {
       const structures = new Map()
 
       const structRegExp = /struct\s*(.*)\s*{\s*([\s\S]*?)}/g
-      const structMemberRegExp = /^\s*(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
+      const structMemberRegExp = /^\s*(?:highp|mediump|lowp)?\s*(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
       let structMatch
       while ((structMatch = structRegExp.exec(shaderString))) {
         const structName = structMatch[1]
@@ -190,7 +190,7 @@ export default class Shader {
       const uniformsRegExp = /^\s*uniform (highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
       let uniformMatch
       while ((uniformMatch = uniformsRegExp.exec(shaderString))) {
-        let [, , type, name, arrayLengthStr] = uniformMatch
+        const [, , type, name, arrayLengthStr] = uniformMatch
 
         const structure = structures.get(type)
         const arrayLength = parseInt(arrayLengthStr)
