@@ -93,14 +93,33 @@ export default class Shader {
     this._parseUniforms()
   }
 
-  _createUniform(name, type, arrayLength) {
-    if (!arrayLength) {
-      this.uniformTypes.set(name, type)
-    } else {
-      this.uniformTypes.set(name, `${type}array`)
+  _createUniform({ uniforms, name, type, arrayLength, structures }) {
+    if (arrayLength) {
       for (let index = 0; index < arrayLength; index++) {
-        this.uniformTypes.set(`${name}[${index}]`, type)
+        this._createUniform({
+          uniforms,
+          name: `${name}[${index}]`,
+          type,
+          arrayLength: null,
+          structures,
+        })
       }
+      return
+    }
+
+    const structure = structures?.get(type)
+
+    if (structure) {
+      for (const key of Object.keys(structure)) {
+        this._createUniform({
+          uniforms,
+          name: `${name}.${key}`,
+          type: structure[key].type,
+          arrayLength: structure[key].arrayLength,
+          structures,
+        })
+      }
+      return
     }
 
     let value
@@ -154,6 +173,9 @@ export default class Shader {
       value = undefined
     }
 
+    this.uniformTypes.set(name, type)
+    uniforms[name] = value
+
     return value
   }
 
@@ -168,15 +190,9 @@ export default class Shader {
 
       const structRegExp = /struct\s*(.*)\s*{\s*([\s\S]*?)}/g
       const structMemberRegExp = /^\s*(?:highp|mediump|lowp)?\s*(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
-      let structMatch
-      while ((structMatch = structRegExp.exec(shaderString))) {
-        const structName = structMatch[1]
-        const structString = structMatch[2]
-
+      for (const [, structName, structString] of shaderString.matchAll(structRegExp)) {
         const structure = {}
-        let structMemberMatch
-        while ((structMemberMatch = structMemberRegExp.exec(structString))) {
-          const [, type, name, arrayLengthStr] = structMemberMatch
+        for (const [, type, name, arrayLengthStr] of structString.matchAll(structMemberRegExp)) {
           const arrayLength = parseInt(arrayLengthStr)
           structure[name] = {
             type,
@@ -187,30 +203,15 @@ export default class Shader {
         structures.set(structName, structure)
       }
 
-      const uniformsRegExp = /^\s*uniform (highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
-      let uniformMatch
-      while ((uniformMatch = uniformsRegExp.exec(shaderString))) {
-        const [, , type, name, arrayLengthStr] = uniformMatch
-
-        const structure = structures.get(type)
-        const arrayLength = parseInt(arrayLengthStr)
-        if (structure) {
-          if (arrayLength) {
-            for (let index = 0; index < arrayLength; index++) {
-              for (const key of Object.keys(structure)) {
-                const uniformName = `${name}[${index}].${key}`
-                newUniforms[uniformName] = this._createUniform(uniformName, structure[key].type, structure[key].arrayLength)
-              }
-            }
-          } else {
-            for (const key of Object.keys(structure)) {
-              const uniformName = `${name}.${key}`
-              newUniforms[uniformName] = this._createUniform(uniformName, structure[key].type, structure[key].arrayLength)
-            }
-          }
-        } else {
-          newUniforms[name] = this._createUniform(name, type, arrayLength)
-        }
+      const uniformsRegExp = /^\s*uniform (?:highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
+      for (const [, type, name, arrayLengthStr] of shaderString.matchAll(uniformsRegExp)) {
+        this._createUniform({
+          uniforms: newUniforms,
+          name,
+          type,
+          arrayLength: parseInt(arrayLengthStr),
+          structures,
+        })
       }
     }
 
