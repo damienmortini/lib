@@ -42,4 +42,9 @@ export default class Vector4 extends Float32Array {
     vec4.set(this, x, y, z, w)
     return this
   }
+
+  applyMatrix4(matrix4) {
+    vec4.transformMat4(this, this, matrix4)
+    return this
+  }
 }
