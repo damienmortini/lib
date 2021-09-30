@@ -105,9 +105,9 @@ export default class SDFShader {
       return `
         vec3 ${name}(vec3 position, float epsilon)
         {
-          #define ZERO (min(int(epsilon),0)) // or any other non constant and cheap expression that is guaranteed to evaluate to zero
+          #define ZERO (min(int(epsilon),0))
           vec3 n = vec3(0.0);
-          for( int i=ZERO; i<4; i++ )
+          for( int i = ZERO; i < 4; i++ )
           {
             vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
             n += e*${mapName}(position+e*epsilon).coord.w;
@@ -132,7 +132,6 @@ export default class SDFShader {
   static sdfRayMarch({
     name = 'sdfRayMarch',
     mapName = 'map',
-    maxSteps = 512,
   } = {}) {
     return `
       Voxel ${name}(Ray ray, float near, float far, int steps, float distancePrecision)
@@ -142,9 +141,8 @@ export default class SDFShader {
         float rayMarchingStep = far;
         float distance = near;
 
-        // TODO: Remove use of maxsteps and just use step when WebGL2 is broadly supported
-        
-        for(int i = 0; i < ${maxSteps}; i++) {
+        int i = 0;
+        for(i = 0; i < steps; i++) {
           if (i == steps || rayMarchingStep < distancePrecision || distance > far) break;
           voxel = ${mapName}(ray.origin + ray.direction * distance);
           rayMarchingStep = voxel.coord.w;
@@ -154,6 +152,8 @@ export default class SDFShader {
         voxel.coord.xyz = ray.origin + ray.direction * distance;
         voxel.coord.w = distance;
         voxel = sdfMin(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
+
+        // voxel.material.xyz = vec3(float(i) / float(steps));
 
         return voxel;
       }

@@ -19,7 +19,10 @@
   "rules": {
     "indent": [
       "error",
-      2
+      2,
+      {
+        "SwitchCase": 1
+      }
     ],
     "max-len": 0,
     "require-jsdoc": 0,
