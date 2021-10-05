@@ -1,4 +1,3 @@
-import BoxGeometry from '../../3d/geometry/BoxGeometry.js'
 import GLObject from '../GLObject.js'
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'
@@ -7,7 +6,6 @@ import RayShader from '../../shader/RayShader.js'
 import SDFShader from '../../shader/SDFShader.js'
 import Shader from '../../3d/Shader.js'
 import RoundedBoxGeometry from '../../3d/geometry/RoundedBoxGeometry.js'
-import Vector3 from '../../math/Vector3.js'
 import Vector4 from '../../math/Vector4.js'
 import Vector2 from '../../math/Vector2.js'
 
@@ -18,7 +16,7 @@ export default class GLRayMarchingObject extends GLObject {
     vertexChunks = [],
     fragmentChunks = [],
     sdfRayMarchSteps = 100,
-    sdfRayMarchPrecision = 0.01,
+    sdfRayMarchPrecision = .01,
   }) {
     const SDFObjectStructure = `
       struct SDFObject
