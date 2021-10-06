@@ -24,7 +24,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core",
   "dependencies": {
-    "gl-matrix": "^3.3.0",
+    "gl-matrix": "^3.4.3",
     "mobile-detect": "^1.4.5"
   }
 }
