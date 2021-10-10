@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-color",
-  "version": "0.0.102",
+  "version": "0.0.103",
   "description": "<element-input-color> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-color",
   "dependencies": {
-    "@damienmortini/core": "^0.2.108"
+    "@damienmortini/core": "^0.2.109"
   }
 }
