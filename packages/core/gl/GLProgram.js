@@ -89,14 +89,20 @@ export default class GLProgram {
         gl.uniform4fv(location, value)
       } else if (type === 'int') {
         gl.uniform1i(location, value)
-      } else if (type === 'uint') {
-        gl.uniform1ui(location, value)
       } else if (type === 'ivec2') {
         gl.uniform2iv(location, value)
       } else if (type === 'ivec3') {
         gl.uniform3iv(location, value)
       } else if (type === 'ivec4') {
         gl.uniform4iv(location, value)
+      } else if (type === 'uint') {
+        gl.uniform1ui(location, value)
+      } else if (type === 'uvec2') {
+        gl.uniform2uiv(location, value)
+      } else if (type === 'uvec3') {
+        gl.uniform3uiv(location, value)
+      } else if (type === 'uvec4') {
+        gl.uniform4uiv(location, value)
       } else if (type === 'mat3') {
         gl.uniformMatrix3fv(location, false, value)
       } else if (type === 'mat4') {
