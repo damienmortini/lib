@@ -44,7 +44,7 @@ export default class THREEShaderMaterial extends ShaderMaterial {
 
     const threeUniforms = {}
     for (const [key, value] of Object.entries(shader.uniforms)) {
-      if (value.value !== undefined) {
+      if (value?.value !== undefined) {
         continue
       }
       threeUniforms[key] = {
