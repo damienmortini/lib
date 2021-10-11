@@ -23,10 +23,6 @@
         "SwitchCase": 1
       }
     ],
-    "comma-dangle": [
-      "error",
-      "only-multiline"
-    ],
     "max-len": 0,
     "require-jsdoc": 0,
     "object-curly-spacing": [
@@ -36,10 +32,6 @@
     "semi": [
       "error",
       "never"
-    ],
-    "quotes": [
-      "error",
-      "double"
     ],
     "space-before-function-paren": [
       2,
