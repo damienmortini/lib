@@ -1,7 +1,6 @@
 {
   "env": {
     "browser": true,
-    "ecmaVersion ": "latest",
     "node": true
   },
   "extends": [
@@ -13,7 +12,7 @@
     "SharedArrayBuffer": "readonly"
   },
   "parserOptions": {
-    "ecmaVersion": 12,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "rules": {
