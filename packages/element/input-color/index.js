@@ -1,4 +1,4 @@
-import Color from '../core/math/Color.js'
+import { styleToRGBA } from '../core/math/Color.js'
 
 export default class InputColorElement extends HTMLElement {
   static get observedAttributes() {
@@ -93,7 +93,7 @@ export default class InputColorElement extends HTMLElement {
     this._valueAsHexadecimal = hexadecimalValue
 
     if (typeof this._value === 'object' && typeof value === 'string') {
-      const RGBA = Color.styleToRGBA(this._valueAsHexadecimal)
+      const RGBA = styleToRGBA(this._valueAsHexadecimal)
       if (this._value.r !== undefined) {
         [this._value.r, this._value.g, this._value.b] = [RGBA[0], RGBA[1], RGBA[2]]
       } else if (this._value.x !== undefined) {
@@ -127,7 +127,7 @@ export default class InputColorElement extends HTMLElement {
     if (typeof value === 'string' && value.startsWith('#') && value.length === 7) {
       return value
     } else if (typeof value === 'string') {
-      RGBA = Color.styleToRGBA(value)
+      RGBA = styleToRGBA(value)
     } else if (value.r !== undefined) {
       RGBA = [value.r, value.g, value.b, 1]
     } else if (value.x !== undefined) {
