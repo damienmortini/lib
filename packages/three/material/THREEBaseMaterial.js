@@ -19,6 +19,9 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
           ${options.morphTargets ? '#include <morphtarget_pars_vertex>' : ''}
           ${options.skinning ? '#include <skinning_pars_vertex>' : ''}
           
+          in vec3 color;
+          
+          out vec3 vColor;
           out vec3 vPosition;
           out vec3 vNormal;
           out vec2 vUV;
@@ -48,6 +51,7 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
           vNormal = normalize(mat3(modelMatrix) * transformedNormal);
           vUV = uv;
           vFresnel = max(0., 1. - dot(-vViewDirection, vNormal));
+          vColor = color;
         `],
         ...vertexChunks,
       ],
@@ -59,6 +63,7 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
           in vec3 vWorldPosition;
           in vec3 vViewDirection;
           in float vFresnel;
+          in vec3 vColor;
         `],
         ...fragmentChunks,
       ],
