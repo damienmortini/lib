@@ -5,10 +5,26 @@ import { TextureLoader } from '../../../three/src/loaders/TextureLoader.js'
 import { BasisTextureLoader } from '../examples/loaders/BasisTextureLoader.js'
 import { DRACOLoader } from '../examples/loaders/DRACOLoader.js'
 import { GLTFLoader } from '../examples/loaders/GLTFLoader.js'
+import { KTX2Loader } from '../examples/loaders/KTX2Loader.js'
 import { Mesh } from '../../../three/src/objects/Mesh.js'
 import { Line } from '../../../three/src/objects/Line.js'
 import { LineSegments } from '../../../three/src/objects/LineSegments.js'
 import { Vector3 } from '../../../three/src/math/Vector3.js'
+
+let renderer
+const getEmptyRenderer = () => {
+  if (renderer) return renderer
+  if (window.WebGL2RenderingContext !== undefined && !/\bforcewebgl1\b/.test(window.location.search)) {
+    const canvas = document.createElement('canvas')
+    renderer = new WebGLRenderer({
+      canvas: canvas,
+      context: canvas.getContext('webgl2'),
+    })
+  } else {
+    renderer = new WebGLRenderer()
+  }
+  return renderer
+}
 
 function computeSceneGeometry(data, scale, offset) {
   const hasOffset = offset.lengthSq() !== 0
@@ -30,6 +46,7 @@ function computeSceneGeometry(data, scale, offset) {
 let gltfLoader
 let dracoLoader
 let basisLoader
+let ktx2Loader
 
 let meshOptimizerInitialized = false
 
@@ -53,6 +70,9 @@ class THREELoader extends Loader {
         dracoLoader = new DRACOLoader(undefined)
         dracoLoader.setWorkerLimit(2)
         gltfLoader.setDRACOLoader(dracoLoader)
+        ktx2Loader = new KTX2Loader()
+        gltfLoader.setKTX2Loader(ktx2Loader)
+        ktx2Loader.detectSupport(getEmptyRenderer())
       }
 
       if (meshOptimizer && !meshOptimizerInitialized) {
@@ -67,6 +87,7 @@ class THREELoader extends Loader {
       }
 
       dracoLoader.setDecoderPath(`${this.baseURI}${this.dracoDecoderPath}`)
+      ktx2Loader.setTranscoderPath(`${this.baseURI}${this.basisTranscoderPath}`)
       gltfLoader.setPath(path)
 
       return new Promise((resolve) => {
@@ -79,17 +100,7 @@ class THREELoader extends Loader {
       if (!basisLoader) {
         basisLoader = new BasisTextureLoader(undefined)
         basisLoader.setWorkerLimit(2)
-        let renderer
-        if (window.WebGL2RenderingContext !== undefined && !/\bforcewebgl1\b/.test(window.location.search)) {
-          const canvas = document.createElement('canvas')
-          renderer = new WebGLRenderer({
-            canvas: canvas,
-            context: canvas.getContext('webgl2'),
-          })
-        } else {
-          renderer = new WebGLRenderer()
-        }
-        basisLoader.detectSupport(renderer)
+        basisLoader.detectSupport(getEmptyRenderer())
       }
       basisLoader.setTranscoderPath(`${this.baseURI}${this.basisTranscoderPath}`)
       return new Promise((resolve) => {
