@@ -4,6 +4,8 @@ const files = new Map([
   [require.resolve('three/examples/jsm/loaders/BasisTextureLoader.js'), './examples/loaders/BasisTextureLoader.js'],
   [require.resolve('three/examples/jsm/loaders/GLTFLoader.js'), './examples/loaders/GLTFLoader.js'],
   [require.resolve('three/examples/jsm/loaders/DRACOLoader.js'), './examples/loaders/DRACOLoader.js'],
+  [require.resolve('three/examples/jsm/loaders/KTX2Loader.js'), './examples/loaders/KTX2Loader.js'],
+  [require.resolve('three/examples/jsm/utils/WorkerPool.js'), './examples/utils/WorkerPool.js'],
   [require.resolve('three/examples/jsm/objects/Lensflare.js'), './examples/objects/Lensflare.js'],
   [require.resolve('three/examples/jsm/utils/BufferGeometryUtils.js'), './examples/utils/BufferGeometryUtils.js'],
 ])
