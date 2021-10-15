@@ -1,6 +1,6 @@
 import { Scene } from '../../../three/src/scenes/Scene.js'
 import { Mesh } from '../../../three/src/objects/Mesh.js'
-import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneBufferGeometry.js'
+import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneGeometry.js'
 import { WebGLRenderTarget } from '../../../three/src/renderers/WebGLRenderTarget.js'
 import { OrthographicCamera } from '../../../three/src/cameras/OrthographicCamera.js'
 
@@ -55,8 +55,8 @@ export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
     this._quad.material = value
   }
 
-  render() {
-    this.renderer.setRenderTarget(this)
+  render({ debug = false } = {}) {
+    if (!debug) this.renderer.setRenderTarget(this)
     this.renderer.render(this._scene, this._camera)
     this.renderer.setRenderTarget(null)
   }

@@ -29,6 +29,6 @@
     "@damienmortini/element-starter-gl": "^0.0.59",
     "@damienmortini/element-starter-three": "^0.0.74",
     "fs-extra": "^10.0.0",
-    "jsdoc-to-markdown": "^7.0.1"
+    "jsdoc-to-markdown": "^7.1.0"
   }
 }
