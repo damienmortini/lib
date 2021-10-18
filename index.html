@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lib</title>
 </head>
+
 <body>
-  <a href="node_modules/@damienmortini/element-elements-showcase">Elements</a>
+  <damdom-elementgallery>
+    <demo-lottieanimation></demo-lottieanimation>
+  </damdom-elementgallery>
+
+  <script type="module">
+    import "./node_modules/@damienmortini/damdom-elementgallery/index.js"
+    import "./node_modules/@damienmortini/demo-lottieanimation/index.js"
+
+    const elementGallery = document.querySelector('damdom-elementgallery')
+  </script>
 </body>
+
 </html>

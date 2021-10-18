@@ -12,7 +12,7 @@ import { dirname } from 'path'
 const directoryName = dirname(fileURLToPath(import.meta.url))
 
 export default class Server {
-  constructor({ path = '', watch = false, watchPath = '', watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
+  constructor({ path = '', watch = false, watchPath = '.', watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
     /**
      * Create HTTP2 Server
      */

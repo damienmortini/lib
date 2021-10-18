@@ -8,6 +8,8 @@
       "node_modules",
       "packages/element",
       "packages",
+      "damdom",
+      "demos",
     ],
   },
 }

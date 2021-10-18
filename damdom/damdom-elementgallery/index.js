@@ -1,4 +1,4 @@
-window.customElements.define('damo-starter-element', class extends HTMLElement {
+window.customElements.define('damdom-elementgallery', class extends HTMLElement {
   constructor() {
     super()
 
@@ -9,7 +9,7 @@ window.customElements.define('damo-starter-element', class extends HTMLElement {
           position: relative;
         }
       </style>
-      <h1>damo-starter-element</h1>
+      <slot></slot>
     `
   }
 })

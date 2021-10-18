@@ -1,4 +1,4 @@
-window.customElements.define('damo-starter-element', class extends HTMLElement {
+export class TemplateElement extends HTMLElement {
   constructor() {
     super()
 
@@ -9,7 +9,9 @@ window.customElements.define('damo-starter-element', class extends HTMLElement {
           position: relative;
         }
       </style>
-      <h1>damo-starter-element</h1>
+      <h1>template title</h1>
     `
   }
-})
+}
+
+window.customElements.define('template-element', TemplateElement)
