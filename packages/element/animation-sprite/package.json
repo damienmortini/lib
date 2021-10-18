@@ -21,6 +21,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-sprite",
   "dependencies": {
     "@damienmortini/core": "^0.2.112",
-    "@damienmortini/element-animation-ticker": "^0.0.111"
+    "@damienmortini/damdom-ticker": "^0.0.1"
   }
 }
