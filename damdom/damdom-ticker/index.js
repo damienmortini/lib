@@ -6,16 +6,16 @@ const PAUSED_BY_DOCUMENT_VISIBILITY = 4
 const PAUSED_BY_CONNECTION = 8
 
 /**
- * Element triggering requestAnimationFrame on its update method.
+ * Element triggering and managing a stable requestAnimationFrame loop.
  * @hideconstructor
  */
+
 class DamdomTicker extends HTMLElement {
+  #pauseFlagValue
+  #callback = () => console.log('DamdomTicker.callback needs to be set')
+
   constructor() {
     super()
-
-    this._updateBound = this.update.bind(this)
-
-    this._pauseFlag = 0
 
     const observer = new IntersectionObserver((entries) => {
       let isIntersecting = false
@@ -25,49 +25,49 @@ class DamdomTicker extends HTMLElement {
         }
       }
       if (isIntersecting) {
-        this._pauseFlag &= ~PAUSED_BY_INTERSECTION
+        this.#pauseFlag &= ~PAUSED_BY_INTERSECTION
       } else {
-        this._pauseFlag |= PAUSED_BY_INTERSECTION
+        this.#pauseFlag |= PAUSED_BY_INTERSECTION
       }
     })
     observer.observe(this)
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
+        this.#pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
       } else {
-        this._pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY
+        this.#pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY
       }
     })
   }
 
   connectedCallback() {
-    this._pauseFlag &= ~PAUSED_BY_CONNECTION
+    this.#pauseFlag &= ~PAUSED_BY_CONNECTION
     if (document.hidden) {
-      this._pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
+      this.#pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
     }
-    if (!(this._pauseFlag & PAUSED_BY_ACTION)) {
-      this.update()
+    if (!(this.#pauseFlag & PAUSED_BY_ACTION)) {
+      this.#callback()
     }
   }
 
   disconnectedCallback() {
-    this._pauseFlag |= PAUSED_BY_CONNECTION
+    this.#pauseFlag |= PAUSED_BY_CONNECTION
   }
 
-  get _pauseFlag() {
-    return this.__pauseFlag
+  get #pauseFlag() {
+    return this.#pauseFlagValue
   }
 
-  set _pauseFlag(value) {
-    if (this.__pauseFlag === value) {
+  set #pauseFlag(value) {
+    if (this.#pauseFlagValue === value) {
       return
     }
-    this.__pauseFlag = value
-    if (this.__pauseFlag) {
-      Ticker.delete(this._updateBound)
+    this.#pauseFlagValue = value
+    if (this.#pauseFlagValue) {
+      Ticker.delete(this.#callback)
     } else {
-      Ticker.add(this._updateBound)
+      Ticker.add(this.#callback)
     }
   }
 
@@ -75,14 +75,14 @@ class DamdomTicker extends HTMLElement {
    * Play element.
    */
   play() {
-    this._pauseFlag &= ~PAUSED_BY_ACTION
+    this.#pauseFlag &= ~PAUSED_BY_ACTION
   }
 
   /**
    * Pause element.
    */
   pause() {
-    this._pauseFlag |= PAUSED_BY_ACTION
+    this.#pauseFlag |= PAUSED_BY_ACTION
   }
 
   /**
@@ -91,13 +91,14 @@ class DamdomTicker extends HTMLElement {
    * @readonly
    */
   get paused() {
-    return !!this._pauseFlag
+    return !!this.#pauseFlag
   }
 
-  /**
-   * Update loop method
-   */
-  update() { }
+  set callback(value) {
+    Ticker.delete(this.#callback)
+    this.#callback = value
+    if (!this.#pauseFlagValue) Ticker.add(this.#callback)
+  }
 }
 
 export default DamdomTicker
