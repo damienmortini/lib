@@ -9,7 +9,7 @@ const PAUSED_BY_CONNECTION = 8
  * Element triggering requestAnimationFrame on its update method.
  * @hideconstructor
  */
-class AnimationTickerElement extends HTMLElement {
+class DamdomTicker extends HTMLElement {
   constructor() {
     super()
 
@@ -100,4 +100,4 @@ class AnimationTickerElement extends HTMLElement {
   update() { }
 }
 
-export default AnimationTickerElement
+export default DamdomTicker
