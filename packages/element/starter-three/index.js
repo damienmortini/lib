@@ -4,12 +4,6 @@ import { WebGLRenderer, WebGL1Renderer } from '../../three/src/Three.js'
 
 import Scene from './Scene.js'
 
-/**
- * Entry point element
- * @hideconstructor
- * @example
- * <damo-starter-three></damo-starter-three>
- */
 window.customElements.define('damo-starter-three', class extends AnimationTickerElement {
   constructor() {
     super()

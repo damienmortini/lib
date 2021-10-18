@@ -6,13 +6,15 @@
     "bump": "lerna version patch",
     "fix": "eslint packages --fix",
     "rewritepackagefiles": "node rewritepackagefiles.js",
-    "start": "server --watchpath=packages",
+    "start": "server --watchignore=node_modules",
     "test": "eslint packages",
     "update": "yarn",
     "upgrade": "yarn && yarn upgrade-interactive --latest",
     "version": "lerna version"
   },
   "workspaces": [
+    "damdom/*",
+    "demos/*",
     "packages/*",
     "packages/element/*"
   ],

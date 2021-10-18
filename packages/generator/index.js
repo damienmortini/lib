@@ -12,7 +12,7 @@ import { dirname } from 'path';
 
   const generatorName = process.argv[2]
 
-  const jsDocData = jsdoc2md.getTemplateDataSync({ files: `${__dirname}/generators/${generatorName}.js` })
+  const jsDocData = jsdoc2md.getTemplateDataSync({ files: `${__dirname}/generators/${generatorName}/index.js` })
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -40,7 +40,7 @@ import { dirname } from 'path';
 
   rl.close()
 
-  import(`./generators/${generatorName}.js`).then((value) => {
+  import(`./generators/${generatorName}/index.js`).then((value) => {
     value.default(options)
   })
 })()

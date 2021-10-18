@@ -44,7 +44,7 @@ export default new Map([
           touch-action: none;
         }
       </style>
-      <damo-starter-three></damo-starter-three>  
+      <damo-starter-three></damo-starter-three>
     `,
   }],
   ['damo-viewport', {

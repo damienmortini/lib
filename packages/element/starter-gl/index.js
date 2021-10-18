@@ -2,12 +2,6 @@ import AnimationTickerElement from '../../@damienmortini/element-animation-ticke
 
 import View from './View.js'
 
-/**
- * Entry point element
- * @hideconstructor
- * @example
- * <damo-starter-gl></damo-starter-gl>
- */
 window.customElements.define('damo-starter-gl', class extends AnimationTickerElement {
   constructor() {
     super()
