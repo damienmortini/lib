@@ -5,7 +5,7 @@
   "dependencies": {
     "@damienmortini/element-animation-lottie": "^0.0.114",
     "@damienmortini/element-animation-sprite": "^0.0.97",
-    "@damienmortini/element-animation-ticker": "^0.0.111",
+    "@damienmortini/damdom-ticker": "^0.0.1",
     "@damienmortini/element-animation-view": "^0.0.91",
     "@damienmortini/element-glslcanvas": "^0.0.29",
     "@damienmortini/element-input-button": "^0.0.19",
