@@ -26,7 +26,6 @@
     "@damienmortini/damdom-colorpicker": "^0.0.1",
     "@damienmortini/damdom-select": "^0.0.1",
     "@damienmortini/damdom-slider": "^0.0.1",
-    "@damienmortini/damdom-textfield": "^0.0.1",
-    "@damienmortini/gui-server": "^0.0.4"
+    "@damienmortini/damdom-textfield": "^0.0.1"
   }
 }
