@@ -1,4 +1,4 @@
-# `<damo-animation-ticker>`
+# `<damdom-animation-ticker>`
 
 ## Installation
 
@@ -10,7 +10,7 @@ npm install @damienmortini/element-animation-ticker
 ```html
 <script src="node_modules/@damienmortini/element-animation-ticker/index.js"></script>
 
-<damo-animation-ticker></damo-animation-ticker>
+<damdom-animation-ticker></damdom-animation-ticker>
 ```
 
 ## Usage with custom name

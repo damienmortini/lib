@@ -1,0 +1,32 @@
+{
+  "name": "@damienmortini/damdom-gui",
+  "version": "0.0.1",
+  "description": "GUI element",
+  "keywords": [
+    "javascript",
+    "gui",
+    "custom elements",
+    "web components"
+  ],
+  "author": "Damien Mortini",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gui",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/damdom/damdom-gui"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "dependencies": {
+    "@damienmortini/gui-server": "^0.0.4",
+    "@damienmortini/damdom-checkbox": "^0.0.1",
+    "@damienmortini/damdom-colorpicker": "^0.0.1",
+    "@damienmortini/damdom-slider": "^0.0.1",
+    "@damienmortini/damdom-select": "^0.0.1",
+    "@damienmortini/damdom-textfield": "^0.0.1"
+  }
+}

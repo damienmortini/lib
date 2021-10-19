@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>damdom-selectinput</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+      gap: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <damdom-selectinput></damdom-selectinput>
+  <damdom-selectinput value="1" options="[.5, 1, 2.5, 3]"></damdom-selectinput>
+  <damdom-selectinput options="[{a: 1}, {b: 2}, {c: 3}]"></damdom-selectinput>
+  <damdom-selectinput value="World" options="['Hello', 'World', '!']" disabled></damdom-selectinput>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`damdom-selectinput`, Element);
+
+    const element = document.querySelector('damdom-selectinput');
+    element.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+  </script>
+</body>
+
+</html>

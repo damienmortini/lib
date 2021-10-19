@@ -28,6 +28,38 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.10.1.tgz#2e142c27ca58aa2c7b119d09269b702c8bbad28c"
   integrity sha512-AUTksaz3FqugBkbTZ1i+lDLG5qy8hIzCaAxEtttU6C0BtZZU9pkNZtWSVAht4EW9kl46YBiyTGMp9xTTGqViNg==
 
+"@damienmortini/element-input-button@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@damienmortini/element-input-button/-/element-input-button-0.0.19.tgz#2ba806e9f1b6ab7f1dddc6fb044c0f1bc9d80c62"
+  integrity sha512-5JUkgt5saHP8aDd85qLD7u+tUHns9Vf4bZ9Wt4tQpKa/IC3aYPR3fMgCLSS7jOvtqktk0yjaXjAV008to3bR6A==
+
+"@damienmortini/element-input-checkbox@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@damienmortini/element-input-checkbox/-/element-input-checkbox-0.0.19.tgz#f3e2615f65973da01d7dbe68e966535931b2c2fd"
+  integrity sha512-FNN1JgJAGzRY+GGhKyoFlfXSv1EI7MWEAoBStd5GVJsTZgroTC1xMLaf4mjGg5dYYmpWV7rZt7apJgXZumTNgQ==
+
+"@damienmortini/element-input-color@^0.0.106":
+  version "0.0.106"
+  resolved "https://registry.yarnpkg.com/@damienmortini/element-input-color/-/element-input-color-0.0.106.tgz#527844552b68429df35fcc303f41d453f4c7ecea"
+  integrity sha512-90E6gSHfrovGizqUeovTEI2bIarR8Tyo//qXRS/UrIjcmE1u/Qm37Lk83dTdc3sP6Sois/Vt5Py6w1n4aWzLKg==
+  dependencies:
+    "@damienmortini/core" "^0.2.112"
+
+"@damienmortini/element-input-range@^0.0.22":
+  version "0.0.22"
+  resolved "https://registry.yarnpkg.com/@damienmortini/element-input-range/-/element-input-range-0.0.22.tgz#be50ef8ed0d57d1a26d31ecddb88cfa15243f5ab"
+  integrity sha512-xzTQRxHWYrhNrme0++9P/dBVWT3AgKT6fKQ1UYxu7wFbYYJRmLNr7IwCxptyC/bmlElwnJEARHViVF4tVAU9lg==
+
+"@damienmortini/element-input-select@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@damienmortini/element-input-select/-/element-input-select-0.0.20.tgz#a44d90e1df809a94cd46df82b5a226c9ee0a1750"
+  integrity sha512-glnNHoIxr9bBR47I5+n137qqiDukp8AZJLcehWZJ7ey0lLfxDtPdsQklzrHPiBq5UNirtHeVzV2mUxmsLF21qA==
+
+"@damienmortini/element-input-text@^0.0.16":
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/@damienmortini/element-input-text/-/element-input-text-0.0.16.tgz#0a6972726179a2047ca5d1c97e66eb66119ae959"
+  integrity sha512-FCSuMESM3BzRXta6Ntk0CCQdqpKAqBdAkX89IEb/oHbHEsyUVTh2aDVlpYvHW0ejgWl+dR8mwCy3PMknpz2Cag==
+
 "@eslint/eslintrc@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.0.2.tgz#6044884f7f93c4ecc2d1694c7486cce91ef8f746"

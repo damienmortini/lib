@@ -22,8 +22,8 @@ export default function ({ elementScope, elementName, scope = 'damienmortini', p
   }, null, 2))
   let indexFileContent = fs.readFileSync(`${__dirname}/template.js`, { encoding: 'utf-8' })
   indexFileContent = indexFileContent.replaceAll('template-element', fullElementName)
-  const elementClass = `${elementScope} ${elementName}`.replace(/(^| )(.)/g, (result) => result.replace(' ', '').toUpperCase())
   indexFileContent = indexFileContent.replaceAll('template title', elementName)
+  const elementClass = `${elementScope} ${elementName}`.replace(/(^| )(.)/g, (result) => result.replace(' ', '').toUpperCase()) + 'Element'
   indexFileContent = indexFileContent.replaceAll('TemplateElement', elementClass)
   fs.writeFileSync(`${fullPath}/index.js`, indexFileContent)
 }
