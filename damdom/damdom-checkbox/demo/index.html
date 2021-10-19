@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>damdom-checkbox</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <damdom-checkbox></damdom-checkbox>
+  <damdom-checkbox value="true"></damdom-checkbox>
+  <damdom-checkbox value="true" disabled></damdom-checkbox>
+
+  <script type="module">
+    import Element from '../index.js';
+    window.customElements.define(`damdom-checkbox`, Element);
+
+    const element = document.querySelector('damdom-checkbox');
+    element.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+  </script>
+</body>
+
+</html>
