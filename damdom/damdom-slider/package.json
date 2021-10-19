@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-slider",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "<damdom-slider> custom element.",
   "publishConfig": {
     "access": "public"
