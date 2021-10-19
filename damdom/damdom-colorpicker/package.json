@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-colorpicker",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "<damdom-colorpicker> custom element.",
   "publishConfig": {
     "access": "public"
