@@ -1,0 +1,15 @@
+{
+  "name": "@damienmortini/damdom-gltfoptimizer",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "install": "npm run compilegltftransform",
+    "compilegltftransform": "esbuild ../../node_modules/@gltf-transform/core/dist/core.modern.js ../../node_modules/@gltf-transform/functions/dist/functions.modern.js --bundle --format=esm --outdir=@gltf-transform"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.13.8"
+  }
+}
