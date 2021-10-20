@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLTF Optimizer</title>
+</head>
+
+<body>
+  <input type="file" accept=".gltf, .glb">
+  <script type="module" async>
+    const input = document.querySelector('input')
+    // input.addEventListener('change', () => {
+    //   const file = input.files[0]
+    //   const reader = new FileReader()
+    //   reader.addEventListener('load', () => {
+    //     const gltf = JSON.parse(reader.result)
+    //     const optimizer = new GLTFOptimizer(gltf)
+    //     optimizer.optimize()
+    //     const output = JSON.stringify(gltf, null, 2)
+    //     const blob = new Blob([output], { type: 'application/json' })
+    //     const url = URL.createObjectURL(blob)
+    //     const a = document.createElement('a')
+    //     a.href = url
+    //     a.download = 'optimized.gltf'
+    //     a.click()
+    //   })
+    //   reader.readAsText(file)
+    // })
+
+    const gltf = await fetch('cube.gltf')
+      .then((response) => response.json())
+
+    const response = await fetch(location.origin, {
+      method: 'post',
+      body: JSON.stringify(gltf),
+      headers: { 'Content-Type': 'model/gltf-binary' },
+    })
+    console.log(response)
+    const data = await response.arrayBuffer()
+
+    const blob = new Blob([data], { type: 'model/gltf-binary' })
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    const fileName = 'cube.glb'
+    link.download = fileName
+    link.click()
+    console.log(data)
+
+  </script>
+</body>
+
+</html>

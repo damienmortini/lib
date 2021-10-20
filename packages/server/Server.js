@@ -79,6 +79,8 @@ export default class Server {
     })
 
     this.http2SecureServer.on('stream', (stream, headers) => {
+      if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) return
+
       const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY]
       const requestScheme = headers[http2.constants.HTTP2_HEADER_SCHEME]
       const requestPath = headers[http2.constants.HTTP2_HEADER_PATH]
