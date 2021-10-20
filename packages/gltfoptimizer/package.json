@@ -1,0 +1,13 @@
+{
+  "name": "@damienmortini/gltfoptimizer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node ./index.js"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^1.0.0",
+    "@gltf-transform/functions": "^1.0.0"
+  }
+}
