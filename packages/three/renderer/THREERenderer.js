@@ -1,13 +1,15 @@
-import { WebGLRenderer } from '../../../three/src/renderers/WebGLRenderer.js'
-import { WebGLRenderTarget } from '../../../three/src/renderers/WebGLRenderTarget.js'
-import { DepthTexture } from '../../../three/src/textures/DepthTexture.js'
-import { RGBAFormat } from '../../../three/src/constants.js'
-import { LinearFilter } from '../../../three/src/constants.js'
-import { UnsignedShortType } from '../../../three/src/constants.js'
-import { Scene } from '../../../three/src/scenes/Scene.js'
-import { OrthographicCamera } from '../../../three/src/cameras/OrthographicCamera.js'
-import { Mesh } from '../../../three/src/objects/Mesh.js'
-import { PlaneBufferGeometry } from '../../../three/src/geometries/PlaneBufferGeometry.js'
+import {
+  WebGLRenderer,
+  WebGLRenderTarget,
+  DepthTexture,
+  RGBAFormat,
+  LinearFilter,
+  UnsignedShortType,
+  Scene,
+  OrthographicCamera,
+  Mesh,
+  PlaneGeometry,
+} from '../../../three/src/Three.js'
 
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {
@@ -41,7 +43,7 @@ export default class THREERenderer extends WebGLRenderer {
 
     this.scene = new Scene()
     this.scene.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
-    this._quad = new Mesh(new PlaneBufferGeometry(2, 2))
+    this._quad = new Mesh(new PlaneGeometry(2, 2))
     this._quad.frustumCulled = false
     this.scene.add(this._quad)
 

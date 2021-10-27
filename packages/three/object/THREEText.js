@@ -1,8 +1,9 @@
-import { Object3D } from '../../../three/src/core/Object3D.js'
-import { Mesh } from '../../../three/src/objects/Mesh.js'
-import { PlaneGeometry } from '../../../three/src/geometries/PlaneGeometry.js'
-import { Texture } from '../../../three/src/textures/Texture.js'
-import { LinearFilter } from '../../../three/src/constants.js'
+import {
+  Object3D,
+  Mesh,
+  PlaneGeometry,
+  Texture,
+} from '../../../three/src/Three.js'
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js'
 

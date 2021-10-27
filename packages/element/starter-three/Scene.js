@@ -1,8 +1,9 @@
-import { Scene as THREEScene } from '../../three/src/scenes/Scene.js'
-import { PerspectiveCamera } from '../../three/src/cameras/PerspectiveCamera.js'
-import { Mesh } from '../../three/src/objects/Mesh.js'
-import { BoxGeometry } from '../../three/src/geometries/BoxGeometry.js'
-import { MeshNormalMaterial } from '../../three/src/materials/MeshNormalMaterial.js'
+import {
+  Scene as THREEScene, PerspectiveCamera,
+  Mesh,
+  BoxGeometry,
+  MeshNormalMaterial,
+} from '../../three/src/Three.js'
 
 import TrackballController from '../../@damienmortini/core/3d/controller/TrackballController.js'
 
