@@ -1,6 +1,8 @@
-import { ShaderMaterial } from '../../../three/src/materials/ShaderMaterial.js'
-import { ShaderLib } from '../../../three/src/renderers/shaders/ShaderLib.js'
-import { UniformsUtils } from '../../../three/src/renderers/shaders/UniformsUtils.js'
+import {
+  ShaderMaterial,
+  ShaderLib,
+  UniformsUtils,
+} from '../../../three/src/Three.js'
 import DEFAULT_VERTEX from '../../../three/src/renderers/shaders/ShaderChunk/default_vertex.glsl.js'
 import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js'
 

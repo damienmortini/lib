@@ -1,7 +1,9 @@
-import { BackSide } from '../../../three/src/constants.js'
-import { Mesh } from '../../../three/src/objects/Mesh.js'
-import { Vector3 } from '../../../three/src/math/Vector3.js'
-import { IcosahedronBufferGeometry } from '../../../three/src/geometries/IcosahedronGeometry.js'
+import {
+  BackSide,
+  Mesh,
+  Vector3,
+  IcosahedronBufferGeometry,
+} from '../../../three/src/Three.js'
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js'
 import SkyShader from '../../core/shader/SkyShader.js'
 import GradientNoiseShader from '../../core/shader/noise/GradientNoiseShader.js'

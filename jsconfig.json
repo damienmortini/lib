@@ -1,10 +1,12 @@
 {
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
     "checkJs": true,
     "baseUrl": "node_modules/",
     "rootDirs": [
+      ".",
       "node_modules",
       "packages/element",
       "packages",
