@@ -202,8 +202,6 @@ export default class GLRayMarchingObject extends GLObject {
         }),
       }),
     })
-
-    console.log(this._debugSphere)
   }
 
   draw({ uniforms = {}, ...options } = {}) {
