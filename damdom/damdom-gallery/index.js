@@ -5,18 +5,28 @@ class DamdomGalleryElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          display: grid;
+          --gap: 10px;
+          display: block;
           position: relative;
-          grid-gap: 10px;
+          width: 300px;
+          height: 300px;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           grid-auto-rows: minmax(300px, 1fr);
           grid-auto-flow: row dense;
+          font-family: sans-serif;
+        }
+        
+        #grid {
+          width: 100%;
+          height: 100%;
+          display: grid;
+          overflow: auto;
+          box-sizing: border-box;
+          padding: var(--gap);
+          gap: var(--gap);
+          grid: inherit;
           justify-items: center;
           align-items: center;
-        }
-
-        #grid {
-          display: contents;
         }
 
         #highlight {
@@ -29,7 +39,7 @@ class DamdomGalleryElement extends HTMLElement {
         }
 
         #highlight.hide, #grid.hide {
-          display: none;
+          visibility: hidden;
         }
 
         .elementcontainer {
@@ -42,22 +52,44 @@ class DamdomGalleryElement extends HTMLElement {
           align-items: center;
         }
 
-        .highlightbutton {
+        .highlightbutton, #backbutton {
           position: absolute;
-          right: 20px;
-          bottom: 20px;
-          width: 20px;
-          height: 20px;
-          background-image: url(node_modules/@damienmortini/damdom-gallery/icon-fullscreen.svg);
-          mix-blend-mode: exclusion;
+          right: 15px;
+          bottom: 15px;
+          width: 30px;
+          height: 30px;
+          border-radius: 5px;
+          box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 10%);
+          background-color: white;
+          background-size: 55%;
+          background-repeat: no-repeat;
+          background-position: center;
           cursor: pointer;
+          will-change: transform;
+          transition: transform .4s cubic-bezier(0.6, 2, 0.5, 1);
+        }
+
+        .highlightbutton:hover, #backbutton:hover {
+          transform: scale(1.1);
+        }
+        
+        .highlightbutton {
+          background-image: url(node_modules/@damienmortini/damdom-gallery/icon-expand.svg);
+        }
+        
+        #backbutton {
+          background-image: url(node_modules/@damienmortini/damdom-gallery/icon-compress.svg);
         }
       </style>
-      <slot id="highlight" name="highlight" class="hide"></slot>
+      <div id="highlight" class="hide">
+        <slot name="highlight"></slot>
+        <div id="backbutton"></div>
+      </div>
       <div id="grid"></div>
     `
 
     const highlight = this.shadowRoot.querySelector('#highlight')
+    const backButton = this.shadowRoot.querySelector('#backbutton')
     const grid = this.shadowRoot.querySelector('#grid')
 
     let currentId = null
@@ -82,8 +114,7 @@ class DamdomGalleryElement extends HTMLElement {
       currentId = null
     }
 
-    // TMP
-    highlight.addEventListener('click', leaveHighlight)
+    backButton.addEventListener('click', leaveHighlight)
 
     let slotUID = 0
     const nodeContainerMap = new Map()
