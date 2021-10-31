@@ -39,7 +39,7 @@ class DamdomGalleryElement extends HTMLElement {
         }
 
         #highlight.hide, #grid.hide {
-          visibility: hidden;
+          display: none;
         }
 
         .elementcontainer {
