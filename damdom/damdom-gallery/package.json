@@ -1,5 +1,22 @@
 {
   "name": "@damienmortini/damdom-gallery",
-  "private": true,
-  "version": "0.0.2"
+  "version": "0.0.2",
+  "description": "<damdom-gallery> custom element.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "damdom/damdom-gallery"
+  },
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-gallery"
 }

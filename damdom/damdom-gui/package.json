@@ -9,7 +9,7 @@
     "web components"
   ],
   "author": "Damien Mortini",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gui",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-gui",
   "license": "ISC",
   "publishConfig": {
     "access": "public"
@@ -18,7 +18,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/damdom/damdom-gui"
+    "directory": "damdom/damdom-gui"
   },
   "bugs": "https://github.com/damienmortini/lib/issues",
   "dependencies": {
