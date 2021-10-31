@@ -11,14 +11,14 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/damdom/damdom-colorpicker"
+    "directory": "damdom/damdom-colorpicker"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-colorpicker",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-colorpicker",
   "dependencies": {
     "@damienmortini/core": "^0.2.113"
   }
