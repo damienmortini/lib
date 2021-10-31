@@ -92,17 +92,21 @@ class DamdomGalleryElement extends HTMLElement {
     const backButton = this.shadowRoot.querySelector('#backbutton')
     const grid = this.shadowRoot.querySelector('#grid')
 
-    let currentId = null
+    let currentId = sessionStorage.getItem('damdom-gallery:currentid')
 
-    const enterHighlight = (event) => {
-      if (event.target.classList.contains('highlightbutton')) {
-        currentId = event.target.parentElement.id
-        const element = this.querySelector(`[slot=${currentId}]`)
-        element.slot = 'highlight'
-        element.toggleAttribute('highlighted', true)
-        highlight.classList.remove('hide')
-        grid.classList.add('hide')
-      }
+    const highlightButtonClick = (event) => {
+      enterHighlight(event.target.parentElement.id)
+    }
+
+    const enterHighlight = (id) => {
+      const element = this.querySelector(`[slot=${id}]`)
+      if (!element) return
+      currentId = id
+      sessionStorage.setItem('damdom-gallery:currentid', currentId)
+      element.slot = 'highlight'
+      element.toggleAttribute('highlighted', true)
+      highlight.classList.remove('hide')
+      grid.classList.add('hide')
     }
 
     const leaveHighlight = (event) => {
@@ -112,6 +116,7 @@ class DamdomGalleryElement extends HTMLElement {
       element.slot = currentId
       element.toggleAttribute('highlighted', false)
       currentId = null
+      sessionStorage.removeItem('damdom-gallery:currentid')
     }
 
     backButton.addEventListener('click', leaveHighlight)
@@ -129,7 +134,7 @@ class DamdomGalleryElement extends HTMLElement {
             <slot name="${id}"></slot>
             <div class="highlightbutton"></div>
           `
-          container.addEventListener('click', enterHighlight)
+          container.querySelector('.highlightbutton').addEventListener('click', highlightButtonClick)
           node.slot = id
           grid.appendChild(container)
           nodeContainerMap.set(node, container)
@@ -138,7 +143,7 @@ class DamdomGalleryElement extends HTMLElement {
         for (const node of mutation.removedNodes) {
           node.slot = ''
           const container = nodeContainerMap.get(node)
-          container.removeEventListener('click', enterHighlight)
+          container.querySelector('.highlightbutton').removeEventListener('click', highlightButtonClick)
           container.remove()
           nodeContainerMap.delete(node)
         }
@@ -150,6 +155,8 @@ class DamdomGalleryElement extends HTMLElement {
     }])
     const observer = new MutationObserver(mutationCallback)
     observer.observe(this, { childList: true })
+
+    enterHighlight(currentId)
   }
 }
 
