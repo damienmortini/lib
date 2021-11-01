@@ -1,13 +1,13 @@
 {
   "name": "@damienmortini/element-starter-three",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "main": "index.js",
   "author": "Damien Mortini",
   "description": "<element-starter-three> custom element.",
   "dependencies": {
     "@damienmortini/core": "^0.2.114",
     "@damienmortini/damdom-ticker": "^0.0.4",
-    "@damienmortini/three": "^0.1.144",
+    "@damienmortini/three": "^0.1.145",
     "three": "^0.134.0"
   },
   "publishConfig": {
