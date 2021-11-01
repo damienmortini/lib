@@ -80,7 +80,7 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.2.tgz#30aa825f11d438671d585bd44e7fd564535fc210"
   integrity sha512-82cpyJyKRoQoRi+14ibCeGPu0CwypgtBAdBhq1WfvagpCZNKqwXbKwXllYSMG91DhmG4jt9gN8eP6lGOtozuaw==
 
-"@gltf-transform/core@^1.0.0", "@gltf-transform/core@^1.0.1":
+"@gltf-transform/core@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@gltf-transform/core/-/core-1.0.1.tgz#d4b7d5f813799ff369484ee544166b14ba5860b1"
   integrity sha512-tUBGY24wntM4PxZhRt/bj9eTaDWS5BSFPO3V93986jAAhjdjcMd2N53Ewe1WArYxL1+RPSqH5gGo6ccw4gY/CQ==
@@ -95,7 +95,7 @@
     "@gltf-transform/core" "^1.0.1"
     ktx-parse "^0.2.1"
 
-"@gltf-transform/functions@^1.0.0":
+"@gltf-transform/functions@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@gltf-transform/functions/-/functions-1.0.1.tgz#84ab0833cfbdf144ea5671551bd94e2487530512"
   integrity sha512-BOJ2sJMm6XScFt64dF9swBHyJjEeunfDELihnso1noCvyDbMOVN+GlxNwg0kMkBmsskIrnioWGqi6JpjsVa/IA==
@@ -2099,7 +2099,7 @@ esbuild-windows-arm64@0.13.12:
   resolved "https://registry.yarnpkg.com/esbuild-windows-arm64/-/esbuild-windows-arm64-0.13.12.tgz#782c5a8bd6d717ea55aaafe648f9926ca36a4a88"
   integrity sha512-2tTv/BpYRIvuwHpp2M960nG7uvL+d78LFW/ikPItO+2GfK51CswIKSetSpDii+cjz8e9iSPgs+BU4o8nWICBwQ==
 
-esbuild@^0.13.8:
+esbuild@^0.13.12:
   version "0.13.12"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.13.12.tgz#9cac641594bf03cf34145258c093d743ebbde7ca"
   integrity sha512-vTKKUt+yoz61U/BbrnmlG9XIjwpdIxmHB8DlPR0AAW6OdS+nBQBci6LUHU2q9WbBobMEIQxxDpKbkmOGYvxsow==

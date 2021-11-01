@@ -1,5 +1,5 @@
 import { Object3D, BufferGeometry, BufferAttribute, AnimationMixer, DataTexture, RGBAFormat, FloatType, RGBFormat, Points, Color, Matrix4 } from '../../../three/src/Three.js'
-import TransformShader from '../../core/shader/TransformShader.js'
+import { quaternionFromMatrix } from '../../core/shader/TransformShader.js'
 import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js'
 import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js'
 
@@ -146,7 +146,7 @@ export default class THREEMotionVectorObject extends Object3D {
           uniform highp sampler2D boneTexture;
           uniform int boneTextureSize;
 
-          ${TransformShader.quaternionFromMatrix()}
+          ${quaternionFromMatrix()}
 
           mat4 getBoneMatrix( const in float i ) {
             float j = i * 4.0;
