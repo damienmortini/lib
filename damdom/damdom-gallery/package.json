@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-gallery",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "<damdom-gallery> custom element.",
   "publishConfig": {
     "access": "public"
