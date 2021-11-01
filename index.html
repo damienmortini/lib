@@ -6,18 +6,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lib</title>
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    damdom-gallery {
+      width: 100%;
+      height: 100%;
+    }
+
+    damdom-gallery::part(grid) {
+      padding: 25px;
+      gap: 25px;
+    }
+
+    damdom-gallery::part(item) {
+      border-radius: 10px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+  </style>
 </head>
 
 <body>
   <damdom-gallery>
     <demo-gui></demo-gui>
     <demo-lottieanimation></demo-lottieanimation>
+    <damdom-checkbox></damdom-checkbox>
+    <damdom-colorpicker></damdom-colorpicker>
+    <damdom-select></damdom-select>
+    <damdom-slider></damdom-slider>
+    <damdom-textfield></damdom-textfield>
   </damdom-gallery>
 
   <script type="module">
     import "./node_modules/@damienmortini/damdom-gallery/index.js"
-    import "./node_modules/@damienmortini/demo-lottieanimation/index.js"
-    import "./node_modules/@damienmortini/demo-gui/index.js"
+
+    const gallery = document.querySelector('damdom-gallery')
+    gallery.highlightedIndex = sessionStorage.getItem('highlightedsketchindex')
+    gallery.addEventListener('highlightchange', () => {
+      sessionStorage.setItem('highlightedsketchindex', gallery.highlightedIndex)
+    })
+
+    const initializedElementSet = new Set()
+    const observer = new IntersectionObserver((entries) => {
+      let isIntersecting = false
+      for (const entry of entries) {
+        const tagName = entry.target.tagName.toLowerCase()
+        if (entry.isIntersecting && !initializedElementSet.has(tagName)) {
+          initializedElementSet.add(tagName)
+          import(`./node_modules/@damienmortini/${tagName}/index.js`)
+        }
+      }
+    })
+    for (const element of document.querySelectorAll('damdom-gallery > *')) {
+      observer.observe(element)
+    }
   </script>
 </body>
 
