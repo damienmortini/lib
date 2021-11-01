@@ -52,7 +52,7 @@ export default class THREEBaseMaterial extends THREEShaderMaterial {
           vPosition = transformedPosition;
           vNormal = normalize(mat3(modelMatrix) * transformedNormal);
           vUV = uv;
-          vFresnel = max(0., 1. - dot(-vViewDirection, vNormal));
+          vFresnel = 1. - abs(dot(-vViewDirection, vNormal));
           vColor = color;
         `],
         ...vertexChunks,

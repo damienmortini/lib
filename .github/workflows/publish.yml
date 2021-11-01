@@ -2,7 +2,6 @@ name: Publish
 on:
   push:
     branches: [main]
-
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
@@ -16,7 +15,6 @@ jobs:
       - run: yarn run lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
   publish-gpr:
     runs-on: ubuntu-latest
     steps:
