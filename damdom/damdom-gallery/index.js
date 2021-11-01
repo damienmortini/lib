@@ -9,14 +9,10 @@ class DamdomGalleryElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
-          --gap: 10px;
           display: block;
           position: relative;
           width: 300px;
           height: 300px;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          grid-auto-rows: minmax(300px, 1fr);
-          grid-auto-flow: row dense;
           font-family: sans-serif;
         }
         
@@ -24,22 +20,26 @@ class DamdomGalleryElement extends HTMLElement {
           width: 100%;
           height: 100%;
           display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          grid-auto-rows: minmax(300px, 1fr);
+          grid-auto-flow: row dense;
           overflow: auto;
           box-sizing: border-box;
-          padding: var(--gap);
-          gap: var(--gap);
-          grid: inherit;
+          padding: 10px;
+          gap: 10px;
           justify-items: center;
           align-items: center;
         }
 
         #highlight {
-          display: block;
+          display: grid;
           position: absolute;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
+          justify-items: center;
+          align-items: center;
         }
 
         #highlight.hide, #grid.hide {
@@ -89,7 +89,7 @@ class DamdomGalleryElement extends HTMLElement {
         <slot name="highlight"></slot>
         <div id="backbutton"></div>
       </div>
-      <div id="grid"></div>
+      <div id="grid" part="grid"></div>
     `
 
     this.#highlight = this.shadowRoot.querySelector('#highlight')
@@ -112,6 +112,7 @@ class DamdomGalleryElement extends HTMLElement {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
           const container = document.createElement('div')
+          container.part = 'item'
           container.classList.add('elementcontainer')
           container.id = slotUID
           container.innerHTML = `
