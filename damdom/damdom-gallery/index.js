@@ -1,4 +1,8 @@
 class DamdomGalleryElement extends HTMLElement {
+  #highlightedIndex = -1
+  #highlight
+  #grid
+
   constructor() {
     super()
 
@@ -88,38 +92,19 @@ class DamdomGalleryElement extends HTMLElement {
       <div id="grid"></div>
     `
 
-    const highlight = this.shadowRoot.querySelector('#highlight')
+    this.#highlight = this.shadowRoot.querySelector('#highlight')
+    this.#grid = this.shadowRoot.querySelector('#grid')
     const backButton = this.shadowRoot.querySelector('#backbutton')
-    const grid = this.shadowRoot.querySelector('#grid')
-
-    let currentId = sessionStorage.getItem('damdom-gallery:currentid')
 
     const highlightButtonClick = (event) => {
-      enterHighlight(event.target.parentElement.id)
+      this.highlightedIndex = Number(event.target.parentElement.id)
     }
 
-    const enterHighlight = (id) => {
-      const element = this.querySelector(`[slot=${id}]`)
-      if (!element) return
-      currentId = id
-      sessionStorage.setItem('damdom-gallery:currentid', currentId)
-      element.slot = 'highlight'
-      element.toggleAttribute('highlighted', true)
-      highlight.classList.remove('hide')
-      grid.classList.add('hide')
+    const backButtonClick = () => {
+      this.highlightedIndex = -1
     }
 
-    const leaveHighlight = (event) => {
-      highlight.classList.add('hide')
-      grid.classList.remove('hide')
-      const element = this.querySelector(`[slot=highlight]`)
-      element.slot = currentId
-      element.toggleAttribute('highlighted', false)
-      currentId = null
-      sessionStorage.removeItem('damdom-gallery:currentid')
-    }
-
-    backButton.addEventListener('click', leaveHighlight)
+    backButton.addEventListener('click', backButtonClick)
 
     let slotUID = 0
     const nodeContainerMap = new Map()
@@ -128,15 +113,14 @@ class DamdomGalleryElement extends HTMLElement {
         for (const node of mutation.addedNodes) {
           const container = document.createElement('div')
           container.classList.add('elementcontainer')
-          const id = `damdom-gallery-element${slotUID}`
-          container.id = id
+          container.id = slotUID
           container.innerHTML = `
-            <slot name="${id}"></slot>
+            <slot name="element${slotUID}"></slot>
             <div class="highlightbutton"></div>
           `
           container.querySelector('.highlightbutton').addEventListener('click', highlightButtonClick)
-          node.slot = id
-          grid.appendChild(container)
+          node.slot = `element${slotUID}`
+          this.#grid.appendChild(container)
           nodeContainerMap.set(node, container)
           slotUID++
         }
@@ -155,8 +139,31 @@ class DamdomGalleryElement extends HTMLElement {
     }])
     const observer = new MutationObserver(mutationCallback)
     observer.observe(this, { childList: true })
+  }
 
-    enterHighlight(currentId)
+  get highlightedIndex() {
+    return this.#highlightedIndex
+  }
+
+  set highlightedIndex(value) {
+    const element = this.querySelector(`[slot=element${value}]`)
+    if (!element) value = -1
+    if (value === this.#highlightedIndex) return
+    if (value !== -1) {
+      element.slot = 'highlight'
+      element.toggleAttribute('highlighted', true)
+      this.#highlight.classList.remove('hide')
+      this.#grid.classList.add('hide')
+    } else {
+      this.#highlight.classList.add('hide')
+      this.#grid.classList.remove('hide')
+      const highlightedElement = this.querySelector(`[slot=highlight]`)
+      if (!highlightedElement) return
+      highlightedElement.slot = `element${this.#highlightedIndex}`
+      highlightedElement.toggleAttribute('highlighted', false)
+    }
+    this.#highlightedIndex = value
+    this.dispatchEvent(new Event('highlightchange'))
   }
 }
 
