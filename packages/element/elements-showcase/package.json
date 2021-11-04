@@ -1,21 +1,21 @@
 {
   "name": "@damienmortini/element-elements-showcase",
   "private": true,
-  "version": "0.0.140",
+  "version": "0.0.141",
   "dependencies": {
-    "@damienmortini/damdom-ticker": "^0.0.5",
-    "@damienmortini/element-animation-lottie": "^0.0.118",
-    "@damienmortini/element-animation-sprite": "^0.0.101",
-    "@damienmortini/element-animation-view": "^0.0.94",
-    "@damienmortini/element-glslcanvas": "^0.0.32",
+    "@damienmortini/damdom-ticker": "^0.0.6",
+    "@damienmortini/element-animation-lottie": "^0.0.119",
+    "@damienmortini/element-animation-sprite": "^0.0.102",
+    "@damienmortini/element-animation-view": "^0.0.95",
+    "@damienmortini/element-glslcanvas": "^0.0.33",
     "@damienmortini/element-input-button": "^0.0.19",
     "@damienmortini/element-input-checkbox": "^0.0.19",
     "@damienmortini/element-input-color": "^0.0.106",
     "@damienmortini/element-input-colorpicker": "^0.0.17",
     "@damienmortini/element-input-connector": "^0.0.19",
     "@damienmortini/element-input-connector-linkable": "^0.0.16",
-    "@damienmortini/element-input-file": "^0.0.108",
-    "@damienmortini/element-input-joystick": "^0.0.107",
+    "@damienmortini/element-input-file": "^0.0.109",
+    "@damienmortini/element-input-joystick": "^0.0.108",
     "@damienmortini/element-input-knob": "^0.0.10",
     "@damienmortini/element-input-number": "^0.0.20",
     "@damienmortini/element-input-pad-xy": "^0.0.20",
@@ -29,7 +29,7 @@
     "@damienmortini/element-menu": "^0.0.16",
     "@damienmortini/element-select-lasso": "^0.0.11",
     "@damienmortini/element-viewer-array": "^0.0.11",
-    "@damienmortini/element-viewport": "^0.0.34"
+    "@damienmortini/element-viewport": "^0.0.35"
   },
   "publishConfig": {
     "access": "public"
