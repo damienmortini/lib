@@ -210,7 +210,7 @@ export default class THREEMotionVectorObject extends Object3D {
             rotationMatrix += skinWeight.y * boneMatY;
             rotationMatrix += skinWeight.z * boneMatZ;
             rotationMatrix += skinWeight.w * boneMatW;
-            vec4 quaternion = normalize(quaternionFromMatrix(rotationMatrix));
+            vec4 quaternion = quaternionFromMatrix(rotationMatrix);
             data = quaternion;
           }
           gl_FragColor = data;
