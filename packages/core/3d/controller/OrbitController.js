@@ -2,6 +2,11 @@ import Matrix4 from '../../math/Matrix4.js'
 import GestureObserver from '../../input/GestureObserver.js'
 
 export default class OrbitController {
+  #selfMatrix = new Matrix4()
+  #distance
+  #tilt
+  #pan
+
   constructor({
     matrix = new Matrix4(),
     domElement = null,
@@ -23,8 +28,6 @@ export default class OrbitController {
     zoomVelocity = .1,
     zoomDisabled = false,
   }) {
-    this._selfMatrix = new Matrix4()
-
     this.matrix = matrix
     this.invertRotation = invertRotation
     this.distanceMax = distanceMax
@@ -41,37 +44,35 @@ export default class OrbitController {
     this.zoomDisabled = zoomDisabled
     this.zoomVelocity = zoomVelocity
 
-    this._distance = distance
-    this._tilt = tilt
-    this._pan = pan
+    this.#distance = distance
+    this.#tilt = tilt
+    this.#pan = pan
 
-    this._panEased = this._pan
-    this._tiltEased = this._tilt
-    this._distanceEased = this._distance
-
-    this._multiTouchMode = false
+    this.panEnd = this.#pan
+    this.tiltEnd = this.#tilt
+    this.distanceEnd = this.#distance
 
     if (domElement) {
       domElement.addEventListener('wheel', (event) => {
         if (this.zoomDisabled) return
-        this._distance = Math.max(this._distance, .001) * (1 + event.deltaY * this.zoomVelocity * .01)
-        this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance))
+        this.distanceEnd = Math.max(this.distanceEnd, .001) * (1 + event.deltaY * this.zoomVelocity * .01)
+        this.distanceEnd = Math.max(this.distanceMin, Math.min(this.distanceMax, this.distanceEnd))
       }, { passive: true })
 
       const gestureObserver = new GestureObserver((gesture) => {
         if (!this.panDisabled) {
-          this._pan += (this.invertRotation ? -1 : 1) * gesture.movementX * this.rotationVelocity
-          this._pan = Math.max(this.panMin, Math.min(this.panMax, this._pan))
+          this.panEnd += (this.invertRotation ? -1 : 1) * gesture.movementX * this.rotationVelocity
+          this.panEnd = Math.max(this.panMin, Math.min(this.panMax, this.panEnd))
         }
 
         if (!this.tiltDisabled) {
-          this._tilt += (this.invertRotation ? 1 : -1) * gesture.movementY * this.rotationVelocity
-          this._tilt = Math.max(this.tiltMin, Math.min(this.tiltMax, this._tilt))
+          this.tiltEnd += (this.invertRotation ? 1 : -1) * gesture.movementY * this.rotationVelocity
+          this.tiltEnd = Math.max(this.tiltMin, Math.min(this.tiltMax, this.tiltEnd))
         }
 
         if (!this.zoomDisabled) {
-          this._distance *= 1 + (1 - gesture.movementScale) * this.zoomVelocity * 10
-          this._distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this._distance))
+          this.distanceEnd *= 1 + (1 - gesture.movementScale) * this.zoomVelocity * 10
+          this.distanceEnd = Math.max(this.distanceMin, Math.min(this.distanceMax, this.distanceEnd))
         }
       }, { pointerCapture: true })
       gestureObserver.observe(domElement)
@@ -81,66 +82,54 @@ export default class OrbitController {
   }
 
   get pan() {
-    return this._pan
+    return this.#pan
   }
 
   set pan(value) {
     value = Math.max(this.panMin, Math.min(this.panMax, value))
-    this._pan = value
-    this._panEased = value
+    this.#pan = value
+    this.panEnd = value
   }
 
   get tilt() {
-    return this._tilt
+    return this.#tilt
   }
 
   set tilt(value) {
     value = Math.max(this.tiltMin, Math.min(this.tiltMax, value))
-    this._tilt = value
-    this._tiltEased = value
+    this.#tilt = value
+    this.tiltEnd = value
   }
 
   get distance() {
-    return this._distance
+    return this.#distance
   }
 
   set distance(value) {
     value = Math.max(this.distanceMin, Math.min(this.distanceMax, value))
-    this._distance = value
-    this._distanceEased = value
-  }
-
-  get panEased() {
-    return this._panEased
-  }
-
-  get tiltEased() {
-    return this._tiltEased
-  }
-
-  get distanceEased() {
-    return this._distanceEased
+    this.#distance = value
+    this.distanceEnd = value
   }
 
   update() {
-    this._tiltEased += (this._tilt - this._tiltEased) * this.rotationEasing
-    this._panEased += (this._pan - this._panEased) * this.rotationEasing
-    this._distanceEased += (this._distance - this._distanceEased) * this.zoomEasing
+    this.#tilt += (this.tiltEnd - this.#tilt) * this.rotationEasing
+    this.#pan += (this.panEnd - this.#pan) * this.rotationEasing
+    this.#distance += (this.distanceEnd - this.#distance) * this.zoomEasing
 
-    this._selfMatrix.invert()
-    this.matrix.multiply(this._selfMatrix)
+    this.#selfMatrix.invert()
+    this.matrix.multiply(this.#selfMatrix)
 
-    this._selfMatrix.identity()
-    this._selfMatrix.rotateY(this._panEased)
-    this._selfMatrix.rotateX(-this._tiltEased)
-    const sinPan = Math.sin(this._panEased)
-    const cosPan = Math.cos(this._panEased)
-    const cosTilt = Math.cos(this._tiltEased)
-    const sinTilt = Math.sin(this._tiltEased)
-    this._selfMatrix.x = this._distanceEased * sinPan * cosTilt
-    this._selfMatrix.y = sinTilt * this._distanceEased
-    this._selfMatrix.z = this._distanceEased * cosPan * cosTilt
+    this.#selfMatrix.identity()
+    this.#selfMatrix.rotateY(this.#pan)
+    this.#selfMatrix.rotateX(-this.#tilt)
+    const sinPan = Math.sin(this.#pan)
+    const cosPan = Math.cos(this.#pan)
+    const cosTilt = Math.cos(this.#tilt)
+    const sinTilt = Math.sin(this.#tilt)
+    this.#selfMatrix.x = this.#distance * sinPan * cosTilt
+    this.#selfMatrix.y = sinTilt * this.#distance
+    this.#selfMatrix.z = this.#distance * cosPan * cosTilt
 
-    this.matrix.multiply(this._selfMatrix)
+    this.matrix.multiply(this.#selfMatrix)
   }
 }
