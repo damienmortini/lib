@@ -1,53 +1,50 @@
-export default class SDFShader {
-  static get Voxel() {
-    return `
-      struct Voxel
-      {
-        vec4 coord;
-        vec4 material;
-      };
-    `
-  }
+export const Voxel = `
+  struct Voxel
+  {
+    vec4 coord;
+    vec4 material;
+  };
+`
 
-  static sdfBox() {
-    return `
-      Voxel sdfBox(vec3 position, vec3 box, vec4 material) {
-        return Voxel(vec4(position, length(max(abs(position) - box, 0.0))), material);
-      }
-    `
-  }
+export const sdfBox = () => {
+  return `
+    Voxel sdfBox(vec3 position, vec3 box, vec4 material) {
+      return Voxel(vec4(position, length(max(abs(position) - box, 0.0))), material);
+    }
+  `
+}
 
-  static sdfEllipsoid() {
-    return `
-      Voxel sdfEllipsoid(vec3 position, vec3 box, vec4 material) {
-        return Voxel(vec4(position, (length(position / box) - 1.0) * min(min(box.x, box.y), box.z)), material);
-      }
-    `
-  }
+export const sdfEllipsoid = () => {
+  return `
+    Voxel sdfEllipsoid(vec3 position, vec3 box, vec4 material) {
+      return Voxel(vec4(position, (length(position / box) - 1.0) * min(min(box.x, box.y), box.z)), material);
+    }
+  `
+}
 
-  static sdfSphere() {
-    return `
-      Voxel sdfSphere(vec3 position, float radius, vec4 material) {
-        return Voxel(vec4(position, length(position) - radius), material);
-      }
-    `
-  }
+export const sdfSphere = () => {
+  return `
+    Voxel sdfSphere(vec3 position, float radius, vec4 material) {
+      return Voxel(vec4(position, length(position) - radius), material);
+    }
+  `
+}
 
-  static sdfSmoothMin() {
-    return `
-      Voxel sdfSmoothMin(Voxel voxel1, Voxel voxel2, float blend) {
-        float ratio = clamp(.5 + .5 * (voxel2.coord.w - voxel1.coord.w) / blend, 0., 1.);
-    
-        vec4 coord = mix(voxel2.coord, voxel1.coord, ratio) - blend * ratio * (1. - ratio);
-        vec4 material = mix(voxel2.material, voxel1.material, ratio);
-    
-        return Voxel(coord, material);
-      }
-    `
-  }
+export const sdfSmoothMin = () => {
+  return `
+    Voxel sdfSmoothMin(Voxel voxel1, Voxel voxel2, float blend) {
+      float ratio = clamp(.5 + .5 * (voxel2.coord.w - voxel1.coord.w) / blend, 0., 1.);
+  
+      vec4 coord = mix(voxel2.coord, voxel1.coord, ratio) - blend * ratio * (1. - ratio);
+      vec4 material = mix(voxel2.material, voxel1.material, ratio);
+  
+      return Voxel(coord, material);
+    }
+  `
+}
 
-  static sdfMin() {
-    return `
+export const sdfMin = () => {
+  return `
     Voxel sdfMin(Voxel voxel1, Voxel voxel2) {
       if(voxel1.coord.w < voxel2.coord.w) {
         return voxel1;
@@ -56,109 +53,108 @@ export default class SDFShader {
         return voxel2;
       }
     }
-    `
-  }
+  `
+}
 
-  static sdfTransform() {
-    return `
+export const sdfTransform = () => {
+  return `
     vec3 sdfTransform(vec3 position, mat4 transform) {
       position = inverse(transform) * position;
       return position;
     }
     `
-  }
+}
 
-  static sdfSubstraction() {
-    return `
-      Voxel sdfSubstraction(Voxel voxel1, Voxel voxel2)
-      {
-        voxel1.coord.w = max(-voxel2.coord.w, voxel1.coord.w);
-        voxel1.material = mix(voxel1.material, voxel2.material, step(voxel1.coord.w, -voxel2.coord.w));
-        return voxel1;
-      }
-    `
-  }
-
-  static sdfRepeat() {
-    return `
-      float sdfRepeat(float p, float c) {
-        return mod(p,c) - 0.5 * c;
-      }
-
-      vec2 sdfRepeat(vec2 p, vec2 c) {
-        return mod(p,c) - 0.5 * c;
-      }
-
-      vec3 sdfRepeat(vec3 p, vec3 c) {
-        return mod(p,c) - 0.5 * c;
-      }
-    `
-  }
-
-  // http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
-  static sdfNormalFromPosition({
-    name = 'sdfNormalFromPosition',
-    mapName = 'map',
-    preventInline = false,
-  } = {}) {
-    if (preventInline) {
-      return `
-        vec3 ${name}(vec3 position, float epsilon)
-        {
-          #define ZERO (min(int(epsilon),0))
-          vec3 n = vec3(0.0);
-          for( int i = ZERO; i < 4; i++ )
-          {
-            vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
-            n += e*${mapName}(position+e*epsilon).coord.w;
-          }
-          return normalize(n);
-        }
-      `
-    } else {
-      return `
-        vec3 ${name}(vec3 position, float epsilon)
-        {
-            const vec2 k = vec2(1,-1);
-            return normalize( k.xyy*${mapName}( position + k.xyy*epsilon ).coord.w + 
-                              k.yyx*${mapName}( position + k.yyx*epsilon ).coord.w + 
-                              k.yxy*${mapName}( position + k.yxy*epsilon ).coord.w + 
-                              k.xxx*${mapName}( position + k.xxx*epsilon ).coord.w );
-        }
-      `
+export const sdfSubstraction = () => {
+  return `
+    Voxel sdfSubstraction(Voxel voxel1, Voxel voxel2)
+    {
+      voxel1.coord.w = max(-voxel2.coord.w, voxel1.coord.w);
+      voxel1.material = mix(voxel1.material, voxel2.material, step(voxel1.coord.w, -voxel2.coord.w));
+      return voxel1;
     }
-  }
+  `
+}
 
-  static sdfRayMarch({
-    name = 'sdfRayMarch',
-    mapName = 'map',
-  } = {}) {
+export const sdfRepeat = () => {
+  return `
+    float sdfRepeat(float p, float c) {
+      return mod(p,c) - 0.5 * c;
+    }
+
+    vec2 sdfRepeat(vec2 p, vec2 c) {
+      return mod(p,c) - 0.5 * c;
+    }
+
+    vec3 sdfRepeat(vec3 p, vec3 c) {
+      return mod(p,c) - 0.5 * c;
+    }
+  `
+}
+
+// http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
+export const sdfNormalFromPosition = ({
+  name = 'sdfNormalFromPosition',
+  mapName = 'map',
+  preventInline = false,
+} = {}) => {
+  if (preventInline) {
     return `
-      Voxel ${name}(Ray ray, float near, float far, int steps, float distancePrecision)
+      vec3 ${name}(vec3 position, float epsilon)
       {
-        Voxel voxel;
-
-        float rayMarchingStep = far;
-        float distance = near;
-
-        int i = 0;
-        for(i = 0; i < steps; i++) {
-          if (i == steps || rayMarchingStep < distancePrecision || distance > far) break;
-          voxel = ${mapName}(ray.origin + ray.direction * distance);
-          rayMarchingStep = voxel.coord.w;
-          distance += rayMarchingStep;
+        #define ZERO (min(int(epsilon),0))
+        vec3 n = vec3(0.0);
+        for( int i = ZERO; i < 4; i++ )
+        {
+          vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);
+          n += e*${mapName}(position+e*epsilon).coord.w;
         }
-
-        voxel.coord.xyz = ray.origin + ray.direction * distance;
-        voxel.coord.w = distance;
-        voxel = sdfMin(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
-
-        // voxel.material.xyz = vec3(float(i) / float(steps));
-
-        return voxel;
+        return normalize(n);
+      }
+    `
+  } else {
+    return `
+      vec3 ${name}(vec3 position, float epsilon)
+      {
+          const vec2 k = vec2(1,-1);
+          return normalize( k.xyy*${mapName}( position + k.xyy*epsilon ).coord.w + 
+                            k.yyx*${mapName}( position + k.yyx*epsilon ).coord.w + 
+                            k.yxy*${mapName}( position + k.yxy*epsilon ).coord.w + 
+                            k.xxx*${mapName}( position + k.xxx*epsilon ).coord.w );
       }
     `
   }
+}
+
+export const sdfRayMarch = ({
+  name = 'sdfRayMarch',
+  mapName = 'map',
+} = {}) => {
+  return `
+    Voxel ${name}(Ray ray, float near, float far, int steps, float distancePrecision)
+    {
+      Voxel voxel;
+
+      float rayMarchingStep = far;
+      float distance = near;
+
+      int i = 0;
+      for(i = 0; i < steps; i++) {
+        if (i == steps || rayMarchingStep < distancePrecision || distance > far) break;
+        voxel = ${mapName}(ray.origin + ray.direction * distance);
+        rayMarchingStep = voxel.coord.w;
+        distance += rayMarchingStep;
+      }
+
+      voxel.coord.xyz = ray.origin + ray.direction * distance;
+      voxel.coord.w = distance;
+      voxel = sdfMin(voxel, Voxel(vec4(0., 0., 0., far), vec4(0.)));
+
+      // voxel.material.xyz = vec3(float(i) / float(steps));
+
+      return voxel;
+    }
+  `
 }
 
 // Voxel rayMarchTerrain(vec3 rayOrigin, vec3 rayDirection)
