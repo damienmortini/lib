@@ -1,9 +1,9 @@
 import GLObject from '../GLObject.js'
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'
-import CameraShader from '../../shader/CameraShader.js'
-import RayShader from '../../shader/RayShader.js'
-import SDFShader from '../../shader/SDFShader.js'
+import { Camera } from '../../shader/CameraShader.js'
+import { Ray, rayFromCamera } from '../../shader/RayShader.js'
+import { sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere, Voxel } from '../../shader/SDFShader.js'
 import Shader from '../../3d/Shader.js'
 import RoundedBoxGeometry from '../../3d/geometry/RoundedBoxGeometry.js'
 import Vector4 from '../../math/Vector4.js'
@@ -53,8 +53,8 @@ export default class GLRayMarchingObject extends GLObject {
           },
           vertexChunks: [
             ['start', `
-              ${CameraShader.Camera}
-              ${RayShader.Ray}
+              ${Camera}
+              ${Ray}
               ${SDFObjectStructure}
 
               uniform Camera camera;
@@ -86,9 +86,9 @@ export default class GLRayMarchingObject extends GLObject {
           ],
           fragmentChunks: [
             ['start', `
-              ${CameraShader.Camera}
-              ${RayShader.Ray}
-              ${SDFShader.Voxel}
+              ${Camera}
+              ${Ray}
+              ${Voxel}
               ${SDFObjectStructure}
               
               uniform Camera camera;
@@ -104,11 +104,11 @@ export default class GLRayMarchingObject extends GLObject {
               in vec4 glPosition;
               in float near;
               
-              ${RayShader.rayFromCamera()}
-              ${SDFShader.sdfSphere()}
-              ${SDFShader.sdfBox()}
-              ${SDFShader.sdfMin()}
-              ${SDFShader.sdfSmoothMin()}
+              ${rayFromCamera()}
+              ${sdfSphere()}
+              ${sdfBox()}
+              ${sdfMin()}
+              ${sdfSmoothMin()}
 
               Voxel map(vec3 position) {
                 ;
@@ -130,11 +130,11 @@ export default class GLRayMarchingObject extends GLObject {
                 return voxel;
               }
 
-              ${SDFShader.sdfRayMarch()}
-              ${SDFShader.sdfNormalFromPosition()}
+              ${sdfRayMarch()}
+              ${sdfNormalFromPosition()}
             `],
             ['end', `
-              Ray ray = rayFromCamera(glPosition.xy / glPosition.w, camera);
+              Ray ray = rayFromCamera(glPosition.xy / glPosition.w, camera.inverseTransform, camera.fov, camera.aspectRatio);
 
               Voxel voxel = sdfRayMarch(ray, near, camera.far, sdfRayMarchSteps, sdfRayMarchPrecision);
         
