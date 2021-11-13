@@ -3,18 +3,17 @@
 // https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 // Parsing code ;) - [...document.querySelectorAll('.code')].map((v) => v.textContent).join('#end\n\n#start')
 
-export default class SDF2DShader {
-  static sdCircle() {
-    return `
+export const sdCircle = () => {
+  return `
 float sdCircle( vec2 p, float r )
 {
   return length(p) - r;
 }
 `
-  }
+}
 
-  static sdRoundedBox() {
-    return `
+export const sdRoundedBox = () => {
+  return `
 float sdRoundedBox( in vec2 p, in vec2 b, in vec4 r )
 {
   r.xy = (p.x>0.0)?r.xy : r.zw;
@@ -23,20 +22,20 @@ float sdRoundedBox( in vec2 p, in vec2 b, in vec4 r )
   return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
 `
-  }
+}
 
-  static sdBox() {
-    return `
+export const sdBox = () => {
+  return `
 float sdBox( in vec2 p, in vec2 b )
 {
   vec2 d = abs(p)-b;
   return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
 `
-  }
+}
 
-  static sdOrientedBox() {
-    return `
+export const sdOrientedBox = () => {
+  return `
 float sdOrientedBox( in vec2 p, in vec2 a, in vec2 b, float th )
 {
   float l = length(b-a);
@@ -47,10 +46,10 @@ float sdOrientedBox( in vec2 p, in vec2 a, in vec2 b, float th )
   return length(max(q,0.0)) + min(max(q.x,q.y),0.0);  
 }
 `
-  }
+}
 
-  static sdSegment() {
-    return `
+export const sdSegment = () => {
+  return `
 float sdSegment( in vec2 p, in vec2 a, in vec2 b )
 {
   vec2 pa = p-a, ba = b-a;
@@ -58,10 +57,10 @@ float sdSegment( in vec2 p, in vec2 a, in vec2 b )
   return length( pa - ba*h );
 }
 `
-  }
+}
 
-  static sdRhombus() {
-    return `
+export const sdRhombus = () => {
+  return `
 float sdRhombus( in vec2 p, in vec2 b ) 
 {
   vec2 q = abs(p);
@@ -70,10 +69,10 @@ float sdRhombus( in vec2 p, in vec2 b )
   return d * sign( q.x*b.y + q.y*b.x - b.x*b.y );
 }
 `
-  }
+}
 
-  static sdEquilateralTriangle() {
-    return `
+export const sdEquilateralTriangle = () => {
+  return `
 float sdEquilateralTriangle( in vec2 p )
 {
   const float k = sqrt(3.0);
@@ -84,10 +83,10 @@ float sdEquilateralTriangle( in vec2 p )
   return -length(p)*sign(p.y);
 }
 `
-  }
+}
 
-  static sdTriangleIsosceles() {
-    return `
+export const sdTriangleIsosceles = () => {
+  return `
 float sdTriangleIsosceles( in vec2 p, in vec2 q )
 {
   p.x = abs(p.x);
@@ -99,10 +98,10 @@ float sdTriangleIsosceles( in vec2 p, in vec2 q )
   return -sqrt(d.x)*sign(d.y);
 }
 `
-  }
+}
 
-  static sdUnevenCapsule() {
-    return `
+export const sdUnevenCapsule = () => {
+  return `
 float sdUnevenCapsule( vec2 p, float r1, float r2, float h )
 {
   p.x = abs(p.x);
@@ -114,10 +113,10 @@ float sdUnevenCapsule( vec2 p, float r1, float r2, float h )
   return dot(p, vec2(a,b) ) - r1;
 }
 `
-  }
+}
 
-  static sdTriangle() {
-    return `
+export const sdTriangle = () => {
+  return `
 float sdTriangle( in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2 )
 {
   vec2 e0 = p1-p0, e1 = p2-p1, e2 = p0-p2;
@@ -132,10 +131,10 @@ float sdTriangle( in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2 )
   return -sqrt(d.x)*sign(d.y);
 }
 `
-  }
+}
 
-  static sdPentagon() {
-    return `
+export const sdPentagon = () => {
+  return `
 float sdPentagon( in vec2 p, in float r )
 {
   const vec3 k = vec3(0.809016994,0.587785252,0.726542528);
@@ -146,10 +145,10 @@ float sdPentagon( in vec2 p, in float r )
   return length(p)*sign(p.y);
 }
 `
-  }
+}
 
-  static sdHexagon() {
-    return `
+export const sdHexagon = () => {
+  return `
 float sdHexagon( in vec2 p, in float r )
 {
   const vec3 k = vec3(-0.866025404,0.5,0.577350269);
@@ -159,10 +158,10 @@ float sdHexagon( in vec2 p, in float r )
   return length(p)*sign(p.y);
 }
 `
-  }
+}
 
-  static sdOctogon() {
-    return `
+export const sdOctogon = () => {
+  return `
 float sdOctogon( in vec2 p, in float r )
 {
   const vec3 k = vec3(-0.9238795325, 0.3826834323, 0.4142135623 );
@@ -173,10 +172,10 @@ float sdOctogon( in vec2 p, in float r )
   return length(p)*sign(p.y);
 }
 `
-  }
+}
 
-  static sdHexagram() {
-    return `
+export const sdHexagram = () => {
+  return `
 float sdHexagram( in vec2 p, in float r )
 {
   const vec4 k = vec4(-0.5,0.8660254038,0.5773502692,1.7320508076);
@@ -187,10 +186,10 @@ float sdHexagram( in vec2 p, in float r )
   return length(p)*sign(p.y);
 }
 `
-  }
+}
 
-  static sdStar5() {
-    return `
+export const sdStar5 = () => {
+  return `
 float sdStar5(in vec2 p, in float r, in float rf)
 {
   const vec2 k1 = vec2(0.809016994375, -0.587785252292);
@@ -205,10 +204,10 @@ float sdStar5(in vec2 p, in float r, in float rf)
   return length(p-ba*h) * sign(p.y*ba.x-p.x*ba.y);
 }
 `
-  }
+}
 
-  static sdStar() {
-    return `
+export const sdStar = () => {
+  return `
 float sdStar(in vec2 p, in float r, in int n, in float m)
 {
   // next 4 lines can be precomputed for a given shape
@@ -224,10 +223,10 @@ float sdStar(in vec2 p, in float r, in int n, in float m)
   return length(p)*sign(p.x);
 }
 `
-  }
+}
 
-  static sdTrapezoid() {
-    return `
+export const sdTrapezoid = () => {
+  return `
 float sdTrapezoid( in vec2 p, in float r1, float r2, float he )
 {
   vec2 k1 = vec2(r2,he);
@@ -239,10 +238,10 @@ float sdTrapezoid( in vec2 p, in float r1, float r2, float he )
   return s*sqrt( min(dot2(ca),dot2(cb)) );
 }
 `
-  }
+}
 
-  static sdPie() {
-    return `
+export const sdPie = () => {
+  return `
 float sdPie( in vec2 p, in vec2 c, in float r )
 {
   p.x = abs(p.x);
@@ -251,10 +250,10 @@ float sdPie( in vec2 p, in vec2 c, in float r )
   return max(l,m*sign(c.y*p.x-c.x*p.y));
 }
 `
-  }
+}
 
-  static sdArc() {
-    return `
+export const sdArc = () => {
+  return `
 float sdArc( in vec2 p, in vec2 sca, in vec2 scb, in float ra, float rb )
 {
   p *= mat2(sca.x,sca.y,-sca.y,sca.x);
@@ -263,10 +262,10 @@ float sdArc( in vec2 p, in vec2 sca, in vec2 scb, in float ra, float rb )
   return sqrt( dot(p,p) + ra*ra - 2.0*ra*k ) - rb;
 }
 `
-  }
+}
 
-  static sdHorseshoe() {
-    return `
+export const sdHorseshoe = () => {
+  return `
 float sdHorseshoe( in vec2 p, in vec2 c, in float r, in vec2 w )
 {
   p.x = abs(p.x);
@@ -279,10 +278,10 @@ float sdHorseshoe( in vec2 p, in vec2 c, in float r, in vec2 w )
   return length(max(p,0.0)) + min(0.0,max(p.x,p.y));
 }
 `
-  }
+}
 
-  static sdVesica() {
-    return `
+export const sdVesica = () => {
+  return `
 float sdVesica(vec2 p, float r, float d)
 {
   p = abs(p);
@@ -291,10 +290,10 @@ float sdVesica(vec2 p, float r, float d)
                : length(p-vec2(-d,0.0))-r;
 }
 `
-  }
+}
 
-  static sdEgg() {
-    return `
+export const sdEgg = () => {
+  return `
 float sdEgg( in vec2 p, in float ra, in float rb )
 {
   const float k = sqrt(3.0);
@@ -305,10 +304,10 @@ float sdEgg( in vec2 p, in float ra, in float rb )
                 length(vec2(p.x+r,p.y  )) - 2.0*r) - rb;
 }
 `
-  }
+}
 
-  static sdCross() {
-    return `
+export const sdCross = () => {
+  return `
 float sdCross( in vec2 p, in vec2 b, float r ) 
 {
   p = abs(p); p = (p.y>p.x) ? p.yx : p.xy;
@@ -318,20 +317,20 @@ float sdCross( in vec2 p, in vec2 b, float r )
   return sign(k)*length(max(w,0.0)) + r;
 }
 `
-  }
+}
 
-  static sdRoundedX() {
-    return `
+export const sdRoundedX = () => {
+  return `
 float sdRoundedX( in vec2 p, in float w, in float r )
 {
   p = abs(p);
   return length(p-min(p.x+p.y,w)*0.5) - r;
 }
 `
-  }
+}
 
-  static sdPolygon() {
-    return `
+export const sdPolygon = () => {
+  return `
 float sdPolygon( in vec2[N] v, in vec2 p )
 {
   float d = dot(p-v[0],p-v[0]);
@@ -348,10 +347,10 @@ float sdPolygon( in vec2[N] v, in vec2 p )
   return s*sqrt(d);
 }
 `
-  }
+}
 
-  static sdEllipse() {
-    return `
+export const sdEllipse = () => {
+  return `
 float sdEllipse( in vec2 p, in vec2 ab )
 {
   p = abs(p); if( p.x > p.y ) {p=p.yx;ab=ab.yx;}
@@ -386,10 +385,10 @@ float sdEllipse( in vec2 p, in vec2 ab )
   return length(r-p) * sign(p.y-r.y);
 }
 `
-  }
+}
 
-  static sdParabola() {
-    return `
+export const sdParabola = () => {
+  return `
 float sdParabola( in vec2 pos, in float k )
 {
   pos.x = abs(pos.x);
@@ -420,10 +419,10 @@ float sdParabola( in vec2 pos, in float wi, in float he )
        sign(ik*(pos.y-he)+pos.x*pos.x);
 }
 `
-  }
+}
 
-  static sdBezier() {
-    return `
+export const sdBezier = () => {
+  return `
 float sdBezier( in vec2 pos, in vec2 A, in vec2 B, in vec2 C )
 {  
   vec2 a = B - A;
@@ -462,23 +461,22 @@ float sdBezier( in vec2 pos, in vec2 A, in vec2 B, in vec2 C )
   return sqrt( res );
 }
 `
-  }
+}
 
-  static opRound() {
-    return `
+export const opRound = () => {
+  return `
 float opRound( in vec2 p, in float r )
 {
   return sdShape(p) - r;
 }
 `
-  }
+}
 
-  static opOnion() {
-    return `
+export const opOnion = () => {
+  return `
 float opOnion( in vec2 p, in float r )
 {
   return abs(sdShape(p)) - r;
 }
 `
-  }
 }

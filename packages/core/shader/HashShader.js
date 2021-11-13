@@ -1,7 +1,7 @@
 // https://www.shadertoy.com/view/XlGcRh
 // https://www.shadertoy.com/view/XdXBRH
 
-export const hash1 = () => {
+export const hash1 = ({ noUInt = false } = {}) => {
   return `float hash1(float n) {
   return fract(sin(n) * 43758.5453123);
 }
@@ -17,7 +17,7 @@ float hash1(vec3 n) {
 float hash1(vec4 n) {
   return hash1(vec2(hash1(n.xyz), n.w));
 }
-
+` + (noUInt ? '' : `
 float hash1(uint n) {
   // integer hash copied from Hugo Elias
   n = (n << 13U) ^ n;
@@ -30,15 +30,15 @@ float hash1(uvec2 x) {
   uint n = 1103515245U * ((q.x) ^ (q.y >> 3U));
   return float(n) * (1.0 / float(0xffffffffU));
 }
-`
+`)
 }
 
-export const hash2 = () => {
+export const hash2 = ({ noUInt = false } = {}) => {
   return `vec2 hash2(vec2 p) {
   p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
   return fract(sin(p) * 43758.5453123);
 }
-
+` + (noUInt ? '' : `
 vec2 hash2(uint n) {
   // integer hash copied from Hugo Elias
   n = (n << 13U) ^ n;
@@ -54,7 +54,7 @@ vec2 hash2(uvec2 x) {
 
   return vec2(x) * (1.0 / float(0xffffffffU));
 }
-`
+`)
 }
 
 export const hash3 = () => {
