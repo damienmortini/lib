@@ -1,4 +1,4 @@
-import '../../lottie-web/build/player/lottie.min.js'
+import Lottie from '../../Lottie-web/build/player/lottie.min.js'
 
 /**
  * Element to plays Lottie animation
@@ -41,7 +41,7 @@ class LottieAnimationElement extends HTMLElement {
     if (this.animation) {
       this.animation.destroy()
     }
-    this.animation = lottie.loadAnimation({
+    this.animation = Lottie.loadAnimation({
       container: this._container,
       renderer: this.renderer,
       autoplay: this.autoplay,
@@ -67,21 +67,21 @@ class LottieAnimationElement extends HTMLElement {
   }
 
   #onDrop = (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.items[0].getAsFile();
+    event.preventDefault()
+    const file = event.dataTransfer.items[0].getAsFile()
     if (!file) {
-      return;
+      return
     }
     const reader = new FileReader()
-    reader.addEventListener("load", () => {
-      this.src = reader.result;
-    });
+    reader.addEventListener('load', () => {
+      this.src = reader.result
+    })
     reader.readAsDataURL(file)
   }
 
   #onDragOver = (event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
