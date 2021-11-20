@@ -12,7 +12,7 @@ import { dirname } from 'path'
 const directoryName = dirname(fileURLToPath(import.meta.url))
 
 export default class Server {
-  constructor({ path = '', watch = false, watchPath = '.', watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
+  constructor({ path = '', watch = false, watchPath = '', rootPath = '.', watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
     /**
      * Create HTTP2 Server
      */
@@ -20,6 +20,7 @@ export default class Server {
       key: fs.readFileSync(`${directoryName}/server.key`),
       cert: fs.readFileSync(`${directoryName}/server.crt`),
     }, (request, response) => {
+      // TODO: Check if rootPath needs to be added here
       const url = `.${request.url}`
       if (fs.existsSync(url) && fs.statSync(url).isDirectory() && !request.url.endsWith('/')) {
         response.writeHead(301, {
@@ -66,7 +67,7 @@ export default class Server {
       webSocketServer.listen(++port)
 
       if (watch) {
-        chokidar.watch(watchPath, {
+        chokidar.watch(`${rootPath}${watchPath}`, {
           ignored: watchIgnore,
           ignoreInitial: true,
         }).on('change', (path) => {
@@ -82,19 +83,16 @@ export default class Server {
       if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) return
 
       const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY]
-      const requestScheme = headers[http2.constants.HTTP2_HEADER_SCHEME]
       const requestPath = headers[http2.constants.HTTP2_HEADER_PATH]
       const requestRange = headers[http2.constants.HTTP2_HEADER_RANGE]
 
-      const url = new URL(`${requestScheme}://${requestAuthority}${requestPath}`)
-
-      let filePath = `.${url.pathname}`
+      let filePath = `${rootPath}${requestPath}`
 
       /**
        * Rewrite to root if url doesn't exist and isn't a file
        */
       if (!/\.[^/]*$/.test(filePath) && !fs.existsSync(filePath)) {
-        filePath = './'
+        filePath = `${rootPath}/`
       }
 
       /**
