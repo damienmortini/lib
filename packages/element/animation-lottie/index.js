@@ -220,7 +220,7 @@ class LottieAnimationElement extends HTMLElement {
    * @type {Number}
    */
   get currentTime() {
-    return this._currentTime
+    return (this.animation.currentFrame / (this.animation.totalFrames - 1)) * this.animation.getDuration()
   }
 
   set currentTime(value) {
