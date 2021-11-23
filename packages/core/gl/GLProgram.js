@@ -1,18 +1,53 @@
-import Shader from '../3d/Shader.js'
+import * as GLSLShader from '../gl/GLSLShader.js'
+
+const GL_UNIFORM_TYPE_MAP = new Map([
+  ['float', 'uniform1f'],
+  ['vec2', 'uniform2fv'],
+  ['vec3', 'uniform3fv'],
+  ['vec4', 'uniform4fv'],
+  ['int', 'uniform1i'],
+  ['ivec2', 'uniform2iv'],
+  ['ivec3', 'uniform3iv'],
+  ['ivec4', 'uniform4iv'],
+  ['uint', 'uniform1ui'],
+  ['uvec2', 'uniform2uiv'],
+  ['uvec3', 'uniform3uiv'],
+  ['uvec4', 'uniform4uiv'],
+  ['bool', 'uniform1i'],
+  ['bvec2', 'uniform2iv'],
+  ['bvec3', 'uniform3iv'],
+  ['bvec4', 'uniform4iv'],
+  ['mat2', 'uniformMatrix2fv'],
+  ['mat3', 'uniformMatrix3fv'],
+  ['mat4', 'uniformMatrix4fv'],
+  ['sampler2D', 'uniform1i'],
+  ['samplerCube', 'uniform1i'],
+])
 
 export default class GLProgram {
+  #program
+  #attachedShaders = new Map()
+  #textureUnits = new Map()
+  #vertex = ''
+  #fragment = ''
+  #vertexUniformData = new Map()
+  #fragmentUniformData = new Map()
+  #uniformData = new Map()
+  #attributesLocations = new Map()
+  #uniformLocations = new Map()
+
   constructor({
     gl,
-    shader = new Shader(),
+    uniforms = {},
+    vertex = GLSLShader.VERTEX,
+    fragment = GLSLShader.FRAGMENT,
     transformFeedbackVaryings = undefined,
   }) {
     this.gl = gl
 
-    this._webGL1 = this.gl.getParameter(this.gl.VERSION).startsWith('WebGL 1.0')
-    this._shader = shader instanceof Shader ? shader : new Shader(shader)
-    this._program = gl.createProgram()
-    this._attachedShaders = new Map()
-    this._textureUnits = new Map()
+    this.#vertex = vertex
+    this.#fragment = fragment
+    this.#program = gl.createProgram()
 
     this._vertexAttribDivisor = () => { }
     const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays')
@@ -25,7 +60,7 @@ export default class GLProgram {
     const self = this
 
     class Attributes extends Map {
-      set(name, { buffer = undefined, location = self._attributesLocations.get(name), size = 1, componentType = gl.FLOAT, normalized = false, byteStride = 0, byteOffset = 0, divisor = 0 } = {}) {
+      set(name, { buffer = undefined, location = self.#attributesLocations.get(name), size = 1, componentType = gl.FLOAT, normalized = false, byteStride = 0, byteOffset = 0, divisor = 0 } = {}) {
         if (name instanceof Map) {
           for (const [key, value] of name) {
             this.set(key, value)
@@ -34,12 +69,12 @@ export default class GLProgram {
         }
         buffer.bind()
         if (location === undefined) {
-          location = gl.getAttribLocation(self._program, name)
-          self._attributesLocations.set(name, location)
+          location = gl.getAttribLocation(self.#program, name)
+          self.#attributesLocations.set(name, location)
         }
         if (location !== -1) {
           gl.enableVertexAttribArray(location)
-          if (self._webGL1 || componentType === gl.FLOAT || componentType === gl.HALF_FLOAT) {
+          if (self.gl instanceof WebGLRenderingContext || componentType === gl.FLOAT || componentType === gl.HALF_FLOAT) {
             if (componentType === gl.UNSIGNED_INT) componentType = gl.FLOAT
             gl.vertexAttribPointer(location, size, componentType, normalized, byteStride, byteOffset)
           } else {
@@ -53,119 +88,97 @@ export default class GLProgram {
       }
     }
 
-    const uploadUniform = (name, value) => {
-      if (value === undefined) {
-        return
-      }
-
-      const type = self.uniformTypes.get(name)
-
-      if (value instanceof Object && !type) {
-        for (const key of [...Object.keys(value), ...Object.keys(Object.getPrototypeOf(value))]) {
-          uploadUniform(value[0] !== undefined ? `${name}[${key}]` : `${name}.${key}`, value[key])
-        }
-        return
-      }
-
-      self._shader.uniforms[name] = value
-
-      let location = self._uniformLocations.get(name)
-      if (location === undefined) {
-        location = gl.getUniformLocation(self._program, name)
-        self._uniformLocations.set(name, location)
-      }
-
-      if (location === null) {
-        return
-      }
-
-      if (type === 'float' || type === 'bool') {
-        gl.uniform1f(location, value)
-      } else if (type === 'vec2') {
-        gl.uniform2fv(location, value)
-      } else if (type === 'vec3') {
-        gl.uniform3fv(location, value)
-      } else if (type === 'vec4') {
-        gl.uniform4fv(location, value)
-      } else if (type === 'int') {
-        gl.uniform1i(location, value)
-      } else if (type === 'ivec2') {
-        gl.uniform2iv(location, value)
-      } else if (type === 'ivec3') {
-        gl.uniform3iv(location, value)
-      } else if (type === 'ivec4') {
-        gl.uniform4iv(location, value)
-      } else if (type === 'uint') {
-        gl.uniform1ui(location, value)
-      } else if (type === 'uvec2') {
-        gl.uniform2uiv(location, value)
-      } else if (type === 'uvec3') {
-        gl.uniform3uiv(location, value)
-      } else if (type === 'uvec4') {
-        gl.uniform4uiv(location, value)
-      } else if (type === 'mat3') {
-        gl.uniformMatrix3fv(location, false, value)
-      } else if (type === 'mat4') {
-        gl.uniformMatrix4fv(location, false, value)
-      } else if (type.startsWith('sampler')) {
-        gl.uniform1i(location, self._textureUnits.get(name))
-      }
-    }
-
     class Uniforms extends Map {
       set(name, value) {
-        uploadUniform(name, value)
+        self.#uploadUniform(name, value)
         return super.set(name, value)
       }
     }
 
     if (transformFeedbackVaryings) {
-      this.gl.transformFeedbackVaryings(this._program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS)
+      this.gl.transformFeedbackVaryings(this.#program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS)
     }
 
+    this.#updateShader(this.gl.VERTEX_SHADER, this.#vertex)
+    this.#updateShader(this.gl.FRAGMENT_SHADER, this.#fragment)
+
     this.attributes = new Attributes()
-    this.uniforms = new Uniforms()
-
-    this._updateShader(this.gl.VERTEX_SHADER, this._shader.vertex)
-    this._updateShader(this.gl.FRAGMENT_SHADER, this._shader.fragment)
+    this.uniforms = new Uniforms(Object.entries(uniforms))
   }
 
-  set vertexShader(value) {
-    this._shader.vertex = value
-    this._updateShader(this.gl.VERTEX_SHADER, this._shader.vertex)
+  #uploadUniform = (name, value) => {
+    if (value === undefined) {
+      return
+    }
+
+    const type = this.uniformData.get(name)?.type
+
+    if (value instanceof Object && !type) {
+      for (const key of [...Object.keys(value), ...Object.keys(Object.getPrototypeOf(value))]) {
+        this.#uploadUniform(value[0] !== undefined ? `${name}[${key}]` : `${name}.${key}`, value[key])
+      }
+      return
+    }
+
+    let location = this.#uniformLocations.get(name)
+    if (location === undefined) {
+      location = this.gl.getUniformLocation(this.#program, name)
+      this.#uniformLocations.set(name, location)
+    }
+
+    if (location === null) {
+      return
+    }
+
+    if (type.startsWith('mat')) {
+      this.gl[GL_UNIFORM_TYPE_MAP.get(type)](location, false, value)
+    } else if (type.startsWith('sampler')) {
+      this.gl[GL_UNIFORM_TYPE_MAP.get(type)](location, this.#textureUnits.get(name))
+    } else {
+      this.gl[GL_UNIFORM_TYPE_MAP.get(type)](location, value)
+    }
   }
 
-  get vertexShader() {
-    return this._shader.vertex
+  set vertex(value) {
+    this.#vertex = value
+    this.#updateShader(this.gl.VERTEX_SHADER, this.#vertex)
   }
 
-  set fragmentShader(value) {
-    this._shader.fragment = value
-    this._updateShader(this.gl.FRAGMENT_SHADER, this._shader.fragment)
+  get vertex() {
+    return this.#vertex
   }
 
-  get fragmentShader() {
-    return this._shader.fragment
+  set fragment(value) {
+    this.#fragment = value
+    this.#updateShader(this.gl.FRAGMENT_SHADER, this.#fragment)
   }
 
-  get uniformTypes() {
-    return this._shader.uniformTypes
+  get fragment() {
+    return this.#fragment
+  }
+
+  get uniformData() {
+    return this.#uniformData
   }
 
   get textureUnits() {
-    return this._textureUnits
+    return this.#textureUnits
   }
 
   use() {
-    this.gl.useProgram(this._program)
+    this.gl.useProgram(this.#program)
   }
 
-  _updateShader(type, source) {
+  #updateShader(type, source) {
     if (!source) {
       return
     }
 
-    if (this._webGL1) {
+    if (type === this.gl.VERTEX_SHADER) this.#vertexUniformData = GLSLShader.getUniformData(source)
+    else this.#fragmentUniformData = GLSLShader.getUniformData(source)
+    this.#uniformData = new Map([...this.#vertexUniformData, ...this.#fragmentUniformData])
+
+    if (this.gl instanceof WebGLRenderingContext) {
       source = source.replace(/#version.*?\n/g, '')
       source = source.replace(/\btexture\b/g, 'texture2D')
       source = source.replace(/\buvec(.)\b/g, 'vec$1')
@@ -206,46 +219,43 @@ export default class GLProgram {
       console.warn(shaderInfoLog)
     }
 
-    const attachedShader = this._attachedShaders.get(type)
+    const attachedShader = this.#attachedShaders.get(type)
     if (attachedShader) {
-      this.gl.detachShader(this._program, attachedShader)
+      this.gl.detachShader(this.#program, attachedShader)
       this.gl.deleteShader(attachedShader)
     }
 
-    this.gl.attachShader(this._program, shader)
+    this.gl.attachShader(this.#program, shader)
     this.gl.deleteShader(shader)
-    this._attachedShaders.set(type, shader)
+    this.#attachedShaders.set(type, shader)
 
-    if (this._attachedShaders.size === 2) {
-      this.gl.linkProgram(this._program)
-      const programInfoLog = this.gl.getProgramInfoLog(this._program)
-      if (!this.gl.getProgramParameter(this._program, this.gl.LINK_STATUS)) {
+    if (this.#attachedShaders.size === 2) {
+      this.gl.linkProgram(this.#program)
+      const programInfoLog = this.gl.getProgramInfoLog(this.#program)
+      if (!this.gl.getProgramParameter(this.#program, this.gl.LINK_STATUS)) {
         throw new Error(programInfoLog)
       } else if (programInfoLog) {
         console.warn(programInfoLog)
       }
 
-      // TODO: Check when issue is resolved on Safari and comment out
-
-      // for (let [type, attachedShader] of this._attachedShaders) {
-      //   this.gl.detachShader(this._program, attachedShader);
-      //   this.gl.deleteShader(attachedShader);
-      //   this._attachedShaders.delete(type);
-      // }
-
-      this._attributesLocations = new Map()
-      this._uniformLocations = new Map()
+      this.#attributesLocations.clear()
+      this.#uniformLocations.clear()
 
       this.use()
-      this.uniforms.clear()
-      this._textureUnits.clear()
-      let unit = 0
-      for (const [key, value] of Object.entries(this._shader.uniforms)) {
-        if (this.uniformTypes.get(key).startsWith('sampler')) {
-          this._textureUnits.set(key, unit)
-          unit++
+      this.#textureUnits.clear()
+
+      if (this.uniforms) {
+        for (const name of this.uniforms.keys()) {
+          if (!this.#uniformData.has(name)) this.uniforms.delete(name)
         }
-        this.uniforms.set(key, value)
+        let unit = 0
+        for (const [key, value] of this.uniforms) {
+          if (this.uniformData.get(key).type.startsWith('sampler')) {
+            this.#textureUnits.set(key, unit)
+            unit++
+          }
+          this.#uploadUniform(key, value)
+        }
       }
     }
   }
