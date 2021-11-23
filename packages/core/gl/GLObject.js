@@ -2,28 +2,30 @@ import GLVertexArray from './GLVertexArray.js'
 import GLTexture from './GLTexture.js'
 
 export default class GLObject {
+  #boundTextures = new Set()
+  #vertexArrays = new Map()
+  #program
+
   constructor({
     gl,
     geometry = undefined,
     program = undefined,
   }) {
     this.gl = gl
-    this._vertexArrays = new Map()
-    this._boundTextures = new Set()
 
     this.geometry = geometry
     this.program = program
   }
 
   get program() {
-    return this._program
+    return this.#program
   }
 
   set program(value) {
-    this._program = value
-    const programsMap = this._vertexArrays.get(this.geometry)
-    if (!programsMap.get(this._program)) {
-      programsMap.set(this._program, new GLVertexArray({
+    this.#program = value
+    const programsMap = this.#vertexArrays.get(this.geometry)
+    if (!programsMap.get(this.#program)) {
+      programsMap.set(this.#program, new GLVertexArray({
         gl: this.gl,
         geometry: this.geometry,
         program: this.program,
@@ -37,26 +39,26 @@ export default class GLObject {
 
   set geometry(value) {
     this._geometry = value
-    if (!this._vertexArrays.has(this.geometry)) {
-      this._vertexArrays.set(this.geometry, new Map())
+    if (!this.#vertexArrays.has(this.geometry)) {
+      this.#vertexArrays.set(this.geometry, new Map())
     }
   }
 
   get vertexArray() {
-    return this._vertexArrays.get(this.geometry).get(this.program)
+    return this.#vertexArrays.get(this.geometry).get(this.program)
   }
 
   bind() {
     this.program.use()
     this.vertexArray.bind()
-    for (const [name, type] of this.program.uniformTypes) {
+    for (const [name, { type }] of this.program.uniformData) {
       if (type.startsWith('sampler')) {
         const value = this.program.uniforms.get(name)
         if (value instanceof GLTexture) {
           value.bind({
             unit: this.program.textureUnits.get(name),
           })
-          this._boundTextures.add(value)
+          this.#boundTextures.add(value)
         }
       }
     }
@@ -69,14 +71,11 @@ export default class GLObject {
     instanceCount = undefined,
     ...options
   } = {}) {
-    // Todo: Fix double call to Program.use when bind is true
-    // (needed to update texture uniforms before binding them)
-    this.program.use()
-    for (const [key, value] of Object.entries(uniforms)) {
-      this.program.uniforms.set(key, value)
-    }
     if (bind) {
       this.bind()
+    }
+    for (const [key, value] of Object.entries(uniforms)) {
+      this.program.uniforms.set(key, value)
     }
     this.geometry.draw({ mode, instanceCount, ...options })
     if (bind) {
@@ -86,9 +85,9 @@ export default class GLObject {
 
   unbind() {
     this.vertexArray.unbind()
-    for (const texture of this._boundTextures) {
+    for (const texture of this.#boundTextures) {
       texture.unbind()
-      this._boundTextures.delete(texture)
+      this.#boundTextures.delete(texture)
     }
   }
 }
