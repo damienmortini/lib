@@ -52,12 +52,24 @@ export const getUniformData = (shader) => {
   }
 
   const uniformsRegExp = /^\s*uniform (?:highp|mediump|lowp)? *(.[^ ]+) (.[^ ;[\]]+)\[? *(\d+)? *\]?/gm
-  for (const [, type, name, arrayLengthStr] of shader.matchAll(uniformsRegExp)) {
+
+  const setUniformData = (name, type, arrayLength = null) => {
+    const structure = structures.get(type)
+    if (structure) {
+      for (const [key, value] of Object.entries(structure)) {
+        setUniformData(`${name}.${key}`, value.type, value.arrayLength)
+      }
+      return
+    }
     const data = {
       type,
-      ...(arrayLengthStr ? { arrayLength: parseInt(arrayLengthStr) } : {}),
+      ...(arrayLength ? { arrayLength } : {}),
     }
     uniformData.set(name, data)
+  }
+
+  for (const [, type, name, arrayLengthStr] of shader.matchAll(uniformsRegExp)) {
+    setUniformData(name, type, parseInt(arrayLengthStr))
   }
 
   return uniformData

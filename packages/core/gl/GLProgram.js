@@ -49,12 +49,12 @@ export default class GLProgram {
     this.#fragment = fragment
     this.#program = gl.createProgram()
 
-    this._vertexAttribDivisor = () => { }
+    let vertexAttribDivisor
     const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays')
     if (instancedArraysExtension) {
-      this._vertexAttribDivisor = instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension)
+      vertexAttribDivisor = instancedArraysExtension.vertexAttribDivisorANGLE.bind(instancedArraysExtension)
     } else if (this.gl.vertexAttribDivisor) {
-      this._vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl)
+      vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl)
     }
 
     const self = this
@@ -80,7 +80,7 @@ export default class GLProgram {
           } else {
             gl.vertexAttribIPointer(location, size, componentType, byteStride, byteOffset)
           }
-          self._vertexAttribDivisor(location, divisor)
+          vertexAttribDivisor(location, divisor)
         }
 
         buffer.unbind()
