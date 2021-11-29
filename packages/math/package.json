@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/damienmortini/lib/issues"
   },
-  "homepage": "https://github.com/damienmortini/lib#readme"
+  "homepage": "https://github.com/damienmortini/lib#readme",
+  "dependencies": {
+    "gl-matrix": "^3.4.3"
+  }
 }
