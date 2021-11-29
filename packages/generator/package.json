@@ -25,9 +25,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/generator",
   "bin": "index.js",
   "dependencies": {
-    "@damienmortini/element-starter-element": "^0.0.8",
-    "@damienmortini/element-starter-gl": "^0.0.73",
-    "@damienmortini/element-starter-three": "^0.0.93",
     "fs-extra": "^10.0.0",
     "jsdoc-to-markdown": "^7.1.0"
   }
