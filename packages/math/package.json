@@ -1,0 +1,19 @@
+{
+  "name": "@damienmortini/math",
+  "version": "0.0.0",
+  "description": "Math Helpers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damienmortini/lib.git",
+    "directory": "packages/math"
+  },
+  "keywords": [
+    "math"
+  ],
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damienmortini/lib/issues"
+  },
+  "homepage": "https://github.com/damienmortini/lib#readme"
+}

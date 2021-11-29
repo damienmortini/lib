@@ -1,4 +1,4 @@
-import * as mat4 from '../../../gl-matrix/esm/mat4.js'
+import * as mat4 from '../../gl-matrix/esm/mat4.js'
 
 const TRANSLATION_IDENTITY = new Float32Array(3)
 const ROTATION_IDENTITY = new Float32Array([0, 0, 0, 1])

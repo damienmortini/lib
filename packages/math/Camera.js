@@ -1,4 +1,4 @@
-import Matrix4 from '../math/Matrix4.js'
+import Matrix4 from './Matrix4.js'
 
 export default class Camera {
   #near
