@@ -1,0 +1,19 @@
+{
+  "name": "@damienmortini/webgl",
+  "version": "0.0.0",
+  "description": "WebGL Helpers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damienmortini/lib.git",
+    "directory": "packages/webgl"
+  },
+  "keywords": [
+    "webgl"
+  ],
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damienmortini/lib/issues"
+  },
+  "homepage": "https://github.com/damienmortini/lib#readme"
+}

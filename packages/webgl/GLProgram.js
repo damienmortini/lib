@@ -1,4 +1,4 @@
-import * as GLSLShader from '../gl/GLSLShader.js'
+import * as GLSLShader from './GLSLShader.js'
 
 const GL_UNIFORM_TYPE_MAP = new Map([
   ['float', 'uniform1f'],

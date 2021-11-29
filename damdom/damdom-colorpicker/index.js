@@ -1,4 +1,4 @@
-import { styleToRGBA } from '../core/math/Color.js'
+import { styleToRGBA } from '../math/Color.js'
 
 export default class DamdomColorPickerElement extends HTMLElement {
   static get observedAttributes() {

@@ -1,4 +1,4 @@
-import BoxGeometry from '../../3d/geometry/BoxGeometry.js'
+import BoxGeometry from '../../math/geometry/BoxGeometry.js'
 import GLObject from '../GLObject.js'
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'

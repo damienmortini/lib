@@ -1,0 +1,19 @@
+{
+  "name": "@damienmortini/gltf",
+  "version": "0.0.0",
+  "description": "GLTF Helpers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damienmortini/lib.git",
+    "directory": "packages/gltf"
+  },
+  "keywords": [
+    "gltf"
+  ],
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damienmortini/lib/issues"
+  },
+  "homepage": "https://github.com/damienmortini/lib#readme"
+}

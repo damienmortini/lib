@@ -1,7 +1,7 @@
-import Matrix4 from '../../math/Matrix4.js'
-import Vector2 from '../../math/Vector2.js'
-import Vector3 from '../../math/Vector3.js'
-import Quaternion from '../../math/Quaternion.js'
+import Matrix4 from '../../../math/Matrix4.js'
+import Vector2 from '../../../math/Vector2.js'
+import Vector3 from '../../../math/Vector3.js'
+import Quaternion from '../../../math/Quaternion.js'
 import GestureObserver from '../../input/GestureObserver.js'
 
 export default class TrackballController {
