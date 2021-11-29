@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-colorpicker",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "<damdom-colorpicker> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-colorpicker",
   "dependencies": {
-    "@damienmortini/core": "^0.2.121"
+    "@damienmortini/core": "^0.2.122"
   }
 }
