@@ -2,6 +2,7 @@ import BoxGeometry from '../../3d/geometry/BoxGeometry.js'
 import GLObject from '../GLObject.js'
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'
+import { addChunks, VERTEX } from '../GLSLShader.js'
 
 export default class GLBoxObject extends GLObject {
   constructor({
@@ -17,16 +18,14 @@ export default class GLBoxObject extends GLObject {
     attributes = {},
     program = new GLProgram({
       gl,
-      shader: {
-        vertexChunks: [
-          ['start', `
-            in vec3 position;
-          `],
-          ['end', `
-            gl_Position = vec4(position, 1.);
-          `],
-        ],
-      },
+      vertex: addChunks(VERTEX,
+        ['start', `
+      in vec3 position;
+    `],
+        ['end', `
+      gl_Position = vec4(position, 1.);
+    `],
+      )
     }),
   }) {
     super({

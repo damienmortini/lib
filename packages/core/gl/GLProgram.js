@@ -111,7 +111,7 @@ export default class GLProgram {
       return
     }
 
-    const type = this.uniformData.get(name)?.type
+    const type = this.uniformData.get(name.replace(/\[\d*\]/, ''))?.type
 
     if (value instanceof Object && !type) {
       for (const key of [...Object.keys(value), ...Object.keys(Object.getPrototypeOf(value))]) {
