@@ -9,6 +9,6 @@
     "@gltf-transform/core": "^1.2.1"
   },
   "devDependencies": {
-    "esbuild": "^0.13.15"
+    "esbuild": "^0.14.0"
   }
 }
