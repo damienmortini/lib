@@ -22,5 +22,8 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core",
+  "dependencies": {
+    "@damienmortini/math": "^0.0.1"
+  }
 }
