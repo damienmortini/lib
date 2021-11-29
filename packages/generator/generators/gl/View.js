@@ -40,8 +40,13 @@ export default class View {
       normals: true,
       program: new GLProgram({
         gl: this.gl,
-        shader: new BasicShader({
+        ...new BasicShader({
           normals: true,
+          vertexChunks: [
+            ['end', `
+            gl_Position = projectionView * transform * vec4(position, 1.);
+            `],
+          ],
           fragmentChunks: [
             ['end', `
               fragColor = vec4(vNormal * .5 + .5, 1.);
