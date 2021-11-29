@@ -2,6 +2,9 @@
   "name": "@damienmortini/gltf",
   "version": "0.0.1",
   "description": "GLTF Helpers",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/damienmortini/lib.git",

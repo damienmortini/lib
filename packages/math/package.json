@@ -2,6 +2,9 @@
   "name": "@damienmortini/math",
   "version": "0.0.1",
   "description": "Math Helpers",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/damienmortini/lib.git",
