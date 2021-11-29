@@ -2,6 +2,7 @@ class DamdomGalleryElement extends HTMLElement {
   #highlightedIndex = -1
   #highlight
   #grid
+  #highlightedElement
 
   constructor() {
     super()
@@ -147,12 +148,12 @@ class DamdomGalleryElement extends HTMLElement {
   }
 
   set highlightedIndex(value) {
-    const element = this.querySelector(`[slot=element${value}]`)
-    if (!element) value = -1
+    this.#highlightedElement = this.querySelector(`[slot=element${value}]`)
+    if (!this.#highlightedElement) value = -1
     if (value === this.#highlightedIndex) return
     if (value !== -1) {
-      element.slot = 'highlight'
-      element.toggleAttribute('highlighted', true)
+      this.#highlightedElement.slot = 'highlight'
+      this.#highlightedElement.toggleAttribute('highlighted', true)
       this.#highlight.classList.remove('hide')
       this.#grid.classList.add('hide')
     } else {
@@ -165,6 +166,10 @@ class DamdomGalleryElement extends HTMLElement {
     }
     this.#highlightedIndex = value
     this.dispatchEvent(new Event('highlightchange'))
+  }
+
+  get highlightedElement() {
+    return this.#highlightedElement
   }
 }
 
