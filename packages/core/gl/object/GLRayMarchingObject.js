@@ -4,7 +4,7 @@ import GLProgram from '../GLProgram.js'
 import { Camera } from '../../shader/CameraShader.js'
 import { Ray, rayFromCamera } from '../../shader/RayShader.js'
 import { sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere, Voxel } from '../../shader/SDFShader.js'
-import Shader from '../../3d/Shader.js'
+import * as GLSLShader from '../../gl/GLSLShader.js'
 import RoundedBoxGeometry from '../../3d/geometry/RoundedBoxGeometry.js'
 import Vector4 from '../../math/Vector4.js'
 import Vector2 from '../../math/Vector2.js'
@@ -46,107 +46,105 @@ export default class GLRayMarchingObject extends GLObject {
       }),
       program: new GLProgram({
         gl,
-        shader: new Shader({
-          uniforms: {
-            'sdfRayMarchSteps': sdfRayMarchSteps,
-            'sdfRayMarchPrecision': sdfRayMarchPrecision,
-          },
-          vertexChunks: [
-            ['start', `
-              ${Camera}
-              ${Ray}
-              ${SDFObjectStructure}
+        uniforms: {
+          'sdfRayMarchSteps': sdfRayMarchSteps,
+          'sdfRayMarchPrecision': sdfRayMarchPrecision,
+        },
+        vertex: GLSLShader.addChunks(GLSLShader.VERTEX,
+          ['start', `
+${Camera}
+${Ray}
+${SDFObjectStructure}
 
-              uniform Camera camera;
-              uniform SDFObject sdfObjects[${sdfObjects.length}];
-              uniform highp int index;
+uniform Camera camera;
+uniform SDFObject sdfObjects[${sdfObjects.length}];
+uniform highp int index;
 
-              in vec3 position;
+in vec3 position;
+
+out vec3 normal;
+out Ray ray;
+out vec4 glPosition;
+out float near;
+// flat out int instanceID;
+`],
+          ['end', `
+SDFObject sdfObject = sdfObjects[index];
+
+vec3 position = position;
+position *= (1. + sdfObject.blend) * sdfObject.size;
+position += sdfObject.position;
+gl_Position = camera.projectionView * vec4(position, 1.);
+
+vec3 rayOrigin = -camera.inverseTransform[3].xyz * mat3(camera.inverseTransform);
+near = distance(position, rayOrigin);
+
+glPosition = gl_Position;
+`],
+          ...vertexChunks,
+        ),
+        fragment: GLSLShader.addChunks(GLSLShader.FRAGMENT,
+          ['start', `
+${Camera}
+${Ray}
+${Voxel}
+${SDFObjectStructure}
+
+uniform Camera camera;
+uniform SDFObject sdfObjects[${sdfObjects.length}];
+uniform int sdfRayMarchSteps;
+uniform float sdfRayMarchPrecision;
+uniform int intersectObjectsNumber;
+uniform int intersectObjects[100];
+
+// flat in int instanceID;
+in Ray ray;
+in vec3 normal;
+in vec4 glPosition;
+in float near;
+
+${rayFromCamera()}
+${sdfSphere()}
+${sdfBox()}
+${sdfMin()}
+${sdfSmoothMin()}
+
+Voxel map(vec3 position) {
+  ;
+  vec3 objectPosition;
+
+  Voxel voxel = Voxel(vec4(0., 0., 0., camera.far), vec4(0.));
+  // SDFObject sdfObject = sdfObjects[index];
+  // objectPosition = position - sdfObject.position;
+  // voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, sdfObject.size * .5, sdfObject.material), sdfObject.blend * sdfObject.size);
+
+  for (int i = 0; i < intersectObjectsNumber; i++) { 
+    SDFObject intersectObject = sdfObjects[intersectObjects[i]];
+    objectPosition = position - intersectObject.position;
+    
+    voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, intersectObject.size * .5, intersectObject.material), intersectObject.blend * intersectObject.size);
+    // voxel = sdfMin(voxel, sdfSphere(objectPosition, intersectObject.size * .5, intersectObject.material));
+  }
   
-              out vec3 normal;
-              out Ray ray;
-              out vec4 glPosition;
-              out float near;
-              // flat out int instanceID;
-            `],
-            ['end', `
-              SDFObject sdfObject = sdfObjects[index];
-  
-              vec3 position = position;
-              position *= (1. + sdfObject.blend) * sdfObject.size;
-              position += sdfObject.position;
-              gl_Position = camera.projectionView * vec4(position, 1.);
+  return voxel;
+}
 
-              vec3 rayOrigin = -camera.inverseTransform[3].xyz * mat3(camera.inverseTransform);
-              near = distance(position, rayOrigin);
+${sdfRayMarch()}
+${sdfNormalFromPosition()}
+`],
+          ['end', `
+Ray ray = rayFromCamera(glPosition.xy / glPosition.w, camera.inverseTransform, camera.fov, camera.aspectRatio);
 
-              glPosition = gl_Position;
-            `],
-            ...vertexChunks,
-          ],
-          fragmentChunks: [
-            ['start', `
-              ${Camera}
-              ${Ray}
-              ${Voxel}
-              ${SDFObjectStructure}
-              
-              uniform Camera camera;
-              uniform SDFObject sdfObjects[${sdfObjects.length}];
-              uniform int sdfRayMarchSteps;
-              uniform float sdfRayMarchPrecision;
-              uniform int intersectObjectsNumber;
-              uniform int intersectObjects[100];
+Voxel voxel = sdfRayMarch(ray, near, camera.far, sdfRayMarchSteps, sdfRayMarchPrecision);
 
-              // flat in int instanceID;
-              in Ray ray;
-              in vec3 normal;
-              in vec4 glPosition;
-              in float near;
-              
-              ${rayFromCamera()}
-              ${sdfSphere()}
-              ${sdfBox()}
-              ${sdfMin()}
-              ${sdfSmoothMin()}
+vec3 normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
+normal = mix(normal, vec3(0.), step(camera.far, voxel.coord.w));
 
-              Voxel map(vec3 position) {
-                ;
-                vec3 objectPosition;
-
-                Voxel voxel = Voxel(vec4(0., 0., 0., camera.far), vec4(0.));
-                // SDFObject sdfObject = sdfObjects[index];
-                // objectPosition = position - sdfObject.position;
-                // voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, sdfObject.size * .5, sdfObject.material), sdfObject.blend * sdfObject.size);
-
-                for (int i = 0; i < intersectObjectsNumber; i++) { 
-                  SDFObject intersectObject = sdfObjects[intersectObjects[i]];
-                  objectPosition = position - intersectObject.position;
-                  
-                  voxel = sdfSmoothMin(voxel, sdfSphere(objectPosition, intersectObject.size * .5, intersectObject.material), intersectObject.blend * intersectObject.size);
-                  // voxel = sdfMin(voxel, sdfSphere(objectPosition, intersectObject.size * .5, intersectObject.material));
-                }
-                
-                return voxel;
-              }
-
-              ${sdfRayMarch()}
-              ${sdfNormalFromPosition()}
-            `],
-            ['end', `
-              Ray ray = rayFromCamera(glPosition.xy / glPosition.w, camera.inverseTransform, camera.fov, camera.aspectRatio);
-
-              Voxel voxel = sdfRayMarch(ray, near, camera.far, sdfRayMarchSteps, sdfRayMarchPrecision);
-        
-              vec3 normal = sdfNormalFromPosition(ray.origin + ray.direction * voxel.coord.w, .1);
-              normal = mix(normal, vec3(0.), step(camera.far, voxel.coord.w));
-  
-              fragColor = voxel.material;
-              // voxel.material = vec4(float(intersectObjects[8]) / 10.);
-            `],
-            ...fragmentChunks,
-          ],
-        }),
+fragColor = voxel.material;
+// voxel.material = vec4(float(intersectObjects[8]) / 10.);
+`],
+          ...fragmentChunks,
+        ),
       }),
     })
 
@@ -170,36 +168,34 @@ export default class GLRayMarchingObject extends GLObject {
       }),
       program: new GLProgram({
         gl,
-        shader: new Shader({
-          uniforms: {
-            color: new Vector4([1, 0, 0, 1]),
-          },
-          vertexChunks: [
-            ['start', `
-              uniform float radius;
-              uniform float drawingBufferRatio;
-              uniform vec2 objectPosition;
+        uniforms: {
+          color: new Vector4([1, 0, 0, 1]),
+        },
+        vertex: GLSLShader.addChunks(GLSLShader.VERTEX,
+          ['start', `
+            uniform float radius;
+            uniform float drawingBufferRatio;
+            uniform vec2 objectPosition;
 
-              in vec3 position;
-            `],
-            ['end', `
-              vec3 position = position;
-              position.x /= drawingBufferRatio;
-              position *= radius;
-              position.xy += objectPosition;
+            in vec3 position;
+          `],
+          ['end', `
+            vec3 position = position;
+            position.x /= drawingBufferRatio;
+            position *= radius;
+            position.xy += objectPosition;
 
-              gl_Position = vec4(position, 1.);
-            `],
-          ],
-          fragmentChunks: [
-            ['start', `
-              uniform vec4 color;
-            `],
-            ['end', `
-              fragColor = color;
-            `],
-          ],
-        }),
+            gl_Position = vec4(position, 1.);
+          `],
+        ),
+        fragment: GLSLShader.addChunks(GLSLShader.FRAGMENT,
+          ['start', `
+            uniform vec4 color;
+          `],
+          ['end', `
+            fragColor = color;
+          `],
+        ),
       }),
     })
   }

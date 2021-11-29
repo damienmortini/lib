@@ -2,7 +2,7 @@ import GLTexture from './GLTexture.js'
 import GLFrameBuffer from './GLFrameBuffer.js'
 import GLProgram from './GLProgram.js'
 import GLPlaneObject from './object/GLPlaneObject.js'
-import Shader from '../3d/Shader.js'
+import { addChunks, FRAGMENT, VERTEX } from './GLSLShader.js'
 
 export default class GLShaderTexture extends GLTexture {
   constructor({
@@ -51,23 +51,21 @@ export default class GLShaderTexture extends GLTexture {
       height: 2,
       program: new GLProgram({
         gl: this.gl,
-        shader: new Shader({
-          uniforms,
-          vertexChunks: [
-            ['start', `
+        uniforms,
+        vertex: addChunks(VERTEX,
+          ['start', `
               in vec3 position;
               out vec2 vPosition;
             `],
-            ['end', `
+          ['end', `
               gl_Position = vec4(position, 1.);
               vPosition = position.xy;
             `],
-          ],
-          fragmentChunks: [
-            ...fragmentChunks,
-            ['start', `in vec2 vPosition;`],
-          ],
-        }),
+        ),
+        fragment: addChunks(FRAGMENT,
+          ...fragmentChunks,
+          ['start', `in vec2 vPosition;`],
+        ),
       }),
     })
 

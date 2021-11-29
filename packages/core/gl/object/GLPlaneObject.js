@@ -2,7 +2,6 @@ import PlaneGeometry from '../../3d/geometry/PlaneGeometry.js'
 import GLObject from '../GLObject.js'
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'
-import Shader from '../../3d/Shader.js'
 
 export default class GLPlaneObject extends GLObject {
   constructor({
@@ -16,16 +15,13 @@ export default class GLPlaneObject extends GLObject {
     attributes = undefined,
     program = new GLProgram({
       gl,
-      shader: new Shader({
-        vertexChunks: [
-          ['start', `
-            in vec3 position;
-          `],
-          ['end', `
-            gl_Position = vec4(position, 1.);
-          `],
-        ],
-      }),
+      vertex: `#version 300 es
+
+      in vec3 position;
+
+      void main() {
+        gl_Position = vec4(position, 1.);
+      }`,
     }),
   }) {
     super({
