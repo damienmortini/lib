@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-viewport",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "description": "<element-viewport> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/viewport",
   "dependencies": {
-    "@damienmortini/core": "^0.2.123"
+    "@damienmortini/core": "^0.2.124"
   }
 }

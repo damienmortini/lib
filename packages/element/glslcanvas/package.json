@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-glslcanvas",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "<element-glslcanvas> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/glslcanvas",
   "dependencies": {
-    "@damienmortini/core": "^0.2.123"
+    "@damienmortini/core": "^0.2.124"
   }
 }
