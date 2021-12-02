@@ -13,10 +13,7 @@
     "version": "lerna version"
   },
   "workspaces": [
-    "damdom/*",
-    "demos/*",
-    "packages/*",
-    "packages/element/*"
+    "packages/**/*"
   ],
   "devDependencies": {
     "@damienmortini/server": "^1.0.16",
