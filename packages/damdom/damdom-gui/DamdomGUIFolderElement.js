@@ -1,4 +1,8 @@
 export default class DamdomGUIFolderElement extends HTMLElement {
+  #details
+  #summary
+  #content
+
   static get observedAttributes() {
     return ['name', 'open']
   }
@@ -81,9 +85,9 @@ export default class DamdomGUIFolderElement extends HTMLElement {
       </details>
     `
 
-    this._details = this.shadowRoot.querySelector('details')
-    this._summary = this.shadowRoot.querySelector('summary')
-    this._content = this.shadowRoot.querySelector('#content')
+    this.#details = this.shadowRoot.querySelector('details')
+    this.#summary = this.shadowRoot.querySelector('summary')
+    this.#content = this.shadowRoot.querySelector('#content')
 
     let slotUID = 0
     const mutationCallback = (mutationsList) => {
@@ -93,7 +97,7 @@ export default class DamdomGUIFolderElement extends HTMLElement {
           if (!('value' in node)) {
             const slot = document.createElement('slot')
             slot.name = slotName
-            this._content.appendChild(slot)
+            this.#content.appendChild(slot)
           } else {
             const label = node.getAttribute('label') ?? node.label ?? node.getAttribute('name') ?? node.name ?? node.id ?? ''
             const template = document.createElement('template')
@@ -111,22 +115,14 @@ export default class DamdomGUIFolderElement extends HTMLElement {
             `
             const fragment = template.content.firstElementChild.cloneNode(true)
             const resetButton = fragment.querySelector('.reset')
-            if (JSON.stringify(node.defaultValue) !== JSON.stringify(node.value)) {
-              resetButton.toggleAttribute('disabled', false)
-            }
+            const defaultValue = node.value
             node.addEventListener('change', () => {
-              resetButton.toggleAttribute('disabled', false)
+              resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue))
             })
             resetButton.addEventListener('click', () => {
-              this.dispatchEvent(new CustomEvent('reset', {
-                detail: {
-                  node,
-                },
-                bubbles: true,
-              }))
-              resetButton.toggleAttribute('disabled', true)
+              node.value = node.defaultValue ?? defaultValue
             })
-            this._content.appendChild(fragment)
+            this.#content.appendChild(fragment)
           }
           node.slot = slotName
         }
@@ -145,7 +141,7 @@ export default class DamdomGUIFolderElement extends HTMLElement {
     const observer = new MutationObserver(mutationCallback)
     observer.observe(this, { childList: true })
 
-    this._details.addEventListener('toggle', (event) => {
+    this.#details.addEventListener('toggle', (event) => {
       this.open = event.target.open
       this.dispatchEvent(new Event(event.type, event))
     })
@@ -154,11 +150,11 @@ export default class DamdomGUIFolderElement extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'name':
-        this._summary.textContent = newValue
-        this._summary.title = newValue
+        this.#summary.textContent = newValue
+        this.#summary.title = newValue
         break
       case 'open':
-        this._details.open = newValue !== null
+        this.#details.open = newValue !== null
         break
     }
   }
