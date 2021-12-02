@@ -1,23 +1,23 @@
-# `<damo-input-file>`
+# `<damdom-fileinput>`
 
 ## Installation
 
 ```sh
-npm install @damienmortini/element-input-file
+npm install @damienmortini/damdom-fileinput
 ```
 
 ## Simple Usage
 ```html
-<script src="node_modules/@damienmortini/element-input-file/index.js"></script>
+<script src="node_modules/@damienmortini/damdom-fileinput/index.js"></script>
 
-<damo-input-file></damo-input-file>
+<damdom-fileinput></damdom-fileinput>
 ```
 
 ## Usage with custom name
 ```html
 <script type="module">
 
-  import Element from '@damienmortini/element-input-file';
+  import Element from '@damienmortini/damdom-fileinput';
 
   window.customElements.define('my-element-name', class extends Element { });
 

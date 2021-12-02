@@ -1,7 +1,7 @@
 {
-  "name": "@damienmortini/element-input-file",
-  "version": "0.0.117",
-  "description": "<element-input-file> custom element.",
+  "name": "@damienmortini/damdom-fileinput",
+  "version": "0.0.0",
+  "description": "<damdom-fileinput> custom element.",
   "publishConfig": {
     "access": "public"
   },
@@ -11,14 +11,14 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/element/input-file"
+    "directory": "packages/damdom-fileinput"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-file",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom-fileinput",
   "dependencies": {
     "@damienmortini/core": "^0.2.124"
   }
