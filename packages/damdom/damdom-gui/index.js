@@ -18,13 +18,14 @@ const tagNameResolvers = new Map([
   ['damdom-checkbox', (attributes) => typeof attributes.value === 'boolean'],
 ])
 
-const valuesMap = new Map([
-  ...JSON.parse(localStorage.getItem(STORAGE_ID)) ?? [],
-  ...JSON.parse(sessionStorage.getItem(STORAGE_ID)) ?? [],
-  ...JSON.parse(new URLSearchParams(location.hash.slice(1)).get('gui')) ?? [],
-])
+const urlValuesMap = new Map(JSON.parse(new URLSearchParams(location.hash.slice(1)).get('gui')) ?? [])
+const localStorageValuesMap = new Map(JSON.parse(localStorage.getItem(STORAGE_ID)) ?? [])
+const sessionStorageValuesMap = new Map(JSON.parse(sessionStorage.getItem(STORAGE_ID)) ?? [])
 
 export default class DamdomGUIElement extends DamdomGUIFolderElement {
+  #elementDataMap
+  #foldersMap
+
   constructor() {
     super()
 
@@ -44,18 +45,11 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
       }
     `)
 
-    this.autoSaveToURL = false
+    this.name = 'GUI'
 
-    this._summary.textContent = 'GUI'
+    this.#elementDataMap = new Map()
 
-    this._elementDataMap = new Map()
-
-    this._foldersMap = new Map()
-
-    this.addEventListener('reset', (event) => {
-      const node = event.detail.node
-      if ('defaultValue' in node) node.value = node.defaultValue
-    })
+    this.#foldersMap = new Map()
 
     this.addEventListener('toggle', () => {
       if (this.open) {
@@ -75,10 +69,10 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
   }
 
   get folders() {
-    return this._foldersMap
+    return this.#foldersMap
   }
 
-  _updateFolderOpenState(folder, path) {
+  #updateFolderOpenState(folder, path) {
     if (folder.open) {
       sessionStorage.setItem(path, '')
     } else {
@@ -108,8 +102,6 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
       }
     }
 
-    options.saveToURL = this.autoSaveToURL || options.saveToURL
-
     const { tagName, object, key, folder, reload, saveToLocalStorage, saveToSessionStorage, saveToURL, watch } = options
     delete options.tagName
     delete options.object
@@ -132,17 +124,17 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
           path += '/'
         }
         path += folderName
-        folderElement = this._foldersMap.get(path)
+        folderElement = this.#foldersMap.get(path)
         if (!folderElement) {
           folderElement = document.createElement('damdom-guifolder')
           folderElement.name = folderName
           const currentPath = path
           folderElement.open = sessionStorage.getItem(`GUI["${currentPath}"].open`) !== null
           folderElement.addEventListener('toggle', (event) => {
-            this._updateFolderOpenState(event.target, `GUI["${currentPath}"].open`)
+            this.#updateFolderOpenState(event.target, `GUI["${currentPath}"].open`)
           })
           parentFolderElement.appendChild(folderElement)
-          this._foldersMap.set(currentPath, folderElement)
+          this.#foldersMap.set(currentPath, folderElement)
         }
         parentFolderElement = folderElement
       }
@@ -174,29 +166,34 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
       element.onchange = onchange
     }
 
-    if (options.id) {
-      const savedValue = valuesMap.get(options.id)
-      if (savedValue !== undefined) element.value = savedValue
-    }
+    if (options.id && saveToURL && urlValuesMap.has(options.id)) element.value = urlValuesMap.get(options.id)
+    else if (options.id && saveToSessionStorage && sessionStorageValuesMap.has(options.id)) element.value = sessionStorageValuesMap.get(options.id)
+    else if (options.id && saveToLocalStorage && localStorageValuesMap.has(options.id)) element.value = localStorageValuesMap.get(options.id)
 
     // Update URL params and reload if needed
     const saveValue = () => {
-      if (options.id) {
-        if (JSON.stringify(element.value) === JSON.stringify(element.defaultValue)) valuesMap.delete(options.id)
-        else valuesMap.set(options.id, element.value)
+      let needsUpdate = true
+      if (JSON.stringify(element.value) === JSON.stringify(element.defaultValue)) {
+        urlValuesMap.delete(options.id)
+        sessionStorageValuesMap.delete(options.id)
+        localStorageValuesMap.delete(options.id)
+        needsUpdate = false
       }
       if (saveToURL) {
+        if (needsUpdate) urlValuesMap.set(options.id, element.value)
         const urlSearchParams = new URLSearchParams(location.hash.slice(1))
-        if (valuesMap.size) urlSearchParams.set('gui', JSON.stringify([...valuesMap]))
+        if (urlValuesMap.size) urlSearchParams.set('gui', JSON.stringify([...urlValuesMap]))
         else urlSearchParams.delete('gui')
         location.hash = urlSearchParams.toString()
       }
       if (saveToSessionStorage) {
-        if (valuesMap.size) sessionStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]))
+        if (needsUpdate) sessionStorageValuesMap.set(options.id, element.value)
+        if (sessionStorageValuesMap.size) sessionStorage.setItem(STORAGE_ID, JSON.stringify([...sessionStorageValuesMap]))
         else sessionStorage.removeItem(STORAGE_ID)
       }
       if (saveToLocalStorage) {
-        if (valuesMap.size) localStorage.setItem(STORAGE_ID, JSON.stringify([...valuesMap]))
+        if (needsUpdate) localStorageValuesMap.set(options.id, element.value)
+        if (localStorageValuesMap.size) localStorage.setItem(STORAGE_ID, JSON.stringify([...localStorageValuesMap]))
         else localStorage.removeItem(STORAGE_ID)
       }
     }
@@ -204,10 +201,8 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
     element.addEventListener('change', () => {
       clearTimeout(timeout)
       timeout = setTimeout(() => {
-        saveValue()
-        if (reload) {
-          window.location.reload()
-        }
+        if (options.id) saveValue()
+        if (reload) window.location.reload()
       }, 100)
     })
 
@@ -224,7 +219,7 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
     }
 
     if (object) {
-      this._elementDataMap.set(element, {
+      this.#elementDataMap.set(element, {
         object,
         key,
       })
@@ -235,24 +230,24 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
     return element
   }
 
-  _updateChildrenValues(children) {
+  #updateChildrenValues(children) {
     for (const child of children) {
       if (!child.parentElement) {
-        this._elementDataMap.delete(child)
+        this.#elementDataMap.delete(child)
         continue
       }
-      const data = this._elementDataMap.get(child)
+      const data = this.#elementDataMap.get(child)
       if ('value' in child && data) {
         child.value = data.object[data.key]
       }
       if (child.children) {
-        this._updateChildrenValues(child.children)
+        this.#updateChildrenValues(child.children)
       }
     }
   }
 
   update() {
-    this._updateChildrenValues(this.children)
+    this.#updateChildrenValues(this.children)
   }
 }
 
