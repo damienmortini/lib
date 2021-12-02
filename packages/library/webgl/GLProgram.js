@@ -242,18 +242,21 @@ export default class GLProgram {
       this.#uniformLocations.clear()
 
       this.use()
+
       this.#textureUnits.clear()
+      let unit = 0
+      for (const [uniformName, uniformData] of this.#uniformData) {
+        if (uniformData.type.startsWith('sampler')) {
+          this.#textureUnits.set(uniformName, unit)
+          unit++
+        }
+      }
 
       if (this.uniforms) {
         for (const name of this.uniforms.keys()) {
           if (!this.#uniformData.has(name)) this.uniforms.delete(name)
         }
-        let unit = 0
         for (const [key, value] of this.uniforms) {
-          if (this.uniformData.get(key).type.startsWith('sampler')) {
-            this.#textureUnits.set(key, unit)
-            unit++
-          }
           this.#uploadUniform(key, value)
         }
       }
