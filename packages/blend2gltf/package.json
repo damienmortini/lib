@@ -1,0 +1,11 @@
+{
+  "name": "@damienmortini/blend2gltf",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.js",
+  "bin": "bin/index.js",
+  "type": "module",
+  "dependencies": {
+    "chokidar": "^3.5.2"
+  }
+}
