@@ -1,7 +1,9 @@
 {
   "name": "@damienmortini/blend2gltf",
-  "private": true,
   "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "bin": "bin/index.js",
   "type": "module",
