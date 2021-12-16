@@ -14,36 +14,35 @@ export default class GLTransformFeedbackObject extends GLObject {
     attributes = {},
     program,
   }) {
-    console.log(program)
     super({
       gl,
       program,
     })
 
-    console.log(attributes)
-
     for (let index = 0; index < 2; index++) {
       const attributesDynamic = new Map()
+      const buffers = new Map()
       for (const [name, attribute] of Object.entries(attributes)) {
+        const data = attribute.buffer?.data ?? attribute.data
+        let buffer = buffers.get(data)
+        if (!buffer) {
+          buffer = new GLBuffer({
+            gl,
+            data,
+            usage: gl.DYNAMIC_COPY,
+          })
+          buffers.set(data, buffer)
+        }
         attributesDynamic.set(name, new GLVertexAttribute({
           ...attribute,
           gl,
-          data: new GLBuffer({
-            gl,
-            data: attribute.buffer?.data ?? attribute.data,
-            usage: gl.DYNAMIC_COPY,
-            // target: gl.TRANSFORM_FEEDBACK_BUFFER,
-          }),
+          data: buffer,
         }))
       }
 
       const transformFeedback = gl.createTransformFeedback()
       gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback)
-      const buffers = new Set()
-      for (const attribute of attributesDynamic.values()) {
-        buffers.add(attribute.buffer)
-      }
-      for (const buffer of buffers) {
+      for (const buffer of buffers.values()) {
         buffer.bind({
           target: gl.TRANSFORM_FEEDBACK_BUFFER,
           index: 0,
@@ -61,12 +60,6 @@ export default class GLTransformFeedbackObject extends GLObject {
 
       this.geometry = geometry
     }
-
-    // this.geometry = this.#geometryIn
-
-    console.log(this.#geometryIn, this.#geometryOut)
-
-    console.log(program)
   }
 
   // get geometry() {
@@ -88,6 +81,8 @@ export default class GLTransformFeedbackObject extends GLObject {
   } = {}) {
     this.geometry = this.#geometryIn
 
+    // this.gl.enable(this.gl.RASTERIZER_DISCARD)
+
     this.bind()
     this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.#transformFeedbackOut)
     this.gl.beginTransformFeedback(mode)
@@ -99,6 +94,8 @@ export default class GLTransformFeedbackObject extends GLObject {
     this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null)
     this.unbind()
 
+    // this.gl.disable(this.gl.RASTERIZER_DISCARD)
+
     const tmpGeometry = this.#geometryIn
     this.#geometryIn = this.#geometryOut
     this.#geometryOut = tmpGeometry
@@ -106,7 +103,5 @@ export default class GLTransformFeedbackObject extends GLObject {
     const tmpTransformFeedback = this.#transformFeedbackIn
     this.#transformFeedbackIn = this.#transformFeedbackOut
     this.#transformFeedbackOut = tmpTransformFeedback
-    // [this.#geometryIn, this.#geometryOut] = [this.#geometryOut, this.#geometryIn]
-    // [this.#transformFeedbackIn, this.#transformFeedbackOut] = [this.#transformFeedbackOut, this.#transformFeedbackIn]
   }
 }
