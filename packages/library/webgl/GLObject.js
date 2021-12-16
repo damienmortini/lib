@@ -5,6 +5,7 @@ export default class GLObject {
   #boundTextures = new Set()
   #vertexArrays = new Map()
   #program
+  #geometry
 
   constructor({
     gl,
@@ -17,13 +18,13 @@ export default class GLObject {
     this.program = program
   }
 
-  get program() {
-    return this.#program
-  }
-
-  set program(value) {
-    this.#program = value
-    const programsMap = this.#vertexArrays.get(this.geometry)
+  #updateVAO() {
+    if (!this.program || !this.geometry) return
+    let programsMap = this.#vertexArrays.get(this.geometry)
+    if (!programsMap) {
+      programsMap = new Map()
+      this.#vertexArrays.set(this.geometry, programsMap)
+    }
     if (!programsMap.get(this.#program)) {
       programsMap.set(this.#program, new GLVertexArray({
         gl: this.gl,
@@ -33,15 +34,22 @@ export default class GLObject {
     }
   }
 
+  get program() {
+    return this.#program
+  }
+
+  set program(value) {
+    this.#program = value
+    this.#updateVAO()
+  }
+
   get geometry() {
-    return this._geometry
+    return this.#geometry
   }
 
   set geometry(value) {
-    this._geometry = value
-    if (!this.#vertexArrays.has(this.geometry)) {
-      this.#vertexArrays.set(this.geometry, new Map())
-    }
+    this.#geometry = value
+    this.#updateVAO()
   }
 
   get vertexArray() {

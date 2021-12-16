@@ -22,12 +22,14 @@ const ARRAY_TYPE_MAP = new Map([
 ])
 
 export default class GLVertexAttribute {
+  #buffer
+
   constructor({
     gl,
     data = null,
     target = gl.ARRAY_BUFFER,
     size = 1,
-    componentType = ARRAY_TYPE_MAP.get(data?.constructor),
+    componentType = ARRAY_TYPE_MAP.get(data instanceof GLBuffer ? data.data?.constructor : data?.constructor),
     byteOffset = 0,
     normalized = false,
     byteStride = 0,
@@ -44,7 +46,7 @@ export default class GLVertexAttribute {
     this.count = count
     this.divisor = divisor
 
-    this._buffer = data instanceof GLBuffer ? data : new GLBuffer({
+    this.#buffer = data instanceof GLBuffer ? data : new GLBuffer({
       gl,
       data,
       target,
@@ -52,7 +54,7 @@ export default class GLVertexAttribute {
   }
 
   get buffer() {
-    return this._buffer
+    return this.#buffer
   }
 
   get typedArray() {

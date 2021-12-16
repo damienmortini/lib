@@ -1,6 +1,9 @@
 import GLVertexAttribute from './GLVertexAttribute.js'
 
 export default class GLGeometry {
+  #drawElementsInstanced
+  #drawArraysInstanced
+
   constructor({
     gl,
     positions = null,
@@ -14,15 +17,15 @@ export default class GLGeometry {
 
     this.gl.getExtension('OES_element_index_uint')
 
-    this._drawElementsInstanced = () => { }
-    this._drawArraysInstanced = () => { }
+    this.#drawElementsInstanced = () => { }
+    this.#drawArraysInstanced = () => { }
     const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays')
     if (instancedArraysExtension) {
-      this._drawElementsInstanced = instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension)
-      this._drawArraysInstanced = instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension)
+      this.#drawElementsInstanced = instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension)
+      this.#drawArraysInstanced = instancedArraysExtension.drawArraysInstancedANGLE.bind(instancedArraysExtension)
     } else if (this.gl.drawElementsInstanced) {
-      this._drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl)
-      this._drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl)
+      this.#drawElementsInstanced = this.gl.drawElementsInstanced.bind(this.gl)
+      this.#drawArraysInstanced = this.gl.drawArraysInstanced.bind(this.gl)
     }
 
     this.attributes = new Map(attributes instanceof Map ? attributes : Object.entries(attributes))
@@ -77,13 +80,13 @@ export default class GLGeometry {
   } = {}) {
     if (elements) {
       if (instanceCount !== undefined) {
-        this._drawElementsInstanced(mode, count, type, offset, instanceCount)
+        this.#drawElementsInstanced(mode, count, type, offset, instanceCount)
       } else {
         this.gl.drawElements(mode, count, type, offset)
       }
     } else {
       if (instanceCount !== undefined) {
-        this._drawArraysInstanced(mode, first, count, instanceCount)
+        this.#drawArraysInstanced(mode, first, count, instanceCount)
       } else {
         this.gl.drawArrays(mode, first, count)
       }

@@ -1,4 +1,7 @@
 export default class GLBuffer {
+  #buffer
+  #data
+
   constructor({
     gl,
     data = null,
@@ -9,7 +12,7 @@ export default class GLBuffer {
     this.target = target
     this.usage = usage
 
-    this._buffer = this.gl.createBuffer()
+    this.#buffer = this.gl.createBuffer()
 
     if (data) {
       this.data = data
@@ -17,14 +20,14 @@ export default class GLBuffer {
   }
 
   set data(value) {
-    this._data = value
+    this.#data = value
     this.bind()
-    this.gl.bufferData(this.target, this._data, this.usage)
+    this.gl.bufferData(this.target, this.#data, this.usage)
     this.unbind()
   }
 
   get data() {
-    return this._data
+    return this.#data
   }
 
   bind({
@@ -34,11 +37,11 @@ export default class GLBuffer {
     size = undefined,
   } = {}) {
     if (index === undefined) {
-      this.gl.bindBuffer(target, this._buffer)
+      this.gl.bindBuffer(target, this.#buffer)
     } else if (size === undefined) {
-      this.gl.bindBufferBase(target, index, this._buffer)
+      this.gl.bindBufferBase(target, index, this.#buffer)
     } else {
-      this.gl.bindBufferRange(target, index, this._buffer, offset, size)
+      this.gl.bindBufferRange(target, index, this.#buffer, offset, size)
     }
   }
 

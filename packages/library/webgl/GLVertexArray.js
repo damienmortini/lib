@@ -1,4 +1,8 @@
 export default class GLVertexArray {
+  #vertexArray
+  #geometry
+  #program
+
   constructor({
     gl,
     geometry = undefined,
@@ -6,13 +10,16 @@ export default class GLVertexArray {
   }) {
     this.gl = gl
 
+    this.#geometry = geometry
+    this.#program = program
+
     const extension = gl.getExtension('OES_vertex_array_object')
     if (extension) {
       this.gl.createVertexArray = extension.createVertexArrayOES.bind(extension)
       this.gl.bindVertexArray = extension.bindVertexArrayOES.bind(extension)
     }
 
-    this._vertexArray = this.gl.createVertexArray()
+    this.#vertexArray = this.gl.createVertexArray()
 
     if (geometry && program) {
       this.add({
@@ -35,7 +42,7 @@ export default class GLVertexArray {
   }
 
   bind() {
-    this.gl.bindVertexArray(this._vertexArray)
+    this.gl.bindVertexArray(this.#vertexArray)
   }
 
   unbind() {

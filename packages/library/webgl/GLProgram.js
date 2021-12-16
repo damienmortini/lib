@@ -35,6 +35,7 @@ export default class GLProgram {
   #uniformData = new Map()
   #attributesLocations = new Map()
   #uniformLocations = new Map()
+  #transformFeedbackVaryings
 
   constructor({
     gl,
@@ -48,6 +49,7 @@ export default class GLProgram {
     this.#vertex = vertex
     this.#fragment = fragment
     this.#program = gl.createProgram()
+    this.#transformFeedbackVaryings = transformFeedbackVaryings
 
     let vertexAttribDivisor
     const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays')
@@ -95,8 +97,8 @@ export default class GLProgram {
       }
     }
 
-    if (transformFeedbackVaryings) {
-      this.gl.transformFeedbackVaryings(this.#program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS)
+    if (this.#transformFeedbackVaryings) {
+      this.gl.transformFeedbackVaryings(this.#program, this.#transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS)
     }
 
     this.#updateShader(this.gl.VERTEX_SHADER, this.#vertex)
