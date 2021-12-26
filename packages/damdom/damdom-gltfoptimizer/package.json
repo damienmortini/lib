@@ -6,9 +6,9 @@
     "compilegltftransform": "esbuild ../../node_modules/@gltf-transform/core/dist/core.modern.js ../../node_modules/@gltf-transform/functions/dist/functions.modern.js --bundle --format=esm --outdir=@gltf-transform"
   },
   "dependencies": {
-    "@gltf-transform/core": "^1.2.1"
+    "@gltf-transform/core": "^1.2.4"
   },
   "devDependencies": {
-    "esbuild": "^0.14.0"
+    "esbuild": "^0.14.8"
   }
 }
