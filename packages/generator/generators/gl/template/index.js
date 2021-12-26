@@ -6,6 +6,8 @@ class TemplateElement extends DamdomTickerElement {
   constructor() {
     super()
 
+    this.callback = this.#update
+
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
@@ -43,7 +45,7 @@ class TemplateElement extends DamdomTickerElement {
     resizeObserver.observe(this.canvas)
   }
 
-  update() {
+  #update = () => {
     this.view.update()
   }
 }
