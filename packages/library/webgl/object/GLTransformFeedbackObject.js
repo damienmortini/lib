@@ -62,26 +62,18 @@ export default class GLTransformFeedbackObject extends GLObject {
     }
   }
 
-  // get geometry() {
-  //   const geometry = this.#geometryOut
-  //   return geometry
-  // }
-
-  // set geometry(value) {
-  //   super.geometry = value
-  // }
-
-  // get attributes() {
-  //   return this.#geometryOut.attributes
-  // }
+  get attributes() {
+    return this.#geometryOut.attributes
+  }
 
   draw({
     mode = this.gl.POINTS,
     uniforms = {},
+    debug = false,
   } = {}) {
     this.geometry = this.#geometryIn
 
-    // this.gl.enable(this.gl.RASTERIZER_DISCARD)
+    if (!debug) this.gl.enable(this.gl.RASTERIZER_DISCARD)
 
     this.bind()
     this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.#transformFeedbackOut)
@@ -94,7 +86,7 @@ export default class GLTransformFeedbackObject extends GLObject {
     this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null)
     this.unbind()
 
-    // this.gl.disable(this.gl.RASTERIZER_DISCARD)
+    if (!debug) this.gl.disable(this.gl.RASTERIZER_DISCARD)
 
     const tmpGeometry = this.#geometryIn
     this.#geometryIn = this.#geometryOut
