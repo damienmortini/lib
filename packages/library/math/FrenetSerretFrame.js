@@ -19,16 +19,16 @@ export default class FrenetSerretFrame {
     for (let i = start; i <= end; i++) {
       const previousPositionId = i === 0 ? i : i - 1
       previousPosition.set(
-          positions[previousPositionId * 3],
-          positions[previousPositionId * 3 + 1],
-          positions[previousPositionId * 3 + 2],
+        positions[previousPositionId * 3],
+        positions[previousPositionId * 3 + 1],
+        positions[previousPositionId * 3 + 2],
       )
 
       const nextPositionId = i === length - 1 ? i : i + 1
       nextPosition.set(
-          positions[nextPositionId * 3],
-          positions[nextPositionId * 3 + 1],
-          positions[nextPositionId * 3 + 2],
+        positions[nextPositionId * 3],
+        positions[nextPositionId * 3 + 1],
+        positions[nextPositionId * 3 + 2],
       )
 
       tangent.copy(nextPosition).subtract(previousPosition)
@@ -40,9 +40,9 @@ export default class FrenetSerretFrame {
       if (i === start) {
         if (normals[i * 3] + normals[i * 3 + 1] + normals[i * 3 + 2]) {
           normal.set(
-              normals[i * 3],
-              normals[i * 3 + 1],
-              normals[i * 3 + 2],
+            normals[i * 3],
+            normals[i * 3 + 1],
+            normals[i * 3 + 2],
           )
         } else {
           vector3.copy(tangent);
