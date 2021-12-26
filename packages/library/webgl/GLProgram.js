@@ -98,7 +98,7 @@ export default class GLProgram {
     }
 
     if (this.#transformFeedbackVaryings) {
-      this.gl.transformFeedbackVaryings(this.#program, this.#transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS)
+      this.gl.transformFeedbackVaryings(this.#program, this.#transformFeedbackVaryings, gl.SEPARATE_ATTRIBS)
     }
 
     this.#updateShader(this.gl.VERTEX_SHADER, this.#vertex)

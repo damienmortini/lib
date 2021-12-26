@@ -42,10 +42,10 @@ export default class GLTransformFeedbackObject extends GLObject {
 
       const transformFeedback = gl.createTransformFeedback()
       gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback)
-      for (const buffer of buffers.values()) {
+      for (const [index, buffer] of [...buffers.values()].entries()) {
         buffer.bind({
           target: gl.TRANSFORM_FEEDBACK_BUFFER,
-          index: 0,
+          index,
         })
       }
       if (!index) this.#transformFeedbackIn = transformFeedback
