@@ -8,6 +8,7 @@ export default class PlaneGeometry {
     normals = true,
     uvs = true,
     indices = true,
+    facingUp = false,
   } = {}) {
     const xSegments = columns + 1
     const ySegments = rows + 1
@@ -26,20 +27,22 @@ export default class PlaneGeometry {
 
     for (let j = 0; j < ySegments; j++) {
       const v = 1 - j / rows
-      const y = j / rows * height - height * .5
+      const y = (j / rows * height - height * .5) * (facingUp ? -1 : 1)
 
       for (let i = 0; i < xSegments; i++) {
         const u = i / columns
 
         const offset = j * xSegments + i
 
+        const yIndex = facingUp ? 2 : 1
         if (positions) {
           this.positions[offset * 3] = u * width - width * .5
-          this.positions[offset * 3 + 1] = y
+          this.positions[offset * 3 + yIndex] = y
         }
 
+        const upIndex = facingUp ? 1 : 2
         if (normals) {
-          this.normals[offset * 3 + 2] = 1
+          this.normals[offset * 3 + upIndex] = 1
         }
 
         if (uvs) {

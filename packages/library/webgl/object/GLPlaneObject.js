@@ -13,6 +13,7 @@ export default class GLPlaneObject extends GLObject {
     normals = false,
     uvs = false,
     attributes = undefined,
+    facingUp = false,
     program = new GLProgram({
       gl,
       vertex: `#version 300 es
@@ -36,6 +37,7 @@ export default class GLPlaneObject extends GLObject {
         rows,
         normals,
         uvs,
+        facingUp,
       }))),
       program,
     })
