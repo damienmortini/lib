@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-fileinput",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "<damdom-fileinput> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom-fileinput",
   "dependencies": {
-    "@damienmortini/core": "^0.2.125"
+    "@damienmortini/core": "^0.2.126"
   }
 }
