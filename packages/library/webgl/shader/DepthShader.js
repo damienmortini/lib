@@ -19,11 +19,9 @@ export const unpack = () => {
     `
 }
 
-export const bumpFromDepth = ({
-  getDepthFunctionName = 'getDepth',
-} = {}) => {
+export const bumpFromDepthTexture = () => {
   return `
-      vec4 bumpFromDepth(sampler2D depthTexture, vec2 uv, vec2 resolution, float scale) {
+      vec4 bumpFromDepthTexture(sampler2D depthTexture, vec2 uv, vec2 resolution, float scale) {
         vec2 step = 1. / resolution;
           
         float depth = texture(depthTexture, uv).r;
@@ -35,8 +33,14 @@ export const bumpFromDepth = ({
         
         return vec4(depth, normalize(vec3(dxy * scale / step, 1.)));
       }
-    
-      vec4 bumpFromDepth(vec2 uv, vec2 resolution, float scale) {
+    `
+}
+
+export const bumpFromDepthFunction = ({
+  getDepthFunctionName = 'getDepth',
+} = {}) => {
+  return `
+      vec4 bumpFromDepthFunction(vec2 uv, vec2 resolution, float scale) {
         vec2 step = 1. / resolution;
           
         float depth = ${getDepthFunctionName}(uv);
