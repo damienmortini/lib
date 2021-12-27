@@ -5,6 +5,11 @@ import GLPlaneObject from './object/GLPlaneObject.js'
 import { addChunks, FRAGMENT, VERTEX } from './GLSLShader.js'
 
 export default class GLShaderTexture extends GLTexture {
+  #debug
+  #autoGenerateMipmap
+  #frameBuffer
+  #quad
+
   constructor({
     gl,
     width,
@@ -37,15 +42,15 @@ export default class GLShaderTexture extends GLTexture {
       autoGenerateMipmap: false,
     })
 
-    this._debug = debug
-    this._autoGenerateMipmap = autoGenerateMipmap
+    this.#debug = debug
+    this.#autoGenerateMipmap = autoGenerateMipmap
 
-    this._frameBuffer = new GLFrameBuffer({
+    this.#frameBuffer = new GLFrameBuffer({
       gl: this.gl,
       colorTextures: [this],
     })
 
-    this._quad = new GLPlaneObject({
+    this.#quad = new GLPlaneObject({
       gl: this.gl,
       width: 2,
       height: 2,
@@ -54,13 +59,13 @@ export default class GLShaderTexture extends GLTexture {
         uniforms,
         vertex: addChunks(VERTEX,
           ['start', `
-              in vec3 position;
-              out vec2 vPosition;
-            `],
+            in vec3 position;
+            out vec2 vPosition;
+          `],
           ['end', `
-              gl_Position = vec4(position, 1.);
-              vPosition = position.xy;
-            `],
+            gl_Position = vec4(position, 1.);
+            vPosition = position.xy;
+          `],
         ),
         fragment: addChunks(FRAGMENT,
           ...fragmentChunks,
@@ -73,27 +78,27 @@ export default class GLShaderTexture extends GLTexture {
   }
 
   get program() {
-    return this._quad.program
+    return this.#quad.program
   }
 
-  draw({ uniforms = {}, debug = this._debug } = {}) {
+  draw({ uniforms = {}, debug = this.#debug } = {}) {
     this.gl.viewport(0, 0, this.width, this.height)
-    this._frameBuffer.bind()
-    this._quad.draw({
+    this.#frameBuffer.bind()
+    this.#quad.draw({
       bind: true,
       uniforms,
     })
-    this._frameBuffer.unbind()
+    this.#frameBuffer.unbind()
     if (debug) {
       if (debug instanceof Array) {
         this.gl.viewport(debug[0], debug[1], debug[2], debug[3])
       }
-      this._quad.draw({
+      this.#quad.draw({
         bind: true,
         uniforms,
       })
     }
-    if (this._autoGenerateMipmap) {
+    if (this.#autoGenerateMipmap) {
       this.generateMipmap()
     }
   }
