@@ -26,6 +26,17 @@ export const rotatePositionWithQuaternion = () => {
   `
 }
 
+// https://github.com/glslify/glsl-look-at
+export const rotationMatrixFromDirection = () => {
+  return `
+    mat3 rotationMatrixFromDirection(vec3 direction, vec3 up) {
+      vec3 xaxis = cross(direction, up);
+      vec3 yaxis = cross(xaxis, direction);
+      return mat3(xaxis, yaxis, -direction);
+    }
+  `
+}
+
 export const quaternionFromMatrix = () => {
   return `
     vec4 quaternionFromMatrix(mat4 m) {
@@ -88,9 +99,25 @@ export const matrixFromQuaternion = () => {
   `
 }
 
-export const matrixFromRotation = () => {
+export const matrixFromAxisAngle = () => {
   return `
-    mat3 matrixFromRotation(vec3 eulerRotation) {
+    mat3 matrixFromAxisAngle(vec3 axis, float angle)
+    {
+        axis = normalize(axis);
+        float s = sin(angle);
+        float c = cos(angle);
+        float oc = 1.0 - c;
+        
+        return mat3(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,
+                    oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
+                    oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);
+    }
+  `
+}
+
+export const matrixFromEuler = () => {
+  return `
+    mat3 matrixFromEuler(vec3 eulerRotation) {
       float x = eulerRotation.x; 
       float y = eulerRotation.y;
       float z = eulerRotation.z;
