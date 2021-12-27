@@ -30,8 +30,8 @@ export const rotatePositionWithQuaternion = () => {
 export const rotationMatrixFromDirection = () => {
   return `
     mat3 rotationMatrixFromDirection(vec3 direction, vec3 up) {
-      vec3 xaxis = cross(direction, up);
-      vec3 yaxis = cross(xaxis, direction);
+      vec3 xaxis = normalize(cross(direction, up));
+      vec3 yaxis = normalize(cross(xaxis, direction));
       return mat3(xaxis, yaxis, -direction);
     }
   `
