@@ -18,8 +18,5 @@
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom-fileinput",
-  "dependencies": {
-    "@damienmortini/core": "^0.2.126"
-  }
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom-fileinput"
 }
