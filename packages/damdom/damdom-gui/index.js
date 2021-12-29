@@ -45,8 +45,6 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
       }
     `)
 
-    this.name = 'GUI'
-
     this.#elementDataMap = new Map()
 
     this.#foldersMap = new Map()
@@ -65,6 +63,7 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
   }
 
   connectedCallback() {
+    if (!this.name) this.name = '🪄 GUI'
     this.open = sessionStorage.getItem('damdom-gui:close') === null
   }
 
