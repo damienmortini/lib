@@ -1,8 +1,8 @@
 class DamdomGalleryElement extends HTMLElement {
-  #highlightedIndex = -1
-  #highlight
-  #grid
-  #highlightedElement
+  #highlightContainer
+  #gridContainer
+  #highlighted = null
+  #elementSlotMap
 
   constructor() {
     super()
@@ -93,45 +93,49 @@ class DamdomGalleryElement extends HTMLElement {
       <div id="grid" part="grid"></div>
     `
 
-    this.#highlight = this.shadowRoot.querySelector('#highlight')
-    this.#grid = this.shadowRoot.querySelector('#grid')
+    this.#highlightContainer = this.shadowRoot.querySelector('#highlight')
+    this.#gridContainer = this.shadowRoot.querySelector('#grid')
     const backButton = this.shadowRoot.querySelector('#backbutton')
 
     const highlightButtonClick = (event) => {
-      this.highlightedIndex = Number(event.target.parentElement.id)
+      for (const [element, id] of this.#elementSlotMap) {
+        if (id === event.target.parentElement.id) {
+          this.highlighted = element
+        }
+      }
     }
 
     const backButtonClick = () => {
-      this.highlightedIndex = -1
+      this.highlighted = null
     }
 
     backButton.addEventListener('click', backButtonClick)
 
     let slotUID = 0
-    const nodeContainerMap = new Map()
+    this.#elementSlotMap = new Map()
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
+          const slotName = `gallery-item-${slotUID++}`
           const container = document.createElement('div')
           container.part = 'item'
           container.classList.add('elementcontainer')
-          container.id = slotUID
+          container.id = slotName
           container.innerHTML = `
-            <slot name="element${slotUID}"></slot>
+            <slot name="${slotName}"></slot>
             <div class="highlightbutton"></div>
           `
           container.querySelector('.highlightbutton').addEventListener('click', highlightButtonClick)
-          node.slot = `element${slotUID}`
-          this.#grid.appendChild(container)
-          nodeContainerMap.set(node, container)
-          slotUID++
+          node.slot = slotName
+          this.#elementSlotMap.set(node, slotName)
+          this.#gridContainer.appendChild(container)
         }
         for (const node of mutation.removedNodes) {
           node.slot = ''
-          const container = nodeContainerMap.get(node)
+          const container = this.#gridContainer.querySelector(`#${this.#elementSlotMap.get(node)}`)
           container.querySelector('.highlightbutton').removeEventListener('click', highlightButtonClick)
           container.remove()
-          nodeContainerMap.delete(node)
+          this.#elementSlotMap.delete(node)
         }
       }
     }
@@ -143,33 +147,27 @@ class DamdomGalleryElement extends HTMLElement {
     observer.observe(this, { childList: true })
   }
 
-  get highlightedIndex() {
-    return this.#highlightedIndex
+  get highlighted() {
+    return this.#highlighted
   }
 
-  set highlightedIndex(value) {
-    this.#highlightedElement = this.querySelector(`[slot=element${value}]`)
-    if (!this.#highlightedElement) value = -1
-    if (value === this.#highlightedIndex) return
-    if (value !== -1) {
-      this.#highlightedElement.slot = 'highlight'
-      this.#highlightedElement.toggleAttribute('highlighted', true)
-      this.#highlight.classList.remove('hide')
-      this.#grid.classList.add('hide')
-    } else {
-      this.#highlight.classList.add('hide')
-      this.#grid.classList.remove('hide')
-      const highlightedElement = this.querySelector(`[slot=highlight]`)
-      if (!highlightedElement) return
-      highlightedElement.slot = `element${this.#highlightedIndex}`
-      highlightedElement.toggleAttribute('highlighted', false)
+  set highlighted(value) {
+    if (this.#highlighted === value) return
+    if (this.#highlighted) {
+      this.#highlighted.slot = `${this.#elementSlotMap.get(this.#highlighted)}`
+      this.#highlighted.toggleAttribute('highlighted', false)
     }
-    this.#highlightedIndex = value
+    this.#highlighted = value
+    if (this.#highlighted) {
+      this.#highlighted.slot = 'highlight'
+      this.#highlighted.toggleAttribute('highlighted', true)
+      this.#highlightContainer.classList.remove('hide')
+      this.#gridContainer.classList.add('hide')
+    } else {
+      this.#highlightContainer.classList.add('hide')
+      this.#gridContainer.classList.remove('hide')
+    }
     this.dispatchEvent(new Event('highlightchange'))
-  }
-
-  get highlightedElement() {
-    return this.#highlightedElement
   }
 }
 
