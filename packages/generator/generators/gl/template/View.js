@@ -1,6 +1,6 @@
 import Camera from '../../@damienmortini/math/Camera.js'
+import TrackballController from '../../@damienmortini/core/input/TrackballController.js'
 import GLBoxObject from '../../@damienmortini/webgl/object/GLBoxObject.js'
-import TrackballController from '../../@damienmortini/core/3d/controller/TrackballController.js'
 import GLProgram from '../../@damienmortini/webgl/GLProgram.js'
 import BasicShader from '../../@damienmortini/webgl/shader/BasicShader.js'
 

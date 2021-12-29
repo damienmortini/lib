@@ -1,5 +1,5 @@
 import Matrix4 from '../../math/Matrix4.js'
-import GestureObserver from '../../input/GestureObserver.js'
+import GestureObserver from './GestureObserver.js'
 
 export default class OrbitController {
   #selfMatrix = new Matrix4()
