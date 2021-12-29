@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-fileinput",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "<damdom-fileinput> custom element.",
   "publishConfig": {
     "access": "public"
