@@ -8,7 +8,7 @@
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --watchignore=node_modules",
     "test": "eslint packages",
-    "update": "yarn",
+    "update": "npm i",
     "upgrade": "yarn && yarn upgrade-interactive --latest",
     "version": "lerna version"
   },
@@ -17,7 +17,7 @@
   ],
   "devDependencies": {
     "@damienmortini/server": "^1.0.16",
-    "eslint": "^8.0.0",
+    "eslint": "^8.5.0",
     "eslint-config-google": "^0.14.0",
     "fast-glob": "^3.2.7",
     "jsdoc": "^3.6.7",
