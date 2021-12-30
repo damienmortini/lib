@@ -3,5 +3,8 @@
   "version": "0.0.1",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "eslint-config-google": "^0.14.0"
   }
 }
