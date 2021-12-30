@@ -1,0 +1,11 @@
+{
+  "name": "@damienmortini/graph",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "bin": "bin/index.js",
+  "dependencies": {
+    "ws": "^8.4.0"
+  }
+}
