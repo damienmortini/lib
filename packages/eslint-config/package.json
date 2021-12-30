@@ -6,5 +6,10 @@
   },
   "dependencies": {
     "eslint-config-google": "^0.14.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/eslint-config"
   }
 }
