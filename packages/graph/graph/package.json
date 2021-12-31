@@ -5,7 +5,11 @@
   "main": "index.js",
   "type": "module",
   "bin": "bin/index.js",
+  "scripts": {
+    "server": "node bin/index.js server"
+  },
   "dependencies": {
+    "@damienmortini/server": "^1.0.52",
     "ws": "^8.4.0"
   }
 }

@@ -1,6 +1,6 @@
-import GestureObserver from '../core/input/GestureObserver.js'
+import GestureObserver from '../../@damienmortini/core/input/GestureObserver.js'
 
-export default class ViewportElement extends HTMLElement {
+export default class DamdomViewportElement extends HTMLElement {
   constructor() {
     super()
 
@@ -165,4 +165,4 @@ export default class ViewportElement extends HTMLElement {
   }
 }
 
-customElements.define('damo-viewport', ViewportElement)
+customElements.define('damdom-viewport', DamdomViewportElement)

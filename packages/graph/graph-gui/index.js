@@ -1,8 +1,10 @@
 import { getGraph } from '../../@damienmortini/graph/index.js'
+import '../../@damienmortini/damdom-viewport/index.js'
+import '../../@damienmortini/graph-propertynode/index.js'
 
 export class GraphGUIElement extends HTMLElement {
-  #rtcPeerConnection
-  #dataChannel
+  #graph
+  #container
 
   static get observedAttributes() {
     return ['name']
@@ -17,25 +19,45 @@ export class GraphGUIElement extends HTMLElement {
           display: block;
           position: relative;
         }
+
+        damdom-viewport {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
       </style>
-      <slot>GUI</slot>
+      <damdom-viewport id="container"></damdom-viewport>
     `
+
+    this.#container = this.shadowRoot.querySelector('#container')
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'name') {
-      this.#dataChannel?.close()
-      this.#rtcPeerConnection?.close()
-      const graph = getGraph(this.getAttribute(newValue))
-      if (graph) {
-        this.#rtcPeerConnection = new RTCPeerConnection()
-        this.#rtcPeerConnection.ondatachannel = (event) => {
-          this.#dataChannel = event.channel
-          this.#dataChannel.onmessage = (event) => console.log(event.data)
-          this.#dataChannel.send('Hi back!')
-        }
-        graph.connect(this.#rtcPeerConnection)
+      this.#graph?.onChange.delete(this.#onGraphChange)
+      this.#graph = getGraph(newValue)
+      this.#graph.onChange.add(this.#onGraphChange)
+      this.#onGraphChange({
+        type: 'content',
+        data: this.#graph.content,
+      })
+    }
+  }
+
+  #onGraphChange = ({ type, data }) => {
+    if (type === 'content') {
+      this.#container.innerHTML = data
+    } else if (type === 'data') {
+      let node = this.querySelector(`#${data.id}`)
+      if (!node) {
+        node = document.createElement('graph-propertynode')
+        node.id = data.id
+        this.#container.appendChild(node)
       }
+      node.value = data.value
+      console.log(data)
     }
   }
 }
