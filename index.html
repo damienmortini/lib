@@ -36,6 +36,8 @@
   <damdom-gallery>
     <demo-gui></demo-gui>
     <demo-lottieanimation></demo-lottieanimation>
+    <demo-graph></demo-graph>
+    <demo-viewport></demo-viewport>
     <damdom-checkbox></damdom-checkbox>
     <damdom-colorpicker></damdom-colorpicker>
     <damdom-select></damdom-select>
@@ -47,9 +49,16 @@
     import "./node_modules/@damienmortini/damdom-gallery/index.js"
 
     const gallery = document.querySelector('damdom-gallery')
-    gallery.highlightedIndex = sessionStorage.getItem('highlightedsketchindex')
+
+    const hashchange = () => {
+      const hash = location.hash.slice(1)
+      if (hash) gallery.highlighted = gallery.querySelector(hash)
+      else gallery.highlighted = null
+    }
+    hashchange()
+
     gallery.addEventListener('highlightchange', () => {
-      sessionStorage.setItem('highlightedsketchindex', gallery.highlightedIndex)
+      location.hash = gallery.highlighted?.tagName.toLowerCase() ?? ''
     })
 
     const initializedElementSet = new Set()

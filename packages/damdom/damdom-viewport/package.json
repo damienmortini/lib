@@ -1,7 +1,7 @@
 {
-  "name": "@damienmortini/element-viewport",
+  "name": "@damienmortini/damdom-viewport",
   "version": "0.0.46",
-  "description": "<element-viewport> custom element.",
+  "description": "<damdom-viewport> custom element.",
   "publishConfig": {
     "access": "public"
   },
@@ -11,14 +11,14 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/element/viewport"
+    "directory": "packages/damdom/damdom-viewport"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/viewport",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-viewport",
   "dependencies": {
     "@damienmortini/core": "^0.2.127"
   }
