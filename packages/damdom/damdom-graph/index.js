@@ -1,6 +1,6 @@
 import { getGraph } from '../../@damienmortini/graph/index.js'
 import '../../@damienmortini/damdom-viewport/index.js'
-import '../../@damienmortini/graph-propertynode/index.js'
+import '../../@damienmortini/damdom-propertynode/index.js'
 
 export class GraphGUIElement extends HTMLElement {
   #graph
@@ -27,6 +27,10 @@ export class GraphGUIElement extends HTMLElement {
           width: 100%;
           height: 100%;
         }
+
+        damdom-viewport > * {
+          position: absolute;
+        }
       </style>
       <damdom-viewport id="container"></damdom-viewport>
     `
@@ -52,7 +56,7 @@ export class GraphGUIElement extends HTMLElement {
     } else if (type === 'data') {
       let node = this.querySelector(`#${data.id}`)
       if (!node) {
-        node = document.createElement('graph-propertynode')
+        node = document.createElement('damdom-propertynode')
         node.id = data.id
         this.#container.appendChild(node)
       }
@@ -62,4 +66,4 @@ export class GraphGUIElement extends HTMLElement {
   }
 }
 
-window.customElements.define('graph-gui', GraphGUIElement)
+window.customElements.define('damdom-graph', GraphGUIElement)
