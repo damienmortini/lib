@@ -1,5 +1,5 @@
 import { getGraph } from '../../@damienmortini/graph/index.js'
-import '../../@damienmortini/graph-gui/index.js'
+import '../../@damienmortini/damdom-graph/index.js'
 
 getGraph('demo-graph').loadData('node_modules/@damienmortini/demo-graph/graph-data.json')
 
@@ -33,9 +33,9 @@ export class DemoGraphElement extends HTMLElement {
         }
       </style>
       <div id="container"><div id="cube"></div></div>
-      <graph-gui name="demo-graph"></graph-gui>
-      <graph-gui name="demo-graph"></graph-gui>
-      <graph-gui name="demo-graph"></graph-gui>
+      <damdom-graph name="demo-graph"></damdom-graph>
+      <damdom-graph name="demo-graph"></damdom-graph>
+      <damdom-graph name="demo-graph"></damdom-graph>
     `
 
     this.#cube = this.shadowRoot.querySelector('#cube')
