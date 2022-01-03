@@ -1,14 +1,20 @@
 import Camera from '../../@damienmortini/math/Camera.js'
-import TrackballController from '../../@damienmortini/core/input/TrackballController.js'
+import OrbitController from '../../@damienmortini/core/input/OrbitController.js'
 import GLBoxObject from '../../@damienmortini/webgl/object/GLBoxObject.js'
 import GLProgram from '../../@damienmortini/webgl/GLProgram.js'
 import BasicShader from '../../@damienmortini/webgl/shader/BasicShader.js'
 
 export default class View {
+  #canvas
+  #camera
+  #cameraController
+  #gl
+  #object
+
   constructor({
     canvas,
   }) {
-    this.canvas = canvas
+    this.#canvas = canvas
 
     const webGLOptions = {
       depth: true,
@@ -17,29 +23,29 @@ export default class View {
     }
 
     if (!/\bforcewebgl1\b/.test(window.location.search)) {
-      this.gl = this.canvas.getContext('webgl2', webGLOptions)
+      this.#gl = this.#canvas.getContext('webgl2', webGLOptions)
     }
-    if (!this.gl) {
-      this.gl = this.canvas.getContext('webgl', webGLOptions) || this.canvas.getContext('experimental-webgl', webGLOptions)
+    if (!this.#gl) {
+      this.#gl = this.#canvas.getContext('webgl', webGLOptions) || this.#canvas.getContext('experimental-webgl', webGLOptions)
     }
 
-    this.camera = new Camera()
+    this.#camera = new Camera()
 
-    this.cameraController = new TrackballController({
-      domElement: this.canvas,
-      matrix: this.camera.transform,
+    this.#cameraController = new OrbitController({
+      domElement: this.#canvas,
+      matrix: this.#camera.transform,
       distance: 5,
     })
 
-    this.gl.clearColor(0, 0, 0, 1)
-    this.gl.enable(this.gl.CULL_FACE)
-    this.gl.enable(this.gl.DEPTH_TEST)
+    this.#gl.clearColor(0, 0, 0, 1)
+    this.#gl.enable(this.#gl.CULL_FACE)
+    this.#gl.enable(this.#gl.DEPTH_TEST)
 
-    this.object = new GLBoxObject({
-      gl: this.gl,
+    this.#object = new GLBoxObject({
+      gl: this.#gl,
       normals: true,
       program: new GLProgram({
-        gl: this.gl,
+        gl: this.#gl,
         ...new BasicShader({
           normals: true,
           vertexChunks: [
@@ -58,20 +64,20 @@ export default class View {
   }
 
   resize(width, height) {
-    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight)
-    this.camera.aspectRatio = width / height
+    this.#gl.viewport(0, 0, this.#gl.drawingBufferWidth, this.#gl.drawingBufferHeight)
+    this.#camera.aspectRatio = width / height
     this.update()
   }
 
   update() {
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+    this.#gl.clear(this.#gl.COLOR_BUFFER_BIT | this.#gl.DEPTH_BUFFER_BIT)
 
-    this.cameraController.update()
+    this.#cameraController.update()
 
-    this.object.draw({
+    this.#object.draw({
       bind: true,
       uniforms: {
-        projectionView: this.camera.projectionView,
+        projectionView: this.#camera.projectionView,
       },
     })
   }
