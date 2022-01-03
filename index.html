@@ -5,7 +5,7 @@
   <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lib</title>
+  <title>Personal library of cool stuff ✨</title>
 
   <style>
     html,
@@ -33,6 +33,16 @@
 </head>
 
 <body>
+  <script async src="node_modules/es-module-shims/dist/es-module-shims.js"></script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@damienmortini/": "./node_modules/@damienmortini/"
+      }
+    }
+  </script>
+
   <damdom-gallery>
     <demo-gui></demo-gui>
     <demo-lottieanimation></demo-lottieanimation>
@@ -46,7 +56,7 @@
   </damdom-gallery>
 
   <script type="module">
-    import "./node_modules/@damienmortini/damdom-gallery/index.js"
+    import "@damienmortini/damdom-gallery/index.js"
 
     const gallery = document.querySelector('damdom-gallery')
 
@@ -68,7 +78,7 @@
         const tagName = entry.target.tagName.toLowerCase()
         if (entry.isIntersecting && !initializedElementSet.has(tagName)) {
           initializedElementSet.add(tagName)
-          import(`./node_modules/@damienmortini/${tagName}/index.js`)
+          import(`@damienmortini/${tagName}/index.js`)
         }
       }
     })

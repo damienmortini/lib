@@ -23,5 +23,8 @@
     "jsdoc": "^3.6.7",
     "lerna": "^4.0.0",
     "yarn": "^1.22.15"
+  },
+  "dependencies": {
+    "es-module-shims": "^1.4.1"
   }
 }
