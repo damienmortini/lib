@@ -16,9 +16,9 @@
     "packages/**/*"
   ],
   "devDependencies": {
-    "@damienmortini/server": "^1.0.16",
-    "eslint": "^8.5.0",
-    "eslint-config-google": "^0.14.0",
+    "@damienmortini/eslint-config": "^0.0.3",
+    "@damienmortini/server": "^1.0.45",
+    "eslint": "^8.6.0",
     "fast-glob": "^3.2.7",
     "jsdoc": "^3.6.7",
     "lerna": "^4.0.0",
