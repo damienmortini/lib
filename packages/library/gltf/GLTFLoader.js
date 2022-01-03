@@ -1,4 +1,4 @@
-import SingletonLoader, { Loader } from '../util/Loader.js'
+import SingletonLoader, { Loader } from '../core/util/Loader.js'
 import Base64 from '../math/Base64.js'
 import GLTFMesh from './GLTFMesh.js'
 import GLTFNode from './GLTFNode.js'
