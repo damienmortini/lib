@@ -1,5 +1,5 @@
 import SingletonLoader, { Loader } from '@damienmortini/core/util/Loader.js'
-import Base64 from '../math/Base64.js'
+import Base64 from '@damienmortini/math/Base64.js'
 import GLTFMesh from './GLTFMesh.js'
 import GLTFNode from './GLTFNode.js'
 import GLTFAnimation from './GLTFAnimation.js'

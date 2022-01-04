@@ -1,5 +1,5 @@
 import Particle from '../../physics/Particle.js'
-import Vector2 from '../../math/Vector2.js'
+import Vector2 from '@damienmortini/math/Vector2.js'
 import SubstratePolygon from './SubstratePolygon.js'
 import SubstrateEdge from './SubstrateEdge.js'
 

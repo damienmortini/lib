@@ -1,5 +1,5 @@
-import Matrix4 from '../../math/Matrix4.js'
-import Quaternion from '../../math/Quaternion.js'
+import Matrix4 from '@damienmortini/math/Matrix4.js'
+import Quaternion from '@damienmortini/math/Quaternion.js'
 
 import GLSLView from '../../webgl/GLSLView.js'
 

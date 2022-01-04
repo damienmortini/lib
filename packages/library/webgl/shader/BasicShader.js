@@ -1,5 +1,5 @@
 import { addChunks, FRAGMENT, VERTEX } from '../GLSLShader.js'
-import Matrix4 from '../../math/Matrix4.js'
+import Matrix4 from '@damienmortini/math/Matrix4.js'
 
 export default class BasicShader {
   constructor({

@@ -1,4 +1,4 @@
-import Polygon from '../../math/Polygon.js'
+import Polygon from '@damienmortini/math/Polygon.js'
 
 export default class SubstratePolygon extends Polygon {
   constructor(vertices) {

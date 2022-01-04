@@ -1,4 +1,4 @@
-import PlaneGeometry from '../../math/geometry/PlaneGeometry.js'
+import PlaneGeometry from '@damienmortini/math/geometry/PlaneGeometry.js'
 import GLObject from '../GLObject.js'
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'

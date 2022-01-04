@@ -1,7 +1,7 @@
 import GLGeometry from '../GLGeometry.js'
 import GLProgram from '../GLProgram.js'
 import GLTexture from '../GLTexture.js'
-import Matrix4 from '../../math/Matrix4.js'
+import Matrix4 from '@damienmortini/math/Matrix4.js'
 
 export default class GLCanvasTextObject {
   constructor({

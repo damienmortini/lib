@@ -4,7 +4,7 @@ import {
 
 import THREELine from './THREELine.js'
 
-import FrenetSerretFrame from '../math/FrenetSerretFrame.js'
+import FrenetSerretFrame from '@damienmortini/math/FrenetSerretFrame.js'
 
 export default class THREERibbon extends THREELine {
   constructor({
