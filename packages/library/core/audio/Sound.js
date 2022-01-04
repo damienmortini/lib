@@ -1,4 +1,4 @@
-import Ticker from '../../core/util/Ticker.js'
+import Ticker from '@damienmortini/core/util/Ticker.js'
 
 let baseURI = ''
 let muted = false

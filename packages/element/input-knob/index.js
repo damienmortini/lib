@@ -1,4 +1,4 @@
-import { modulo } from '../core/math/Math.js'
+import { modulo } from '@damienmortini/core/math/Math.js'
 
 export default class KnobInputElement extends HTMLElement {
   static get observedAttributes() {

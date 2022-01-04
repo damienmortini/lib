@@ -1,4 +1,4 @@
-import View from '../core/abstract/View.js'
+import View from '@damienmortini/core/abstract/View.js'
 
 export default class ViewAnimationElement extends HTMLElement {
   static get observedAttributes() {

@@ -1,8 +1,8 @@
 import { Mesh, OrthographicCamera, PlaneBufferGeometry, DataTexture, RGBAFormat, FloatType, WebGLRenderer, WebGLRenderTarget, Scene, NearestFilter, RGBFormat, HalfFloatType, MathUtils } from '../../../three/src/Three.js'
 
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js'
-import DatatextureShader from '../../core/shader/DataTextureShader.js'
-import Float16 from '../../core/math/Float16.js'
+import DatatextureShader from '@damienmortini/core/shader/DataTextureShader.js'
+import Float16 from '@damienmortini/core/math/Float16.js'
 
 let DEBUG_RENDERER
 

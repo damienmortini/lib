@@ -1,6 +1,6 @@
 import TickerAnimationElement from '../element-animation-ticker/index.js'
-import SpriteAnimation from '../core/abstract/SpriteAnimation.js'
-import Loader from '../core/util/Loader.js'
+import SpriteAnimation from '@damienmortini/core/abstract/SpriteAnimation.js'
+import Loader from '@damienmortini/core/util/Loader.js'
 
 const LOAD_PROMISES = new Map()
 

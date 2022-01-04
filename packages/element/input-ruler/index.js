@@ -1,4 +1,4 @@
-import Ticker from '../core/util/Ticker.js'
+import Ticker from '@damienmortini/core/util/Ticker.js'
 
 const SIDE_MOVEMENT_SPEED = .02
 const PADDING_RATIO = .1

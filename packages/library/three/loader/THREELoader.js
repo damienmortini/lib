@@ -1,4 +1,4 @@
-import { Loader } from '../../core/util/Loader.js'
+import { Loader } from '@damienmortini/core/util/Loader.js'
 import { BasisTextureLoader } from '../examples/loaders/BasisTextureLoader.js'
 import { DRACOLoader } from '../examples/loaders/DRACOLoader.js'
 import { GLTFLoader } from '../examples/loaders/GLTFLoader.js'

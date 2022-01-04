@@ -1,6 +1,6 @@
-import GLPlaneObject from '../core/gl/object/GLPlaneObject.js'
-import GLProgram from '../core/gl/GLProgram.js'
-import Shader from '../core/3d/Shader.js'
+import GLPlaneObject from '@damienmortini/core/gl/object/GLPlaneObject.js'
+import GLProgram from '@damienmortini/core/gl/GLProgram.js'
+import Shader from '@damienmortini/core/3d/Shader.js'
 
 export default class GLSLCanvasElement extends HTMLElement {
   constructor() {
