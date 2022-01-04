@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/core",
-  "version": "0.2.127",
+  "version": "0.2.128",
   "description": "Helpers library for the web.",
   "publishConfig": {
     "access": "public"
@@ -24,6 +24,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core",
   "dependencies": {
-    "@damienmortini/math": "^0.0.4"
+    "@damienmortini/math": "^0.0.5"
   }
 }
