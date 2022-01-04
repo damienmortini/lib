@@ -50,7 +50,7 @@ export default class GLRayMarchingObject extends GLObject {
           'sdfRayMarchSteps': sdfRayMarchSteps,
           'sdfRayMarchPrecision': sdfRayMarchPrecision,
         },
-        vertex: GLSLShader.addChunks(GLSLShader.VERTEX,
+        vertex: GLSLShader.addChunks(GLSLShader.VERTEX, [
           ['start', `
 ${Camera}
 ${Ray}
@@ -82,8 +82,8 @@ near = distance(position, rayOrigin);
 glPosition = gl_Position;
 `],
           ...vertexChunks,
-        ),
-        fragment: GLSLShader.addChunks(GLSLShader.FRAGMENT,
+        ]),
+        fragment: GLSLShader.addChunks(GLSLShader.FRAGMENT, [
           ['start', `
 ${Camera}
 ${Ray}
@@ -144,7 +144,7 @@ fragColor = voxel.material;
 // voxel.material = vec4(float(intersectObjects[8]) / 10.);
 `],
           ...fragmentChunks,
-        ),
+        ]),
       }),
     })
 
@@ -171,7 +171,7 @@ fragColor = voxel.material;
         uniforms: {
           color: new Vector4([1, 0, 0, 1]),
         },
-        vertex: GLSLShader.addChunks(GLSLShader.VERTEX,
+        vertex: GLSLShader.addChunks(GLSLShader.VERTEX, [
           ['start', `
             uniform float radius;
             uniform float drawingBufferRatio;
@@ -187,15 +187,15 @@ fragColor = voxel.material;
 
             gl_Position = vec4(position, 1.);
           `],
-        ),
-        fragment: GLSLShader.addChunks(GLSLShader.FRAGMENT,
+        ]),
+        fragment: GLSLShader.addChunks(GLSLShader.FRAGMENT, [
           ['start', `
             uniform vec4 color;
           `],
           ['end', `
             fragColor = color;
           `],
-        ),
+        ]),
       }),
     })
   }

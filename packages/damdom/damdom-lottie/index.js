@@ -1,5 +1,7 @@
 import '../../Lottie-web/build/player/lottie.min.js'
 
+console.log('dsljkgfdskjhgf')
+
 /**
  * Element to plays Lottie animation
  * @element damdom-lottie
