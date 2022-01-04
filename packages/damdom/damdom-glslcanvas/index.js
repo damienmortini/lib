@@ -1,9 +1,7 @@
 import GLPlaneObject from '@damienmortini/webgl/object/GLPlaneObject.js'
 import GLProgram from '@damienmortini/webgl/GLProgram.js'
-import { FRAGMENT, addChunks } from '@damienmortini/webgl/GLSLShader.js'
 
 export default class DamdomGLSLCanvasElement extends HTMLElement {
-  #fragmentChunks
   #gl
 
   constructor() {
@@ -13,13 +11,17 @@ export default class DamdomGLSLCanvasElement extends HTMLElement {
       <style>
         :host {
           display: block;
-          touch-action: none;
+          position: relative;
+          width: 300px;
+          height: 150px;
         }
         
         canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
           height: 100%;
-          max-height: 100%;
         }
       </style>
       <canvas></canvas>
@@ -33,14 +35,14 @@ export default class DamdomGLSLCanvasElement extends HTMLElement {
     }
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width
-      const height = entries[0].contentRect.height
+      const width = entries[0].contentRect.width * window.devicePixelRatio
+      const height = entries[0].contentRect.height * window.devicePixelRatio
 
-      this.canvas.width = width * window.devicePixelRatio
-      this.canvas.height = height * window.devicePixelRatio
+      this.canvas.width = width
+      this.canvas.height = height
 
-      this.#gl.viewport(0, 0, this.canvas.width, this.canvas.height)
-      this.uniforms.set('glslCanvasSize', [width, height])
+      this.#gl.viewport(0, 0, width, height)
+      this.uniforms.set('resolution', [width, height])
       this.draw()
     })
     resizeObserver.observe(this.canvas)
@@ -52,27 +54,36 @@ export default class DamdomGLSLCanvasElement extends HTMLElement {
       program: new GLProgram({
         gl: this.#gl,
         uniforms: {
-          glslCanvasSize: [this.canvas.width, this.canvas.height],
+          resolution: [this.canvas.width, this.canvas.height],
         },
         vertex: `#version 300 es
 in vec3 position;
-out vec2 uv;
 void main() {
   gl_Position = vec4(position, 1.);
-  uv = position.xy * .5 + .5;
 }`,
-        fragment: FRAGMENT,
+        fragment: `#version 300 es
+precision highp float;
+
+uniform vec2 resolution;
+out vec4 fragColor;
+
+void main() {
+  fragColor = vec4(gl_FragCoord.xy / resolution, 0., 1.);
+}`,
       }),
     })
   }
 
-  get fragmentChunks() {
-    return this.#fragmentChunks
+  connectedCallback() {
+    if (this.hasAttribute('fragment')) this.fragment = this.getAttribute('fragment')
   }
 
-  set fragmentChunks(value) {
-    this.#fragmentChunks = value
-    this.object.program.fragment = addChunks(FRAGMENT, this.#fragmentChunks)
+  get fragment() {
+    return this.object.program.fragment
+  }
+
+  set fragment(value) {
+    this.object.program.fragment = value
     this.draw()
   }
 
