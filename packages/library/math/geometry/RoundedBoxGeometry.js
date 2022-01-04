@@ -1,7 +1,7 @@
 // Adapted from Marcin Ignac https://github.com/vorg/primitive-rounded-cube
 
 import BoxGeometry from './BoxGeometry.js'
-import Vector3 from '../../math/Vector3.js'
+import Vector3 from '@damienmortini/math/Vector3.js'
 
 const VECTOR3 = new Vector3()
 

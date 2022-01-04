@@ -1,4 +1,4 @@
-import Matrix4 from '../../math/Matrix4.js'
+import Matrix4 from '@damienmortini/math/Matrix4.js'
 import GestureObserver from './GestureObserver.js'
 
 export default class OrbitController {

@@ -1,5 +1,5 @@
-import Vector2 from '../math/Vector2.js'
-import Vector3 from '../math/Vector3.js'
+import Vector2 from '@damienmortini/math/Vector2.js'
+import Vector3 from '@damienmortini/math/Vector3.js'
 
 export default class Particle {
   constructor({

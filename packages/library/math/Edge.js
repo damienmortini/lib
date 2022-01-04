@@ -1,4 +1,4 @@
-import Vector2 from '../math/Vector2.js'
+import Vector2 from '@damienmortini/math/Vector2.js'
 
 export default class Edge {
   constructor(a = new Vector2(), b = new Vector2()) {

@@ -5,9 +5,9 @@ import { Camera } from '../shader/CameraShader.js'
 import { Ray, rayFromCamera } from '../shader/RayShader.js'
 import { sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere, Voxel } from '../shader/SDFShader.js'
 import * as GLSLShader from '../GLSLShader.js'
-import RoundedBoxGeometry from '../../math/geometry/RoundedBoxGeometry.js'
-import Vector4 from '../../math/Vector4.js'
-import Vector2 from '../../math/Vector2.js'
+import RoundedBoxGeometry from '@damienmortini/math/geometry/RoundedBoxGeometry.js'
+import Vector4 from '@damienmortini/math/Vector4.js'
+import Vector2 from '@damienmortini/math/Vector2.js'
 
 export default class GLRayMarchingObject extends GLObject {
   constructor({
