@@ -1,4 +1,4 @@
-import '../../@damienmortini/element-animation-lottie/index.js'
+import '@damienmortini/element-animation-lottie/index.js'
 
 export class DemoLottieAnimation extends HTMLElement {
   constructor() {

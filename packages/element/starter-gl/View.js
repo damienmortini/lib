@@ -1,8 +1,8 @@
-import Camera from '../../@damienmortini/core/3d/Camera.js'
-import GLBoxObject from '../../@damienmortini/core/gl/object/GLBoxObject.js'
-import TrackballController from '../../@damienmortini/core/input/TrackballController.js'
-import GLProgram from '../../@damienmortini/core/gl/GLProgram.js'
-import BasicShader from '../../@damienmortini/core/shader/BasicShader.js'
+import Camera from '@damienmortini/core/3d/Camera.js'
+import GLBoxObject from '@damienmortini/core/gl/object/GLBoxObject.js'
+import TrackballController from '@damienmortini/core/input/TrackballController.js'
+import GLProgram from '@damienmortini/core/gl/GLProgram.js'
+import BasicShader from '@damienmortini/core/shader/BasicShader.js'
 
 export default class View {
   constructor({

@@ -1,6 +1,6 @@
-import { getGraph } from '../../@damienmortini/graph/index.js'
-import '../../@damienmortini/damdom-viewport/index.js'
-import '../../@damienmortini/damdom-propertynode/index.js'
+import { getGraph } from '@damienmortini/graph/index.js'
+import '@damienmortini/damdom-viewport/index.js'
+import '@damienmortini/damdom-propertynode/index.js'
 
 export class GraphGUIElement extends HTMLElement {
   #graph

@@ -1,5 +1,5 @@
 
-import '../../@damienmortini/damdom-gui/index.js'
+import '@damienmortini/damdom-gui/index.js'
 
 export class DemoGuiElement extends HTMLElement {
   constructor() {

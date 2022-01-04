@@ -1,4 +1,4 @@
-import GestureObserver from '../../@damienmortini/core/input/GestureObserver.js'
+import GestureObserver from '@damienmortini/core/input/GestureObserver.js'
 
 export default class DamdomViewportElement extends HTMLElement {
   constructor() {

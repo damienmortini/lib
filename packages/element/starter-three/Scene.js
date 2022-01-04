@@ -5,7 +5,7 @@ import {
   MeshNormalMaterial,
 } from '../../three/src/Three.js'
 
-import TrackballController from '../../@damienmortini/core/input/TrackballController.js'
+import TrackballController from '@damienmortini/core/input/TrackballController.js'
 
 export default class Scene extends THREEScene {
   constructor({ canvas }) {
