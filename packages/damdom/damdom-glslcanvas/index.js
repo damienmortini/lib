@@ -82,7 +82,6 @@ void main() {
 
   draw(options) {
     this.#gl.clear(this.#gl.COLOR_BUFFER_BIT)
-    console.log(this.object.program)
     this.object.draw({ bind: true, ...options })
   }
 }
