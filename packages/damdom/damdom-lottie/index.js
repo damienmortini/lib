@@ -1,12 +1,15 @@
-import Lottie from '../../Lottie-web/build/player/lottie.min.js'
+import '../../Lottie-web/build/player/lottie.min.js'
 
 /**
  * Element to plays Lottie animation
- * @element element-animation-lottie
+ * @element damdom-lottie
  * @example
- * <element-animation-lottie src="data.json" autoplay loop></element-animation-lottie>
+ * <damdom-lottie src="data.json" autoplay loop></damdom-lottie>
  */
-class LottieAnimationElement extends HTMLElement {
+class DamdomLottieElement extends HTMLElement {
+  #container
+  #currentTime
+
   static get observedAttributes() {
     return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime', 'segments', 'customizable']
   }
@@ -34,15 +37,15 @@ class LottieAnimationElement extends HTMLElement {
       <div id="container"></div>
     `
 
-    this._container = this.shadowRoot.querySelector(`#container`)
+    this.#container = this.shadowRoot.querySelector(`#container`)
   }
 
-  async _load(src) {
+  async #load(src) {
     if (this.animation) {
       this.animation.destroy()
     }
-    this.animation = Lottie.loadAnimation({
-      container: this._container,
+    this.animation = window.lottie.loadAnimation({
+      container: this.#container,
       renderer: this.renderer,
       autoplay: this.autoplay,
       loop: this.loop,
@@ -90,7 +93,7 @@ class LottieAnimationElement extends HTMLElement {
     }
     switch (name) {
       case 'src':
-        this._load(newValue)
+        this.#load(newValue)
         break
       case 'loop':
         if (this.animation) {
@@ -224,9 +227,9 @@ class LottieAnimationElement extends HTMLElement {
   }
 
   set currentTime(value) {
-    this._currentTime = value
+    this.#currentTime = value
     if (this.animation) {
-      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this._currentTime, false)
+      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.#currentTime, false)
     }
   }
 
@@ -258,6 +261,6 @@ class LottieAnimationElement extends HTMLElement {
   }
 }
 
-export default LottieAnimationElement
+export default DamdomLottieElement
 
-customElements.define('damo-animation-lottie', LottieAnimationElement)
+customElements.define('damdom-lottie', DamdomLottieElement)
