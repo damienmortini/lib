@@ -1,17 +1,11 @@
 {
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules"
+  ],
   "compilerOptions": {
+    "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "checkJs": true,
-    "baseUrl": "node_modules/",
-    "rootDirs": [
-      ".",
-      "node_modules",
-      "packages/element",
-      "packages",
-      "damdom",
-      "demos",
-    ],
+    "checkJs": true
   },
 }
