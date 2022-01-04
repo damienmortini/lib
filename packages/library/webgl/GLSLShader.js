@@ -12,7 +12,7 @@ void main() {
   fragColor = vec4(1.);
 }`
 
-export const addChunks = (shader, ...chunks) => {
+export const addChunks = (shader, chunks) => {
   for (const [key, chunk] of chunks) {
     switch (key) {
       case 'start':

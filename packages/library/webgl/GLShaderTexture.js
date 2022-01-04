@@ -57,7 +57,7 @@ export default class GLShaderTexture extends GLTexture {
       program: new GLProgram({
         gl: this.gl,
         uniforms,
-        vertex: addChunks(VERTEX,
+        vertex: addChunks(VERTEX, [
           ['start', `
             in vec3 position;
             out vec2 vPosition;
@@ -66,11 +66,11 @@ export default class GLShaderTexture extends GLTexture {
             gl_Position = vec4(position, 1.);
             vPosition = position.xy;
           `],
-        ),
-        fragment: addChunks(FRAGMENT,
+        ]),
+        fragment: addChunks(FRAGMENT, [
           ...fragmentChunks,
           ['start', `in vec2 vPosition;`],
-        ),
+        ]),
       }),
     })
 

@@ -18,14 +18,14 @@ export default class GLBoxObject extends GLObject {
     attributes = {},
     program = new GLProgram({
       gl,
-      vertex: addChunks(VERTEX,
+      vertex: addChunks(VERTEX, [
         ['start', `
-      in vec3 position;
-    `],
+          in vec3 position;
+        `],
         ['end', `
-      gl_Position = vec4(position, 1.);
-    `],
-      )
+          gl_Position = vec4(position, 1.);
+        `],
+      ]),
     }),
   }) {
     super({

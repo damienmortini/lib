@@ -16,7 +16,7 @@ export default class BasicShader {
       ...uniforms,
     }
 
-    this.vertex = addChunks(VERTEX,
+    this.vertex = addChunks(VERTEX, [
       ['start', `
         uniform mat4 projectionView;
         uniform mat4 transform;
@@ -37,15 +37,15 @@ export default class BasicShader {
       ['end', `
         gl_Position = projectionView * transform * vec4(position, 1.);
       `],
-      ...vertexChunks)
+      ...vertexChunks])
 
-    this.fragment = addChunks(FRAGMENT,
+    this.fragment = addChunks(FRAGMENT, [
       ['start', `
         ${positions ? 'in vec3 vPosition;' : ''}
         ${normals ? 'in vec3 vNormal;' : ''}
         ${uvs ? 'in vec2 vUV;' : ''}
       `],
       ...fragmentChunks,
-    )
+    ])
   }
 }
