@@ -1,7 +1,7 @@
 {
-  "name": "@damienmortini/element-animation-lottie",
-  "version": "0.0.132",
-  "description": "<element-animation-lottie> custom element.",
+  "name": "@damienmortini/damdom-lottie",
+  "version": "0.0.1",
+  "description": "<damdom-lottie> custom element.",
   "main": "index.js",
   "publishConfig": {
     "access": "public"
@@ -11,16 +11,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/element/animation-lottie"
+    "directory": "packages/element/damdom-lottie"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-lottie",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/damdom-lottie",
   "dependencies": {
-    "@damienmortini/core": "^0.2.127",
     "lottie-web": "^5.8.1"
   }
 }

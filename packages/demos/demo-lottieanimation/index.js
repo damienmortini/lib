@@ -1,4 +1,4 @@
-import '@damienmortini/element-animation-lottie/index.js'
+import '@damienmortini/damdom-lottie/index.js'
 
 export class DemoLottieAnimation extends HTMLElement {
   constructor() {
@@ -13,13 +13,13 @@ export class DemoLottieAnimation extends HTMLElement {
           height: 150px;
         }
 
-        damo-animation-lottie {
+        damdom-lottie {
           width: 100%;
           height: 100%;
         }
       </style>
-      <damo-animation-lottie autoplay loop src="node_modules/@damienmortini/demo-lottieanimation/animations/data.json">
-      </damo-animation-lottie>
+      <damdom-lottie autoplay loop src="node_modules/@damienmortini/demo-lottieanimation/animations/data.json">
+      </damdom-lottie>
     `
   }
 }
