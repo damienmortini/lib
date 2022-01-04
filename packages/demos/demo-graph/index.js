@@ -1,5 +1,5 @@
-import { getGraph } from '../../@damienmortini/graph/index.js'
-import '../../@damienmortini/damdom-graph/index.js'
+import { getGraph } from '@damienmortini/graph/index.js'
+import '@damienmortini/damdom-graph/index.js'
 
 getGraph('demo-graph').loadData('node_modules/@damienmortini/demo-graph/graph-data.json')
 

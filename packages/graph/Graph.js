@@ -1,4 +1,4 @@
-import Signal from '../../@damienmortini/core/util/Signal.js'
+import Signal from '@damienmortini/core/util/Signal.js'
 
 export default class Graph {
   #name

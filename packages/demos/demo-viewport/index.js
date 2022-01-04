@@ -1,4 +1,4 @@
-import '../../@damienmortini/damdom-viewport/index.js'
+import '@damienmortini/damdom-viewport/index.js'
 
 export class DemoViewportElement extends HTMLElement {
   constructor() {

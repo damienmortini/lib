@@ -1,4 +1,4 @@
-import AnimationTickerElement from '../../@damienmortini/element-animation-ticker/index.js'
+import AnimationTickerElement from '@damienmortini/element-animation-ticker/index.js'
 
 import { WebGLRenderer, WebGL1Renderer } from '../../three/src/Three.js'
 

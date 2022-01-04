@@ -1,8 +1,8 @@
-import Camera from '../../@damienmortini/math/Camera.js'
-import OrbitController from '../../@damienmortini/core/input/OrbitController.js'
-import GLBoxObject from '../../@damienmortini/webgl/object/GLBoxObject.js'
-import GLProgram from '../../@damienmortini/webgl/GLProgram.js'
-import BasicShader from '../../@damienmortini/webgl/shader/BasicShader.js'
+import Camera from '@damienmortini/math/Camera.js'
+import OrbitController from '@damienmortini/core/input/OrbitController.js'
+import GLBoxObject from '@damienmortini/webgl/object/GLBoxObject.js'
+import GLProgram from '@damienmortini/webgl/GLProgram.js'
+import BasicShader from '@damienmortini/webgl/shader/BasicShader.js'
 
 export default class View {
   #canvas
