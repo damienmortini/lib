@@ -1,4 +1,4 @@
-import FrenetSerretFrame from '../../core/math/FrenetSerretFrame.js'
+import FrenetSerretFrame from '@damienmortini/core/math/FrenetSerretFrame.js'
 
 import THREEShaderMaterial from './THREEShaderMaterial.js'
 

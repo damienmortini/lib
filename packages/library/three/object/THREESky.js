@@ -5,8 +5,8 @@ import {
   IcosahedronBufferGeometry,
 } from '../../../three/src/Three.js'
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js'
-import SkyShader from '../../core/shader/SkyShader.js'
-import GradientNoiseShader from '../../core/shader/noise/GradientNoiseShader.js'
+import SkyShader from '@damienmortini/core/shader/SkyShader.js'
+import GradientNoiseShader from '@damienmortini/core/shader/noise/GradientNoiseShader.js'
 
 const skyShader = {
   uniforms: {

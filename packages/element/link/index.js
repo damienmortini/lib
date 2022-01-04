@@ -1,5 +1,5 @@
-import Ticker from '../../core/util/Ticker.js'
-import Pointer from '../../core/input/Pointer.js'
+import Ticker from '@damienmortini/core/util/Ticker.js'
+import Pointer from '@damienmortini/core/input/Pointer.js'
 
 const POINTER = Pointer.get()
 
