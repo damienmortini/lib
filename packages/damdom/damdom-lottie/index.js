@@ -1,7 +1,5 @@
 import '../../Lottie-web/build/player/lottie.min.js'
 
-console.log('dsljkgfdskjhgf')
-
 /**
  * Element to plays Lottie animation
  * @element damdom-lottie
@@ -40,6 +38,20 @@ class DamdomLottieElement extends HTMLElement {
     `
 
     this.#container = this.shadowRoot.querySelector(`#container`)
+
+    new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              for (const element of node.querySelectorAll('path, circle, ellipse, line, polygon, polyline, rect')) {
+                element.part = 'shape'
+              }
+            }
+          }
+        }
+      }
+    }).observe(this.#container, { childList: true, subtree: true })
   }
 
   async #load(src) {
