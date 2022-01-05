@@ -91,6 +91,10 @@ void main() {
     return this.object.program.uniforms
   }
 
+  get gl() {
+    return this.#gl
+  }
+
   draw(options) {
     this.#gl.clear(this.#gl.COLOR_BUFFER_BIT)
     this.object.draw({ bind: true, ...options })
