@@ -55,6 +55,8 @@ class DamdomGalleryElement extends HTMLElement {
           height: 100%;
           justify-items: center;
           align-items: center;
+          grid-auto-columns: minmax(0, 1fr);
+          grid-auto-rows: minmax(0, 1fr);
         }
 
         .highlightbutton, #backbutton {
