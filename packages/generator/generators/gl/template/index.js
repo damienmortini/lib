@@ -40,8 +40,8 @@ class TemplateElement extends DamdomTickerElement {
       const width = entries[0].contentRect.width
       const height = entries[0].contentRect.height
 
-      this.#canvas.width = width * window.devicePixelRatio
-      this.#canvas.height = height * window.devicePixelRatio
+      this.#canvas.width = width * devicePixelRatio
+      this.#canvas.height = height * devicePixelRatio
 
       this.#view.resize(width, height)
     })
@@ -53,4 +53,4 @@ class TemplateElement extends DamdomTickerElement {
   }
 }
 
-window.customElements.define('template-element', TemplateElement)
+customElements.define('template-element', TemplateElement)
