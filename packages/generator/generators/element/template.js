@@ -14,4 +14,4 @@ export class TemplateElement extends HTMLElement {
   }
 }
 
-window.customElements.define('template-element', TemplateElement)
+customElements.define('template-element', TemplateElement)

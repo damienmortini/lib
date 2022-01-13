@@ -22,7 +22,7 @@ export default class View {
       antialias: true,
     }
 
-    if (!/\bforcewebgl1\b/.test(window.location.search)) {
+    if (!/\bforcewebgl1\b/.test(location.search)) {
       this.#gl = this.#canvas.getContext('webgl2', webGLOptions)
     }
     if (!this.#gl) {
