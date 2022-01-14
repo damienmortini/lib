@@ -13,17 +13,17 @@ const __dirname = dirname(__filename)
  * @param {String} [object.path=./packages] Output path
  */
 export default function ({ elementScope, elementName, scope = 'damienmortini', path = './packages' }) {
-  const fullElementName = `${elementScope.toLowerCase()}-${elementName.replaceAll(' ', '').toLowerCase()}`
+  const fullElementName = `${elementScope}-${elementName}`.replaceAll(' ', '').toLowerCase()
   const fullPath = `${path}/${fullElementName}`
   fs.outputFileSync(`${fullPath}/package.json`, JSON.stringify({
     name: `@${scope}/${fullElementName}`,
     private: true,
     version: '0.0.0',
     dependencies: {
-      '@damienmortini/core': '*',
-      '@damienmortini/damdom-ticker': '*',
-      '@damienmortini/math': '*',
-      '@damienmortini/webgl': '*',
+      '@damienmortini/core': '0.2.127',
+      '@damienmortini/damdom-ticker': '0.0.18',
+      '@damienmortini/math': '0.0.4',
+      '@damienmortini/webgl': '0.0.6',
     },
   }, null, 2))
   let indexFileContent = fs.readFileSync(`${__dirname}/template/index.js`, { encoding: 'utf-8' })
