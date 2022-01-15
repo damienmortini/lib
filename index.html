@@ -68,6 +68,7 @@
       else gallery.highlighted = null
     }
     hashchange()
+    window.addEventListener('hashchange', hashchange)
 
     gallery.addEventListener('highlightchange', () => {
       location.hash = gallery.highlighted?.tagName.toLowerCase() ?? ''
