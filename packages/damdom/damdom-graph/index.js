@@ -18,6 +18,7 @@ export class GraphGUIElement extends HTMLElement {
         :host {
           display: block;
           position: relative;
+          font-family: monospace;
         }
 
         damdom-viewport {
@@ -61,7 +62,6 @@ export class GraphGUIElement extends HTMLElement {
         this.#container.appendChild(node)
       }
       node.value = data.value
-      console.log(data)
     }
   }
 }

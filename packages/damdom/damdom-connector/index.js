@@ -6,12 +6,20 @@ const CONNECTOR_ADD_SIGNAL = new Signal()
  * Connector element used to link inputs and other connectors together
  * @attribute inputs
  * @attribute outputs
- * @example <graph-connector
+ * @example <damdom-connector
  *    inputs="[document.getElementById('input1'), document.getElementById('input2')]"
  *    outputs="[document.getElementById('output1'), document.getElementById('output2')]"
- * ></graph-connector>
+ * ></damdom-connector>
  */
-class InputConnectorElement extends HTMLElement {
+export default class DamdomConnector extends HTMLElement {
+  #value
+  #inputs
+  #outputs
+  #inputElementInputs
+  #connectorElementInputs
+  #inputElementOutputs
+  #connectorElementOutputs
+
   /**
    * Observed Attributes
    * @private
@@ -100,36 +108,33 @@ class InputConnectorElement extends HTMLElement {
       </slot>
     `
 
-    this._onInputChangeBound = this._onInputChange.bind(this)
-    this._checkConnectionBound = this._checkConnection.bind(this)
+    this.#inputElementInputs = new Set()
+    this.#connectorElementInputs = new Set()
 
-    this._inputElementInputs = new Set()
-    this._connectorElementInputs = new Set()
-
-    this._inputElementOutputs = new Set()
-    this._connectorElementOutputs = new Set()
+    this.#inputElementOutputs = new Set()
+    this.#connectorElementOutputs = new Set()
 
     const self = this
 
-    this._inputs = new class extends Set {
+    this.#inputs = new class extends Set {
       add(value) {
         if (this.has(value) || self === value) {
           return this
         }
         super.add(value)
         if (value.value !== undefined) {
-          self._value = value.value
+          self.#value = value.value
         }
-        if (value instanceof InputConnectorElement) {
-          self._connectorElementInputs.add(value)
+        if (value instanceof DamdomConnector) {
+          self.#connectorElementInputs.add(value)
           value.outputs.add(self)
         } else {
-          self._inputElementInputs.add(value)
+          self.#inputElementInputs.add(value)
         }
-        value.addEventListener('input', self._onInputChangeBound)
-        self._updateConnectedStatus()
-        if (!(value instanceof InputConnectorElement)) {
-          self.dispatchEvent(new InputEvent('input'))
+        value.addEventListener('change', self.#onInputChange)
+        self.#updateConnectedStatus()
+        if (!(value instanceof DamdomConnector)) {
+          self.dispatchEvent(new InputEvent('change'))
         }
         return this
       }
@@ -138,14 +143,14 @@ class InputConnectorElement extends HTMLElement {
         if (!returnValue) {
           return
         }
-        value.removeEventListener('input', self._onInputChangeBound)
-        if (value instanceof InputConnectorElement) {
-          self._connectorElementInputs.delete(value)
+        value.removeEventListener('change', self.#onInputChange)
+        if (value instanceof DamdomConnector) {
+          self.#connectorElementInputs.delete(value)
           value.outputs.delete(self)
         } else {
-          self._inputElementInputs.delete(value)
+          self.#inputElementInputs.delete(value)
         }
-        self._updateConnectedStatus()
+        self.#updateConnectedStatus()
         return returnValue
       }
       clear() {
@@ -155,17 +160,17 @@ class InputConnectorElement extends HTMLElement {
       }
     }
 
-    this._outputs = new class extends Set {
+    this.#outputs = new class extends Set {
       add(value) {
         if (this.has(value) || self === value) {
           return this
         }
         super.add(value)
-        if (value instanceof InputConnectorElement) {
+        if (value instanceof DamdomConnector) {
           if (self.value !== undefined) {
-            value._value = self.value
+            value.#value = self.value
           }
-          self._connectorElementOutputs.add(value)
+          self.#connectorElementOutputs.add(value)
           value.inputs.add(self)
           self.dispatchEvent(new CustomEvent('connected', {
             bubbles: true,
@@ -179,11 +184,11 @@ class InputConnectorElement extends HTMLElement {
           if (self.value !== undefined) {
             value.value = self.value
           }
-          self._inputElementOutputs.add(value)
+          self.#inputElementOutputs.add(value)
         }
-        self._updateConnectedStatus()
-        if (value instanceof InputConnectorElement) {
-          self.dispatchEvent(new InputEvent('input'))
+        self.#updateConnectedStatus()
+        if (value instanceof DamdomConnector) {
+          self.dispatchEvent(new InputEvent('change'))
         }
         return this
       }
@@ -192,13 +197,13 @@ class InputConnectorElement extends HTMLElement {
         if (!returnValue) {
           return
         }
-        self._connectorElementOutputs.delete(value)
-        self._inputElementOutputs.delete(value)
-        if (value instanceof InputConnectorElement) {
+        self.#connectorElementOutputs.delete(value)
+        self.#inputElementOutputs.delete(value)
+        if (value instanceof DamdomConnector) {
           value.inputs.delete(self)
         }
-        self._updateConnectedStatus()
-        if (value instanceof InputConnectorElement) {
+        self.#updateConnectedStatus()
+        if (value instanceof DamdomConnector) {
           self.dispatchEvent(new CustomEvent('disconnected', {
             bubbles: true,
             composed: true,
@@ -224,12 +229,12 @@ class InputConnectorElement extends HTMLElement {
     }
 
     switch (name) {
-      case 'input':
+      case 'input': {
         const inputIds = newValue.split(' ')
         for (const inputId of inputIds) {
           const input = this.getRootNode().querySelector(`#${inputId}`)
           requestAnimationFrame(() => {
-            if (input instanceof InputConnectorElement) {
+            if (input instanceof DamdomConnector) {
               return
             }
             if (input) {
@@ -238,7 +243,8 @@ class InputConnectorElement extends HTMLElement {
           })
         }
         break
-      case 'output':
+      }
+      case 'output': {
         const outputIds = newValue.split(' ')
         for (const outputId of outputIds) {
           const output = this.getRootNode().querySelector(`#${outputId}`)
@@ -249,16 +255,17 @@ class InputConnectorElement extends HTMLElement {
           }
         }
         break
+      }
       case 'connected':
         if (!this.connected) {
-          this._connectorElementInputs.clear()
-          this._connectorElementOutputs.clear()
+          this.#connectorElementInputs.clear()
+          this.#connectorElementOutputs.clear()
         }
         break
     }
   }
 
-  _checkConnection(connector) {
+  #checkConnection = (connector) => {
     if (!this.getAttribute('output')) {
       return
     }
@@ -269,15 +276,15 @@ class InputConnectorElement extends HTMLElement {
 
   connectedCallback() {
     CONNECTOR_ADD_SIGNAL.dispatch(this)
-    CONNECTOR_ADD_SIGNAL.add(this._checkConnectionBound)
+    CONNECTOR_ADD_SIGNAL.add(this.#checkConnection)
   }
 
   disconnectedCallback() {
-    CONNECTOR_ADD_SIGNAL.delete(this._checkConnectionBound)
-    if (this.type & InputConnectorElement.TYPE_INPUT) {
+    CONNECTOR_ADD_SIGNAL.delete(this.#checkConnection)
+    if (this.type & DamdomConnector.TYPE_INPUT) {
       this.inputs.clear()
     }
-    if (this.type & InputConnectorElement.TYPE_OUTPUT) {
+    if (this.type & DamdomConnector.TYPE_OUTPUT) {
       this.outputs.clear()
     }
   }
@@ -294,19 +301,19 @@ class InputConnectorElement extends HTMLElement {
     return this.hasAttribute('connected')
   }
 
-  _onInputChange(event) {
-    this._value = event.target.value
+  #onInputChange = (event) => {
+    this.#value = event.target.value
     for (const output of this.outputs) {
-      if (!(output instanceof InputConnectorElement)) {
-        output.value = this._value
+      if (!(output instanceof DamdomConnector)) {
+        output.value = this.#value
       }
     }
-    this.dispatchEvent(new InputEvent('input'))
+    this.dispatchEvent(new InputEvent('change'))
   }
 
-  _updateConnectedStatus() {
-    this.connected = !!this._connectorElementInputs.size || !!this._connectorElementOutputs.size
-    for (const output of this._inputElementOutputs) {
+  #updateConnectedStatus() {
+    this.connected = !!this.#connectorElementInputs.size || !!this.#connectorElementOutputs.size
+    for (const output of this.#inputElementOutputs) {
       output.disabled = this.connected
     }
   }
@@ -316,43 +323,25 @@ class InputConnectorElement extends HTMLElement {
    * @readonly
    */
   get value() {
-    return this._value
+    return this.#value
   }
 
   /**
    * Set of inputs
    * @readonly
-   * @type {Set.<HTMLInputElement|InputConnectorElement>}
+   * @type {Set.<HTMLInputElement|DamdomConnector>}
    */
   get inputs() {
-    return this._inputs
+    return this.#inputs
   }
 
   /**
    * Set of outputs
    * @readonly
-   * @type {Set.<(HTMLInputElement|InputConnectorElement)>}
+   * @type {Set.<(HTMLInputElement|DamdomConnector)>}
    */
   get outputs() {
-    return this._outputs
-  }
-
-  /**
-   * Set of input elements (non connector) only
-   * @readonly
-   * @type {Set.<HTMLInputElement>}
-   */
-  get inputElements() {
-    return this._inputElementInputs
-  }
-
-  /**
-   * Set of output elements (non connector) only
-   * @readonly
-   * @type {Set.<(HTMLInputElement)>}
-   */
-  get outputElements() {
-    return this._inputElementOutputs
+    return this.#outputs
   }
 
   /**
@@ -361,8 +350,8 @@ class InputConnectorElement extends HTMLElement {
    * @type {number}
    */
   get type() {
-    return +!!this._inputElementInputs.size << 1 | +!!this._inputElementOutputs.size
+    return +!!this.#inputElementInputs.size << 1 | +!!this.#inputElementOutputs.size
   }
 }
 
-export default InputConnectorElement
+customElements.define('damdom-connector', DamdomConnector)

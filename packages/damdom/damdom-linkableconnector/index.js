@@ -1,4 +1,4 @@
-import InputConnectorElement from '../input-connector/index.js'
+import DamdomConnector from '../damdom-connector/index.js'
 
 const CONNECTORS = new Set()
 
@@ -7,7 +7,7 @@ let activeConnector = null
 /**
  * Handle connector elements linking
  */
-class InputConnectorLinkableElement extends InputConnectorElement {
+class DamdomLinkableConnector extends DamdomConnector {
   constructor() {
     super()
 
@@ -56,10 +56,11 @@ class InputConnectorLinkableElement extends InputConnectorElement {
     }))
   }
 
-  _onPointerDown() {
+  _onPointerDown(event) {
     if (activeConnector) {
       return
     }
+    event.stopPropagation()
     activeConnector = this
 
     window.addEventListener('pointerup', this._onWindowPointerUpBound, { passive: false })
@@ -97,7 +98,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
 
     window.removeEventListener('pointerup', this._onWindowPointerUpBound)
 
-    if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== InputConnectorLinkableElement.TYPE_BOTH)) {
+    if (!hitConnector || (activeConnector.type === hitConnector.type && hitConnector.type !== DamdomLinkableConnector.TYPE_BOTH)) {
       activeConnector = null
       this.dispatchEvent(new CustomEvent('connectorlink', {
         composed: true,
@@ -110,7 +111,7 @@ class InputConnectorLinkableElement extends InputConnectorElement {
       return
     }
 
-    const inputConnector = activeConnector.type & InputConnectorLinkableElement.TYPE_INPUT || hitConnector.type & InputConnectorLinkableElement.TYPE_OUTPUT ? hitConnector : activeConnector
+    const inputConnector = activeConnector.type & DamdomLinkableConnector.TYPE_INPUT || hitConnector.type & DamdomLinkableConnector.TYPE_OUTPUT ? hitConnector : activeConnector
     const outputConnector = inputConnector === activeConnector ? hitConnector : activeConnector
 
     inputConnector.outputs.add(outputConnector)
@@ -119,4 +120,6 @@ class InputConnectorLinkableElement extends InputConnectorElement {
   }
 }
 
-export default InputConnectorLinkableElement
+export default DamdomLinkableConnector
+
+window.customElements.define('damdom-linkableconnector', DamdomLinkableConnector)
