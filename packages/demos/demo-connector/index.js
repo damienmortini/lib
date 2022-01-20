@@ -10,13 +10,34 @@ export class DemoConnectorElement extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <div id="left">
         <input type="range" id="input">
-        <damdom-connector id="input-connector" input="input" output="output-connector"></damdom-connector>
+        <damdom-connector tabindex="-1" id="input-connector" input="input" output="output-connector"></damdom-connector>
       </div>
       <div id="right">
-        <damdom-connector id="output-connector" output="output"></damdom-connector>
+        <damdom-connector tabindex="-1" id="output-connector" output="output"></damdom-connector>
         <input type="range" id="output">
       </div>
     `
+
+    this.shadowRoot.querySelector('#input').addEventListener('input', (event) => event.target.dispatchEvent(new Event('change')))
+
+    let activeConnector
+    this.shadowRoot.addEventListener('pointerdown', (event) => {
+      if (event.target.localName !== 'damdom-connector') return
+      if (activeConnector === event.target) {
+        activeConnector.disconnectConnectors()
+        const connector = activeConnector
+        requestAnimationFrame(() => connector.blur())
+        activeConnector = null
+      }
+      if (!activeConnector) {
+        activeConnector = event.target
+        activeConnector.addEventListener('blur', () => activeConnector = null, { once: true })
+      } else {
+        const connector = activeConnector
+        requestAnimationFrame(() => connector.blur())
+        activeConnector.connect(event.target)
+      }
+    })
   }
 }
 

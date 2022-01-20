@@ -187,6 +187,7 @@ export default class DamdomConnector extends HTMLElement {
           self.#inputElementOutputs.add(value)
         }
         self.#updateConnectedStatus()
+        self.#updateOutputAttribute()
         if (value instanceof DamdomConnector) {
           self.dispatchEvent(new InputEvent('change'))
         }
@@ -203,6 +204,7 @@ export default class DamdomConnector extends HTMLElement {
           value.inputs.delete(self)
         }
         self.#updateConnectedStatus()
+        self.#updateOutputAttribute()
         if (value instanceof DamdomConnector) {
           self.dispatchEvent(new CustomEvent('disconnected', {
             bubbles: true,
@@ -223,6 +225,26 @@ export default class DamdomConnector extends HTMLElement {
     }
   }
 
+  #updateOutputAttribute() {
+    this.setAttribute('output', [...this.outputs].map((output) => output.id).join(' '))
+  }
+
+  connect(connector) {
+    if (this.type & DamdomConnector.TYPE_OUTPUT) this.outputs.add(connector)
+    else this.inputs.add(connector)
+  }
+
+  disconnect(connector) {
+    this.outputs.delete(connector)
+    this.inputs.delete(connector)
+  }
+
+  disconnectConnectors() {
+    for (const connector of [...this.inputs, ...this.outputs]) {
+      if (connector instanceof DamdomConnector) this.disconnect(connector)
+    }
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) {
       return
@@ -230,7 +252,9 @@ export default class DamdomConnector extends HTMLElement {
 
     switch (name) {
       case 'input': {
+        // this.inputs.clear()
         const inputIds = newValue.split(' ')
+        if (!inputIds[0]) break
         for (const inputId of inputIds) {
           const input = this.getRootNode().querySelector(`#${inputId}`)
           requestAnimationFrame(() => {
@@ -245,7 +269,9 @@ export default class DamdomConnector extends HTMLElement {
         break
       }
       case 'output': {
+        // this.outputs.clear()
         const outputIds = newValue.split(' ')
+        if (!outputIds[0]) break
         for (const outputId of outputIds) {
           const output = this.getRootNode().querySelector(`#${outputId}`)
           if (output) {
@@ -265,40 +291,44 @@ export default class DamdomConnector extends HTMLElement {
     }
   }
 
-  #checkConnection = (connector) => {
-    if (!this.getAttribute('output')) {
-      return
-    }
-    if (this.getAttribute('output').split(' ').includes(connector.id)) {
-      this.outputs.add(connector)
-    }
-  }
+  // #checkConnection = (connector) => {
+  //   if (!this.getAttribute('output')) {
+  //     return
+  //   }
+  //   if (this.getAttribute('output').split(' ').includes(connector.id)) {
+  //     this.outputs.add(connector)
+  //   }
+  // }
 
-  connectedCallback() {
-    CONNECTOR_ADD_SIGNAL.dispatch(this)
-    CONNECTOR_ADD_SIGNAL.add(this.#checkConnection)
-  }
+  // connectedCallback() {
+  //   CONNECTOR_ADD_SIGNAL.dispatch(this)
+  //   CONNECTOR_ADD_SIGNAL.add(this.#checkConnection)
+  // }
 
-  disconnectedCallback() {
-    CONNECTOR_ADD_SIGNAL.delete(this.#checkConnection)
-    if (this.type & DamdomConnector.TYPE_INPUT) {
-      this.inputs.clear()
-    }
-    if (this.type & DamdomConnector.TYPE_OUTPUT) {
-      this.outputs.clear()
-    }
-  }
-
-  set connected(value) {
-    if (value) {
-      this.setAttribute('connected', '')
-    } else {
-      this.removeAttribute('connected')
-    }
-  }
+  // disconnectedCallback() {
+  //   CONNECTOR_ADD_SIGNAL.delete(this.#checkConnection)
+  //   if (this.type & DamdomConnector.TYPE_INPUT) {
+  //     this.inputs.clear()
+  //   }
+  //   if (this.type & DamdomConnector.TYPE_OUTPUT) {
+  //     this.outputs.clear()
+  //   }
+  // }
 
   get connected() {
     return this.hasAttribute('connected')
+  }
+
+  set connected(value) {
+    this.toggleAttribute('connected', value)
+  }
+
+  get active() {
+    return this.hasAttribute('active')
+  }
+
+  set active(value) {
+    this.toggleAttribute('active', value)
   }
 
   #onInputChange = (event) => {

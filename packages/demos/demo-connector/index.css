@@ -2,3 +2,7 @@
   display: block;
   position: relative;
 }
+
+damdom-connector:focus {
+  background-color: aquamarine;
+}
