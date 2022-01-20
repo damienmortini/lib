@@ -32,8 +32,9 @@ export default class DamdomViewportElement extends HTMLElement {
     height: 100%;
     pointer-events: none;
   }
-
+  
   #container slot::slotted(*) {
+    will-change: transform;
     pointer-events: auto;
   }
 </style>

@@ -1,7 +1,9 @@
+import '@damienmortini/damdom-linkableconnector/index.js'
+
 export class GraphPropertyNodeElement extends HTMLElement {
   #value
-  #valueDisplay
-  #idDisplay
+  #valueElement
+  #idElement
 
   static get observedAttributes() {
     return ['id']
@@ -19,19 +21,18 @@ export class GraphPropertyNodeElement extends HTMLElement {
           border-radius: 4px;
           padding: 5px 10px;
           box-sizing: border-box;
+          user-select: none;
         }
       </style>
-      <span id="id"></span>: 
-      <span id="value"></span>
+      <span id="id"></span><damdom-linkableconnector></damdom-linkableconnector>
     `
-    this.#idDisplay = this.shadowRoot.querySelector('#id')
-    this.#valueDisplay = this.shadowRoot.querySelector('#value')
+    this.#idElement = this.shadowRoot.querySelector('#id')
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'id':
-        this.#idDisplay.textContent = newValue
+        this.#idElement.textContent = newValue
         break
     }
   }
@@ -42,7 +43,6 @@ export class GraphPropertyNodeElement extends HTMLElement {
 
   set value(value) {
     this.#value = value
-    this.#valueDisplay.textContent = value
   }
 }
 

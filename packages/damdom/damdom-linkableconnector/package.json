@@ -1,8 +1,8 @@
 {
-  "name": "@damienmortini/element-input-connector-linkable",
+  "name": "@damienmortini/damdom-linkableconnector",
   "private": true,
   "version": "0.0.16",
-  "description": "<element-input-connector-linkable> custom element.",
+  "description": "<damdom-linkableconnector> custom element.",
   "publishConfig": {
     "access": "public"
   },
@@ -12,12 +12,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/element/input-connector-linkable"
+    "directory": "packages/damdom/damdom-linkableconnector"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-connector-linkable"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-linkableconnector"
 }
