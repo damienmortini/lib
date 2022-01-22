@@ -1,23 +1,5 @@
 {
   "name": "@damienmortini/damdom-connector",
   "private": true,
-  "version": "0.0.20",
-  "description": "<damdom-connector> custom element.",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/damdom/damdom-connector"
-  },
-  "keywords": [
-    "custom elements",
-    "web components"
-  ],
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-connector"
+  "version": "0.0.0"
 }

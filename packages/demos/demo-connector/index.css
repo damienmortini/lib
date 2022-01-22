@@ -1,6 +1,8 @@
 :host {
-  display: block;
+  display: grid;
   position: relative;
+  gap: 50px;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 damdom-connector:focus {
