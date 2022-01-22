@@ -1,0 +1,21 @@
+:host {
+  display: grid;
+  position: relative;
+  grid-template-columns: auto 1fr auto;
+  gap: 5px;
+}
+
+.connector {
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #ccc;
+}
+
+.connector:hover {
+  background-color: #aaa;
+}
+
+.connector:focus {
+  background-color: red;
+}
