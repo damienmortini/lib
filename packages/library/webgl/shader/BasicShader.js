@@ -37,7 +37,8 @@ export default class BasicShader {
       ['end', `
         gl_Position = projectionView * transform * vec4(position, 1.);
       `],
-      ...vertexChunks])
+      ...vertexChunks,
+    ])
 
     this.fragment = addChunks(FRAGMENT, [
       ['start', `
