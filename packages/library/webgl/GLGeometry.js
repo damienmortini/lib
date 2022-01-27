@@ -56,7 +56,7 @@ export default class GLGeometry {
 
     for (const [key, value] of this.attributes) {
       if (!(value instanceof GLVertexAttribute)) {
-        this.attributes.set(key, new GLVertexAttribute({ gl, ...value }))
+        this.attributes.set(key, new GLVertexAttribute({ gl, ...value, data: value.data ?? value.buffer }))
       }
     }
 
@@ -64,7 +64,7 @@ export default class GLGeometry {
       this.indices = new GLVertexAttribute({
         gl: this.gl,
         target: this.gl.ELEMENT_ARRAY_BUFFER,
-        ...(indices.length !== undefined ? { data: indices } : indices),
+        ...(indices.length !== undefined ? { data: indices } : { ...indices, data: indices.data ?? indices.buffer }),
       })
     }
   }
