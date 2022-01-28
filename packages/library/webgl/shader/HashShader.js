@@ -1,5 +1,6 @@
 // https://www.shadertoy.com/view/XlGcRh
 // https://www.shadertoy.com/view/XdXBRH
+// https://www.shadertoy.com/view/fljGWz
 
 export const hash1 = ({ noUInt = false } = {}) => {
   return `float hash1(float n) {
@@ -29,6 +30,12 @@ float hash1(uvec2 x) {
   uvec2 q = 1103515245U * ((x >> 1U) ^ (x.yx));
   uint n = 1103515245U * ((q.x) ^ (q.y >> 3U));
   return float(n) * (1.0 / float(0xffffffffU));
+}
+
+float hash1(uvec3 i) {
+  i*=uvec3(0x456789ab,0x1b74a659,0x46d5c422);
+	i.x^=i.y^i.z;
+  return float(i.x*0x666aa045u)/4294967295.;
 }
 `)
 }
