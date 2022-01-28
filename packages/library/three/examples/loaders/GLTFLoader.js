@@ -385,18 +385,6 @@ class GLTFLoader extends Loader {
 
 	}
 
-	parseAsync( data, path ) {
-
-		const scope = this;
-
-		return new Promise( function ( resolve, reject ) {
-
-			scope.parse( data, path, resolve, reject );
-
-		} );
-
-	}
-
 }
 
 /* GLTFREGISTRY */
@@ -1445,7 +1433,7 @@ class GLTFTextureTransformExtension {
 /**
  * Specular-Glossiness Extension
  *
- * Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness
  */
 
 /**
@@ -2253,7 +2241,7 @@ class GLTFParser {
 
 		// Use an ImageBitmapLoader if imageBitmaps are supported. Moves much of the
 		// expensive work of uploading a texture to the GPU off the main thread.
-		if ( typeof createImageBitmap !== 'undefined' && /Firefox|Safari/.test( navigator.userAgent ) === false ) {
+		if ( typeof createImageBitmap !== 'undefined' && /Firefox/.test( navigator.userAgent ) === false ) {
 
 			this.textureLoader = new ImageBitmapLoader( this.options.manager );
 
@@ -3655,9 +3643,10 @@ class GLTFParser {
 
 				if ( PATH_PROPERTIES[ target.path ] === PATH_PROPERTIES.weights ) {
 
+					// Node may be a Group (glTF mesh with several primitives) or a Mesh.
 					node.traverse( function ( object ) {
 
-						if ( object.morphTargetInfluences ) {
+						if ( object.isMesh === true && object.morphTargetInfluences ) {
 
 							targetNames.push( object.name ? object.name : object.uuid );
 

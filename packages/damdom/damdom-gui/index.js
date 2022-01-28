@@ -63,7 +63,7 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
   }
 
   connectedCallback() {
-    if (!this.name) this.name = '🪄 GUI'
+    if (!this.name) this.name = '✨ GUI'
     this.open = sessionStorage.getItem('damdom-gui:close') === null
   }
 
