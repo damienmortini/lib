@@ -38,7 +38,7 @@ export default class DamdomGUIFolderElement extends HTMLElement {
         #content {
           display: grid;
           align-items: center;
-          grid-template-columns: auto 2fr 10px;
+          grid-template-columns: auto minmax(66%, 1fr) 10px;
           gap: 5px;
         }
         section {
