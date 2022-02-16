@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gltf",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "GLTF Helpers",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/math": "^0.0.5"
+    "@damienmortini/math": "^0.0.6"
   }
 }
