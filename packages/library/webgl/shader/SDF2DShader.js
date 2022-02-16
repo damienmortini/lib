@@ -63,10 +63,10 @@ export const sdRhombus = () => {
   return `
 float sdRhombus( in vec2 p, in vec2 b ) 
 {
-  vec2 q = abs(p);
-  float h = clamp((-2.0*ndot(q,b)+ndot(b,b))/dot(b,b),-1.0,1.0);
-  float d = length( q - 0.5*b*vec2(1.0-h,1.0+h) );
-  return d * sign( q.x*b.y + q.y*b.x - b.x*b.y );
+  p = abs(p);
+  float h = clamp( ndot(b-2.0*p,b)/dot(b,b), -1.0, 1.0 );
+  float d = length( p-0.5*b*vec2(1.0-h,1.0+h) );
+  return d * sign( p.x*b.y + p.y*b.x - b.x*b.y );
 }
 `
 }

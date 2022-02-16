@@ -6,6 +6,19 @@ export const Voxel = `
   };
 `
 
+export const dot2 = () => {
+  return `
+    float dot2( in vec2 v ) { return dot(v,v); }
+    float dot2( in vec3 v ) { return dot(v,v); }
+  `
+}
+
+export const ndot = () => {
+  return `
+    float ndot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
+  `
+}
+
 export const sdfBox = () => {
   return `
     Voxel sdfBox(vec3 position, vec3 box, vec4 material) {
