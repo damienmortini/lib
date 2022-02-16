@@ -13,6 +13,6 @@
     "directory": "packages/blend2gltf"
   },
   "dependencies": {
-    "chokidar": "^3.5.2"
+    "chokidar": "^3.5.3"
   }
 }

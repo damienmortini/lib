@@ -7,7 +7,7 @@
     "start": "node ./index.js"
   },
   "dependencies": {
-    "@gltf-transform/core": "^1.2.4",
-    "@gltf-transform/functions": "^1.2.4"
+    "@gltf-transform/core": "^2.0.4",
+    "@gltf-transform/functions": "^2.0.4"
   }
 }

@@ -26,6 +26,6 @@
   "bin": "index.js",
   "dependencies": {
     "fs-extra": "^10.0.0",
-    "jsdoc-to-markdown": "^7.1.0"
+    "jsdoc-to-markdown": "^7.1.1"
   }
 }
