@@ -1,4 +1,4 @@
-export default class InputPadXYElement extends HTMLElement {
+export default class DamdomPadXYElement extends HTMLElement {
   static get observedAttributes() {
     return ['value', 'disabled']
   }
@@ -137,6 +137,4 @@ export default class InputPadXYElement extends HTMLElement {
   }
 }
 
-if (!customElements.get('damo-input-pad-xy')) {
-  customElements.define('damo-input-pad-xy', class DamoInputPadXYElement extends InputPadXYElement { })
-}
+customElements.define('damdom-padxy', DamdomPadXYElement)
