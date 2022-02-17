@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-padxy",
-  "version": "0.0.2",
+  "version": "0.0.20",
   "description": "<damdom-padxy> custom element.",
   "publishConfig": {
     "access": "public"
