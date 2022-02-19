@@ -117,7 +117,11 @@ export default class OrbitController {
     this.#distance += (this.distanceEnd - this.#distance) * this.zoomEasing
 
     this.#selfMatrix.invert()
-    this.matrix.multiply(this.#selfMatrix)
+    if (this.inverted) {
+      this.matrix.multiply(this.#selfMatrix, this.matrix)
+    } else {
+      this.matrix.multiply(this.#selfMatrix)
+    }
 
     this.#selfMatrix.identity()
     this.#selfMatrix.rotateX(this.#tilt)
