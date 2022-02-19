@@ -12,7 +12,7 @@ export default class OrbitController {
     domElement = null,
     pan = 0,
     tilt = 0,
-    invertRotation = true,
+    inverted = false,
     distance = 1,
     distanceMin = 0,
     distanceMax = Infinity,
@@ -29,7 +29,7 @@ export default class OrbitController {
     zoomDisabled = false,
   }) {
     this.matrix = matrix
-    this.invertRotation = invertRotation
+    this.inverted = inverted
     this.distanceMax = distanceMax
     this.distanceMin = distanceMin
     this.zoomEasing = zoomEasing
@@ -61,12 +61,12 @@ export default class OrbitController {
 
       const gestureObserver = new GestureObserver((gesture) => {
         if (!this.panDisabled) {
-          this.panEnd += (this.invertRotation ? -1 : 1) * gesture.movementX * this.rotationVelocity
+          this.panEnd += gesture.movementX * this.rotationVelocity
           this.panEnd = Math.max(this.panMin, Math.min(this.panMax, this.panEnd))
         }
 
         if (!this.tiltDisabled) {
-          this.tiltEnd += (this.invertRotation ? 1 : -1) * gesture.movementY * this.rotationVelocity
+          this.tiltEnd += gesture.movementY * this.rotationVelocity
           this.tiltEnd = Math.max(this.tiltMin, Math.min(this.tiltMax, this.tiltEnd))
         }
 
@@ -120,8 +120,8 @@ export default class OrbitController {
     this.matrix.multiply(this.#selfMatrix)
 
     this.#selfMatrix.identity()
+    this.#selfMatrix.rotateX(this.#tilt)
     this.#selfMatrix.rotateY(this.#pan)
-    this.#selfMatrix.rotateX(-this.#tilt)
     const sinPan = Math.sin(this.#pan)
     const cosPan = Math.cos(this.#pan)
     const cosTilt = Math.cos(this.#tilt)
@@ -130,6 +130,10 @@ export default class OrbitController {
     this.#selfMatrix.y = sinTilt * this.#distance
     this.#selfMatrix.z = this.#distance * cosPan * cosTilt
 
-    this.matrix.multiply(this.#selfMatrix)
+    if (this.inverted) {
+      this.matrix.multiply(this.#selfMatrix, this.matrix)
+    } else {
+      this.matrix.multiply(this.#selfMatrix)
+    }
   }
 }

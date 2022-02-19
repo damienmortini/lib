@@ -100,8 +100,7 @@ export default class TrackballController {
 
     if (this.inverted) {
       this.#cachedMatrix.invert()
-      this.#cachedMatrix.multiply(this.matrix)
-      this.matrix.copy(this.#cachedMatrix)
+      this.matrix.multiply(this.#cachedMatrix, this.matrix)
     } else {
       this.matrix.multiply(this.#cachedMatrix)
     }
