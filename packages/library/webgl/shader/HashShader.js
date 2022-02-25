@@ -19,13 +19,14 @@ float hash1(vec4 n) {
   return hash1(vec2(hash1(n.xyz), n.w));
 }
 ` + (noUInt ? '' : `
-float hash1(uint n) {
-  // integer hash copied from Hugo Elias
-  n = (n << 13U) ^ n;
-  n = n * (n * n * 15731U + 789221U) + 1376312589U;
-  return float(n & uvec3(0x7fffffffU)) / float(0x7fffffff);
+float hash1(uint v) {
+  uint state = v * 747796405u + 2891336453u;
+  uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+  uint hash = (word >> 22u) ^ word;
+  return float(hash) * (1.0 / float(0xffffffffu));
 }
 
+// TODO change these to use PCG (https://www.shadertoy.com/view/XlGcRh)
 float hash1(uvec2 x) {
   uvec2 q = 1103515245U * ((x >> 1U) ^ (x.yx));
   uint n = 1103515245U * ((q.x) ^ (q.y >> 3U));
@@ -38,6 +39,15 @@ float hash1(uvec3 i) {
   return float(i.x*0x666aa045u)/4294967295.;
 }
 `)
+}
+
+export const uhash1 = () => {
+  return `uint uhash1(uint v) {
+  uint state = v * 747796405u + 2891336453u;
+  uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+  return (word >> 22u) ^ word;
+}
+`
 }
 
 export const hash2 = ({ noUInt = false } = {}) => {
