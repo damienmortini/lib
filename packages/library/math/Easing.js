@@ -3,7 +3,7 @@ export const powerIn = (x, power = 2) => {
 }
 
 export const powerOut = (x, power = 2) => {
-  return 1 - Math.abs(Math.pow(x - 1, power))
+  return 1 - Math.pow(1 - x, power)
 }
 
 export const powerInOut = (x, power = 2) => {
