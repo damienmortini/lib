@@ -13,7 +13,7 @@ export default class OrbitController {
     pan = 0,
     tilt = 0,
     inverted = false,
-    distance = 1,
+    distance = 0,
     distanceMin = 0,
     distanceMax = Infinity,
     tiltMin = -Infinity,
@@ -117,27 +117,21 @@ export default class OrbitController {
     this.#distance += (this.distanceEnd - this.#distance) * this.zoomEasing
 
     this.#selfMatrix.invert()
-    if (this.inverted) {
-      this.matrix.multiply(this.#selfMatrix, this.matrix)
-    } else {
-      this.matrix.multiply(this.#selfMatrix)
-    }
+    this.matrix.multiply(this.#selfMatrix)
 
     this.#selfMatrix.identity()
-    this.#selfMatrix.rotateX(this.#tilt)
-    this.#selfMatrix.rotateY(this.#pan)
-    const sinPan = Math.sin(this.#pan)
-    const cosPan = Math.cos(this.#pan)
+    this.#selfMatrix.rotateY(-this.#pan)
+    this.#selfMatrix.rotateX(-this.#tilt)
+    const sinPan = Math.sin(-this.#pan)
+    const cosPan = Math.cos(-this.#pan)
     const cosTilt = Math.cos(this.#tilt)
     const sinTilt = Math.sin(this.#tilt)
     this.#selfMatrix.x = this.#distance * sinPan * cosTilt
     this.#selfMatrix.y = sinTilt * this.#distance
     this.#selfMatrix.z = this.#distance * cosPan * cosTilt
 
-    if (this.inverted) {
-      this.matrix.multiply(this.#selfMatrix, this.matrix)
-    } else {
-      this.matrix.multiply(this.#selfMatrix)
-    }
+    if (this.inverted) this.#selfMatrix.invert()
+
+    this.matrix.multiply(this.#selfMatrix)
   }
 }
