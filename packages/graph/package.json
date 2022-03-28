@@ -11,5 +11,17 @@
   "dependencies": {
     "@damienmortini/server": "^1.0.55",
     "ws": "^8.5.0"
-  }
+  },
+  "author": "Damien Mortini",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/graph"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/graph"
 }

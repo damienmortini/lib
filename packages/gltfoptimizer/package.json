@@ -9,5 +9,17 @@
   "dependencies": {
     "@gltf-transform/core": "^2.0.5",
     "@gltf-transform/functions": "^2.0.5"
-  }
+  },
+  "author": "Damien Mortini",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/gltfoptimizer"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gltfoptimizer"
 }
