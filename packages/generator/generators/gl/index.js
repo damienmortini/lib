@@ -20,10 +20,10 @@ export default function ({ elementScope, elementName, scope = 'damienmortini', p
     private: true,
     version: '0.0.0',
     dependencies: {
-      '@damienmortini/core': '0.2.127',
-      '@damienmortini/damdom-ticker': '0.0.18',
-      '@damienmortini/math': '0.0.4',
-      '@damienmortini/webgl': '0.0.6',
+      '@damienmortini/core': '^0.2.131',
+      '@damienmortini/damdom-ticker': '^0.0.22',
+      '@damienmortini/math': '^0.0.7',
+      '@damienmortini/webgl': '^0.0.10',
     },
   }, null, 2))
   let indexFileContent = fs.readFileSync(`${__dirname}/template/index.js`, { encoding: 'utf-8' })
