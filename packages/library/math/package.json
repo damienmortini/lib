@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/math",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Math Helpers",
   "publishConfig": {
     "access": "public"

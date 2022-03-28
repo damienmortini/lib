@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/webgl",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "WebGL Helpers",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/damienmortini/lib#readme",
   "dependencies": {
-    "@damienmortini/math": "^0.0.6"
+    "@damienmortini/math": "^0.0.7"
   }
 }
