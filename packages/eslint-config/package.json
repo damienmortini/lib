@@ -11,5 +11,9 @@
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/eslint-config"
-  }
+  },
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/eslint-config"
 }

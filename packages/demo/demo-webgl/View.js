@@ -3,7 +3,6 @@ import OrbitController from '@damienmortini/core/input/OrbitController.js'
 import GLBoxObject from '@damienmortini/webgl/object/GLBoxObject.js'
 import GLProgram from '@damienmortini/webgl/GLProgram.js'
 import BasicShader from '@damienmortini/webgl/shader/BasicShader.js'
-import Matrix4 from '@damienmortini/math/Matrix4.js'
 
 export default class View {
   #canvas
@@ -11,7 +10,6 @@ export default class View {
   #controller
   #gl
   #object
-  #objectTransform = new Matrix4()
 
   constructor({
     canvas,
@@ -72,7 +70,6 @@ export default class View {
     this.#object.draw({
       bind: true,
       uniforms: {
-        transform: this.#objectTransform,
         projectionView: this.#camera.projectionView,
       },
     })

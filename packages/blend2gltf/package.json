@@ -14,5 +14,9 @@
   },
   "dependencies": {
     "chokidar": "^3.5.3"
-  }
+  },
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/blend2gltf"
 }
