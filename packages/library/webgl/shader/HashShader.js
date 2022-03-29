@@ -3,16 +3,23 @@
 // https://www.shadertoy.com/view/fljGWz
 
 export const hash1 = ({ noUInt = false } = {}) => {
-  return `float hash1(float n) {
-  return fract(sin(n) * 43758.5453123);
+  return `float hash1(float p) {
+  p = fract(p * .1031);
+  p *= p + 33.33;
+  p *= p + p;
+  return fract(p);
 }
 
-float hash1(vec2 n) {
-  return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
+float hash1(vec2 p) {
+  vec3 p3  = fract(vec3(p.xyx) * .1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
 }
 
-float hash1(vec3 n) {
-  return hash1(vec2(hash1(n.xy), n.z));
+float hash1(vec3 p3) {
+  p3  = fract(p3 * .1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
 }
 
 float hash1(vec4 n) {
@@ -52,8 +59,9 @@ export const uhash1 = () => {
 
 export const hash2 = ({ noUInt = false } = {}) => {
   return `vec2 hash2(vec2 p) {
-  p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-  return fract(sin(p) * 43758.5453123);
+  vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+  p3 += dot(p3, p3.yzx+33.33);
+  return fract((p3.xx+p3.yz)*p3.zy);
 }
 ` + (noUInt ? '' : `
 vec2 hash2(uint n) {
@@ -75,9 +83,10 @@ vec2 hash2(uvec2 x) {
 }
 
 export const hash3 = () => {
-  return `vec3 hash3(vec3 p) {
-  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
-  return fract(sin(p) * 43758.5453123);
+  return `vec3 hash3(vec3 p3) {
+  p3 = fract(p3 * vec3(.1031, .1030, .0973));
+  p3 += dot(p3, p3.yxz+33.33);
+  return fract((p3.xxy + p3.yxx)*p3.zyx);
 }
 
 vec3 hash3(uint n) {
