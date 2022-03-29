@@ -20,6 +20,7 @@ export default class View {
       depth: true,
       alpha: false,
       antialias: true,
+      powerPreference: 'high-performance',
     })
 
     this.#camera = new Camera()
