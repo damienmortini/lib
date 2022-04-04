@@ -20,7 +20,7 @@ export default function ({ template, elementScope, elementName, scope, path }) {
   const fileNames = fs.readdirSync(`${__dirname}/templates/${template}`)
   let packageJSON = {}
   for (const fileName of fileNames) {
-    if (fileName === 'package.json') {
+    if (fileName === '_package.json') {
       packageJSON = fs.readJSONSync(`${__dirname}/templates/${template}/${fileName}`)
     } else if (fileName === 'index.js') {
       let indexFileContent = fs.readFileSync(`${__dirname}/templates/${template}/${fileName}`, { encoding: 'utf-8' })
