@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/graph",
   "private": true,
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "index.js",
   "type": "module",
   "bin": "bin/index.js",
