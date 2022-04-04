@@ -1,22 +1,29 @@
 module.exports = {
-  'env': {
-    'browser': true,
-    'es2021': true,
-    'node': true,
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
   },
-  'extends': [
+  extends: [
     'eslint:recommended',
     'google',
   ],
-  'globals': {
-    'Atomics': 'readonly',
-    'SharedArrayBuffer': 'readonly',
+  parser: '@babel/eslint-parser',
+  parserOptions: {
+    babelOptions: {
+      plugins: [
+        '@babel/plugin-syntax-import-assertions',
+      ],
+    },
+    requireConfigFile: false,
+    sourceType: 'module',
+    ecmaVersion: 'latest',
   },
-  'parserOptions': {
-    'sourceType': 'module',
-    'ecmaVersion': 'latest',
+  globals: {
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
   },
-  'rules': {
+  rules: {
     'indent': [
       'error',
       2,
