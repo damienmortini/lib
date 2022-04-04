@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@damienmortini/core": "^0.2.131",
+    "@damienmortini/damdom-ticker": "^0.0.22",
+    "@damienmortini/math": "^0.0.7",
+    "@damienmortini/webgl": "^0.0.10"
+  }
+}
