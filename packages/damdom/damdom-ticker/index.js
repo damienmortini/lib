@@ -14,6 +14,10 @@ class DamdomTickerElement extends HTMLElement {
   #pauseFlagValue
   #callback = () => console.log('DamdomTickerElement.callback needs to be set')
 
+  static get deltaTime() {
+    return Ticker.deltaTime
+  }
+
   constructor() {
     super()
 
