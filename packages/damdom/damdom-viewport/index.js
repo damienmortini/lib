@@ -109,9 +109,11 @@ export default class DamdomViewportElement extends HTMLElement {
     }, { pointerCapture: true })
 
     this.addEventListener('wheel', (event) => {
-      if (event.target !== this && event.target.scrollHeight > event.target.clientHeight) return
+      if (event.target !== this && event.target.scrollHeight > event.target.clientHeight || !event.deltaY) return
       viewportBoundingClientRect = this.getBoundingClientRect()
-      const scale = 1 + (event.deltaY < 0 ? 1 : -1) * .1
+      let scale = 1
+      if (event.deltaMode === WheelEvent.DOM_DELTA_PIXEL) scale -= event.deltaY * .001
+      else scale += (event.deltaY < 0 ? 1 : -1) * .1
       const x = event.clientX - viewportBoundingClientRect.x - viewportBoundingClientRect.width * .5
       const y = event.clientY - viewportBoundingClientRect.y - viewportBoundingClientRect.height * .5
       zoom(scale, x, y)
