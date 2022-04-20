@@ -13,7 +13,7 @@ export default class GLTexture {
   #minFilter
 
   constructor({
-    gl,
+    gl = {}, // Default value to remove when https://github.com/microsoft/vscode/issues/147777 will be resolved
     data = undefined,
     width = undefined,
     height = undefined,
