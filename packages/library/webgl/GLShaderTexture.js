@@ -11,7 +11,7 @@ export default class GLShaderTexture extends GLTexture {
   #quad
 
   constructor({
-    gl = {} // Default value to remove when https://github.com/microsoft/vscode/issues/147777 will be resolved,
+    gl = {}, // Default value to remove when https://github.com/microsoft/vscode/issues/147777 will be resolved,
     width,
     height,
     target = gl.TEXTURE_2D,
