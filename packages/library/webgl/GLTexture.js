@@ -11,6 +11,7 @@ export default class GLTexture {
   #wrapS
   #magFilter
   #minFilter
+  #data
 
   constructor({
     gl = {}, // Default value to remove when https://github.com/microsoft/vscode/issues/147777 will be resolved
@@ -55,11 +56,11 @@ export default class GLTexture {
   }
 
   set data(value) {
-    this._data = value
+    this.#data = value
 
-    if (this._data && (this._data.length === undefined)) {
-      this.#dataWidth = this._data.width || this._data.videoWidth
-      this.#dataHeight = this._data.height || this._data.videoHeight
+    if (this.#data && (this.#data.length === undefined)) {
+      this.#dataWidth = this.#data.width || this.#data.videoWidth
+      this.#dataHeight = this.#data.height || this.#data.videoHeight
     }
 
     this.bind()
@@ -67,10 +68,10 @@ export default class GLTexture {
     // parameters, make sure they are correct
     this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY)
 
-    if (this.gl instanceof WebGLRenderingContext && this._data && this._data.length === undefined) {
-      this.gl.texImage2D(this.#target, this.level, this.internalFormat, this.format, this.type, this._data)
+    if (this.gl instanceof WebGLRenderingContext && this.#data && this.#data.length === undefined) {
+      this.gl.texImage2D(this.#target, this.level, this.internalFormat, this.format, this.type, this.#data)
     } else {
-      this.gl.texImage2D(this.#target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this._data || null)
+      this.gl.texImage2D(this.#target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this.#data || null)
     }
     if (this.autoGenerateMipmap) {
       this.gl.generateMipmap(this.#target)
@@ -79,7 +80,7 @@ export default class GLTexture {
   }
 
   get data() {
-    return this._data
+    return this.#data
   }
 
   set width(value) {
