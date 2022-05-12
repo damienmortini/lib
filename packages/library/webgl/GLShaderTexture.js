@@ -57,17 +57,23 @@ export default class GLShaderTexture extends GLTexture {
       program: new GLProgram({
         gl: this.gl,
         uniforms,
-        vertex: addChunks(VERTEX, [
-          ['start', `
-            in vec3 position;
-            out vec2 vPosition;
-          `],
-          ['end', `
-            gl_Position = vec4(position, 1.);
-            vPosition = position.xy;
-          `],
-        ]),
-        fragment: addChunks(FRAGMENT, [
+        vertex: `#version 300 es
+
+in vec3 position;
+out vec2 vPosition;
+
+void main() {
+  gl_Position = vec4(position, 1.);
+  vPosition = position.xy;
+}`,
+        fragment: addChunks(`#version 300 es
+precision highp float;
+
+out vec4 fragColor;
+
+void main() {
+  fragColor = vec4(0.);
+}`, [
           ...fragmentChunks,
           ['start', `in vec2 vPosition;`],
         ]),
