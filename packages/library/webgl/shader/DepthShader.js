@@ -50,7 +50,7 @@ export const bumpFromDepthFunction = ({
             ${getDepthFunctionName}(uv + vec2(0., step.y))
         );
           
-        return vec4(depth, normalize(vec3(dxy * scale / step, 1.)));
+        return vec4(depth * scale, normalize(vec3(dxy * scale / step, 1.)));
       }
     `
 }
