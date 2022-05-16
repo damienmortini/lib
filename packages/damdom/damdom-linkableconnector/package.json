@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/damdom-linkableconnector",
   "private": true,
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "<damdom-linkableconnector> custom element.",
   "publishConfig": {
     "access": "public"
