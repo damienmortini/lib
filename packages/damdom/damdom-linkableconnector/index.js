@@ -1,4 +1,4 @@
-import DamdomConnector from '../damdom-connector/index.js'
+import { DamdomConnectorElement } from '../damdom-connector/index.js'
 
 const CONNECTORS = new Set()
 
@@ -7,7 +7,7 @@ let activeConnector = null
 /**
  * Handle connector elements linking
  */
-class DamdomLinkableConnector extends DamdomConnector {
+class DamdomLinkableConnector extends DamdomConnectorElement {
   constructor() {
     super()
 

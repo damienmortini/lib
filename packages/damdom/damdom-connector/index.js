@@ -57,8 +57,7 @@ export class DamdomConnectorElement extends HTMLElement {
       case 'connect': {
         (async () => {
           await customElements.whenDefined('damdom-connector')
-          const connectorIds = newValue.split(' ')
-          if (!connectorIds[0]) return
+          const connectorIds = newValue.split(' ') ?? []
           for (const connectorId of connectorIds) {
             const input = this.getRootNode().querySelector(`#${connectorId}`)
             if (!input) continue
@@ -79,7 +78,7 @@ export class DamdomConnectorElement extends HTMLElement {
     connector.value = this.value
   }
 
-  disconnect() {
+  disconnect(connector) {
     this.#connectors.delete(connector)
   }
 
