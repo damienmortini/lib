@@ -10,20 +10,13 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           registry-url: https://registry.npmjs.org/
-      - run: yarn
-      - run: git stash
-      - run: yarn run lerna publish from-package --yes
+      - run: npm ci
+      - run: npm run lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-  publish-gpr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           registry-url: https://npm.pkg.github.com/
-      - run: yarn
-      - run: git stash
-      - run: yarn run lerna publish from-package --yes --no-verify-access
+      - run: npm run lerna publish from-package --yes --no-verify-access
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
