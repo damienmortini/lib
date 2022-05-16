@@ -100,20 +100,16 @@ void main() {
   draw({ uniforms = {}, debug = this.#debug } = {}) {
     this.gl.viewport(0, 0, this.width, this.height)
     this.#frameBuffer.bind()
+    this.#quad.bind()
     this.#quad.draw({
-      bind: true,
       uniforms,
     })
     this.#frameBuffer.unbind()
     if (debug) {
-      if (debug instanceof Array) {
-        this.gl.viewport(debug[0], debug[1], debug[2], debug[3])
-      }
-      this.#quad.draw({
-        bind: true,
-        uniforms,
-      })
+      if (debug instanceof Array) this.gl.viewport(debug[0], debug[1], debug[2], debug[3])
+      this.#quad.draw()
     }
+    this.#quad.unbind()
     if (this.#autoGenerateMipmap) {
       this.generateMipmap()
     }
