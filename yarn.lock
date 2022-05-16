@@ -213,6 +213,13 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
+"@damienmortini/eslint-config@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@damienmortini/eslint-config/-/eslint-config-0.0.3.tgz#ad8fd55aaa48bcce31d98eefca17feba2903b986"
+  integrity sha512-iZMYhljfFcVLJWxLAWC29/uaz6Eza3GLVvdDzIKhCNg/nguGqdQt1qlxOPFGwy2rlk+m1YKlE/Uf6SpEEmIW3Q==
+  dependencies:
+    eslint-config-google "^0.14.0"
+
 "@eslint/eslintrc@^1.2.1":
   version "1.2.1"
   resolved "https://registry.npmjs.org/@eslint/eslintrc/-/eslintrc-1.2.1.tgz"
