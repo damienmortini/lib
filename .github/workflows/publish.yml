@@ -11,12 +11,12 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org/
       - run: npm install
-      - run: npm run lerna publish from-package --yes
+      - run: npx lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - uses: actions/setup-node@v2
         with:
           registry-url: https://npm.pkg.github.com/
-      - run: npm run lerna publish from-package --yes --no-verify-access
+      - run: npx lerna publish from-package --yes --no-verify-access
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
