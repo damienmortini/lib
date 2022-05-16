@@ -63,9 +63,7 @@ export default class GLObject {
       if (type.startsWith('sampler')) {
         const value = this.program.uniforms.get(name)
         if (value instanceof GLTexture) {
-          value.bind({
-            unit: this.program.textureUnits.get(name),
-          })
+          value.bind({ unit: this.program.textureUnits.get(name) })
           this.#boundTextures.add(value)
         }
       }
@@ -79,16 +77,16 @@ export default class GLObject {
     instanceCount = undefined,
     ...options
   } = {}) {
-    if (bind) {
-      this.bind()
-    }
+    if (bind) this.bind()
     for (const [key, value] of Object.entries(uniforms)) {
+      if (value instanceof GLTexture && !this.#boundTextures.has(value)) {
+        value.bind({ unit: this.program.textureUnits.get(key) })
+        this.#boundTextures.add(value)
+      }
       this.program.uniforms.set(key, value)
     }
     this.geometry.draw({ mode, instanceCount, ...options })
-    if (bind) {
-      this.unbind()
-    }
+    if (bind) this.unbind()
   }
 
   unbind() {
