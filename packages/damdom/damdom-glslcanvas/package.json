@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-glslcanvas",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "<damdom-glslcanvas> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-glslcanvas",
   "dependencies": {
-    "@damienmortini/webgl": "^0.0.13"
+    "@damienmortini/webgl": "^0.0.14"
   }
 }
