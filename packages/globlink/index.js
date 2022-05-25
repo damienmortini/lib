@@ -4,7 +4,7 @@ import micromatch from 'micromatch'
 import { execSync } from 'child_process'
 
 /**
- * Function to npm batch link packages from glob patterns
+ * Function to npm link all packages matching an array of glob patterns
  * @param {String[]} globPatterns - Array of glob patterns to match
  */
 export const globLink = async (globPatterns) => {
