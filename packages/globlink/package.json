@@ -1,0 +1,25 @@
+{
+  "name": "@damienmortini/globlink",
+  "description": "Batch link packages from glob patterns",
+  "version": "0.0.0",
+  "author": "Damien Mortini",
+  "main": "index.js",
+  "type": "module",
+  "bin": "bin/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/globlink"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/globlink",
+  "dependencies": {
+    "fast-glob": "^3.2.11",
+    "fs-extra": "^10.1.0",
+    "micromatch": "^4.0.5"
+  }
+}
