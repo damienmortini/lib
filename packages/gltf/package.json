@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/damienmortini/lib.git",
+    "url": "https://github.com/damienmortini/lib",
     "directory": "packages/gltf"
   },
   "keywords": [
@@ -15,10 +15,8 @@
   ],
   "author": "Damien Mortini",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/damienmortini/lib/issues"
-  },
-  "homepage": "https://github.com/damienmortini/lib#readme",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gltf",
   "dependencies": {
     "@damienmortini/math": "^0.0.8"
   }
