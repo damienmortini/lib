@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/globlink",
-  "description": "Batch link packages from glob patterns",
+  "description": "npm link all packages matching an array of glob patterns",
   "version": "0.0.0",
   "author": "Damien Mortini",
   "main": "index.js",
