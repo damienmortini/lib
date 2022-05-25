@@ -22,8 +22,8 @@ import { dirname } from 'path';
   const rootPackage = fs.readJSONSync(`./package.json`)
   const rootPackageNameSplitted = rootPackage.name.split('/')
   const defaultsMap = new Map([
-    ['$rootScope', rootPackageNameSplitted[0].slice(1)],
-    ['$rootName', rootPackageNameSplitted[1]],
+    ['$rootScope', rootPackageNameSplitted.length > 1 ? rootPackageNameSplitted[0].slice(1) : ''],
+    ['$rootName', rootPackageNameSplitted[1] ?? rootPackageNameSplitted[0]],
   ])
   const options = {}
 
