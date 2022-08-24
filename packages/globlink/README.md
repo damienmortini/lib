@@ -18,7 +18,7 @@ await globLink([
 ])
 ```
 
-## Commad Line
+## Command Line
 ```cmd
 globlink @my-scope/* @my-scope2/* my-package
 ```
