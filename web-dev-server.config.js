@@ -6,6 +6,9 @@ export default {
   nodeResolve: true,
   appIndex: 'index.html',
   preserveSymlinks: true,
+  http2: true,
+  sslKey: fileURLToPath(new URL('./packages/server/server.key', import.meta.url)),
+  sslCert: fileURLToPath(new URL('./packages/server/server.crt', import.meta.url)),
   plugins: [
     esbuildPlugin({
       ts: true,

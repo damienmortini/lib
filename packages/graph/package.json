@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@damienmortini/server": "^1.0.55",
-    "ws": "^8.5.0"
+    "ws": "^8.8.1"
   },
   "author": "Damien Mortini",
   "publishConfig": {

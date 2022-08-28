@@ -7,8 +7,8 @@
     "start": "node ./index.js"
   },
   "dependencies": {
-    "@gltf-transform/core": "^2.1.5",
-    "@gltf-transform/functions": "^2.1.5"
+    "@gltf-transform/core": "^2.4.1",
+    "@gltf-transform/functions": "^2.4.1"
   },
   "author": "Damien Mortini",
   "publishConfig": {
