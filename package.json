@@ -6,10 +6,10 @@
     "bump": "lerna version patch",
     "fix": "eslint packages --fix",
     "rewritepackagefiles": "node rewritepackagefiles.js",
-    "start": "server --watchignore=node_modules",
+    "start": "wds",
     "test": "eslint packages",
-    "update": "yarn",
-    "upgrade": "yarn && yarn upgrade-interactive --latest",
+    "update": "npm i",
+    "upgrade": "ncu --deep -u",
     "version": "lerna version"
   },
   "workspaces": [
@@ -18,13 +18,16 @@
   "devDependencies": {
     "@damienmortini/eslint-config": "^0.0.4",
     "@damienmortini/server": "^1.0.45",
+    "@web/dev-server": "^0.1.34",
+    "@web/dev-server-esbuild": "^0.3.2",
     "eslint": "^8.12.0",
     "fast-glob": "^3.2.11",
     "jsdoc": "^3.6.10",
-    "lerna": "^4.0.0",
-    "yarn": "^1.22.18"
+    "lerna": "^4.0.0"
   },
   "dependencies": {
-    "es-module-shims": "^1.5.2"
+    "es-module-shims": "^1.5.2",
+    "npm": "^8.18.0",
+    "typescript": "^4.8.2"
   }
 }

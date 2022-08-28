@@ -11,7 +11,7 @@ const PAUSED_BY_CONNECTION = 8
  */
 
 class DamdomTickerElement extends HTMLElement {
-  #pauseFlagValue
+  #pauseFlagValue = 0
   #callback = () => console.log('DamdomTickerElement.callback needs to be set')
 
   static get deltaTime() {
