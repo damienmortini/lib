@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-lottie",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "<damdom-lottie> custom element.",
   "main": "index.js",
   "publishConfig": {
