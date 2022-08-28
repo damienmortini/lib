@@ -26,7 +26,7 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/three",
   "dependencies": {
     "@damienmortini/core": "^0.2.133",
-    "fs-extra": "^10.0.1",
-    "three": "0.140.2"
+    "fs-extra": "^10.1.0",
+    "three": "0.143.0"
   }
 }

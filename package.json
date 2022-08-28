@@ -16,17 +16,18 @@
     "packages/**/*"
   ],
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.4",
-    "@damienmortini/server": "^1.0.45",
+    "@damienmortini/eslint-config": "^0.0.6",
+    "@damienmortini/server": "^1.0.55",
     "@web/dev-server": "^0.1.34",
     "@web/dev-server-esbuild": "^0.3.2",
-    "eslint": "^8.12.0",
+    "eslint": "^8.23.0",
     "fast-glob": "^3.2.11",
-    "jsdoc": "^3.6.10",
-    "lerna": "^4.0.0"
+    "jsdoc": "^3.6.11",
+    "lerna": "^5.4.3",
+    "npm-check-updates": "^16.0.6"
   },
   "dependencies": {
-    "es-module-shims": "^1.5.2",
+    "es-module-shims": "^1.5.17",
     "npm": "^8.18.0",
     "typescript": "^4.8.2"
   }
