@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-ticker",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "<damdom-ticker> custom element.",
   "main": "index.js",
   "publishConfig": {
