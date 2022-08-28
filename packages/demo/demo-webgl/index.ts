@@ -1,10 +1,10 @@
-import DamdomTickerElement from '@damienmortini/damdom-ticker/index.js'
+import DamdomTickerElement from '@damienmortini/damdom-ticker'
 
 import View from './View.js'
 
 class DemoWebGLElement extends DamdomTickerElement {
-  #canvas
-  #view
+  #canvas: HTMLCanvasElement
+  #view: View
 
   constructor() {
     super()
@@ -32,9 +32,9 @@ class DemoWebGLElement extends DamdomTickerElement {
       <canvas></canvas>
     `
 
-    this.#canvas = this.shadowRoot.querySelector('canvas')
+    this.#canvas = this.shadowRoot!.querySelector('canvas')!
 
-    this.#view = new View({ canvas: this.#canvas })
+      this. #view = new View({ canvas: this.#canvas })
 
     const resizeObserver = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width

@@ -9,6 +9,8 @@
     "@babel/core": "^7.17.10",
     "@babel/eslint-parser": "^7.17.0",
     "@babel/plugin-syntax-import-assertions": "^7.16.7",
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
     "eslint": "^8.15.0",
     "eslint-config-google": "^0.14.0"
   },
