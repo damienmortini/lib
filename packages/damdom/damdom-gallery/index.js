@@ -1,3 +1,5 @@
+import style from './index.css' assert { type: 'css' }
+
 class DamdomGalleryElement extends HTMLElement {
   #highlightContainer
   #gridContainer
@@ -8,92 +10,13 @@ class DamdomGalleryElement extends HTMLElement {
     super()
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
-      <style>
-        :host {
-          display: block;
-          position: relative;
-          width: 300px;
-          height: 300px;
-          font-family: sans-serif;
-        }
-        
-        #grid {
-          width: 100%;
-          height: 100%;
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          grid-auto-rows: minmax(300px, 1fr);
-          grid-auto-flow: row dense;
-          overflow: auto;
-          box-sizing: border-box;
-          padding: 10px;
-          gap: 10px;
-          justify-items: center;
-          align-items: center;
-        }
-
-        #highlight {
-          display: grid;
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          justify-items: center;
-          align-items: center;
-        }
-
-        #highlight.hide, #grid.hide {
-          display: none;
-        }
-
-        .elementcontainer {
-          display: grid;
-          position: relative;
-          background: white;
-          width: 100%;
-          height: 100%;
-          justify-items: center;
-          align-items: center;
-          grid-auto-columns: minmax(0, 1fr);
-          grid-auto-rows: minmax(0, 1fr);
-        }
-
-        .highlightbutton, #backbutton {
-          position: absolute;
-          right: 15px;
-          bottom: 15px;
-          width: 30px;
-          height: 30px;
-          border-radius: 5px;
-          box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 10%);
-          background-color: white;
-          background-size: 55%;
-          background-repeat: no-repeat;
-          background-position: center;
-          cursor: pointer;
-          will-change: transform;
-          transition: transform .4s cubic-bezier(0.6, 2, 0.5, 1);
-        }
-
-        .highlightbutton:hover, #backbutton:hover {
-          transform: scale(1.1);
-        }
-        
-        .highlightbutton {
-          background-image: url(node_modules/@damienmortini/damdom-gallery/icon-expand.svg);
-        }
-        
-        #backbutton {
-          background-image: url(node_modules/@damienmortini/damdom-gallery/icon-compress.svg);
-        }
-      </style>
       <div id="highlight" class="hide">
         <slot name="highlight"></slot>
         <div id="backbutton"></div>
       </div>
       <div id="grid" part="grid"></div>
     `
+    this.shadowRoot.adoptedStyleSheets = [style]
 
     this.#highlightContainer = this.shadowRoot.querySelector('#highlight')
     this.#gridContainer = this.shadowRoot.querySelector('#grid')
