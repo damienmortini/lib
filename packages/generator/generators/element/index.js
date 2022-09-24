@@ -26,7 +26,7 @@ export default function ({ template, elementScope, elementName, scope, path }) {
       let indexFileContent = fs.readFileSync(`${__dirname}/templates/${template}/${fileName}`, { encoding: 'utf-8' })
       indexFileContent = indexFileContent.replaceAll('template-element', fullElementName)
       indexFileContent = indexFileContent.replaceAll('template title', elementName)
-      const elementClass = `${elementScope} ${elementName} Element`.replaceAll(/\s+(.)/g, (match, captureGroup) => captureGroup.toUpperCase())
+      const elementClass = `${elementScope} ${elementName} Element`.replaceAll(/(\s+|^)(.)/g, (match, captureGroup1, captureGroup2) => captureGroup2.toUpperCase())
       indexFileContent = indexFileContent.replaceAll('TemplateElement', elementClass)
       fs.writeFileSync(`${fullPath}/${fileName}`, indexFileContent)
     } else {
