@@ -3,9 +3,11 @@
     "node_modules"
   ],
   "compilerOptions": {
+    "allowJs": true,
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "checkJs": true
+    "checkJs": true,
+    "strictNullChecks": false
   },
 }

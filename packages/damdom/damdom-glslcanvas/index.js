@@ -30,9 +30,6 @@ export default class DamdomGLSLCanvasElement extends HTMLElement {
     this.canvas = this.shadowRoot.querySelector('canvas')
 
     this.#gl = this.canvas.getContext('webgl2')
-    if (!this.#gl) {
-      this.#gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')
-    }
 
     const resizeObserver = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width * window.devicePixelRatio

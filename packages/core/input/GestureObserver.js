@@ -40,6 +40,7 @@ class GestureObserver {
    * Observe gesture changes on the specified target element.
    * @param {HTMLElement|Window} element Element to observe
    */
+  // TODO: Put pointerLock and pointerCapture in options here
   observe(element) {
     if (this._elementsData.has(element)) {
       return

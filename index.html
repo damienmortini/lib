@@ -84,7 +84,7 @@
         const tagName = entry.target.tagName.toLowerCase()
         if (entry.isIntersecting && !initializedElementSet.has(tagName)) {
           initializedElementSet.add(tagName)
-          import(`@damienmortini/${tagName}/index.ts`)
+          import(`@damienmortini/${tagName}/index.js`)
         }
       }
     })
