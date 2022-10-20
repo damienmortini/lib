@@ -4,11 +4,11 @@
   "version": "0.0.9",
   "type": "module",
   "scripts": {
-    "start": "node ./index.js"
+    "start": "node --watch ./index.js"
   },
   "dependencies": {
-    "@gltf-transform/core": "^2.4.1",
-    "@gltf-transform/functions": "^2.4.1"
+    "@gltf-transform/core": "^2.4.4",
+    "@gltf-transform/functions": "^2.4.4"
   },
   "author": "Damien Mortini",
   "publishConfig": {
