@@ -6,9 +6,7 @@ export class TemplateElement extends HTMLElement {
 
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.adoptedStyleSheets = [css]
-    this.shadowRoot.innerHTML = `
-      <h1>template title</h1>
-    `
+    this.shadowRoot.innerHTML = 'template title'
   }
 }
 
