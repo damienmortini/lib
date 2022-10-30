@@ -14,8 +14,9 @@ const __dirname = dirname(__filename)
  * @param {String} [object.path=./packages] Output path
  */
 export default function ({ template, elementScope, elementName, scope, path }) {
-  const fullElementName = `${elementScope}-${elementName}`.replaceAll(' ', '').toLowerCase()
-  const fullPath = `${path}/${fullElementName}`
+  const flattenElementname = elementName.replaceAll(' ', '').toLowerCase()
+  const fullElementName = `${elementScope}-${flattenElementname}`.replaceAll(' ', '').toLowerCase()
+  const fullPath = `${path}/${flattenElementname}`
   fs.mkdirSync(fullPath)
   const fileNames = fs.readdirSync(`${__dirname}/templates/${template}`)
   let packageJSON = {}
@@ -34,7 +35,7 @@ export default function ({ template, elementScope, elementName, scope, path }) {
     }
   }
   fs.outputFileSync(`${fullPath}/package.json`, JSON.stringify({
-    name: `@${scope}/${fullElementName}`,
+    name: `@${scope}/${flattenElementname}`,
     private: true,
     version: '0.0.0',
     ...packageJSON,

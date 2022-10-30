@@ -22,6 +22,7 @@ import { dirname } from 'path';
   const rootPackage = fs.readJSONSync(`./package.json`)
   const rootPackageNameSplitted = rootPackage.name.split('/')
   const defaultsMap = new Map([
+    ['$rootPackageName', rootPackage.name],
     ['$rootScope', rootPackageNameSplitted.length > 1 ? rootPackageNameSplitted[0].slice(1) : ''],
     ['$rootName', rootPackageNameSplitted[1] ?? rootPackageNameSplitted[0]],
   ])
@@ -30,12 +31,17 @@ import { dirname } from 'path';
   for (const parameter of jsDocData[0].params) {
     if (!parameter.description) continue
     const name = parameter.name.split('.')[1]
-    const defaultValue = defaultsMap.get(parameter.defaultvalue) ?? parameter.defaultvalue
+    let defaultValue = parameter.defaultvalue
     options[name] = await new Promise((resolve) => {
       rl.question(`${parameter.description}: `, (answer) => {
         resolve(answer)
       })
-      if (defaultValue) rl.write(defaultValue)
+      if (defaultValue) {
+        for (const [key, value] of defaultsMap) {
+          defaultValue = defaultValue.replace(key, value)
+        }
+        rl.write(defaultValue)
+      }
     })
   }
 
