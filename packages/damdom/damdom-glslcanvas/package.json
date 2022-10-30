@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-glslcanvas",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<damdom-glslcanvas> custom element.",
   "publishConfig": {
     "access": "public"
