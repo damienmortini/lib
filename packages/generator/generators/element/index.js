@@ -17,7 +17,7 @@ export default function ({ template, elementScope, elementName, scope, path }) {
   const flattenElementname = elementName.replaceAll(' ', '').toLowerCase()
   const fullElementName = `${elementScope}-${flattenElementname}`.replaceAll(' ', '').toLowerCase()
   const fullPath = `${path}/${flattenElementname}`
-  fs.mkdirSync(fullPath)
+  fs.ensureDirSync(fullPath)
   const fileNames = fs.readdirSync(`${__dirname}/templates/${template}`)
   let packageJSON = {}
   for (const fileName of fileNames) {
