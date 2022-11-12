@@ -1,5 +1,3 @@
-import Vector2 from '@damienmortini/math/Vector2.js'
-
 class GestureObserver {
   #elementsData = new Map()
   #callback
@@ -40,7 +38,8 @@ class GestureObserver {
     if (!elementData) {
       elementData = {
         pointers: new Map(),
-        gestureVector: new Vector2(),
+        gestureVectorX: 0,
+        gestureVectorY: 0,
         previousSize: 0,
         previousX: 0,
         previousY: 0,
@@ -80,7 +79,8 @@ class GestureObserver {
 
   #resetElementPreviousData(element) {
     const data = this.#elementsData.get(element)
-    data.gestureVector.set(0, 0)
+    data.gestureVectorX = 0
+    data.gestureVectorY = 0
     data.previousSize = 0
     data.previousX = 0
     data.previousY = 0
@@ -129,8 +129,8 @@ class GestureObserver {
     let index = 0
     for (const pointer of data.pointers.values()) {
       if (index === 1) {
-        data.gestureVector.x = x - pointer.clientX
-        data.gestureVector.y = y - pointer.clientY
+        data.gestureVectorX = x - pointer.clientX
+        data.gestureVectorY = y - pointer.clientY
       }
       x += pointer.clientX
       y += pointer.clientY
@@ -152,11 +152,11 @@ class GestureObserver {
     data.previousMovementX = movementX
     data.previousMovementY = movementY
 
-    const size = data.gestureVector.size
+    const size = Math.hypot(data.gestureVectorX, data.gestureVectorY)
     const movementScale = data.previousSize ? size / data.previousSize : 1
     data.previousSize = size
 
-    const rotation = Math.atan2(data.gestureVector.y, data.gestureVector.x)
+    const rotation = Math.atan2(data.gestureVectorY, data.gestureVectorX)
     let movementRotation = data.previousRotation ? rotation - data.previousRotation : 0
     if (movementRotation > Math.PI) {
       movementRotation -= Math.PI * 2
