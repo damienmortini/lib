@@ -1,47 +1,17 @@
 import GestureObserver from '@damienmortini/core/input/GestureObserver.js'
+import css from './index.css' assert { type: 'css' }
 
 export default class DamdomViewportElement extends HTMLElement {
+  zoom = 1
+
   constructor() {
     super()
 
-    this.attachShadow({ mode: 'open' }).innerHTML = `<style>
-  :host {
-    display: block;
-    overflow: hidden;
-    touch-action: none;
-    position: relative;
-    width: 300px;
-    height: 150px;
-  }
-
-  #container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-  }
-
-  #container slot {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  
-  #container slot::slotted(*) {
-    will-change: transform;
-    pointer-events: auto;
-  }
-</style>
+    this.attachShadow({ mode: 'open' })
+    this.shadowRoot.adoptedStyleSheets = [css]
+    this.shadowRoot.innerHTML = `
 <slot></slot>
 <div id="container"></div>`
-
-    this.zoom = 1
 
     const elementSlotMap = new Map()
     const slotDOMMatrixMap = new Map()
@@ -106,7 +76,7 @@ export default class DamdomViewportElement extends HTMLElement {
         getComputedStyle(target)['touch-action'] === 'none'
       ) return
       offsetSlot(gesture.target.assignedSlot, gesture.movementX, gesture.movementY)
-    }, { pointerCapture: true })
+    })
 
     this.addEventListener('wheel', (event) => {
       if (event.target !== this && event.target.scrollHeight > event.target.clientHeight || !event.deltaY) return
@@ -143,7 +113,7 @@ export default class DamdomViewportElement extends HTMLElement {
           container.appendChild(slot)
           slotUID++
           slots.add(slot)
-          elementGestureObserver.observe(node)
+          elementGestureObserver.observe(node, { pointerCapture: true })
           initializingElements.add(node)
           resizeObserver.observe(node)
         }

@@ -1,6 +1,9 @@
 import Vector2 from '@damienmortini/math/Vector2.js'
 
 class GestureObserver {
+  #elementsData = new Map()
+  #callback
+
   /**
    * @typedef Gesture
    * @property {HTMLElement} target - The target DOM Element
@@ -24,40 +27,37 @@ class GestureObserver {
   /**
    * @param {GestureObserverCallback} callback
    */
-  constructor(callback, { pointerLock = false, pointerCapture = false } = {}) {
-    this.pointerLock = pointerLock
-    this.pointerCapture = pointerCapture
-
-    this._elementsData = new Map()
-    this._callback = callback
-
-    this._onPointerDownBound = this._onPointerDown.bind(this)
-    this._onPointerMoveBound = this._onPointerMove.bind(this)
-    this._onPointerUpBound = this._onPointerUp.bind(this)
+  constructor(callback) {
+    this.#callback = callback
   }
 
   /**
    * Observe gesture changes on the specified target element.
    * @param {HTMLElement|Window} element Element to observe
    */
-  // TODO: Put pointerLock and pointerCapture in options here
-  observe(element) {
-    if (this._elementsData.has(element)) {
-      return
+  observe(element, { pointerLock = false, pointerCapture = false } = {}) {
+    let elementData = this.#elementsData.get(element)
+    if (!elementData) {
+      elementData = {
+        pointers: new Map(),
+        gestureVector: new Vector2(),
+        previousSize: 0,
+        previousX: 0,
+        previousY: 0,
+        offsetX: 0,
+        offsetY: 0,
+        previousMovementX: 0,
+        previousMovementY: 0,
+        previousRotation: 0,
+        startTimeStamp: 0,
+        pointerLock: false,
+        pointerCapture: false,
+      }
+      this.#elementsData.set(element, elementData)
     }
-    element.addEventListener('pointerdown', this._onPointerDownBound)
-    this._elementsData.set(element, {
-      pointers: new Map(),
-      gestureVector: new Vector2(),
-      previousSize: 0,
-      previousX: 0,
-      previousY: 0,
-      offsetX: 0,
-      offsetY: 0,
-      previousMovementX: 0,
-      previousMovementY: 0,
-      startTimeStamp: 0,
-    })
+    elementData.pointerLock = pointerLock
+    elementData.pointerCapture = pointerCapture
+    element.addEventListener('pointerdown', this.#onPointerDown)
   }
 
   /**
@@ -65,25 +65,21 @@ class GestureObserver {
    * @param {HTMLElement|Window} element Element to unobserve
    */
   unobserve(element) {
-    if (!this._elementsData.has(element)) {
-      return
-    }
-    element.removeEventListener('pointerdown', this._onPointerDownBound)
-    element.removeEventListener('pointermove', this._onPointerMoveBound)
-    this._elementsData.delete(element)
+    if (!this.#elementsData.has(element)) return
+    element.removeEventListener('pointerdown', this.#onPointerDown)
+    element.removeEventListener('pointermove', this.#onPointerMove)
+    this.#elementsData.delete(element)
   }
 
   /**
    * Stops watching all of its target elements for gesture changes.
    */
   disconnect() {
-    for (const element of this._elementsData.keys()) {
-      this.unobserve(element)
-    }
+    for (const element of this.#elementsData.keys()) this.unobserve(element)
   }
 
-  _resetElementPreviousData(element) {
-    const data = this._elementsData.get(element)
+  #resetElementPreviousData(element) {
+    const data = this.#elementsData.get(element)
     data.gestureVector.set(0, 0)
     data.previousSize = 0
     data.previousX = 0
@@ -91,24 +87,23 @@ class GestureObserver {
     data.previousRotation = 0
   }
 
-  _onPointerDown(event) {
+  #onPointerDown = (event) => {
     const element = event.currentTarget
-    const data = this._elementsData.get(element)
-    if (this.pointerLock) {
-      element.requestPointerLock()
-    } else if (this.pointerCapture) {
-      element.setPointerCapture(event.pointerId)
-    }
-    this._resetElementPreviousData(element)
+    const data = this.#elementsData.get(element)
+
+    if (data.pointerLock) element.requestPointerLock()
+    else if (data.pointerCapture) element.setPointerCapture(event.pointerId)
+
+    this.#resetElementPreviousData(element)
     data.pointers.set(event.pointerId, event)
     if (data.pointers.size === 1) {
-      element.addEventListener('pointermove', this._onPointerMoveBound)
-      element.addEventListener('pointerup', this._onPointerUpBound)
-      element.addEventListener('pointerout', this._onPointerUpBound)
+      element.addEventListener('pointermove', this.#onPointerMove)
+      element.addEventListener('pointerup', this.#onPointerUp)
+      element.addEventListener('pointerout', this.#onPointerUp)
       data.startTimeStamp = Date.now()
       data.offsetX = 0
       data.offsetY = 0
-      this._callback({
+      this.#callback({
         event,
         pointers: data.pointers,
         target: event.currentTarget,
@@ -126,8 +121,8 @@ class GestureObserver {
     }
   }
 
-  _onPointerMove(event) {
-    const data = this._elementsData.get(event.currentTarget)
+  #onPointerMove = (event) => {
+    const data = this.#elementsData.get(event.currentTarget)
     data.pointers.set(event.pointerId, event)
     let x = 0
     let y = 0
@@ -173,12 +168,12 @@ class GestureObserver {
     data.offsetX += movementX
     data.offsetY += movementY
 
-    this._callback({
+    this.#callback({
       event,
       pointers: data.pointers,
       target: event.currentTarget,
-      movementX: this.pointerLock ? event.movementX / devicePixelRatio : movementX,
-      movementY: this.pointerLock ? event.movementY / devicePixelRatio : movementY,
+      movementX: data.pointerLock ? event.movementX / devicePixelRatio : movementX,
+      movementY: data.pointerLock ? event.movementY / devicePixelRatio : movementY,
       x,
       y,
       offsetX: data.offsetX,
@@ -190,16 +185,16 @@ class GestureObserver {
     })
   }
 
-  _onPointerUp(event) {
+  #onPointerUp = (event) => {
     const element = event.currentTarget
-    const data = this._elementsData.get(element)
-    data.pointers.delete(event.pointerId)
+    const data = this.#elementsData.get(element)
+    data?.pointers.delete(event.pointerId)
     element.releasePointerCapture(event.pointerId)
     if (document.exitPointerLock) {
       document.exitPointerLock()
     }
     if (!data || !data.pointers.size) {
-      this._callback({
+      this.#callback({
         event,
         pointers: data.pointers,
         target: event.currentTarget,
@@ -214,11 +209,11 @@ class GestureObserver {
         duration: Date.now() - data.startTimeStamp,
         state: 'finishing',
       })
-      element.removeEventListener('pointermove', this._onPointerMoveBound)
-      element.removeEventListener('pointerup', this._onPointerUpBound)
-      element.removeEventListener('pointerout', this._onPointerUpBound)
+      element.removeEventListener('pointermove', this.#onPointerMove)
+      element.removeEventListener('pointerup', this.#onPointerUp)
+      element.removeEventListener('pointerout', this.#onPointerUp)
     }
-    this._resetElementPreviousData(element)
+    this.#resetElementPreviousData(element)
   }
 }
 
