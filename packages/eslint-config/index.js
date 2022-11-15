@@ -47,5 +47,6 @@ module.exports = {
         'asyncArrow': 'always',
       },
     ],
+    'space-infix-ops': ['error', { 'int32Hint': false }],
   },
 }

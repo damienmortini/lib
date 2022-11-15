@@ -74,8 +74,8 @@ export default class OrbitController {
           this.distanceEnd *= 1 + (1 - gesture.movementScale) * this.zoomVelocity * 10
           this.distanceEnd = Math.max(this.distanceMin, Math.min(this.distanceMax, this.distanceEnd))
         }
-      }, { pointerCapture: true })
-      gestureObserver.observe(domElement)
+      })
+      gestureObserver.observe(domElement, { pointerCapture: true })
     }
 
     this.update()

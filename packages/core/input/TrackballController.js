@@ -63,8 +63,8 @@ export default class TrackballController {
         this.#distance *= 1 + (1 - gesture.movementScale) * this.zoomVelocity * 10
         this.#distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this.#distance))
       }
-    }, { pointerCapture: true })
-    gestureObserver.observe(domElement)
+    })
+    gestureObserver.observe(domElement, { pointerCapture: true })
   }
 
   set distance(value) {
