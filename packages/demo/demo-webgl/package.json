@@ -1,10 +1,10 @@
 {
   "name": "@damienmortini/demo-webgl",
   "private": true,
-  "version": "0.0.8",
+  "version": "0.0.9",
   "dependencies": {
-    "@damienmortini/core": "^0.2.134",
-    "@damienmortini/damdom-ticker": "^0.0.27",
+    "@damienmortini/core": "^0.2.135",
+    "@damienmortini/damdom-ticker": "^0.0.28",
     "@damienmortini/math": "^0.0.9",
     "@damienmortini/webgl": "^0.0.14"
   }
