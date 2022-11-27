@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-viewport",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "description": "<damdom-viewport> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-viewport",
   "dependencies": {
-    "@damienmortini/core": "^0.2.134"
+    "@damienmortini/core": "^0.2.135"
   }
 }
