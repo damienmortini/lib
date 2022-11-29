@@ -24,6 +24,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core",
   "dependencies": {
+    "@damienmortini/gestureobserver": "^0.0.1",
     "@damienmortini/math": "^0.0.9"
   }
 }
