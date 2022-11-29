@@ -1,4 +1,4 @@
-import GestureObserver from '@damienmortini/core/input/GestureObserver.js'
+import GestureObserver from '@damienmortini/gestureobserver'
 import css from './index.css' assert { type: 'css' }
 
 export default class DamdomViewportElement extends HTMLElement {
