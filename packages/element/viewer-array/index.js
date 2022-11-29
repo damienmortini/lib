@@ -1,4 +1,4 @@
-import GestureObserver from '@damienmortini/core/input/GestureObserver.js'
+import GestureObserver from '@damienmortini/gestureobserver'
 
 export default class ArrayViewerElement extends HTMLElement {
   static get observedAttributes() {

@@ -2,7 +2,7 @@ import Matrix4 from '@damienmortini/math/Matrix4.js'
 import Vector2 from '@damienmortini/math/Vector2.js'
 import Vector3 from '@damienmortini/math/Vector3.js'
 import Quaternion from '@damienmortini/math/Quaternion.js'
-import GestureObserver from './GestureObserver.js'
+import GestureObserver from '@damienmortini/gestureobserver'
 
 export default class TrackballController {
   #cachedMatrix = new Matrix4()
