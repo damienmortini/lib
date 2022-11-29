@@ -1,17 +1,21 @@
-import https from 'https'
-import http2 from 'http2'
-import fs from 'fs'
-import chokidar from 'chokidar'
+import * as https from 'https'
+import * as http2 from 'http2'
+import * as fs from 'fs'
+import * as chokidar from 'chokidar'
 import mimeTypes from 'mime-types'
 import WebSocket, { WebSocketServer } from 'ws'
-import os from 'os'
+import * as os from 'os'
 
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import * as esbuild from 'esbuild'
 
 const directoryName = dirname(fileURLToPath(import.meta.url))
 
 export default class Server {
+  http2SecureServer
+  #wss
+
   constructor({ path = '', watch = false, watchPath = '', rootPath = '.', watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
     /**
      * Create HTTP2 Server
@@ -63,7 +67,7 @@ export default class Server {
         key: fs.readFileSync(`${directoryName}/server.key`),
         cert: fs.readFileSync(`${directoryName}/server.crt`),
       })
-      this._wss = new WebSocketServer({ server: webSocketServer })
+      this.#wss = new WebSocketServer({ server: webSocketServer })
       webSocketServer.listen(++port)
 
       if (watch) {
@@ -118,6 +122,17 @@ export default class Server {
 </script>
 </body>`)
           stream.end(fileContent)
+        } else if (filePath.endsWith('.ts')) {
+          const fileContent = fs.readFileSync(filePath, {
+            encoding: 'utf-8',
+          })
+          stream.respond({
+            ':status': 200,
+            'content-type': mimeTypes.contentType('.js'),
+          })
+          stream.end(esbuild.transformSync(fileContent, {
+            loader: 'ts',
+          }).code)
         } else {
           const responseHeaders = {
             'content-type': String(mimeTypes.lookup(filePath)),
@@ -141,7 +156,7 @@ export default class Server {
   }
 
   refresh() {
-    for (const client of this._wss.clients) {
+    for (const client of this.#wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
         client.send()
       }

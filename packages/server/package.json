@@ -25,6 +25,7 @@
   "bin": "bin/index.js",
   "dependencies": {
     "chokidar": "^3.5.3",
+    "esbuild": "^0.15.16",
     "mime-types": "^2.1.35",
     "ws": "^8.11.0"
   }
