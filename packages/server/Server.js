@@ -12,6 +12,22 @@ import * as esbuild from 'esbuild'
 
 const directoryName = dirname(fileURLToPath(import.meta.url))
 
+const rootDirectory = `file:///${process.cwd()}/`.replaceAll(/\\/g, '/')
+const resolveImports = async (string) => {
+  const promises = []
+  string = string.replaceAll(/(import([\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3, p4) => {
+    const id = crypto.randomUUID()
+    const promise = import.meta.resolve(p3, rootDirectory).then((url) => {
+      string = string.replace(id, url.replace(rootDirectory, './'))
+    }).catch(() => {
+      string = string.replace(id, p3)
+    })
+    promises.push(promise)
+    return p1 + id + p4
+  })
+  return Promise.all(promises).then(() => string)
+}
+
 export default class Server {
   http2SecureServer
   #wss
@@ -23,15 +39,6 @@ export default class Server {
     this.http2SecureServer = http2.createSecureServer({
       key: fs.readFileSync(`${directoryName}/server.key`),
       cert: fs.readFileSync(`${directoryName}/server.crt`),
-    }, (request, response) => {
-      // TODO: Check if rootPath needs to be added here
-      const url = `.${request.url}`
-      if (fs.existsSync(url) && fs.statSync(url).isDirectory() && !request.url.endsWith('/')) {
-        response.writeHead(301, {
-          'Location': `${request.url}/`,
-        })
-        response.end()
-      }
     })
 
     this.http2SecureServer.on('error', (error) => {
@@ -83,7 +90,7 @@ export default class Server {
       }
     })
 
-    this.http2SecureServer.on('stream', (stream, headers) => {
+    this.http2SecureServer.on('stream', async (stream, headers) => {
       if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) return
 
       const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY]
@@ -114,6 +121,7 @@ export default class Server {
           let fileContent = fs.readFileSync(filePath, {
             encoding: 'utf-8',
           })
+          fileContent = await resolveImports(fileContent)
           fileContent = fileContent.replace('</body>', `<script>
   const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
   socket.addEventListener("message", function (event) {
@@ -122,17 +130,21 @@ export default class Server {
 </script>
 </body>`)
           stream.end(fileContent)
-        } else if (filePath.endsWith('.ts')) {
-          const fileContent = fs.readFileSync(filePath, {
+        } else if (filePath.endsWith('.js') || filePath.endsWith('.ts')) {
+          let fileContent = fs.readFileSync(filePath, {
             encoding: 'utf-8',
           })
           stream.respond({
             ':status': 200,
             'content-type': mimeTypes.contentType('.js'),
           })
-          stream.end(esbuild.transformSync(fileContent, {
-            loader: 'ts',
-          }).code)
+          if (filePath.endsWith('.ts')) {
+            fileContent = esbuild.transformSync(fileContent, {
+              loader: 'ts',
+            }).code
+          }
+          fileContent = await resolveImports(fileContent)
+          stream.end(fileContent)
         } else {
           const responseHeaders = {
             'content-type': String(mimeTypes.lookup(filePath)),
