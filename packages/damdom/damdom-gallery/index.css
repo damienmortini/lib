@@ -32,13 +32,15 @@
   align-items: center;
 }
 
-#highlight.hide, #grid.hide {
+#highlight.hide,
+#grid.hide {
   display: none;
 }
 
 .elementcontainer {
   display: grid;
   position: relative;
+  contain: content;
   background: white;
   width: 100%;
   height: 100%;
@@ -48,7 +50,8 @@
   grid-auto-rows: minmax(0, 1fr);
 }
 
-.highlightbutton, #backbutton {
+.highlightbutton,
+#backbutton {
   position: absolute;
   right: 15px;
   bottom: 15px;
@@ -62,10 +65,11 @@
   background-position: center;
   cursor: pointer;
   will-change: transform;
-  transition: transform .4s cubic-bezier(0.6, 2, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.6, 2, 0.5, 1);
 }
 
-.highlightbutton:hover, #backbutton:hover {
+.highlightbutton:hover,
+#backbutton:hover {
   transform: scale(1.1);
 }
 
