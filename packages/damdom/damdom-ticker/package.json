@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-ticker",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "<damdom-ticker> custom element.",
   "main": "index.js",
   "publishConfig": {
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-ticker",
   "dependencies": {
-    "@damienmortini/core": "^0.2.137"
+    "@damienmortini/core": "^0.2.138"
   }
 }
