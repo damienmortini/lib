@@ -15,15 +15,15 @@ const directoryName = dirname(fileURLToPath(import.meta.url))
 const rootDirectory = `file:///${process.cwd()}/`.replaceAll(/\\/g, '/')
 const resolveImports = async (string) => {
   const promises = []
-  string = string.replaceAll(/(import([\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3, p4) => {
+  string = string.replaceAll(/((import|export)([\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3, p4, p5) => {
     const id = crypto.randomUUID()
-    const promise = import.meta.resolve(p3, rootDirectory).then((url) => {
-      string = string.replace(id, url.replace(rootDirectory, './'))
+    const promise = import.meta.resolve(p4, rootDirectory).then((url) => {
+      string = string.replace(id, url.replace(rootDirectory, '/'))
     }).catch(() => {
-      string = string.replace(id, p3)
+      string = string.replace(id, p4)
     })
     promises.push(promise)
-    return p1 + id + p4
+    return p1 + id + p5
   })
   return Promise.all(promises).then(() => string)
 }
@@ -130,7 +130,7 @@ export default class Server {
 </script>
 </body>`)
           stream.end(fileContent)
-        } else if (filePath.endsWith('.js') || filePath.endsWith('.ts')) {
+        } else if (filePath.endsWith('.js') || filePath.endsWith('.ts') || filePath.endsWith('.mjs')) {
           let fileContent = fs.readFileSync(filePath, {
             encoding: 'utf-8',
           })
