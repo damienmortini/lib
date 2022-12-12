@@ -114,45 +114,58 @@ export default class Server {
       }
 
       try {
+        const fileExtension = extname(filePath)
         /**
          * Add socket code on html pages for live reloading
          */
-        if (filePath.endsWith('.html')) {
-          let fileContent = fs.readFileSync(filePath, {
-            encoding: 'utf-8',
-          })
-          fileContent = await resolveImports(fileContent)
-          fileContent = fileContent.replace('</body>', `<script>
-  const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
-  socket.addEventListener("message", function (event) {
-    window.location.reload();
-  });
-</script>
-</body>`)
-          stream.end(fileContent)
-        } else if (['.js', '.ts', '.mjs'].includes(extname(filePath))) {
-          let fileContent = fs.readFileSync(filePath, {
-            encoding: 'utf-8',
-          })
-          stream.respond({
-            ':status': 200,
-            'content-type': mimeTypes.contentType('.js'),
-          })
-          if (filePath.endsWith('.ts')) {
-            fileContent = esbuild.transformSync(fileContent, {
-              loader: 'ts',
-            }).code
-          }
-          fileContent = await resolveImports(fileContent)
-          stream.end(fileContent)
-        } else {
-          const responseHeaders = {
-            'content-type': String(mimeTypes.lookup(filePath)),
-          }
-          if (requestRange) {
-            responseHeaders['Accept-Ranges'] = 'bytes'
-          }
-          stream.respondWithFile(decodeURIComponent(filePath), responseHeaders)
+        switch (fileExtension) {
+          case '.html':
+            {
+              let fileContent = fs.readFileSync(filePath, {
+                encoding: 'utf-8',
+              })
+              fileContent = await resolveImports(fileContent)
+              fileContent = fileContent.replace('</body>', `<script>
+    const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
+    socket.addEventListener("message", function (event) {
+      window.location.reload();
+    });
+  </script>
+  </body>`)
+              stream.end(fileContent)
+            }
+            break
+          case '.js':
+          case '.ts':
+          case '.mjs':
+            {
+              let fileContent = fs.readFileSync(filePath, {
+                encoding: 'utf-8',
+              })
+              stream.respond({
+                ':status': 200,
+                'content-type': mimeTypes.contentType('.js'),
+              })
+              if (fileExtension === '.ts') {
+                fileContent = esbuild.transformSync(fileContent, {
+                  loader: 'ts',
+                }).code
+              }
+              fileContent = await resolveImports(fileContent)
+              stream.end(fileContent)
+            }
+            break
+          default:
+            {
+              const responseHeaders = {
+                'content-type': String(mimeTypes.lookup(filePath)),
+              }
+              if (requestRange) {
+                responseHeaders['Accept-Ranges'] = 'bytes'
+              }
+              stream.respondWithFile(decodeURIComponent(filePath), responseHeaders)
+            }
+            break
         }
       } catch (error) {
         if (error.code === 'ENOENT') {
