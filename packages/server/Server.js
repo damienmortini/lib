@@ -7,7 +7,7 @@ import WebSocket, { WebSocketServer } from 'ws'
 import * as os from 'os'
 
 import { fileURLToPath } from 'url'
-import { dirname } from 'path'
+import { dirname, extname } from 'path'
 import * as esbuild from 'esbuild'
 
 const directoryName = dirname(fileURLToPath(import.meta.url))
@@ -130,7 +130,7 @@ export default class Server {
 </script>
 </body>`)
           stream.end(fileContent)
-        } else if (filePath.endsWith('.js') || filePath.endsWith('.ts') || filePath.endsWith('.mjs')) {
+        } else if (['.js', '.ts', '.mjs'].includes(extname(filePath))) {
           let fileContent = fs.readFileSync(filePath, {
             encoding: 'utf-8',
           })
