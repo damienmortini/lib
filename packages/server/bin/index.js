@@ -6,6 +6,7 @@ import Server from '../Server.js'
  * Extract parameters
  */
 let verbose = false
+let resolveModules = false
 let path
 let watchPath
 let watchIgnore
@@ -19,6 +20,8 @@ for (const arg of process.argv) {
     watchIgnore = arg.split('=')[1].trim()
   } else if (arg === '--verbose') {
     verbose = true
+  } else if (arg === '--resolve-modules') {
+    resolveModules = true
   }
 }
 
@@ -28,4 +31,5 @@ new Server({
   watchPath,
   watchIgnore,
   verbose,
+  resolveModules,
 })
