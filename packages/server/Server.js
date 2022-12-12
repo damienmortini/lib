@@ -32,7 +32,7 @@ export default class Server {
   http2SecureServer
   #wss
 
-  constructor({ path = '', watch = false, watchPath = '', rootPath = '.', watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
+  constructor({ path = '', watch = false, watchPath = '', rootPath = '.', resolveModules = false, watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
     /**
      * Create HTTP2 Server
      */
@@ -124,7 +124,7 @@ export default class Server {
               let fileContent = fs.readFileSync(filePath, {
                 encoding: 'utf-8',
               })
-              fileContent = await resolveImports(fileContent)
+              if (resolveModules) fileContent = await resolveImports(fileContent)
               fileContent = fileContent.replace('</body>', `<script>
     const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
     socket.addEventListener("message", function (event) {
@@ -151,7 +151,7 @@ export default class Server {
                   loader: 'ts',
                 }).code
               }
-              fileContent = await resolveImports(fileContent)
+              if (resolveModules) fileContent = await resolveImports(fileContent)
               stream.end(fileContent)
             }
             break
