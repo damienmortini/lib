@@ -17,11 +17,14 @@ const resolveImports = async (string) => {
   const promises = []
   string = string.replaceAll(/((import|export)([\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3, p4, p5) => {
     const id = crypto.randomUUID()
-    const promise = import.meta.resolve(p4, rootDirectory).then((url) => {
-      string = string.replace(id, url.replace(rootDirectory, '/'))
-    }).catch(() => {
-      string = string.replace(id, p4)
-    })
+    const promise = import.meta
+      .resolve(p4, rootDirectory)
+      .then((url) => {
+        string = string.replace(id, url.replace(rootDirectory, '/'))
+      })
+      .catch(() => {
+        string = string.replace(id, p4)
+      })
     promises.push(promise)
     return p1 + id + p5
   })
@@ -32,7 +35,16 @@ export default class Server {
   http2SecureServer
   #wss
 
-  constructor({ path = '', watch = false, watchPath = '', rootPath = '.', resolveModules = false, watchIgnore = undefined, verbose = false, port = 3000 } = {}) {
+  constructor({
+    path = '',
+    watch = false,
+    watchPath = '',
+    rootPath = '.',
+    resolveModules = false,
+    watchIgnore = undefined,
+    verbose = false,
+    port = 3000,
+  } = {}) {
     /**
      * Create HTTP2 Server
      */
@@ -78,42 +90,46 @@ export default class Server {
       webSocketServer.listen(++port)
 
       if (watch) {
-        chokidar.watch(`${rootPath}${watchPath}`, {
-          ignored: watchIgnore,
-          ignoreInitial: true,
-        }).on('change', (path) => {
-          if (verbose) {
-            console.log(`${path} just changed, refresh.`)
-          }
-          this.refresh()
-        })
+        chokidar
+          .watch(`${rootPath}${watchPath}`, {
+            ignored: watchIgnore,
+            ignoreInitial: true,
+          })
+          .on('change', (path) => {
+            if (verbose) {
+              console.log(`${path} just changed, refresh.`)
+            }
+            this.refresh()
+          })
       }
     })
 
     this.http2SecureServer.on('stream', async (stream, headers) => {
-      if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) return
+      if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) {
+        return
+      }
 
       const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY]
       const requestPath = headers[http2.constants.HTTP2_HEADER_PATH]
       const requestRange = headers[http2.constants.HTTP2_HEADER_RANGE]
 
-      let filePath = `${rootPath}${requestPath}`
-
-      /**
-       * Rewrite to root if url doesn't exist and isn't a file
-       */
-      if (!/\.[^/]*$/.test(filePath) && !fs.existsSync(filePath)) {
-        filePath = `${rootPath}/`
-      }
-
-      /**
-       * If path is a directory then set index.html file by default
-       */
-      if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-        filePath += filePath.endsWith('/') ? 'index.html' : '/index.html'
-      }
-
       try {
+        let filePath = `${rootPath}${requestPath}`
+
+        /**
+         * Rewrite to root if url doesn't exist and isn't a file
+         */
+        if (!/\.[^/]*$/.test(filePath) && !fs.existsSync(filePath)) {
+          filePath = `${rootPath}/`
+        }
+
+        /**
+         * If path is a directory then set index.html file by default
+         */
+        if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+          filePath += filePath.endsWith('/') ? 'index.html' : '/index.html'
+        }
+
         const fileExtension = extname(filePath)
         /**
          * Add socket code on html pages for live reloading
@@ -124,14 +140,19 @@ export default class Server {
               let fileContent = fs.readFileSync(filePath, {
                 encoding: 'utf-8',
               })
-              if (resolveModules) fileContent = await resolveImports(fileContent)
-              fileContent = fileContent.replace('</body>', `<script>
+              if (resolveModules) {
+                fileContent = await resolveImports(fileContent)
+              }
+              fileContent = fileContent.replace(
+                '</body>',
+                `<script>
     const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
     socket.addEventListener("message", function (event) {
       window.location.reload();
     });
   </script>
-  </body>`)
+  </body>`,
+              )
               stream.end(fileContent)
             }
             break
@@ -151,7 +172,9 @@ export default class Server {
                   loader: 'ts',
                 }).code
               }
-              if (resolveModules) fileContent = await resolveImports(fileContent)
+              if (resolveModules) {
+                fileContent = await resolveImports(fileContent)
+              }
               stream.end(fileContent)
             }
             break
@@ -168,13 +191,20 @@ export default class Server {
             break
         }
       } catch (error) {
+        if (verbose) console.log(error)
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND })
         } else {
-          stream.respond({ ':status': http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR })
+          stream.respond({
+            ':status': http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+          })
         }
         stream.end()
       }
+
+      stream.on('error', (error) => {
+        if (verbose) console.log(error)
+      })
     })
 
     this.http2SecureServer.listen(port)
