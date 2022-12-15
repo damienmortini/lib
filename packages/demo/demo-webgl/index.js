@@ -1,4 +1,4 @@
-import DamdomTickerElement from '@damienmortini/damdom-ticker/index.js'
+import { DamdomTickerElement } from '@damienmortini/damdom-ticker/index.js'
 
 import View from './View.js'
 
@@ -34,7 +34,7 @@ class DemoWebGLElement extends DamdomTickerElement {
 
     this.#canvas = this.shadowRoot.querySelector('canvas')
 
-    this. #view = new View({ canvas: this.#canvas })
+    this.#view = new View({ canvas: this.#canvas })
 
     const resizeObserver = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width

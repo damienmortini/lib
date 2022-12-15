@@ -10,7 +10,7 @@ const PAUSED_BY_CONNECTION = 8
  * @hideconstructor
  */
 
-class DamdomTickerElement extends HTMLElement {
+export class DamdomTickerElement extends HTMLElement {
   #pauseFlagValue = 0
   #callback = () => console.log('DamdomTickerElement.callback needs to be set')
 
@@ -104,5 +104,3 @@ class DamdomTickerElement extends HTMLElement {
     if (!this.#pauseFlagValue) Ticker.add(this.#callback)
   }
 }
-
-export default DamdomTickerElement
