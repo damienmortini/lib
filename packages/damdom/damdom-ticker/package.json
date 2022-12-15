@@ -3,6 +3,10 @@
   "version": "0.0.31",
   "description": "<damdom-ticker> custom element.",
   "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+  },
   "publishConfig": {
     "access": "public"
   },
