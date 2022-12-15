@@ -1,4 +1,4 @@
-import DamdomTickerElement from '@damienmortini/damdom-ticker/index.js'
+import { DamdomTickerElement } from '@damienmortini/damdom-ticker/index.js'
 
 import View from './View.js'
 
