@@ -2,6 +2,9 @@
   "name": "@damienmortini/signal",
   "version": "0.0.1",
   "author": "Damien Mortini",
+  "scripts": {
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+  },
   "publishConfig": {
     "access": "public"
   },
