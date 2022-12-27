@@ -1,7 +1,5 @@
 {
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "allowJs": true,
     "moduleResolution": "node",
@@ -9,5 +7,5 @@
     "module": "esnext",
     "checkJs": true,
     "strictNullChecks": false
-  },
+  }
 }

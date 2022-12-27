@@ -10,8 +10,7 @@
     "test": "eslint packages",
     "update": "npm i",
     "upgrade": "ncu --deep -u",
-    "version": "lerna version",
-    "generateTypes": "npx -p typescript tsc packages --declaration --allowJs --emitDeclarationOnly"
+    "version": "lerna version"
   },
   "workspaces": [
     "packages/**/*"
