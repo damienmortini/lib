@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/signal",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Damien Mortini",
   "scripts": {
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
