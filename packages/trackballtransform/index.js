@@ -6,7 +6,7 @@ import Vector3 from '@damienmortini/math/Vector3.js'
 import Quaternion from '@damienmortini/math/Quaternion.js'
 import GestureObserver from '@damienmortini/gestureobserver'
 
-export default class TrackballController {
+export default class TrackballTransform {
   #cachedMatrix = new Matrix4()
   #cachedQuaternion = new Quaternion()
   #positionOffset = new Vector3()

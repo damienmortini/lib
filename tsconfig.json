@@ -6,6 +6,9 @@
     "target": "esnext",
     "module": "esnext",
     "checkJs": true,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true
   }
 }
