@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/trackballtransform",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
