@@ -1,5 +1,3 @@
-console.warn('Deprecated. Use @damienmortini/trackballtransform instead.')
-
 import Matrix4 from '@damienmortini/math/Matrix4.js'
 import Vector2 from '@damienmortini/math/Vector2.js'
 import Vector3 from '@damienmortini/math/Vector3.js'

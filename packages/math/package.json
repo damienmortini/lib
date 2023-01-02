@@ -8,6 +8,8 @@
   "publishConfig": {
     "access": "public"
   },
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
