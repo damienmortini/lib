@@ -1,19 +1,16 @@
-import Matrix4 from '@damienmortini/math/Matrix4.js'
-import Vector2 from '@damienmortini/math/Vector2.js'
-import Vector3 from '@damienmortini/math/Vector3.js'
-import Quaternion from '@damienmortini/math/Quaternion.js'
-import GestureObserver from '@damienmortini/gestureobserver'
+import { Matrix4, Vector2, Vector3, Quaternion } from '@damienmortini/math'
+import { GestureObserver } from '@damienmortini/gestureobserver'
 
-export default class TrackballTransform {
+export class TrackballTransform {
   #cachedMatrix = new Matrix4()
   #cachedQuaternion = new Quaternion()
   #positionOffset = new Vector3()
   #cachedVector3 = new Vector3()
   #velocity = new Vector2()
   #velocityOrigin = new Vector2()
-  #distanceEased
+  #distanceEased = 0
+  #distance = 0
   #position
-  #distance
 
   constructor({
     matrix = new Matrix4(),

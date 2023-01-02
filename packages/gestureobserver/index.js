@@ -1,4 +1,4 @@
-class GestureObserver {
+export class GestureObserver {
   #elementsData = new Map()
   #callback
 
@@ -216,5 +216,3 @@ class GestureObserver {
     this.#resetElementPreviousData(element)
   }
 }
-
-export default GestureObserver
