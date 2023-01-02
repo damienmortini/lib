@@ -1,6 +1,4 @@
-import { Matrix4 } from '@damienmortini/math'
-
-export default class TrackballTransform {
+export class TrackballTransform {
   constructor({
     matrix,
     domElement,
@@ -44,3 +42,4 @@ export default class TrackballTransform {
   update(): void
   #private
 }
+import { Matrix4 } from '@damienmortini/math'
