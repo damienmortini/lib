@@ -1,8 +1,19 @@
 {
   "name": "@damienmortini/trackballtransform",
-  "private": true,
   "version": "0.0.0",
   "scripts": {
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
-  }
+  },
+  "author": "Damien Mortini",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/trackballtransform"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/trackballtransform"
 }
