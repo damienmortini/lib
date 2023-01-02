@@ -2,6 +2,9 @@
   "name": "@damienmortini/math",
   "version": "0.0.11",
   "description": "Math Helpers",
+  "scripts": {
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+  },
   "publishConfig": {
     "access": "public"
   },
