@@ -1,0 +1,33 @@
+export default class Vector3 extends Float32Array {
+    constructor(array?: number[]);
+    set x(arg: any);
+    get x(): any;
+    0: any;
+    set y(arg: any);
+    get y(): any;
+    1: any;
+    set z(arg: any);
+    get z(): any;
+    2: any;
+    set(x: any, y: any, z: any): Vector3;
+    copy(vector3: any): Vector3;
+    add(vector3: any): Vector3;
+    get size(): number;
+    get squaredSize(): number;
+    distance(vector3: any): number;
+    squaredDistance(vector3: any): number;
+    subtract(vector3: any): Vector3;
+    negate(vector3?: Vector3): Vector3;
+    cross(vector3a: any, vector3b: any): Vector3;
+    scale(value: any): Vector3;
+    normalize(): Vector3;
+    dot(vector3: any): number;
+    lerp(vector3: any, value: any): vec3;
+    equals(vector3: any): boolean;
+    applyMatrix3(matrix3: any): Vector3;
+    applyMatrix4(matrix4: any): Vector3;
+    applyQuaternion(quaternion: any): Vector3;
+    angle(vector3: any): number;
+    clone(): Vector3;
+}
+import { vec3 } from "gl-matrix";
