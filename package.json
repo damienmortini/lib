@@ -16,15 +16,15 @@
     "packages/**/*"
   ],
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.8",
-    "@damienmortini/server": "^1.0.57",
-    "eslint": "^8.27.0",
+    "@damienmortini/eslint-config": "^0.0.9",
+    "@damienmortini/server": "^1.0.62",
+    "eslint": "^8.31.0",
     "fast-glob": "^3.2.12",
     "jsdoc": "^4.0.0",
-    "lerna": "^6.0.3",
-    "npm-check-updates": "^16.4.1"
+    "lerna": "^6.4.0",
+    "npm-check-updates": "^16.6.2"
   },
   "dependencies": {
-    "es-module-shims": "^1.6.2"
+    "es-module-shims": "^1.6.3"
   }
 }
