@@ -1,4 +1,4 @@
-import Ticker from '@damienmortini/core/util/Ticker.js'
+import Ticker from '@damienmortini/ticker'
 
 const PAUSED_BY_ACTION = 1
 const PAUSED_BY_INTERSECTION = 2

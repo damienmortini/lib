@@ -1,6 +1,4 @@
-console.warn('Deprecated. Use @damienmortini/ticker instead.')
-
-import Signal from './Signal.js'
+import { Signal } from '@damienmortini/signal'
 
 class Ticker extends Signal {
   static #BASE_DELTA_TIME = 1000 / 60

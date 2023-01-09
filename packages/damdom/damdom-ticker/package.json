@@ -24,6 +24,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-ticker",
   "dependencies": {
-    "@damienmortini/core": "^0.2.141"
+    "@damienmortini/ticker": "^0.0.3"
   }
 }
