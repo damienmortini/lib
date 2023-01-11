@@ -1,0 +1,25 @@
+{
+  "name": "@damienmortini/orbittransform",
+  "version": "0.0.3",
+  "scripts": {
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+  },
+  "author": "Damien Mortini",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/orbittransform"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/orbittransform",
+  "dependencies": {
+    "@damienmortini/gestureobserver": "^0.0.2",
+    "@damienmortini/math": "^0.0.12"
+  }
+}

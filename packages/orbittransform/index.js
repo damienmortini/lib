@@ -1,9 +1,7 @@
-console.warn('Deprecated. Use @damienmortini/orbittransform instead.')
-
 import { Matrix4 } from '@damienmortini/math'
-import GestureObserver from '@damienmortini/gestureobserver'
+import { GestureObserver } from '@damienmortini/gestureobserver'
 
-export default class OrbitController {
+export class OrbitTransform {
   #selfMatrix = new Matrix4()
   #distance
   #tilt
