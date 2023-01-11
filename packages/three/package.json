@@ -4,8 +4,11 @@
   "description": "Three.js helpers",
   "scripts": {
     "install": "npm run copyexamples",
-    "copyexamples": "node copyExamples.js"
+    "copyexamples": "node copyExamples.js",
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },

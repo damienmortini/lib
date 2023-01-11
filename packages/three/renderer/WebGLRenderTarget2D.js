@@ -1,12 +1,10 @@
-import {
-  Scene,
-  Mesh,
-  PlaneBufferGeometry,
-  WebGLRenderTarget,
-  OrthographicCamera,
-} from '../../../three/src/Three.js'
+import { Scene, Mesh, PlaneGeometry, WebGLRenderTarget, OrthographicCamera } from 'three'
 
-export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
+export class WebGLRenderTarget2D extends WebGLRenderTarget {
+  #scene
+  #camera
+  #quad
+
   constructor({
     renderer,
     material = undefined,
@@ -42,24 +40,24 @@ export default class THREEWebGLRenderTarget2D extends WebGLRenderTarget {
 
     this.renderer = renderer
 
-    this._scene = new Scene()
-    this._camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
+    this.#scene = new Scene()
+    this.#camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
 
-    this._quad = new Mesh(new PlaneBufferGeometry(2, 2), material)
-    this._scene.add(this._quad)
+    this.#quad = new Mesh(new PlaneGeometry(2, 2), material)
+    this.#scene.add(this.#quad)
   }
 
   get material() {
-    return this._quad.material
+    return this.#quad.material
   }
 
   set material(value) {
-    this._quad.material = value
+    this.#quad.material = value
   }
 
   render({ debug = false } = {}) {
     if (!debug) this.renderer.setRenderTarget(this)
-    this.renderer.render(this._scene, this._camera)
+    this.renderer.render(this.#scene, this.#camera)
     this.renderer.setRenderTarget(null)
   }
 }
