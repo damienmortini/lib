@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/graph",
   "private": true,
-  "version": "0.0.13",
+  "version": "0.0.14",
   "main": "index.js",
   "type": "module",
   "bin": "bin/index.js",
@@ -9,7 +9,7 @@
     "server": "node bin/index.js server"
   },
   "dependencies": {
-    "@damienmortini/server": "^1.0.62",
+    "@damienmortini/server": "^1.0.63",
     "ws": "^8.12.0"
   },
   "author": "Damien Mortini",
