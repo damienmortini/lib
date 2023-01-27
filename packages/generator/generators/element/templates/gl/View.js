@@ -1,5 +1,5 @@
 import Camera from '@damienmortini/math/Camera.js'
-import OrbitController from '@damienmortini/core/input/OrbitController.js'
+import { OrbitTransform } from '@damienmortini/orbittransform'
 import GLBoxObject from '@damienmortini/webgl/object/GLBoxObject.js'
 import GLProgram from '@damienmortini/webgl/GLProgram.js'
 import BasicShader from '@damienmortini/webgl/shader/BasicShader.js'
@@ -11,9 +11,7 @@ export default class View {
   #gl
   #object
 
-  constructor({
-    canvas,
-  }) {
+  constructor({ canvas }) {
     this.#canvas = canvas
 
     this.#gl = this.#canvas.getContext('webgl2', {
@@ -25,7 +23,7 @@ export default class View {
 
     this.#camera = new Camera()
 
-    this.#controller = new OrbitController({
+    this.#controller = new OrbitTransform({
       domElement: this.#canvas,
       matrix: this.#camera.transform,
       distance: 5,
@@ -43,14 +41,20 @@ export default class View {
         ...new BasicShader({
           normals: true,
           vertexChunks: [
-            ['end', `
+            [
+              'end',
+              `
               gl_Position = projectionView * transform * vec4(position, 1.);
-            `],
+            `,
+            ],
           ],
           fragmentChunks: [
-            ['end', `
+            [
+              'end',
+              `
               fragColor = vec4(vNormal * .5 + .5, 1.);
-            `],
+            `,
+            ],
           ],
         }),
       }),
