@@ -1,4 +1,4 @@
-import PlaneGeometry from '@damienmortini/math/geometry/PlaneGeometry.js'
+import { PlaneGeometry } from '@damienmortini/math'
 import { GLObject, GLGeometry, GLProgram } from '../index.js'
 
 export class GLPlaneObject extends GLObject {
