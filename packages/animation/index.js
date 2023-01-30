@@ -1,6 +1,4 @@
-console.warn('Deprecated. Use @damienmortini/animation instead.')
-
-import Ticker from './Ticker.js'
+import Ticker from '@damienmortini/ticker'
 
 const targetComputedKeyframesMap = new Map()
 
