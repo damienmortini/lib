@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/globlink",
   "description": "npm link all packages matching an array of glob patterns",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Damien Mortini",
   "main": "index.js",
   "type": "module",
