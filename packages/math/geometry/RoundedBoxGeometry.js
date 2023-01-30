@@ -1,7 +1,6 @@
 // Adapted from Marcin Ignac https://github.com/vorg/primitive-rounded-cube
 
-import BoxGeometry from './BoxGeometry.js'
-import Vector3 from '@damienmortini/math/Vector3.js'
+import { Vector3, BoxGeometry } from '@damienmortini/math'
 
 const VECTOR3 = new Vector3()
 
@@ -13,7 +12,7 @@ export default class RoundedBoxGeometry extends BoxGeometry {
     widthSegments = 10,
     heightSegments = 10,
     depthSegments = 10,
-    radius = .25,
+    radius = 0.25,
     radiusWidth = radius,
     radiusHeight = radius,
     radiusDepth = radius,
@@ -42,22 +41,22 @@ export default class RoundedBoxGeometry extends BoxGeometry {
       position.set(this.positions[index * 3], this.positions[index * 3 + 1], this.positions[index * 3 + 2])
       VECTOR3.copy(position)
 
-      if (position.x < -width * .5 + radiusWidth) {
-        position.x = -width * .5 + radiusWidth
-      } else if (position.x > width * .5 - radiusWidth) {
-        position.x = width * .5 - radiusWidth
+      if (position.x < -width * 0.5 + radiusWidth) {
+        position.x = -width * 0.5 + radiusWidth
+      } else if (position.x > width * 0.5 - radiusWidth) {
+        position.x = width * 0.5 - radiusWidth
       }
 
-      if (position.y < -height * .5 + radiusHeight) {
-        position.y = -height * .5 + radiusHeight
-      } else if (position.y > height * .5 - radiusHeight) {
-        position.y = height * .5 - radiusHeight
+      if (position.y < -height * 0.5 + radiusHeight) {
+        position.y = -height * 0.5 + radiusHeight
+      } else if (position.y > height * 0.5 - radiusHeight) {
+        position.y = height * 0.5 - radiusHeight
       }
 
-      if (position.z < -depth * .5 + radiusDepth) {
-        position.z = -depth * .5 + radiusDepth
-      } else if (position.z > depth * .5 - radiusDepth) {
-        position.z = depth * .5 - radiusDepth
+      if (position.z < -depth * 0.5 + radiusDepth) {
+        position.z = -depth * 0.5 + radiusDepth
+      } else if (position.z > depth * 0.5 - radiusDepth) {
+        position.z = depth * 0.5 - radiusDepth
       }
 
       VECTOR3.subtract(position).normalize()

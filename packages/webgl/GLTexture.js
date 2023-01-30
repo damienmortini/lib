@@ -1,4 +1,4 @@
-export default class GLTexture {
+export class GLTexture {
   #glTexture
   #width
   #height
@@ -58,7 +58,7 @@ export default class GLTexture {
   set data(value) {
     this.#data = value
 
-    if (this.#data && (this.#data.length === undefined)) {
+    if (this.#data && this.#data.length === undefined) {
       this.#dataWidth = this.#data.width || this.#data.videoWidth
       this.#dataHeight = this.#data.height || this.#data.videoHeight
     }
@@ -71,7 +71,17 @@ export default class GLTexture {
     if (this.gl instanceof WebGLRenderingContext && this.#data && this.#data.length === undefined) {
       this.gl.texImage2D(this.#target, this.level, this.internalFormat, this.format, this.type, this.#data)
     } else {
-      this.gl.texImage2D(this.#target, this.level, this.internalFormat, this.width, this.height, 0, this.format, this.type, this.#data || null)
+      this.gl.texImage2D(
+        this.#target,
+        this.level,
+        this.internalFormat,
+        this.width,
+        this.height,
+        0,
+        this.format,
+        this.type,
+        this.#data || null,
+      )
     }
     if (this.autoGenerateMipmap) {
       this.gl.generateMipmap(this.#target)

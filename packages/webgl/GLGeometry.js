@@ -1,24 +1,17 @@
 import GLVertexAttribute from './GLVertexAttribute.js'
 
-export default class GLGeometry {
+export class GLGeometry {
   #drawElementsInstanced
   #drawArraysInstanced
 
-  constructor({
-    gl,
-    positions = null,
-    normals = null,
-    uvs = null,
-    attributes = {},
-    indices = null,
-  }) {
+  constructor({ gl, positions = null, normals = null, uvs = null, attributes = {}, indices = null }) {
     this.gl = gl
     this.indices = null
 
     this.gl.getExtension('OES_element_index_uint')
 
-    this.#drawElementsInstanced = () => { }
-    this.#drawArraysInstanced = () => { }
+    this.#drawElementsInstanced = () => {}
+    this.#drawArraysInstanced = () => {}
     const instancedArraysExtension = this.gl.getExtension('ANGLE_instanced_arrays')
     if (instancedArraysExtension) {
       this.#drawElementsInstanced = instancedArraysExtension.drawElementsInstancedANGLE.bind(instancedArraysExtension)
@@ -31,27 +24,36 @@ export default class GLGeometry {
     this.attributes = new Map(attributes instanceof Map ? attributes : Object.entries(attributes))
 
     if (positions) {
-      this.attributes.set('position', new GLVertexAttribute({
-        gl,
-        data: positions,
-        size: 3,
-      }))
+      this.attributes.set(
+        'position',
+        new GLVertexAttribute({
+          gl,
+          data: positions,
+          size: 3,
+        }),
+      )
     }
 
     if (normals) {
-      this.attributes.set('normal', new GLVertexAttribute({
-        gl,
-        data: normals,
-        size: 3,
-      }))
+      this.attributes.set(
+        'normal',
+        new GLVertexAttribute({
+          gl,
+          data: normals,
+          size: 3,
+        }),
+      )
     }
 
     if (uvs) {
-      this.attributes.set('uv', new GLVertexAttribute({
-        gl,
-        data: uvs,
-        size: 2,
-      }))
+      this.attributes.set(
+        'uv',
+        new GLVertexAttribute({
+          gl,
+          data: uvs,
+          size: 2,
+        }),
+      )
     }
 
     for (const [key, value] of this.attributes) {

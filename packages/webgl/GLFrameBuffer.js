@@ -1,11 +1,5 @@
-export default class GLFrameBuffer {
-  constructor({
-    gl,
-    target = gl.FRAMEBUFFER,
-    colorTextures = [],
-    depthTexture = undefined,
-    stencilTexture = undefined,
-  }) {
+export class GLFrameBuffer {
+  constructor({ gl, target = gl.FRAMEBUFFER, colorTextures = [], depthTexture = undefined, stencilTexture = undefined }) {
     this.gl = gl
     this.target = target
 
@@ -32,12 +26,7 @@ export default class GLFrameBuffer {
     }
   }
 
-  attach({
-    texture,
-    attachment = this.gl.COLOR_ATTACHMENT0,
-    target = this.target,
-    textarget = this.gl.TEXTURE_2D,
-  }) {
+  attach({ texture, attachment = this.gl.COLOR_ATTACHMENT0, target = this.target, textarget = this.gl.TEXTURE_2D }) {
     this.bind({ target })
     if (attachment === this.gl.DEPTH_ATTACHMENT) {
       this.depthTexture = texture
@@ -50,15 +39,11 @@ export default class GLFrameBuffer {
     this.unbind({ target })
   }
 
-  bind({
-    target = this.target,
-  } = {}) {
+  bind({ target = this.target } = {}) {
     this.gl.bindFramebuffer(target, this._frameBuffer)
   }
 
-  unbind({
-    target = this.target,
-  } = {}) {
+  unbind({ target = this.target } = {}) {
     this.gl.bindFramebuffer(target, null)
   }
 

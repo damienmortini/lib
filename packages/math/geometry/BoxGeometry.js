@@ -1,6 +1,6 @@
 // From https://github.com/mrdoob/three.js/blob/master/src/geometries/BoxGeometry.js
 
-export default class BoxGeometry {
+export class BoxGeometry {
   constructor({
     width = 1,
     height = 1,
@@ -20,12 +20,12 @@ export default class BoxGeometry {
 
     let numberOfVertices = 0
 
-    buildPlane('z', 'y', 'x', - 1, - 1, depth, height, width, depthSegments, heightSegments)
-    buildPlane('z', 'y', 'x', 1, - 1, depth, height, - width, depthSegments, heightSegments)
+    buildPlane('z', 'y', 'x', -1, -1, depth, height, width, depthSegments, heightSegments)
+    buildPlane('z', 'y', 'x', 1, -1, depth, height, -width, depthSegments, heightSegments)
     buildPlane('x', 'z', 'y', 1, 1, width, depth, height, widthSegments, depthSegments)
-    buildPlane('x', 'z', 'y', 1, - 1, width, depth, - height, widthSegments, depthSegments)
-    buildPlane('x', 'y', 'z', 1, - 1, width, height, depth, widthSegments, heightSegments)
-    buildPlane('x', 'y', 'z', - 1, - 1, width, height, - depth, widthSegments, heightSegments)
+    buildPlane('x', 'z', 'y', 1, -1, width, depth, -height, widthSegments, depthSegments)
+    buildPlane('x', 'y', 'z', 1, -1, width, height, depth, widthSegments, heightSegments)
+    buildPlane('x', 'y', 'z', -1, -1, width, height, -depth, widthSegments, heightSegments)
 
     if (positions) {
       this.positions = new Float32Array(verticesArray)
@@ -62,7 +62,8 @@ export default class BoxGeometry {
 
       let vertexCounter = 0
 
-      let ix; let iy
+      let ix
+      let iy
 
       const vector = {
         x: 0,
@@ -86,7 +87,7 @@ export default class BoxGeometry {
 
           vector[u] = 0
           vector[v] = 0
-          vector[w] = depth > 0 ? 1 : - 1
+          vector[w] = depth > 0 ? 1 : -1
 
           if (normals) {
             normalsArray.push(vector.x, vector.y, vector.z)
@@ -94,7 +95,7 @@ export default class BoxGeometry {
 
           if (uvs) {
             uvsArray.push(ix / gridX)
-            uvsArray.push(1 - (iy / gridY))
+            uvsArray.push(1 - iy / gridY)
           }
 
           vertexCounter += 1

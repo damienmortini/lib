@@ -16,8 +16,8 @@
     "packages/**/*"
   ],
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.10",
-    "@damienmortini/server": "^1.0.63",
+    "@damienmortini/eslint-config": "^0.0.11",
+    "@damienmortini/server": "^1.0.64",
     "eslint": "^8.33.0",
     "fast-glob": "^3.2.12",
     "jsdoc": "^4.0.0",

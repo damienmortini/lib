@@ -2,16 +2,14 @@ import Shader from '../3d/Shader.js'
 import DataTextureShader from './DataTextureShader.js'
 import SkinShader from './SkinShader.js'
 
-export default class GLTFShader extends Shader {
-  constructor({
-    uniforms = undefined,
-    vertexChunks = [],
-    fragmentChunks = [],
-  } = {}) {
+export class GLTFShader extends Shader {
+  constructor({ uniforms = undefined, vertexChunks = [], fragmentChunks = [] } = {}) {
     super({
       uniforms,
       vertexChunks: [
-        ['start', `
+        [
+          'start',
+          `
           uniform mat4 projectionView;
           uniform mat4 transform;
           uniform mat3 normalMatrix;
@@ -50,8 +48,11 @@ export default class GLTFShader extends Shader {
           out vec2 vUV;
           out vec3 vViewDirection;
           out vec3 vWorldPosition;
-        `],
-        ['main', `
+        `,
+        ],
+        [
+          'main',
+          `
           vec3 gltfPosition = position;
           vec3 gltfNormal = normal;
 
@@ -75,8 +76,11 @@ export default class GLTFShader extends Shader {
           gltfNormal = normalize(normalMatrix * gltfNormal);
 
           vec3 worldPosition = (transform * vec4(gltfPosition, 1.)).xyz;
-        `],
-        ['end', `
+        `,
+        ],
+        [
+          'end',
+          `
           gl_Position = projectionView * vec4(worldPosition, 1.);
           
           vWorldPosition = worldPosition;
@@ -84,17 +88,21 @@ export default class GLTFShader extends Shader {
           vNormal = gltfNormal;
           vUV = uv;
           vViewDirection = normalize(worldPosition - cameraPosition);
-        `],
+        `,
+        ],
         ...vertexChunks,
       ],
       fragmentChunks: [
-        ['start', `
+        [
+          'start',
+          `
           in vec3 vPosition;
           in vec3 vNormal;
           in vec2 vUV;
           in vec3 vViewDirection;
           in vec3 vWorldPosition;
-        `],
+        `,
+        ],
         ...fragmentChunks,
       ],
     })

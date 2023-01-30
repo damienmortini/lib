@@ -1,10 +1,10 @@
-import GLTexture from './GLTexture.js'
-import GLFrameBuffer from './GLFrameBuffer.js'
-import GLProgram from './GLProgram.js'
-import GLPlaneObject from './object/GLPlaneObject.js'
+import { GLTexture } from './GLTexture.js'
+import { GLFrameBuffer } from './GLFrameBuffer.js'
+import { GLProgram } from './GLProgram.js'
+import { GLPlaneObject } from './object/GLPlaneObject.js'
 import { addChunks } from './GLSLShader.js'
 
-export default class GLShaderTexture extends GLTexture {
+export class GLShaderTexture extends GLTexture {
   #debug
   #autoGenerateMipmap
   #frameBuffer
@@ -72,17 +72,17 @@ export default class GLShaderTexture extends GLTexture {
         gl: this.gl,
         uniforms,
         vertex: GLShaderTexture.VERTEX,
-        fragment: addChunks(`#version 300 es
+        fragment: addChunks(
+          `#version 300 es
 precision highp float;
 
 out vec4 fragColor;
 
 void main() {
   fragColor = vec4(0.);
-}`, [
-          ...fragmentChunks,
-          ['start', `in vec2 vUV;`],
-        ]),
+}`,
+          [...fragmentChunks, ['start', `in vec2 vUV;`]],
+        ),
       }),
     })
 

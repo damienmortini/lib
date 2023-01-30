@@ -1,15 +1,8 @@
 import { addChunks, FRAGMENT, VERTEX } from '../GLSLShader.js'
 import Matrix4 from '@damienmortini/math/Matrix4.js'
 
-export default class BasicShader {
-  constructor({
-    positions = true,
-    normals = false,
-    uvs = false,
-    uniforms = {},
-    vertexChunks = [],
-    fragmentChunks = [],
-  } = {}) {
+export class BasicShader {
+  constructor({ positions = true, normals = false, uvs = false, uniforms = {}, vertexChunks = [], fragmentChunks = [] } = {}) {
     this.uniforms = {
       projectionView: new Matrix4(),
       transform: new Matrix4(),
@@ -17,7 +10,9 @@ export default class BasicShader {
     }
 
     this.vertex = addChunks(VERTEX, [
-      ['start', `
+      [
+        'start',
+        `
         uniform mat4 projectionView;
         uniform mat4 transform;
 
@@ -28,24 +23,34 @@ export default class BasicShader {
         ${positions ? 'out vec3 vPosition;' : ''}
         ${normals ? 'out vec3 vNormal;' : ''}
         ${uvs ? 'out vec2 vUV;' : ''}
-      `],
-      ['main', `
+      `,
+      ],
+      [
+        'main',
+        `
         ${positions ? 'vPosition = position;' : ''}
         ${normals ? 'vNormal = normal;' : ''}
         ${uvs ? 'vUV = uv;' : ''}
-      `],
-      ['end', `
+      `,
+      ],
+      [
+        'end',
+        `
         gl_Position = projectionView * transform * vec4(position, 1.);
-      `],
+      `,
+      ],
       ...vertexChunks,
     ])
 
     this.fragment = addChunks(FRAGMENT, [
-      ['start', `
+      [
+        'start',
+        `
         ${positions ? 'in vec3 vPosition;' : ''}
         ${normals ? 'in vec3 vNormal;' : ''}
         ${uvs ? 'in vec2 vUV;' : ''}
-      `],
+      `,
+      ],
       ...fragmentChunks,
     ])
   }
