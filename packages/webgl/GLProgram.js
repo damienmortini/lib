@@ -1,19 +1,19 @@
 import * as GLSLShader from './GLSLShader.js'
 
 const GL_UNIFORM_TYPE_MAP = new Map([
-  ['float', 'uniform1f'],
+  ['float', 'uniform1fv'],
   ['vec2', 'uniform2fv'],
   ['vec3', 'uniform3fv'],
   ['vec4', 'uniform4fv'],
-  ['int', 'uniform1i'],
+  ['int', 'uniform1iv'],
   ['ivec2', 'uniform2iv'],
   ['ivec3', 'uniform3iv'],
   ['ivec4', 'uniform4iv'],
-  ['uint', 'uniform1ui'],
+  ['uint', 'uniform1uiv'],
   ['uvec2', 'uniform2uiv'],
   ['uvec3', 'uniform3uiv'],
   ['uvec4', 'uniform4uiv'],
-  ['bool', 'uniform1i'],
+  ['bool', 'uniform1iv'],
   ['bvec2', 'uniform2iv'],
   ['bvec3', 'uniform3iv'],
   ['bvec4', 'uniform4iv'],
@@ -143,7 +143,7 @@ export class GLProgram {
     } else if (type.startsWith('sampler')) {
       this.gl[GL_UNIFORM_TYPE_MAP.get(type)](location, this.#textureUnits.get(name))
     } else {
-      this.gl[GL_UNIFORM_TYPE_MAP.get(type)](location, value)
+      this.gl[GL_UNIFORM_TYPE_MAP.get(type)](location, typeof value === 'number' ? [value] : value)
     }
   }
 
