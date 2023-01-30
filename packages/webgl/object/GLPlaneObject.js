@@ -1,9 +1,7 @@
 import PlaneGeometry from '@damienmortini/math/geometry/PlaneGeometry.js'
-import GLObject from '../GLObject.js'
-import GLGeometry from '../GLGeometry.js'
-import GLProgram from '../GLProgram.js'
+import { GLObject, GLGeometry, GLProgram } from '../index.js'
 
-export default class GLPlaneObject extends GLObject {
+export class GLPlaneObject extends GLObject {
   constructor({
     gl,
     width = undefined,
@@ -27,18 +25,23 @@ export default class GLPlaneObject extends GLObject {
   }) {
     super({
       gl,
-      geometry: new GLGeometry(Object.assign({
-        gl,
-        attributes,
-      }, new PlaneGeometry({
-        width,
-        height,
-        columns,
-        rows,
-        normals,
-        uvs,
-        facingUp,
-      }))),
+      geometry: new GLGeometry(
+        Object.assign(
+          {
+            gl,
+            attributes,
+          },
+          new PlaneGeometry({
+            width,
+            height,
+            columns,
+            rows,
+            normals,
+            uvs,
+            facingUp,
+          }),
+        ),
+      ),
       program,
     })
   }

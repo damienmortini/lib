@@ -1,17 +1,13 @@
-import GLVertexArray from './GLVertexArray.js'
-import GLTexture from './GLTexture.js'
+import { GLVertexArray } from './GLVertexArray.js'
+import { GLTexture } from './GLTexture.js'
 
-export default class GLObject {
+export class GLObject {
   #boundTextures = new Set()
   #vertexArrays = new Map()
   #program
   #geometry
 
-  constructor({
-    gl,
-    geometry = undefined,
-    program = undefined,
-  }) {
+  constructor({ gl, geometry = undefined, program = undefined }) {
     this.gl = gl
 
     this.geometry = geometry
@@ -26,11 +22,14 @@ export default class GLObject {
       this.#vertexArrays.set(this.geometry, programsMap)
     }
     if (!programsMap.get(this.#program)) {
-      programsMap.set(this.#program, new GLVertexArray({
-        gl: this.gl,
-        geometry: this.geometry,
-        program: this.program,
-      }))
+      programsMap.set(
+        this.#program,
+        new GLVertexArray({
+          gl: this.gl,
+          geometry: this.geometry,
+          program: this.program,
+        }),
+      )
     }
   }
 
@@ -70,13 +69,7 @@ export default class GLObject {
     }
   }
 
-  draw({
-    mode = this.gl.TRIANGLES,
-    bind = false,
-    uniforms = {},
-    instanceCount = undefined,
-    ...options
-  } = {}) {
+  draw({ mode = this.gl.TRIANGLES, bind = false, uniforms = {}, instanceCount = undefined, ...options } = {}) {
     if (bind) this.bind()
     for (const [key, value] of Object.entries(uniforms)) {
       if (value instanceof GLTexture && !this.#boundTextures.has(value)) {

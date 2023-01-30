@@ -1,6 +1,6 @@
 // From https://github.com/mattdesl/glsl-fxaa
 
-export default class AntialiasGLSL {
+export class AntialiasGLSL {
   static vertex() {
     return `
       varying vec2 v_rgbNW;

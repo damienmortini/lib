@@ -1,15 +1,10 @@
-import GLFrameBuffer from './GLFrameBuffer.js'
-import GLTexture from './GLTexture.js'
-import GLPlaneObject from './object/GLPlaneObject.js'
-import GLProgram from './GLProgram.js'
+import { GLFrameBuffer } from './GLFrameBuffer.js'
+import { GLTexture } from './GLTexture.js'
+import { GLPlaneObject } from './object/GLPlaneObject.js'
+import { GLProgram } from './GLProgram.js'
 
-export default class GLGPGPUSystem {
-  constructor({
-    gl,
-    data,
-    maxWidth = 1024,
-    fragmentChunks = [],
-  }) {
+export class GLGPGPUSystem {
+  constructor({ gl, data, maxWidth = 1024, fragmentChunks = [] }) {
     this.gl = gl
 
     if (this.gl instanceof WebGLRenderingContext) {
@@ -29,17 +24,19 @@ export default class GLGPGPUSystem {
 
     this._frameBufferIn = new GLFrameBuffer({
       gl: this.gl,
-      colorTextures: [new GLTexture({
-        gl: this.gl,
-        data: textureData,
-        width: this._width,
-        height: this._height,
-        minFilter: this.gl.NEAREST,
-        magFilter: this.gl.NEAREST,
-        format: this.gl.RGBA,
-        internalFormat: this.gl instanceof WebGLRenderingContext ? this.gl.RGBA : this.gl.RGBA32F,
-        type: this.gl.FLOAT,
-      })],
+      colorTextures: [
+        new GLTexture({
+          gl: this.gl,
+          data: textureData,
+          width: this._width,
+          height: this._height,
+          minFilter: this.gl.NEAREST,
+          magFilter: this.gl.NEAREST,
+          format: this.gl.RGBA,
+          internalFormat: this.gl instanceof WebGLRenderingContext ? this.gl.RGBA : this.gl.RGBA32F,
+          type: this.gl.FLOAT,
+        }),
+      ],
     })
 
     this._frameBufferOut = this._frameBufferIn.clone()
@@ -57,30 +54,45 @@ export default class GLGPGPUSystem {
             dataTexture: this._frameBufferIn.colorTextures[0],
           },
           vertexChunks: [
-            ['start', `
+            [
+              'start',
+              `
               in vec3 position;
               in vec2 uv;
 
               out vec2 vUV;
-            `],
-            ['end', `
+            `,
+            ],
+            [
+              'end',
+              `
               gl_Position = vec4(position, 1.);
 
               vUV = uv;
-            `],
+            `,
+            ],
           ],
           fragmentChunks: [
             ...fragmentChunks,
-            ['start', `
+            [
+              'start',
+              `
               uniform sampler2D dataTexture;
               in vec2 vUV;
-            `],
-            ['main', `
+            `,
+            ],
+            [
+              'main',
+              `
               vec4 data = texture(dataTexture, vUV);
-            `],
-            ['end', `
+            `,
+            ],
+            [
+              'end',
+              `
               fragColor = data;
-            `],
+            `,
+            ],
           ],
         },
       }),
@@ -104,8 +116,8 @@ export default class GLGPGPUSystem {
     this._frameBufferOut.bind()
     this._quad.draw()
     this._frameBufferOut.unbind()
-    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-    [this._frameBufferIn, this._frameBufferOut] = [this._frameBufferOut, this._frameBufferIn]
+    this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight)
+    ;[this._frameBufferIn, this._frameBufferOut] = [this._frameBufferOut, this._frameBufferIn]
     this._quad.program.uniforms.set('dataTexture', this.dataTexture)
   }
 }

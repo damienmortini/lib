@@ -1,6 +1,6 @@
 // From https://catlikecoding.com/unity/tutorials/flow/waves/
 
-export default class GerstnerWaveShader {
+export class GerstnerWaveShader {
   static get GerstnerWave() {
     return `
       struct GerstnerWave {

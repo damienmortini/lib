@@ -1,14 +1,12 @@
-export default class LUTShader {
-  static computeLUT({
-    lutSize = 64,
-  } = {}) {
+export class LUTShader {
+  static computeLUT({ lutSize = 64 } = {}) {
     const lutTextureSize = lutSize * Math.sqrt(lutSize)
     return `
       vec3 computeLUT(vec3 color, sampler2D lutTexture, vec4 lutRectangle)
       {
-        float x = color.r * ${(lutSize - 1)}.;
-        float y = color.g * ${(lutSize - 1)}.;
-        float z = color.b * ${(lutSize - 1)}.;
+        float x = color.r * ${lutSize - 1}.;
+        float y = color.g * ${lutSize - 1}.;
+        float z = color.b * ${lutSize - 1}.;
 
         float previousZ = floor(z);
         float nextZ = ceil(z);

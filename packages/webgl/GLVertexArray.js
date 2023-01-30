@@ -1,17 +1,8 @@
-export default class GLVertexArray {
+export class GLVertexArray {
   #vertexArray
-  #geometry
-  #program
 
-  constructor({
-    gl,
-    geometry = undefined,
-    program = undefined,
-  }) {
+  constructor({ gl, geometry = undefined, program = undefined }) {
     this.gl = gl
-
-    this.#geometry = geometry
-    this.#program = program
 
     const extension = gl.getExtension('OES_vertex_array_object')
     if (extension) {
@@ -29,10 +20,7 @@ export default class GLVertexArray {
     }
   }
 
-  add({
-    geometry = undefined,
-    program = undefined,
-  } = {}) {
+  add({ geometry = undefined, program = undefined } = {}) {
     this.bind()
     program.attributes.set(geometry.attributes)
     if (geometry.indices) {

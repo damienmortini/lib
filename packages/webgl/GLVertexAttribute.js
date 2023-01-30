@@ -46,11 +46,14 @@ export default class GLVertexAttribute {
     this.count = count
     this.divisor = divisor
 
-    this.#buffer = data instanceof GLBuffer ? data : new GLBuffer({
-      gl,
-      data,
-      target,
-    })
+    this.#buffer =
+      data instanceof GLBuffer
+        ? data
+        : new GLBuffer({
+            gl,
+            data,
+            target,
+          })
   }
 
   get buffer() {

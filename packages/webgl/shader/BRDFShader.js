@@ -2,7 +2,7 @@
 // https://google.github.io/filament/Filament.md.html#materialsystem/diffusebrdf
 // https://github.com/google/filament/blob/master/shaders/src/brdf.fs
 
-export default class BRDFShader {
+export class BRDFShader {
   static brdfDistributionGGX() {
     return `
       #define M_PI 3.141592653589793

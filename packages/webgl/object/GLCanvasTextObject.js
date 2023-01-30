@@ -1,9 +1,9 @@
-import GLGeometry from '../GLGeometry.js'
-import GLProgram from '../GLProgram.js'
-import GLTexture from '../GLTexture.js'
-import Matrix4 from '@damienmortini/math/Matrix4.js'
+import { GLGeometry } from '../GLGeometry.js'
+import { GLProgram } from '../GLProgram.js'
+import { GLTexture } from '../GLTexture.js'
+import { Matrix4 } from '@damienmortini/math'
 
-export default class GLCanvasTextObject {
+export class GLCanvasTextObject {
   constructor({
     gl,
     textContent = '',
@@ -64,24 +64,20 @@ export default class GLCanvasTextObject {
     this.geometry = new GLGeometry({
       gl: this.gl,
       attributes: [
-        ['position', {
-          data: new Float32Array([
-            -1, 1,
-            -1, -1,
-            1, 1,
-            1, -1,
-          ]),
-          size: 2,
-        }],
-        ['uv', {
-          data: new Float32Array([
-            0, 0,
-            0, 1,
-            1, 0,
-            1, 1,
-          ]),
-          size: 2,
-        }],
+        [
+          'position',
+          {
+            data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
+            size: 2,
+          },
+        ],
+        [
+          'uv',
+          {
+            data: new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]),
+            size: 2,
+          },
+        ],
       ],
     })
 
@@ -143,8 +139,8 @@ export default class GLCanvasTextObject {
     const shadowOffsetX = this.shadowOffsetX - this.shadowBlur
     const shadowOffsetY = this.shadowOffsetY - this.shadowBlur
 
-    width *= (1 + this.paddingPercentageWidth * 2)
-    height *= (1 + this.paddingPercentageHeight * 2)
+    width *= 1 + this.paddingPercentageWidth * 2
+    height *= 1 + this.paddingPercentageHeight * 2
 
     width += this.shadowBlur * 2 + Math.abs(this.shadowOffsetX)
     height += this.shadowBlur * 2 + Math.abs(this.shadowOffsetY)
@@ -162,23 +158,27 @@ export default class GLCanvasTextObject {
       this._context.textBaseline = 'ideographic'
     }
 
-    this._scaleOffset[3] = -shadowOffsetY * .5 * .01
+    this._scaleOffset[3] = -shadowOffsetY * 0.5 * 0.01
 
     if (this.textAlign === 'start' || this.textAlign === 'left') {
-      this._scaleOffset[2] = (this._canvas.width * .5 + Math.min(0, shadowOffsetX)) * .01
+      this._scaleOffset[2] = (this._canvas.width * 0.5 + Math.min(0, shadowOffsetX)) * 0.01
     } else if (this.textAlign === 'end' || this.textAlign === 'right') {
-      this._scaleOffset[2] = (-this._canvas.width * .5 + Math.max(0, shadowOffsetX)) * .01
+      this._scaleOffset[2] = (-this._canvas.width * 0.5 + Math.max(0, shadowOffsetX)) * 0.01
     } else {
-      this._scaleOffset[2] = shadowOffsetX * .5 * .01
+      this._scaleOffset[2] = shadowOffsetX * 0.5 * 0.01
     }
-    this._scaleOffset[0] = this._canvas.width * this._textScale * .01
-    this._scaleOffset[1] = this._canvas.height * this._textScale * .01
+    this._scaleOffset[0] = this._canvas.width * this._textScale * 0.01
+    this._scaleOffset[1] = this._canvas.height * this._textScale * 0.01
 
     this._context.clearRect(0, 0, this._canvas.width, this._canvas.height)
     this._context.globalAlpha = 0.01
     this._context.fillRect(0, 0, this._canvas.width, this._canvas.height)
     this._context.globalAlpha = 1
-    this._context.fillText(this._textContent, (shadowOffsetX < 0 ? Math.abs(shadowOffsetX) : 0) + paddingWidth + offsetX, this._canvas.height - (shadowOffsetY > 0 ? Math.abs(shadowOffsetY) : 0) - paddingHeight + offsetY)
+    this._context.fillText(
+      this._textContent,
+      (shadowOffsetX < 0 ? Math.abs(shadowOffsetX) : 0) + paddingWidth + offsetX,
+      this._canvas.height - (shadowOffsetY > 0 ? Math.abs(shadowOffsetY) : 0) - paddingHeight + offsetY,
+    )
 
     this._texture.data = this._canvas
     // TODO: Put back when WebGL2 is supported everywhere

@@ -1,4 +1,4 @@
-export default class LightShader {
+export class LightShader {
   static get Light() {
     return `
       struct Light

@@ -1,8 +1,8 @@
-import LightShader from './LightShader.js'
+import { LightShader } from './LightShader.js'
 import RayShader from './RayShader.js'
 import Shader from '../3d/Shader.js'
 
-export default class PBRShader extends Shader {
+export class PBRShader extends Shader {
   static get MetallicRoughnessMaterial() {
     return `
     struct MetallicRoughnessMaterial
@@ -235,15 +235,20 @@ export default class PBRShader extends Shader {
     pbrReflectionFromRay = undefined,
   } = {}) {
     super({
-      uniforms: Object.assign({
-        material: {
-          baseColor,
-          metallic,
-          roughness,
+      uniforms: Object.assign(
+        {
+          material: {
+            baseColor,
+            metallic,
+            roughness,
+          },
         },
-      }, uniforms),
+        uniforms,
+      ),
       vertexChunks: [
-        ['start', `
+        [
+          'start',
+          `
             uniform vec3 cameraPosition;
             uniform mat4 projectionView;
             uniform mat4 transform;
@@ -256,8 +261,11 @@ export default class PBRShader extends Shader {
             out vec3 vNormal;
             ${uvs ? 'out vec2 vUV;' : ''}
             out vec3 vViewDirection;
-         `],
-        ['end', `
+         `,
+        ],
+        [
+          'end',
+          `
           ${uvs ? 'vUV = uv;' : ''}
 
           vec3 worldPosition = (transform * vec4(position, 1.)).xyz;
@@ -266,11 +274,14 @@ export default class PBRShader extends Shader {
           vPosition = position;
           vNormal = mat3(transform) * normal;
           vViewDirection = normalize(worldPosition - cameraPosition);
-        `],
+        `,
+        ],
         ...vertexChunks,
       ],
       fragmentChunks: [
-        ['start', `
+        [
+          'start',
+          `
           ${LightShader.Light}
           ${RayShader.Ray}
           ${PBRShader.MetallicRoughnessMaterial}
@@ -284,11 +295,15 @@ export default class PBRShader extends Shader {
           in vec3 vViewDirection;
   
           ${PBRShader.computePBRColor({ pbrDiffuseLightFromRay, pbrReflectionFromRay })}
-        `],
-        ['end', `
+        `,
+        ],
+        [
+          'end',
+          `
           Light light = Light(vec3(1.), vec3(1.), normalize(vec3(-1.)), 1.);
           fragColor = computePBRColor(vViewDirection, light, vPosition, vNormal, material);
-        `],
+        `,
+        ],
         ...fragmentChunks,
       ],
     })

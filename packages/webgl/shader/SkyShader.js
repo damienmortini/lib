@@ -10,17 +10,17 @@
  * http://blenderartists.org/forum/showthread.php?245954-preethams-sky-impementation-HDR
  *
  * From Three.js integration by zz85 http://twitter.com/blurspline
-*/
+ */
 
-export default class SkyShader {
+export class SkyShader {
   static get SUN_ANGULAR_DIAMETER() {
     const sunArcMin = 32
-    return (sunArcMin / 60) / 180 * Math.PI
+    return (sunArcMin / 60 / 180) * Math.PI
   }
 
   static get MOON_ANGULAR_DIAMETER() {
     const moonArcMin = 31
-    return (moonArcMin / 60) / 180 * Math.PI
+    return (moonArcMin / 60 / 180) * Math.PI
   }
 
   static computeSkyColor() {
