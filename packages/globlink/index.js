@@ -24,4 +24,3 @@ export const globLink = async (globPatterns) => {
 
   execSync(`npm link ${[...dependenciesToLink].join(' ')}`)
 }
-
