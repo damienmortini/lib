@@ -12,23 +12,21 @@ import * as esbuild from 'esbuild'
 
 const directoryName = dirname(fileURLToPath(import.meta.url))
 
-const rootDirectory = `file:///${process.cwd()}/`.replaceAll(/\\/g, '/')
-const resolveImports = async (string) => {
-  const promises = []
-  string = string.replaceAll(/((import|export)([\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3, p4, p5) => {
-    const id = crypto.randomUUID()
-    const promise = import.meta
-      .resolve(p4, rootDirectory)
-      .then((url) => {
-        string = string.replace(id, url.replace(rootDirectory, '/'))
-      })
-      .catch(() => {
-        string = string.replace(id, p4)
-      })
-    promises.push(promise)
-    return p1 + id + p5
+const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/')
+const resolveImports = (string) => {
+  string = string.replaceAll(/((?:import|export)(?:[\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3) => {
+    const [, packageName, filePath] = /^(?![./])((?:@.*?\/)?.*?)((?:\/|$).*)/.exec(p2) ?? []
+
+    if (packageName) {
+      const packagePath = `node_modules/${packageName}`
+      const packageJSON = JSON.parse(fs.readFileSync(`${rootDirectory}${packagePath}/package.json`, 'utf8'))
+      const mainFileName = filePath || packageJSON.module || packageJSON.main || 'index.js'
+      p2 = `/${packagePath}/${mainFileName}`
+    }
+
+    return p1 + p2 + p3
   })
-  return Promise.all(promises).then(() => string)
+  return string
 }
 
 export default class Server {
@@ -104,7 +102,7 @@ export default class Server {
       }
     })
 
-    this.http2SecureServer.on('stream', async (stream, headers) => {
+    this.http2SecureServer.on('stream', (stream, headers) => {
       if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) {
         return
       }
@@ -141,7 +139,7 @@ export default class Server {
                 encoding: 'utf-8',
               })
               if (resolveModules) {
-                fileContent = await resolveImports(fileContent)
+                fileContent = resolveImports(fileContent)
               }
               fileContent = fileContent.replace(
                 '</body>',
@@ -173,7 +171,7 @@ export default class Server {
                 }).code
               }
               if (resolveModules) {
-                fileContent = await resolveImports(fileContent)
+                fileContent = resolveImports(fileContent)
               }
               stream.end(fileContent)
             }
