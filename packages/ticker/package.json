@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/ticker",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Damien Mortini",
   "scripts": {
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
