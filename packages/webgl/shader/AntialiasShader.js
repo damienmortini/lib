@@ -1,6 +1,14 @@
 // From https://github.com/mattdesl/glsl-fxaa
 
-export class AntialiasGLSL {
+export const aastep = () => {
+  return `float aastep(float threshold, float value) {
+    float afwidth = fwidth(value) * 0.5;
+    return smoothstep(threshold - afwidth, threshold + afwidth, value);
+  }
+`
+}
+
+export class AntialiasShader {
   static vertex() {
     return `
       varying vec2 v_rgbNW;
