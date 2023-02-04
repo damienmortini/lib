@@ -1,8 +1,6 @@
-import GLProgram from '@damienmortini/webgl/GLProgram.js'
-import GLShaderTexture from '@damienmortini/webgl/GLShaderTexture.js'
-import { addChunks } from '@damienmortini/webgl/GLSLShader.js'
+import { GLProgram, GLShaderTexture, addChunks } from '@damienmortini/webgl'
 
-export default class GLFluidVelocityField {
+export class GLFluidVelocityField {
   #inputTexture
   #outputTexture
   gl
@@ -12,12 +10,7 @@ export default class GLFluidVelocityField {
   #width = 1
   #height = 1
 
-  constructor({
-    gl,
-    width,
-    height,
-    fragmentChunks = [],
-  }) {
+  constructor({ gl, width, height, fragmentChunks = [] }) {
     this.#width = width
     this.#height = height
 
@@ -95,20 +88,26 @@ export default class GLFluidVelocityField {
     this.#modifierProgram = new GLProgram({
       gl,
       vertex: GLShaderTexture.VERTEX,
-      fragment: addChunks(`#version 300 es
+      fragment: addChunks(
+        `#version 300 es
       precision highp float;
       
       out vec4 fragColor;
       
       void main() {
         fragColor = texture(inputTexture, vUV);
-      }`, [
-        ...fragmentChunks,
-        ['start', `
+      }`,
+        [
+          ...fragmentChunks,
+          [
+            'start',
+            `
           uniform sampler2D inputTexture;
           in vec2 vUV;
-        `],
-      ]),
+        `,
+          ],
+        ],
+      ),
     })
   }
 
@@ -142,11 +141,7 @@ export default class GLFluidVelocityField {
     return this.#outputTexture
   }
 
-  draw({
-    uniforms = {},
-    jacobiIterations = 5,
-    speed = 1,
-  } = {}) {
+  draw({ uniforms = {}, jacobiIterations = 5, speed = 1 } = {}) {
     this.#outputTexture.program = this.#advectProgram
     this.#outputTexture.draw({
       uniforms: {
@@ -165,7 +160,7 @@ export default class GLFluidVelocityField {
           x: this.#inputTexture,
           b: this.#inputTexture,
           alpha: 4 / jacobiSpeed,
-          beta: 4 / jacobiSpeed * (1 + jacobiSpeed),
+          beta: (4 / jacobiSpeed) * (1 + jacobiSpeed),
         },
       })
       this.#swapTextures()
