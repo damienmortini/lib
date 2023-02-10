@@ -65,6 +65,7 @@ export class GLFluidVelocityField {
       uniform sampler2D x;
       uniform sampler2D b;
       uniform vec2 size;
+      uniform float speed;
       uniform float alpha;
       uniform float beta;
       
@@ -73,7 +74,7 @@ export class GLFluidVelocityField {
       out vec4 fragColor;
       
       void main() {
-        vec2 texelSize = 1. / vec2(textureSize(x, 0));
+        vec2 texelSize = speed / vec2(textureSize(x, 0));
         vec4 left  = texture(x, vUV + vec2(-texelSize.x, 0.));
         vec4 right = texture(x, vUV + vec2(texelSize.x, 0.));
         vec4 down  = texture(x, vUV + vec2(0., -texelSize.y));
@@ -159,6 +160,7 @@ export class GLFluidVelocityField {
         uniforms: {
           x: this.#inputTexture,
           b: this.#inputTexture,
+          speed,
           alpha: 4 / jacobiSpeed,
           beta: (4 / jacobiSpeed) * (1 + jacobiSpeed),
         },
