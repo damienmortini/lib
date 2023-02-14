@@ -10,7 +10,7 @@ export class GLFluidVelocityField {
   #width = 1
   #height = 1
 
-  constructor({ gl, width, height, fragmentChunks = [] }) {
+  constructor({ gl, width, height, uniforms = {}, fragmentChunks = [] }) {
     this.#width = width
     this.#height = height
 
@@ -89,6 +89,7 @@ export class GLFluidVelocityField {
     this.#modifierProgram = new GLProgram({
       gl,
       vertex: GLShaderTexture.VERTEX,
+      uniforms,
       fragment: addChunks(
         `#version 300 es
       precision highp float;
@@ -110,6 +111,10 @@ export class GLFluidVelocityField {
         ],
       ),
     })
+  }
+
+  get program() {
+    return this.#modifierProgram
   }
 
   get width() {
