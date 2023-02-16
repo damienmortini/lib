@@ -37,7 +37,6 @@ export class GLFluidVelocityField {
 
       uniform float speed;
       uniform sampler2D inputTexture;
-      uniform vec2 viewportSize;
       
       in vec2 vUV;
       
@@ -63,7 +62,6 @@ export class GLFluidVelocityField {
       precision highp float;
 
       uniform sampler2D x;
-      uniform sampler2D b;
       uniform vec2 size;
       uniform float speed;
       uniform float alpha;
@@ -80,7 +78,7 @@ export class GLFluidVelocityField {
         vec4 down  = texture(x, vUV + vec2(0., -texelSize.y));
         vec4 up    = texture(x, vUV + vec2(0., texelSize.y));
 
-        vec4 self  = texture(b, vUV);
+        vec4 self  = texture(x, vUV);
         
         fragColor = (left + right + down + up + alpha * self) / beta;
       }`,
@@ -133,8 +131,8 @@ export class GLFluidVelocityField {
 
   set height(value) {
     this.#height = value
-    this.#inputTexture.width = this.#height
-    this.#outputTexture.width = this.#height
+    this.#inputTexture.height = this.#height
+    this.#outputTexture.height = this.#height
   }
 
   #swapTextures() {
@@ -147,7 +145,7 @@ export class GLFluidVelocityField {
     return this.#outputTexture
   }
 
-  draw({ uniforms = {}, jacobiIterations = 5, speed = 1 } = {}) {
+  draw({ uniforms = {}, jacobiIterations = 5, jacobiSpeed = 1, speed = 1 } = {}) {
     this.#outputTexture.program = this.#advectProgram
     this.#outputTexture.draw({
       uniforms: {
@@ -159,12 +157,10 @@ export class GLFluidVelocityField {
 
     this.#inputTexture.program = this.#jacobiProgram
     this.#outputTexture.program = this.#jacobiProgram
-    const jacobiSpeed = 1
     for (let index = 0; index < jacobiIterations; index++) {
       this.#outputTexture.draw({
         uniforms: {
           x: this.#inputTexture,
-          b: this.#inputTexture,
           speed,
           alpha: 4 / jacobiSpeed,
           beta: (4 / jacobiSpeed) * (1 + jacobiSpeed),
