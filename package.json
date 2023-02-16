@@ -11,7 +11,7 @@
     "update": "npm i",
     "upgrade": "ncu --deep -u",
     "version": "lerna version",
-    "publish": "npx lerna publish from-package --yes"
+    "publish": "lerna publish from-package --yes"
   },
   "workspaces": [
     "packages/**/*"
