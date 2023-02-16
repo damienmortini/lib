@@ -10,7 +10,8 @@
     "test": "eslint packages",
     "update": "npm i",
     "upgrade": "ncu --deep -u",
-    "version": "lerna version"
+    "version": "lerna version",
+    "publish": "npx lerna publish from-package --yes"
   },
   "workspaces": [
     "packages/**/*"
