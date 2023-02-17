@@ -116,7 +116,9 @@ export default class DamdomGUIFolderElement extends HTMLElement {
             const fragment = template.content.firstElementChild.cloneNode(true)
             const resetButton = fragment.querySelector('.reset')
             const defaultValue = node.value
-            if (node.defaultValue !== undefined) resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue))
+            if (node.defaultValue !== undefined) {
+              resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue))
+            }
             node.addEventListener('change', () => {
               resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue))
             })
@@ -135,10 +137,12 @@ export default class DamdomGUIFolderElement extends HTMLElement {
         }
       }
     }
-    mutationCallback([{
-      addedNodes: this.children,
-      removedNodes: [],
-    }])
+    mutationCallback([
+      {
+        addedNodes: this.children,
+        removedNodes: [],
+      },
+    ])
     const observer = new MutationObserver(mutationCallback)
     observer.observe(this, { childList: true })
 
