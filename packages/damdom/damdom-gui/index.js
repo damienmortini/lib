@@ -10,9 +10,21 @@ const STORAGE_ID = 'damdom-gui:data'
 
 const tagNameResolvers = new Map([
   ['damdom-select', (attributes) => !!attributes.options],
-  ['damdom-colorpicker', (attributes) => {
-    return typeof attributes.value === 'string' && ((attributes.value.length === 7 && attributes.value.startsWith('#')) || attributes.value.startsWith('rgb') || attributes.value.startsWith('hsl')) || (typeof attributes.value === 'object' && attributes.value.r !== undefined && attributes.value.g !== undefined && attributes.value.b !== undefined)
-  }],
+  [
+    'damdom-colorpicker',
+    (attributes) => {
+      return (
+        (typeof attributes.value === 'string' &&
+          ((attributes.value.length === 7 && attributes.value.startsWith('#')) ||
+            attributes.value.startsWith('rgb') ||
+            attributes.value.startsWith('hsl'))) ||
+        (typeof attributes.value === 'object' &&
+          attributes.value.r !== undefined &&
+          attributes.value.g !== undefined &&
+          attributes.value.b !== undefined)
+      )
+    },
+  ],
   ['damdom-textfield', (attributes) => typeof attributes.value === 'string'],
   ['damdom-slider', (attributes) => typeof attributes.value === 'number'],
   ['damdom-checkbox', (attributes) => typeof attributes.value === 'boolean'],
@@ -29,7 +41,9 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
   constructor() {
     super()
 
-    this.shadowRoot.querySelector('style').insertAdjacentHTML('beforeend', `
+    this.shadowRoot.querySelector('style').insertAdjacentHTML(
+      'beforeend',
+      `
       :host {
         width: 250px;
         padding: 10px 0;
@@ -43,7 +57,8 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
       :host::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, .2);
       }
-    `)
+    `,
+    )
 
     this.#elementDataMap = new Map()
 
@@ -51,9 +66,9 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
 
     this.addEventListener('toggle', () => {
       if (this.open) {
-        sessionStorage.removeItem('damdom-gui:close')
+        sessionStorage.setItem('damdom-gui:open', '')
       } else {
-        sessionStorage.setItem('damdom-gui:close', '')
+        sessionStorage.removeItem('damdom-gui:open')
       }
     })
 
@@ -64,7 +79,7 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
 
   connectedCallback() {
     if (!this.name) this.name = '✨ GUI'
-    this.open = sessionStorage.getItem('damdom-gui:close') === null
+    this.open = sessionStorage.getItem('damdom-gui:open') !== null
   }
 
   get folders() {
@@ -166,8 +181,11 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
     }
 
     if (options.id && saveToURL && urlValuesMap.has(options.id)) element.value = urlValuesMap.get(options.id)
-    else if (options.id && saveToSessionStorage && sessionStorageValuesMap.has(options.id)) element.value = sessionStorageValuesMap.get(options.id)
-    else if (options.id && saveToLocalStorage && localStorageValuesMap.has(options.id)) element.value = localStorageValuesMap.get(options.id)
+    else if (options.id && saveToSessionStorage && sessionStorageValuesMap.has(options.id)) {
+      element.value = sessionStorageValuesMap.get(options.id)
+    } else if (options.id && saveToLocalStorage && localStorageValuesMap.has(options.id)) {
+      element.value = localStorageValuesMap.get(options.id)
+    }
 
     // Update URL params and reload if needed
     const saveValue = () => {
