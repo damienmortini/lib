@@ -168,7 +168,7 @@ export default class DamdomGUIElement extends DamdomGUIFolderElement {
 
     if ('value' in element) {
       element.value = value
-      element.defaultValue = value
+      element.defaultValue = typeof value === 'object' ? structuredClone(value) : value
     }
 
     const onElementChange = () => {
