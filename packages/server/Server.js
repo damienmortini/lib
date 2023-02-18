@@ -14,17 +14,22 @@ const directoryName = dirname(fileURLToPath(import.meta.url))
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/')
 const resolveImports = (string) => {
-  string = string.replaceAll(/((?:import|export)(?:[\s\S]*?from)?\s+['"])(.*?)(['"])/g, (match, p1, p2, p3) => {
-    const [, packageName, filePath] = /^(?![./])((?:@.*?\/)?.*?)((?:\/|$).*)/.exec(p2) ?? []
+  string = string.replaceAll(/((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])/g, (match, p1, importPath, p3) => {
+    const [, packageName, filePath] = /^(?![./])((?:@.*?\/)?.*?)(?:\/|$)(.*)/.exec(importPath) ?? []
 
     if (packageName) {
       const packagePath = `node_modules/${packageName}`
       const packageJSON = JSON.parse(fs.readFileSync(`${rootDirectory}${packagePath}/package.json`, 'utf8'))
       const mainFileName = filePath || packageJSON.module || packageJSON.main || 'index.js'
-      p2 = `/${packagePath}/${mainFileName}`
+      importPath = `${packagePath}/${mainFileName}`
+      if (!importPath.endsWith('.js') && fs.existsSync(`${rootDirectory}${importPath}/package.json`)) {
+        const packageJSON = JSON.parse(fs.readFileSync(`${rootDirectory}${importPath}/package.json`, 'utf8'))
+        importPath = `${importPath}/${packageJSON.module || packageJSON.main || 'index.js'}`
+      }
+      importPath = `/${importPath}`
     }
 
-    return p1 + p2 + p3
+    return p1 + importPath + p3
   })
   return string
 }
@@ -115,9 +120,16 @@ export default class Server {
         let filePath = `${rootPath}${requestPath}`
 
         /**
+         * Try .ts if .js doesn't exist
+         */
+        if (!fs.existsSync(filePath) && filePath.endsWith('.js')) {
+          filePath = filePath.replace(/\.js$/, '.ts')
+        }
+
+        /**
          * Rewrite to root if url doesn't exist and isn't a file
          */
-        if (!/\.[^/]*$/.test(filePath) && !fs.existsSync(filePath)) {
+        if (!fs.existsSync(filePath) && !/\.[^/]*$/.test(filePath)) {
           filePath = `${rootPath}/`
         }
 
