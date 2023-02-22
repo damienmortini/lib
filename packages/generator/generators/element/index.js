@@ -16,7 +16,7 @@ const __dirname = dirname(__filename)
 export default function ({ template, elementScope, elementName, scope, path }) {
   const flattenElementname = elementName.replaceAll(' ', '').toLowerCase()
   const fullElementName = `${elementScope}-${flattenElementname}`.replaceAll(' ', '').toLowerCase()
-  const fullPath = `${path}/${flattenElementname}`
+  const fullPath = `${path}/${flattenElementname}element`
   fs.ensureDirSync(fullPath)
   const fileNames = fs.readdirSync(`${__dirname}/templates/${template}`)
   let packageJSON = {}
@@ -27,17 +27,26 @@ export default function ({ template, elementScope, elementName, scope, path }) {
       let indexFileContent = fs.readFileSync(`${__dirname}/templates/${template}/${fileName}`, { encoding: 'utf-8' })
       indexFileContent = indexFileContent.replaceAll('template-element', fullElementName)
       indexFileContent = indexFileContent.replaceAll('template title', elementName)
-      const elementClass = `${elementScope} ${elementName} Element`.replaceAll(/(\s+|^)(.)/g, (match, captureGroup1, captureGroup2) => captureGroup2.toUpperCase())
+      const elementClass = `${elementScope} ${elementName} Element`.replaceAll(/(\s+|^)(.)/g, (match, captureGroup1, captureGroup2) =>
+        captureGroup2.toUpperCase(),
+      )
       indexFileContent = indexFileContent.replaceAll('TemplateElement', elementClass)
       fs.writeFileSync(`${fullPath}/${fileName}`, indexFileContent)
     } else {
       fs.copyFileSync(`${__dirname}/templates/${template}/${fileName}`, `${fullPath}/${fileName}`)
     }
   }
-  fs.outputFileSync(`${fullPath}/package.json`, JSON.stringify({
-    name: `@${scope}/${flattenElementname}`,
-    private: true,
-    version: '0.0.0',
-    ...packageJSON,
-  }, null, 2))
+  fs.outputFileSync(
+    `${fullPath}/package.json`,
+    JSON.stringify(
+      {
+        name: `@${scope}/${flattenElementname}element`,
+        private: true,
+        version: '0.0.0',
+        ...packageJSON,
+      },
+      null,
+      2,
+    ),
+  )
 }
