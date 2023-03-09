@@ -1,0 +1,11 @@
+{
+  "name": "@damienmortini/dependencycleaner",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": {
+    "depclean": "./index.js"
+  },
+  "dependencies": {
+    "depcheck": "^1.4.3"
+  }
+}
