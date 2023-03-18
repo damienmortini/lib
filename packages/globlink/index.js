@@ -22,5 +22,14 @@ export const globLink = async (globPatterns) => {
     }
   }
 
+  if (!dependenciesToLink.size) {
+    console.log(`No dependencies found to link`)
+    return
+  }
+
+  console.log(`Found dependencies to link:`)
+  console.log(dependenciesToLink)
+  console.log(`Linking in progress...`)
+
   execSync(`npm link ${[...dependenciesToLink].join(' ')}`)
 }
