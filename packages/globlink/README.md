@@ -8,7 +8,13 @@ If you are working in a monorepo with workspaces you can use `npm link --workspa
 ## Command Line
 
 ```cmd
-globlink @my-scope/* @my-scope2/* my-package
+globlink [globpatterns]
+```
+
+### Example
+
+```cmd
+globlink @my-scope/* @another-scope/* packageprefix-* a-single-package ...
 ```
 
 ## API
