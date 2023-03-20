@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-joystick",
-  "version": "0.0.135",
+  "version": "0.0.136",
   "description": "<element-input-joystick> custom element.",
   "publishConfig": {
     "access": "public"
@@ -20,6 +20,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-joystick",
   "dependencies": {
-    "@damienmortini/core": "^0.2.143"
+    "@damienmortini/core": "^0.2.144"
   }
 }
