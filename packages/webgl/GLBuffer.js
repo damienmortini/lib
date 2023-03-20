@@ -1,13 +1,8 @@
-export default class GLBuffer {
+export class GLBuffer {
   #buffer
   #data
 
-  constructor({
-    gl,
-    data = null,
-    target = gl.ARRAY_BUFFER,
-    usage = gl.STATIC_DRAW,
-  }) {
+  constructor({ gl, data = null, target = gl.ARRAY_BUFFER, usage = gl.STATIC_DRAW }) {
     this.gl = gl
     this.target = target
     this.usage = usage
@@ -30,12 +25,7 @@ export default class GLBuffer {
     return this.#data
   }
 
-  bind({
-    target = this.target,
-    index = undefined,
-    offset = 0,
-    size = undefined,
-  } = {}) {
+  bind({ target = this.target, index = undefined, offset = 0, size = undefined } = {}) {
     if (index === undefined) {
       this.gl.bindBuffer(target, this.#buffer)
     } else if (size === undefined) {
@@ -45,12 +35,7 @@ export default class GLBuffer {
     }
   }
 
-  unbind({
-    target = this.target,
-    index = undefined,
-    offset = 0,
-    size = undefined,
-  } = {}) {
+  unbind({ target = this.target, index = undefined, offset = 0, size = undefined } = {}) {
     if (index === undefined) {
       this.gl.bindBuffer(target, null)
     } else if (size === undefined) {
