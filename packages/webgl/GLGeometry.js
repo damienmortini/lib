@@ -1,4 +1,4 @@
-import GLVertexAttribute from './GLVertexAttribute.js'
+import { GLVertexAttribute } from '@damienmortini/webgl'
 
 export class GLGeometry {
   #drawElementsInstanced

@@ -252,5 +252,3 @@ export class GLTFLoader extends Loader {
     return options.parseOnly ? await this.parse(data) : await this.build({ data })
   }
 }
-
-export default new GLTFLoader()

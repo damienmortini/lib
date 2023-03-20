@@ -1,4 +1,4 @@
-import GLBuffer from './GLBuffer.js'
+import { GLBuffer } from '@damienmortini/webgl'
 
 const TYPE_ARRAY_MAP = new Map([
   [WebGLRenderingContext.BYTE, Int8Array],
@@ -21,7 +21,7 @@ const ARRAY_TYPE_MAP = new Map([
   [Float64Array, WebGLRenderingContext.FLOAT],
 ])
 
-export default class GLVertexAttribute {
+export class GLVertexAttribute {
   #buffer
 
   constructor({

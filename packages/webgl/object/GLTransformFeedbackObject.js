@@ -1,19 +1,12 @@
-import GLBuffer from '../GLBuffer.js'
-import GLGeometry from '../GLGeometry.js'
-import GLObject from '../GLObject.js'
-import GLVertexAttribute from '../GLVertexAttribute.js'
+import { GLBuffer, GLGeometry, GLObject, GLVertexAttribute } from '@damienmortini/webgl'
 
-export default class GLTransformFeedbackObject extends GLObject {
+export class GLTransformFeedbackObject extends GLObject {
   #geometryIn
   #geometryOut
   #transformFeedbackIn
   #transformFeedbackOut
 
-  constructor({
-    gl,
-    attributes = {},
-    program,
-  }) {
+  constructor({ gl, attributes = {}, program }) {
     super({
       gl,
       program,
@@ -33,11 +26,14 @@ export default class GLTransformFeedbackObject extends GLObject {
           })
           buffers.set(data, buffer)
         }
-        attributesDynamic.set(name, new GLVertexAttribute({
-          ...attribute,
-          gl,
-          data: buffer,
-        }))
+        attributesDynamic.set(
+          name,
+          new GLVertexAttribute({
+            ...attribute,
+            gl,
+            data: buffer,
+          }),
+        )
       }
 
       const transformFeedback = gl.createTransformFeedback()
@@ -66,11 +62,7 @@ export default class GLTransformFeedbackObject extends GLObject {
     return this.#geometryOut.attributes
   }
 
-  draw({
-    mode = this.gl.POINTS,
-    uniforms = {},
-    debug = false,
-  } = {}) {
+  draw({ mode = this.gl.POINTS, uniforms = {}, debug = false } = {}) {
     this.geometry = this.#geometryIn
 
     if (!debug) this.gl.enable(this.gl.RASTERIZER_DISCARD)
