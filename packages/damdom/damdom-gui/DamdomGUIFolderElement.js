@@ -1,4 +1,4 @@
-export default class DamdomGUIFolderElement extends HTMLElement {
+export class DamdomGUIFolderElement extends HTMLElement {
   #details
   #summary
   #content

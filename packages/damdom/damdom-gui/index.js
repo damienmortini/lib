@@ -1,4 +1,4 @@
-import DamdomGUIFolderElement from './DamdomGUIFolderElement.js'
+import { DamdomGUIFolderElement } from './DamdomGUIFolderElement.js'
 
 import '../damdom-checkbox/index.js'
 import '../damdom-colorpicker/index.js'
@@ -34,7 +34,7 @@ const urlValuesMap = new Map(JSON.parse(new URLSearchParams(location.hash.slice(
 const localStorageValuesMap = new Map(JSON.parse(localStorage.getItem(STORAGE_ID)) ?? [])
 const sessionStorageValuesMap = new Map(JSON.parse(sessionStorage.getItem(STORAGE_ID)) ?? [])
 
-export default class DamdomGUIElement extends DamdomGUIFolderElement {
+export class DamdomGUIElement extends DamdomGUIFolderElement {
   #elementDataMap
   #foldersMap
 
