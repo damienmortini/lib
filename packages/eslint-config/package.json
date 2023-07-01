@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/eslint-config",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "ESLint config",
   "publishConfig": {
     "access": "public"
