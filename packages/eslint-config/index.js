@@ -1,52 +1,23 @@
 module.exports = {
-  'env': {
+  env: {
     browser: true,
-    es2021: true,
     node: true,
+    es2021: true,
   },
-  'plugins': [
-    '@typescript-eslint',
-  ],
-  'extends': [
-    'eslint:recommended',
-    'google',
-  ],
-  'parser': '@typescript-eslint/parser',
-  'parserOptions': {
-    sourceType: 'module',
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
     ecmaVersion: 'latest',
+    sourceType: 'module',
   },
-  'globals': {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
+  plugins: ['@typescript-eslint', 'prettier'],
+  rules: {
+    'n/no-callback-literal': 'off',
+    'prettier/prettier': ['error'],
+    'no-empty': 'warn',
   },
-  'rules': {
-    'indent': [
-      'error',
-      2,
-      {
-        'SwitchCase': 1,
-      },
-    ],
-    'max-len': 0,
-    'linebreak-style': 0,
-    'require-jsdoc': 0,
-    'object-curly-spacing': [
-      2,
-      'always',
-    ],
-    'semi': [
-      'error',
-      'never',
-    ],
-    'space-before-function-paren': [
-      2,
-      {
-        'anonymous': 'always',
-        'named': 'never',
-        'asyncArrow': 'always',
-      },
-    ],
-    'space-infix-ops': ['error', { 'int32Hint': false }],
+  globals: {
+    navigation: 'readonly',
+    NavigateEvent: 'readonly',
   },
 }
