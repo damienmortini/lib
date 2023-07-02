@@ -9,6 +9,7 @@
     "strictNullChecks": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
   }
 }
