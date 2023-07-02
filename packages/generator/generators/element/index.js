@@ -40,7 +40,7 @@ export default function ({ template, elementScope, elementName, scope, path }) {
     `${fullPath}/package.json`,
     JSON.stringify(
       {
-        name: `@${scope}/${flattenElementname}element`,
+        name: `@${scope}/${scope === elementScope ? flattenElementname : fullElementName}element`,
         private: true,
         version: '0.0.0',
         ...packageJSON,
