@@ -1,3 +1,4 @@
 {
-  "extends": "@damienmortini/typescript-config"
+  "extends": "@damienmortini/typescript-config",
+  "exclude": ["**/node_modules/**", "**/dist/**"]
 }

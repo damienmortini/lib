@@ -2,6 +2,17 @@ import { Matrix4, Vector2, Vector3, Quaternion } from '@damienmortini/math'
 import { GestureObserver } from '@damienmortini/gestureobserver'
 
 export class TrackballTransform {
+  matrix: Matrix4
+  inverted: boolean
+  rotationVelocity: number
+  rotationEaseRatio: number
+  distanceMax: number
+  distanceMin: number
+  zoomVelocity: number
+  zoomEaseRatio: number
+  zoomDisabled: boolean
+  disabled: boolean
+
   #cachedMatrix = new Matrix4()
   #cachedQuaternion = new Quaternion()
   #positionOffset = new Vector3()
@@ -10,7 +21,7 @@ export class TrackballTransform {
   #velocityOrigin = new Vector2()
   #distanceEased = 0
   #distance = 0
-  #position
+  #position: Vector3
 
   constructor({
     matrix = new Matrix4(),
@@ -86,7 +97,8 @@ export class TrackballTransform {
 
     this.#distanceEased += (this.#distance - this.#distanceEased) * this.zoomEaseRatio
 
-    this.#position.set(this.matrix.x, this.matrix.y, this.matrix.z).subtract(this.#positionOffset)
+    this.#position.set([this.matrix.x, this.matrix.y, this.matrix.z])
+    this.#position.subtract(this.#positionOffset)
 
     this.matrix.x = 0
     this.matrix.y = 0
@@ -106,7 +118,7 @@ export class TrackballTransform {
       this.matrix.multiply(this.#cachedMatrix)
     }
 
-    this.#positionOffset.set(0, 0, 1)
+    this.#positionOffset.set([0, 0, 1])
     this.#positionOffset.applyMatrix4(this.matrix)
     this.#positionOffset.scale(this.#distanceEased)
 

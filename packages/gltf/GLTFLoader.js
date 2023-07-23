@@ -1,5 +1,5 @@
 import SingletonLoader, { Loader } from '@damienmortini/core/util/Loader.js'
-import Base64 from '@damienmortini/math/Base64.js'
+import { toByteArray } from '@damienmortini/math'
 import GLTFMesh from './GLTFMesh.js'
 import GLTFNode from './GLTFNode.js'
 import GLTFAnimation from './GLTFAnimation.js'
@@ -63,7 +63,7 @@ export class GLTFLoader extends Loader {
       if (buffer.binary) {
         data.buffers[index] = buffer.binary
       } else if (buffer.uri.startsWith('data')) {
-        data.buffers[index] = Base64.toByteArray(buffer.uri.split(',')[1]).buffer
+        data.buffers[index] = toByteArray(buffer.uri.split(',')[1]).buffer
       } else {
         data.buffers[index] = await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`)
       }
