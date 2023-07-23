@@ -30,7 +30,7 @@ export class PoissonDiskSampler {
     while (step < steps) {
       let distanceOk = true
       for (let index = 0; index < 10; index++) {
-        CURRENT_POINT.set(x + Math.random() * width, y + Math.random() * height, z + Math.random() * depth)
+        CURRENT_POINT.set([x + Math.random() * width, y + Math.random() * height, z + Math.random() * depth])
         BEST_POINT.copy(CURRENT_POINT)
 
         const gridX = Math.floor((CURRENT_POINT.x - x) / radius)

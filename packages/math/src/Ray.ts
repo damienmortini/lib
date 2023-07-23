@@ -11,7 +11,7 @@ export class Ray {
     this.origin.y = camera.transform.y
     this.origin.z = camera.transform.z
 
-    this.direction.set(position[0], position[1], 1)
+    this.direction.set([position[0], position[1], 1])
     MATRIX4.invert(camera.projection)
     this.direction.applyMatrix4(MATRIX4)
     this.direction.applyMatrix4(camera.transform)
