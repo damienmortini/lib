@@ -1,15 +1,11 @@
 {
-  "exclude": ["node_modules"],
   "compilerOptions": {
-    "allowJs": true,
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "checkJs": true,
-    "strictNullChecks": false,
     "declaration": true,
-    "emitDeclarationOnly": true,
     "declarationMap": true,
+    "sourceMap": true,
     "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
-  }
+  },
 }

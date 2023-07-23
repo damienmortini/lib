@@ -1,9 +1,5 @@
 node_modules
 
-.yarn/*
-!.yarn/cache
-!.yarn/releases
-!.yarn/plugins
+dist
 
 lerna-debug.log
-yarn-error.log

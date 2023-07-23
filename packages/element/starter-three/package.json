@@ -8,7 +8,7 @@
     "@damienmortini/core": "^0.2.145",
     "@damienmortini/damdom-ticker": "^0.0.37",
     "@damienmortini/three": "^0.1.184",
-    "three": "^0.149.0"
+    "three": "^0.154.0"
   },
   "publishConfig": {
     "access": "public"
