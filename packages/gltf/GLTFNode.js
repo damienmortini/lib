@@ -1,12 +1,7 @@
-import Matrix4 from '@damienmortini/math/Matrix4.js'
-import Matrix3 from '@damienmortini/math/Matrix3.js'
-import Quaternion from '@damienmortini/math/Quaternion.js'
-import Vector3 from '@damienmortini/math/Vector3.js'
+import { Matrix3, Matrix4, Quaternion, Vector3 } from '@damienmortini/math'
 
 export default class GLTFNode {
-  constructor({
-    data = null,
-  } = {}) {
+  constructor({ data = null } = {}) {
     this.name = data?.name
     this.children = data?.children || []
     this.skin = data?.skin

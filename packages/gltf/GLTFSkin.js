@@ -1,9 +1,7 @@
-import Matrix4 from '@damienmortini/math/Matrix4.js'
+import { Matrix4 } from '@damienmortini/math'
 
 export default class GLTFSkin {
-  constructor({
-    data,
-  }) {
+  constructor({ data }) {
     this.name = data.name
     this.joints = data.joints
 
@@ -15,10 +13,14 @@ export default class GLTFSkin {
     }
 
     const bufferView = data.inverseBindMatrices.bufferView
-    this.inverseBindMatrices = new Float32Array(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT)
+    this.inverseBindMatrices = new Float32Array(
+      bufferView.buffer,
+      bufferView.byteOffset,
+      bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT,
+    )
 
     let width = Math.max(4, Math.pow(2, Math.ceil(Math.log(Math.sqrt(this.joints.length * 4)) / Math.LN2)))
-    const height = Math.pow(2, Math.ceil(Math.log(this.joints.length * 4 / width) / Math.LN2))
+    const height = Math.pow(2, Math.ceil(Math.log((this.joints.length * 4) / width) / Math.LN2))
     width *= 2
     this.jointMatricesTextureData = new Float32Array(width * height * 4)
     this.jointMatricesTextureSize = [width, height]

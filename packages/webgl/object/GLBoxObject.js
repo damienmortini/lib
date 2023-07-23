@@ -1,4 +1,4 @@
-import { BoxGeometry } from '@damienmortini/math/geometry/BoxGeometry.js'
+import { BoxGeometry } from '@damienmortini/math'
 import { GLObject } from '../GLObject.js'
 import { GLGeometry } from '../GLGeometry.js'
 import { GLProgram } from '../GLProgram.js'

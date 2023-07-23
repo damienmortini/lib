@@ -2,14 +2,13 @@
   "name": "@damienmortini/trackballtransform",
   "version": "0.0.5",
   "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+    "build": "tsc"
   },
   "author": "Damien Mortini",
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
   "license": "ISC",
   "repository": {
     "type": "git",
@@ -20,6 +19,7 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/trackballtransform",
   "dependencies": {
     "@damienmortini/gestureobserver": "^0.0.2",
-    "@damienmortini/math": "^0.0.14"
+    "@damienmortini/math": "^0.0.14",
+    "typescript": "^5.1.6"
   }
 }
