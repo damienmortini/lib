@@ -3,13 +3,12 @@
   "version": "0.0.14",
   "description": "Math Helpers",
   "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "build": "tsc"
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.js",
-  "types": "types/index.d.ts",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
@@ -24,5 +23,8 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/math",
   "dependencies": {
     "gl-matrix": "^3.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6"
   }
 }

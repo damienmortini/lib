@@ -10,8 +10,8 @@
     "gltfoptimizer": "./index.js"
   },
   "dependencies": {
-    "@gltf-transform/core": "^2.5.1",
-    "@gltf-transform/functions": "^2.5.1",
+    "@gltf-transform/core": "^3.4.8",
+    "@gltf-transform/functions": "^3.4.8",
     "fbx2gltf": "^0.9.7-p1"
   },
   "author": "Damien Mortini",
