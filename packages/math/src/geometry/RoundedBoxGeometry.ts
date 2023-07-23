@@ -38,7 +38,7 @@ export class RoundedBoxGeometry extends BoxGeometry {
 
     const VERTICES_NUMBER = this.positions.length / 3
     for (let index = 0; index < VERTICES_NUMBER; index++) {
-      position.set(this.positions[index * 3], this.positions[index * 3 + 1], this.positions[index * 3 + 2])
+      position.set([this.positions[index * 3], this.positions[index * 3 + 1], this.positions[index * 3 + 2]])
       VECTOR3.copy(position)
 
       if (position.x < -width * 0.5 + radiusWidth) {
