@@ -9,6 +9,9 @@
     "access": "public"
   },
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "license": "ISC",
   "repository": {
     "type": "git",
