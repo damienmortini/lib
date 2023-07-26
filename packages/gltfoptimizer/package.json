@@ -1,17 +1,18 @@
 {
   "name": "@damienmortini/gltfoptimizer",
-  "private": true,
   "version": "0.0.13",
   "type": "module",
   "scripts": {
-    "start": "node --watch ./index.js"
+    "start": "node --watch ./server.js"
   },
   "bin": {
-    "gltfoptimizer": "./index.js"
+    "gltfoptimizer": "./bin/index.js"
   },
+  "files": [
+    "bin/index.js",
+    "README.md"
+  ],
   "dependencies": {
-    "@gltf-transform/core": "^3.4.8",
-    "@gltf-transform/functions": "^3.4.8",
     "fbx2gltf": "^0.9.7-p1"
   },
   "author": "Damien Mortini",
