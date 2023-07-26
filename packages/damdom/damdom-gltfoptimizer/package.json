@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/damdom-gltfoptimizer",
   "private": true,
-  "version": "0.0.18",
+  "version": "0.0.19",
   "scripts": {
     "compilegltftransform": "esbuild ../../node_modules/@gltf-transform/core/dist/core.modern.js ../../node_modules/@gltf-transform/functions/dist/functions.modern.js --bundle --format=esm --outdir=@gltf-transform"
   },

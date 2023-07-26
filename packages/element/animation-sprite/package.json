@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-sprite",
-  "version": "0.0.135",
+  "version": "0.0.136",
   "description": "<element-animation-sprite> custom element.",
   "main": "index.js",
   "publishConfig": {
@@ -20,7 +20,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-sprite",
   "dependencies": {
-    "@damienmortini/core": "^0.2.145",
+    "@damienmortini/core": "^0.2.146",
     "@damienmortini/damdom-ticker": "^0.0.37"
   }
 }
