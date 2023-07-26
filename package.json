@@ -24,7 +24,7 @@
     "fast-glob": "^3.3.1",
     "jsdoc": "^4.0.2",
     "lerna": "^7.1.4",
-    "npm-check-updates": "^16.10.16",
+    "npm-check-updates": "^16.10.17",
     "typescript": "^5.1.6"
   },
   "dependencies": {
