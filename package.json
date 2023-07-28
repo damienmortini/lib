@@ -18,6 +18,7 @@
   ],
   "devDependencies": {
     "@damienmortini/eslint-config": "^0.0.12",
+    "@damienmortini/typescript-config": "^0.0.2",
     "@damienmortini/server": "^1.0.65",
     "eslint": "^8.45.0",
     "fast-glob": "^3.3.1",
