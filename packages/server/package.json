@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/server",
-  "version": "1.0.65",
+  "version": "1.0.66",
   "description": "Simple live reloading HTTP2 server for development",
   "publishConfig": {
     "access": "public"
@@ -25,7 +25,7 @@
   "bin": "bin/index.js",
   "dependencies": {
     "chokidar": "^3.5.3",
-    "esbuild": "^0.18.16",
+    "esbuild": "^0.18.17",
     "mime-types": "^2.1.35",
     "ws": "^8.13.0"
   }

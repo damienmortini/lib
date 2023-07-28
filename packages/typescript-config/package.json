@@ -1,7 +1,7 @@
 {
   "name": "@damienmortini/typescript-config",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "dependencies": {
     "@types/node": "^20.4.5",
     "@webgpu/types": "^0.1.34"
