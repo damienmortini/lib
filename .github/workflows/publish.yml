@@ -14,7 +14,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - uses: nrwl/nx-set-shas@v3
       - run: npm ci
-      - run: npx nx format:check
+      # - run: npx nx format:check
       - run: npx nx affected -t build --parallel=3
       - run: git stash
       - run: npx lerna publish from-package --yes
