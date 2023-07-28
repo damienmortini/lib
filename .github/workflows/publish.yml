@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           registry-url: https://registry.npmjs.org/
-      - run: npm install
+      - run: npm install --include=optional
       - run: git stash
       - run: npx lerna publish from-package --yes
         env:
