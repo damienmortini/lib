@@ -31,5 +31,8 @@
   },
   "dependencies": {
     "es-module-shims": "^1.8.0"
+  },
+  "optionalDependencies": {
+    "@nx/nx-linux-x64-gnu": "16.5.5"
   }
 }
