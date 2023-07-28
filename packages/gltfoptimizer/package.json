@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gltfoptimizer",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "scripts": {
     "start": "node --watch ./server.js"
