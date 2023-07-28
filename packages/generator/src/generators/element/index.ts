@@ -23,7 +23,7 @@ export default function ({ template, elementScope, elementName, scope, path }) {
   for (const fileName of fileNames) {
     if (fileName === '_package.json') {
       packageJSON = fs.readJSONSync(`${__dirname}/../../templates/${template}/${fileName}`)
-    } else if (fileName === 'index.js') {
+    } else if (fileName === 'index.ts') {
       let indexFileContent = fs.readFileSync(`${__dirname}/../../templates/${template}/${fileName}`, { encoding: 'utf-8' })
       indexFileContent = indexFileContent.replaceAll('template-element', fullElementName)
       indexFileContent = indexFileContent.replaceAll('template title', elementName)
