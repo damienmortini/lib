@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import jsdoc2md from 'jsdoc-to-markdown'
-import readline from 'readline'
+import { createInterface } from 'readline'
 import fs from 'fs-extra'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
@@ -13,7 +13,7 @@ import { dirname } from 'path'
 
   const jsDocData = jsdoc2md.getTemplateDataSync({ files: `${__dirname}/generators/${generatorName}/index.js` })
 
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   })

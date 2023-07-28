@@ -8,7 +8,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
+    "types": ["node", "@webgpu/types", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
 }

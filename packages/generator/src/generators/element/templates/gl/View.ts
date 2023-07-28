@@ -1,4 +1,4 @@
-import Camera from '@damienmortini/math/Camera.js'
+import { Camera } from '@damienmortini/math'
 import { OrbitTransform } from '@damienmortini/orbittransform'
 import GLBoxObject from '@damienmortini/webgl/object/GLBoxObject.js'
 import GLProgram from '@damienmortini/webgl/GLProgram.js'

@@ -2,6 +2,7 @@
   "name": "@damienmortini/typescript-config",
   "private": true,
   "version": "0.0.1",
+  "types": "index.d.ts",
   "dependencies": {
     "@types/node": "^20.4.5",
     "@webgpu/types": "^0.1.34"
