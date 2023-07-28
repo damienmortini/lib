@@ -5,5 +5,17 @@
   "dependencies": {
     "@types/node": "^20.4.5",
     "@webgpu/types": "^0.1.34"
-  }
+  },
+  "author": "Damien Mortini",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/typescript-config"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/typescript-config"
 }
