@@ -1,7 +1,1 @@
-{
-  "trailingComma": "all",
-  "printWidth": 140,
-  "semi": false,
-  "singleQuote": true,
-  "endOfLine": "auto"
-}
+"@damienmortini/prettier-config"

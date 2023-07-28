@@ -1,0 +1,18 @@
+{
+  "name": "@damienmortini/prettier-config",
+  "version": "0.0.0",
+  "description": "Prettier config",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/prettier-config"
+  },
+  "author": "Damien Mortini",
+  "license": "ISC",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/prettier-config"
+}
