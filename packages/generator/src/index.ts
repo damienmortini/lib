@@ -4,9 +4,8 @@ import jsdoc2md from 'jsdoc-to-markdown'
 import readline from 'readline'
 import fs from 'fs-extra'
 import { fileURLToPath } from 'url'
-import { dirname } from 'path';
-
-(async function () {
+import { dirname } from 'path'
+;(async function () {
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = dirname(__filename)
 
@@ -47,7 +46,7 @@ import { dirname } from 'path';
 
   rl.close()
 
-  import(`./generators/${generatorName}/index.js`).then((value) => {
-    value.default(options)
+  import(`./generators/${generatorName}/index.js`).then(async (value) => {
+    await value.default(options)
   })
 })()
