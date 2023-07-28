@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/generator",
-  "version": "0.0.114",
+  "version": "0.0.115",
   "description": "Generator to create boilerplate files",
   "type": "module",
   "publishConfig": {

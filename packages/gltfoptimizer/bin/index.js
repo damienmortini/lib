@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 import fbx2gltf from 'fbx2gltf'
-import { execSync } from 'child_process'
 import { existsSync, mkdirSync, readdirSync } from 'fs'
 
 let inputDirectory = process.cwd()
 let outputDirectory = process.cwd()
+let dracoCompression = false
 
 const args = process.argv.slice(2)
 for (const [index, value] of args.entries()) {
@@ -15,6 +15,7 @@ for (const [index, value] of args.entries()) {
 
       Options:
         --help, -h      Show this help message
+        --draco, -d      Enable DRACO conversion
         --input, -i     Input directory
         --output, -o    Output directory
     `)
@@ -26,6 +27,9 @@ for (const [index, value] of args.entries()) {
   if (value === '--output' || value === '-o') {
     outputDirectory = `${outputDirectory}/${args[index + 1]}`
   }
+  if (value === '--draco' || value === '-d') {
+    dracoCompression = true
+  }
 }
 
 const convertAndOptimizeModels = async (path) => {
@@ -35,14 +39,19 @@ const convertAndOptimizeModels = async (path) => {
       convertAndOptimizeModels(`${path}/${dirent.name}/`)
       continue
     }
-    if (dirent.name.endsWith('.fbx')) {
+    const fullFileName = dirent.name.toLowerCase()
+    if (fullFileName.endsWith('.fbx')) {
       console.log(`Converting ${path}/${dirent.name}`)
-      const fileName = dirent.name.replace(/\.fbx$/, '')
+      const fileName = fullFileName.replace(/\.fbx$/, '')
       const fullOutputDirectory = `${outputDirectory}${relativeDirectory}`
       if (!existsSync(fullOutputDirectory)) {
         mkdirSync(fullOutputDirectory, { recursive: true })
       }
-      await fbx2gltf(`${path}/${dirent.name}`, `${outputDirectory}${relativeDirectory}/${fileName}.glb`)
+      const options = []
+      if (dracoCompression) {
+        options.push('--draco')
+      }
+      await fbx2gltf(`${path}/${dirent.name}`, `${outputDirectory}${relativeDirectory}/${fileName}.glb`, options)
     }
     // const fileName = dirent.name.replace(/\.gltf|\.glb/, '')
     // execSync(`gltf-pipeline -i ${path}${dirent.name} -o models/${fileName}.glb`)
