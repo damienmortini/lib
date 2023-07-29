@@ -8,6 +8,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": true,
+    "incremental": true,
     "types": ["node", "@webgpu/types", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
