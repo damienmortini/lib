@@ -19,6 +19,7 @@ export default async function ({ name, scope, path }) {
           version: '0.0.0',
           type: 'module',
           main: 'dist/index.js',
+          types: 'dist/index.d.ts',
           scripts: {
             build: 'tsc',
           },
@@ -37,6 +38,7 @@ export default async function ({ name, scope, path }) {
         compilerOptions: {
           outDir: './dist',
         },
+        include: ['./src/**/*'],
       }),
     ),
     writeFile(`${path}/${name}/.gitignore`, 'node_modules\n/dist'),
