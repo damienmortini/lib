@@ -2,6 +2,7 @@
   "name": "@damienmortini/lib",
   "private": true,
   "type": "module",
+  "version": "0.0.0",
   "scripts": {
     "bump": "lerna version patch",
     "fix": "eslint packages --fix",
