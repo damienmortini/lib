@@ -15,8 +15,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - run: npm install
       # - run: npx nx format:check
-      - run: npx nx affected:graph
-      - run: npx nx affected -t build --parallel=3
+      # - run: npx nx affected -t build --parallel=3
+      - run: npx nx run-many --target=build
       - run: git stash
       - run: npx lerna publish from-package --yes
         env:
