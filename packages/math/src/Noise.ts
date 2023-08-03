@@ -1,4 +1,5 @@
-import { modulo, random } from './index.js'
+import { modulo } from './Math.js'
+import { random } from './PRNG.js'
 
 export class Noise {
   static noise(x) {

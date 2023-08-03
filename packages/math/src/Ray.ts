@@ -1,4 +1,5 @@
-import { Vector3, Matrix4 } from './index.js'
+import { Vector3 } from './Vector3.js'
+import { Matrix4 } from './Matrix4.js'
 
 const MATRIX4 = new Matrix4()
 

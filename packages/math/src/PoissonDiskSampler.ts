@@ -1,4 +1,4 @@
-import { Vector3 } from './index.js'
+import { Vector3 } from './Vector3.js'
 
 const CURRENT_POINT = new Vector3()
 const BEST_POINT = new Vector3()
