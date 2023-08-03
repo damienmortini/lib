@@ -1,4 +1,7 @@
-import { GLBuffer, GLGeometry, GLObject, GLVertexAttribute } from '@damienmortini/webgl'
+import { GLBuffer } from '../GLBuffer.js'
+import { GLGeometry } from '../GLGeometry.js'
+import { GLObject } from '../GLObject.js'
+import { GLVertexAttribute } from '../GLVertexAttribute.js'
 
 export class GLTransformFeedbackObject extends GLObject {
   #geometryIn

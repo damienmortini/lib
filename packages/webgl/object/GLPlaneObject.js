@@ -1,5 +1,7 @@
 import { PlaneGeometry } from '@damienmortini/math'
-import { GLObject, GLGeometry, GLProgram } from '../index.js'
+import { GLObject } from '../GLObject.js'
+import { GLGeometry } from '../GLGeometry.js'
+import { GLProgram } from '../GLProgram.js'
 
 export class GLPlaneObject extends GLObject {
   constructor({

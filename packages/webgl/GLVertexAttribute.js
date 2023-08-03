@@ -1,4 +1,4 @@
-import { GLBuffer } from '@damienmortini/webgl'
+import { GLBuffer } from './GLBuffer.js'
 
 const TYPE_ARRAY_MAP = new Map([
   [WebGLRenderingContext.BYTE, Int8Array],
