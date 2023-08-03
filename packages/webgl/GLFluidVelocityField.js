@@ -1,4 +1,6 @@
-import { GLProgram, GLShaderTexture, addChunks } from '@damienmortini/webgl'
+import { GLProgram } from './GLProgram.js'
+import { GLShaderTexture } from './GLShaderTexture.js'
+import { addChunks } from './GLSLShader.js'
 
 export class GLFluidVelocityField {
   #inputTexture
