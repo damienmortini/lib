@@ -1,5 +1,5 @@
 import { mat3 } from 'gl-matrix'
-import { Matrix4 } from './index.js'
+import { Matrix4 } from './Matrix4.js'
 
 export class Matrix3 extends Float32Array {
   constructor(array = [1, 0, 0, 0, 1, 0, 0, 0, 1]) {

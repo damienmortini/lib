@@ -1,6 +1,7 @@
 // Adapted from Marcin Ignac https://github.com/vorg/primitive-rounded-cube
 
-import { Vector3, BoxGeometry } from '../index.js'
+import { Vector3 } from '../Vector3.js'
+import { BoxGeometry } from '../geometry/BoxGeometry.js'
 
 const VECTOR3 = new Vector3()
 

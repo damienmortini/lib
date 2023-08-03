@@ -1,4 +1,4 @@
-import { Vector2 } from './index.js'
+import { Vector2 } from './Vector2.js'
 
 export class Edge {
   a: Vector2

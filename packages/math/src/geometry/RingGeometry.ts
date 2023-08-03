@@ -1,6 +1,7 @@
 // Similar to https://github.com/mrdoob/three.js/blob/master/src/geometries/RingGeometry.js but with circular uvs
 
-import { Vector2, Vector3 } from '../index.js'
+import { Vector2 } from '../Vector2.js'
+import { Vector3 } from '../Vector3.js'
 
 export class RingGeometry {
   positions: Float32Array
