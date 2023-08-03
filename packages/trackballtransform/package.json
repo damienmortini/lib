@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/trackballtransform",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "scripts": {
     "build": "tsc"
   },
@@ -23,7 +23,7 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/trackballtransform",
   "dependencies": {
     "@damienmortini/gestureobserver": "^0.0.2",
-    "@damienmortini/math": "^0.0.16",
+    "@damienmortini/math": "^0.0.17",
     "typescript": "^5.1.6"
   }
 }
