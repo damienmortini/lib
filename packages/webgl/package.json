@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/webgl",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "WebGL Helpers",
   "scripts": {
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
@@ -21,6 +21,6 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/webgl",
   "dependencies": {
-    "@damienmortini/math": "^0.0.16"
+    "@damienmortini/math": "^0.0.17"
   }
 }
