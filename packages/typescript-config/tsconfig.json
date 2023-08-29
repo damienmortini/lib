@@ -9,6 +9,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "incremental": true,
+    "preserveWatchOutput": true,
     "types": ["node", "@webgpu/types", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
