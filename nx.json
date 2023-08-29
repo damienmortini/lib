@@ -6,8 +6,18 @@
         "cacheableOperations": [
           "build"
         ],
-        "accessToken": "NWZiN2I3YzItODVhNi00NDJiLTgzZjgtMzZhYzJmODRhOTVhfHJlYWQtd3JpdGU="
+        "accessToken": "MWM0NDVkNTQtMzRkYi00YzlhLThlOGItOTViYTU1NWI4OWU3fHJlYWQtd3JpdGU="
       }
+    }
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
     }
   },
   "affected": {

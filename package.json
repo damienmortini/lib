@@ -28,7 +28,7 @@
     "jsdoc": "^4.0.2",
     "lerna": "^7.1.4",
     "npm-check-updates": "^16.10.17",
-    "nx": "16.5.5",
+    "nx": "16.7.4",
     "nx-cloud": "latest",
     "typescript": "^5.1.6"
   },
