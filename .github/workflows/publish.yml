@@ -16,7 +16,7 @@ jobs:
       - run: npm install
       # - run: npx nx format:check
       # - run: npx nx affected -t build --parallel=3
-      - run: npx nx run-many --target=build
+      - run: npm run build
       - run: git stash
       - run: npx lerna publish from-package --yes
         env:
