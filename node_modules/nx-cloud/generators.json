@@ -1,0 +1,12 @@
+{
+  "name": "Nx Cloud",
+  "version": "0.1",
+  "generators": {
+    "init": {
+      "factory": "./lib/generators/init/init#generator",
+      "schema": "./lib/generators/init/schema.json",
+      "description": "Register nx-cloud in nx.json",
+      "hidden": true
+    }
+  }
+}

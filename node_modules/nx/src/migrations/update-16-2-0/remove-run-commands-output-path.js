@@ -1,0 +1,51 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const path_1 = require("../../utils/path");
+const format_changed_files_with_prettier_if_available_1 = require("../../generators/internal-utils/format-changed-files-with-prettier-if-available");
+const json_1 = require("../../generators/utils/json");
+const project_configuration_1 = require("../../generators/utils/project-configuration");
+function removeRunCommandsOutputPath(tree) {
+    var _a;
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        for (const [project, configuration] of (0, project_configuration_1.getProjects)(tree).entries()) {
+            const targets = (_a = configuration.targets) !== null && _a !== void 0 ? _a : {};
+            let changed = false;
+            for (const [, target] of Object.entries(targets)) {
+                changed || (changed = updateTargetBlock(target));
+            }
+            if (changed) {
+                (0, project_configuration_1.updateProjectConfiguration)(tree, project, configuration);
+            }
+        }
+        if (tree.exists('nx.json')) {
+            (0, json_1.updateJson)(tree, 'nx.json', (json) => {
+                var _a;
+                for (const [, target] of Object.entries((_a = json.targetDefaults) !== null && _a !== void 0 ? _a : {})) {
+                    updateTargetBlock(target);
+                }
+                return json;
+            });
+        }
+        yield (0, format_changed_files_with_prettier_if_available_1.formatChangedFilesWithPrettierIfAvailable)(tree);
+    });
+}
+exports.default = removeRunCommandsOutputPath;
+function updateTargetBlock(target) {
+    var _a, _b;
+    let changed = false;
+    if (target.executor === 'nx:run-commands' && ((_a = target.options) === null || _a === void 0 ? void 0 : _a.outputPath)) {
+        changed = true;
+        const outputs = new Set((_b = target.outputs) !== null && _b !== void 0 ? _b : []);
+        outputs.delete('{options.outputPath}');
+        const newOutputs = Array.isArray(target.options.outputPath)
+            ? target.options.outputPath.map((p) => (0, path_1.joinPathFragments)('{workspaceRoot}', p))
+            : [(0, path_1.joinPathFragments)('{workspaceRoot}', target.options.outputPath)];
+        for (const outputPath of newOutputs) {
+            outputs.add(outputPath);
+        }
+        delete target.options.outputPath;
+        target.outputs = Array.from(outputs);
+    }
+    return changed;
+}

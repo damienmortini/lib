@@ -1,0 +1,38 @@
+{
+  "name": "nx-packages-nx-cloud",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/nx-packages/nx-cloud/src",
+  "projectType": "library",
+  "generators": {},
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "libs/nx-packages/nx-cloud/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "outputs": ["{workspaceRoot}/coverage/libs/nx-packages/nx-cloud"]
+    },
+    "build": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "outputPath": "dist/libs/nx-packages/nx-cloud",
+        "tsConfig": "libs/nx-packages/nx-cloud/tsconfig.lib.json",
+        "packageJson": "libs/nx-packages/nx-cloud/package.json",
+        "main": "libs/nx-packages/nx-cloud/index.ts",
+        "assets": [
+          "libs/nx-packages/nx-cloud/**/*.md",
+          "libs/nx-packages/nx-cloud/LICENSE",
+          {
+            "input": "libs/nx-packages/nx-cloud",
+            "glob": "**/*.json",
+            "output": "."
+          }
+        ],
+        "updateBuildableProjectDepsInPackageJson": false
+      },
+      "outputs": ["{options.outputPath}"]
+    }
+  },
+  "implicitDependencies": ["!nx-packages-nrwl-nx-cloud"]
+}

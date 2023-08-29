@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "generators": {},
+  "targets": {
+    "build": {
+      "command": "cp -r libs/nx-packages/nrwl-nx-cloud dist/libs/nx-packages/",
+      "outputs": ["dist/libs/nx-packages/nrwl-nx-cloud"]
+    }
+  },
+  "name": "nx-packages-nrwl-nx-cloud"
+}

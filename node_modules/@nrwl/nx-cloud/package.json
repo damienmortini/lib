@@ -1,0 +1,21 @@
+{
+  "name": "@nrwl/nx-cloud",
+  "version": "16.1.1",
+  "description": "Distributed caching and task execution for Lerna and Nx",
+  "keywords": [
+    "Monorepo",
+    "Nx",
+    "Nx Cloud"
+  ],
+  "main": "index.js",
+  "author": "Victor Savkin",
+  "license": "CC-BY-ND-3.0",
+  "bugs": {
+    "url": "https://github.com/nrwl/nx/issues"
+  },
+  "homepage": "https://nx.app",
+  "generators": "./generators.json",
+  "dependencies": {
+    "nx-cloud": "16.1.1"
+  }
+}

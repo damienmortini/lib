@@ -1,0 +1,12 @@
+// @ts-ignore
+jest.mock('fs', () => {
+    const mockFs = require('memfs').fs;
+    return Object.assign(Object.assign({}, mockFs), { existsSync(path) {
+            if (path.endsWith('.node')) {
+                return true;
+            }
+            else {
+                return mockFs.existsSync(path);
+            }
+        } });
+});
