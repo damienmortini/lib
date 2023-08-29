@@ -1,4 +1,6 @@
-import { mkdir, writeFile } from 'fs/promises'
+import { mkdir, writeFile, readFile } from 'fs/promises'
+import { fileURLToPath } from 'url'
+import { resolve, dirname } from 'path'
 
 /**
  * @param {Object} object
@@ -8,6 +10,11 @@ import { mkdir, writeFile } from 'fs/promises'
  */
 export default async function ({ name, scope, path }) {
   await mkdir(`${path}/${name}`, { recursive: true })
+  await mkdir(`${path}/${name}/src`, { recursive: true })
+
+  const { devDependencies } = JSON.parse(
+    await readFile(resolve(`${dirname(fileURLToPath(import.meta.url))}/../../../package.json`), 'utf-8'),
+  )
 
   await Promise.all([
     writeFile(
@@ -24,7 +31,7 @@ export default async function ({ name, scope, path }) {
             build: 'tsc',
           },
           devDependencies: {
-            typescript: '*',
+            typescript: devDependencies.typescript,
           },
         },
         null,
