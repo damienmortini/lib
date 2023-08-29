@@ -1,0 +1,26 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildExplicitTypescriptAndPackageJsonDependencies = void 0;
+const explicit_project_dependencies_1 = require("./explicit-project-dependencies");
+const explicit_package_json_dependencies_1 = require("./explicit-package-json-dependencies");
+function buildExplicitTypescriptAndPackageJsonDependencies(jsPluginConfig, nxJsonConfiguration, projectsConfigurations, projectGraph, filesToProcess) {
+    let res = [];
+    if (jsPluginConfig.analyzeSourceFiles === undefined ||
+        jsPluginConfig.analyzeSourceFiles === true) {
+        let tsExists = false;
+        try {
+            require.resolve('typescript');
+            tsExists = true;
+        }
+        catch (_a) { }
+        if (tsExists) {
+            res = res.concat((0, explicit_project_dependencies_1.buildExplicitTypeScriptDependencies)(projectGraph, filesToProcess));
+        }
+    }
+    if (jsPluginConfig.analyzePackageJson === undefined ||
+        jsPluginConfig.analyzePackageJson === true) {
+        res = res.concat((0, explicit_package_json_dependencies_1.buildExplicitPackageJsonDependencies)(nxJsonConfiguration, projectsConfigurations, projectGraph, filesToProcess));
+    }
+    return res;
+}
+exports.buildExplicitTypescriptAndPackageJsonDependencies = buildExplicitTypescriptAndPackageJsonDependencies;
