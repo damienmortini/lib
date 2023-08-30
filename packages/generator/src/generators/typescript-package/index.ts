@@ -40,13 +40,17 @@ export default async function ({ name, scope, path }) {
     ),
     writeFile(
       `${path}/${name}/tsconfig.json`,
-      JSON.stringify({
-        extends: '../../tsconfig.json',
-        compilerOptions: {
-          outDir: './dist',
+      JSON.stringify(
+        {
+          extends: '../../tsconfig.json',
+          compilerOptions: {
+            outDir: './dist',
+          },
+          include: ['./src/**/*'],
         },
-        include: ['./src/**/*'],
-      }),
+        null,
+        2,
+      ),
     ),
     writeFile(`${path}/${name}/.gitignore`, 'node_modules\n/dist'),
     writeFile(`${path}/${name}/src/index.ts`, ''),
