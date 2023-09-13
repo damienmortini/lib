@@ -10,6 +10,7 @@
     "skipLibCheck": true,
     "incremental": true,
     "preserveWatchOutput": true,
+    "allowSyntheticDefaultImports": true,
     "types": ["node", "@webgpu/types", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
