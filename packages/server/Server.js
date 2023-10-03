@@ -13,20 +13,15 @@ import * as esbuild from 'esbuild'
 const directoryName = dirname(fileURLToPath(import.meta.url))
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/')
+const importMetaResolveParent = `file:///${rootDirectory}`
 const resolveImports = (string) => {
   string = string.replaceAll(/((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])/g, (match, p1, importPath, p3) => {
-    const [, packageName, filePath] = /^(?![./])((?:@.*?\/)?.*?)(?:\/|$)(.*)/.exec(importPath) ?? []
-
-    if (packageName) {
-      const packagePath = `node_modules/${packageName}`
-      const packageJSON = JSON.parse(fs.readFileSync(`${rootDirectory}${packagePath}/package.json`, 'utf8'))
-      const mainFileName = filePath || packageJSON.module || packageJSON.main || 'index.js'
-      importPath = `${packagePath}/${mainFileName}`
-      if (!importPath.endsWith('.js') && fs.existsSync(`${rootDirectory}${importPath}/package.json`)) {
-        const packageJSON = JSON.parse(fs.readFileSync(`${rootDirectory}${importPath}/package.json`, 'utf8'))
-        importPath = `${importPath}/${packageJSON.module || packageJSON.main || 'index.js'}`
+    if (!/^[./]/.test(importPath)) {
+      try {
+        importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent, '/')
+      } catch (error) {
+        console.log(importPath, error)
       }
-      importPath = `/${importPath}`
     }
 
     return p1 + importPath + p3
@@ -201,7 +196,7 @@ export default class Server {
             break
         }
       } catch (error) {
-        if (verbose) console.log(error)
+        console.log(error)
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND })
         } else {
@@ -213,7 +208,7 @@ export default class Server {
       }
 
       stream.on('error', (error) => {
-        if (verbose) console.log(error)
+        console.log(error)
       })
     })
 
