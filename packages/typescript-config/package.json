@@ -4,6 +4,7 @@
   "types": "index.d.ts",
   "dependencies": {
     "@types/dom-navigation": "^1.0.2",
+    "@types/dom-view-transitions": "^1.0.3",
     "@types/node": "^20.4.5",
     "@webgpu/types": "^0.1.34"
   },
