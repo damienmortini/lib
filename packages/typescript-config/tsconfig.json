@@ -12,7 +12,7 @@
     "sourceMap": true,
     "incremental": true,
     "preserveWatchOutput": true,
-    "types": ["node", "dom-navigation", "@webgpu/types", "@damienmortini/typescript-config"]
+    "types": ["node", "dom-navigation", "dom-view-transitions", "@webgpu/types", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
 }

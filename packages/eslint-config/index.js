@@ -14,6 +14,7 @@ module.exports = {
   rules: {
     'n/no-callback-literal': 'off',
     'no-empty': 'warn',
+    'prefer-const': ['error', { destructuring: 'all' }],
   },
   globals: {
     navigation: 'readonly',
