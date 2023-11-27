@@ -2,6 +2,7 @@
   "name": "@damienmortini/math",
   "version": "0.0.17",
   "description": "Math Helpers",
+  "type": "module",
   "scripts": {
     "build": "tsc"
   },

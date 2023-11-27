@@ -51,7 +51,7 @@ class DamdomGalleryElement extends HTMLElement {
             <div class="highlightbutton"></div>
           `
           container.querySelector('.highlightbutton').addEventListener('click', highlightButtonClick)
-          node.slot = slotName
+          node.slot = this.#highlighted === node ? 'highlight' : slotName
           this.#elementSlotMap.set(node, slotName)
           this.#gridContainer.appendChild(container)
         }
@@ -64,10 +64,12 @@ class DamdomGalleryElement extends HTMLElement {
         }
       }
     }
-    mutationCallback([{
-      addedNodes: this.children,
-      removedNodes: [],
-    }])
+    mutationCallback([
+      {
+        addedNodes: this.children,
+        removedNodes: [],
+      },
+    ])
     const observer = new MutationObserver(mutationCallback)
     observer.observe(this, { childList: true })
   }
