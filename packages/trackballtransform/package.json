@@ -1,6 +1,7 @@
 {
   "name": "@damienmortini/trackballtransform",
   "version": "0.0.8",
+  "type": "module",
   "scripts": {
     "build": "tsc"
   },
