@@ -21,5 +21,6 @@
   "dependencies": {
     "@damienmortini/gestureobserver": "^0.0.2",
     "@damienmortini/math": "^0.0.17"
-  }
+  },
+  "type": "module"
 }

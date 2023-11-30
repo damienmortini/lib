@@ -14,5 +14,6 @@
     "directory": "packages/element/starter-element"
   },
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-element"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-element",
+  "type": "module"
 }

@@ -22,5 +22,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-view",
   "dependencies": {
     "@damienmortini/core": "^0.2.148"
-  }
+  },
+  "type": "module"
 }

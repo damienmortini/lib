@@ -20,5 +20,6 @@
     "directory": "packages/element/starter-three"
   },
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-three"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-three",
+  "type": "module"
 }

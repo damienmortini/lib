@@ -15,5 +15,6 @@
     "directory": "packages/signal"
   },
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/signal"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/signal",
+  "type": "module"
 }

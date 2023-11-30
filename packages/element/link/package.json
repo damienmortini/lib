@@ -19,5 +19,6 @@
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/link"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/link",
+  "type": "module"
 }
