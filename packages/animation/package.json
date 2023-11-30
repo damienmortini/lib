@@ -19,5 +19,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/animation",
   "dependencies": {
     "@damienmortini/ticker": "^0.0.5"
-  }
+  },
+  "type": "module"
 }

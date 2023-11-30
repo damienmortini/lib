@@ -18,5 +18,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/ticker",
   "dependencies": {
     "@damienmortini/signal": "^0.0.3"
-  }
+  },
+  "type": "module"
 }

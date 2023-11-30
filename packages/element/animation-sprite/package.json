@@ -22,5 +22,6 @@
   "dependencies": {
     "@damienmortini/core": "^0.2.148",
     "@damienmortini/damdom-ticker": "^0.0.37"
-  }
+  },
+  "type": "module"
 }

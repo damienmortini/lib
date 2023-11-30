@@ -9,8 +9,9 @@ for (const result of fastGlob.sync(['*/package.json', 'element/*/package.json'],
   const filePath = `packages/${result.path}`
   const directory = filePath.replace(`/${result.name}`, '')
   const packageData = {
-    ...JSON.parse(fs.readFileSync(filePath)),
+    ...JSON.parse(fs.readFileSync(filePath, 'utf-8')),
     author: 'Damien Mortini',
+    type: 'module',
     publishConfig: {
       access: 'public',
     },

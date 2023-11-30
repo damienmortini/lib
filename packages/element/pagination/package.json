@@ -12,5 +12,6 @@
     "directory": "packages/element/pagination"
   },
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/pagination"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/pagination",
+  "type": "module"
 }

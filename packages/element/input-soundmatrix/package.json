@@ -19,5 +19,6 @@
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-soundmatrix"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-soundmatrix",
+  "type": "module"
 }
