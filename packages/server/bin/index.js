@@ -1,39 +1,7 @@
 #!/usr/bin/env node
 
-import Server from '../Server.js'
+import { spawn } from 'child_process';
 
-/**
- * Extract parameters
- */
-let verbose = false
-let resolveModules = false
-let path
-let rootPath
-let watchPath
-let watchIgnore
+const serverBinPath = process.argv[1].replace('index.js', 'server-bin.js')
 
-for (const arg of process.argv) {
-  if (arg.startsWith('--path')) {
-    path = arg.split('=')[1].trim()
-  } else if (arg.startsWith('--root')) {
-    rootPath = arg.split('=')[1].trim()
-  } else if (arg.startsWith('--watchpath')) {
-    watchPath = arg.split('=')[1].trim()
-  } else if (arg.startsWith('--watchignore')) {
-    watchIgnore = arg.split('=')[1].trim()
-  } else if (arg === '--verbose') {
-    verbose = true
-  } else if (arg === '--resolve-modules') {
-    resolveModules = true
-  }
-}
-
-new Server({
-  path,
-  rootPath,
-  watch: true,
-  watchPath,
-  watchIgnore,
-  verbose,
-  resolveModules,
-})
+spawn('node', ['--preserve-symlinks', '--preserve-symlinks-main', serverBinPath, ...process.argv.slice(2)], {stdio: 'inherit'});

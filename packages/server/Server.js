@@ -1,6 +1,6 @@
 import * as https from 'https'
 import * as http2 from 'http2'
-import * as fs from 'fs'
+import * as fs from 'fs/promises'
 import * as chokidar from 'chokidar'
 import mimeTypes from 'mime-types'
 import WebSocket, { WebSocketServer } from 'ws'
@@ -8,9 +8,11 @@ import * as os from 'os'
 
 import { fileURLToPath } from 'url'
 import { dirname, extname } from 'path'
-import * as esbuild from 'esbuild'
 
 const directoryName = dirname(fileURLToPath(import.meta.url))
+
+const serverKey = await fs.readFile(`${directoryName}/server.key`)
+const serverCrt = await fs.readFile(`${directoryName}/server.crt`)
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/')
 const importMetaResolveParent = `file:///${rootDirectory}`
@@ -47,8 +49,8 @@ export default class Server {
      * Create HTTP2 Server
      */
     this.http2SecureServer = http2.createSecureServer({
-      key: fs.readFileSync(`${directoryName}/server.key`),
-      cert: fs.readFileSync(`${directoryName}/server.crt`),
+      key: serverKey,
+      cert: serverCrt,
     })
 
     this.http2SecureServer.on('error', (error) => {
@@ -81,8 +83,8 @@ export default class Server {
        * Create WebSocket server to refresh page on file change
        */
       const webSocketServer = https.createServer({
-        key: fs.readFileSync(`${directoryName}/server.key`),
-        cert: fs.readFileSync(`${directoryName}/server.crt`),
+        key: serverKey,
+        cert: serverCrt,
       })
       this.#wss = new WebSocketServer({ server: webSocketServer })
       webSocketServer.listen(++port)
@@ -102,7 +104,7 @@ export default class Server {
       }
     })
 
-    this.http2SecureServer.on('stream', (stream, headers) => {
+    this.http2SecureServer.on('stream', async (stream, headers) => {
       if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) {
         return
       }
@@ -115,23 +117,16 @@ export default class Server {
         let filePath = `${rootPath}${requestPath}`
 
         /**
-         * Try .ts if .js doesn't exist
-         */
-        if (!fs.existsSync(filePath) && filePath.endsWith('.js')) {
-          filePath = filePath.replace(/\.js$/, '.ts')
-        }
-
-        /**
          * Rewrite to root if url doesn't exist and isn't a file
          */
-        if (!fs.existsSync(filePath) && !/\.[^/]*$/.test(filePath)) {
+        if (!(await fs.stat(filePath)) && !/\.[^/]*$/.test(filePath)) {
           filePath = `${rootPath}/`
         }
 
         /**
          * If path is a directory then set index.html file by default
          */
-        if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+        if ((await fs.stat(filePath))?.isDirectory()) {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html'
         }
 
@@ -142,41 +137,41 @@ export default class Server {
         switch (fileExtension) {
           case '.html':
             {
-              let fileContent = fs.readFileSync(filePath, {
-                encoding: 'utf-8',
-              })
-              if (resolveModules) {
-                fileContent = resolveImports(fileContent)
+              if(watch) {
+                let fileContent = await fs.readFile(filePath, {
+                  encoding: 'utf-8',
+                })
+                if (resolveModules) {
+                  fileContent = resolveImports(fileContent)
+                }
+                fileContent = fileContent.replace(
+                  '</body>',
+                  `<script>
+      const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
+      socket.addEventListener("message", function (event) {
+        window.location.reload();
+      });
+    </script>
+    </body>`,
+                )
+                stream.end(fileContent)
+              } else {
+                stream.respondWithFile(decodeURIComponent(filePath), {
+                  'content-type': String(mimeTypes.lookup(filePath)),
+                })
               }
-              fileContent = fileContent.replace(
-                '</body>',
-                `<script>
-    const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
-    socket.addEventListener("message", function (event) {
-      window.location.reload();
-    });
-  </script>
-  </body>`,
-              )
-              stream.end(fileContent)
             }
             break
           case '.js':
-          case '.ts':
           case '.mjs':
             {
-              let fileContent = fs.readFileSync(filePath, {
+              let fileContent = await fs.readFile(filePath, {
                 encoding: 'utf-8',
               })
               stream.respond({
-                ':status': 200,
+                ':status': http2.constants.HTTP_STATUS_OK,
                 'content-type': mimeTypes.contentType('.js'),
               })
-              if (fileExtension === '.ts') {
-                fileContent = esbuild.transformSync(fileContent, {
-                  loader: 'ts',
-                }).code
-              }
               if (resolveModules) {
                 fileContent = resolveImports(fileContent)
               }

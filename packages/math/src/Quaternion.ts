@@ -1,5 +1,5 @@
-import { quat } from 'gl-matrix'
-import { mat4 } from 'gl-matrix'
+import { quat } from 'gl-matrix/esm/index.js'
+import { mat4 } from 'gl-matrix/esm/index.js'
 
 export class Quaternion extends Float32Array {
   constructor(array = [0, 0, 0, 1]) {
