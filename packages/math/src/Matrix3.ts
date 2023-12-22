@@ -1,4 +1,4 @@
-import { mat3 } from 'gl-matrix'
+import { mat3 } from 'gl-matrix/esm/index.js'
 import { Matrix4 } from './Matrix4.js'
 
 export class Matrix3 extends Float32Array {

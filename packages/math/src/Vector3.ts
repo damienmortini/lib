@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix'
+import { vec3 } from 'gl-matrix/esm/index.js'
 
 export class Vector3 extends Float32Array {
   constructor(array = [0, 0, 0]) {
