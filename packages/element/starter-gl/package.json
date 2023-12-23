@@ -1,12 +1,12 @@
 {
   "name": "@damienmortini/element-starter-gl",
-  "version": "0.0.102",
+  "version": "0.0.103",
   "description": "<damo-starter-gl> custom element.",
   "main": "index.js",
   "author": "Damien Mortini",
   "dependencies": {
-    "@damienmortini/core": "^0.2.148",
-    "@damienmortini/damdom-ticker": "^0.0.37"
+    "@damienmortini/core": "^0.2.149",
+    "@damienmortini/damdom-ticker": "^0.0.38"
   },
   "publishConfig": {
     "access": "public"

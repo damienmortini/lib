@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-colorpicker",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "<element-input-colorpicker> custom element.",
   "publishConfig": {
     "access": "public"

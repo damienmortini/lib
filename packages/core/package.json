@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/core",
-  "version": "0.2.148",
+  "version": "0.2.149",
   "description": "Helpers library for the web.",
   "publishConfig": {
     "access": "public"
@@ -24,8 +24,8 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core",
   "dependencies": {
-    "@damienmortini/gestureobserver": "^0.0.2",
-    "@damienmortini/math": "^0.0.17"
+    "@damienmortini/gestureobserver": "^0.0.3",
+    "@damienmortini/math": "^0.0.18"
   },
   "type": "module"
 }
