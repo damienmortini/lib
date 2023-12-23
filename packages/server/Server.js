@@ -165,12 +165,12 @@ export default class Server {
           case '.js':
           case '.mjs':
             {
-              let fileContent = await fs.readFile(filePath, {
-                encoding: 'utf-8',
-              })
               stream.respond({
                 ':status': http2.constants.HTTP_STATUS_OK,
                 'content-type': mimeTypes.contentType('.js'),
+              })
+              let fileContent = await fs.readFile(filePath, {
+                encoding: 'utf-8',
               })
               if (resolveModules) {
                 fileContent = resolveImports(fileContent)
@@ -214,6 +214,7 @@ export default class Server {
   }
 
   refresh() {
+    if(!this.#wss) return
     for (const client of this.#wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
         client.send()
