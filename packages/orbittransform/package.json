@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/orbittransform",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "scripts": {
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
@@ -19,8 +19,8 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/orbittransform",
   "dependencies": {
-    "@damienmortini/gestureobserver": "^0.0.2",
-    "@damienmortini/math": "^0.0.17"
+    "@damienmortini/gestureobserver": "^0.0.3",
+    "@damienmortini/math": "^0.0.18"
   },
   "type": "module"
 }

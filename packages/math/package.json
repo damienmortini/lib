@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/math",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Math Helpers",
   "type": "module",
   "scripts": {

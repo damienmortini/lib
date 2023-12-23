@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gltf",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "GLTF Helpers",
   "publishConfig": {
     "access": "public"
@@ -18,7 +18,7 @@
   "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gltf",
   "dependencies": {
-    "@damienmortini/math": "^0.0.17"
+    "@damienmortini/math": "^0.0.18"
   },
   "type": "module"
 }
