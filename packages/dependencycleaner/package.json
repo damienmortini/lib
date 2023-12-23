@@ -6,7 +6,7 @@
     "depclean": "./index.js"
   },
   "dependencies": {
-    "depcheck": "^1.4.3"
+    "depcheck": "^1.4.7"
   },
   "author": "Damien Mortini",
   "publishConfig": {
