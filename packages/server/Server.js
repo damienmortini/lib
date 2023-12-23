@@ -79,17 +79,17 @@ export default class Server {
       }
       console.log('\n')
 
-      /**
-       * Create WebSocket server to refresh page on file change
-       */
-      const webSocketServer = https.createServer({
-        key: serverKey,
-        cert: serverCrt,
-      })
-      this.#wss = new WebSocketServer({ server: webSocketServer })
-      webSocketServer.listen(++port)
-
       if (watch) {
+        /**
+         * Create WebSocket server to refresh page on file change
+         */
+        const webSocketServer = https.createServer({
+          key: serverKey,
+          cert: serverCrt,
+        })
+        this.#wss = new WebSocketServer({ server: webSocketServer })
+        webSocketServer.listen(++port)
+
         chokidar
           .watch(`${rootPath}${watchPath}`, {
             ignored: watchIgnore,
