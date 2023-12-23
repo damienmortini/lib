@@ -9,7 +9,6 @@ let verbose = false
 let resolveModules = false
 let path
 let rootPath
-let watchPath
 let watchIgnore
 
 for (const arg of process.argv) {
@@ -17,8 +16,6 @@ for (const arg of process.argv) {
     path = arg.split('=')[1].trim()
   } else if (arg.startsWith('--root')) {
     rootPath = arg.split('=')[1].trim()
-  } else if (arg.startsWith('--watchpath')) {
-    watchPath = arg.split('=')[1].trim()
   } else if (arg.startsWith('--watchignore')) {
     watchIgnore = arg.split('=')[1].trim()
   } else if (arg === '--verbose') {
@@ -32,7 +29,6 @@ new Server({
   path,
   rootPath,
   watch: true,
-  watchPath,
   watchIgnore,
   verbose,
   resolveModules,
