@@ -192,6 +192,9 @@ export default class Server {
         }
       } catch (error) {
         console.log(error)
+
+        if(stream.closed) return
+
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND })
         } else {
