@@ -91,7 +91,7 @@ export default class Server {
         webSocketServer.listen(++port)
 
         this.#watcher = chokidar
-          .watch(null, {
+          .watch(undefined, {
             ignored: watchIgnore,
             ignoreInitial: true,
           })
