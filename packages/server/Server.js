@@ -34,11 +34,11 @@ const resolveImports = (string) => {
 export default class Server {
   http2SecureServer
   #wss
+  #watcher
 
   constructor({
     path = '',
     watch = false,
-    watchPath = '',
     rootPath = '.',
     resolveModules = false,
     watchIgnore = undefined,
@@ -90,8 +90,8 @@ export default class Server {
         this.#wss = new WebSocketServer({ server: webSocketServer })
         webSocketServer.listen(++port)
 
-        chokidar
-          .watch(`${rootPath}${watchPath}`, {
+        this.#watcher = chokidar
+          .watch(null, {
             ignored: watchIgnore,
             ignoreInitial: true,
           })
@@ -130,6 +130,8 @@ export default class Server {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html'
         }
 
+        this.#watcher?.add(filePath)
+
         const fileExtension = extname(filePath)
         /**
          * Add socket code on html pages for live reloading
@@ -137,7 +139,7 @@ export default class Server {
         switch (fileExtension) {
           case '.html':
             {
-              if(watch) {
+              if (watch) {
                 let fileContent = await fs.readFile(filePath, {
                   encoding: 'utf-8',
                 })
@@ -193,7 +195,7 @@ export default class Server {
       } catch (error) {
         console.log(error)
 
-        if(stream.closed) return
+        if (stream.closed) return
 
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND })
@@ -214,7 +216,7 @@ export default class Server {
   }
 
   refresh() {
-    if(!this.#wss) return
+    if (!this.#wss) return
     for (const client of this.#wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
         client.send()
