@@ -18,17 +18,9 @@ export class PlaneGeometry {
     const xSegments = columns + 1
     const ySegments = rows + 1
 
-    if (positions) {
-      this.positions = new Float32Array((columns + 1) * (rows + 1) * 3)
-    }
-
-    if (normals) {
-      this.normals = new Float32Array((columns + 1) * (rows + 1) * 3)
-    }
-
-    if (uvs) {
-      this.uvs = new Float32Array((columns + 1) * (rows + 1) * 2)
-    }
+    this.positions = positions ? new Float32Array((columns + 1) * (rows + 1) * 3) : null
+    this.normals = normals ? new Float32Array((columns + 1) * (rows + 1) * 3) : null
+    this.uvs = uvs ? new Float32Array((columns + 1) * (rows + 1) * 2) : null
 
     for (let j = 0; j < ySegments; j++) {
       const v = 1 - j / rows
@@ -59,8 +51,7 @@ export class PlaneGeometry {
 
     if (indices) {
       const length = columns * rows * 6
-      if (length < 2 ** 8) this.indices = new Uint8Array(length)
-      else if (length < 2 ** 16) this.indices = new Uint16Array(length)
+      if (length < 2 ** 16) this.indices = new Uint16Array(length)
       else this.indices = new Uint32Array(length)
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < columns; i++) {
