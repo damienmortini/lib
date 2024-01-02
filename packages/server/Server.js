@@ -116,6 +116,14 @@ export default class Server {
       try {
         let filePath = `${rootPath}${requestPath}`
 
+        const responseHeaders = {
+          ':status': http2.constants.HTTP_STATUS_OK,
+          'content-type': String(mimeTypes.lookup(filePath)),
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+          ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
+        }
+
         /**
          * Rewrite to root if url doesn't exist and isn't a file
          */
@@ -133,64 +141,38 @@ export default class Server {
         this.#watcher?.add(filePath)
 
         const fileExtension = extname(filePath)
+
         /**
          * Add socket code on html pages for live reloading
          */
-        switch (fileExtension) {
-          case '.html':
-            {
-              if (watch) {
-                let fileContent = await fs.readFile(filePath, {
-                  encoding: 'utf-8',
-                })
-                if (resolveModules) {
-                  fileContent = resolveImports(fileContent)
-                }
-                fileContent = fileContent.replace(
-                  '</body>',
-                  `<script>
-      const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
-      socket.addEventListener("message", function (event) {
-        window.location.reload();
-      });
-    </script>
-    </body>`,
-                )
-                stream.end(fileContent)
-              } else {
-                stream.respondWithFile(decodeURIComponent(filePath), {
-                  'content-type': String(mimeTypes.lookup(filePath)),
-                })
-              }
-            }
-            break
-          case '.js':
-          case '.mjs':
-            {
-              stream.respond({
-                ':status': http2.constants.HTTP_STATUS_OK,
-                'content-type': mimeTypes.contentType('.js'),
-              })
-              let fileContent = await fs.readFile(filePath, {
-                encoding: 'utf-8',
-              })
-              if (resolveModules) {
-                fileContent = resolveImports(fileContent)
-              }
-              stream.end(fileContent)
-            }
-            break
-          default:
-            {
-              const responseHeaders = {
-                'content-type': String(mimeTypes.lookup(filePath)),
-              }
-              if (requestRange) {
-                responseHeaders['Accept-Ranges'] = 'bytes'
-              }
-              stream.respondWithFile(decodeURIComponent(filePath), responseHeaders)
-            }
-            break
+        if (watch && fileExtension === '.html') {
+          stream.respond(responseHeaders)
+          let fileContent = await fs.readFile(filePath, {
+            encoding: 'utf-8',
+          })
+          if (resolveModules) {
+            fileContent = resolveImports(fileContent)
+          }
+          fileContent = fileContent.replace(
+            '</body>',
+            `<script>
+const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
+socket.addEventListener("message", function (event) {
+  window.location.reload();
+});
+</script>
+</body>`,
+          )
+          stream.end(fileContent)
+        } else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
+          stream.respond(responseHeaders)
+          let fileContent = await fs.readFile(filePath, {
+            encoding: 'utf-8',
+          })
+          fileContent = resolveImports(fileContent)
+          stream.end(fileContent)
+        } else {
+          stream.respondWithFile(decodeURIComponent(filePath), responseHeaders)
         }
       } catch (error) {
         console.log(error)
