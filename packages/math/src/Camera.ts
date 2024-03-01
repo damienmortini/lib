@@ -9,6 +9,7 @@ export class Camera {
   #fov: number
   #inverseTransform = new Matrix4()
   #projection = new Matrix4()
+  #inverseProjection = new Matrix4()
   #projectionView = new Matrix4()
 
   constructor({ near = 0.01, far = 1000, aspectRatio = 1, fov = Math.PI / 3 } = {}) {
@@ -62,6 +63,10 @@ export class Camera {
 
   get projection() {
     return this.#projection
+  }
+
+  get inverseProjection() {
+    return this.#inverseProjection.invert(this.projection)
   }
 
   get projectionView() {
