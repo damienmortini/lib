@@ -3,7 +3,8 @@
   "version": "0.0.9",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "author": "Damien Mortini",
   "publishConfig": {

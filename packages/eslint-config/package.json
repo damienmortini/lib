@@ -2,6 +2,7 @@
   "name": "@damienmortini/eslint-config",
   "version": "0.0.16",
   "description": "ESLint config",
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
@@ -20,6 +21,5 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/eslint-config",
-  "type": "module"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/eslint-config"
 }

@@ -2,6 +2,7 @@
   "name": "@damienmortini/prettier-config",
   "version": "0.0.2",
   "description": "Prettier config",
+  "main": "index.js",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -14,5 +15,8 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/prettier-config"
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/prettier-config",
+  "dependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0"
+  }
 }

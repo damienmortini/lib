@@ -20,4 +20,4 @@ module.exports = {
     navigation: 'readonly',
     NavigateEvent: 'readonly',
   },
-}
+};
