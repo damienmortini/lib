@@ -10,11 +10,13 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['simple-import-sort', '@typescript-eslint'],
   rules: {
     'n/no-callback-literal': 'off',
     'no-empty': 'warn',
     'prefer-const': ['error', { destructuring: 'all' }],
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
   },
   globals: {
     navigation: 'readonly',

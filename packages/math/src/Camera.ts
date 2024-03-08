@@ -1,80 +1,80 @@
-import { Matrix4 } from './Matrix4.js'
+import { Matrix4 } from './Matrix4.js';
 
 export class Camera {
-  transform = new Matrix4()
+  transform = new Matrix4();
 
-  #near: number
-  #far: number
-  #aspectRatio: number
-  #fov: number
-  #inverseTransform = new Matrix4()
-  #projection = new Matrix4()
-  #inverseProjection = new Matrix4()
-  #projectionView = new Matrix4()
+  #near: number;
+  #far: number;
+  #aspectRatio: number;
+  #fov: number;
+  #inverseTransform = new Matrix4();
+  #projection = new Matrix4();
+  #inverseProjection = new Matrix4();
+  #projectionView = new Matrix4();
 
   constructor({ near = 0.01, far = 1000, aspectRatio = 1, fov = Math.PI / 3 } = {}) {
-    this.#near = near
-    this.#far = far
-    this.#aspectRatio = aspectRatio
-    this.#fov = fov
+    this.#near = near;
+    this.#far = far;
+    this.#aspectRatio = aspectRatio;
+    this.#fov = fov;
 
-    this.#updateProjection()
+    this.#updateProjection();
   }
 
   set near(value) {
-    this.#near = value
-    this.#updateProjection()
+    this.#near = value;
+    this.#updateProjection();
   }
 
   get near() {
-    return this.#near
+    return this.#near;
   }
 
   set far(value) {
-    this.#far = value
-    this.#updateProjection()
+    this.#far = value;
+    this.#updateProjection();
   }
 
   get far() {
-    return this.#far
+    return this.#far;
   }
 
   set fov(value) {
-    this.#fov = value
-    this.#updateProjection()
+    this.#fov = value;
+    this.#updateProjection();
   }
 
   get fov() {
-    return this.#fov
+    return this.#fov;
   }
 
   set aspectRatio(value) {
-    this.#aspectRatio = value
-    this.#updateProjection()
+    this.#aspectRatio = value;
+    this.#updateProjection();
   }
 
   get aspectRatio() {
-    return this.#aspectRatio
+    return this.#aspectRatio;
   }
 
   get inverseTransform() {
-    return this.#inverseTransform.invert(this.transform)
+    return this.#inverseTransform.invert(this.transform);
   }
 
   get projection() {
-    return this.#projection
+    return this.#projection;
   }
 
   get inverseProjection() {
-    return this.#inverseProjection.invert(this.projection)
+    return this.#inverseProjection.invert(this.projection);
   }
 
   get projectionView() {
-    return this.#projectionView.copy(this.projection).multiply(this.inverseTransform)
+    return this.#projectionView.copy(this.projection).multiply(this.inverseTransform);
   }
 
   #updateProjection() {
-    this.#projection.fromPerspective(this.fov, this.aspectRatio, this.near, this.far)
+    this.#projection.fromPerspective(this.fov, this.aspectRatio, this.near, this.far);
   }
 }
 
