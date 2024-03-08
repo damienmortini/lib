@@ -15,8 +15,5 @@
   "author": "Damien Mortini",
   "license": "ISC",
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/prettier-config",
-  "dependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0"
-  }
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/prettier-config"
 }

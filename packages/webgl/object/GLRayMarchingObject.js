@@ -1,13 +1,12 @@
-import { GLGeometry } from '../GLGeometry.js'
-import { GLObject } from '../GLObject.js'
-import { GLProgram } from '../GLProgram.js'
-import { Camera } from '../shader/CameraShader.js'
-import { Ray, rayFromCamera } from '../shader/RayShader.js'
-import { sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere, Voxel } from '../shader/SDFShader.js'
-import { addChunks, VERTEX, FRAGMENT } from '../GLSLShader.js'
-
-import { RoundedBoxGeometry } from '@damienmortini/math'
-import { Vector2, Vector4 } from '@damienmortini/math'
+import { GLGeometry } from '../GLGeometry.js';
+import { GLObject } from '../GLObject.js';
+import { GLProgram } from '../GLProgram.js';
+import { FRAGMENT, VERTEX, addChunks } from '../GLSLShader.js';
+import { Camera } from '../shader/CameraShader.js';
+import { Ray, rayFromCamera } from '../shader/RayShader.js';
+import { Voxel, sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere } from '../shader/SDFShader.js';
+import { RoundedBoxGeometry } from '@damienmortini/math';
+import { Vector2, Vector4 } from '@damienmortini/math';
 
 export class GLRayMarchingObject extends GLObject {
   constructor({ gl, sdfObjects = [], vertexChunks = [], fragmentChunks = [], sdfRayMarchSteps = 100, sdfRayMarchPrecision = 0.01 }) {
@@ -19,7 +18,7 @@ export class GLRayMarchingObject extends GLObject {
         vec3 position;
         vec4 material;
       };
-    `
+    `;
 
     super({
       gl,
@@ -151,11 +150,11 @@ fragColor = voxel.material;
           ...fragmentChunks,
         ]),
       }),
-    })
+    });
 
-    this.sdfObjects = sdfObjects
-    this.intersectObjectsMap = new Map()
-    this.sdfObjectsUnprojectedBoundingSpheres = new Map()
+    this.sdfObjects = sdfObjects;
+    this.intersectObjectsMap = new Map();
+    this.sdfObjectsUnprojectedBoundingSpheres = new Map();
 
     this._debugSphere = new GLObject({
       gl,
@@ -214,69 +213,69 @@ fragColor = voxel.material;
           ],
         ]),
       }),
-    })
+    });
   }
 
   draw({ uniforms = {}, ...options } = {}) {
-    const drawingBufferRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight
-    const unprojectedSdfObjectOrigin = new Vector4()
-    const drawingList = []
+    const drawingBufferRatio = this.gl.drawingBufferWidth / this.gl.drawingBufferHeight;
+    const unprojectedSdfObjectOrigin = new Vector4();
+    const drawingList = [];
 
     for (const sdfObject of this.sdfObjects) {
-      let boundingSphere = this.sdfObjectsUnprojectedBoundingSpheres.get(sdfObject)
-      drawingList.push(sdfObject)
+      let boundingSphere = this.sdfObjectsUnprojectedBoundingSpheres.get(sdfObject);
+      drawingList.push(sdfObject);
       if (!boundingSphere) {
         boundingSphere = {
           position: new Vector2(),
           radius: 1,
           depth: 0,
-        }
-        this.sdfObjectsUnprojectedBoundingSpheres.set(sdfObject, boundingSphere)
+        };
+        this.sdfObjectsUnprojectedBoundingSpheres.set(sdfObject, boundingSphere);
       }
-      unprojectedSdfObjectOrigin.set(sdfObject.position.x, sdfObject.position.y, sdfObject.position.z, 1)
-      unprojectedSdfObjectOrigin.applyMatrix4(uniforms.camera.projectionView)
-      const projectionRatio = unprojectedSdfObjectOrigin.w
-      boundingSphere.position.set(unprojectedSdfObjectOrigin.x / projectionRatio, unprojectedSdfObjectOrigin.y / projectionRatio)
-      boundingSphere.radius = (sdfObject.size * (1 + sdfObject.blend)) / projectionRatio
-      boundingSphere.depth = projectionRatio - sdfObject.size * (1 + sdfObject.blend) * 0.5
+      unprojectedSdfObjectOrigin.set(sdfObject.position.x, sdfObject.position.y, sdfObject.position.z, 1);
+      unprojectedSdfObjectOrigin.applyMatrix4(uniforms.camera.projectionView);
+      const projectionRatio = unprojectedSdfObjectOrigin.w;
+      boundingSphere.position.set(unprojectedSdfObjectOrigin.x / projectionRatio, unprojectedSdfObjectOrigin.y / projectionRatio);
+      boundingSphere.radius = (sdfObject.size * (1 + sdfObject.blend)) / projectionRatio;
+      boundingSphere.depth = projectionRatio - sdfObject.size * (1 + sdfObject.blend) * 0.5;
     }
 
     drawingList.sort((a, b) => {
-      return this.sdfObjectsUnprojectedBoundingSpheres.get(a).depth - this.sdfObjectsUnprojectedBoundingSpheres.get(b).depth
-    })
+      return this.sdfObjectsUnprojectedBoundingSpheres.get(a).depth - this.sdfObjectsUnprojectedBoundingSpheres.get(b).depth;
+    });
 
     for (const sdfObject of this.sdfObjects) {
-      const sdfObjectBoundingSphere = this.sdfObjectsUnprojectedBoundingSpheres.get(sdfObject)
-      const intersectObjects = []
-      this.intersectObjectsMap.set(sdfObject, intersectObjects)
+      const sdfObjectBoundingSphere = this.sdfObjectsUnprojectedBoundingSpheres.get(sdfObject);
+      const intersectObjects = [];
+      this.intersectObjectsMap.set(sdfObject, intersectObjects);
       for (const [index, intersectObject] of this.sdfObjects.entries()) {
         if (sdfObject === intersectObject) {
-          intersectObjects.push(index)
-          continue
+          intersectObjects.push(index);
+          continue;
         }
-        const intersectObjectBoundingSphere = this.sdfObjectsUnprojectedBoundingSpheres.get(intersectObject)
+        const intersectObjectBoundingSphere = this.sdfObjectsUnprojectedBoundingSpheres.get(intersectObject);
         const distance = Math.hypot(
           (sdfObjectBoundingSphere.position.x - intersectObjectBoundingSphere.position.x) * drawingBufferRatio,
           sdfObjectBoundingSphere.position.y - intersectObjectBoundingSphere.position.y,
-        )
+        );
         if (distance < sdfObjectBoundingSphere.radius + intersectObjectBoundingSphere.radius) {
-          intersectObjects.push(index)
+          intersectObjects.push(index);
         }
         // if (sdfObject.intersectObjects > 10) break
       }
     }
 
-    this.bind()
-    this.program.uniforms.set('camera', uniforms.camera)
-    this.program.uniforms.set('sdfObjects', this.sdfObjects)
+    this.bind();
+    this.program.uniforms.set('camera', uniforms.camera);
+    this.program.uniforms.set('sdfObjects', this.sdfObjects);
     for (const sdfObject of drawingList) {
-      const intersectObjects = this.intersectObjectsMap.get(sdfObject)
+      const intersectObjects = this.intersectObjectsMap.get(sdfObject);
       super.draw({
         uniforms: { intersectObjects, index: this.sdfObjects.indexOf(sdfObject), intersectObjectsNumber: intersectObjects.length },
         ...options,
-      })
+      });
     }
-    this.unbind()
+    this.unbind();
 
     // for (const [sdfObject, boundingSphere] of this.sdfObjectsUnprojectedBoundingSpheres.entries()) {
     //   // console.log(sdfObject.intersectObjects);
