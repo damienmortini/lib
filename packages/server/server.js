@@ -124,9 +124,13 @@ export class Server {
         };
 
         /**
-         * Rewrite to root if url doesn't exist and isn't a file
+         * Rewrite to root if url isn't a file and doesn't exist
          */
-        if (!(await fs.stat(filePath)) && !/\.[^/]*$/.test(filePath)) {
+        try {
+          if (!/\.[^/]*$/.test(filePath) && !(await fs.stat(filePath))) {
+            throw new Error();
+          }
+        } catch (error) {
           filePath = `${rootPath}/`;
         }
 
