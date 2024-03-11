@@ -1,13 +1,12 @@
-import * as https from 'https';
-import * as http2 from 'http2';
-import * as fs from 'fs/promises';
 import * as chokidar from 'chokidar';
+import * as fs from 'fs/promises';
+import * as http2 from 'http2';
+import * as https from 'https';
 import mimeTypes from 'mime-types';
-import WebSocket, { WebSocketServer } from 'ws';
 import * as os from 'os';
-
-import { fileURLToPath } from 'url';
 import { dirname, extname } from 'path';
+import { fileURLToPath } from 'url';
+import WebSocket, { WebSocketServer } from 'ws';
 
 const directoryName = dirname(fileURLToPath(import.meta.url));
 
@@ -31,7 +30,7 @@ const resolveImports = (string) => {
   return string;
 };
 
-export default class Server {
+export class Server {
   http2SecureServer;
   #wss;
   #watcher;
