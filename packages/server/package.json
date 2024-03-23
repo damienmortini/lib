@@ -24,8 +24,8 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/server",
   "bin": "bin/index.js",
   "dependencies": {
-    "chokidar": "^3.5.3",
+    "chokidar": "^3.6.0",
     "mime-types": "^2.1.35",
-    "ws": "^8.15.1"
+    "ws": "^8.16.0"
   }
 }

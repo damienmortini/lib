@@ -30,6 +30,6 @@
     "gl-matrix": "^3.4.3"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   }
 }

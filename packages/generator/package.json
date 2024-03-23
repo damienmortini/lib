@@ -31,9 +31,9 @@
   "bin": "dist/index.js",
   "dependencies": {
     "fs-extra": "^11.2.0",
-    "jsdoc-to-markdown": "^8.0.0"
+    "jsdoc-to-markdown": "^8.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   }
 }

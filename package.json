@@ -20,22 +20,22 @@
     "packages/**/*"
   ],
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.15",
-    "@damienmortini/typescript-config": "^0.0.5",
-    "@damienmortini/server": "^1.0.67",
-    "eslint": "^8.56.0",
+    "@damienmortini/eslint-config": "^0.0.16",
+    "@damienmortini/server": "^1.0.68",
+    "@damienmortini/typescript-config": "^0.0.6",
+    "eslint": "^8.57.0",
     "fast-glob": "^3.3.2",
     "jsdoc": "^4.0.2",
-    "lerna": "^8.0.1",
-    "npm-check-updates": "^16.14.12",
-    "nx": "17.2.7",
+    "lerna": "^8.1.2",
+    "npm-check-updates": "^16.14.17",
+    "nx": "18.1.2",
     "nx-cloud": "latest",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   },
   "dependencies": {
-    "es-module-shims": "^1.8.2"
+    "es-module-shims": "^1.8.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "17.2.7"
+    "@nx/nx-linux-x64-gnu": "18.1.2"
   }
 }
