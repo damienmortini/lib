@@ -5,7 +5,7 @@
   "dependencies": {
     "@types/dom-navigation": "^1.0.3",
     "@types/dom-view-transitions": "^1.0.4",
-    "@types/node": "^20.10.5",
+    "@types/node": "^20.11.30",
     "@webgpu/types": "^0.1.40"
   },
   "author": "Damien Mortini",

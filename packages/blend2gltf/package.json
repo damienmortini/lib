@@ -13,7 +13,7 @@
     "directory": "packages/blend2gltf"
   },
   "dependencies": {
-    "chokidar": "^3.5.3"
+    "chokidar": "^3.6.0"
   },
   "author": "Damien Mortini",
   "license": "ISC",
