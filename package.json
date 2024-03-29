@@ -1,24 +1,27 @@
 {
   "name": "@damienmortini/lib",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
-  "version": "0.0.0",
+  "workspaces": [
+    "packages/**/*"
+  ],
   "scripts": {
-    "bump": "lerna version patch",
-    "fix": "eslint packages --fix",
-    "rewritepackagefiles": "node rewritepackagefiles.js",
     "build": "npx nx run-many --target=build",
     "build:watch": "npx nx run-many --target=build --watch",
+    "bump": "lerna version patch",
+    "fix": "eslint packages --fix",
+    "publish": "lerna publish from-package --yes",
+    "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --watchignore=node_modules",
     "test": "eslint packages",
     "update": "npm i",
     "upgrade": "ncu --deep -u",
-    "version": "lerna version",
-    "publish": "lerna publish from-package --yes"
+    "version": "lerna version"
   },
-  "workspaces": [
-    "packages/**/*"
-  ],
+  "dependencies": {
+    "es-module-shims": "^1.8.3"
+  },
   "devDependencies": {
     "@damienmortini/eslint-config": "^0.0.16",
     "@damienmortini/server": "^1.0.68",
@@ -32,9 +35,6 @@
     "nx-cloud": "latest",
     "sort-package-json": "^2.9.0",
     "typescript": "^5.4.3"
-  },
-  "dependencies": {
-    "es-module-shims": "^1.8.3"
   },
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "18.1.2"
