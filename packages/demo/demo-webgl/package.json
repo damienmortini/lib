@@ -7,5 +7,18 @@
     "@damienmortini/damdom-ticker": "^0.0.38",
     "@damienmortini/math": "^0.0.18",
     "@damienmortini/webgl": "^0.0.29"
-  }
+  },
+  "author": "Damien Mortini",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/demo/demo-webgl"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/demo/demo-webgl"
 }

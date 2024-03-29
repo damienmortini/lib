@@ -1,5 +1,18 @@
 {
   "name": "@damienmortini/damdom-connector",
   "private": true,
-  "version": "0.0.2"
+  "version": "0.0.2",
+  "author": "Damien Mortini",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/damdom/damdom-connector"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-connector"
 }

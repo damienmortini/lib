@@ -10,5 +10,18 @@
   },
   "devDependencies": {
     "esbuild": "^0.20.2"
-  }
+  },
+  "author": "Damien Mortini",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/damdom/damdom-gltfoptimizer"
+  },
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gltfoptimizer"
 }

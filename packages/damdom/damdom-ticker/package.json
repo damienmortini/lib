@@ -15,15 +15,16 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "damdom/damdom-ticker"
+    "directory": "packages/damdom/damdom-ticker"
   },
   "keywords": [
     "custom elements",
     "web components"
   ],
   "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/damdom/damdom-ticker",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-ticker",
   "dependencies": {
     "@damienmortini/ticker": "^0.0.6"
-  }
+  },
+  "type": "module"
 }
