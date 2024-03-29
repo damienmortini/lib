@@ -2,26 +2,27 @@
   "name": "@damienmortini/webgl",
   "version": "0.0.29",
   "description": "WebGL Helpers",
-  "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
+  "keywords": [
+    "webgl"
+  ],
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/webgl",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/webgl"
   },
-  "keywords": [
-    "webgl"
-  ],
-  "author": "Damien Mortini",
   "license": "ISC",
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/webgl",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+  },
   "dependencies": {
     "@damienmortini/math": "^0.0.18"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

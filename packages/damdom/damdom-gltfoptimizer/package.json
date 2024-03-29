@@ -1,7 +1,18 @@
 {
   "name": "@damienmortini/damdom-gltfoptimizer",
-  "private": true,
   "version": "0.0.21",
+  "private": true,
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gltfoptimizer",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/damdom/damdom-gltfoptimizer"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "scripts": {
     "compilegltftransform": "esbuild ../../node_modules/@gltf-transform/core/dist/core.modern.js ../../node_modules/@gltf-transform/functions/dist/functions.modern.js --bundle --format=esm --outdir=@gltf-transform"
   },
@@ -11,17 +22,7 @@
   "devDependencies": {
     "esbuild": "^0.20.2"
   },
-  "author": "Damien Mortini",
-  "type": "module",
   "publishConfig": {
     "access": "public"
-  },
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/damdom/damdom-gltfoptimizer"
-  },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gltfoptimizer"
+  }
 }

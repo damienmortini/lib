@@ -30,6 +30,7 @@
     "npm-check-updates": "^16.14.17",
     "nx": "18.1.2",
     "nx-cloud": "latest",
+    "sort-package-json": "^2.9.0",
     "typescript": "^5.4.3"
   },
   "dependencies": {

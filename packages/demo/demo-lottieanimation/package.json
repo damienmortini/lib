@@ -1,18 +1,19 @@
 {
   "name": "@damienmortini/demo-lottieanimation",
-  "private": true,
   "version": "0.0.6",
-  "author": "Damien Mortini",
-  "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "ISC",
+  "private": true,
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/demo/demo-lottieanimation",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/demo/demo-lottieanimation"
   },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/demo/demo-lottieanimation"
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  }
 }

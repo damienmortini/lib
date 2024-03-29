@@ -1,9 +1,18 @@
 {
   "name": "@damienmortini/graph",
-  "private": true,
   "version": "0.0.19",
-  "main": "index.js",
+  "private": true,
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/graph",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/graph"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
   "type": "module",
+  "main": "index.js",
   "bin": "bin/index.js",
   "scripts": {
     "server": "node bin/index.js server"
@@ -12,16 +21,7 @@
     "@damienmortini/server": "^1.0.68",
     "ws": "^8.16.0"
   },
-  "author": "Damien Mortini",
   "publishConfig": {
     "access": "public"
-  },
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/graph"
-  },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/graph"
+  }
 }

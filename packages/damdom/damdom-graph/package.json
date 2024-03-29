@@ -1,18 +1,19 @@
 {
   "name": "@damienmortini/damdom-graph",
-  "private": true,
   "version": "0.0.3",
-  "author": "Damien Mortini",
-  "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "ISC",
+  "private": true,
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-graph",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/damdom/damdom-graph"
   },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-graph"
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  }
 }

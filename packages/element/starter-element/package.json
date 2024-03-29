@@ -2,18 +2,18 @@
   "name": "@damienmortini/element-starter-element",
   "version": "0.0.9",
   "description": "<damo-starter-element> custom element.",
-  "main": "index.js",
-  "author": "Damien Mortini",
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "ISC",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-element",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/element/starter-element"
   },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-element",
-  "type": "module"
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  }
 }

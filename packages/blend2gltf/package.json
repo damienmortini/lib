@@ -1,22 +1,22 @@
 {
   "name": "@damienmortini/blend2gltf",
   "version": "0.0.4",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
-  "bin": "bin/index.js",
-  "type": "module",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/blend2gltf",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/blend2gltf"
   },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "bin": "bin/index.js",
   "dependencies": {
     "chokidar": "^3.6.0"
   },
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/blend2gltf"
+  "publishConfig": {
+    "access": "public"
+  }
 }

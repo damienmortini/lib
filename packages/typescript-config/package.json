@@ -1,6 +1,17 @@
 {
   "name": "@damienmortini/typescript-config",
   "version": "0.0.6",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/typescript-config",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/typescript-config"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "types": "index.d.ts",
   "dependencies": {
     "@types/dom-navigation": "^1.0.3",
@@ -8,17 +19,7 @@
     "@types/node": "^20.11.30",
     "@webgpu/types": "^0.1.40"
   },
-  "author": "Damien Mortini",
   "publishConfig": {
     "access": "public"
-  },
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/typescript-config"
-  },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/typescript-config",
-  "type": "module"
+  }
 }

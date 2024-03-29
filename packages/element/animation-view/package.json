@@ -1,27 +1,27 @@
 {
   "name": "@damienmortini/element-animation-view",
-  "private": true,
   "version": "0.0.128",
+  "private": true,
   "description": "<element-animation-view> custom element.",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
-  "author": "Damien Mortini",
-  "license": "ISC",
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-view",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/element/animation-view"
   },
-  "keywords": [
-    "custom elements",
-    "web components"
-  ],
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-view",
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "dependencies": {
     "@damienmortini/core": "^0.2.149"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }
