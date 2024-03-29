@@ -25,7 +25,6 @@ for (const result of fastGlob.sync(['**/package.json'], {
     bugs: 'https://github.com/damienmortini/lib/issues',
     homepage: `https://github.com/damienmortini/lib/tree/main/${directory}`,
   };
-  console.log(packageData.type);
   fs.writeFileSync(filePath, `${JSON.stringify(packageData, null, 2)}\n`);
 }
 
