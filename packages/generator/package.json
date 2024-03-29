@@ -2,21 +2,6 @@
   "name": "@damienmortini/generator",
   "version": "0.0.120",
   "description": "Generator to create boilerplate files",
-  "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/generator"
-  },
   "keywords": [
     "generator",
     "boilerplate",
@@ -24,16 +9,31 @@
     "yeoman",
     "plop"
   ],
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/generator",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/generator"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
   "dependencies": {
     "fs-extra": "^11.2.0",
     "jsdoc-to-markdown": "^8.0.1"
   },
   "devDependencies": {
     "typescript": "^5.4.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

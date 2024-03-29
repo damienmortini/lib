@@ -8,19 +8,17 @@
     "custom elements",
     "web components"
   ],
-  "author": "Damien Mortini",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gui",
-  "license": "ISC",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/damdom/damdom-gui"
   },
-  "bugs": "https://github.com/damienmortini/lib/issues",
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "dependencies": {
     "@damienmortini/damdom-checkbox": "^0.0.3",
     "@damienmortini/damdom-colorpicker": "^0.0.30",
@@ -28,5 +26,7 @@
     "@damienmortini/damdom-slider": "^0.0.3",
     "@damienmortini/damdom-textfield": "^0.0.3"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

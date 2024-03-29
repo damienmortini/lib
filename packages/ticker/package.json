@@ -1,23 +1,24 @@
 {
   "name": "@damienmortini/ticker",
   "version": "0.0.6",
-  "author": "Damien Mortini",
-  "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "ISC",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/ticker",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/ticker"
   },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/ticker",
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+  },
   "dependencies": {
     "@damienmortini/signal": "^0.0.4"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

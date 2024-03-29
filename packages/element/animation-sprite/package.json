@@ -2,26 +2,26 @@
   "name": "@damienmortini/element-animation-sprite",
   "version": "0.0.139",
   "description": "<element-animation-sprite> custom element.",
-  "main": "index.js",
-  "publishConfig": {
-    "access": "public"
-  },
-  "author": "Damien Mortini",
-  "license": "ISC",
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-sprite",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/element/animation-sprite"
   },
-  "keywords": [
-    "custom elements",
-    "web components"
-  ],
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/animation-sprite",
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "dependencies": {
     "@damienmortini/core": "^0.2.149",
     "@damienmortini/damdom-ticker": "^0.0.38"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

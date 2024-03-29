@@ -1,24 +1,24 @@
 {
   "name": "@damienmortini/damdom-linkableconnector",
-  "private": true,
   "version": "0.0.18",
+  "private": true,
   "description": "<damdom-linkableconnector> custom element.",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
-  "author": "Damien Mortini",
-  "license": "ISC",
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-linkableconnector",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/damdom/damdom-linkableconnector"
   },
-  "keywords": [
-    "custom elements",
-    "web components"
-  ],
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-linkableconnector",
-  "type": "module"
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  }
 }

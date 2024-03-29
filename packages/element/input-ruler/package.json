@@ -2,22 +2,22 @@
   "name": "@damienmortini/element-input-ruler",
   "version": "0.0.11",
   "description": "<element-input-ruler> custom element.",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
-  "author": "Damien Mortini",
-  "license": "ISC",
+  "keywords": [
+    "custom elements",
+    "web components"
+  ],
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-ruler",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/element/input-ruler"
   },
-  "keywords": [
-    "custom elements",
-    "web components"
-  ],
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/input-ruler",
-  "type": "module"
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -2,34 +2,34 @@
   "name": "@damienmortini/three",
   "version": "0.1.188",
   "description": "Three.js helpers",
-  "scripts": {
-    "copyexamples": "node copyExamples.js",
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
-  },
-  "main": "index.js",
-  "types": "types/index.d.ts",
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/three"
-  },
   "keywords": [
     "three",
     "3d",
     "helpers",
     "library"
   ],
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/three",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/three"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "copyexamples": "node copyExamples.js",
+    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+  },
   "dependencies": {
     "@damienmortini/core": "^0.2.149",
     "fs-extra": "^11.2.0",
     "three": "0.162.0"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

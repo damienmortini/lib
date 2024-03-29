@@ -1,5 +1,6 @@
 import fastGlob from 'fast-glob';
 import fs from 'fs';
+import sortPackageJson from 'sort-package-json';
 
 // Re-write package.json
 for (const result of fastGlob.sync(['**/package.json'], {
@@ -9,7 +10,10 @@ for (const result of fastGlob.sync(['**/package.json'], {
 })) {
   const filePath = `packages/${result.path}`;
   const directory = filePath.replace(`/${result.name}`, '');
-  const packageData = {
+  const packageData = sortPackageJson({
+    ...{
+      main: 'index.js',
+    },
     ...JSON.parse(fs.readFileSync(filePath, 'utf-8')),
     author: 'Damien Mortini',
     type: 'module',
@@ -24,8 +28,24 @@ for (const result of fastGlob.sync(['**/package.json'], {
     },
     bugs: 'https://github.com/damienmortini/lib/issues',
     homepage: `https://github.com/damienmortini/lib/tree/main/${directory}`,
-  };
+  });
+
   fs.writeFileSync(filePath, `${JSON.stringify(packageData, null, 2)}\n`);
+
+  // const npmPackageJsonLint = new NpmPackageJsonLint({
+  //   packageJsonFilePath: filePath,
+  //   packageJsonObject: packageData,
+  //   fix: true,
+  //   config: {
+  //     extends: 'npm-package-json-lint-config-default',
+  //   },
+  // });
+  // const lintResult = npmPackageJsonLint.lint();
+
+  // fs.writeFileSync(filePath, `${JSON.stringify(packageData, null, 2)}\n`);
+
+  // console.log(lintResult);
+  // npmPackageJsonLint.packageJsonObject = packageData;
 }
 
 // Re-write elements README

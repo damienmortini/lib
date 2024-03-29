@@ -1,33 +1,33 @@
 {
   "name": "@damienmortini/trackballtransform",
   "version": "0.0.9",
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
-  },
-  "author": "Damien Mortini",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "license": "ISC",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/trackballtransform",
+  "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
     "directory": "packages/trackballtransform"
   },
-  "bugs": "https://github.com/damienmortini/lib/issues",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/trackballtransform",
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
   "dependencies": {
     "@damienmortini/gestureobserver": "^0.0.3",
     "@damienmortini/math": "^0.0.18"
   },
   "devDependencies": {
     "typescript": "^5.4.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

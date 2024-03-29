@@ -2,14 +2,6 @@
   "name": "@damienmortini/core",
   "version": "0.2.149",
   "description": "Helpers library for the web.",
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/core"
-  },
   "keywords": [
     "math",
     "physics",
@@ -19,13 +11,22 @@
     "toolkit",
     "library"
   ],
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/core",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/core"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "dependencies": {
     "@damienmortini/gestureobserver": "^0.0.3",
     "@damienmortini/math": "^0.0.18"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

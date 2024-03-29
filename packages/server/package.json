@@ -2,30 +2,30 @@
   "name": "@damienmortini/server",
   "version": "1.0.68",
   "description": "Simple live reloading HTTP2 server for development",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "index.js",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/server"
-  },
   "keywords": [
     "server",
     "http2",
     "livereload",
     "https"
   ],
-  "author": "Damien Mortini",
-  "license": "ISC",
-  "bugs": "https://github.com/damienmortini/lib/issues",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/server",
+  "bugs": "https://github.com/damienmortini/lib/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/damienmortini/lib",
+    "directory": "packages/server"
+  },
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "main": "index.js",
   "bin": "bin/index.js",
   "dependencies": {
     "chokidar": "^3.6.0",
     "mime-types": "^2.1.35",
     "ws": "^8.16.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
