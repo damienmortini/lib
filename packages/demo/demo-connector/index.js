@@ -1,33 +1,34 @@
-import css from './index.css' assert { type: 'css' }
-import '@damienmortini/damdom-connector/index.js'
+import '@damienmortini/damdom-connector/index.js';
+
+import css from './index.css' with { type: 'css' };
 
 export class DemoConnectorElement extends HTMLElement {
   constructor() {
-    super()
+    super();
 
-    this.attachShadow({ mode: 'open' })
-    this.shadowRoot.adoptedStyleSheets = [css]
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.adoptedStyleSheets = [css];
     this.shadowRoot.innerHTML = `
       <damdom-connector id="input1"><input type="range"></damdom-connector>
       <damdom-connector id="input2" connect="input3"><input type="range"></damdom-connector>
       <damdom-connector id="input3"><input type="range"></damdom-connector>
-    `
-    let activeConnector
+    `;
+    let activeConnector;
     this.shadowRoot.addEventListener('connectorselected', (event) => {
       if (activeConnector === event.target) {
-        const connector = activeConnector
-        requestAnimationFrame(() => connector.blur())
-        activeConnector = null
+        const connector = activeConnector;
+        requestAnimationFrame(() => connector.blur());
+        activeConnector = null;
       }
       if (!activeConnector) {
-        activeConnector = event.target
-        activeConnector.addEventListener('blur', () => activeConnector = null, { once: true })
+        activeConnector = event.target;
+        activeConnector.addEventListener('blur', () => (activeConnector = null), { once: true });
       } else {
-        const connector = activeConnector
-        requestAnimationFrame(() => connector.blur())
-        activeConnector.connect(event.target)
+        const connector = activeConnector;
+        requestAnimationFrame(() => connector.blur());
+        activeConnector.connect(event.target);
       }
-    })
+    });
 
     // this.shadowRoot.querySelector('#input1').addEventListener('input', (event) => event.target.dispatchEvent(new Event('change')))
 
@@ -51,4 +52,4 @@ export class DemoConnectorElement extends HTMLElement {
   }
 }
 
-customElements.define('demo-connector', DemoConnectorElement)
+customElements.define('demo-connector', DemoConnectorElement);
