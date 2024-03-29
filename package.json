@@ -11,6 +11,7 @@
     "build:watch": "npx nx run-many --target=build --watch",
     "bump": "lerna version patch",
     "fix": "eslint packages --fix",
+    "clean": "rimraf --glob \"packages/**/node_modules\"",
     "publish": "lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --watchignore=node_modules",
@@ -20,7 +21,7 @@
     "version": "lerna version"
   },
   "dependencies": {
-    "es-module-shims": "^1.8.3"
+    "es-module-shims": "^1.9.0"
   },
   "devDependencies": {
     "@damienmortini/eslint-config": "^0.0.16",
@@ -30,13 +31,14 @@
     "fast-glob": "^3.3.2",
     "jsdoc": "^4.0.2",
     "lerna": "^8.1.2",
-    "npm-check-updates": "^16.14.17",
-    "nx": "18.1.2",
+    "npm-check-updates": "^16.14.18",
+    "nx": "18.2.1",
     "nx-cloud": "latest",
+    "rimraf": "^5.0.5",
     "sort-package-json": "^2.9.0",
     "typescript": "^5.4.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "18.1.2"
+    "@nx/nx-linux-x64-gnu": "18.2.1"
   }
 }
