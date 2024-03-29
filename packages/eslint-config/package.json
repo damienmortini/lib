@@ -11,7 +11,6 @@
   },
   "license": "ISC",
   "author": "Damien Mortini",
-  "type": "module",
   "main": "index.js",
   "dependencies": {
     "eslint": "^8.57.0",
