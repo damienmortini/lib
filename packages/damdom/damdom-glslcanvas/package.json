@@ -21,5 +21,6 @@
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-glslcanvas",
   "dependencies": {
     "@damienmortini/webgl": "^0.0.29"
-  }
+  },
+  "type": "module"
 }
