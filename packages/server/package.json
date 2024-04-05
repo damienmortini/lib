@@ -18,14 +18,25 @@
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
-  "main": "index.js",
-  "bin": "bin/index.js",
+  "main": "dist/index.js",
+  "bin": "dist/bin/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "chokidar": "^3.6.0",
+    "devcert": "^1.2.2",
+    "get-port": "^7.1.0",
     "mime-types": "^2.1.35",
     "ws": "^8.16.0"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@types/mime-types": "^2.1.4",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.4.4"
   }
 }

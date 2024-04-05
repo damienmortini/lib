@@ -25,7 +25,7 @@ for (const arg of process.argv) {
   }
 }
 
-new Server({
+const server = new Server({
   path,
   rootPath,
   watch: true,
@@ -33,3 +33,5 @@ new Server({
   verbose,
   resolveModules,
 });
+
+await server.ready;

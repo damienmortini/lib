@@ -1,21 +1,17 @@
 import * as chokidar from 'chokidar';
+import devcert from 'devcert';
 import * as fs from 'fs/promises';
+import getPort, { portNumbers } from 'get-port';
 import * as http2 from 'http2';
 import * as https from 'https';
 import mimeTypes from 'mime-types';
 import * as os from 'os';
-import { dirname, extname } from 'path';
-import { fileURLToPath } from 'url';
+import { extname } from 'path';
 import WebSocket, { WebSocketServer } from 'ws';
-
-const directoryName = dirname(fileURLToPath(import.meta.url));
-
-const serverKey = await fs.readFile(`${directoryName}/server.key`);
-const serverCrt = await fs.readFile(`${directoryName}/server.crt`);
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = `file:///${rootDirectory}`;
-const resolveImports = (string) => {
+const resolveImports = (string: string) => {
   string = string.replaceAll(/((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])/g, (match, p1, importPath, p3) => {
     if (!/^[./]/.test(importPath)) {
       try {
@@ -30,12 +26,28 @@ const resolveImports = (string) => {
   return string;
 };
 
-export class Server {
-  http2SecureServer;
-  #wss;
-  #watcher;
+type ServerOptions = {
+  path?: string;
+  watch?: boolean;
+  rootPath?: string;
+  resolveModules?: boolean;
+  watchIgnore?: string | RegExp | Array<string | RegExp>;
+  verbose?: boolean;
+  port?: number;
+};
 
-  constructor({
+export class Server {
+  http2SecureServer: http2.Http2SecureServer;
+  ready: Promise<void>;
+
+  #wss: WebSocketServer;
+  #watcher: chokidar.FSWatcher;
+
+  constructor(serverOptions: ServerOptions = {}) {
+    this.ready = this.#setup(serverOptions);
+  }
+
+  async #setup({
     path = '',
     watch = false,
     rootPath = '.',
@@ -45,49 +57,54 @@ export class Server {
     port = 3000,
   } = {}) {
     /**
+     * Get port
+     */
+    const fromPort = port;
+    const toPort = port + 100;
+    const serverPort = await getPort({ port: portNumbers(fromPort, toPort) });
+    const webSocketServerPort = await getPort({ port: portNumbers(fromPort, toPort) });
+
+    /**
+     * Get addresses
+     */
+    const addresses = ['localhost'];
+    const networkInterfaces = os.networkInterfaces();
+    Object.values(networkInterfaces)
+      .flat()
+      .forEach((networkInterface) => {
+        if (networkInterface.family === 'IPv4' && !networkInterface.internal) {
+          addresses.push(networkInterface.address);
+        }
+      });
+
+    /**
+     * Create certificate for addresses
+     */
+    const { key, cert } = await devcert.certificateFor(addresses[0]);
+
+    /**
      * Create HTTP2 Server
      */
     this.http2SecureServer = http2.createSecureServer({
-      key: serverKey,
-      cert: serverCrt,
+      key,
+      cert,
     });
 
     this.http2SecureServer.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        port++;
-        this.http2SecureServer.listen(port);
-      } else {
-        console.error(error);
-      }
+      console.error(error);
     });
 
     this.http2SecureServer.on('listening', () => {
-      /**
-       * Log currently used URLs
-       */
-      const networkInterfaces = os.networkInterfaces();
-      console.log(`https://localhost:${port}/${path}`);
-      for (const key of Object.keys(networkInterfaces)) {
-        const networkInterfacesArray = networkInterfaces[key];
-        for (const networkInterface of networkInterfacesArray) {
-          if (networkInterface.family !== 'IPv4' || networkInterface.internal) {
-            continue;
-          }
-          console.log(`https://${networkInterface.address}:${port}/${path}`);
-        }
-      }
-      console.log('\n');
-
       if (watch) {
         /**
          * Create WebSocket server to refresh page on file change
          */
         const webSocketServer = https.createServer({
-          key: serverKey,
-          cert: serverCrt,
+          key,
+          cert,
         });
         this.#wss = new WebSocketServer({ server: webSocketServer });
-        webSocketServer.listen(++port);
+        webSocketServer.listen(webSocketServerPort);
 
         this.#watcher = chokidar
           .watch(undefined, {
@@ -159,7 +176,7 @@ export class Server {
           fileContent = fileContent.replace(
             '</body>',
             `<script>
-const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${port}");
+const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${webSocketServerPort}");
 socket.addEventListener("message", function (event) {
   window.location.reload();
 });
@@ -197,14 +214,18 @@ socket.addEventListener("message", function (event) {
       });
     });
 
-    this.http2SecureServer.listen(port);
+    this.http2SecureServer.listen(serverPort);
+
+    for (const address of addresses) {
+      console.log(`https://${address}:${serverPort}/${path}`);
+    }
   }
 
   refresh() {
     if (!this.#wss) return;
     for (const client of this.#wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
-        client.send();
+        client.send('refresh');
       }
     }
   }
