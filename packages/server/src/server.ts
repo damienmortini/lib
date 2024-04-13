@@ -110,6 +110,7 @@ export class Server {
           .watch(undefined, {
             ignored: watchIgnore,
             ignoreInitial: true,
+            usePolling: true,
           })
           .on('change', (path) => {
             if (verbose) {
@@ -174,14 +175,19 @@ export class Server {
             fileContent = resolveImports(fileContent);
           }
           fileContent = fileContent.replace(
-            '</body>',
+            '</head>',
             `<script>
 const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${webSocketServerPort}");
+let forceReload = false;
+window.navigation.addEventListener('navigate', (event) => {
+  if(forceReload) event.stopImmediatePropagation();
+});
 socket.addEventListener("message", function (event) {
+  forceReload = true;
   window.location.reload();
 });
 </script>
-</body>`,
+</head>`,
           );
           stream.end(fileContent);
         } else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
