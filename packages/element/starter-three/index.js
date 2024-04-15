@@ -1,14 +1,15 @@
-import AnimationTickerElement from '@damienmortini/element-animation-ticker/index.js'
+import AnimationTickerElement from '@damienmortini/element-animation-ticker/index.js';
 
-import { WebGLRenderer, WebGL1Renderer } from '../../three/src/Three.js'
+import { WebGL1Renderer, WebGLRenderer } from '../../three/src/Three.js';
+import Scene from './Scene.js';
 
-import Scene from './Scene.js'
+window.customElements.define(
+  'damo-starter-three',
+  class extends AnimationTickerElement {
+    constructor() {
+      super();
 
-window.customElements.define('damo-starter-three', class extends AnimationTickerElement {
-  constructor() {
-    super()
-
-    this.attachShadow({ mode: 'open' }).innerHTML = `
+      this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
         :host {
           display: block;
@@ -27,33 +28,33 @@ window.customElements.define('damo-starter-three', class extends AnimationTicker
         }
       </style>
       <canvas></canvas>
-    `
+    `;
 
-    this.canvas = this.shadowRoot.querySelector('canvas')
+      this.canvas = this.shadowRoot.querySelector('canvas');
 
-    this.renderer = new (/\bforcewebgl1\b/.test(window.location.search) ? WebGL1Renderer : WebGLRenderer)({
-      canvas: this.canvas,
-      powerPreference: 'high-performance',
-      antialias: true,
-    })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+      this.renderer = new (/\bforcewebgl1\b/.test(window.location.search) ? WebGL1Renderer : WebGLRenderer)({
+        canvas: this.canvas,
+        powerPreference: 'high-performance',
+        antialias: true,
+      });
+      this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    this.scene = new Scene({ canvas: this.canvas })
+      this.scene = new Scene({ canvas: this.canvas });
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width
-      const height = entries[0].contentRect.height
+      const resizeObserver = new ResizeObserver((entries) => {
+        const width = entries[0].contentRect.width;
+        const height = entries[0].contentRect.height;
 
-      this.scene.resize(width, height)
-      this.renderer.setSize(width, height, false)
-      this.renderer.render(this.scene, this.scene.camera)
-    })
-    resizeObserver.observe(this.canvas)
-  }
+        this.scene.resize(width, height);
+        this.renderer.setSize(width, height, false);
+        this.renderer.render(this.scene, this.scene.camera);
+      });
+      resizeObserver.observe(this.canvas);
+    }
 
-  update() {
-    this.scene.update()
-    this.renderer.render(this.scene, this.scene.camera)
-  }
-})
-
+    update() {
+      this.scene.update();
+      this.renderer.render(this.scene, this.scene.camera);
+    }
+  },
+);
