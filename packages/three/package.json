@@ -25,7 +25,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
-    "@damienmortini/core": "^0.2.150",
+    "@damienmortini/core": "^0.2.151",
     "fs-extra": "^11.2.0",
     "three": "0.163.0"
   },

@@ -17,8 +17,8 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/gestureobserver": "^0.0.4",
-    "@damienmortini/math": "^0.0.19"
+    "@damienmortini/gestureobserver": "^0.0.5",
+    "@damienmortini/math": "^0.0.20"
   },
   "publishConfig": {
     "access": "public"
