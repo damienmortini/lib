@@ -32,13 +32,13 @@
     "jsdoc": "^4.0.2",
     "lerna": "^8.1.2",
     "npm-check-updates": "^16.14.18",
-    "nx": "18.2.1",
+    "nx": "18.2.4",
     "nx-cloud": "latest",
     "rimraf": "^5.0.5",
-    "sort-package-json": "^2.9.0",
-    "typescript": "^5.4.3"
+    "sort-package-json": "^2.10.0",
+    "typescript": "^5.4.5"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "18.2.1"
+    "@nx/nx-linux-x64-gnu": "18.2.4"
   }
 }
