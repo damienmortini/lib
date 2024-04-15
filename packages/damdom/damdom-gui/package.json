@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-gui",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "description": "GUI element",
   "keywords": [
     "javascript",
@@ -20,11 +20,11 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/damdom-checkbox": "^0.0.5",
-    "@damienmortini/damdom-colorpicker": "^0.0.32",
-    "@damienmortini/damdom-select": "^0.0.5",
-    "@damienmortini/damdom-slider": "^0.0.5",
-    "@damienmortini/damdom-textfield": "^0.0.5"
+    "@damienmortini/damdom-checkbox": "^0.0.6",
+    "@damienmortini/damdom-colorpicker": "^0.0.33",
+    "@damienmortini/damdom-select": "^0.0.6",
+    "@damienmortini/damdom-slider": "^0.0.6",
+    "@damienmortini/damdom-textfield": "^0.0.6"
   },
   "publishConfig": {
     "access": "public"

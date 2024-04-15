@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-knob",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "<element-input-knob> custom element.",
   "keywords": [
     "custom elements",
