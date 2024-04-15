@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-link",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "private": true,
   "description": "<element-link> custom element.",
   "keywords": [

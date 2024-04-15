@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/demo-webgl",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "private": true,
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/demo/demo-webgl",
   "bugs": "https://github.com/damienmortini/lib/issues",
