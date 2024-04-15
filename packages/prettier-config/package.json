@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/prettier-config",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Prettier config",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/prettier-config",
   "bugs": "https://github.com/damienmortini/lib/issues",

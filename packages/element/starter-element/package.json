@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-starter-element",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "<damo-starter-element> custom element.",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-element",
   "bugs": "https://github.com/damienmortini/lib/issues",

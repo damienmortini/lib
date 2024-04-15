@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/trackballtransform",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/trackballtransform",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -21,8 +21,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@damienmortini/gestureobserver": "^0.0.3",
-    "@damienmortini/math": "^0.0.18"
+    "@damienmortini/gestureobserver": "^0.0.4",
+    "@damienmortini/math": "^0.0.19"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
