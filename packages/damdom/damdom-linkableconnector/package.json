@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-linkableconnector",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "private": true,
   "description": "<damdom-linkableconnector> custom element.",
   "keywords": [
