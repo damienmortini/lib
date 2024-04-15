@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-select-lasso",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "private": true,
   "description": "<element-select-lasso> custom element.",
   "keywords": [

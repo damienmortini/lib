@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gltf",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "GLTF Helpers",
   "keywords": [
     "gltf"
@@ -17,7 +17,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/math": "^0.0.18"
+    "@damienmortini/math": "^0.0.19"
   },
   "publishConfig": {
     "access": "public"

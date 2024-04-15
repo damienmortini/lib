@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-soundmatrix",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "private": true,
   "description": "<element-input-soundmatrix> custom element.",
   "keywords": [

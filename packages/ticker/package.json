@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/ticker",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/ticker",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -16,7 +16,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/signal": "^0.0.4"
+    "@damienmortini/signal": "^0.0.5"
   },
   "publishConfig": {
     "access": "public"
