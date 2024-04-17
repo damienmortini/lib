@@ -4,18 +4,26 @@ import * as fs from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import * as http2 from 'http2';
 import * as https from 'https';
+import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
 import * as os from 'os';
 import { extname } from 'path';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
-const importMetaResolveParent = `file:///${rootDirectory}`;
+const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
 const resolveImports = (string: string) => {
   string = string.replaceAll(/((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])/g, (match, p1, importPath, p3) => {
     if (!/^[./]/.test(importPath)) {
       try {
-        importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent, '/');
+        importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['import']), true).href.replace(
+          importMetaResolveParent.href,
+          '/',
+        );
+        /**
+         * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
+         */
+        // importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent.href, '/');
       } catch (error) {
         console.log(importPath, error);
       }
@@ -136,8 +144,9 @@ export class Server {
         const responseHeaders = {
           ':status': http2.constants.HTTP_STATUS_OK,
           'content-type': String(mimeTypes.lookup(filePath)),
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'require-corp',
+          'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+          'Cross-Origin-Embedder-Policy': 'unsafe-none',
+          'Cross-Origin-Resource-Policy': 'cross-origin',
           ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
         };
 
