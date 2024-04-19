@@ -39,7 +39,7 @@ type ServerOptions = {
   watch?: boolean;
   rootPath?: string;
   resolveModules?: boolean;
-  watchIgnore?: string | RegExp | Array<string | RegExp>;
+  watchIgnore?: Array<string | RegExp>;
   verbose?: boolean;
   port?: number;
 };
