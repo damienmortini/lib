@@ -16,8 +16,8 @@ for (const arg of process.argv) {
     path = arg.split('=')[1].trim();
   } else if (arg.startsWith('--root')) {
     rootPath = arg.split('=')[1].trim();
-  } else if (arg.startsWith('--watchignore')) {
-    watchIgnore = arg.split('=')[1].trim();
+  } else if (arg.startsWith('--watch-ignore')) {
+    watchIgnore = arg.split('=')[1].trim().split(',');
   } else if (arg === '--verbose') {
     verbose = true;
   } else if (arg === '--resolve-modules') {
