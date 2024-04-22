@@ -24,21 +24,21 @@
     "es-module-shims": "^1.9.0"
   },
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.18",
-    "@damienmortini/server": "^1.0.70",
-    "@damienmortini/typescript-config": "^0.0.8",
+    "@damienmortini/eslint-config": "^0.0.19",
+    "@damienmortini/server": "^1.0.71",
+    "@damienmortini/typescript-config": "^0.0.9",
     "eslint": "^8.57.0",
     "fast-glob": "^3.3.2",
     "jsdoc": "^4.0.2",
     "lerna": "^8.1.2",
     "npm-check-updates": "^16.14.18",
-    "nx": "18.2.4",
+    "nx": "18.3.3",
     "nx-cloud": "latest",
     "rimraf": "^5.0.5",
     "sort-package-json": "^2.10.0",
     "typescript": "^5.4.5"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "18.2.4"
+    "@nx/nx-linux-x64-gnu": "18.3.3"
   }
 }
