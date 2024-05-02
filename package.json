@@ -14,7 +14,7 @@
     "clean": "rimraf --glob \"packages/**/node_modules\"",
     "publish": "lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
-    "start": "server --watchignore=node_modules",
+    "start": "server --resolve-modules",
     "test": "eslint packages",
     "update": "npm i",
     "upgrade": "ncu --deep -u",
