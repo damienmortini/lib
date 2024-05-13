@@ -99,7 +99,7 @@ export class GestureObserver {
     if (data.pointers.size === 1) {
       element.addEventListener('pointermove', this.#onPointerMove)
       element.addEventListener('pointerup', this.#onPointerUp)
-      element.addEventListener('pointerout', this.#onPointerUp)
+      element.addEventListener('pointerleave', this.#onPointerUp)
       data.startTimeStamp = Date.now()
       data.offsetX = 0
       data.offsetY = 0
@@ -211,7 +211,7 @@ export class GestureObserver {
       })
       element.removeEventListener('pointermove', this.#onPointerMove)
       element.removeEventListener('pointerup', this.#onPointerUp)
-      element.removeEventListener('pointerout', this.#onPointerUp)
+      element.removeEventListener('pointerleave', this.#onPointerUp)
     }
     this.#resetElementPreviousData(element)
   }
