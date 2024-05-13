@@ -27,6 +27,7 @@ export class OrbitTransform {
     zoomEasing = 0.1,
     zoomVelocity = 0.1,
     zoomDisabled = false,
+    pointerCapture = false,
   }) {
     this.matrix = matrix
     this.inverted = inverted
@@ -79,7 +80,7 @@ export class OrbitTransform {
           this.distanceEnd = Math.max(this.distanceMin, Math.min(this.distanceMax, this.distanceEnd))
         }
       })
-      gestureObserver.observe(domElement, { pointerCapture: true })
+      gestureObserver.observe(domElement, { pointerCapture })
     }
 
     this.update()

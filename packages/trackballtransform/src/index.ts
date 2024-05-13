@@ -36,6 +36,7 @@ export class TrackballTransform {
     zoomVelocity = 0.1,
     zoomDisabled = false,
     disabled = false,
+    pointerCapture = false,
   } = {}) {
     this.matrix = matrix;
 
@@ -76,7 +77,7 @@ export class TrackballTransform {
         this.#distance = Math.max(this.distanceMin, Math.min(this.distanceMax, this.#distance));
       }
     });
-    gestureObserver.observe(domElement, { pointerCapture: true });
+    gestureObserver.observe(domElement, { pointerCapture });
   }
 
   set distance(value) {
