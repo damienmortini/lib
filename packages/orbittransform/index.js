@@ -13,6 +13,7 @@ export class OrbitTransform {
     pan = 0,
     tilt = 0,
     inverted = false,
+    disabled = false,
     distance = 0,
     distanceMin = 0,
     distanceMax = Infinity,
@@ -31,6 +32,7 @@ export class OrbitTransform {
   }) {
     this.matrix = matrix
     this.inverted = inverted
+    this.disabled = disabled
     this.distanceMax = distanceMax
     this.distanceMin = distanceMin
     this.zoomEasing = zoomEasing
@@ -57,7 +59,7 @@ export class OrbitTransform {
       domElement.addEventListener(
         'wheel',
         (event) => {
-          if (this.zoomDisabled) return
+          if (this.zoomDisabled || this.disabled) return
           this.distanceEnd = Math.max(this.distanceEnd, 0.001) * (1 + event.deltaY * this.zoomVelocity * 0.01)
           this.distanceEnd = Math.max(this.distanceMin, Math.min(this.distanceMax, this.distanceEnd))
         },
@@ -65,12 +67,12 @@ export class OrbitTransform {
       )
 
       const gestureObserver = new GestureObserver((gesture) => {
-        if (!this.panDisabled) {
+        if (!this.panDisabled && !this.disabled) {
           this.panEnd += gesture.movementX * this.rotationVelocity
           this.panEnd = Math.max(this.panMin, Math.min(this.panMax, this.panEnd))
         }
 
-        if (!this.tiltDisabled) {
+        if (!this.tiltDisabled && !this.disabled) {
           this.tiltEnd += gesture.movementY * this.rotationVelocity
           this.tiltEnd = Math.max(this.tiltMin, Math.min(this.tiltMax, this.tiltEnd))
         }
