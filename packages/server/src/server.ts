@@ -144,8 +144,8 @@ export class Server {
         const responseHeaders = {
           ':status': http2.constants.HTTP_STATUS_OK,
           'content-type': String(mimeTypes.lookup(filePath)),
-          'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
-          'Cross-Origin-Embedder-Policy': 'unsafe-none',
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
           'Cross-Origin-Resource-Policy': 'cross-origin',
           ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
         };
