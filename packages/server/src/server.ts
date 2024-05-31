@@ -12,9 +12,8 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
-const cssFilesToConvert = new Set<string>();
 
-const resolveImports = (string: string, convertCSSImports = false) => {
+const resolveImports = (string: string, removeCSSImportAttribute = false) => {
   string = string.replaceAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
     (match, p1, importPath, p3, p4, importAttribute) => {
@@ -33,13 +32,9 @@ const resolveImports = (string: string, convertCSSImports = false) => {
         }
       }
 
-      const needsCSSConversion = convertCSSImports && importAttribute === 'css';
+      const removeImportAttribute = removeCSSImportAttribute && importAttribute === 'css';
 
-      if (needsCSSConversion) {
-        cssFilesToConvert.add(importPath);
-      }
-
-      return p1 + importPath + p3 + (p4 && !needsCSSConversion ? p4 : '');
+      return p1 + importPath + p3 + (p4 && !removeImportAttribute ? p4 : '');
     },
   );
   return string;
@@ -53,7 +48,6 @@ type ServerOptions = {
   watchIgnore?: Array<string | RegExp>;
   verbose?: boolean;
   port?: number;
-  convertCSSImports?: boolean;
 };
 
 export class Server {
@@ -75,7 +69,6 @@ export class Server {
     watchIgnore = undefined,
     verbose = false,
     port = 3000,
-    convertCSSImports = true,
   } = {}) {
     /**
      * Get port
@@ -150,6 +143,14 @@ export class Server {
       const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY];
       const requestPath = headers[http2.constants.HTTP2_HEADER_PATH];
       const requestRange = headers[http2.constants.HTTP2_HEADER_RANGE];
+      const userAgent = headers['user-agent'];
+      const fetchDest = headers['sec-fetch-dest'];
+
+      /**
+       * Detect Safari browser to convert CSS imports to JS imports
+       */
+      const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
+      const importedFromScript = fetchDest === 'script';
 
       try {
         let filePath = `${rootPath}${requestPath}`;
@@ -194,7 +195,7 @@ export class Server {
             encoding: 'utf-8',
           });
           if (resolveModules) {
-            fileContent = resolveImports(fileContent);
+            fileContent = resolveImports(fileContent, convertCSSImport);
           }
           fileContent = fileContent.replace(
             '</head>',
@@ -217,9 +218,9 @@ socket.addEventListener("message", function (event) {
           let fileContent = await fs.readFile(filePath, {
             encoding: 'utf-8',
           });
-          fileContent = resolveImports(fileContent, convertCSSImports);
+          fileContent = resolveImports(fileContent, convertCSSImport);
           stream.end(fileContent);
-        } else if (convertCSSImports && fileExtension === '.css') {
+        } else if (fileExtension === '.css' && convertCSSImport && importedFromScript) {
           responseHeaders['content-type'] = 'application/javascript';
           stream.respond(responseHeaders);
           let fileContent = await fs.readFile(filePath, {
