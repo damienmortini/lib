@@ -8,7 +8,7 @@ import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
 import * as os from 'os';
 import { extname } from 'path';
-import qrcode from 'qrcode-terminal';
+import QRCode from 'qrcode';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
@@ -260,7 +260,7 @@ export default styles;`;
       const url = `https://${address}:${serverPort}/${path}`;
       console.log(url);
       if (index !== 0) {
-        qrcode.generate(url, { small: true });
+        QRCode.toString(url, { type: 'terminal', small: true });
       }
     }
   }
