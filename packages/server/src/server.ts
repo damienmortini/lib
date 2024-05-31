@@ -12,25 +12,36 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
-const resolveImports = (string: string) => {
-  string = string.replaceAll(/((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])/g, (match, p1, importPath, p3) => {
-    if (!/^[./]/.test(importPath)) {
-      try {
-        importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['import']), true).href.replace(
-          importMetaResolveParent.href,
-          '/',
-        );
-        /**
-         * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
-         */
-        // importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent.href, '/');
-      } catch (error) {
-        console.log(importPath, error);
-      }
-    }
+const cssFilesToConvert = new Set<string>();
 
-    return p1 + importPath + p3;
-  });
+const resolveImports = (string: string, convertCSSImports = false) => {
+  string = string.replaceAll(
+    /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
+    (match, p1, importPath, p3, p4, importAttribute) => {
+      if (!/^[./]/.test(importPath)) {
+        try {
+          importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['import']), true).href.replace(
+            importMetaResolveParent.href,
+            '/',
+          );
+          /**
+           * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
+           */
+          // importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent.href, '/');
+        } catch (error) {
+          console.log(importPath, error);
+        }
+      }
+
+      const needsCSSConversion = convertCSSImports && importAttribute === 'css';
+
+      if (needsCSSConversion) {
+        cssFilesToConvert.add(importPath);
+      }
+
+      return p1 + importPath + p3 + (p4 && !needsCSSConversion ? p4 : '');
+    },
+  );
   return string;
 };
 
@@ -42,6 +53,7 @@ type ServerOptions = {
   watchIgnore?: Array<string | RegExp>;
   verbose?: boolean;
   port?: number;
+  convertCSSImports?: boolean;
 };
 
 export class Server {
@@ -63,6 +75,7 @@ export class Server {
     watchIgnore = undefined,
     verbose = false,
     port = 3000,
+    convertCSSImports = true,
   } = {}) {
     /**
      * Get port
@@ -188,7 +201,7 @@ export class Server {
             `<script>
 const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${webSocketServerPort}");
 let forceReload = false;
-window.navigation.addEventListener('navigate', (event) => {
+window.navigation?.addEventListener('navigate', (event) => {
   if(forceReload) event.stopImmediatePropagation();
 });
 socket.addEventListener("message", function (event) {
@@ -204,7 +217,17 @@ socket.addEventListener("message", function (event) {
           let fileContent = await fs.readFile(filePath, {
             encoding: 'utf-8',
           });
-          fileContent = resolveImports(fileContent);
+          fileContent = resolveImports(fileContent, convertCSSImports);
+          stream.end(fileContent);
+        } else if (convertCSSImports && fileExtension === '.css') {
+          responseHeaders['content-type'] = 'application/javascript';
+          stream.respond(responseHeaders);
+          let fileContent = await fs.readFile(filePath, {
+            encoding: 'utf-8',
+          });
+          fileContent = `const styles = new CSSStyleSheet();
+styles.replaceSync(\`${fileContent.replaceAll(/[`$]/gm, '\\$&')}\`);
+export default styles;`;
           stream.end(fileContent);
         } else {
           stream.respondWithFile(decodeURIComponent(filePath), responseHeaders);
