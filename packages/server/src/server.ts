@@ -8,6 +8,7 @@ import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
 import * as os from 'os';
 import { extname } from 'path';
+import qrcode from 'qrcode-terminal';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
@@ -255,8 +256,12 @@ export default styles;`;
 
     this.http2SecureServer.listen(serverPort);
 
-    for (const address of addresses) {
-      console.log(`https://${address}:${serverPort}/${path}`);
+    for (const [index, address] of addresses.entries()) {
+      const url = `https://${address}:${serverPort}/${path}`;
+      console.log(url);
+      if (index !== 0) {
+        qrcode.generate(url, { small: true });
+      }
     }
   }
 
