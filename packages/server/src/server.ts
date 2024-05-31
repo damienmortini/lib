@@ -260,7 +260,7 @@ export default styles;`;
       const url = `https://${address}:${serverPort}/${path}`;
       console.log(url);
       if (index !== 0) {
-        QRCode.toString(url, { type: 'terminal', small: true });
+        console.log(await QRCode.toString(url, { type: 'terminal', small: true }));
       }
     }
   }
