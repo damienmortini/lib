@@ -29,6 +29,7 @@ export default [
       'n/no-callback-literal': 'off',
       'no-empty': 'warn',
       'prefer-const': ['error', { destructuring: 'all' }],
+      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
     },
