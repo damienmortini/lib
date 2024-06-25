@@ -16,8 +16,8 @@
   "dependencies": {
     "@types/dom-navigation": "^1.0.3",
     "@types/dom-view-transitions": "^1.0.4",
-    "@types/node": "^20.12.7",
-    "@webgpu/types": "^0.1.40"
+    "@types/node": "^20.14.8",
+    "@webgpu/types": "^0.1.43"
   },
   "publishConfig": {
     "access": "public"
