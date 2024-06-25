@@ -28,7 +28,8 @@ const resolveImports = (string: string, removeCSSImportAttribute = false) => {
            * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
            */
           // importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent.href, '/');
-        } catch (error) {
+        }
+        catch (error) {
           console.log(importPath, error);
         }
       }
@@ -172,7 +173,8 @@ export class Server {
           if (!/\.[^/]*$/.test(filePath) && !(await fs.stat(filePath))) {
             throw new Error();
           }
-        } catch (error) {
+        }
+        catch (error) {
           filePath = `${rootPath}/`;
         }
 
@@ -214,14 +216,16 @@ socket.addEventListener("message", function (event) {
 </head>`,
           );
           stream.end(fileContent);
-        } else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
+        }
+        else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
           stream.respond(responseHeaders);
           let fileContent = await fs.readFile(filePath, {
             encoding: 'utf-8',
           });
           fileContent = resolveImports(fileContent, convertCSSImport);
           stream.end(fileContent);
-        } else if (fileExtension === '.css' && convertCSSImport && importedFromScript) {
+        }
+        else if (fileExtension === '.css' && convertCSSImport && importedFromScript) {
           responseHeaders['content-type'] = 'application/javascript';
           stream.respond(responseHeaders);
           let fileContent = await fs.readFile(filePath, {
@@ -231,17 +235,20 @@ socket.addEventListener("message", function (event) {
 styles.replaceSync(\`${fileContent.replaceAll(/[`$]/gm, '\\$&')}\`);
 export default styles;`;
           stream.end(fileContent);
-        } else {
+        }
+        else {
           stream.respondWithFile(decodeURIComponent(filePath), responseHeaders);
         }
-      } catch (error) {
+      }
+      catch (error) {
         console.log(error);
 
         if (stream.closed) return;
 
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND });
-        } else {
+        }
+        else {
           stream.respond({
             ':status': http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
           });
