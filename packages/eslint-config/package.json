@@ -2,6 +2,7 @@
   "name": "@damienmortini/eslint-config",
   "version": "0.0.20",
   "description": "ESLint config",
+  "type": "module",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/eslint-config",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -18,7 +19,7 @@
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-simple-import-sort": "^12.1.0",
     "typescript": "^5.5.2",
-    "typescript-eslint": "^8.0.0-alpha.10"
+    "typescript-eslint": "^8.0.0-alpha.33"
   },
   "publishConfig": {
     "access": "public"
