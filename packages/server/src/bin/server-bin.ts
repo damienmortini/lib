@@ -10,6 +10,7 @@ let resolveModules = false;
 let path: string;
 let rootPath: string;
 let watchIgnore: Array<string | RegExp>;
+let port: number;
 
 for (const arg of process.argv) {
   if (arg.startsWith('--path')) {
@@ -27,6 +28,9 @@ for (const arg of process.argv) {
   else if (arg === '--resolve-modules') {
     resolveModules = true;
   }
+  else if (arg.startsWith('--port')) {
+    port = parseInt(arg.split('=')[1].trim());
+  }
 }
 
 const server = new Server({
@@ -36,6 +40,7 @@ const server = new Server({
   watchIgnore,
   verbose,
   resolveModules,
+  port,
 });
 
 await server.ready;
