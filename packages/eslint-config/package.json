@@ -16,6 +16,7 @@
   "main": "index.js",
   "dependencies": {
     "@eslint/js": "^9.5.0",
+    "@stylistic/eslint-plugin": "^2.3.0",
     "eslint": "^9.5.0",
     "eslint-plugin-simple-import-sort": "^12.1.0",
     "globals": "^15.6.0",
@@ -24,8 +25,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "@stylistic/eslint-plugin": "^2.2.2"
   }
 }
