@@ -152,7 +152,6 @@ export class Server {
        * Detect Safari browser to convert CSS imports to JS imports
        */
       const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
-      const importedFromScript = fetchDest === 'script';
 
       try {
         let filePath = `${rootPath}${requestPath}`;
@@ -160,10 +159,13 @@ export class Server {
         const responseHeaders = {
           ':status': http2.constants.HTTP_STATUS_OK,
           'content-type': String(mimeTypes.lookup(filePath)),
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'require-corp',
-          'Cross-Origin-Resource-Policy': 'cross-origin',
           ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
+          ...(fetchDest === 'script'
+            ? {
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'require-corp',
+              }
+            : {}),
         };
 
         /**
@@ -225,7 +227,7 @@ socket.addEventListener("message", function (event) {
           fileContent = resolveImports(fileContent, convertCSSImport);
           stream.end(fileContent);
         }
-        else if (fileExtension === '.css' && convertCSSImport && importedFromScript) {
+        else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
           responseHeaders['content-type'] = 'application/javascript';
           stream.respond(responseHeaders);
           let fileContent = await fs.readFile(filePath, {

@@ -7,20 +7,24 @@ import { Server } from '../server.js';
  */
 let verbose = false;
 let resolveModules = false;
-let path;
-let rootPath;
-let watchIgnore;
+let path: string;
+let rootPath: string;
+let watchIgnore: Array<string | RegExp>;
 
 for (const arg of process.argv) {
   if (arg.startsWith('--path')) {
     path = arg.split('=')[1].trim();
-  } else if (arg.startsWith('--root')) {
+  }
+  else if (arg.startsWith('--root')) {
     rootPath = arg.split('=')[1].trim();
-  } else if (arg.startsWith('--watch-ignore')) {
+  }
+  else if (arg.startsWith('--watch-ignore')) {
     watchIgnore = arg.split('=')[1].trim().split(',');
-  } else if (arg === '--verbose') {
+  }
+  else if (arg === '--verbose') {
     verbose = true;
-  } else if (arg === '--resolve-modules') {
+  }
+  else if (arg === '--resolve-modules') {
     resolveModules = true;
   }
 }
