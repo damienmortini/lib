@@ -1,11 +1,10 @@
-import GLPlaneObject from '@damienmortini/webgl/object/GLPlaneObject.js'
-import GLProgram from '@damienmortini/webgl/GLProgram.js'
+import { GLPlaneObject, GLProgram } from '@damienmortini/webgl';
 
 export default class DamdomGLSLCanvasElement extends HTMLElement {
-  #gl
+  #gl;
 
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -25,24 +24,24 @@ export default class DamdomGLSLCanvasElement extends HTMLElement {
         }
       </style>
       <canvas></canvas>
-    `
+    `;
 
-    this.canvas = this.shadowRoot.querySelector('canvas')
+    this.canvas = this.shadowRoot.querySelector('canvas');
 
-    this.#gl = this.canvas.getContext('webgl2')
+    this.#gl = this.canvas.getContext('webgl2');
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width * window.devicePixelRatio
-      const height = entries[0].contentRect.height * window.devicePixelRatio
+      const width = entries[0].contentRect.width * window.devicePixelRatio;
+      const height = entries[0].contentRect.height * window.devicePixelRatio;
 
-      this.canvas.width = width
-      this.canvas.height = height
+      this.canvas.width = width;
+      this.canvas.height = height;
 
-      this.#gl.viewport(0, 0, width, height)
-      this.uniforms.set('resolution', [width, height])
-      this.draw()
-    })
-    resizeObserver.observe(this.canvas)
+      this.#gl.viewport(0, 0, width, height);
+      this.uniforms.set('resolution', [width, height]);
+      this.draw();
+    });
+    resizeObserver.observe(this.canvas);
 
     this.object = new GLPlaneObject({
       gl: this.#gl,
@@ -68,34 +67,34 @@ void main() {
   fragColor = vec4(gl_FragCoord.xy / resolution, 0., 1.);
 }`,
       }),
-    })
+    });
   }
 
   connectedCallback() {
-    if (this.hasAttribute('fragment')) this.fragment = this.getAttribute('fragment')
+    if (this.hasAttribute('fragment')) this.fragment = this.getAttribute('fragment');
   }
 
   get fragment() {
-    return this.object.program.fragment
+    return this.object.program.fragment;
   }
 
   set fragment(value) {
-    this.object.program.fragment = value
-    this.draw()
+    this.object.program.fragment = value;
+    this.draw();
   }
 
   get uniforms() {
-    return this.object.program.uniforms
+    return this.object.program.uniforms;
   }
 
   get gl() {
-    return this.#gl
+    return this.#gl;
   }
 
   draw(options) {
-    this.#gl.clear(this.#gl.COLOR_BUFFER_BIT)
-    this.object.draw({ bind: true, ...options })
+    this.#gl.clear(this.#gl.COLOR_BUFFER_BIT);
+    this.object.draw({ bind: true, ...options });
   }
 }
 
-customElements.define('damdom-glslcanvas', DamdomGLSLCanvasElement)
+customElements.define('damdom-glslcanvas', DamdomGLSLCanvasElement);
