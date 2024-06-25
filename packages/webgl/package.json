@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/webgl",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "WebGL Helpers",
   "keywords": [
     "webgl"
@@ -20,7 +20,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
-    "@damienmortini/math": "^0.0.21"
+    "@damienmortini/math": "^0.0.22"
   },
   "publishConfig": {
     "access": "public"
