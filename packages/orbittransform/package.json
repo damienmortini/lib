@@ -11,14 +11,17 @@
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+    "build": "tsc"
   },
   "dependencies": {
     "@damienmortini/gestureobserver": "^0.0.7",
     "@damienmortini/math": "^0.0.22"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.2"
   },
   "publishConfig": {
     "access": "public"
