@@ -4,4 +4,4 @@ import { spawn } from 'child_process';
 
 const serverBinPath = process.argv[1].replace('index.js', 'server-bin.js');
 
-spawn('node', ['--preserve-symlinks', '--preserve-symlinks-main', serverBinPath, ...process.argv.slice(2)], { stdio: 'inherit' });
+spawn('node', ['--preserve-symlinks', '--preserve-symlinks-main', '--experimental-import-meta-resolve', serverBinPath, ...process.argv.slice(2)], { stdio: 'inherit' });
