@@ -20,7 +20,7 @@ const resolveImports = (string: string, removeCSSImportAttribute = false) => {
     (match, p1, importPath, p3, p4, importAttribute) => {
       if (!/^[./]/.test(importPath)) {
         try {
-          importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['import']), true).href.replace(
+          importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['module']), true).href.replace(
             importMetaResolveParent.href,
             '/',
           );

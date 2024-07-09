@@ -19,7 +19,7 @@
   "author": "Damien Mortini",
   "type": "module",
   "main": "dist/index.js",
-  "bin": "dist/bin/server-bin.js",
+  "bin": "dist/bin/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
