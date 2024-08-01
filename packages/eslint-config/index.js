@@ -33,7 +33,7 @@ export default [
     },
     rules: {
       'n/no-callback-literal': 'off',
-      'no-empty': 'warn',
+      'no-empty': ['error', { allowEmptyCatch: true }],
       'prefer-const': ['error', { destructuring: 'all' }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'simple-import-sort/imports': 'error',
