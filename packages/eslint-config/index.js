@@ -1,10 +1,17 @@
+import { includeIgnoreFile } from '@eslint/compat';
 import pluginJs from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
+import { join } from 'path';
 import tseslint from 'typescript-eslint';
 
+const gitignorePath = join(process.cwd(), '.gitignore');
+
 export default [
+  {
+    ignores: includeIgnoreFile(gitignorePath).ignores, // Has to be done like this while https://github.com/eslint/eslint/issues/18723 is fixed.
+  },
   stylistic.configs.customize({
     semi: true,
   }),

@@ -1,5 +1,5 @@
-import { fileURLToPath } from 'url'
-import { esbuildPlugin } from '@web/dev-server-esbuild'
+import { esbuildPlugin } from '@web/dev-server-esbuild';
+import { fileURLToPath } from 'url';
 
 export default {
   watch: true,
@@ -15,4 +15,4 @@ export default {
       tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url)),
     }),
   ],
-}
+};
