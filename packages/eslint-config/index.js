@@ -5,8 +5,6 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default [
-  { files: ['**/*.{js,mjs,cjs,ts}'] },
-  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   stylistic.configs.customize({
     semi: true,
   }),
@@ -14,6 +12,7 @@ export default [
   ...tseslint.configs.recommended,
   {
     languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
       ecmaVersion: 'latest',
       sourceType: 'module',
       // globals: {
