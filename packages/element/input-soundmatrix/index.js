@@ -1,9 +1,10 @@
-import AnimationTickerElement from '../element-animation-ticker/index.js'
-import SoundMatrix from '@damienmortini/core/audio/SoundMatrix.js'
+import SoundMatrix from '@damienmortini/core/audio/SoundMatrix.js';
+
+import AnimationTickerElement from '../element-animation-ticker/index.js';
 
 export default class SoundMatrixElement extends AnimationTickerElement {
   constructor({ soundMatrix = new SoundMatrix() } = {}) {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -11,80 +12,81 @@ export default class SoundMatrixElement extends AnimationTickerElement {
           display: inline-block;
         }
       </style>
-    `
+    `;
 
-    this.soundMatrix = soundMatrix
+    this.soundMatrix = soundMatrix;
 
-    this._padsMatrix = new Map()
+    this._padsMatrix = new Map();
   }
 
   set soundMatrix(value) {
     if (this._soundMatrix) {
-      this._soundMatrix.onBeat.delete(this._onBeatBound)
+      this._soundMatrix.onBeat.delete(this._onBeatBound);
     }
-    this._soundMatrix = value
-    this._soundMatrix.onBeat.add(this._onBeatBound = this._onBeat.bind(this))
+    this._soundMatrix = value;
+    this._soundMatrix.onBeat.add(this._onBeatBound = this._onBeat.bind(this));
   }
 
   get soundMatrix() {
-    return this._soundMatrix
+    return this._soundMatrix;
   }
 
   _onBeat(beat) {
     for (const pads of this._padsMatrix.values()) {
       for (const [i, pad] of pads.entries()) {
         if (i !== beat && pad.classList.contains('highlight')) {
-          pad.classList.remove('highlight')
-        } else if (i === beat && !pad.classList.contains('highlight')) {
-          pad.classList.add('highlight')
+          pad.classList.remove('highlight');
+        }
+        else if (i === beat && !pad.classList.contains('highlight')) {
+          pad.classList.add('highlight');
         }
       }
     }
   }
 
   update() {
-    super.update()
+    super.update();
 
     for (const [sound, array] of this.soundMatrix) {
-      let pads = this._padsMatrix.get(sound)
+      let pads = this._padsMatrix.get(sound);
 
       if (!pads) {
-        const row = document.createElement('div')
-        row.classList.add('row')
+        const row = document.createElement('div');
+        row.classList.add('row');
 
-        const empty = document.createElement('input')
-        empty.type = 'button'
-        empty.value = '✖'
+        const empty = document.createElement('input');
+        empty.type = 'button';
+        empty.value = '✖';
         empty.onclick = () => {
           for (let i = 0; i < array.length; i++) {
-            array[i] = 0
+            array[i] = 0;
           }
-        }
-        row.appendChild(empty)
+        };
+        row.appendChild(empty);
 
-        pads = []
+        pads = [];
         for (let i = 0; i < this.soundMatrix.beats; i++) {
-          const pad = document.createElement('input')
+          const pad = document.createElement('input');
           pad.onkeyup = (e) => {
             if (e.keyCode === 32) {
-              e.preventDefault()
+              e.preventDefault();
             }
-          }
-          pad.type = 'checkbox'
-          pad.classList.add('pad')
+          };
+          pad.type = 'checkbox';
+          pad.classList.add('pad');
           pad.onchange = () => {
-            array[i] = pad.checked ? 1 : 0
-          }
-          row.appendChild(pad)
-          pads.push(pad)
+            array[i] = pad.checked ? 1 : 0;
+          };
+          row.appendChild(pad);
+          pads.push(pad);
         }
-        this._padsMatrix.set(sound, pads)
+        this._padsMatrix.set(sound, pads);
 
-        this.appendChild(row)
+        this.appendChild(row);
       }
 
       for (const [i, pad] of pads.entries()) {
-        pad.checked = !!array[i]
+        pad.checked = !!array[i];
       }
     }
   }

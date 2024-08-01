@@ -3,23 +3,23 @@
  * @hideconstructor
  */
 export class DamdomTickerElement extends HTMLElement {
-  static get deltaTime(): number
-  connectedCallback(): void
-  disconnectedCallback(): void
+  static get deltaTime(): number;
+  connectedCallback(): void;
+  disconnectedCallback(): void;
   /**
    * Play element.
    */
-  play(): void
+  play(): void;
   /**
    * Pause element.
    */
-  pause(): void
+  pause(): void;
   /**
    * Tells whether the element is paused.
    * @type {Boolean}
    * @readonly
    */
-  get paused(): boolean
-  set callback(arg: any)
-  #private
+  get paused(): boolean;
+  set callback(arg: any);
+  #private;
 }

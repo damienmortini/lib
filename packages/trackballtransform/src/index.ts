@@ -115,7 +115,8 @@ export class TrackballTransform {
     if (this.inverted) {
       this.#cachedMatrix.invert();
       this.matrix.multiply(this.#cachedMatrix, this.matrix);
-    } else {
+    }
+    else {
       this.matrix.multiply(this.#cachedMatrix);
     }
 

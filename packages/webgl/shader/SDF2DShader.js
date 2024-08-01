@@ -1,4 +1,3 @@
-
 // From Inigo Quilez
 // https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 // Parsing code ;) - [...document.querySelectorAll('.code')].map((v) => v.textContent).join('#end\n\n#start')
@@ -9,8 +8,8 @@ float sdCircle( vec2 p, float r )
 {
   return length(p) - r;
 }
-`
-}
+`;
+};
 
 export const sdRoundedBox = () => {
   return `
@@ -21,8 +20,8 @@ float sdRoundedBox( in vec2 p, in vec2 b, in vec4 r )
   vec2 q = abs(p)-b+r.x;
   return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
-`
-}
+`;
+};
 
 export const sdBox = () => {
   return `
@@ -31,8 +30,8 @@ float sdBox( in vec2 p, in vec2 b )
   vec2 d = abs(p)-b;
   return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
-`
-}
+`;
+};
 
 export const sdOrientedBox = () => {
   return `
@@ -45,8 +44,8 @@ float sdOrientedBox( in vec2 p, in vec2 a, in vec2 b, float th )
       q = abs(q)-vec2(l,th)*0.5;
   return length(max(q,0.0)) + min(max(q.x,q.y),0.0);  
 }
-`
-}
+`;
+};
 
 export const sdSegment = () => {
   return `
@@ -56,8 +55,8 @@ float sdSegment( in vec2 p, in vec2 a, in vec2 b )
   float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
   return length( pa - ba*h );
 }
-`
-}
+`;
+};
 
 export const sdRhombus = () => {
   return `
@@ -68,8 +67,8 @@ float sdRhombus( in vec2 p, in vec2 b )
   float d = length( p-0.5*b*vec2(1.0-h,1.0+h) );
   return d * sign( p.x*b.y + p.y*b.x - b.x*b.y );
 }
-`
-}
+`;
+};
 
 export const sdEquilateralTriangle = () => {
   return `
@@ -82,8 +81,8 @@ float sdEquilateralTriangle( in vec2 p )
   p.x -= clamp( p.x, -2.0, 0.0 );
   return -length(p)*sign(p.y);
 }
-`
-}
+`;
+};
 
 export const sdTriangleIsosceles = () => {
   return `
@@ -97,8 +96,8 @@ float sdTriangleIsosceles( in vec2 p, in vec2 q )
           vec2( dot(b,b), s*(p.y-q.y)  ));
   return -sqrt(d.x)*sign(d.y);
 }
-`
-}
+`;
+};
 
 export const sdUnevenCapsule = () => {
   return `
@@ -112,8 +111,8 @@ float sdUnevenCapsule( vec2 p, float r1, float r2, float h )
   if( k > a*h ) return length(p-vec2(0.0,h)) - r2;
   return dot(p, vec2(a,b) ) - r1;
 }
-`
-}
+`;
+};
 
 export const sdTriangle = () => {
   return `
@@ -130,8 +129,8 @@ float sdTriangle( in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2 )
            vec2(dot(pq2,pq2), s*(v2.x*e2.y-v2.y*e2.x)));
   return -sqrt(d.x)*sign(d.y);
 }
-`
-}
+`;
+};
 
 export const sdPentagon = () => {
   return `
@@ -144,8 +143,8 @@ float sdPentagon( in vec2 p, in float r )
   p -= vec2(clamp(p.x,-r*k.z,r*k.z),r);  
   return length(p)*sign(p.y);
 }
-`
-}
+`;
+};
 
 export const sdHexagon = () => {
   return `
@@ -157,8 +156,8 @@ float sdHexagon( in vec2 p, in float r )
   p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
   return length(p)*sign(p.y);
 }
-`
-}
+`;
+};
 
 export const sdOctogon = () => {
   return `
@@ -171,8 +170,8 @@ float sdOctogon( in vec2 p, in float r )
   p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
   return length(p)*sign(p.y);
 }
-`
-}
+`;
+};
 
 export const sdHexagram = () => {
   return `
@@ -185,8 +184,8 @@ float sdHexagram( in vec2 p, in float r )
   p -= vec2(clamp(p.x,r*k.z,r*k.w),r);
   return length(p)*sign(p.y);
 }
-`
-}
+`;
+};
 
 export const sdStar5 = () => {
   return `
@@ -203,8 +202,8 @@ float sdStar5(in vec2 p, in float r, in float rf)
   float h = clamp( dot(p,ba)/dot(ba,ba), 0.0, r );
   return length(p-ba*h) * sign(p.y*ba.x-p.x*ba.y);
 }
-`
-}
+`;
+};
 
 export const sdStar = () => {
   return `
@@ -222,8 +221,8 @@ float sdStar(in vec2 p, in float r, in int n, in float m)
   p += ecs*clamp( -dot(p,ecs), 0.0, r*acs.y/ecs.y);
   return length(p)*sign(p.x);
 }
-`
-}
+`;
+};
 
 export const sdTrapezoid = () => {
   return `
@@ -237,8 +236,8 @@ float sdTrapezoid( in vec2 p, in float r1, float r2, float he )
   float s = (cb.x<0.0 && ca.y<0.0) ? -1.0 : 1.0;
   return s*sqrt( min(dot2(ca),dot2(cb)) );
 }
-`
-}
+`;
+};
 
 export const sdPie = () => {
   return `
@@ -249,8 +248,8 @@ float sdPie( in vec2 p, in vec2 c, in float r )
   float m = length(p-c*clamp(dot(p,c),0.0,r)); // c = sin/cos of the aperture
   return max(l,m*sign(c.y*p.x-c.x*p.y));
 }
-`
-}
+`;
+};
 
 export const sdArc = () => {
   return `
@@ -260,8 +259,8 @@ export const sdArc = () => {
       return ((sc.y*p.x>sc.x*p.y) ? length(p-sc*ra) : 
                                     abs(length(p)-ra)) - rb;
   }
-`
-}
+`;
+};
 
 export const sdHorseshoe = () => {
   return `
@@ -276,8 +275,8 @@ float sdHorseshoe( in vec2 p, in vec2 c, in float r, in vec2 w )
   p = vec2(p.x,abs(p.y-r))-w;
   return length(max(p,0.0)) + min(0.0,max(p.x,p.y));
 }
-`
-}
+`;
+};
 
 export const sdVesica = () => {
   return `
@@ -288,8 +287,8 @@ float sdVesica(vec2 p, float r, float d)
   return ((p.y-b)*d>p.x*b) ? length(p-vec2(0.0,b))
                : length(p-vec2(-d,0.0))-r;
 }
-`
-}
+`;
+};
 
 export const sdEgg = () => {
   return `
@@ -302,8 +301,8 @@ float sdEgg( in vec2 p, in float ra, in float rb )
       (k*(p.x+r)<p.y) ? length(vec2(p.x,  p.y-k*r)) :
                 length(vec2(p.x+r,p.y  )) - 2.0*r) - rb;
 }
-`
-}
+`;
+};
 
 export const sdCross = () => {
   return `
@@ -315,8 +314,8 @@ float sdCross( in vec2 p, in vec2 b, float r )
   vec2  w = (k>0.0) ? q : vec2(b.y-p.x,-k);
   return sign(k)*length(max(w,0.0)) + r;
 }
-`
-}
+`;
+};
 
 export const sdRoundedX = () => {
   return `
@@ -325,8 +324,8 @@ float sdRoundedX( in vec2 p, in float w, in float r )
   p = abs(p);
   return length(p-min(p.x+p.y,w)*0.5) - r;
 }
-`
-}
+`;
+};
 
 export const sdPolygon = () => {
   return `
@@ -345,8 +344,8 @@ float sdPolygon( in vec2[N] v, in vec2 p )
   }
   return s*sqrt(d);
 }
-`
-}
+`;
+};
 
 export const sdEllipse = () => {
   return `
@@ -383,8 +382,8 @@ float sdEllipse( in vec2 p, in vec2 ab )
   vec2 r = ab * vec2(co, sqrt(1.0-co*co));
   return length(r-p) * sign(p.y-r.y);
 }
-`
-}
+`;
+};
 
 export const sdParabola = () => {
   return `
@@ -417,8 +416,8 @@ float sdParabola( in vec2 pos, in float wi, in float he )
   return length(pos-vec2(x,he-x*x/ik)) * 
        sign(ik*(pos.y-he)+pos.x*pos.x);
 }
-`
-}
+`;
+};
 
 export const sdBezier = () => {
   return `
@@ -459,8 +458,8 @@ float sdBezier( in vec2 pos, in vec2 A, in vec2 B, in vec2 C )
   }
   return sqrt( res );
 }
-`
-}
+`;
+};
 
 export const opRound = () => {
   return `
@@ -468,8 +467,8 @@ float opRound( in vec2 p, in float r )
 {
   return sdShape(p) - r;
 }
-`
-}
+`;
+};
 
 export const opOnion = () => {
   return `
@@ -477,5 +476,5 @@ float opOnion( in vec2 p, in float r )
 {
   return abs(sdShape(p)) - r;
 }
-`
-}
+`;
+};

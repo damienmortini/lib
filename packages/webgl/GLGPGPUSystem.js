@@ -1,26 +1,27 @@
-import { GLFrameBuffer } from './GLFrameBuffer.js'
-import { GLTexture } from './GLTexture.js'
-import { GLPlaneObject } from './object/GLPlaneObject.js'
-import { GLProgram } from './GLProgram.js'
+import { GLFrameBuffer } from './GLFrameBuffer.js';
+import { GLProgram } from './GLProgram.js';
+import { GLTexture } from './GLTexture.js';
+import { GLPlaneObject } from './object/GLPlaneObject.js';
 
 export class GLGPGPUSystem {
   constructor({ gl, data, maxWidth = 1024, fragmentChunks = [] }) {
-    this.gl = gl
+    this.gl = gl;
 
     if (this.gl instanceof WebGLRenderingContext) {
-      this.gl.getExtension('OES_texture_float')
-    } else {
-      this.gl.getExtension('EXT_color_buffer_float')
+      this.gl.getExtension('OES_texture_float');
+    }
+    else {
+      this.gl.getExtension('EXT_color_buffer_float');
     }
 
-    const channels = 4
+    const channels = 4;
 
-    const length = data.length / channels
-    this._width = Math.min(length, maxWidth)
-    this._height = Math.ceil(length / maxWidth)
+    const length = data.length / channels;
+    this._width = Math.min(length, maxWidth);
+    this._height = Math.ceil(length / maxWidth);
 
-    const textureData = new Float32Array(this._width * this._height * channels)
-    textureData.set(data)
+    const textureData = new Float32Array(this._width * this._height * channels);
+    textureData.set(data);
 
     this._frameBufferIn = new GLFrameBuffer({
       gl: this.gl,
@@ -37,10 +38,10 @@ export class GLGPGPUSystem {
           type: this.gl.FLOAT,
         }),
       ],
-    })
+    });
 
-    this._frameBufferOut = this._frameBufferIn.clone()
-    this._frameBufferOut.colorTextures[0].data = new Float32Array(this._width * this._height * channels)
+    this._frameBufferOut = this._frameBufferIn.clone();
+    this._frameBufferOut.colorTextures[0].data = new Float32Array(this._width * this._height * channels);
 
     this._quad = new GLPlaneObject({
       gl: this.gl,
@@ -96,28 +97,28 @@ export class GLGPGPUSystem {
           ],
         },
       }),
-    })
+    });
   }
 
   get dataTexture() {
-    return this._frameBufferIn.colorTextures[0]
+    return this._frameBufferIn.colorTextures[0];
   }
 
   get dataTextureWidth() {
-    return this._width
+    return this._width;
   }
 
   get dataTextureHeight() {
-    return this._height
+    return this._height;
   }
 
   update() {
-    this.gl.viewport(0, 0, this._width, this._height)
-    this._frameBufferOut.bind()
-    this._quad.draw()
-    this._frameBufferOut.unbind()
+    this.gl.viewport(0, 0, this._width, this._height);
+    this._frameBufferOut.bind();
+    this._quad.draw();
+    this._frameBufferOut.unbind();
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight)
-    ;[this._frameBufferIn, this._frameBufferOut] = [this._frameBufferOut, this._frameBufferIn]
-    this._quad.program.uniforms.set('dataTexture', this.dataTexture)
+    ;[this._frameBufferIn, this._frameBufferOut] = [this._frameBufferOut, this._frameBufferIn];
+    this._quad.program.uniforms.set('dataTexture', this.dataTexture);
   }
 }

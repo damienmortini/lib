@@ -9,7 +9,7 @@ export class GerstnerWaveShader {
         float steepness;
         float speed;
       };
-    `
+    `;
   }
 
   static gerstnerWave() {
@@ -50,6 +50,6 @@ export class GerstnerWaveShader {
           amplitude * direction.y * cosf
         );
       }
-    `
+    `;
   }
 }

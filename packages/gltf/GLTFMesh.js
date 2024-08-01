@@ -1,18 +1,18 @@
-import GLTFPrimitive from './GLTFPrimitive.js'
+import GLTFPrimitive from './GLTFPrimitive.js';
 
 export default class GLTFMesh {
   constructor({
     data,
   }) {
-    this.name = data.name
-    this.weights = data.weights
+    this.name = data.name;
+    this.weights = data.weights;
 
-    this.primitives = []
+    this.primitives = [];
     for (const primitiveData of data.primitives) {
       const primitive = new GLTFPrimitive({
         data: primitiveData,
-      })
-      this.primitives.push(primitive)
+      });
+      this.primitives.push(primitive);
     }
   }
 }

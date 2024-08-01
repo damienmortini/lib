@@ -1,9 +1,9 @@
-import { Scene, Mesh, PlaneGeometry, WebGLRenderTarget, OrthographicCamera } from 'three'
+import { Mesh, OrthographicCamera, PlaneGeometry, Scene, WebGLRenderTarget } from 'three';
 
 export class WebGLRenderTarget2D extends WebGLRenderTarget {
-  #scene
-  #camera
-  #quad
+  #scene;
+  #camera;
+  #quad;
 
   constructor({
     renderer,
@@ -36,28 +36,28 @@ export class WebGLRenderTarget2D extends WebGLRenderTarget {
       depthBuffer,
       stencilBuffer,
       depthTexture,
-    })
+    });
 
-    this.renderer = renderer
+    this.renderer = renderer;
 
-    this.#scene = new Scene()
-    this.#camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
+    this.#scene = new Scene();
+    this.#camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    this.#quad = new Mesh(new PlaneGeometry(2, 2), material)
-    this.#scene.add(this.#quad)
+    this.#quad = new Mesh(new PlaneGeometry(2, 2), material);
+    this.#scene.add(this.#quad);
   }
 
   get material() {
-    return this.#quad.material
+    return this.#quad.material;
   }
 
   set material(value) {
-    this.#quad.material = value
+    this.#quad.material = value;
   }
 
   render({ debug = false } = {}) {
-    if (!debug) this.renderer.setRenderTarget(this)
-    this.renderer.render(this.#scene, this.#camera)
-    this.renderer.setRenderTarget(null)
+    if (!debug) this.renderer.setRenderTarget(this);
+    this.renderer.render(this.#scene, this.#camera);
+    this.renderer.setRenderTarget(null);
   }
 }

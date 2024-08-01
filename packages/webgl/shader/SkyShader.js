@@ -14,13 +14,13 @@
 
 export class SkyShader {
   static get SUN_ANGULAR_DIAMETER() {
-    const sunArcMin = 32
-    return (sunArcMin / 60 / 180) * Math.PI
+    const sunArcMin = 32;
+    return (sunArcMin / 60 / 180) * Math.PI;
   }
 
   static get MOON_ANGULAR_DIAMETER() {
-    const moonArcMin = 31
-    return (moonArcMin / 60 / 180) * Math.PI
+    const moonArcMin = 31;
+    return (moonArcMin / 60 / 180) * Math.PI;
   }
 
   static computeSkyColor() {
@@ -147,6 +147,6 @@ export class SkyShader {
         // return vec4(hdrIntensity);
         return vec4(color, hdrIntensity);
       }
-    `
+    `;
   }
 }

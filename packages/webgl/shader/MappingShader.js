@@ -4,5 +4,5 @@ export const directionToEquirectangularUV = () => {
   float v = asin(clamp(direction.y, -1., 1.)) * 0.3183098861837907 + .5;
   return vec2(u, v);
 }
-`
-}
+`;
+};

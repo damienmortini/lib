@@ -7,8 +7,8 @@ export const pack = () => {
         comp -= comp.xxyz * bitMsk;
         return comp;
       }
-    `
-}
+    `;
+};
 
 export const unpack = () => {
   return `
@@ -16,8 +16,8 @@ export const unpack = () => {
         const vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1);
         return dot(packedDepth, bitShifts);
       }
-    `
-}
+    `;
+};
 
 export const bumpFromDepthTexture = () => {
   return `
@@ -33,8 +33,8 @@ export const bumpFromDepthTexture = () => {
         
         return vec4(depth, normalize(vec3(dxy * scale / step, 1.)));
       }
-    `
-}
+    `;
+};
 
 export const bumpFromDepthFunction = ({
   getDepthFunctionName = 'getDepth',
@@ -52,5 +52,5 @@ export const bumpFromDepthFunction = ({
           
         return vec4(depth * scale, normalize(vec3(dxy * scale / step, 1.)));
       }
-    `
-}
+    `;
+};

@@ -27,57 +27,57 @@ export class GestureObserver {
       /**
        * - The target DOM Element
        */
-      target: HTMLElement
+      target: HTMLElement;
       /**
        * - Map of active pointers
        */
-      pointers: Map<number, PointerEvent>
+      pointers: Map<number, PointerEvent>;
       /**
        * - Event that triggered the gesture
        */
-      event: Event
+      event: Event;
       /**
        * - Gesture position on the X axis
        */
-      x: number
+      x: number;
       /**
        * - Gesture position on the Y axis
        */
-      y: number
+      y: number;
       /**
        * - Movement on the X axis
        */
-      movementX: number
+      movementX: number;
       /**
        * - Movement on the Y axis
        */
-      movementY: number
+      movementY: number;
       /**
        * - Offset between gesture start and gesture end on the X axis
        */
-      offsetX: number
+      offsetX: number;
       /**
        * - Offset between gesture start and gesture end on the Y axis
        */
-      offsetY: number
+      offsetY: number;
       /**
        * - Pinch-zoom movement
        */
-      movementScale: number
+      movementScale: number;
       /**
        * - Angular movement in radians
        */
-      movementRotation: number
+      movementRotation: number;
       /**
        * - Duration of the gesture
        */
-      duration: number
+      duration: number;
       /**
        * - State of the gesture
        */
-      state: 'starting' | 'moving' | 'finishing'
+      state: 'starting' | 'moving' | 'finishing';
     }) => any,
-  )
+  );
   /**
    * Observe gesture changes on the specified target element.
    * @param {HTMLElement|Window} element Element to observe
@@ -88,18 +88,18 @@ export class GestureObserver {
       pointerLock,
       pointerCapture,
     }?: {
-      pointerLock?: boolean
-      pointerCapture?: boolean
+      pointerLock?: boolean;
+      pointerCapture?: boolean;
     },
-  ): void
+  ): void;
   /**
    * Stop observing gesture changes on the specified target element.
    * @param {HTMLElement|Window} element Element to unobserve
    */
-  unobserve(element: HTMLElement | Window): void
+  unobserve(element: HTMLElement | Window): void;
   /**
    * Stops watching all of its target elements for gesture changes.
    */
-  disconnect(): void
-  #private
+  disconnect(): void;
+  #private;
 }

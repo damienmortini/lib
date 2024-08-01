@@ -1,12 +1,13 @@
+import { RoundedBoxGeometry } from '@damienmortini/math';
+import { Vector2, Vector4 } from '@damienmortini/math';
+
 import { GLGeometry } from '../GLGeometry.js';
 import { GLObject } from '../GLObject.js';
 import { GLProgram } from '../GLProgram.js';
-import { FRAGMENT, VERTEX, addChunks } from '../GLSLShader.js';
+import { addChunks, FRAGMENT, VERTEX } from '../GLSLShader.js';
 import { Camera } from '../shader/CameraShader.js';
 import { Ray, rayFromCamera } from '../shader/RayShader.js';
-import { Voxel, sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere } from '../shader/SDFShader.js';
-import { RoundedBoxGeometry } from '@damienmortini/math';
-import { Vector2, Vector4 } from '@damienmortini/math';
+import { sdfBox, sdfMin, sdfNormalFromPosition, sdfRayMarch, sdfSmoothMin, sdfSphere, Voxel } from '../shader/SDFShader.js';
 
 export class GLRayMarchingObject extends GLObject {
   constructor({ gl, sdfObjects = [], vertexChunks = [], fragmentChunks = [], sdfRayMarchSteps = 100, sdfRayMarchPrecision = 0.01 }) {

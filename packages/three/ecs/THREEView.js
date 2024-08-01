@@ -1,4 +1,4 @@
-import View from '../ecs/components/View.js'
+import View from '../ecs/components/View.js';
 
 export default class THREEView extends View {
   constructor(entity, {
@@ -6,26 +6,26 @@ export default class THREEView extends View {
     visible,
     visibilityExecutor,
   } = {}) {
-    super(entity, view, { visible, visibilityExecutor })
+    super(entity, view, { visible, visibilityExecutor });
   }
 
   get position() {
-    return this._view.position
+    return this._view.position;
   }
 
   get rotation() {
-    return this._view.rotation
+    return this._view.rotation;
   }
 
   get quaternion() {
-    return this._view.quaternion
+    return this._view.quaternion;
   }
 
   get scale() {
-    return this._view.scale
+    return this._view.scale;
   }
 
   get object3D() {
-    return this._view
+    return this._view;
   }
 }

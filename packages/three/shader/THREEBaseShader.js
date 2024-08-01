@@ -30,4 +30,4 @@ export default {
       in float vFresnel;
     `],
   ],
-}
+};

@@ -9,8 +9,8 @@ export const blendNormals = () => {
         vec3(n2.x, n2.y,  n2.z));
       return normalize(n1.x*nBasis[0] + n1.y*nBasis[1] + n1.z*nBasis[2]);
   }
-`
-}
+`;
+};
 
 // From Three.js
 export const perturbNormal = () => {
@@ -36,5 +36,5 @@ export const perturbNormal = () => {
 
       return normalize(TBN * normal);
     }
-  `
-}
+  `;
+};

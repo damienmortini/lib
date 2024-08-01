@@ -1,6 +1,6 @@
 export class GestureObserver {
-  #elementsData = new Map()
-  #callback
+  #elementsData = new Map();
+  #callback;
 
   /**
    * @typedef Gesture
@@ -26,7 +26,7 @@ export class GestureObserver {
    * @param {GestureObserverCallback} callback
    */
   constructor(callback) {
-    this.#callback = callback
+    this.#callback = callback;
   }
 
   /**
@@ -34,7 +34,7 @@ export class GestureObserver {
    * @param {HTMLElement|Window} element Element to observe
    */
   observe(element, { pointerLock = false, pointerCapture = false } = {}) {
-    let elementData = this.#elementsData.get(element)
+    let elementData = this.#elementsData.get(element);
     if (!elementData) {
       elementData = {
         pointers: new Map(),
@@ -51,12 +51,12 @@ export class GestureObserver {
         startTimeStamp: 0,
         pointerLock: false,
         pointerCapture: false,
-      }
-      this.#elementsData.set(element, elementData)
+      };
+      this.#elementsData.set(element, elementData);
     }
-    elementData.pointerLock = pointerLock
-    elementData.pointerCapture = pointerCapture
-    element.addEventListener('pointerdown', this.#onPointerDown)
+    elementData.pointerLock = pointerLock;
+    elementData.pointerCapture = pointerCapture;
+    element.addEventListener('pointerdown', this.#onPointerDown);
   }
 
   /**
@@ -64,45 +64,45 @@ export class GestureObserver {
    * @param {HTMLElement|Window} element Element to unobserve
    */
   unobserve(element) {
-    if (!this.#elementsData.has(element)) return
-    element.removeEventListener('pointerdown', this.#onPointerDown)
-    element.removeEventListener('pointermove', this.#onPointerMove)
-    this.#elementsData.delete(element)
+    if (!this.#elementsData.has(element)) return;
+    element.removeEventListener('pointerdown', this.#onPointerDown);
+    element.removeEventListener('pointermove', this.#onPointerMove);
+    this.#elementsData.delete(element);
   }
 
   /**
    * Stops watching all of its target elements for gesture changes.
    */
   disconnect() {
-    for (const element of this.#elementsData.keys()) this.unobserve(element)
+    for (const element of this.#elementsData.keys()) this.unobserve(element);
   }
 
   #resetElementPreviousData(element) {
-    const data = this.#elementsData.get(element)
-    data.gestureVectorX = 0
-    data.gestureVectorY = 0
-    data.previousSize = 0
-    data.previousX = 0
-    data.previousY = 0
-    data.previousRotation = 0
+    const data = this.#elementsData.get(element);
+    data.gestureVectorX = 0;
+    data.gestureVectorY = 0;
+    data.previousSize = 0;
+    data.previousX = 0;
+    data.previousY = 0;
+    data.previousRotation = 0;
   }
 
   #onPointerDown = (event) => {
-    const element = event.currentTarget
-    const data = this.#elementsData.get(element)
+    const element = event.currentTarget;
+    const data = this.#elementsData.get(element);
 
-    if (data.pointerLock) element.requestPointerLock()
-    else if (data.pointerCapture) element.setPointerCapture(event.pointerId)
+    if (data.pointerLock) element.requestPointerLock();
+    else if (data.pointerCapture) element.setPointerCapture(event.pointerId);
 
-    this.#resetElementPreviousData(element)
-    data.pointers.set(event.pointerId, event)
+    this.#resetElementPreviousData(element);
+    data.pointers.set(event.pointerId, event);
     if (data.pointers.size === 1) {
-      element.addEventListener('pointermove', this.#onPointerMove)
-      element.addEventListener('pointerup', this.#onPointerUp)
-      element.addEventListener('pointerleave', this.#onPointerUp)
-      data.startTimeStamp = Date.now()
-      data.offsetX = 0
-      data.offsetY = 0
+      element.addEventListener('pointermove', this.#onPointerMove);
+      element.addEventListener('pointerup', this.#onPointerUp);
+      element.addEventListener('pointerleave', this.#onPointerUp);
+      data.startTimeStamp = Date.now();
+      data.offsetX = 0;
+      data.offsetY = 0;
       this.#callback({
         event,
         pointers: data.pointers,
@@ -117,56 +117,57 @@ export class GestureObserver {
         movementRotation: 0,
         duration: 0,
         state: 'starting',
-      })
+      });
     }
-  }
+  };
 
   #onPointerMove = (event) => {
-    const data = this.#elementsData.get(event.currentTarget)
-    data.pointers.set(event.pointerId, event)
-    let x = 0
-    let y = 0
-    let index = 0
+    const data = this.#elementsData.get(event.currentTarget);
+    data.pointers.set(event.pointerId, event);
+    let x = 0;
+    let y = 0;
+    let index = 0;
     for (const pointer of data.pointers.values()) {
       if (index === 1) {
-        data.gestureVectorX = x - pointer.clientX
-        data.gestureVectorY = y - pointer.clientY
+        data.gestureVectorX = x - pointer.clientX;
+        data.gestureVectorY = y - pointer.clientY;
       }
-      x += pointer.clientX
-      y += pointer.clientY
-      index++
+      x += pointer.clientX;
+      y += pointer.clientY;
+      index++;
     }
-    x /= data.pointers.size
-    y /= data.pointers.size
+    x /= data.pointers.size;
+    y /= data.pointers.size;
 
     if (!data.previousX && !data.previousY) {
-      data.previousX = x
-      data.previousY = y
-      return
+      data.previousX = x;
+      data.previousY = y;
+      return;
     }
 
-    const movementX = x - data.previousX
-    const movementY = y - data.previousY
-    data.previousX = x
-    data.previousY = y
-    data.previousMovementX = movementX
-    data.previousMovementY = movementY
+    const movementX = x - data.previousX;
+    const movementY = y - data.previousY;
+    data.previousX = x;
+    data.previousY = y;
+    data.previousMovementX = movementX;
+    data.previousMovementY = movementY;
 
-    const size = Math.hypot(data.gestureVectorX, data.gestureVectorY)
-    const movementScale = data.previousSize ? size / data.previousSize : 1
-    data.previousSize = size
+    const size = Math.hypot(data.gestureVectorX, data.gestureVectorY);
+    const movementScale = data.previousSize ? size / data.previousSize : 1;
+    data.previousSize = size;
 
-    const rotation = Math.atan2(data.gestureVectorY, data.gestureVectorX)
-    let movementRotation = data.previousRotation ? rotation - data.previousRotation : 0
+    const rotation = Math.atan2(data.gestureVectorY, data.gestureVectorX);
+    let movementRotation = data.previousRotation ? rotation - data.previousRotation : 0;
     if (movementRotation > Math.PI) {
-      movementRotation -= Math.PI * 2
-    } else if (movementRotation < -Math.PI) {
-      movementRotation += Math.PI * 2
+      movementRotation -= Math.PI * 2;
     }
-    data.previousRotation = rotation
+    else if (movementRotation < -Math.PI) {
+      movementRotation += Math.PI * 2;
+    }
+    data.previousRotation = rotation;
 
-    data.offsetX += movementX
-    data.offsetY += movementY
+    data.offsetX += movementX;
+    data.offsetY += movementY;
 
     this.#callback({
       event,
@@ -182,16 +183,16 @@ export class GestureObserver {
       movementRotation,
       duration: Date.now() - data.startTimeStamp,
       state: 'moving',
-    })
-  }
+    });
+  };
 
   #onPointerUp = (event) => {
-    const element = event.currentTarget
-    const data = this.#elementsData.get(element)
-    data?.pointers.delete(event.pointerId)
-    element.releasePointerCapture(event.pointerId)
+    const element = event.currentTarget;
+    const data = this.#elementsData.get(element);
+    data?.pointers.delete(event.pointerId);
+    element.releasePointerCapture(event.pointerId);
     if (document.exitPointerLock) {
-      document.exitPointerLock()
+      document.exitPointerLock();
     }
     if (!data || !data.pointers.size) {
       this.#callback({
@@ -208,11 +209,11 @@ export class GestureObserver {
         offsetY: data.offsetY,
         duration: Date.now() - data.startTimeStamp,
         state: 'finishing',
-      })
-      element.removeEventListener('pointermove', this.#onPointerMove)
-      element.removeEventListener('pointerup', this.#onPointerUp)
-      element.removeEventListener('pointerleave', this.#onPointerUp)
+      });
+      element.removeEventListener('pointermove', this.#onPointerMove);
+      element.removeEventListener('pointerup', this.#onPointerUp);
+      element.removeEventListener('pointerleave', this.#onPointerUp);
     }
-    this.#resetElementPreviousData(element)
-  }
+    this.#resetElementPreviousData(element);
+  };
 }

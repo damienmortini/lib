@@ -1,15 +1,15 @@
-import { DamdomTickerElement } from '@damienmortini/damdom-ticker/index.js'
+import { DamdomTickerElement } from '@damienmortini/damdom-ticker/index.js';
 
-import View from './View.js'
+import View from './View.js';
 
 class DemoWebGLElement extends DamdomTickerElement {
-  #canvas
-  #view
+  #canvas;
+  #view;
 
   constructor() {
-    super()
+    super();
 
-    this.callback = this.#update
+    this.callback = this.#update;
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -30,27 +30,27 @@ class DemoWebGLElement extends DamdomTickerElement {
         }
       </style>
       <canvas></canvas>
-    `
+    `;
 
-    this.#canvas = this.shadowRoot.querySelector('canvas')
+    this.#canvas = this.shadowRoot.querySelector('canvas');
 
-    this.#view = new View({ canvas: this.#canvas })
+    this.#view = new View({ canvas: this.#canvas });
 
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width
-      const height = entries[0].contentRect.height
+      const width = entries[0].contentRect.width;
+      const height = entries[0].contentRect.height;
 
-      this.#canvas.width = width * devicePixelRatio
-      this.#canvas.height = height * devicePixelRatio
+      this.#canvas.width = width * devicePixelRatio;
+      this.#canvas.height = height * devicePixelRatio;
 
-      this.#view.resize(width, height)
-    })
-    resizeObserver.observe(this.#canvas)
+      this.#view.resize(width, height);
+    });
+    resizeObserver.observe(this.#canvas);
   }
 
   #update = () => {
-    this.#view.update()
-  }
+    this.#view.update();
+  };
 }
 
-customElements.define('demo-webgl', DemoWebGLElement)
+customElements.define('demo-webgl', DemoWebGLElement);

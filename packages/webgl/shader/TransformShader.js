@@ -13,8 +13,8 @@ export const rotate = () => {
       mat2 m = mat2(c, -s, s, c);
       return m * position;
     }
-  `
-}
+  `;
+};
 
 // https://twistedpairdevelopment.wordpress.com/2013/02/11/rotating-a-vector-by-a-quaternion-in-glsl/
 export const rotatePositionWithQuaternion = () => {
@@ -23,8 +23,8 @@ export const rotatePositionWithQuaternion = () => {
     {
       return position + 2.0 * cross( cross( position, quaternion.xyz ) + quaternion.w * position, quaternion.xyz );
     }
-  `
-}
+  `;
+};
 
 // https://github.com/glslify/glsl-look-at
 export const rotationMatrixFromDirection = () => {
@@ -34,8 +34,8 @@ export const rotationMatrixFromDirection = () => {
       vec3 yaxis = normalize(cross(xaxis, direction));
       return mat3(xaxis, yaxis, -direction);
     }
-  `
-}
+  `;
+};
 
 export const quaternionFromMatrix = () => {
   return `
@@ -76,8 +76,8 @@ export const quaternionFromMatrix = () => {
       }
       return q;
     }
-  `
-}
+  `;
+};
 
 export const matrixFromQuaternion = () => {
   return `
@@ -96,8 +96,8 @@ export const matrixFromQuaternion = () => {
       float wz = quaternion.w * z2;
       return mat3(1. - yy - zz, yx - wz, zx + wy, yx + wz, 1. - xx - zz, zy - wx, zx - wy, zy + wx, 1. - xx - yy);
     }
-  `
-}
+  `;
+};
 
 export const matrixFromAxisAngle = () => {
   return `
@@ -112,8 +112,8 @@ export const matrixFromAxisAngle = () => {
                     oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
                     oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);
     }
-  `
-}
+  `;
+};
 
 export const matrixFromEuler = () => {
   return `
@@ -135,5 +135,5 @@ export const matrixFromEuler = () => {
 
       return mat3(c * e, af + be * d, bf - ae * d, - c * f, ae - bf * d, be + af * d, d, - b * c, a * c);
     }
-  `
-}
+  `;
+};

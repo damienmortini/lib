@@ -1,20 +1,20 @@
-import { GLProgram } from './GLProgram.js'
-import { GLShaderTexture } from './GLShaderTexture.js'
-import { addChunks } from './GLSLShader.js'
+import { GLProgram } from './GLProgram.js';
+import { GLShaderTexture } from './GLShaderTexture.js';
+import { addChunks } from './GLSLShader.js';
 
 export class GLFluidVelocityField {
-  #inputTexture
-  #outputTexture
-  gl
-  #advectProgram
-  #jacobiProgram
-  #modifierProgram
-  #width = 1
-  #height = 1
+  #inputTexture;
+  #outputTexture;
+  gl;
+  #advectProgram;
+  #jacobiProgram;
+  #modifierProgram;
+  #width = 1;
+  #height = 1;
 
   constructor({ gl, width, height, uniforms = {}, fragmentChunks = [] }) {
-    this.#width = width
-    this.#height = height
+    this.#width = width;
+    this.#height = height;
 
     const textureData = {
       gl,
@@ -26,10 +26,10 @@ export class GLFluidVelocityField {
       autoGenerateMipmap: false,
       wrapS: gl.CLAMP_TO_EDGE,
       wrapT: gl.CLAMP_TO_EDGE,
-    }
+    };
 
-    this.#inputTexture = new GLShaderTexture(textureData)
-    this.#outputTexture = new GLShaderTexture(textureData)
+    this.#inputTexture = new GLShaderTexture(textureData);
+    this.#outputTexture = new GLShaderTexture(textureData);
 
     this.#advectProgram = new GLProgram({
       gl,
@@ -55,7 +55,7 @@ export class GLFluidVelocityField {
 
         fragColor = vec4(velocity, 0., 0.);
       }`,
-    })
+    });
 
     this.#jacobiProgram = new GLProgram({
       gl,
@@ -84,7 +84,7 @@ export class GLFluidVelocityField {
         
         fragColor = (left + right + down + up + alpha * self) / beta;
       }`,
-    })
+    });
 
     this.#modifierProgram = new GLProgram({
       gl,
@@ -110,55 +110,55 @@ export class GLFluidVelocityField {
           ],
         ],
       ),
-    })
+    });
   }
 
   get program() {
-    return this.#modifierProgram
+    return this.#modifierProgram;
   }
 
   get width() {
-    return this.#width
+    return this.#width;
   }
 
   set width(value) {
-    this.#width = value
-    this.#inputTexture.width = this.#width
-    this.#outputTexture.width = this.#width
+    this.#width = value;
+    this.#inputTexture.width = this.#width;
+    this.#outputTexture.width = this.#width;
   }
 
   get height() {
-    return this.#height
+    return this.#height;
   }
 
   set height(value) {
-    this.#height = value
-    this.#inputTexture.height = this.#height
-    this.#outputTexture.height = this.#height
+    this.#height = value;
+    this.#inputTexture.height = this.#height;
+    this.#outputTexture.height = this.#height;
   }
 
   #swapTextures() {
-    const tmp = this.#inputTexture
-    this.#inputTexture = this.#outputTexture
-    this.#outputTexture = tmp
+    const tmp = this.#inputTexture;
+    this.#inputTexture = this.#outputTexture;
+    this.#outputTexture = tmp;
   }
 
   get texture() {
-    return this.#outputTexture
+    return this.#outputTexture;
   }
 
   draw({ uniforms = {}, jacobiIterations = 5, jacobiSpeed = 1, speed = 1 } = {}) {
-    this.#outputTexture.program = this.#advectProgram
+    this.#outputTexture.program = this.#advectProgram;
     this.#outputTexture.draw({
       uniforms: {
         speed,
         inputTexture: this.#inputTexture,
       },
-    })
-    this.#swapTextures()
+    });
+    this.#swapTextures();
 
-    this.#inputTexture.program = this.#jacobiProgram
-    this.#outputTexture.program = this.#jacobiProgram
+    this.#inputTexture.program = this.#jacobiProgram;
+    this.#outputTexture.program = this.#jacobiProgram;
     for (let index = 0; index < jacobiIterations; index++) {
       this.#outputTexture.draw({
         uniforms: {
@@ -167,17 +167,17 @@ export class GLFluidVelocityField {
           alpha: 4 / jacobiSpeed,
           beta: (4 / jacobiSpeed) * (1 + jacobiSpeed),
         },
-      })
-      this.#swapTextures()
+      });
+      this.#swapTextures();
     }
 
-    this.#outputTexture.program = this.#modifierProgram
+    this.#outputTexture.program = this.#modifierProgram;
     this.#outputTexture.draw({
       uniforms: {
         inputTexture: this.#inputTexture,
         ...uniforms,
       },
-    })
-    this.#swapTextures()
+    });
+    this.#swapTextures();
   }
 }

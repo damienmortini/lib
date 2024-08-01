@@ -90,7 +90,8 @@ class DamdomGalleryElement extends HTMLElement {
       this.#highlighted.toggleAttribute('highlighted', true);
       this.#highlightContainer.classList.remove('hide');
       this.#gridContainer.classList.add('hide');
-    } else {
+    }
+    else {
       this.#highlightContainer.classList.add('hide');
       this.#gridContainer.classList.remove('hide');
     }

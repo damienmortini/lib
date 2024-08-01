@@ -1,9 +1,9 @@
 // Adapted from Marcin Ignac https://github.com/vorg/primitive-rounded-cube
 
-import { Vector3 } from '../Vector3.js'
-import { BoxGeometry } from '../geometry/BoxGeometry.js'
+import { BoxGeometry } from '../geometry/BoxGeometry.js';
+import { Vector3 } from '../Vector3.js';
 
-const VECTOR3 = new Vector3()
+const VECTOR3 = new Vector3();
 
 export class RoundedBoxGeometry extends BoxGeometry {
   constructor({
@@ -33,47 +33,50 @@ export class RoundedBoxGeometry extends BoxGeometry {
       normals,
       uvs,
       indices,
-    })
+    });
 
-    const position = new Vector3()
+    const position = new Vector3();
 
-    const VERTICES_NUMBER = this.positions.length / 3
+    const VERTICES_NUMBER = this.positions.length / 3;
     for (let index = 0; index < VERTICES_NUMBER; index++) {
-      position.set([this.positions[index * 3], this.positions[index * 3 + 1], this.positions[index * 3 + 2]])
-      VECTOR3.copy(position)
+      position.set([this.positions[index * 3], this.positions[index * 3 + 1], this.positions[index * 3 + 2]]);
+      VECTOR3.copy(position);
 
       if (position.x < -width * 0.5 + radiusWidth) {
-        position.x = -width * 0.5 + radiusWidth
-      } else if (position.x > width * 0.5 - radiusWidth) {
-        position.x = width * 0.5 - radiusWidth
+        position.x = -width * 0.5 + radiusWidth;
+      }
+      else if (position.x > width * 0.5 - radiusWidth) {
+        position.x = width * 0.5 - radiusWidth;
       }
 
       if (position.y < -height * 0.5 + radiusHeight) {
-        position.y = -height * 0.5 + radiusHeight
-      } else if (position.y > height * 0.5 - radiusHeight) {
-        position.y = height * 0.5 - radiusHeight
+        position.y = -height * 0.5 + radiusHeight;
+      }
+      else if (position.y > height * 0.5 - radiusHeight) {
+        position.y = height * 0.5 - radiusHeight;
       }
 
       if (position.z < -depth * 0.5 + radiusDepth) {
-        position.z = -depth * 0.5 + radiusDepth
-      } else if (position.z > depth * 0.5 - radiusDepth) {
-        position.z = depth * 0.5 - radiusDepth
+        position.z = -depth * 0.5 + radiusDepth;
+      }
+      else if (position.z > depth * 0.5 - radiusDepth) {
+        position.z = depth * 0.5 - radiusDepth;
       }
 
-      VECTOR3.subtract(position).normalize()
+      VECTOR3.subtract(position).normalize();
 
-      position.x += VECTOR3.x * radiusWidth
-      position.y += VECTOR3.y * radiusHeight
-      position.z += VECTOR3.z * radiusDepth
+      position.x += VECTOR3.x * radiusWidth;
+      position.y += VECTOR3.y * radiusHeight;
+      position.z += VECTOR3.z * radiusDepth;
 
-      this.positions[index * 3] = position.x
-      this.positions[index * 3 + 1] = position.y
-      this.positions[index * 3 + 2] = position.z
+      this.positions[index * 3] = position.x;
+      this.positions[index * 3 + 1] = position.y;
+      this.positions[index * 3 + 2] = position.z;
 
       if (this.normals) {
-        this.normals[index * 3] = VECTOR3.x
-        this.normals[index * 3 + 1] = VECTOR3.y
-        this.normals[index * 3 + 2] = VECTOR3.z
+        this.normals[index * 3] = VECTOR3.x;
+        this.normals[index * 3 + 1] = VECTOR3.y;
+        this.normals[index * 3 + 2] = VECTOR3.z;
       }
     }
   }

@@ -4,44 +4,44 @@ export const Voxel = `
     vec4 coord;
     vec4 material;
   };
-`
+`;
 
 export const dot2 = () => {
   return `
     float dot2( in vec2 v ) { return dot(v,v); }
     float dot2( in vec3 v ) { return dot(v,v); }
-  `
-}
+  `;
+};
 
 export const ndot = () => {
   return `
     float ndot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
-  `
-}
+  `;
+};
 
 export const sdfBox = () => {
   return `
     Voxel sdfBox(vec3 position, vec3 box, vec4 material) {
       return Voxel(vec4(position, length(max(abs(position) - box, 0.0))), material);
     }
-  `
-}
+  `;
+};
 
 export const sdfEllipsoid = () => {
   return `
     Voxel sdfEllipsoid(vec3 position, vec3 box, vec4 material) {
       return Voxel(vec4(position, (length(position / box) - 1.0) * min(min(box.x, box.y), box.z)), material);
     }
-  `
-}
+  `;
+};
 
 export const sdfSphere = () => {
   return `
     Voxel sdfSphere(vec3 position, float radius, vec4 material) {
       return Voxel(vec4(position, length(position) - radius), material);
     }
-  `
-}
+  `;
+};
 
 export const sdfSmoothMin = () => {
   return `
@@ -53,8 +53,8 @@ export const sdfSmoothMin = () => {
   
       return Voxel(coord, material);
     }
-  `
-}
+  `;
+};
 
 export const sdfMin = () => {
   return `
@@ -66,8 +66,8 @@ export const sdfMin = () => {
         return voxel2;
       }
     }
-  `
-}
+  `;
+};
 
 export const sdfTransform = () => {
   return `
@@ -75,8 +75,8 @@ export const sdfTransform = () => {
       position = inverse(transform) * position;
       return position;
     }
-    `
-}
+    `;
+};
 
 export const sdfSubstraction = () => {
   return `
@@ -86,8 +86,8 @@ export const sdfSubstraction = () => {
       voxel1.material = mix(voxel1.material, voxel2.material, step(voxel1.coord.w, -voxel2.coord.w));
       return voxel1;
     }
-  `
-}
+  `;
+};
 
 export const sdfRepeat = () => {
   return `
@@ -102,8 +102,8 @@ export const sdfRepeat = () => {
     vec3 sdfRepeat(vec3 p, vec3 c) {
       return mod(p,c) - 0.5 * c;
     }
-  `
-}
+  `;
+};
 
 // http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
 export const sdfNormalFromPosition = ({
@@ -124,8 +124,9 @@ export const sdfNormalFromPosition = ({
         }
         return normalize(n);
       }
-    `
-  } else {
+    `;
+  }
+  else {
     return `
       vec3 ${name}(vec3 position, float epsilon)
       {
@@ -135,9 +136,9 @@ export const sdfNormalFromPosition = ({
                             k.yxy*${mapName}( position + k.yxy*epsilon ).coord.w + 
                             k.xxx*${mapName}( position + k.xxx*epsilon ).coord.w );
       }
-    `
+    `;
   }
-}
+};
 
 export const sdfRayMarch = ({
   name = 'sdfRayMarch',
@@ -167,8 +168,8 @@ export const sdfRayMarch = ({
 
       return voxel;
     }
-  `
-}
+  `;
+};
 
 // Voxel rayMarchTerrain(vec3 rayOrigin, vec3 rayDirection)
 // {

@@ -1,8 +1,8 @@
-import '@damienmortini/damdom-viewport/index.js'
+import '@damienmortini/damdom-viewport/index.js';
 
 export class DemoViewportElement extends HTMLElement {
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -60,8 +60,8 @@ export class DemoViewportElement extends HTMLElement {
         <textarea style="width: 200px; height: 100px;"></textarea>
       </div>
     </damdom-viewport>
-    `
+    `;
   }
 }
 
-window.customElements.define('demo-viewport', DemoViewportElement)
+window.customElements.define('demo-viewport', DemoViewportElement);

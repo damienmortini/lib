@@ -1,15 +1,16 @@
-import ArrayViewerElement from '../element-viewer-array/index.js'
-import Ticker from '@damienmortini/core/util/Ticker.js'
+import Ticker from '@damienmortini/core/util/Ticker.js';
+
+import ArrayViewerElement from '../element-viewer-array/index.js';
 
 export default class ArraySignalInputElement extends ArrayViewerElement {
   static get observedAttributes() {
-    return [...ArrayViewerElement.observedAttributes, 'position', 'length']
+    return [...ArrayViewerElement.observedAttributes, 'position', 'length'];
   }
 
   constructor() {
-    super()
+    super();
 
-    const template = document.createElement('template')
+    const template = document.createElement('template');
     template.innerHTML = `
       <style>
         :host {
@@ -28,194 +29,195 @@ export default class ArraySignalInputElement extends ArrayViewerElement {
         }
       </style>
       <div id="head"></div>
-    `
-    this.shadowRoot.append(template.content.cloneNode(true))
+    `;
+    this.shadowRoot.append(template.content.cloneNode(true));
 
-    this._head = this.shadowRoot.querySelector('#head')
+    this._head = this.shadowRoot.querySelector('#head');
 
-    this._length = 1
-    this._position = 0
-    this._previousValue = undefined
+    this._length = 1;
+    this._position = 0;
+    this._previousValue = undefined;
 
-    this.array = new Float32Array(100)
+    this.array = new Float32Array(100);
 
     const resizeObserver = new ResizeObserver((entries) => {
-      this._width = entries[0].contentRect.width
-      this._height = entries[0].contentRect.height
-    })
-    resizeObserver.observe(this)
+      this._width = entries[0].contentRect.width;
+      this._height = entries[0].contentRect.height;
+    });
+    resizeObserver.observe(this);
 
-    let previousPosition = null
-    let pointerOffsetX = 0
-    let pointerOffsetY = 0
+    let previousPosition = null;
+    let pointerOffsetX = 0;
+    let pointerOffsetY = 0;
 
-    this._snap = false
+    this._snap = false;
 
-    const keySet = new Set()
+    const keySet = new Set();
     window.addEventListener('keydown', (event) => {
       if (keySet.has(event.key)) {
-        return
+        return;
       }
-      keySet.add(event.key)
+      keySet.add(event.key);
       switch (event.key) {
         case 'Shift':
-          previousPosition = null
-          this._snap = true
-          break
+          previousPosition = null;
+          this._snap = true;
+          break;
         case 'Control':
-          this.controls = true
-          break
+          this.controls = true;
+          break;
       }
-    })
+    });
     window.addEventListener('keyup', (event) => {
       switch (event.key) {
         case 'Shift':
-          previousPosition = null
-          this._snap = false
-          break
+          previousPosition = null;
+          this._snap = false;
+          break;
         case 'Control':
-          this.controls = false
-          break
+          this.controls = false;
+          break;
       }
-      keySet.delete(event.key)
-    })
+      keySet.delete(event.key);
+    });
 
     const setValuesFromPosition = () => {
-      let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0)
-      value = Math.max(Math.min(this.max, value), this.min)
-      const newPosition = this._snap ? this.position : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.length
-      previousPosition = previousPosition !== null ? previousPosition : newPosition
-      const startPosition = newPosition > previousPosition ? previousPosition : newPosition
-      const endPosition = newPosition > previousPosition ? newPosition : previousPosition
-      const startIndex = this._getIndexFromPosition(startPosition)
-      const endIndex = this._getIndexFromPosition(endPosition)
+      let value = (1 - pointerOffsetY / this._height) * (this.max - this.min) + (this.min || 0);
+      value = Math.max(Math.min(this.max, value), this.min);
+      const newPosition = this._snap ? this.position : ((pointerOffsetX + this.scrollLeft) / this.scrollWidth) * this.length;
+      previousPosition = previousPosition !== null ? previousPosition : newPosition;
+      const startPosition = newPosition > previousPosition ? previousPosition : newPosition;
+      const endPosition = newPosition > previousPosition ? newPosition : previousPosition;
+      const startIndex = this._getIndexFromPosition(startPosition);
+      const endIndex = this._getIndexFromPosition(endPosition);
       for (let index = startIndex; index <= endIndex; index++) {
-        this.array[index] = value
+        this.array[index] = value;
       }
       this.draw({
         start: startIndex,
         length: endIndex - startIndex + 1,
-      })
-      previousPosition = newPosition
+      });
+      previousPosition = newPosition;
       this.dispatchEvent(new Event('input', {
         bubbles: true,
-      }))
+      }));
       if (this._snap && value !== this._previousValue) {
         this.dispatchEvent(new Event('change', {
           bubbles: true,
-        }))
-        this._previousValue = value
+        }));
+        this._previousValue = value;
       }
-    }
+    };
     const pointerDown = (event) => {
       if (this.controls || !(event.buttons & 1) || this.disabled) {
-        return
+        return;
       }
-      this.canvas.setPointerCapture(event.pointerId)
-      this.canvas.addEventListener('pointermove', pointerMove)
-      this.canvas.addEventListener('pointerup', pointerUp)
-      this.canvas.addEventListener('pointerout', pointerUp)
-      pointerMove(event)
-      Ticker.add(setValuesFromPosition)
-    }
+      this.canvas.setPointerCapture(event.pointerId);
+      this.canvas.addEventListener('pointermove', pointerMove);
+      this.canvas.addEventListener('pointerup', pointerUp);
+      this.canvas.addEventListener('pointerout', pointerUp);
+      pointerMove(event);
+      Ticker.add(setValuesFromPosition);
+    };
     const pointerMove = (event) => {
-      pointerOffsetX = event.offsetX
-      pointerOffsetY = event.offsetY
-    }
+      pointerOffsetX = event.offsetX;
+      pointerOffsetY = event.offsetY;
+    };
     const pointerUp = (event) => {
-      Ticker.delete(setValuesFromPosition)
-      previousPosition = null
-      this.canvas.releasePointerCapture(event.pointerId)
-      this.canvas.removeEventListener('pointermove', pointerMove)
-      this.canvas.removeEventListener('pointerup', pointerUp)
-      this.canvas.removeEventListener('pointerout', pointerUp)
-    }
-    this.canvas.addEventListener('pointerdown', pointerDown)
+      Ticker.delete(setValuesFromPosition);
+      previousPosition = null;
+      this.canvas.releasePointerCapture(event.pointerId);
+      this.canvas.removeEventListener('pointermove', pointerMove);
+      this.canvas.removeEventListener('pointerup', pointerUp);
+      this.canvas.removeEventListener('pointerout', pointerUp);
+    };
+    this.canvas.addEventListener('pointerdown', pointerDown);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'position':
-        this.position = Number(newValue)
-        break
+        this.position = Number(newValue);
+        break;
       case 'length':
-        this[name] = Number(newValue)
-        break
+        this[name] = Number(newValue);
+        break;
       default:
-        super.attributeChangedCallback(name, oldValue, newValue)
+        super.attributeChangedCallback(name, oldValue, newValue);
     }
   }
 
   _getIndexFromPosition(position) {
-    return Math.min(this.array.length - 1, Math.max(0, Math.floor(position / this.length * this.array.length)))
+    return Math.min(this.array.length - 1, Math.max(0, Math.floor(position / this.length * this.array.length)));
   }
 
   _updateHead() {
-    const x = this._position / this.length * this._width * this.zoom - this.scrollLeft
-    this._head.style.transform = `translateX(${x}px)`
+    const x = this._position / this.length * this._width * this.zoom - this.scrollLeft;
+    this._head.style.transform = `translateX(${x}px)`;
   }
 
   get position() {
-    return this._position
+    return this._position;
   }
 
   set position(value) {
-    value = Math.min(this.length, Math.max(0, value))
+    value = Math.min(this.length, Math.max(0, value));
     if (this._position === value) {
-      return
+      return;
     }
-    this._position = value
-    this._updateHead()
-    const arrayValue = this.array[this._getIndexFromPosition(this.position)]
+    this._position = value;
+    this._updateHead();
+    const arrayValue = this.array[this._getIndexFromPosition(this.position)];
     if (arrayValue !== this._previousValue && !this._snap) {
       this.dispatchEvent(new Event('change', {
         bubbles: true,
-      }))
-      this._previousValue = arrayValue
+      }));
+      this._previousValue = arrayValue;
     }
   }
 
   get scrollLeft() {
-    return super.scrollLeft
+    return super.scrollLeft;
   }
 
   set scrollLeft(value) {
-    super.scrollLeft = value
-    this._updateHead()
+    super.scrollLeft = value;
+    this._updateHead();
   }
 
   get value() {
-    return this.array[this._getIndexFromPosition(this.position)]
+    return this.array[this._getIndexFromPosition(this.position)];
   }
 
   get length() {
-    return this._length
+    return this._length;
   }
 
   set length(value) {
-    this._length = value
-    this.draw()
+    this._length = value;
+    this.draw();
   }
 
   get name() {
-    return this.getAttribute('name')
+    return this.getAttribute('name');
   }
 
   set name(value) {
-    this.setAttribute('name', value)
+    this.setAttribute('name', value);
   }
 
   get disabled() {
-    return this.hasAttribute('disabled')
+    return this.hasAttribute('disabled');
   }
 
   set disabled(value) {
     if (value) {
-      this.setAttribute('disabled', '')
-    } else {
-      this.removeAttribute('disabled')
+      this.setAttribute('disabled', '');
+    }
+    else {
+      this.removeAttribute('disabled');
     }
   }
 }
 
-customElements.define('damo-input-signal-array', ArraySignalInputElement)
+customElements.define('damo-input-signal-array', ArraySignalInputElement);

@@ -13,8 +13,8 @@ export const fbm = ({ noiseFunctionName }) => {
   }
   return a;
 }
-`
-}
+`;
+};
 
 export const fbmd = ({ noiseFunctionName }) => {
   return `vec4 fbmd(in vec3 x, int octaves, mat3 m3, mat3 m3Inverted) {
@@ -33,5 +33,5 @@ export const fbmd = ({ noiseFunctionName }) => {
     m = f * m3Inverted * m;
   }
   return vec4(a, d);
-}`
-}
+}`;
+};

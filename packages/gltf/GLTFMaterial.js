@@ -2,6 +2,6 @@ export default class GLTFMaterial {
   constructor({
     data,
   }) {
-    this.name = data.name
+    this.name = data.name;
   }
 }

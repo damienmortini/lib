@@ -1,16 +1,16 @@
-import '@damienmortini/damdom-linkableconnector/index.js'
+import '@damienmortini/damdom-linkableconnector/index.js';
 
 export class GraphPropertyNodeElement extends HTMLElement {
-  #value
-  #valueElement
-  #idElement
+  #value;
+  #valueElement;
+  #idElement;
 
   static get observedAttributes() {
-    return ['id']
+    return ['id'];
   }
 
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -25,25 +25,25 @@ export class GraphPropertyNodeElement extends HTMLElement {
         }
       </style>
       <span id="id"></span><damdom-linkableconnector></damdom-linkableconnector>
-    `
-    this.#idElement = this.shadowRoot.querySelector('#id')
+    `;
+    this.#idElement = this.shadowRoot.querySelector('#id');
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'id':
-        this.#idElement.textContent = newValue
-        break
+        this.#idElement.textContent = newValue;
+        break;
     }
   }
 
   get value() {
-    return this.#value
+    return this.#value;
   }
 
   set value(value) {
-    this.#value = value
+    this.#value = value;
   }
 }
 
-window.customElements.define('damdom-propertynode', GraphPropertyNodeElement)
+window.customElements.define('damdom-propertynode', GraphPropertyNodeElement);

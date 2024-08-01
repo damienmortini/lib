@@ -1,4 +1,4 @@
-import '../../Lottie-web/build/player/lottie.min.js'
+import '../../Lottie-web/build/player/lottie.min.js';
 
 /**
  * Element to plays Lottie animation
@@ -7,15 +7,15 @@ import '../../Lottie-web/build/player/lottie.min.js'
  * <damdom-lottie src="data.json" autoplay loop></damdom-lottie>
  */
 class DamdomLottieElement extends HTMLElement {
-  #container
-  #currentTime
+  #container;
+  #currentTime;
 
   static get observedAttributes() {
-    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime', 'segments', 'customizable']
+    return ['src', 'renderer', 'loop', 'autoplay', 'playbackrate', 'framerate', 'starttime', 'segments', 'customizable'];
   }
 
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -35,9 +35,9 @@ class DamdomLottieElement extends HTMLElement {
         }
       </style>
       <div id="container"></div>
-    `
+    `;
 
-    this.#container = this.shadowRoot.querySelector(`#container`)
+    this.#container = this.shadowRoot.querySelector(`#container`);
 
     new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
@@ -45,18 +45,18 @@ class DamdomLottieElement extends HTMLElement {
           for (const node of mutation.addedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               for (const element of node.querySelectorAll('path, circle, ellipse, line, polygon, polyline, rect')) {
-                element.part = 'shape'
+                element.part = 'shape';
               }
             }
           }
         }
       }
-    }).observe(this.#container, { childList: true, subtree: true })
+    }).observe(this.#container, { childList: true, subtree: true });
   }
 
   async #load(src) {
     if (this.animation) {
-      this.animation.destroy()
+      this.animation.destroy();
     }
     this.animation = window.lottie.loadAnimation({
       container: this.#container,
@@ -64,87 +64,88 @@ class DamdomLottieElement extends HTMLElement {
       autoplay: this.autoplay,
       loop: this.loop,
       path: src,
-    })
+    });
     this.animation.addEventListener('DOMLoaded', () => {
       if (this.segments) {
-        this.animation.playSegments(this.segments, true)
+        this.animation.playSegments(this.segments, true);
       }
-      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.getAttribute('starttime') || 0)
-      this.animation.frameRate = this.frameRate
-      this.animation.setSpeed(Math.abs(this.playbackRate))
-      this.animation.setDirection(this.playbackRate)
-      this.dispatchEvent(new Event('load'))
-    })
+      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.getAttribute('starttime') || 0);
+      this.animation.frameRate = this.frameRate;
+      this.animation.setSpeed(Math.abs(this.playbackRate));
+      this.animation.setDirection(this.playbackRate);
+      this.dispatchEvent(new Event('load'));
+    });
     this.animation.addEventListener('loopComplete', () => {
-      this.dispatchEvent(new Event('ended'))
-    })
+      this.dispatchEvent(new Event('ended'));
+    });
     this.animation.addEventListener('complete', () => {
-      this.dispatchEvent(new Event('ended'))
-    })
+      this.dispatchEvent(new Event('ended'));
+    });
   }
 
   #onDrop = (event) => {
-    event.preventDefault()
-    const file = event.dataTransfer.items[0].getAsFile()
+    event.preventDefault();
+    const file = event.dataTransfer.items[0].getAsFile();
     if (!file) {
-      return
+      return;
     }
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.addEventListener('load', () => {
-      this.src = reader.result
-    })
-    reader.readAsDataURL(file)
-  }
+      this.src = reader.result;
+    });
+    reader.readAsDataURL(file);
+  };
 
   #onDragOver = (event) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-  }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  };
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) {
-      return
+      return;
     }
     switch (name) {
       case 'src':
-        this.#load(newValue)
-        break
+        this.#load(newValue);
+        break;
       case 'loop':
         if (this.animation) {
-          this.animation.loop = this.loop
+          this.animation.loop = this.loop;
         }
-        break
+        break;
       case 'framerate':
         if (this.animation) {
-          this.animation.frameRate = this.frameRate
+          this.animation.frameRate = this.frameRate;
         }
-        break
+        break;
       case 'playbackrate':
         if (this.animation) {
-          this.animation.setSpeed(Math.abs(this.playbackRate))
-          this.animation.setDirection(this.playbackRate)
+          this.animation.setSpeed(Math.abs(this.playbackRate));
+          this.animation.setDirection(this.playbackRate);
         }
-        break
+        break;
       case 'starttime':
         if (this.animation) {
-          this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](Number(newValue), false)
+          this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](Number(newValue), false);
         }
-        break
+        break;
       case 'segments':
         if (this.animation) {
-          if (this.segments) this.animation.playSegments(this.segments, true)
-          else this.animation.resetSegments(true)
+          if (this.segments) this.animation.playSegments(this.segments, true);
+          else this.animation.resetSegments(true);
         }
-        break
+        break;
       case 'customizable':
         if (newValue !== null) {
-          this.addEventListener('drop', this.#onDrop)
-          this.addEventListener('dragover', this.#onDragOver)
-        } else {
-          this.removeEventListener('drop', this.#onDrop)
-          this.removeEventListener('dragover', this.#onDragOver)
+          this.addEventListener('drop', this.#onDrop);
+          this.addEventListener('dragover', this.#onDragOver);
         }
-        break
+        else {
+          this.removeEventListener('drop', this.#onDrop);
+          this.removeEventListener('dragover', this.#onDragOver);
+        }
+        break;
     }
   }
 
@@ -153,11 +154,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {String}
    */
   get src() {
-    return this.getAttribute('src')
+    return this.getAttribute('src');
   }
 
   set src(value) {
-    this.setAttribute('src', value)
+    this.setAttribute('src', value);
   }
 
   /**
@@ -165,11 +166,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Boolean}
    */
   get loop() {
-    return this.hasAttribute('loop')
+    return this.hasAttribute('loop');
   }
 
   set loop(value) {
-    this.toggleAttribute('loop', value)
+    this.toggleAttribute('loop', value);
   }
 
   /**
@@ -177,11 +178,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Boolean}
    */
   get autoplay() {
-    return this.hasAttribute('autoplay')
+    return this.hasAttribute('autoplay');
   }
 
   set autoplay(value) {
-    this.toggleAttribute('autoplay', value)
+    this.toggleAttribute('autoplay', value);
   }
 
   /**
@@ -189,11 +190,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Number}
    */
   get frameRate() {
-    return Number(this.getAttribute('framerate')) || this.animation.frameRate
+    return Number(this.getAttribute('framerate')) || this.animation.frameRate;
   }
 
   set frameRate(value) {
-    this.setAttribute('framerate', String(value))
+    this.setAttribute('framerate', String(value));
   }
 
   /**
@@ -201,11 +202,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Number}
    */
   get playbackRate() {
-    return Number(this.getAttribute('playbackrate')) || 1
+    return Number(this.getAttribute('playbackrate')) || 1;
   }
 
   set playbackRate(value) {
-    this.setAttribute('playbackrate', String(value))
+    this.setAttribute('playbackrate', String(value));
   }
 
   /**
@@ -213,11 +214,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {"svg"|"canvas"|"html"}
    */
   get renderer() {
-    return this.getAttribute('renderer') || 'svg'
+    return this.getAttribute('renderer') || 'svg';
   }
 
   set renderer(value) {
-    this.setAttribute('renderer', value)
+    this.setAttribute('renderer', value);
   }
 
   /**
@@ -225,11 +226,11 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Array}
    */
   get segments() {
-    return JSON.parse(this.getAttribute('segments'))
+    return JSON.parse(this.getAttribute('segments'));
   }
 
   set segments(value) {
-    this.setAttribute('segments', JSON.stringify(value))
+    this.setAttribute('segments', JSON.stringify(value));
   }
 
   /**
@@ -237,13 +238,13 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Number}
    */
   get currentTime() {
-    return (this.animation.currentFrame / (this.animation.totalFrames - 1)) * this.animation.getDuration()
+    return (this.animation.currentFrame / (this.animation.totalFrames - 1)) * this.animation.getDuration();
   }
 
   set currentTime(value) {
-    this.#currentTime = value
+    this.#currentTime = value;
     if (this.animation) {
-      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.#currentTime, false)
+      this.animation[this.paused ? 'goToAndStop' : 'goToAndPlay'](this.#currentTime, false);
     }
   }
 
@@ -253,7 +254,7 @@ class DamdomLottieElement extends HTMLElement {
    * @type {Boolean}
    */
   get paused() {
-    return this.animation ? this.animation.isPaused : true
+    return this.animation ? this.animation.isPaused : true;
   }
 
   /**
@@ -261,7 +262,7 @@ class DamdomLottieElement extends HTMLElement {
    */
   play() {
     if (this.animation) {
-      this.animation.play()
+      this.animation.play();
     }
   }
 
@@ -270,11 +271,11 @@ class DamdomLottieElement extends HTMLElement {
    */
   pause() {
     if (this.animation) {
-      this.animation.pause()
+      this.animation.pause();
     }
   }
 }
 
-export default DamdomLottieElement
+export default DamdomLottieElement;
 
-customElements.define('damdom-lottie', DamdomLottieElement)
+customElements.define('damdom-lottie', DamdomLottieElement);

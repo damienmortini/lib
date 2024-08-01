@@ -8,13 +8,13 @@ export function animate(
     onupdate,
     fill,
   }?: {
-    duration?: number
-    delay?: number
-    easing?: (x: any) => any
-    onupdate?: () => void
-    fill?: string
+    duration?: number;
+    delay?: number;
+    easing?: (x: any) => any;
+    onupdate?: () => void;
+    fill?: string;
   },
 ): {
-  finished: Promise<any>
-  cancel: () => void
-}
+  finished: Promise<any>;
+  cancel: () => void;
+};
