@@ -10,4 +10,4 @@ export const Camera = `
     mat4 projection;
     mat4 projectionView;
   };
-`
+`;

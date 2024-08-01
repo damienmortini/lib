@@ -1,5 +1,6 @@
-import { addChunks, FRAGMENT, VERTEX } from '../GLSLShader.js'
-import { Matrix4 } from '@damienmortini/math'
+import { Matrix4 } from '@damienmortini/math';
+
+import { addChunks, FRAGMENT, VERTEX } from '../GLSLShader.js';
 
 export class BasicShader {
   constructor({ positions = true, normals = false, uvs = false, uniforms = {}, vertexChunks = [], fragmentChunks = [] } = {}) {
@@ -7,7 +8,7 @@ export class BasicShader {
       projectionView: new Matrix4(),
       transform: new Matrix4(),
       ...uniforms,
-    }
+    };
 
     this.vertex = addChunks(VERTEX, [
       [
@@ -40,7 +41,7 @@ export class BasicShader {
       `,
       ],
       ...vertexChunks,
-    ])
+    ]);
 
     this.fragment = addChunks(FRAGMENT, [
       [
@@ -52,6 +53,6 @@ export class BasicShader {
       `,
       ],
       ...fragmentChunks,
-    ])
+    ]);
   }
 }

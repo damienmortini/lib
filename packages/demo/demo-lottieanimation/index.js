@@ -1,8 +1,8 @@
-import '@damienmortini/damdom-lottie/index.js'
+import '@damienmortini/damdom-lottie/index.js';
 
 export class DemoLottieAnimation extends HTMLElement {
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -20,8 +20,8 @@ export class DemoLottieAnimation extends HTMLElement {
       </style>
       <damdom-lottie autoplay loop src="node_modules/@damienmortini/demo-lottieanimation/animations/data.json">
       </damdom-lottie>
-    `
+    `;
   }
 }
 
-window.customElements.define('demo-lottieanimation', DemoLottieAnimation)
+window.customElements.define('demo-lottieanimation', DemoLottieAnimation);

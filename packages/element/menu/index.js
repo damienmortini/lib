@@ -1,6 +1,6 @@
 export default class MenuElement extends HTMLElement {
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -25,35 +25,35 @@ export default class MenuElement extends HTMLElement {
         }
       </style>
       <div></div>
-    `
+    `;
 
-    this._container = this.shadowRoot.querySelector('div')
+    this._container = this.shadowRoot.querySelector('div');
   }
 
   get options() {
-    return this._options
+    return this._options;
   }
 
   set options(value) {
-    this._options = value
-    this._container.innerHTML = ''
+    this._options = value;
+    this._container.innerHTML = '';
     const addOptionsTo = (options, container) => {
-      const ul = document.createElement('ul')
-      container.appendChild(ul)
+      const ul = document.createElement('ul');
+      container.appendChild(ul);
       for (const option of options) {
-        const li = document.createElement('li')
+        const li = document.createElement('li');
         if (option.options) {
-          addOptionsTo(option.options, li)
-          delete option.options
+          addOptionsTo(option.options, li);
+          delete option.options;
         }
         for (const [key, value] of Object.entries(option)) {
-          li[key] = value
+          li[key] = value;
         }
-        ul.appendChild(li)
+        ul.appendChild(li);
       }
-    }
-    addOptionsTo(this._options, this._container)
+    };
+    addOptionsTo(this._options, this._container);
   }
 }
 
-customElements.define('damo-menu', MenuElement)
+customElements.define('damo-menu', MenuElement);

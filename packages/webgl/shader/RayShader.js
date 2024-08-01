@@ -4,7 +4,7 @@ export const Ray = `
     vec3 origin;
     vec3 direction;
   };
-`
+`;
 
 export const rayFromCamera = () => {
   return `
@@ -16,5 +16,5 @@ export const rayFromCamera = () => {
 
       return Ray(rayOrigin, rayDirection);
     }
-  `
-}
+  `;
+};

@@ -1,13 +1,13 @@
 export default class DamdomFileInputElement extends HTMLElement {
-  #value
-  #image
+  #value;
+  #image;
 
   static get observedAttributes() {
-    return ['disabled', 'src']
+    return ['disabled', 'src'];
   }
 
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -35,90 +35,91 @@ export default class DamdomFileInputElement extends HTMLElement {
       </style>
       <img class="file">
       <span>Drag and drop media here</span>
-    `
+    `;
 
-    this.#image = this.shadowRoot.querySelector('img')
+    this.#image = this.shadowRoot.querySelector('img');
 
-    this.addEventListener('click', this.#onClick)
-    this.addEventListener('drop', this.#onDrop)
-    this.addEventListener('dragover', this.#onDragOver)
+    this.addEventListener('click', this.#onClick);
+    this.addEventListener('drop', this.#onDrop);
+    this.addEventListener('dragover', this.#onDragOver);
   }
 
   async #onClick(event) {
-    const [fileHandle] = await window.showOpenFilePicker()
-    this.#updateFile(await fileHandle.getFile())
+    const [fileHandle] = await window.showOpenFilePicker();
+    this.#updateFile(await fileHandle.getFile());
   }
 
   #updateFile(file) {
-    this.value = file
-    const reader = new FileReader()
+    this.value = file;
+    const reader = new FileReader();
     reader.addEventListener('load', () => {
       if (file.type.startsWith('image')) {
-        this.#image.src = reader.result
+        this.#image.src = reader.result;
       }
-    })
-    reader.readAsDataURL(file)
+    });
+    reader.readAsDataURL(file);
   }
 
   #onDrop = (event) => {
-    event.preventDefault()
-    const file = event.dataTransfer.items[0].getAsFile()
+    event.preventDefault();
+    const file = event.dataTransfer.items[0].getAsFile();
     if (!file) {
-      return
+      return;
     }
-    this.#updateFile(file)
-  }
+    this.#updateFile(file);
+  };
 
   #onDragOver = (event) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-  }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  };
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'src':
-        fetch(newValue).then((response) => response.blob()).then((blob) => this.#updateFile(blob))
-        break
+        fetch(newValue).then(response => response.blob()).then(blob => this.#updateFile(blob));
+        break;
       case 'disabled':
         if (newValue !== null) {
-          this.removeEventListener('click', this.#onClick)
-          this.removeEventListener('drop', this.#onDrop)
-          this.removeEventListener('dragover', this.#onDragOver)
-        } else {
-          this.addEventListener('click', this.#onClick)
-          this.addEventListener('drop', this.#onDrop)
-          this.addEventListener('dragover', this.#onDragOver)
+          this.removeEventListener('click', this.#onClick);
+          this.removeEventListener('drop', this.#onDrop);
+          this.removeEventListener('dragover', this.#onDragOver);
         }
-        break
+        else {
+          this.addEventListener('click', this.#onClick);
+          this.addEventListener('drop', this.#onDrop);
+          this.addEventListener('dragover', this.#onDragOver);
+        }
+        break;
     }
   }
 
   get disabled() {
-    return this.hasAttribute('disabled')
+    return this.hasAttribute('disabled');
   }
 
   set disabled(value) {
-    this.toggleAttribute('disabled', value)
+    this.toggleAttribute('disabled', value);
   }
 
   get src() {
-    return this.getAttribute('src')
+    return this.getAttribute('src');
   }
 
   set src(value) {
-    this.setAttribute('src', value)
+    this.setAttribute('src', value);
   }
 
   get value() {
-    return this.#value
+    return this.#value;
   }
 
   set value(value) {
-    this.#value = value
+    this.#value = value;
     this.dispatchEvent(new Event('change', {
       bubbles: true,
-    }))
+    }));
   }
 }
 
-customElements.define('damdom-fileinput', DamdomFileInputElement)
+customElements.define('damdom-fileinput', DamdomFileInputElement);

@@ -1,10 +1,9 @@
+import FrenetSerretFrame from '@damienmortini/math/FrenetSerretFrame.js';
+
 import {
   Vector3,
-} from '../../../three/src/Three.js'
-
-import THREELine from './THREELine.js'
-
-import FrenetSerretFrame from '@damienmortini/math/FrenetSerretFrame.js'
+} from '../../../three/src/Three.js';
+import THREELine from './THREELine.js';
 
 export default class THREERibbon extends THREELine {
   constructor({
@@ -20,30 +19,30 @@ export default class THREERibbon extends THREELine {
       detail,
       geometry,
       material,
-    })
+    });
 
-    this.head = points[this.points.length - 1].clone()
+    this.head = points[this.points.length - 1].clone();
   }
 
   update() {
     if (!this._initialized) {
-      super.update()
-      this._initialized = true
-      return
+      super.update();
+      this._initialized = true;
+      return;
     }
 
-    this.userData._linePositions.copyWithin(0, 3)
-    this.userData._lineNormals.copyWithin(0, 3)
+    this.userData._linePositions.copyWithin(0, 3);
+    this.userData._lineNormals.copyWithin(0, 3);
 
-    const headId = this.points.length - 1
-    this.userData._linePositions[headId * 3] = this.head.x
-    this.userData._linePositions[headId * 3 + 1] = this.head.y
-    this.userData._linePositions[headId * 3 + 2] = this.head.z
+    const headId = this.points.length - 1;
+    this.userData._linePositions[headId * 3] = this.head.x;
+    this.userData._linePositions[headId * 3 + 1] = this.head.y;
+    this.userData._linePositions[headId * 3 + 2] = this.head.z;
 
     FrenetSerretFrame.compute({
       positions: this.userData._linePositions,
       normals: this.userData._lineNormals,
       range: [headId - 3, headId],
-    })
+    });
   }
 }

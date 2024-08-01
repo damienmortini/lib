@@ -11,8 +11,8 @@ export const rgbToHSL = () => {
                   (maxc-minc)/(1.0-abs(minc+maxc-1.0) + 0.000001),  // S
                   (minc+maxc)*0.5 );                           // L
     }
-  `
-}
+  `;
+};
 
 export const hslToRGB = () => {
   return `
@@ -20,8 +20,8 @@ export const hslToRGB = () => {
       vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
       return c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0));
     }
-  `
-}
+  `;
+};
 
 export const rgbToHSV = () => {
   return `
@@ -33,8 +33,8 @@ export const rgbToHSV = () => {
       float d = q.x - min(q.w, q.y);
       return vec3(abs(q.z + (q.w - q.y) / (6.0*d+0.000001)), d / (q.x+0.000001), q.x);
     }
-  `
-}
+  `;
+};
 
 export const hsvToRGB = () => {
   return `
@@ -43,16 +43,15 @@ export const hsvToRGB = () => {
       vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
       return c.z * mix( vec3(1.0), rgb, c.y);
     }
-  `
-}
-
+  `;
+};
 
 // TODO: OKLAB Conversion
 
 // struct Lab {float L; float a; float b;};
 // struct RGB {float r; float g; float b;};
 
-// Lab linear_srgb_to_oklab(RGB c) 
+// Lab linear_srgb_to_oklab(RGB c)
 // {
 //     float l = 0.4122214708f * c.r + 0.5363325363f * c.g + 0.0514459929f * c.b;
 // 	float m = 0.2119034982f * c.r + 0.6806995451f * c.g + 0.1073969566f * c.b;
@@ -69,7 +68,7 @@ export const hsvToRGB = () => {
 //     };
 // }
 
-// RGB oklab_to_linear_srgb(Lab c) 
+// RGB oklab_to_linear_srgb(Lab c)
 // {
 //     float l_ = c.L + 0.3963377774f * c.a + 0.2158037573f * c.b;
 //     float m_ = c.L - 0.1055613458f * c.a - 0.0638541728f * c.b;

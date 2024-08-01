@@ -1,6 +1,6 @@
+import Shader from '../3d/Shader.js';
 import { LightShader } from './LightShader.js';
 import RayShader from './RayShader.js';
-import Shader from '../3d/Shader.js';
 
 export class PBRShader extends Shader {
   static get MetallicRoughnessMaterial() {

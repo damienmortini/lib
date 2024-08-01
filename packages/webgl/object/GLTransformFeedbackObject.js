@@ -1,33 +1,33 @@
-import { GLBuffer } from '../GLBuffer.js'
-import { GLGeometry } from '../GLGeometry.js'
-import { GLObject } from '../GLObject.js'
-import { GLVertexAttribute } from '../GLVertexAttribute.js'
+import { GLBuffer } from '../GLBuffer.js';
+import { GLGeometry } from '../GLGeometry.js';
+import { GLObject } from '../GLObject.js';
+import { GLVertexAttribute } from '../GLVertexAttribute.js';
 
 export class GLTransformFeedbackObject extends GLObject {
-  #geometryIn
-  #geometryOut
-  #transformFeedbackIn
-  #transformFeedbackOut
+  #geometryIn;
+  #geometryOut;
+  #transformFeedbackIn;
+  #transformFeedbackOut;
 
   constructor({ gl, attributes = {}, program }) {
     super({
       gl,
       program,
-    })
+    });
 
     for (let index = 0; index < 2; index++) {
-      const attributesDynamic = new Map()
-      const buffers = new Map()
+      const attributesDynamic = new Map();
+      const buffers = new Map();
       for (const [name, attribute] of Object.entries(attributes)) {
-        const data = attribute.buffer?.data ?? attribute.data
-        let buffer = buffers.get(data)
+        const data = attribute.buffer?.data ?? attribute.data;
+        let buffer = buffers.get(data);
         if (!buffer) {
           buffer = new GLBuffer({
             gl,
             data,
             usage: gl.DYNAMIC_COPY,
-          })
-          buffers.set(data, buffer)
+          });
+          buffers.set(data, buffer);
         }
         attributesDynamic.set(
           name,
@@ -36,59 +36,59 @@ export class GLTransformFeedbackObject extends GLObject {
             gl,
             data: buffer,
           }),
-        )
+        );
       }
 
-      const transformFeedback = gl.createTransformFeedback()
-      gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback)
+      const transformFeedback = gl.createTransformFeedback();
+      gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback);
       for (const [index, buffer] of [...buffers.values()].entries()) {
         buffer.bind({
           target: gl.TRANSFORM_FEEDBACK_BUFFER,
           index,
-        })
+        });
       }
-      if (!index) this.#transformFeedbackIn = transformFeedback
-      else this.#transformFeedbackOut = transformFeedback
+      if (!index) this.#transformFeedbackIn = transformFeedback;
+      else this.#transformFeedbackOut = transformFeedback;
 
       const geometry = new GLGeometry({
         gl,
         attributes: attributesDynamic,
-      })
-      if (!index) this.#geometryIn = geometry
-      else this.#geometryOut = geometry
+      });
+      if (!index) this.#geometryIn = geometry;
+      else this.#geometryOut = geometry;
 
-      this.geometry = geometry
+      this.geometry = geometry;
     }
   }
 
   get attributes() {
-    return this.#geometryOut.attributes
+    return this.#geometryOut.attributes;
   }
 
   draw({ mode = this.gl.POINTS, uniforms = {}, debug = false } = {}) {
-    this.geometry = this.#geometryIn
+    this.geometry = this.#geometryIn;
 
-    if (!debug) this.gl.enable(this.gl.RASTERIZER_DISCARD)
+    if (!debug) this.gl.enable(this.gl.RASTERIZER_DISCARD);
 
-    this.bind()
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.#transformFeedbackOut)
-    this.gl.beginTransformFeedback(mode)
+    this.bind();
+    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.#transformFeedbackOut);
+    this.gl.beginTransformFeedback(mode);
     super.draw({
       mode,
       uniforms,
-    })
-    this.gl.endTransformFeedback()
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null)
-    this.unbind()
+    });
+    this.gl.endTransformFeedback();
+    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+    this.unbind();
 
-    if (!debug) this.gl.disable(this.gl.RASTERIZER_DISCARD)
+    if (!debug) this.gl.disable(this.gl.RASTERIZER_DISCARD);
 
-    const tmpGeometry = this.#geometryIn
-    this.#geometryIn = this.#geometryOut
-    this.#geometryOut = tmpGeometry
+    const tmpGeometry = this.#geometryIn;
+    this.#geometryIn = this.#geometryOut;
+    this.#geometryOut = tmpGeometry;
 
-    const tmpTransformFeedback = this.#transformFeedbackIn
-    this.#transformFeedbackIn = this.#transformFeedbackOut
-    this.#transformFeedbackOut = tmpTransformFeedback
+    const tmpTransformFeedback = this.#transformFeedbackIn;
+    this.#transformFeedbackIn = this.#transformFeedbackOut;
+    this.#transformFeedbackOut = tmpTransformFeedback;
   }
 }

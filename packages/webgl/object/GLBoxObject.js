@@ -1,8 +1,9 @@
-import { BoxGeometry } from '@damienmortini/math'
-import { GLObject } from '../GLObject.js'
-import { GLGeometry } from '../GLGeometry.js'
-import { GLProgram } from '../GLProgram.js'
-import { addChunks, VERTEX } from '../GLSLShader.js'
+import { BoxGeometry } from '@damienmortini/math';
+
+import { GLGeometry } from '../GLGeometry.js';
+import { GLObject } from '../GLObject.js';
+import { GLProgram } from '../GLProgram.js';
+import { addChunks, VERTEX } from '../GLSLShader.js';
 
 export class GLBoxObject extends GLObject {
   constructor({
@@ -55,6 +56,6 @@ export class GLBoxObject extends GLObject {
         ),
       ),
       program,
-    })
+    });
   }
 }

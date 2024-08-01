@@ -1,7 +1,8 @@
-import { PlaneGeometry } from '@damienmortini/math'
-import { GLObject } from '../GLObject.js'
-import { GLGeometry } from '../GLGeometry.js'
-import { GLProgram } from '../GLProgram.js'
+import { PlaneGeometry } from '@damienmortini/math';
+
+import { GLGeometry } from '../GLGeometry.js';
+import { GLObject } from '../GLObject.js';
+import { GLProgram } from '../GLProgram.js';
 
 export class GLPlaneObject extends GLObject {
   constructor({
@@ -45,6 +46,6 @@ export class GLPlaneObject extends GLObject {
         ),
       ),
       program,
-    })
+    });
   }
 }

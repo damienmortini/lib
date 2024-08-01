@@ -1,25 +1,26 @@
-import Signal from '@damienmortini/core/util/Signal.js'
+import Signal from '@damienmortini/core/util/Signal.js';
 
 export default class Graph {
-  #name
-  #content = ''
-  onChange = new Signal()
+  #name;
+  #content = '';
+  onChange = new Signal();
   #data = new Proxy({}, {
     get: (target, property) => {
-      return target[property]
+      return target[property];
     },
     set: (target, property, value) => {
-      target[property] = value
-      this.#onDataChange(property, value)
-      return true
+      target[property] = value;
+      this.#onDataChange(property, value);
+      return true;
     },
-  })
-  #ready
+  });
+
+  #ready;
 
   constructor(name) {
-    this.#name = name
+    this.#name = name;
 
-    this.#ready = Promise.resolve()
+    this.#ready = Promise.resolve();
   }
 
   // async connect() {
@@ -60,35 +61,35 @@ export default class Graph {
 
   async loadData(dataURL) {
     const readyPromise = async () => {
-      Object.assign(this, await fetch(dataURL).then((response) => response.json()))
-    }
-    this.#ready = readyPromise()
+      Object.assign(this, await fetch(dataURL).then(response => response.json()));
+    };
+    this.#ready = readyPromise();
   }
 
   async #onDataChange(id, value) {
-    await this.#ready
+    await this.#ready;
     this.onChange.dispatch({
       type: 'data',
       data: {
         id,
         value,
       },
-    })
+    });
   }
 
   add(id, value) {
-    this.#data[id] = value
+    this.#data[id] = value;
   }
 
   get content() {
-    return this.#content
+    return this.#content;
   }
 
   set content(value) {
-    this.#content = value
+    this.#content = value;
     this.onChange.dispatch({
       type: 'content',
       data: value,
-    })
+    });
   }
 }

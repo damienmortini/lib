@@ -1,4 +1,4 @@
-import { GLBuffer } from './GLBuffer.js'
+import { GLBuffer } from './GLBuffer.js';
 
 const TYPE_ARRAY_MAP = new Map([
   [WebGLRenderingContext.BYTE, Int8Array],
@@ -8,7 +8,7 @@ const TYPE_ARRAY_MAP = new Map([
   [WebGLRenderingContext.INT, Int32Array],
   [WebGLRenderingContext.UNSIGNED_INT, Uint32Array],
   [WebGLRenderingContext.FLOAT, Float32Array],
-])
+]);
 
 const ARRAY_TYPE_MAP = new Map([
   [Int8Array, WebGLRenderingContext.BYTE],
@@ -19,10 +19,10 @@ const ARRAY_TYPE_MAP = new Map([
   [Uint32Array, WebGLRenderingContext.UNSIGNED_INT],
   [Float32Array, WebGLRenderingContext.FLOAT],
   [Float64Array, WebGLRenderingContext.FLOAT],
-])
+]);
 
 export class GLVertexAttribute {
-  #buffer
+  #buffer;
 
   constructor({
     gl,
@@ -36,31 +36,31 @@ export class GLVertexAttribute {
     count = data?.length / size || 1,
     divisor = 0,
   }) {
-    this.gl = gl
-    this.data = data
-    this.size = size
-    this.componentType = componentType
-    this.byteOffset = byteOffset
-    this.normalized = normalized
-    this.byteStride = byteStride
-    this.count = count
-    this.divisor = divisor
+    this.gl = gl;
+    this.data = data;
+    this.size = size;
+    this.componentType = componentType;
+    this.byteOffset = byteOffset;
+    this.normalized = normalized;
+    this.byteStride = byteStride;
+    this.count = count;
+    this.divisor = divisor;
 
-    this.#buffer =
-      data instanceof GLBuffer
+    this.#buffer
+      = data instanceof GLBuffer
         ? data
         : new GLBuffer({
-            gl,
-            data,
-            target,
-          })
+          gl,
+          data,
+          target,
+        });
   }
 
   get buffer() {
-    return this.#buffer
+    return this.#buffer;
   }
 
   get typedArray() {
-    return new (TYPE_ARRAY_MAP.get(this.componentType))(this.buffer.data, this.byteOffset, this.count * this.size)
+    return new (TYPE_ARRAY_MAP.get(this.componentType))(this.buffer.data, this.byteOffset, this.count * this.size);
   }
 }

@@ -1,14 +1,14 @@
 export class DamdomGUIFolderElement extends HTMLElement {
-  #details
-  #summary
-  #content
+  #details;
+  #summary;
+  #content;
 
   static get observedAttributes() {
-    return ['name', 'open']
+    return ['name', 'open'];
   }
 
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -83,24 +83,25 @@ export class DamdomGUIFolderElement extends HTMLElement {
         <summary></summary>
         <div id="content"></div>
       </details>
-    `
+    `;
 
-    this.#details = this.shadowRoot.querySelector('details')
-    this.#summary = this.shadowRoot.querySelector('summary')
-    this.#content = this.shadowRoot.querySelector('#content')
+    this.#details = this.shadowRoot.querySelector('details');
+    this.#summary = this.shadowRoot.querySelector('summary');
+    this.#content = this.shadowRoot.querySelector('#content');
 
-    let slotUID = 0
+    let slotUID = 0;
     const mutationCallback = (mutationsList) => {
       for (const mutation of mutationsList) {
         for (const node of mutation.addedNodes) {
-          const slotName = `node-slot-${++slotUID}`
+          const slotName = `node-slot-${++slotUID}`;
           if (!('value' in node)) {
-            const slot = document.createElement('slot')
-            slot.name = slotName
-            this.#content.appendChild(slot)
-          } else {
-            const label = node.getAttribute('label') ?? node.label ?? node.getAttribute('name') ?? node.name ?? node.id ?? ''
-            const template = document.createElement('template')
+            const slot = document.createElement('slot');
+            slot.name = slotName;
+            this.#content.appendChild(slot);
+          }
+          else {
+            const label = node.getAttribute('label') ?? node.label ?? node.getAttribute('name') ?? node.name ?? node.id ?? '';
+            const template = document.createElement('template');
             template.innerHTML = `
               <section class="input" id="${slotName}">
                 <label title="${label}">${label}</label>
@@ -112,73 +113,73 @@ export class DamdomGUIFolderElement extends HTMLElement {
                   </svg>
                 </div>
               </section>
-            `
-            const fragment = template.content.firstElementChild.cloneNode(true)
-            const resetButton = fragment.querySelector('.reset')
-            const defaultValue = node.value
+            `;
+            const fragment = template.content.firstElementChild.cloneNode(true);
+            const resetButton = fragment.querySelector('.reset');
+            const defaultValue = node.value;
             if (node.defaultValue !== undefined) {
-              resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue))
+              resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue));
             }
             node.addEventListener('change', () => {
-              resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue))
-            })
+              resetButton.toggleAttribute('disabled', JSON.stringify(node.value) === JSON.stringify(node.defaultValue));
+            });
             resetButton.addEventListener('click', () => {
-              node.value = node.defaultValue ?? defaultValue
-            })
-            this.#content.appendChild(fragment)
+              node.value = node.defaultValue ?? defaultValue;
+            });
+            this.#content.appendChild(fragment);
           }
-          node.slot = slotName
+          node.slot = slotName;
         }
         for (const node of mutation.removedNodes) {
-          const section = this.shadowRoot.querySelector(`section#${node.slot}`)
+          const section = this.shadowRoot.querySelector(`section#${node.slot}`);
           if (section) {
-            section.remove()
+            section.remove();
           }
         }
       }
-    }
+    };
     mutationCallback([
       {
         addedNodes: this.children,
         removedNodes: [],
       },
-    ])
-    const observer = new MutationObserver(mutationCallback)
-    observer.observe(this, { childList: true })
+    ]);
+    const observer = new MutationObserver(mutationCallback);
+    observer.observe(this, { childList: true });
 
     this.#details.addEventListener('toggle', (event) => {
-      this.open = event.target.open
-      this.dispatchEvent(new Event(event.type, event))
-    })
+      this.open = event.target.open;
+      this.dispatchEvent(new Event(event.type, event));
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'name':
-        this.#summary.textContent = newValue
-        this.#summary.title = newValue
-        break
+        this.#summary.textContent = newValue;
+        this.#summary.title = newValue;
+        break;
       case 'open':
-        this.#details.open = newValue !== null
-        break
+        this.#details.open = newValue !== null;
+        break;
     }
   }
 
   get open() {
-    return this.hasAttribute('open')
+    return this.hasAttribute('open');
   }
 
   set open(value) {
-    this.toggleAttribute('open', value)
+    this.toggleAttribute('open', value);
   }
 
   get name() {
-    return this.getAttribute('name')
+    return this.getAttribute('name');
   }
 
   set name(value) {
-    this.setAttribute('name', value)
+    this.setAttribute('name', value);
   }
 }
 
-customElements.define('damdom-guifolder', DamdomGUIFolderElement)
+customElements.define('damdom-guifolder', DamdomGUIFolderElement);

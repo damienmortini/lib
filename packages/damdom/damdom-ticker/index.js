@@ -1,9 +1,9 @@
-import Ticker from '@damienmortini/ticker'
+import Ticker from '@damienmortini/ticker';
 
-const PAUSED_BY_ACTION = 1
-const PAUSED_BY_INTERSECTION = 2
-const PAUSED_BY_DOCUMENT_VISIBILITY = 4
-const PAUSED_BY_CONNECTION = 8
+const PAUSED_BY_ACTION = 1;
+const PAUSED_BY_INTERSECTION = 2;
+const PAUSED_BY_DOCUMENT_VISIBILITY = 4;
+const PAUSED_BY_CONNECTION = 8;
 
 /**
  * Element triggering and managing a stable requestAnimationFrame loop.
@@ -11,67 +11,70 @@ const PAUSED_BY_CONNECTION = 8
  */
 
 export class DamdomTickerElement extends HTMLElement {
-  #pauseFlagValue = 0
-  #callback = () => console.log('DamdomTickerElement.callback needs to be set')
+  #pauseFlagValue = 0;
+  #callback = () => console.log('DamdomTickerElement.callback needs to be set');
 
   static get deltaTime() {
-    return Ticker.deltaTime
+    return Ticker.deltaTime;
   }
 
   constructor() {
-    super()
+    super();
 
     const observer = new IntersectionObserver((entries) => {
-      let isIntersecting = false
+      let isIntersecting = false;
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          isIntersecting = true
+          isIntersecting = true;
         }
       }
       if (isIntersecting) {
-        this.#pauseFlag &= ~PAUSED_BY_INTERSECTION
-      } else {
-        this.#pauseFlag |= PAUSED_BY_INTERSECTION
+        this.#pauseFlag &= ~PAUSED_BY_INTERSECTION;
       }
-    })
-    observer.observe(this)
+      else {
+        this.#pauseFlag |= PAUSED_BY_INTERSECTION;
+      }
+    });
+    observer.observe(this);
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        this.#pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
-      } else {
-        this.#pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY
+        this.#pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
       }
-    })
+      else {
+        this.#pauseFlag &= ~PAUSED_BY_DOCUMENT_VISIBILITY;
+      }
+    });
   }
 
   connectedCallback() {
-    this.#pauseFlag &= ~PAUSED_BY_CONNECTION
+    this.#pauseFlag &= ~PAUSED_BY_CONNECTION;
     if (document.hidden) {
-      this.#pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY
+      this.#pauseFlag |= PAUSED_BY_DOCUMENT_VISIBILITY;
     }
     if (!(this.#pauseFlag & PAUSED_BY_ACTION)) {
-      this.#callback()
+      this.#callback();
     }
   }
 
   disconnectedCallback() {
-    this.#pauseFlag |= PAUSED_BY_CONNECTION
+    this.#pauseFlag |= PAUSED_BY_CONNECTION;
   }
 
   get #pauseFlag() {
-    return this.#pauseFlagValue
+    return this.#pauseFlagValue;
   }
 
   set #pauseFlag(value) {
     if (this.#pauseFlagValue === value) {
-      return
+      return;
     }
-    this.#pauseFlagValue = value
+    this.#pauseFlagValue = value;
     if (this.#pauseFlagValue) {
-      Ticker.delete(this.#callback)
-    } else {
-      Ticker.add(this.#callback)
+      Ticker.delete(this.#callback);
+    }
+    else {
+      Ticker.add(this.#callback);
     }
   }
 
@@ -79,14 +82,14 @@ export class DamdomTickerElement extends HTMLElement {
    * Play element.
    */
   play() {
-    this.#pauseFlag &= ~PAUSED_BY_ACTION
+    this.#pauseFlag &= ~PAUSED_BY_ACTION;
   }
 
   /**
    * Pause element.
    */
   pause() {
-    this.#pauseFlag |= PAUSED_BY_ACTION
+    this.#pauseFlag |= PAUSED_BY_ACTION;
   }
 
   /**
@@ -95,12 +98,12 @@ export class DamdomTickerElement extends HTMLElement {
    * @readonly
    */
   get paused() {
-    return !!this.#pauseFlag
+    return !!this.#pauseFlag;
   }
 
   set callback(value) {
-    Ticker.delete(this.#callback)
-    this.#callback = value
-    if (!this.#pauseFlagValue) Ticker.add(this.#callback)
+    Ticker.delete(this.#callback);
+    this.#callback = value;
+    if (!this.#pauseFlagValue) Ticker.add(this.#callback);
   }
 }

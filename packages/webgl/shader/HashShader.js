@@ -25,7 +25,9 @@ float hash1(vec3 p3) {
 float hash1(vec4 n) {
   return hash1(vec2(hash1(n.xyz), n.w));
 }
-` + (noUInt ? '' : `
+    ` + (noUInt
+    ? ''
+    : `
 float hash1(uint v) {
   uint state = v * 747796405u + 2891336453u;
   uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
@@ -45,8 +47,8 @@ float hash1(uvec3 i) {
 	i.x^=i.y^i.z;
   return float(i.x*0x666aa045u)/4294967295.;
 }
-`)
-}
+`);
+};
 
 export const uhash1 = () => {
   return `uint uhash1(uint v) {
@@ -54,8 +56,8 @@ export const uhash1 = () => {
   uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
   return (word >> 22u) ^ word;
 }
-`
-}
+`;
+};
 
 export const hash2 = ({ noUInt = false } = {}) => {
   return `vec2 hash2(vec2 p) {
@@ -63,7 +65,9 @@ export const hash2 = ({ noUInt = false } = {}) => {
   p3 += dot(p3, p3.yzx+33.33);
   return fract((p3.xx+p3.yz)*p3.zy);
 }
-` + (noUInt ? '' : `
+    ` + (noUInt
+    ? ''
+    : `
 vec2 hash2(uint n) {
   // integer hash copied from Hugo Elias
   n = (n << 13U) ^ n;
@@ -79,8 +83,8 @@ vec2 hash2(uvec2 x) {
 
   return vec2(x) * (1.0 / float(0xffffffffU));
 }
-`)
-}
+`);
+};
 
 export const hash3 = () => {
   return `vec3 hash3(vec3 p3) {
@@ -104,5 +108,5 @@ vec3 hash3(uvec3 x) {
 
   return vec3(x) * (1.0 / float(0xffffffffU));
 }
-`
-}
+`;
+};

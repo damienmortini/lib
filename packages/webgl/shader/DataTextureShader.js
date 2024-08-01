@@ -6,7 +6,7 @@ export class DataTextureShader {
         vec2 dataPosition = floor(uv * textureSize / strideScale) * strideScale;
         return texture(dataTexture, vec2(dataPosition.x + float(chunkIndex) + .5, dataPosition.y + .5) / textureSize);
       }
-    `
+    `;
   }
 
   static getTextureDataChunkFromIndex() {
@@ -15,6 +15,6 @@ export class DataTextureShader {
         vec2 uv = vec2(mod(float(index * stride), textureSize.x) / textureSize.x, floor(float(index * stride) / textureSize.x) / textureSize.y);
         return getTextureDataChunkFromUV(dataTexture, uv, chunkIndex, stride, textureSize);
       }
-    `
+    `;
   }
 }

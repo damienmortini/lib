@@ -1,13 +1,14 @@
-import { getGraph } from '@damienmortini/graph/index.js'
-import '@damienmortini/damdom-graph/index.js'
+import '@damienmortini/damdom-graph/index.js';
 
-getGraph('demo-graph').loadData('node_modules/@damienmortini/demo-graph/graph-data.json')
+import { getGraph } from '@damienmortini/graph/index.js';
+
+getGraph('demo-graph').loadData('node_modules/@damienmortini/demo-graph/graph-data.json');
 
 export class DemoGraphElement extends HTMLElement {
-  #cube
+  #cube;
 
   constructor() {
-    super()
+    super();
 
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <style>
@@ -36,12 +37,12 @@ export class DemoGraphElement extends HTMLElement {
       <damdom-graph name="demo-graph"></damdom-graph>
       <damdom-graph name="demo-graph"></damdom-graph>
       <damdom-graph name="demo-graph"></damdom-graph>
-    `
+    `;
 
-    this.#cube = this.shadowRoot.querySelector('#cube')
-    const graph = getGraph('demo-graph')
-    graph.add('cuberotation', 0, (value) => console.log(value))
+    this.#cube = this.shadowRoot.querySelector('#cube');
+    const graph = getGraph('demo-graph');
+    graph.add('cuberotation', 0, value => console.log(value));
   }
 }
 
-window.customElements.define('demo-graph', DemoGraphElement)
+window.customElements.define('demo-graph', DemoGraphElement);

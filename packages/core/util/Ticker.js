@@ -1,62 +1,62 @@
-console.warn('Deprecated. Use @damienmortini/ticker instead.')
+console.warn('Deprecated. Use @damienmortini/ticker instead.');
 
-import Signal from './Signal.js'
+import Signal from './Signal.js';
 
 class Ticker extends Signal {
-  static #BASE_DELTA_TIME = 1000 / 60
-  #time
-  #previousTime
-  #currentAnimationFrame
+  static #BASE_DELTA_TIME = 1000 / 60;
+  #time;
+  #previousTime;
+  #currentAnimationFrame;
 
   constructor() {
-    super()
+    super();
 
-    this.#reset()
+    this.#reset();
 
     document.addEventListener('visibilitychange', () => {
-      this.#reset()
-    })
+      this.#reset();
+    });
   }
 
   add(value) {
     if (!this.size) {
-      this.#reset()
-      this.#update()
+      this.#reset();
+      this.#update();
     }
-    return super.add(value)
+    return super.add(value);
   }
 
   delete(value) {
-    const returnValue = super.delete(value)
-    if (!this.size) cancelAnimationFrame(this.#currentAnimationFrame)
-    return returnValue
+    const returnValue = super.delete(value);
+    if (!this.size) cancelAnimationFrame(this.#currentAnimationFrame);
+    return returnValue;
   }
 
   clear() {
-    cancelAnimationFrame(this.#currentAnimationFrame)
-    super.clear()
+    cancelAnimationFrame(this.#currentAnimationFrame);
+    super.clear();
   }
 
   #reset() {
-    this.#time = this.#previousTime = window.performance.now()
-    this.deltaTime = Ticker.#BASE_DELTA_TIME
-    this.smoothDeltatime = this.deltaTime
-    this.timeScale = 1
-    this.smoothTimeScale = this.timeScale
+    this.#time = this.#previousTime = window.performance.now();
+    this.deltaTime = Ticker.#BASE_DELTA_TIME;
+    this.smoothDeltatime = this.deltaTime;
+    this.timeScale = 1;
+    this.smoothTimeScale = this.timeScale;
   }
 
   #update = () => {
-    this.#currentAnimationFrame = requestAnimationFrame(this.#update)
+    this.#currentAnimationFrame = requestAnimationFrame(this.#update);
 
-    this.#time = window.performance.now()
-    this.deltaTime = this.#time - this.#previousTime
-    this.smoothDeltatime += (this.deltaTime - this.smoothDeltatime) * 0.05
-    this.timeScale = this.deltaTime / Ticker.#BASE_DELTA_TIME
-    this.smoothTimeScale = this.smoothDeltatime / Ticker.#BASE_DELTA_TIME
-    this.#previousTime = this.#time
+    this.#time = window.performance.now();
+    this.deltaTime = this.#time - this.#previousTime;
+    this.smoothDeltatime += (this.deltaTime - this.smoothDeltatime) * 0.05;
+    this.timeScale = this.deltaTime / Ticker.#BASE_DELTA_TIME;
+    this.smoothTimeScale = this.smoothDeltatime / Ticker.#BASE_DELTA_TIME;
+    this.#previousTime = this.#time;
 
-    this.dispatch()
-  }
+    this.dispatch();
+  };
 }
 
-export default new Ticker()
+export default new Ticker();

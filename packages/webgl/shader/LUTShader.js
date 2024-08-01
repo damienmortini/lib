@@ -1,6 +1,6 @@
 export class LUTShader {
   static computeLUT({ lutSize = 64 } = {}) {
-    const lutTextureSize = lutSize * Math.sqrt(lutSize)
+    const lutTextureSize = lutSize * Math.sqrt(lutSize);
     return `
       vec3 computeLUT(vec3 color, sampler2D lutTexture, vec4 lutRectangle)
       {
@@ -32,6 +32,6 @@ export class LUTShader {
       vec3 computeLUT(vec3 color, sampler2D lutTexture) {
         return computeLUT(color, lutTexture, vec4(0., 0., 1., 1.));
       }
-    `
+    `;
   }
 }

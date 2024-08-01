@@ -1,8 +1,9 @@
-import THREEShaderMaterial from './THREEShaderMaterial.js'
-import LightShader from '@damienmortini/core/shader/LightShader.js'
-import RayShader from '@damienmortini/core/shader/RayShader.js'
-import PBRShader from '@damienmortini/core/shader/PBRShader.js'
-import { Color, Vector3, ShaderChunk } from '../../../three/src/Three.js'
+import LightShader from '@damienmortini/core/shader/LightShader.js';
+import PBRShader from '@damienmortini/core/shader/PBRShader.js';
+import RayShader from '@damienmortini/core/shader/RayShader.js';
+
+import { Color, ShaderChunk, Vector3 } from '../../../three/src/Three.js';
+import THREEShaderMaterial from './THREEShaderMaterial.js';
 
 export default class THREEPBRMaterial extends THREEShaderMaterial {
   constructor({
@@ -10,14 +11,18 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
     vertexChunks = [],
     fragmentChunks = [],
     uniforms = {},
-    pbrDiffuseLightFromRay = (uniforms.envMap ? `
+    pbrDiffuseLightFromRay = (uniforms.envMap
+      ? `
       vec4 texel = ${webgl2 ? 'textureLod' : 'textureCubeLodEXT'}(envMap, ray.direction, roughness * ${Math.log2(uniforms.envMap.image.width).toFixed(1)});
       return texel.rgb;
-    ` : undefined),
-    pbrReflectionFromRay = (uniforms.envMap ? `
+    `
+      : undefined),
+    pbrReflectionFromRay = (uniforms.envMap
+      ? `
     vec4 texel = ${webgl2 ? 'textureLod' : 'textureCubeLodEXT'}(envMap, ray.direction, roughness * ${Math.log2(uniforms.envMap.image.width).toFixed(1)});
     return texel.rgb;
-  ` : undefined),
+  `
+      : undefined),
     ...options
   } = {}) {
     super({
@@ -102,6 +107,6 @@ export default class THREEPBRMaterial extends THREEShaderMaterial {
         ...fragmentChunks,
       ],
       ...options,
-    })
+    });
   }
 }

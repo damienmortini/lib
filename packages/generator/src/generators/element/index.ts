@@ -1,9 +1,9 @@
-import fs from 'fs-extra'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
+import fs from 'fs-extra';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * @param {Object} object
@@ -14,26 +14,28 @@ const __dirname = dirname(__filename)
  * @param {String} [object.path=./packages] Output path
  */
 export default function ({ template, elementScope, elementName, scope, path }) {
-  const flattenElementname = elementName.replaceAll(' ', '').toLowerCase()
-  const fullElementName = `${elementScope}-${flattenElementname}`.replaceAll(' ', '').toLowerCase()
-  const fullPath = `${path}/${flattenElementname}element`
-  fs.ensureDirSync(fullPath)
-  const fileNames = fs.readdirSync(`${__dirname}/../../templates/${template}`)
-  let packageJSON = {}
+  const flattenElementname = elementName.replaceAll(' ', '').toLowerCase();
+  const fullElementName = `${elementScope}-${flattenElementname}`.replaceAll(' ', '').toLowerCase();
+  const fullPath = `${path}/${flattenElementname}element`;
+  fs.ensureDirSync(fullPath);
+  const fileNames = fs.readdirSync(`${__dirname}/../../templates/${template}`);
+  let packageJSON = {};
   for (const fileName of fileNames) {
     if (fileName === '_package.json') {
-      packageJSON = fs.readJSONSync(`${__dirname}/../../templates/${template}/${fileName}`)
-    } else if (fileName === 'index.ts') {
-      let indexFileContent = fs.readFileSync(`${__dirname}/../../templates/${template}/${fileName}`, { encoding: 'utf-8' })
-      indexFileContent = indexFileContent.replaceAll('template-element', fullElementName)
-      indexFileContent = indexFileContent.replaceAll('template title', elementName)
+      packageJSON = fs.readJSONSync(`${__dirname}/../../templates/${template}/${fileName}`);
+    }
+    else if (fileName === 'index.ts') {
+      let indexFileContent = fs.readFileSync(`${__dirname}/../../templates/${template}/${fileName}`, { encoding: 'utf-8' });
+      indexFileContent = indexFileContent.replaceAll('template-element', fullElementName);
+      indexFileContent = indexFileContent.replaceAll('template title', elementName);
       const elementClass = `${elementScope} ${elementName} Element`.replaceAll(/(\s+|^)(.)/g, (match, captureGroup1, captureGroup2) =>
         captureGroup2.toUpperCase(),
-      )
-      indexFileContent = indexFileContent.replaceAll('TemplateElement', elementClass)
-      fs.writeFileSync(`${fullPath}/${fileName}`, indexFileContent)
-    } else {
-      fs.copyFileSync(`${__dirname}/../../templates/${template}/${fileName}`, `${fullPath}/${fileName}`)
+      );
+      indexFileContent = indexFileContent.replaceAll('TemplateElement', elementClass);
+      fs.writeFileSync(`${fullPath}/${fileName}`, indexFileContent);
+    }
+    else {
+      fs.copyFileSync(`${__dirname}/../../templates/${template}/${fileName}`, `${fullPath}/${fileName}`);
     }
   }
   fs.outputFileSync(
@@ -48,5 +50,5 @@ export default function ({ template, elementScope, elementName, scope, path }) {
       null,
       2,
     ),
-  )
+  );
 }

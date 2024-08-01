@@ -23,7 +23,8 @@ export class DemoConnectorElement extends HTMLElement {
       if (!activeConnector) {
         activeConnector = event.target;
         activeConnector.addEventListener('blur', () => (activeConnector = null), { once: true });
-      } else {
+      }
+      else {
         const connector = activeConnector;
         requestAnimationFrame(() => connector.blur());
         activeConnector.connect(event.target);

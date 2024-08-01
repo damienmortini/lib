@@ -5,8 +5,8 @@ export const aastep = () => {
     float afwidth = fwidth(value) * 0.5;
     return smoothstep(threshold - afwidth, threshold + afwidth, value);
   }
-`
-}
+`;
+};
 
 export class AntialiasShader {
   static vertex() {
@@ -26,7 +26,7 @@ export class AntialiasShader {
         v_rgbSE = (fragCoord + vec2(1.0, 1.0)) * inverseVP;
         v_rgbM = vec2(fragCoord * inverseVP);
       }
-    `
+    `;
   }
 
   static fragment() {
@@ -92,6 +92,6 @@ export class AntialiasShader {
         color = vec4(rgbB, texColor.a);
         return color;
       }
-    `
+    `;
   }
 }

@@ -75,11 +75,11 @@ export default class DamdomViewportElement extends HTMLElement {
       if (isViewportInteracting) return;
       const target = gesture.event.target;
       if (
-        target.isContentEditable ||
-        (target instanceof HTMLInputElement &&
-          ['text', 'number', 'password', 'search', 'number', 'range', 'email', 'url', 'tel'].includes(target.type)) ||
-        target instanceof HTMLTextAreaElement ||
-        getComputedStyle(target)['touch-action'] === 'none'
+        target.isContentEditable
+        || (target instanceof HTMLInputElement
+        && ['text', 'number', 'password', 'search', 'number', 'range', 'email', 'url', 'tel'].includes(target.type))
+        || target instanceof HTMLTextAreaElement
+        || getComputedStyle(target)['touch-action'] === 'none'
       )
         return;
       offsetSlot(gesture.target.assignedSlot, gesture.movementX, gesture.movementY);
