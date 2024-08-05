@@ -101,7 +101,7 @@ export class Server {
     const adressesString = addresses.join('_');
 
     let [key, cert] = await Promise.all([
-      readFile(`${certificatesDirectory}/${adressesString}/key.pem`, { encoding: 'utf-8' }), readFile(`${certificatesDirectory}/${adressesString}/cert.pem`, { encoding: 'utf-8' }),
+      readFile(`${certificatesDirectory}/${adressesString}.key`, { encoding: 'utf-8' }), readFile(`${certificatesDirectory}/${adressesString}.crt`, { encoding: 'utf-8' }),
     ]).catch(() => [undefined, undefined]);
 
     if (!key || !cert) {
@@ -124,25 +124,13 @@ export class Server {
       key = newKey;
       cert = newCert;
 
-      await mkdir(`${certificatesDirectory}/${adressesString}`, { recursive: true });
+      await mkdir(`${certificatesDirectory}`, { recursive: true });
 
       await Promise.all([
-        writeFile(`${certificatesDirectory}/${adressesString}/key.pem`, key),
-        writeFile(`${certificatesDirectory}/${adressesString}/cert.pem`, cert),
+        writeFile(`${certificatesDirectory}/${adressesString}.key`, key),
+        writeFile(`${certificatesDirectory}/${adressesString}.crt`, cert),
       ]);
     }
-    // const ca = await createCA({
-    //   organization: 'localhost',
-    //   countryCode: 'US',
-    //   state: 'California',
-    //   locality: 'San Francisco',
-    //   validity: 365,
-    // });
-    // const { key, cert } = await createCert({
-    //   ca: { key: ca.key, cert: ca.cert },
-    //   domains: ['127.0.0.1', 'localhost'],
-    //   validity: 365,
-    // });
 
     /**
      * Create HTTP2 Server
