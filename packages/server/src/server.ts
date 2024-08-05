@@ -1,18 +1,20 @@
-import * as chokidar from 'chokidar';
-import devcert from 'devcert';
-import * as fs from 'fs/promises';
+import { FSWatcher, watch as chokidarWatch } from 'chokidar';
+import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
-import * as http2 from 'http2';
-import * as https from 'https';
+import { constants, createSecureServer, type Http2SecureServer } from 'http2';
+import { createServer } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
-import * as os from 'os';
+import { createCA, createCert } from 'mkcert';
+import { networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname } from 'path';
+import { join } from 'path';
 import QRCode from 'qrcode';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
+const certificatesDirectory = join(import.meta.dirname, '../certificates');
 
 const resolveImports = (string: string, removeCSSImportAttribute = false) => {
   string = string.replaceAll(
@@ -53,11 +55,11 @@ type ServerOptions = {
 };
 
 export class Server {
-  http2SecureServer: http2.Http2SecureServer;
+  http2SecureServer: Http2SecureServer;
   ready: Promise<void>;
 
   #wss: WebSocketServer;
-  #watcher: chokidar.FSWatcher;
+  #watcher: FSWatcher;
 
   constructor(serverOptions: ServerOptions = {}) {
     this.ready = this.#setup(serverOptions);
@@ -84,7 +86,7 @@ export class Server {
      * Get addresses
      */
     const addresses = ['localhost'];
-    const networkInterfaces = os.networkInterfaces();
+    const networkInterfaces = getNetworkInterfaces();
     Object.values(networkInterfaces)
       .flat()
       .forEach((networkInterface) => {
@@ -96,12 +98,56 @@ export class Server {
     /**
      * Create certificate for addresses
      */
-    const { key, cert } = await devcert.certificateFor(addresses[0]);
+    const adressesString = addresses.join('_');
+
+    let [key, cert] = await Promise.all([
+      readFile(`${certificatesDirectory}/${adressesString}/key.pem`, { encoding: 'utf-8' }), readFile(`${certificatesDirectory}/${adressesString}/cert.pem`, { encoding: 'utf-8' }),
+    ]).catch(() => [undefined, undefined]);
+
+    if (!key || !cert) {
+      console.log('Creating certificate for', addresses);
+
+      const ca = await createCA({
+        organization: 'localhost',
+        countryCode: 'US',
+        state: 'California',
+        locality: 'San Francisco',
+        validity: 365,
+      });
+
+      const { key: newKey, cert: newCert } = await createCert({
+        ca: { key: ca.key, cert: ca.cert },
+        domains: addresses,
+        validity: 365,
+      });
+
+      key = newKey;
+      cert = newCert;
+
+      await mkdir(`${certificatesDirectory}/${adressesString}`, { recursive: true });
+
+      await Promise.all([
+        writeFile(`${certificatesDirectory}/${adressesString}/key.pem`, key),
+        writeFile(`${certificatesDirectory}/${adressesString}/cert.pem`, cert),
+      ]);
+    }
+    // const ca = await createCA({
+    //   organization: 'localhost',
+    //   countryCode: 'US',
+    //   state: 'California',
+    //   locality: 'San Francisco',
+    //   validity: 365,
+    // });
+    // const { key, cert } = await createCert({
+    //   ca: { key: ca.key, cert: ca.cert },
+    //   domains: ['127.0.0.1', 'localhost'],
+    //   validity: 365,
+    // });
 
     /**
      * Create HTTP2 Server
      */
-    this.http2SecureServer = http2.createSecureServer({
+    this.http2SecureServer = createSecureServer({
       key,
       cert,
     });
@@ -115,19 +161,18 @@ export class Server {
         /**
          * Create WebSocket server to refresh page on file change
          */
-        const webSocketServer = https.createServer({
+        const webSocketServer = createServer({
           key,
           cert,
         });
         this.#wss = new WebSocketServer({ server: webSocketServer });
         webSocketServer.listen(webSocketServerPort);
 
-        this.#watcher = chokidar
-          .watch(undefined, {
-            ignored: watchIgnore,
-            ignoreInitial: true,
-            usePolling: true,
-          })
+        this.#watcher = chokidarWatch(undefined, {
+          ignored: watchIgnore,
+          ignoreInitial: true,
+          usePolling: true,
+        })
           .on('change', (path) => {
             if (verbose) {
               console.log(`${path} just changed, refresh.`);
@@ -138,13 +183,13 @@ export class Server {
     });
 
     this.http2SecureServer.on('stream', async (stream, headers) => {
-      if (headers[http2.constants.HTTP2_HEADER_METHOD] !== http2.constants.HTTP2_METHOD_GET) {
+      if (headers[constants.HTTP2_HEADER_METHOD] !== constants.HTTP2_METHOD_GET) {
         return;
       }
 
-      const requestAuthority = headers[http2.constants.HTTP2_HEADER_AUTHORITY];
-      const requestPath = headers[http2.constants.HTTP2_HEADER_PATH];
-      const requestRange = headers[http2.constants.HTTP2_HEADER_RANGE];
+      const requestAuthority = headers[constants.HTTP2_HEADER_AUTHORITY];
+      const requestPath = headers[constants.HTTP2_HEADER_PATH];
+      const requestRange = headers[constants.HTTP2_HEADER_RANGE];
       const userAgent = headers['user-agent'];
       const fetchDest = headers['sec-fetch-dest'];
 
@@ -157,7 +202,7 @@ export class Server {
         let filePath = `${rootPath}${requestPath}`;
 
         const responseHeaders = {
-          ':status': http2.constants.HTTP_STATUS_OK,
+          ':status': constants.HTTP_STATUS_OK,
           'content-type': String(mimeTypes.lookup(filePath)),
           ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
           ...(fetchDest === 'script'
@@ -172,7 +217,7 @@ export class Server {
          * Rewrite to root if url isn't a file and doesn't exist
          */
         try {
-          if (!/\.[^/]*$/.test(filePath) && !(await fs.stat(filePath))) {
+          if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath))) {
             throw new Error();
           }
         }
@@ -183,7 +228,7 @@ export class Server {
         /**
          * If path is a directory then set index.html file by default
          */
-        if ((await fs.stat(filePath))?.isDirectory()) {
+        if ((await stat(filePath))?.isDirectory()) {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
         }
 
@@ -196,7 +241,7 @@ export class Server {
          */
         if (watch && fileExtension === '.html') {
           stream.respond(responseHeaders);
-          let fileContent = await fs.readFile(filePath, {
+          let fileContent = await readFile(filePath, {
             encoding: 'utf-8',
           });
           if (resolveModules) {
@@ -221,7 +266,7 @@ socket.addEventListener("message", function (event) {
         }
         else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
           stream.respond(responseHeaders);
-          let fileContent = await fs.readFile(filePath, {
+          let fileContent = await readFile(filePath, {
             encoding: 'utf-8',
           });
           fileContent = resolveImports(fileContent, convertCSSImport);
@@ -230,7 +275,7 @@ socket.addEventListener("message", function (event) {
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
           responseHeaders['content-type'] = 'application/javascript';
           stream.respond(responseHeaders);
-          let fileContent = await fs.readFile(filePath, {
+          let fileContent = await readFile(filePath, {
             encoding: 'utf-8',
           });
           fileContent = `const styles = new CSSStyleSheet();
@@ -248,11 +293,11 @@ export default styles;`;
         if (stream.closed) return;
 
         if (error.code === 'ENOENT') {
-          stream.respond({ ':status': http2.constants.HTTP_STATUS_NOT_FOUND });
+          stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
         }
         else {
           stream.respond({
-            ':status': http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            ':status': constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
           });
         }
         stream.end();

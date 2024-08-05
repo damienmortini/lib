@@ -9,6 +9,7 @@
   "scripts": {
     "build": "npx nx run-many --target=build",
     "build:watch": "npx nx run-many --target=build --watch",
+    "serve": "server",
     "bump": "lerna version patch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
