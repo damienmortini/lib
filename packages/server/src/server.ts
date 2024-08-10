@@ -5,11 +5,11 @@ import { constants, createSecureServer, type Http2SecureServer } from 'http2';
 import { createServer } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
-import { createCA, createCert } from 'mkcert';
 import { networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname } from 'path';
 import { join } from 'path';
 import QRCode from 'qrcode';
+import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
@@ -100,35 +100,42 @@ export class Server {
      */
     const adressesString = addresses.join('_');
 
-    let [key, cert] = await Promise.all([
-      readFile(`${certificatesDirectory}/${adressesString}.key`, { encoding: 'utf-8' }), readFile(`${certificatesDirectory}/${adressesString}.crt`, { encoding: 'utf-8' }),
+    let [cert, key] = await Promise.all([
+      readFile(`${certificatesDirectory}/${adressesString}.crt`, { encoding: 'utf-8' }),
+      readFile(`${certificatesDirectory}/${adressesString}.key`, { encoding: 'utf-8' }),
     ]).catch(() => [undefined, undefined]);
 
     if (!key || !cert) {
       console.log('Creating certificate for', addresses);
 
-      const ca = await createCA({
-        organization: 'localhost',
-        countryCode: 'US',
-        state: 'California',
-        locality: 'San Francisco',
-        validity: 365,
-      });
+      const pems = generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
+        {
+          extensions: [
+            {
+              name: 'subjectAltName',
+              altNames: addresses.map((address, index) => {
+                // DNS Name
+                if (index === 0) {
+                  return ({ type: 2, value: address });
+                }
+                // IP Address
+                else {
+                  return ({ type: 7, ip: address });
+                }
+              }),
+            },
+          ],
+        },
+      );
 
-      const { key: newKey, cert: newCert } = await createCert({
-        ca: { key: ca.key, cert: ca.cert },
-        domains: addresses,
-        validity: 365,
-      });
-
-      key = newKey;
-      cert = newCert;
+      cert = pems.cert;
+      key = pems.private;
 
       await mkdir(`${certificatesDirectory}`, { recursive: true });
 
       await Promise.all([
-        writeFile(`${certificatesDirectory}/${adressesString}.key`, key),
         writeFile(`${certificatesDirectory}/${adressesString}.crt`, cert),
+        writeFile(`${certificatesDirectory}/${adressesString}.key`, key),
       ]);
     }
 
@@ -136,8 +143,8 @@ export class Server {
      * Create HTTP2 Server
      */
     this.http2SecureServer = createSecureServer({
-      key,
       cert,
+      key,
     });
 
     this.http2SecureServer.on('error', (error) => {
