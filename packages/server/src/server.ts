@@ -52,6 +52,7 @@ type ServerOptions = {
   watchIgnore?: Array<string | RegExp>;
   verbose?: boolean;
   port?: number;
+  useExternalCertificate?: boolean;
 };
 
 export class Server {
@@ -73,7 +74,8 @@ export class Server {
     watchIgnore = undefined,
     verbose = false,
     port = 3000,
-  } = {}) {
+    useExternalCertificate = false,
+  }: ServerOptions = {}) {
     /**
      * Get port
      */
@@ -98,7 +100,8 @@ export class Server {
     /**
      * Create certificate for addresses
      */
-    const adressesString = addresses.join('_');
+    const certificateAdresses = useExternalCertificate ? addresses : ['localhost'];
+    const adressesString = certificateAdresses.join('_');
 
     let [cert, key] = await Promise.all([
       readFile(`${certificatesDirectory}/${adressesString}.crt`, { encoding: 'utf-8' }),
@@ -106,21 +109,21 @@ export class Server {
     ]).catch(() => [undefined, undefined]);
 
     if (!key || !cert) {
-      console.log('Creating certificate for', addresses);
+      console.log('Creating certificate for', certificateAdresses);
 
       const pems = generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
         {
           extensions: [
             {
               name: 'subjectAltName',
-              altNames: addresses.map((address, index) => {
-                // DNS Name
-                if (index === 0) {
-                  return ({ type: 2, value: address });
-                }
-                // IP Address
-                else {
+              altNames: certificateAdresses.map((address) => {
+                const isIPAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(address);
+
+                if (isIPAddress) {
                   return ({ type: 7, ip: address });
+                }
+                else {
+                  return ({ type: 2, value: address });
                 }
               }),
             },
