@@ -11,6 +11,7 @@ let path: string;
 let rootPath: string;
 let watchIgnore: Array<string | RegExp>;
 let port: number;
+let useExternalCertificate = false;
 
 for (const arg of process.argv) {
   if (arg.startsWith('--path')) {
@@ -31,6 +32,9 @@ for (const arg of process.argv) {
   else if (arg.startsWith('--port')) {
     port = parseInt(arg.split('=')[1].trim());
   }
+  else if (arg === '--external-certificate') {
+    useExternalCertificate = true;
+  }
 }
 
 const server = new Server({
@@ -41,6 +45,7 @@ const server = new Server({
   verbose,
   resolveModules,
   port,
+  useExternalCertificate,
 });
 
 await server.ready;
