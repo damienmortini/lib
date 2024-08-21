@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/animation",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/animation",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -17,7 +17,7 @@
     "generateTypes": "npx -p typescript tsc index.js --target esnext --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/ticker": "^0.0.9"
+    "@damienmortini/ticker": "^0.0.10"
   },
   "publishConfig": {
     "access": "public"

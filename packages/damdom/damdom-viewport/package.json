@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-viewport",
-  "version": "0.0.75",
+  "version": "0.0.76",
   "description": "<damdom-viewport> custom element.",
   "keywords": [
     "custom elements",
@@ -18,7 +18,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.154"
+    "@damienmortini/core": "^0.2.155"
   },
   "publishConfig": {
     "access": "public"

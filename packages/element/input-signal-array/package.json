@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-signal-array",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "<element-input-signal-array> custom element.",
   "keywords": [
     "custom elements",
@@ -18,7 +18,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/element-viewer-array": "^0.0.17"
+    "@damienmortini/element-viewer-array": "^0.0.18"
   },
   "publishConfig": {
     "access": "public"

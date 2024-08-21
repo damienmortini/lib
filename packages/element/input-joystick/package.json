@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-input-joystick",
-  "version": "0.0.146",
+  "version": "0.0.147",
   "description": "<element-input-joystick> custom element.",
   "keywords": [
     "custom elements",
@@ -18,7 +18,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.154"
+    "@damienmortini/core": "^0.2.155"
   },
   "publishConfig": {
     "access": "public"
