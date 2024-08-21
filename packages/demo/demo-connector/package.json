@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/demo-connector",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/demo/demo-connector",
   "bugs": "https://github.com/damienmortini/lib/issues",
