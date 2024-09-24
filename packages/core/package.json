@@ -23,7 +23,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/gestureobserver": "^0.0.8",
+    "@damienmortini/gesture-observer": "^0.0.8",
     "@damienmortini/math": "^0.0.23"
   },
   "publishConfig": {

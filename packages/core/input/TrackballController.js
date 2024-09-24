@@ -1,6 +1,6 @@
 console.warn('Deprecated. Use @damienmortini/trackballtransform instead.');
 
-import GestureObserver from '@damienmortini/gestureobserver';
+import { GestureObserver } from '@damienmortini/gesture-observer';
 import Matrix4 from '@damienmortini/math/Matrix4.js';
 import Quaternion from '@damienmortini/math/Quaternion.js';
 import Vector2 from '@damienmortini/math/Vector2.js';

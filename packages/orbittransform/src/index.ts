@@ -1,4 +1,4 @@
-import { GestureObserver } from '@damienmortini/gestureobserver';
+import { GestureObserver } from '@damienmortini/gesture-observer';
 import { Matrix4 } from '@damienmortini/math';
 
 export class OrbitTransform {

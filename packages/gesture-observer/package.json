@@ -1,19 +1,23 @@
 {
-  "name": "@damienmortini/gestureobserver",
+  "name": "@damienmortini/gesture-observer",
   "version": "0.0.8",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gestureobserver",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gesture-observer",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/gestureobserver"
+    "directory": "packages/gesture-observer"
   },
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+    "build": "tsc"
   },
   "publishConfig": {
     "access": "public"

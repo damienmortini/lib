@@ -1,4 +1,4 @@
-import GestureObserver from '@damienmortini/gestureobserver';
+import { GestureObserver } from '@damienmortini/gesture-observer';
 
 import css from './index.css' with { type: 'css' };
 
