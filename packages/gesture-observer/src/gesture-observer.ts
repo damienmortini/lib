@@ -1,39 +1,36 @@
-export class GestureObserver {
-  #elementsData = new Map();
-  #callback;
+import type { Gesture } from './gesture.js';
 
-  /**
-   * @typedef Gesture
-   * @property {HTMLElement} target - The target DOM Element
-   * @property {Map<number, PointerEvent>} pointers - Map of active pointers
-   * @property {Event} event - Event that triggered the gesture
-   * @property {number} x - Gesture position on the X axis
-   * @property {number} y - Gesture position on the Y axis
-   * @property {number} movementX - Movement on the X axis
-   * @property {number} movementY - Movement on the Y axis
-   * @property {number} offsetX - Offset between gesture start and gesture end on the X axis
-   * @property {number} offsetY - Offset between gesture start and gesture end on the Y axis
-   * @property {number} movementScale - Pinch-zoom movement
-   * @property {number} movementRotation - Angular movement in radians
-   * @property {number} duration - Duration of the gesture
-   * @property {("starting"|"moving"|"finishing")} state - State of the gesture
-   */
-  /**
-   * @callback GestureObserverCallback
-   * @param {Gesture} gesture - Current gesture changes
-   */
-  /**
-   * @param {GestureObserverCallback} callback
-   */
-  constructor(callback) {
+type GestureObserverCallback = (gesture: Gesture) => void;
+
+type ElementData = {
+  pointers: Map<number, PointerEvent>;
+  gestureVectorX: number;
+  gestureVectorY: number;
+  previousSize: number;
+  previousX: number;
+  previousY: number;
+  offsetX: number;
+  offsetY: number;
+  previousMovementX: number;
+  previousMovementY: number;
+  previousRotation: number;
+  startTimeStamp: number;
+  pointerLock: boolean;
+  pointerCapture: boolean;
+};
+
+export class GestureObserver {
+  #elementsData: Map<HTMLElement | Window, ElementData> = new Map();
+  #callback: GestureObserverCallback;
+
+  constructor(callback: GestureObserverCallback) {
     this.#callback = callback;
   }
 
-  /**
-   * Observe gesture changes on the specified target element.
-   * @param {HTMLElement|Window} element Element to observe
-   */
-  observe(element, { pointerLock = false, pointerCapture = false } = {}) {
+  observe(
+    element: HTMLElement | Window,
+    options: { pointerLock?: boolean; pointerCapture?: boolean } = {},
+  ): void {
     let elementData = this.#elementsData.get(element);
     if (!elementData) {
       elementData = {
@@ -54,45 +51,50 @@ export class GestureObserver {
       };
       this.#elementsData.set(element, elementData);
     }
-    elementData.pointerLock = pointerLock;
-    elementData.pointerCapture = pointerCapture;
+    elementData.pointerLock = options.pointerLock ?? false;
+    elementData.pointerCapture = options.pointerCapture ?? false;
     element.addEventListener('pointerdown', this.#onPointerDown);
   }
 
-  /**
-   * Stop observing gesture changes on the specified target element.
-   * @param {HTMLElement|Window} element Element to unobserve
-   */
-  unobserve(element) {
+  unobserve(element: HTMLElement | Window): void {
     if (!this.#elementsData.has(element)) return;
     element.removeEventListener('pointerdown', this.#onPointerDown);
     element.removeEventListener('pointermove', this.#onPointerMove);
+    element.removeEventListener('pointerup', this.#onPointerUp);
+    element.removeEventListener('pointerleave', this.#onPointerUp);
     this.#elementsData.delete(element);
   }
 
-  /**
-   * Stops watching all of its target elements for gesture changes.
-   */
-  disconnect() {
-    for (const element of this.#elementsData.keys()) this.unobserve(element);
+  disconnect(): void {
+    for (const element of this.#elementsData.keys()) {
+      this.unobserve(element);
+    }
   }
 
-  #resetElementPreviousData(element) {
+  #resetElementPreviousData(element: HTMLElement | Window): void {
     const data = this.#elementsData.get(element);
-    data.gestureVectorX = 0;
-    data.gestureVectorY = 0;
-    data.previousSize = 0;
-    data.previousX = 0;
-    data.previousY = 0;
-    data.previousRotation = 0;
+    if (data) {
+      data.gestureVectorX = 0;
+      data.gestureVectorY = 0;
+      data.previousSize = 0;
+      data.previousX = 0;
+      data.previousY = 0;
+      data.previousRotation = 0;
+    }
   }
 
-  #onPointerDown = (event) => {
-    const element = event.currentTarget;
+  #onPointerDown = (event: PointerEvent): void => {
+    const element = event.currentTarget as HTMLElement | Window;
     const data = this.#elementsData.get(element);
 
-    if (data.pointerLock) element.requestPointerLock();
-    else if (data.pointerCapture) element.setPointerCapture(event.pointerId);
+    if (!data) return;
+
+    if (data.pointerLock && element instanceof HTMLElement) {
+      element.requestPointerLock();
+    }
+    else if (data.pointerCapture && element instanceof HTMLElement) {
+      element.setPointerCapture(event.pointerId);
+    }
 
     this.#resetElementPreviousData(element);
     data.pointers.set(event.pointerId, event);
@@ -105,8 +107,8 @@ export class GestureObserver {
       data.offsetY = 0;
       this.#callback({
         event,
-        pointers: data.pointers,
-        target: event.currentTarget,
+        pointers: new Map(data.pointers),
+        target: element,
         movementX: 0,
         movementY: 0,
         x: event.clientX,
@@ -121,8 +123,11 @@ export class GestureObserver {
     }
   };
 
-  #onPointerMove = (event) => {
-    const data = this.#elementsData.get(event.currentTarget);
+  #onPointerMove = (event: PointerEvent): void => {
+    const element = event.currentTarget as HTMLElement | Window;
+    const data = this.#elementsData.get(element);
+    if (!data) return;
+
     data.pointers.set(event.pointerId, event);
     let x = 0;
     let y = 0;
@@ -139,7 +144,7 @@ export class GestureObserver {
     x /= data.pointers.size;
     y /= data.pointers.size;
 
-    if (!data.previousX && !data.previousY) {
+    if (data.previousX === 0 && data.previousY === 0) {
       data.previousX = x;
       data.previousY = y;
       return;
@@ -171,10 +176,14 @@ export class GestureObserver {
 
     this.#callback({
       event,
-      pointers: data.pointers,
-      target: event.currentTarget,
-      movementX: data.pointerLock ? event.movementX / devicePixelRatio : movementX,
-      movementY: data.pointerLock ? event.movementY / devicePixelRatio : movementY,
+      pointers: new Map(data.pointers),
+      target: element,
+      movementX: data.pointerLock && event instanceof PointerEvent && 'movementX' in event
+        ? event.movementX / devicePixelRatio
+        : movementX,
+      movementY: data.pointerLock && event instanceof PointerEvent && 'movementY' in event
+        ? event.movementY / devicePixelRatio
+        : movementY,
       x,
       y,
       offsetX: data.offsetX,
@@ -186,19 +195,23 @@ export class GestureObserver {
     });
   };
 
-  #onPointerUp = (event) => {
-    const element = event.currentTarget;
+  #onPointerUp = (event: PointerEvent): void => {
+    const element = event.currentTarget as HTMLElement | Window;
     const data = this.#elementsData.get(element);
-    data?.pointers.delete(event.pointerId);
-    element.releasePointerCapture(event.pointerId);
+    if (!data) return;
+
+    data.pointers.delete(event.pointerId);
+    if (element instanceof HTMLElement) {
+      element.releasePointerCapture(event.pointerId);
+    }
     if (document.exitPointerLock) {
       document.exitPointerLock();
     }
-    if (!data || !data.pointers.size) {
+    if (data.pointers.size === 0) {
       this.#callback({
         event,
-        pointers: data.pointers,
-        target: event.currentTarget,
+        pointers: new Map(),
+        target: element,
         movementX: 0,
         movementY: 0,
         movementScale: 1,

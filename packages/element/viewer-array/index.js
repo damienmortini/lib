@@ -1,4 +1,4 @@
-import GestureObserver from '@damienmortini/gestureobserver';
+import { GestureObserver } from '@damienmortini/gesture-observer';
 
 export default class ArrayViewerElement extends HTMLElement {
   static get observedAttributes() {

@@ -1,4 +1,4 @@
-import { GestureObserver } from '@damienmortini/gestureobserver';
+import { GestureObserver } from '@damienmortini/gesture-observer';
 import { Matrix4, Quaternion, Vector2, Vector3 } from '@damienmortini/math';
 
 export class TrackballTransform {
