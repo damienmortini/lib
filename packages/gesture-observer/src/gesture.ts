@@ -1,5 +1,6 @@
 export type Gesture = {
-  target: HTMLElement | Window;
+  target: EventTarget;
+  currentTarget: EventTarget;
   pointers: Map<number, PointerEvent>;
   event: PointerEvent;
   x: number;
