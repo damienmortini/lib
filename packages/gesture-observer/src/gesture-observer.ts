@@ -4,6 +4,7 @@ type GestureObserverCallback = (gesture: Gesture) => void;
 
 type ElementData = {
   pointers: Map<number, PointerEvent>;
+  target: EventTarget | null;
   gestureVectorX: number;
   gestureVectorY: number;
   previousSize: number;
@@ -35,6 +36,7 @@ export class GestureObserver {
     if (!elementData) {
       elementData = {
         pointers: new Map(),
+        target: null,
         gestureVectorX: 0,
         gestureVectorY: 0,
         previousSize: 0,
@@ -105,10 +107,12 @@ export class GestureObserver {
       data.startTimeStamp = Date.now();
       data.offsetX = 0;
       data.offsetY = 0;
+      data.target = event.target;
       this.#callback({
         event,
         pointers: new Map(data.pointers),
-        target: element,
+        target: event.target,
+        currentTarget: element,
         movementX: 0,
         movementY: 0,
         x: event.clientX,
@@ -126,6 +130,7 @@ export class GestureObserver {
   #onPointerMove = (event: PointerEvent): void => {
     const element = event.currentTarget as HTMLElement | Window;
     const data = this.#elementsData.get(element);
+
     if (!data) return;
 
     data.pointers.set(event.pointerId, event);
@@ -177,7 +182,8 @@ export class GestureObserver {
     this.#callback({
       event,
       pointers: new Map(data.pointers),
-      target: element,
+      target: data.target,
+      currentTarget: element,
       movementX: data.pointerLock && event instanceof PointerEvent && 'movementX' in event
         ? event.movementX / devicePixelRatio
         : movementX,
@@ -211,7 +217,8 @@ export class GestureObserver {
       this.#callback({
         event,
         pointers: new Map(),
-        target: element,
+        target: data.target,
+        currentTarget: element,
         movementX: 0,
         movementY: 0,
         movementScale: 1,
