@@ -14,7 +14,7 @@
   "main": "index.js",
   "bin": "bin/index.js",
   "dependencies": {
-    "chokidar": "^3.6.0"
+    "chokidar": "^4.0.1"
   },
   "publishConfig": {
     "access": "public"

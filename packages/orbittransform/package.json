@@ -24,7 +24,7 @@
     "@damienmortini/math": "^0.0.23"
   },
   "devDependencies": {
-    "typescript": "^5.5.2"
+    "typescript": "^5.6.2"
   },
   "publishConfig": {
     "access": "public"
