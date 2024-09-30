@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/globlink",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "npm link all packages matching an array of glob patterns",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/globlink",
   "bugs": "https://github.com/damienmortini/lib/issues",
