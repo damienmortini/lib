@@ -9,6 +9,7 @@ export const blend2gltf = ({
   path = '.',
   watch = false,
 }) => {
+  // TODO: fix chokidar that doesnt support globs anymore, use fast-glob instead
   const watcher = chokidar.watch(`${path}/**/*.blend`);
   watcher.on('all', (event, path) => {
     execSync(`blender --background ${path} --python "${directoryName}/index.py"`);
