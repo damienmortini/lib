@@ -17,10 +17,10 @@
     "compilegltftransform": "esbuild ../../node_modules/@gltf-transform/core/dist/core.modern.js ../../node_modules/@gltf-transform/functions/dist/functions.modern.js --bundle --format=esm --outdir=@gltf-transform"
   },
   "dependencies": {
-    "@gltf-transform/core": "^4.0.2"
+    "@gltf-transform/core": "^4.0.9"
   },
   "devDependencies": {
-    "esbuild": "^0.21.5"
+    "esbuild": "^0.24.0"
   },
   "publishConfig": {
     "access": "public"

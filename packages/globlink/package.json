@@ -17,7 +17,7 @@
   "dependencies": {
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
-    "micromatch": "^4.0.7"
+    "micromatch": "^4.0.8"
   },
   "publishConfig": {
     "access": "public"

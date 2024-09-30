@@ -14,10 +14,10 @@
   "main": "index.js",
   "types": "index.d.ts",
   "dependencies": {
-    "@types/dom-navigation": "^1.0.3",
-    "@types/dom-view-transitions": "^1.0.4",
-    "@types/node": "^20.14.8",
-    "@webgpu/types": "^0.1.43"
+    "@types/dom-navigation": "^1.0.4",
+    "@types/dom-view-transitions": "^1.0.5",
+    "@types/node": "^22.7.4",
+    "@webgpu/types": "^0.1.46"
   },
   "publishConfig": {
     "access": "public"

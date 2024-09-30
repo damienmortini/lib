@@ -27,7 +27,7 @@
   "dependencies": {
     "@damienmortini/core": "^0.2.155",
     "fs-extra": "^11.2.0",
-    "three": "0.165.0"
+    "three": "0.169.0"
   },
   "publishConfig": {
     "access": "public"
