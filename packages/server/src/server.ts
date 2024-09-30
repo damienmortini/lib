@@ -166,7 +166,7 @@ export class Server {
         this.#wss = new WebSocketServer({ server: webSocketServer });
         webSocketServer.listen(webSocketServerPort);
 
-        this.#watcher = chokidarWatch(undefined, {
+        this.#watcher = chokidarWatch([], {
           ignored: watchIgnore,
           ignoreInitial: true,
           usePolling: true,
