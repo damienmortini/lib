@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/server",
-  "version": "1.0.79",
+  "version": "1.0.80",
   "description": "Simple live reloading HTTP2 server for development",
   "keywords": [
     "server",
