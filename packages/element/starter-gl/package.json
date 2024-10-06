@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-starter-gl",
-  "version": "0.0.110",
+  "version": "0.0.111",
   "description": "<damo-starter-gl> custom element.",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-gl",
   "bugs": "https://github.com/damienmortini/lib/issues",
@@ -14,7 +14,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.156",
+    "@damienmortini/core": "^0.2.157",
     "@damienmortini/damdom-ticker": "^0.0.42"
   },
   "publishConfig": {
