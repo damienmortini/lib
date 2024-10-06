@@ -11,7 +11,7 @@ const args = process.argv.slice(2);
 for (const [index, value] of args.entries()) {
   if (value === '--help' || value === '-h') {
     console.log(`
-      Usage: gltfoptimizer [options]
+      Usage: gltf-optimizer [options]
 
       Options:
         --help, -h      Show this help message

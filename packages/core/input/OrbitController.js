@@ -1,4 +1,4 @@
-console.warn('Deprecated. Use @damienmortini/orbittransform instead.');
+console.warn('Deprecated. Use @damienmortini/orbit-transform instead.');
 
 import { GestureObserver } from '@damienmortini/gesture-observer';
 import { Matrix4 } from '@damienmortini/math';

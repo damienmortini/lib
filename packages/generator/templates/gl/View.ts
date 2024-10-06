@@ -1,5 +1,5 @@
 import { Camera } from '@damienmortini/math';
-import { OrbitTransform } from '@damienmortini/orbittransform';
+import { OrbitTransform } from '@damienmortini/orbit-transform';
 import GLProgram from '@damienmortini/webgl/GLProgram.js';
 import GLBoxObject from '@damienmortini/webgl/object/GLBoxObject.js';
 import BasicShader from '@damienmortini/webgl/shader/BasicShader.js';

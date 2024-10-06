@@ -1,6 +1,6 @@
 import { DamdomTickerElement } from '@damienmortini/damdom-ticker';
 import { BoxGeometry, Camera } from '@damienmortini/math';
-import { TrackballTransform } from '@damienmortini/trackballtransform';
+import { TrackballTransform } from '@damienmortini/trackball-transform';
 
 class TemplateElement extends DamdomTickerElement {
   ready: Promise<void>;

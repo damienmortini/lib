@@ -1,12 +1,12 @@
 {
-  "name": "@damienmortini/orbittransform",
+  "name": "@damienmortini/orbit-transform",
   "version": "0.0.19",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/orbittransform",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/orbit-transform",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/orbittransform"
+    "directory": "packages/orbit-transform"
   },
   "license": "ISC",
   "author": "Damien Mortini",

@@ -71,4 +71,4 @@ export class DamdomGLTFOptimizerElement extends HTMLElement {
   }
 }
 
-window.customElements.define('damdom-gltfoptimizer', DamdomGLTFOptimizerElement);
+window.customElements.define('damdom-gltf-optimizer', DamdomGLTFOptimizerElement);
