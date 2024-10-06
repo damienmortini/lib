@@ -1,13 +1,13 @@
 {
-  "name": "@damienmortini/globlink",
+  "name": "@damienmortini/glob-link",
   "version": "0.0.17",
   "description": "npm link all packages matching an array of glob patterns",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/globlink",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/glob-link",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/globlink"
+    "directory": "packages/glob-link"
   },
   "license": "ISC",
   "author": "Damien Mortini",

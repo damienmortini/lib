@@ -8,13 +8,13 @@ If you are working in a monorepo with workspaces you can use `npm link --workspa
 ## Command Line
 
 ```cmd
-globlink [globpatterns]
+glob-link [globpatterns]
 ```
 
 ### Example
 
 ```cmd
-globlink @my-scope/* @another-scope/* packageprefix-* a-single-package ...
+glob-link @my-scope/* @another-scope/* packageprefix-* a-single-package ...
 ```
 
 ## API
@@ -26,7 +26,7 @@ globLink(globPatterns:String[]) // Returns a promise
 ### Example
 
 ```js
-import { globLink } from '@damienmortini/globlink'
+import { globLink } from '@damienmortini/glob-link'
 
 await globLink([
   'my-package',
