@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/demo-webgl",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "private": true,
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/demo/demo-webgl",
   "bugs": "https://github.com/damienmortini/lib/issues",
@@ -14,7 +14,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.156",
+    "@damienmortini/core": "^0.2.157",
     "@damienmortini/damdom-ticker": "^0.0.42",
     "@damienmortini/math": "^0.0.24",
     "@damienmortini/webgl": "^0.0.36"
