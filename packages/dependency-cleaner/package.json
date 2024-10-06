@@ -1,12 +1,12 @@
 {
-  "name": "@damienmortini/dependencycleaner",
+  "name": "@damienmortini/dependency-cleaner",
   "version": "0.0.7",
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/dependencycleaner",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/dependency-cleaner",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/dependencycleaner"
+    "directory": "packages/dependency-cleaner"
   },
   "license": "ISC",
   "author": "Damien Mortini",
