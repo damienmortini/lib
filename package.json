@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "clean": "rimraf --glob \"packages/**/node_modules\"",
-    "publish": "lerna publish from-package --yes",
+    "publish": "npm run build && lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --resolve-modules",
     "test": "eslint packages",
