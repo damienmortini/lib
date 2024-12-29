@@ -4,4 +4,15 @@ export class Signal<T> extends Set<(value: T) => void> {
       callback(value);
     }
   }
+
+  add(callback: (value: T) => void, options?: { once?: boolean }): this {
+    if (!options?.once) {
+      return super.add(callback);
+    }
+    const onceCallback = (value: T) => {
+      callback(value);
+      this.delete(onceCallback);
+    };
+    return super.add(onceCallback);
+  }
 }
