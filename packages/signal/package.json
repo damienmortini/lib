@@ -11,9 +11,16 @@
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
   },
   "publishConfig": {
     "access": "public"
