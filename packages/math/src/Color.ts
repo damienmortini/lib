@@ -1,6 +1,6 @@
 let element: HTMLBRElement;
 
-export const styleToRGBA = (value) => {
+export const styleToRGBA = (value: string): [number, number, number, number] | null => {
   if (!element) {
     element = document.createElement('br');
     element.style.display = 'none';
@@ -19,7 +19,7 @@ export const styleToRGBA = (value) => {
     : null;
 };
 
-export const RGBToHSL = (rgb, output = []) => {
+export const RGBToHSL = (rgb: [number, number, number], output: [number, number, number] = [0, 0, 0]): [number, number, number] => {
   const r = rgb[0];
   const g = rgb[1];
   const b = rgb[2];
@@ -27,8 +27,8 @@ export const RGBToHSL = (rgb, output = []) => {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
 
-  let hue;
-  let saturation;
+  let hue: number;
+  let saturation: number;
 
   const lightness = (min + max) / 2.0;
 
@@ -60,12 +60,12 @@ export const RGBToHSL = (rgb, output = []) => {
   return output;
 };
 
-export const hexToRGB = (hex) => {
+export const hexToRGB = (hex: string): [number, number, number] | null => {
   const results = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return results ? [parseInt(results[1], 16) / 255, parseInt(results[2], 16) / 255, parseInt(results[3], 16) / 255] : null;
 };
 
-export const rgbToHex = (rgb) => {
+export const rgbToHex = (rgb: [number, number, number]): string => {
   let hex = '#';
   for (const component of rgb) {
     const componentString = Math.floor(component * 255).toString(16);
