@@ -27,11 +27,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "fs-extra": "^11.2.0",
-    "jsdoc-to-markdown": "^9.0.2"
+    "fs-extra": "^11.3.0",
+    "jsdoc-to-markdown": "^9.1.1"
   },
   "devDependencies": {
-    "typescript": "^5.6.2"
+    "typescript": "^5.8.2"
   },
   "publishConfig": {
     "access": "public"

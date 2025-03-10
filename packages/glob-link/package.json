@@ -15,8 +15,8 @@
   "main": "index.js",
   "bin": "bin/index.js",
   "dependencies": {
-    "fast-glob": "^3.3.2",
-    "fs-extra": "^11.2.0",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.3.0",
     "micromatch": "^4.0.8"
   },
   "publishConfig": {
