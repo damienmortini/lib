@@ -15,14 +15,14 @@
   "author": "Damien Mortini",
   "main": "index.js",
   "dependencies": {
-    "@eslint/compat": "^1.1.1",
-    "@eslint/js": "^9.11.1",
-    "@stylistic/eslint-plugin": "^2.8.0",
-    "eslint": "^9.11.1",
+    "@eslint/compat": "^1.2.7",
+    "@eslint/js": "^9.22.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "globals": "^15.9.0",
-    "typescript": "^5.6.2",
-    "typescript-eslint": "^8.7.0"
+    "globals": "^16.0.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
   },
   "publishConfig": {
     "access": "public"
