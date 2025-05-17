@@ -19,8 +19,8 @@
   "author": "Damien Mortini",
   "type": "module",
   "main": "dist/index.js",
-  "bin": "dist/bin/index.js",
   "types": "dist/index.d.ts",
+  "bin": "dist/bin/index.js",
   "scripts": {
     "build": "tsc"
   },
@@ -31,14 +31,14 @@
     "mime-types": "^3.0.1",
     "qrcode": "^1.5.4",
     "selfsigned": "^2.4.1",
-    "ws": "^8.18.1"
-  },
-  "publishConfig": {
-    "access": "public"
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
     "@types/ws": "^8.18.1",
     "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

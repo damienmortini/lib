@@ -1,0 +1,7 @@
+{
+  "extends": "@damienmortini/typescript-config",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+  "include": ["./src/**/*"]
+}
