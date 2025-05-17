@@ -16,31 +16,55 @@ const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
 
-const resolveImports = (string: string, removeCSSImportAttribute = false) => {
-  string = string.replaceAll(
+const resolveImports = async (string: string, removeCSSImportAttribute = false) => {
+  const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
-    (match, p1, importPath, p3, p4, importAttribute) => {
+  ));
+
+  const promises = [];
+
+  for (const match of matches) {
+    promises.push((async () => {
+      let importPath = match[2];
+
       if (!/^[./]/.test(importPath)) {
         try {
+          /**
+           * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
+           */
           importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['module', 'import', 'default']), true).href.replace(
             importMetaResolveParent.href,
             '/',
           );
-          /**
-           * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
-           */
-          // importPath = import.meta.resolve(importPath, importMetaResolveParent).replace(importMetaResolveParent.href, '/');
         }
         catch (error) {
           console.log(importPath, error);
         }
       }
 
-      const removeImportAttribute = removeCSSImportAttribute && importAttribute === 'css';
+      // Check if path has no extension and add .js if needed
+      if (!/\.[^/]*$/.test(importPath)) {
+        try {
+          const fullPath = join(rootDirectory, importPath);
+          const stats = await stat(fullPath);
+          if (!stats.isDirectory()) {
+            importPath += '.js';
+          }
+        }
+        catch (error) {
+          // If path doesn't exist, assume it's a file and add .js
+          importPath += '.js';
+        }
+      }
 
-      return p1 + importPath + p3 + (p4 && !removeImportAttribute ? p4 : '');
-    },
-  );
+      const removeImportAttribute = removeCSSImportAttribute && match[5] === 'css';
+      const replacement = match[1] + importPath + match[3] + (match[4] && !removeImportAttribute ? match[4] : '');
+      string = string.replace(match[0], replacement);
+    })());
+  }
+
+  await Promise.all(promises);
+
   return string;
 };
 
@@ -243,7 +267,7 @@ export class Server {
             encoding: 'utf-8',
           });
           if (resolveModules) {
-            fileContent = resolveImports(fileContent, convertCSSImport);
+            fileContent = await resolveImports(fileContent, convertCSSImport);
           }
           fileContent = fileContent.replace(
             '</head>',
@@ -267,7 +291,7 @@ socket.addEventListener("message", function (event) {
           let fileContent = await readFile(filePath, {
             encoding: 'utf-8',
           });
-          fileContent = resolveImports(fileContent, convertCSSImport);
+          fileContent = await resolveImports(fileContent, convertCSSImport);
           stream.end(fileContent);
         }
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
