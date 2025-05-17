@@ -26,9 +26,9 @@
     "es-module-shims": "^2.5.1"
   },
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.26",
-    "@damienmortini/server": "^1.0.80",
-    "@damienmortini/typescript-config": "^0.0.12",
+    "@damienmortini/eslint-config": "^0.0.27",
+    "@damienmortini/server": "^1.0.81",
+    "@damienmortini/typescript-config": "^0.0.13",
     "eslint": "^9.27.0",
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.4",
