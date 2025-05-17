@@ -2,12 +2,12 @@
   "name": "@damienmortini/damdom-gltf-optimizer",
   "version": "0.0.28",
   "private": true,
-  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gltf-optimizer",
+  "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gltfoptimizer",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/damienmortini/lib",
-    "directory": "packages/damdom/damdom-gltf-optimizer"
+    "directory": "packages/damdom/damdom-gltfoptimizer"
   },
   "license": "ISC",
   "author": "Damien Mortini",
@@ -20,7 +20,7 @@
     "@gltf-transform/core": "^4.1.3"
   },
   "devDependencies": {
-    "esbuild": "^0.25.3"
+    "esbuild": "^0.25.4"
   },
   "publishConfig": {
     "access": "public"

@@ -16,7 +16,7 @@
   "dependencies": {
     "@types/dom-navigation": "^1.0.5",
     "@types/dom-view-transitions": "^1.0.6",
-    "@types/node": "^22.15.2",
+    "@types/node": "^22.15.18",
     "@webgpu/types": "^0.1.60"
   },
   "publishConfig": {
