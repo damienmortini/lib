@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/orbit-transform",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/orbit-transform",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@damienmortini/gesture-observer": "^0.0.9",
-    "@damienmortini/math": "^0.0.24"
+    "@damienmortini/math": "^0.0.25"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-colorpicker",
-  "version": "0.0.36",
+  "version": "0.0.37",
   "description": "<damdom-colorpicker> custom element.",
   "keywords": [
     "custom elements",
@@ -18,7 +18,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/math": "^0.0.24"
+    "@damienmortini/math": "^0.0.25"
   },
   "publishConfig": {
     "access": "public"
