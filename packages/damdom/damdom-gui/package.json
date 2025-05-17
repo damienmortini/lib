@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-gui",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "description": "GUI element",
   "keywords": [
     "javascript",
@@ -21,7 +21,7 @@
   "main": "index.js",
   "dependencies": {
     "@damienmortini/damdom-checkbox": "^0.0.7",
-    "@damienmortini/damdom-colorpicker": "^0.0.36",
+    "@damienmortini/damdom-colorpicker": "^0.0.37",
     "@damienmortini/damdom-select": "^0.0.7",
     "@damienmortini/damdom-slider": "^0.0.7",
     "@damienmortini/damdom-textfield": "^0.0.7"

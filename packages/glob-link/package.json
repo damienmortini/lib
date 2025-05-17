@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/glob-link",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "npm link all packages matching an array of glob patterns",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/glob-link",
   "bugs": "https://github.com/damienmortini/lib/issues",

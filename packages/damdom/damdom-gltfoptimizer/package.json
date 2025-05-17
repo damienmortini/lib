@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-gltf-optimizer",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "private": true,
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/damdom/damdom-gltfoptimizer",
   "bugs": "https://github.com/damienmortini/lib/issues",
