@@ -10,6 +10,7 @@ import { extname } from 'path';
 import { join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
+import { v5 as uuidv5 } from 'uuid';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
@@ -214,6 +215,27 @@ export class Server {
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
       const userAgent = headers['user-agent'];
       const fetchDest = headers['sec-fetch-dest'];
+
+      /**
+       * Handle Chrome DevTools Automatic Workspace Folders request
+       * https://developer.chrome.com/docs/devtools/workspaces/
+       */
+      if (requestPath === '/.well-known/appspecific/com.chrome.devtools.json') {
+        const workspaceConfig = {
+          workspace: {
+            root: rootDirectory.slice(0, -1),
+            uuid: uuidv5(rootDirectory, uuidv5.URL),
+          },
+        };
+
+        stream.respond({
+          ':status': constants.HTTP_STATUS_OK,
+          'content-type': 'application/json',
+          'cache-control': 'no-cache',
+        });
+        stream.end(JSON.stringify(workspaceConfig, null, 2));
+        return;
+      }
 
       /**
        * Detect Safari browser to convert CSS imports to JS imports
