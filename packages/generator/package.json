@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "fs-extra": "^11.3.0",
-    "jsdoc-to-markdown": "^9.1.1"
+    "jsdoc-to-markdown": "^9.1.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

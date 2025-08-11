@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@damienmortini/server": "^1.0.81",
-    "ws": "^8.18.2"
+    "ws": "^8.18.3"
   },
   "publishConfig": {
     "access": "public"

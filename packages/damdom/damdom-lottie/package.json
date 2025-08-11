@@ -18,7 +18,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "lottie-web": "^5.12.2"
+    "lottie-web": "^5.13.0"
   },
   "publishConfig": {
     "access": "public"
