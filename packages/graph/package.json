@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/graph",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "private": true,
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/graph",
   "bugs": "https://github.com/damienmortini/lib/issues",
@@ -18,7 +18,7 @@
     "server": "node bin/index.js server"
   },
   "dependencies": {
-    "@damienmortini/server": "^1.0.81",
+    "@damienmortini/server": "^1.0.82",
     "ws": "^8.18.3"
   },
   "publishConfig": {
