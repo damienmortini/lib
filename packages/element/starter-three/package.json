@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-starter-three",
-  "version": "0.0.139",
+  "version": "0.0.140",
   "description": "<element-starter-three> custom element.",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/element/starter-three",
   "bugs": "https://github.com/damienmortini/lib/issues",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@damienmortini/core": "^0.2.158",
     "@damienmortini/damdom-ticker": "^0.0.45",
-    "@damienmortini/three": "^0.1.197",
+    "@damienmortini/three": "^0.1.198",
     "three": "^0.178.0"
   },
   "publishConfig": {

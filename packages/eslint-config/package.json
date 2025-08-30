@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/eslint-config",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "ESLint config",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/eslint-config",
   "bugs": "https://github.com/damienmortini/lib/issues",
