@@ -16,6 +16,18 @@ export const build = async ({
   ignore = ['**/node_modules/**'],
   noDeclaration = false,
   copyAssets = false,
+  platform = 'browser',
+}: {
+  entryFiles?: string[];
+  outputDirectory?: string;
+  watch?: boolean;
+  bundle?: boolean;
+  minify?: boolean;
+  format?: Format;
+  ignore?: string[];
+  noDeclaration?: boolean;
+  copyAssets?: boolean;
+  platform?: 'node' | 'browser';
 } = {}) => {
   try {
     const filePaths = await fastGlob(entryFiles, { ignore });
@@ -110,6 +122,7 @@ export const build = async ({
           entryPoints,
           bundle,
           minify,
+          platform,
           // splitting: true,
           preserveSymlinks: true,
           format,

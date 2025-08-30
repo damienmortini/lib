@@ -18,6 +18,7 @@ let minify = false;
 let noDeclaration = false;
 let copyAssets = false;
 let format: Format = 'esm';
+let platform: 'node' | 'browser' = 'browser';
 
 for (const [index, value] of args.entries()) {
   if (value === '--help' || value === '-h') {
@@ -35,6 +36,7 @@ for (const [index, value] of args.entries()) {
         --ignore          Array of glob patterns separated by comma (default: ${ignore.toString()})
         --no-declaration  Do not generate declaration files
         --copy-assets     Copy assets instead of symlinking
+        --platform        Specify the platform 'node' | 'browser' (default: ${platform})
     `);
     process.exit(0);
   }
@@ -65,6 +67,9 @@ for (const [index, value] of args.entries()) {
   if (value === '--copy-assets') {
     copyAssets = true;
   }
+  if (value === '--platform') {
+    platform = args[index + 1] as 'node' | 'browser';
+  }
 }
 
 await build({
@@ -77,4 +82,5 @@ await build({
   ignore,
   noDeclaration,
   copyAssets,
+  platform,
 });
