@@ -1,7 +1,7 @@
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
-import { constants, createSecureServer, type Http2SecureServer } from 'http2';
+import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2Stream } from 'http2';
 import { createServer } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
@@ -136,7 +136,7 @@ export class Server {
     if (!key || !cert) {
       console.log('Creating certificate for', certificateAdresses);
 
-      const pems = generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
+      const pems = await generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
         {
           extensions: [
             {
@@ -205,7 +205,7 @@ export class Server {
       }
     });
 
-    this.http2SecureServer.on('stream', async (stream, headers) => {
+    this.http2SecureServer.on('stream', async (stream: ServerHttp2Stream, headers) => {
       if (headers[constants.HTTP2_HEADER_METHOD] !== constants.HTTP2_METHOD_GET) {
         return;
       }

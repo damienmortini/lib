@@ -20,10 +20,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "chokidar": "^4.0.3",
-    "esbuild": "^0.25.8",
+    "chokidar": "^5.0.0",
+    "esbuild": "^0.27.2",
     "fast-glob": "^3.3.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@damienmortini/typescript-config": "^0.0.14"
