@@ -23,24 +23,24 @@
     "version": "lerna version"
   },
   "dependencies": {
-    "es-module-shims": "^2.6.1"
+    "es-module-shims": "^2.7.0"
   },
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.27",
-    "@damienmortini/server": "^1.0.81",
-    "@damienmortini/typescript-config": "^0.0.13",
-    "eslint": "^9.32.0",
+    "@damienmortini/eslint-config": "^0.0.28",
+    "@damienmortini/server": "^1.0.82",
+    "@damienmortini/typescript-config": "^0.0.14",
+    "eslint": "^9.39.2",
     "fast-glob": "^3.3.3",
-    "jsdoc": "^4.0.4",
-    "lerna": "^8.2.3",
-    "npm-check-updates": "^18.0.2",
-    "nx": "21.3.9",
+    "jsdoc": "^4.0.5",
+    "lerna": "^9.0.3",
+    "npm-check-updates": "^19.2.0",
+    "nx": "22.3.3",
     "nx-cloud": "latest",
-    "rimraf": "^6.0.1",
-    "sort-package-json": "^3.4.0",
-    "typescript": "^5.8.3"
+    "rimraf": "^6.1.2",
+    "sort-package-json": "^3.6.0",
+    "typescript": "^5.9.3"
   },
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "21.3.9"
+    "@nx/nx-linux-x64-gnu": "22.3.3"
   }
 }

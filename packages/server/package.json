@@ -25,19 +25,19 @@
     "build": "tsc"
   },
   "dependencies": {
-    "chokidar": "^4.0.3",
+    "chokidar": "^5.0.0",
     "get-port": "^7.1.0",
-    "import-meta-resolve": "^4.1.0",
-    "mime-types": "^3.0.1",
+    "import-meta-resolve": "^4.2.0",
+    "mime-types": "^3.0.2",
     "qrcode": "^1.5.4",
-    "selfsigned": "^3.0.1",
-    "uuid": "^11.1.0",
+    "selfsigned": "^5.2.0",
+    "uuid": "^13.0.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",
     "@types/ws": "^8.18.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
