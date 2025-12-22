@@ -7,8 +7,6 @@
     "module": "NodeNext",
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
     "incremental": true,
     "preserveWatchOutput": true,

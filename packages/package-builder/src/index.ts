@@ -14,7 +14,7 @@ export const build = async ({
   minify = false,
   format = 'esm' as Format,
   ignore = ['**/node_modules/**'],
-  noDeclaration = false,
+  declaration = false,
   copyAssets = false,
   platform = 'browser',
 }: {
@@ -25,7 +25,7 @@ export const build = async ({
   minify?: boolean;
   format?: Format;
   ignore?: string[];
-  noDeclaration?: boolean;
+  declaration?: boolean;
   copyAssets?: boolean;
   platform?: 'node' | 'browser';
 } = {}) => {
@@ -132,9 +132,8 @@ export const build = async ({
           logLevel: 'info',
           // external: bundle ? ['*.css'] : undefined,
           plugins: [
-            ...(noDeclaration
-              ? []
-              : [{
+            ...(declaration
+              ? [{
                   name: 'Emit TypeScript declaration',
                   setup(build) {
                     build.onEnd(() => {
@@ -159,7 +158,7 @@ export const build = async ({
                       // child.unref();
                     });
                   },
-                }]),
+                }]: []),
             ...(bundle
               ? [
                   {
