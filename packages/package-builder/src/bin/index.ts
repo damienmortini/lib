@@ -15,7 +15,7 @@ let watch = false;
 let ignore = tsConfig.exclude ?? ['**/node_modules/**'];
 let bundle = false;
 let minify = false;
-let noDeclaration = false;
+let declaration = false;
 let copyAssets = false;
 let format: Format = 'esm';
 let platform: 'node' | 'browser' = 'browser';
@@ -34,7 +34,7 @@ for (const [index, value] of args.entries()) {
         --bundle, -b      Bundle files
         --minify, -m      Minify files
         --ignore          Array of glob patterns separated by comma (default: ${ignore.toString()})
-        --no-declaration  Do not generate declaration files
+        --declaration     Generate declaration files
         --copy-assets     Copy assets instead of symlinking
         --platform        Specify the platform 'node' | 'browser' (default: ${platform})
     `);
@@ -61,8 +61,8 @@ for (const [index, value] of args.entries()) {
   if (value === '--ignore') {
     ignore = args[index + 1].split(',');
   }
-  if (value === '--no-declaration') {
-    noDeclaration = true;
+  if (value === '--declaration') {
+    declaration = true;
   }
   if (value === '--copy-assets') {
     copyAssets = true;
@@ -80,7 +80,7 @@ await build({
   minify,
   format,
   ignore,
-  noDeclaration,
+  declaration,
   copyAssets,
   platform,
 });
