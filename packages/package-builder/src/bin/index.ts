@@ -1,21 +1,46 @@
 #!/usr/bin/env node
 
 import type { Format } from 'esbuild';
-import { readFile } from 'fs/promises';
+import path from 'path';
+import {
+  findConfigFile,
+  type ParsedCommandLine,
+  parseJsonConfigFileContent,
+  readConfigFile,
+  sys as tsSys,
+} from 'typescript';
 
 import { build } from '../index.js';
 
-const tsConfig = JSON.parse(await readFile(`${process.cwd()}/tsconfig.json`, 'utf8').catch(() => '{}'));
+// Find tsconfig.json file
+const tsconfigPath = findConfigFile(process.cwd(), tsSys.fileExists, 'tsconfig.json');
+let tsConfig: ParsedCommandLine | undefined;
+
+if (tsconfigPath) {
+  // Read tsconfig.json file
+  const tsconfigFile = readConfigFile(tsconfigPath, tsSys.readFile);
+
+  // Resolve extends
+  if (tsconfigFile.config) {
+    tsConfig = parseJsonConfigFileContent(
+      tsconfigFile.config,
+      tsSys,
+      path.dirname(tsconfigPath),
+    );
+  }
+}
 
 const args = process.argv.slice(2);
 
-let entryFiles = tsConfig.include ?? ['**/*'];
-let outputDirectory = tsConfig.compilerOptions?.outDir ?? 'dist';
+const tsConfigRaw = tsConfig?.raw as { include?: string[]; exclude?: string[] } | undefined;
+
+let entryFiles = tsConfigRaw?.include ?? ['**/*'];
+let outputDirectory = tsConfig?.options?.outDir ?? 'dist';
 let watch = false;
-let ignore = tsConfig.exclude ?? ['**/node_modules/**'];
+let ignore = tsConfigRaw?.exclude ?? ['**/node_modules/**'];
 let bundle = false;
 let minify = false;
-let declaration = false;
+let declaration = tsConfig?.options?.declaration ?? false;
 let copyAssets = false;
 let format: Format = 'esm';
 let platform: 'node' | 'browser' = 'browser';
