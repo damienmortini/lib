@@ -138,6 +138,7 @@ export class Server {
 
       const pems = await generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
         {
+          keySize: 2048,
           extensions: [
             {
               name: 'subjectAltName',

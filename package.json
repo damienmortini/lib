@@ -19,7 +19,7 @@
     "start": "server --resolve-modules",
     "test": "eslint packages",
     "update": "npm i",
-    "upgrade": "ncu --deep -u",
+    "upgrade": "ncu --workspaces --upgrade --install always",
     "version": "lerna version"
   },
   "dependencies": {

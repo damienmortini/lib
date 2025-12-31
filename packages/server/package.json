@@ -30,7 +30,7 @@
     "import-meta-resolve": "^4.2.0",
     "mime-types": "^3.0.2",
     "qrcode": "^1.5.4",
-    "selfsigned": "^5.2.0",
+    "selfsigned": "^5.4.0",
     "uuid": "^13.0.0",
     "ws": "^8.18.3"
   },
