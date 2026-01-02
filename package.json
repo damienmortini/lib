@@ -13,7 +13,7 @@
     "bump": "lerna version patch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "clean": "rimraf --glob \"packages/**/node_modules\"",
+    "clean": "git clean -fdx",
     "publish": "npm run build && lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --resolve-modules",
@@ -36,7 +36,6 @@
     "npm-check-updates": "^19.2.0",
     "nx": "22.3.3",
     "nx-cloud": "latest",
-    "rimraf": "^6.1.2",
     "sort-package-json": "^3.6.0",
     "typescript": "^5.9.3"
   },
