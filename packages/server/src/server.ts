@@ -69,6 +69,10 @@ const resolveImports = async (string: string, removeCSSImportAttribute = false) 
   return string;
 };
 
+type ProxyConfig = {
+  [path: string]: string;
+};
+
 type ServerOptions = {
   path?: string;
   watch?: boolean;
@@ -78,6 +82,7 @@ type ServerOptions = {
   verbose?: boolean;
   port?: number;
   useExternalCertificate?: boolean;
+  proxy?: ProxyConfig;
 };
 
 export class Server {
@@ -100,6 +105,7 @@ export class Server {
     verbose = false,
     port = 3000,
     useExternalCertificate = false,
+    proxy = {},
   }: ServerOptions = {}) {
     /**
      * Get port
@@ -236,6 +242,40 @@ export class Server {
         });
         stream.end(JSON.stringify(workspaceConfig, null, 2));
         return;
+      }
+
+      /**
+       * Handle proxy requests
+       */
+      const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
+      for (const [proxyPath, target] of Object.entries(proxy)) {
+        if (requestPathString?.startsWith(proxyPath)) {
+          try {
+            const targetUrl = new URL(requestPathString, target);
+            const response = await fetch(targetUrl.href, {
+              method: 'GET',
+              headers: {
+                Accept: headers['accept'] as string || '*/*',
+              },
+            });
+
+            const contentType = response.headers.get('content-type') || 'application/octet-stream';
+            const body = await response.text();
+
+            stream.respond({
+              ':status': response.status,
+              'content-type': contentType,
+            });
+            stream.end(body);
+            return;
+          }
+          catch (error) {
+            console.error('Proxy error:', error);
+            stream.respond({ ':status': constants.HTTP_STATUS_BAD_GATEWAY });
+            stream.end();
+            return;
+          }
+        }
       }
 
       /**

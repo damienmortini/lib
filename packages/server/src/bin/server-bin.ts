@@ -3,38 +3,56 @@
 import { Server } from '../server.js';
 
 /**
- * Extract parameters
+ * Parse CLI arguments
  */
+const args = process.argv.slice(2);
 let verbose = false;
 let resolveModules = false;
-let path: string;
-let rootPath: string;
-let watchIgnore: Array<string | RegExp>;
-let port: number;
+let path: string | undefined;
+let rootPath: string | undefined;
+let watchIgnore: Array<string | RegExp> | undefined;
+let port: number | undefined;
 let useExternalCertificate = false;
+const proxy: { [path: string]: string } = {};
 
-for (const arg of process.argv) {
-  if (arg.startsWith('--path')) {
-    path = arg.split('=')[1].trim();
+let i = 0;
+while (i < args.length) {
+  const arg = args[i];
+
+  switch (arg) {
+    case '--path':
+      path = args[++i];
+      break;
+    case '--root':
+      rootPath = args[++i];
+      break;
+    case '--watch-ignore':
+      watchIgnore = args[++i]?.split(',');
+      break;
+    case '--verbose':
+      verbose = true;
+      break;
+    case '--resolve-modules':
+      resolveModules = true;
+      break;
+    case '--port':
+      port = parseInt(args[++i]);
+      break;
+    case '--external-certificate':
+      useExternalCertificate = true;
+      break;
+    case '--proxy': {
+      // Format: --proxy /api http://localhost:8080
+      const proxyPath = args[++i];
+      const proxyTarget = args[++i];
+      if (proxyPath && proxyTarget) {
+        proxy[proxyPath] = proxyTarget;
+      }
+      break;
+    }
   }
-  else if (arg.startsWith('--root')) {
-    rootPath = arg.split('=')[1].trim();
-  }
-  else if (arg.startsWith('--watch-ignore')) {
-    watchIgnore = arg.split('=')[1].trim().split(',');
-  }
-  else if (arg === '--verbose') {
-    verbose = true;
-  }
-  else if (arg === '--resolve-modules') {
-    resolveModules = true;
-  }
-  else if (arg.startsWith('--port')) {
-    port = parseInt(arg.split('=')[1].trim());
-  }
-  else if (arg === '--external-certificate') {
-    useExternalCertificate = true;
-  }
+
+  i++;
 }
 
 const server = new Server({
@@ -46,6 +64,7 @@ const server = new Server({
   resolveModules,
   port,
   useExternalCertificate,
+  proxy,
 });
 
 await server.ready;
