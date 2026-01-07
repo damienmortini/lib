@@ -246,18 +246,6 @@ export class Server {
       try {
         let filePath = `${rootPath}${requestPath}`;
 
-        const responseHeaders = {
-          ':status': constants.HTTP_STATUS_OK,
-          'content-type': String(mimeTypes.lookup(filePath)),
-          ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
-          ...(fetchDest === 'script'
-            ? {
-                'Cross-Origin-Opener-Policy': 'same-origin',
-                'Cross-Origin-Embedder-Policy': 'require-corp',
-              }
-            : {}),
-        };
-
         /**
          * Rewrite to root if url isn't a file and doesn't exist
          */
@@ -276,6 +264,18 @@ export class Server {
         if ((await stat(filePath))?.isDirectory()) {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
         }
+
+        const responseHeaders = {
+          ':status': constants.HTTP_STATUS_OK,
+          'content-type': String(mimeTypes.lookup(filePath)),
+          ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
+          ...(fetchDest === 'script'
+            ? {
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'require-corp',
+              }
+            : {}),
+        };
 
         this.#watcher?.add(filePath);
 

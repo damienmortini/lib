@@ -80,7 +80,9 @@ export const build = async ({
                 await symlink(absolutePath, destinationPath);
               }
               catch (error) {
-                throw new Error(`Symlink failed: if you are on Windows, you may need to enable Developer Mode in Windows settings.\n${error.message}`);
+                throw new Error(
+                  `Symlink failed: if you are on Windows, you may need to enable Developer Mode in Windows settings.\n${error.message}`,
+                );
               }
             }
 
@@ -133,32 +135,39 @@ export const build = async ({
           // external: bundle ? ['*.css'] : undefined,
           plugins: [
             ...(declaration
-              ? [{
-                  name: 'Emit TypeScript declaration',
-                  setup(build) {
-                    build.onEnd(() => {
-                      const tscPath = fileURLToPath(import.meta.resolve('typescript/bin/tsc'));
-                      const child = spawn(process.execPath, [
-                        tscPath,
-                        '--declaration',
-                        '--declarationMap',
-                        '--emitDeclarationOnly',
-                        '--skipLibCheck',
-                        '--incremental',
-                        '--outDir',
-                        outputDirectory,
-                        ...entryPoints,
-                      ], {
-                        detached: true,
-                        stdio: 'ignore',
+              ? [
+                  {
+                    name: 'Emit TypeScript declaration',
+                    setup(build) {
+                      build.onEnd(() => {
+                        const tscPath = fileURLToPath(import.meta.resolve('typescript/bin/tsc'));
+                        const child = spawn(
+                          process.execPath,
+                          [
+                            tscPath,
+                            '--declaration',
+                            '--declarationMap',
+                            '--emitDeclarationOnly',
+                            '--skipLibCheck',
+                            '--incremental',
+                            '--outDir',
+                            outputDirectory,
+                            ...entryPoints,
+                          ],
+                          {
+                            detached: true,
+                            stdio: 'ignore',
+                          },
+                        );
+                        child.on('error', (error) => {
+                          console.error(error);
+                        });
+                        // child.unref();
                       });
-                      child.on('error', (error) => {
-                        console.error(error);
-                      });
-                      // child.unref();
-                    });
+                    },
                   },
-                }]: []),
+                ]
+              : []),
             ...(bundle
               ? [
                   {
