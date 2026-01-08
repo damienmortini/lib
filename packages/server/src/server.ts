@@ -79,6 +79,7 @@ type ServerOptions = {
   rootPath?: string;
   resolveModules?: boolean;
   watchIgnore?: Array<string | RegExp>;
+  watchPaths?: Array<string>;
   verbose?: boolean;
   port?: number;
   useExternalCertificate?: boolean;
@@ -102,6 +103,7 @@ export class Server {
     rootPath = '.',
     resolveModules = false,
     watchIgnore = undefined,
+    watchPaths = [],
     verbose = false,
     port = 3000,
     useExternalCertificate = false,
@@ -198,10 +200,9 @@ export class Server {
         this.#wss = new WebSocketServer({ server: webSocketServer });
         webSocketServer.listen(webSocketServerPort);
 
-        this.#watcher = chokidarWatch([], {
+        this.#watcher = chokidarWatch(watchPaths, {
           ignored: watchIgnore,
           ignoreInitial: true,
-          usePolling: true,
         })
           .on('change', (path) => {
             if (verbose) {
@@ -255,7 +256,7 @@ export class Server {
             const response = await fetch(targetUrl.href, {
               method: 'GET',
               headers: {
-                Accept: headers['accept'] as string || '*/*',
+                'Accept': headers['accept'] as string || '*/*',
               },
             });
 

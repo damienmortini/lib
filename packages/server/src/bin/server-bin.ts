@@ -11,6 +11,7 @@ let resolveModules = false;
 let path: string | undefined;
 let rootPath: string | undefined;
 let watchIgnore: Array<string | RegExp> | undefined;
+const watchPaths: Array<string> = [];
 let port: number | undefined;
 let useExternalCertificate = false;
 const proxy: { [path: string]: string } = {};
@@ -50,6 +51,14 @@ while (i < args.length) {
       }
       break;
     }
+    case '--watch': {
+      // Format: --watch path/to/watch
+      const watchPath = args[++i];
+      if (watchPath) {
+        watchPaths.push(watchPath);
+      }
+      break;
+    }
   }
 
   i++;
@@ -60,6 +69,7 @@ const server = new Server({
   rootPath,
   watch: true,
   watchIgnore,
+  watchPaths,
   verbose,
   resolveModules,
   port,
