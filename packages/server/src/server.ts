@@ -1,13 +1,14 @@
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
+import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
 import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2Stream } from 'http2';
-import { createServer } from 'https';
+import { createServer, request as httpsRequest } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
+import { connect as netConnect } from 'net';
 import { networkInterfaces as getNetworkInterfaces } from 'os';
-import { extname } from 'path';
-import { join } from 'path';
+import { extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { v5 as uuidv5 } from 'uuid';
@@ -182,6 +183,9 @@ export class Server {
     this.http2SecureServer = createSecureServer({
       cert,
       key,
+      allowHTTP1: true,
+      // Allow both HTTP/2 and HTTP/1.1, browser picks based on needs
+      ALPNProtocols: ['h2', 'http/1.1'],
     });
 
     this.http2SecureServer.on('error', (error) => {
@@ -214,10 +218,7 @@ export class Server {
     });
 
     this.http2SecureServer.on('stream', async (stream: ServerHttp2Stream, headers) => {
-      if (headers[constants.HTTP2_HEADER_METHOD] !== constants.HTTP2_METHOD_GET) {
-        return;
-      }
-
+      const requestMethod = headers[constants.HTTP2_HEADER_METHOD] as string;
       const requestAuthority = headers[constants.HTTP2_HEADER_AUTHORITY];
       const requestPath = headers[constants.HTTP2_HEADER_PATH];
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
@@ -251,32 +252,77 @@ export class Server {
       const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
       for (const [proxyPath, target] of Object.entries(proxy)) {
         if (requestPathString?.startsWith(proxyPath)) {
-          try {
-            const targetUrl = new URL(requestPathString, target);
-            const response = await fetch(targetUrl.href, {
-              method: 'GET',
-              headers: {
-                'Accept': headers['accept'] as string || '*/*',
-              },
+          const targetUrl = new URL(requestPathString, target);
+          const isHttps = targetUrl.protocol === 'https:';
+          const requester = isHttps ? httpsRequest : httpRequest;
+
+          const proxyRequest = requester({
+            hostname: targetUrl.hostname,
+            port: Number(targetUrl.port) || (isHttps ? 443 : 80),
+            path: targetUrl.pathname + targetUrl.search,
+            method: requestMethod,
+            headers: {
+              host: targetUrl.host,
+              accept: headers['accept'] as string || '*/*',
+              ...(headers['content-type'] ? { 'content-type': headers['content-type'] as string } : {}),
+              ...(headers['content-length'] ? { 'content-length': headers['content-length'] as string } : {}),
+            },
+          }, (proxyResponse) => {
+            const responseHeaders: OutgoingHttpHeaders = {
+              ':status': proxyResponse.statusCode || 502,
+            };
+
+            // Forward relevant response headers
+            if (proxyResponse.headers['content-type']) {
+              responseHeaders['content-type'] = proxyResponse.headers['content-type'];
+            }
+            if (proxyResponse.headers['content-length']) {
+              responseHeaders['content-length'] = proxyResponse.headers['content-length'];
+            }
+            if (proxyResponse.headers['content-encoding']) {
+              responseHeaders['content-encoding'] = proxyResponse.headers['content-encoding'];
+            }
+            if (proxyResponse.headers['cache-control']) {
+              responseHeaders['cache-control'] = proxyResponse.headers['cache-control'];
+            }
+
+            stream.respond(responseHeaders);
+
+            proxyResponse.on('error', (error) => {
+              console.error('Proxy response error:', error);
+              stream.destroy();
             });
 
-            const contentType = response.headers.get('content-type') || 'application/octet-stream';
-            const body = await response.text();
+            proxyResponse.pipe(stream);
+          });
 
-            stream.respond({
-              ':status': response.status,
-              'content-type': contentType,
-            });
-            stream.end(body);
-            return;
-          }
-          catch (error) {
-            console.error('Proxy error:', error);
-            stream.respond({ ':status': constants.HTTP_STATUS_BAD_GATEWAY });
+          proxyRequest.on('error', (error) => {
+            console.error('Proxy request error:', error);
+            if (!stream.closed && !stream.headersSent) {
+              stream.respond({ ':status': constants.HTTP_STATUS_BAD_GATEWAY });
+            }
             stream.end();
-            return;
-          }
+          });
+
+          stream.on('error', () => {
+            proxyRequest.destroy();
+          });
+
+          stream.on('close', () => {
+            proxyRequest.destroy();
+          });
+
+          // Stream request body directly to target (no buffering)
+          stream.pipe(proxyRequest);
+          return;
         }
+      }
+
+      // Only serve files for GET requests
+      if (requestMethod !== 'GET') {
+        stream.respond({ ':status': constants.HTTP_STATUS_METHOD_NOT_ALLOWED });
+        stream.end();
+        return;
       }
 
       /**
@@ -392,6 +438,87 @@ export default styles;`;
       stream.on('error', (error) => {
         console.log(error);
       });
+    });
+
+    /**
+     * Handle WebSocket proxy upgrades
+     */
+    // Pre-parse proxy URLs once at startup
+    const proxyEntries = Object.entries(proxy).map(([path, target]) => ({
+      path,
+      url: new URL(target),
+    }));
+
+    this.http2SecureServer.on('upgrade', (request, socket, head) => {
+      const requestPath = request.url || '';
+
+      for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
+        if (requestPath.startsWith(proxyPath)) {
+          // Disable Nagle's algorithm on client socket for lower latency
+          socket.setNoDelay(true);
+
+          const targetSocket = netConnect({
+            host: targetUrl.hostname,
+            port: Number(targetUrl.port) || 80,
+            noDelay: true,
+          });
+
+          let cleaned = false;
+          const cleanup = () => {
+            if (cleaned) return;
+            cleaned = true;
+            targetSocket.destroy();
+            socket.destroy();
+          };
+
+          targetSocket.on('connect', () => {
+            // Forward the original upgrade request to target
+            let headerString = `GET ${requestPath} HTTP/1.1\r\n`
+              + `Host: ${targetUrl.host}\r\n`
+              + `Upgrade: ${request.headers['upgrade']}\r\n`
+              + `Connection: ${request.headers['connection']}\r\n`
+              + `Sec-WebSocket-Key: ${request.headers['sec-websocket-key']}\r\n`
+              + `Sec-WebSocket-Version: ${request.headers['sec-websocket-version']}\r\n`;
+
+            if (request.headers['sec-websocket-protocol']) {
+              headerString += `Sec-WebSocket-Protocol: ${request.headers['sec-websocket-protocol']}\r\n`;
+            }
+
+            if (request.headers['sec-websocket-extensions']) {
+              headerString += `Sec-WebSocket-Extensions: ${request.headers['sec-websocket-extensions']}\r\n`;
+            }
+
+            if (request.headers['origin']) {
+              headerString += `Origin: ${request.headers['origin']}\r\n`;
+            }
+
+            headerString += '\r\n';
+
+            targetSocket.write(headerString);
+
+            if (head.length > 0) {
+              targetSocket.write(head);
+            }
+
+            // Pipe bidirectionally
+            targetSocket.pipe(socket);
+            socket.pipe(targetSocket);
+          });
+
+          targetSocket.on('error', (error) => {
+            console.error('WebSocket proxy target error:', error.message);
+            cleanup();
+          });
+          targetSocket.on('close', cleanup);
+          socket.on('error', cleanup);
+          socket.on('close', cleanup);
+
+          return;
+        }
+      }
+
+      // No proxy match - reject the upgrade request
+      socket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     });
 
     this.http2SecureServer.listen(serverPort);
