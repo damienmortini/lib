@@ -23,7 +23,7 @@
     "version": "lerna version"
   },
   "dependencies": {
-    "es-module-shims": "^2.7.0"
+    "es-module-shims": "^2.8.0"
   },
   "devDependencies": {
     "@damienmortini/eslint-config": "^0.0.28",
@@ -33,7 +33,7 @@
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
     "lerna": "^9.0.3",
-    "npm-check-updates": "^19.2.0",
+    "npm-check-updates": "^19.3.1",
     "nx": "22.3.3",
     "nx-cloud": "latest",
     "sort-package-json": "^3.6.0",
