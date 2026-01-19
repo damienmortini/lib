@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Server } from "../server.js";
+import { Server } from '../server.js';
 
 const args = process.argv.slice(2);
 let verbose = false;
@@ -18,28 +18,28 @@ while (i < args.length) {
   const arg = args[i];
 
   switch (arg) {
-    case "--path":
+    case '--path':
       path = args[++i];
       break;
-    case "--root":
+    case '--root':
       rootPath = args[++i];
       break;
-    case "--watch-ignore":
-      watchIgnore = args[++i]?.split(",");
+    case '--watch-ignore':
+      watchIgnore = args[++i]?.split(',');
       break;
-    case "--verbose":
+    case '--verbose':
       verbose = true;
       break;
-    case "--resolve-modules":
+    case '--resolve-modules':
       resolveModules = true;
       break;
-    case "--port":
+    case '--port':
       port = parseInt(args[++i]);
       break;
-    case "--external-certificate":
+    case '--external-certificate':
       useExternalCertificate = true;
       break;
-    case "--proxy": {
+    case '--proxy': {
       const proxyPath = args[++i];
       const proxyTarget = args[++i];
       if (proxyPath && proxyTarget) {
@@ -47,7 +47,7 @@ while (i < args.length) {
       }
       break;
     }
-    case "--watch": {
+    case '--watch': {
       const watchPath = args[++i];
       if (watchPath) {
         watchPaths.push(watchPath);
