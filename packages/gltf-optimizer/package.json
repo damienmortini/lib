@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gltf-optimizer",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gltf-optimizer",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {

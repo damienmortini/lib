@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/core",
-  "version": "0.2.158",
+  "version": "0.2.159",
   "description": "Helpers library for the web.",
   "keywords": [
     "math",
@@ -24,7 +24,7 @@
   "main": "index.js",
   "dependencies": {
     "@damienmortini/gesture-observer": "^0.0.9",
-    "@damienmortini/math": "^0.0.25"
+    "@damienmortini/math": "^0.0.26"
   },
   "publishConfig": {
     "access": "public"
