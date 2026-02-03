@@ -26,7 +26,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@damienmortini/typescript-config": "^0.0.16"
+    "@damienmortini/typescript-config": "0.0.16"
   },
   "publishConfig": {
     "access": "public"
