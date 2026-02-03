@@ -2,9 +2,29 @@ import { spawn } from 'child_process';
 import * as chokidar from 'chokidar';
 import { context, type Format } from 'esbuild';
 import fastGlob from 'fast-glob';
-import { copyFile, mkdir, readFile, rm, symlink, unlink } from 'fs/promises';
+import { copyFile, mkdir, readFile, rm, symlink, unlink, writeFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+/**
+ * Generate a simple 1:1 CSS source map
+ * VLQ: 0='A', 1='C', -1='D'. For identity mapping:
+ * - First line: AAAA (col 0, src 0, line 0, col 0)
+ * - Next lines: AACA (col 0, src 0, line +1, col 0)
+ */
+const generateCSSSourceMap = (css: string, sourceFile: string, destFile: string): string => {
+  let lineCount = 1;
+  for (let i = 0; i < css.length; i++) if (css[i] === '\n') lineCount++;
+  const mappings = lineCount === 0 ? '' : 'AAAA' + ';AACA'.repeat(lineCount - 1);
+
+  return JSON.stringify({
+    version: 3,
+    file: path.basename(destFile),
+    sources: [sourceFile],
+    sourcesContent: [css],
+    mappings,
+  });
+};
 
 export const build = async ({
   entryFiles = ['src/**'],
@@ -61,16 +81,29 @@ export const build = async ({
           .on('all', async (event, filePath) => {
             const relativePath = path.relative(baseDirectory, filePath);
             const destinationPath = path.join(outputDirectory, relativePath);
+            const isCSSFile = filePath.endsWith('.css');
 
             if (event === 'add') {
               await mkdir(path.dirname(destinationPath), { recursive: true });
             }
 
-            if (copyAssets && (event === 'add' || event === 'change')) {
+            // CSS files: copy with source map for devtools source linking
+            if (isCSSFile && (event === 'add' || event === 'change')) {
+              const css = await readFile(filePath, 'utf8');
+              const sourceRelativePath = path.relative(path.dirname(destinationPath), filePath).replaceAll('\\', '/');
+              const sourceMap = generateCSSSourceMap(css, sourceRelativePath, destinationPath);
+              const mapFileName = `${path.basename(destinationPath)}.map`;
+
+              await Promise.all([
+                writeFile(destinationPath, `${css}\n/*# sourceMappingURL=${mapFileName} */`),
+                writeFile(`${destinationPath}.map`, sourceMap),
+              ]);
+            }
+            // Other assets: copy or symlink
+            else if (!isCSSFile && copyAssets && (event === 'add' || event === 'change')) {
               await copyFile(filePath, destinationPath);
             }
-
-            if (!copyAssets && event === 'add') {
+            else if (!isCSSFile && !copyAssets && event === 'add') {
               const absolutePath = path.join(process.cwd(), filePath);
               try {
                 await unlink(destinationPath);
@@ -81,13 +114,22 @@ export const build = async ({
               }
               catch (error) {
                 throw new Error(
-                  `Symlink failed: if you are on Windows, you may need to enable Developer Mode in Windows settings.\n${error.message}`,
+                  `Symlink failed: if you are on Windows, you may need to enable Developer Mode in Windows settings.\n${error instanceof Error ? error.message : error}`,
                 );
               }
             }
 
             if (event === 'unlink') {
-              await unlink(destinationPath);
+              try {
+                await unlink(destinationPath);
+              }
+              catch {}
+              if (isCSSFile) {
+                try {
+                  await unlink(`${destinationPath}.map`);
+                }
+                catch {}
+              }
             }
 
             if (event === 'unlinkDir') {
@@ -201,6 +243,6 @@ export default styles;`;
     ]);
   }
   catch (error) {
-    throw new Error(error);
+    throw error instanceof Error ? error : new Error(String(error));
   }
 };
