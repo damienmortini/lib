@@ -16,7 +16,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/signal": "^0.0.12"
+    "@damienmortini/signal": "0.0.12"
   },
   "publishConfig": {
     "access": "public"

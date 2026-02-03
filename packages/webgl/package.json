@@ -20,7 +20,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
-    "@damienmortini/math": "^0.0.26"
+    "@damienmortini/math": "0.0.26"
   },
   "publishConfig": {
     "access": "public"

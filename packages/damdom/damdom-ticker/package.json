@@ -22,7 +22,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/ticker": "^0.0.14"
+    "@damienmortini/ticker": "0.0.14"
   },
   "publishConfig": {
     "access": "public"

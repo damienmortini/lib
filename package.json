@@ -19,7 +19,7 @@
     "start": "server --resolve-modules",
     "test": "eslint packages",
     "update": "npm i",
-    "upgrade": "ncu --workspaces --upgrade --install always",
+    "upgrade": "syncpack update && syncpack fix-mismatches && npm i",
     "version": "lerna version"
   },
   "dependencies": {
@@ -33,8 +33,8 @@
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
     "lerna": "^9.0.3",
-    "npm-check-updates": "^19.3.2",
     "nx": "22.4.4",
+    "syncpack": "^13.0.4",
     "nx-cloud": "latest",
     "sort-package-json": "^3.6.1",
     "typescript": "^5.9.3"
