@@ -1,4 +1,8 @@
-const fs = require('fs-extra');
+import { createRequire } from 'node:module';
+
+import fs from 'fs-extra';
+
+const require = createRequire(import.meta.url);
 
 const files = new Map([
   [require.resolve('three/examples/jsm/loaders/BasisTextureLoader.js'), './examples/loaders/BasisTextureLoader.js'],
