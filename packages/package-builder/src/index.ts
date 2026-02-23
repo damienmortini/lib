@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import * as chokidar from 'chokidar';
 import { context, type Format } from 'esbuild';
 import fastGlob from 'fast-glob';
-import { copyFile, mkdir, readFile, rm, symlink, unlink, writeFile } from 'fs/promises';
+import { copyFile, mkdir, readFile, rm, stat, symlink, unlink, writeFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -82,6 +82,15 @@ export const build = async ({
             const relativePath = path.relative(baseDirectory, filePath);
             const destinationPath = path.join(outputDirectory, relativePath);
             const isCSSFile = filePath.endsWith('.css');
+
+            // In non-watch mode, skip files where destination is newer than source
+            if (!watch && (event === 'add' || event === 'change')) {
+              try {
+                const [srcStat, destStat] = await Promise.all([stat(filePath), stat(destinationPath)]);
+                if (destStat.mtimeMs >= srcStat.mtimeMs) return;
+              }
+              catch {}
+            }
 
             if (event === 'add') {
               await mkdir(path.dirname(destinationPath), { recursive: true });
@@ -173,6 +182,7 @@ export const build = async ({
           sourcemap: true,
           target: 'esnext',
           outdir: outputDirectory,
+          write: watch,
           logLevel: 'info',
           // external: bundle ? ['*.css'] : undefined,
           plugins: [
@@ -236,8 +246,23 @@ export default styles;`;
           await ctx.watch();
         }
         else {
-          await ctx.rebuild();
+          const result = await ctx.rebuild();
           await ctx.dispose();
+          if (result.outputFiles) {
+            await Promise.all(result.outputFiles.map(async (outputFile) => {
+              try {
+                const existing = await readFile(outputFile.path);
+                if (Buffer.compare(existing, outputFile.contents) === 0) {
+                  console.log(`[js] skip: ${outputFile.path}`);
+                  return;
+                }
+              }
+              catch {}
+              console.log(`[js] write: ${outputFile.path}`);
+              await mkdir(path.dirname(outputFile.path), { recursive: true });
+              await writeFile(outputFile.path, outputFile.contents);
+            }));
+          }
         }
       })(),
     ]);
