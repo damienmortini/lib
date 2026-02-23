@@ -1,46 +1,45 @@
 #!/usr/bin/env node
 
 import type { Format } from 'esbuild';
+import { readFile } from 'fs/promises';
 import path from 'path';
-import {
-  findConfigFile,
-  type ParsedCommandLine,
-  parseJsonConfigFileContent,
-  readConfigFile,
-  sys as tsSys,
-} from 'typescript';
 
 import { build } from '../index.js';
 
-// Find tsconfig.json file
-const tsconfigPath = findConfigFile(process.cwd(), tsSys.fileExists, 'tsconfig.json');
-let tsConfig: ParsedCommandLine | undefined;
+type TsConfigJson = {
+  include?: string[];
+  exclude?: string[];
+  compilerOptions?: {
+    outDir?: string;
+    declaration?: boolean;
+  };
+};
 
-if (tsconfigPath) {
-  // Read tsconfig.json file
-  const tsconfigFile = readConfigFile(tsconfigPath, tsSys.readFile);
-
-  // Resolve extends
-  if (tsconfigFile.config) {
-    tsConfig = parseJsonConfigFileContent(
-      tsconfigFile.config,
-      tsSys,
-      path.dirname(tsconfigPath),
-    );
+// Find and parse tsconfig.json (JSONC) walking up from cwd — only walks up on file-not-found
+const findTsConfig = async (dir: string): Promise<TsConfigJson | undefined> => {
+  try {
+    const text = await readFile(path.join(dir, 'tsconfig.json'), 'utf8');
+    return JSON.parse(text.replace(/^\s*\/\/.*$/gm, '')) as TsConfigJson;
   }
-}
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') return undefined;
+    const parent = path.dirname(dir);
+    if (parent === dir) return undefined;
+    return findTsConfig(parent);
+  }
+};
+
+const tsConfig = await findTsConfig(process.cwd());
 
 const args = process.argv.slice(2);
 
-const tsConfigRaw = tsConfig?.raw as { include?: string[]; exclude?: string[] } | undefined;
-
-let entryFiles = tsConfigRaw?.include ?? ['**/*'];
-let outputDirectory = tsConfig?.options?.outDir ?? 'dist';
+let entryFiles = tsConfig?.include ?? ['**/*'];
+let outputDirectory = tsConfig?.compilerOptions?.outDir ?? 'dist';
 let watch = false;
-let ignore = tsConfigRaw?.exclude ?? ['**/node_modules/**'];
+let ignore = tsConfig?.exclude ?? ['**/node_modules/**'];
 let bundle = false;
 let minify = false;
-let declaration = tsConfig?.options?.declaration ?? false;
+let declaration = tsConfig?.compilerOptions?.declaration ?? false;
 let copyAssets = false;
 let format: Format = 'esm';
 let platform: 'node' | 'browser' = 'browser';
