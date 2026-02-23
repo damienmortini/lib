@@ -208,9 +208,10 @@ export class Server {
           ignored: watchIgnore,
           ignoreInitial: true,
         })
-          .on('change', (path) => {
+          .on('change', (changedPath) => {
+            if (changedPath.endsWith('.css') || changedPath.endsWith('.css.map')) return;
             if (verbose) {
-              console.log(`${path} just changed, refresh.`);
+              console.log(`${changedPath} just changed, refresh.`);
             }
             this.refresh();
           });
