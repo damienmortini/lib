@@ -13,7 +13,7 @@
     "bump": "lerna version patch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "clean": "git clean -fdx",
+    "clean": "git clean -fdX",
     "publish": "npm run build && lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --resolve-modules",
