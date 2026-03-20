@@ -53,11 +53,16 @@ export const build = async ({
       throw new Error(`No entry files found for ${entryFiles}`);
     }
 
+    const dirs = allFilePaths.map(filePath => path.dirname(filePath));
     const baseDirectory = path.join(
       process.cwd(),
-      allFilePaths.reduce((shortest, filePath) => {
-        return path.dirname(filePath).length < shortest.length ? path.dirname(filePath) : shortest;
-      }, allFilePaths[0]),
+      dirs.reduce((common, dir) => {
+        const a = common.split(/[\\/]/);
+        const b = dir.split(/[\\/]/);
+        let i = 0;
+        while (i < a.length && i < b.length && a[i] === b[i]) i++;
+        return a.slice(0, i).join('/');
+      }),
     );
 
     const assetPaths = allFilePaths.filter((filePath) => {
