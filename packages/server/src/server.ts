@@ -332,7 +332,7 @@ export class Server {
       const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
 
       try {
-        let filePath = `${rootPath}${requestPath}`;
+        let filePath = `${rootPath}${String(requestPath).split('?')[0]}`;
 
         /**
          * Rewrite to root if url isn't a file and doesn't exist
