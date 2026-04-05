@@ -275,7 +275,7 @@ export class Server {
 
             // Forward all response headers
             for (const [key, value] of Object.entries(proxyResponse.headers)) {
-              if (key === 'transfer-encoding' || key === 'connection') continue;
+              if (key === 'transfer-encoding' || key === 'connection' || key === 'keep-alive') continue;
               if (value !== undefined) responseHeaders[key] = value;
             }
 
