@@ -273,18 +273,10 @@ export class Server {
               ':status': proxyResponse.statusCode || 502,
             };
 
-            // Forward relevant response headers
-            if (proxyResponse.headers['content-type']) {
-              responseHeaders['content-type'] = proxyResponse.headers['content-type'];
-            }
-            if (proxyResponse.headers['content-length']) {
-              responseHeaders['content-length'] = proxyResponse.headers['content-length'];
-            }
-            if (proxyResponse.headers['content-encoding']) {
-              responseHeaders['content-encoding'] = proxyResponse.headers['content-encoding'];
-            }
-            if (proxyResponse.headers['cache-control']) {
-              responseHeaders['cache-control'] = proxyResponse.headers['cache-control'];
+            // Forward all response headers
+            for (const [key, value] of Object.entries(proxyResponse.headers)) {
+              if (key === 'transfer-encoding' || key === 'connection') continue;
+              if (value !== undefined) responseHeaders[key] = value;
             }
 
             stream.respond(responseHeaders);
