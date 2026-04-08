@@ -263,10 +263,12 @@ export class Server {
             path: targetUrl.pathname + targetUrl.search,
             method: requestMethod,
             headers: {
-              host: targetUrl.host,
-              accept: headers['accept'] as string || '*/*',
-              ...(headers['content-type'] ? { 'content-type': headers['content-type'] as string } : {}),
-              ...(headers['content-length'] ? { 'content-length': headers['content-length'] as string } : {}),
+              ...Object.fromEntries(
+                Object.entries(headers).filter(([key]) => key[0] !== ':' && key !== 'connection' && key !== 'keep-alive' && key !== 'transfer-encoding'),
+              ),
+              'host': targetUrl.host,
+              'x-forwarded-proto': (headers[':scheme'] as string) || 'https',
+              'x-forwarded-host': (headers[':authority'] as string) || '',
             },
           }, (proxyResponse) => {
             const responseHeaders: OutgoingHttpHeaders = {
