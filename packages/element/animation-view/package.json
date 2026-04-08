@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-view",
-  "version": "0.0.138",
+  "version": "0.0.139",
   "private": true,
   "description": "<element-animation-view> custom element.",
   "keywords": [
@@ -19,7 +19,7 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "0.2.159"
+    "@damienmortini/core": "^0.2.160"
   },
   "publishConfig": {
     "access": "public"

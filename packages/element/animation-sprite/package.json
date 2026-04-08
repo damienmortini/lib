@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/element-animation-sprite",
-  "version": "0.0.151",
+  "version": "0.0.152",
   "description": "<element-animation-sprite> custom element.",
   "keywords": [
     "custom elements",
@@ -18,8 +18,8 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "0.2.159",
-    "@damienmortini/damdom-ticker": "0.0.46"
+    "@damienmortini/core": "^0.2.160",
+    "@damienmortini/damdom-ticker": "^0.0.47"
   },
   "publishConfig": {
     "access": "public"
