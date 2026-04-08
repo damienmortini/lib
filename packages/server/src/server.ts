@@ -467,26 +467,15 @@ export default styles;`;
           };
 
           targetSocket.on('connect', () => {
-            // Forward the original upgrade request to target
-            let headerString = `GET ${requestPath} HTTP/1.1\r\n`
-              + `Host: ${targetUrl.host}\r\n`
-              + `Upgrade: ${request.headers['upgrade']}\r\n`
-              + `Connection: ${request.headers['connection']}\r\n`
-              + `Sec-WebSocket-Key: ${request.headers['sec-websocket-key']}\r\n`
-              + `Sec-WebSocket-Version: ${request.headers['sec-websocket-version']}\r\n`;
-
-            if (request.headers['sec-websocket-protocol']) {
-              headerString += `Sec-WebSocket-Protocol: ${request.headers['sec-websocket-protocol']}\r\n`;
+            // Forward the original upgrade request with all headers to target
+            let headerString = `GET ${requestPath} HTTP/1.1\r\n`;
+            for (const [key, value] of Object.entries(request.headers)) {
+              if (key === 'host') {
+                headerString += `Host: ${targetUrl.host}\r\n`;
+              } else if (value !== undefined) {
+                headerString += `${key}: ${Array.isArray(value) ? value.join(', ') : value}\r\n`;
+              }
             }
-
-            if (request.headers['sec-websocket-extensions']) {
-              headerString += `Sec-WebSocket-Extensions: ${request.headers['sec-websocket-extensions']}\r\n`;
-            }
-
-            if (request.headers['origin']) {
-              headerString += `Origin: ${request.headers['origin']}\r\n`;
-            }
-
             headerString += '\r\n';
 
             targetSocket.write(headerString);
