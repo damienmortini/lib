@@ -1,4 +1,5 @@
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
+import { randomBytes } from 'crypto';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
@@ -13,6 +14,9 @@ import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { v5 as uuidv5 } from 'uuid';
 import WebSocket, { WebSocketServer } from 'ws';
+
+const HOP_BY_HOP_HEADERS = new Set(['connection', 'upgrade', 'keep-alive', 'transfer-encoding']);
+const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-key', 'sec-websocket-version', 'host']);
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
@@ -116,7 +120,7 @@ export class Server {
     const fromPort = port;
     const toPort = port + 100;
     const serverPort = await getPort({ port: portNumbers(fromPort, toPort) });
-    const webSocketServerPort = await getPort({ port: portNumbers(fromPort, toPort) });
+    const webSocketServerPort = await getPort({ port: portNumbers(fromPort + 10, toPort + 10) });
 
     /**
      * Get addresses
@@ -185,8 +189,11 @@ export class Server {
       cert,
       key,
       allowHTTP1: true,
-      // Allow both HTTP/2 and HTTP/1.1, browser picks based on needs
+      // Allow both HTTP/2 and HTTP/1.1
       ALPNProtocols: ['h2', 'http/1.1'],
+      settings: {
+        enableConnectProtocol: true,
+      }
     });
 
     this.http2SecureServer.on('error', (error) => {
@@ -226,6 +233,84 @@ export class Server {
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
       const userAgent = headers['user-agent'];
       const fetchDest = headers['sec-fetch-dest'];
+      const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
+
+      /**
+       * Handle HTTP/2 WebSocket proxy upgrades (RFC 8441)
+       */
+      if (requestMethod === 'CONNECT' && headers[':protocol'] === 'websocket') {
+        for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
+          if (!requestPathString?.startsWith(proxyPath)) continue;
+
+          const targetSocket = netConnect({
+            host: targetUrl.hostname,
+            port: Number(targetUrl.port) || 80,
+            noDelay: true,
+          });
+
+          let cleaned = false;
+          const cleanup = () => {
+            if (cleaned) return;
+            cleaned = true;
+            targetSocket.destroy();
+            stream.destroy();
+          };
+
+          targetSocket.on('connect', () => {
+            const secWebSocketKey = randomBytes(16).toString('base64');
+            let headerString = `GET ${requestPathString} HTTP/1.1\r\n`
+              + `Host: ${targetUrl.host}\r\n`
+              + `Upgrade: websocket\r\n`
+              + `Connection: Upgrade\r\n`
+              + `Sec-WebSocket-Key: ${secWebSocketKey}\r\n`
+              + `Sec-WebSocket-Version: 13\r\n`;
+            for (const [key, value] of Object.entries(headers)) {
+              if (key[0] === ':' || WS_PROXY_SKIP_HEADERS.has(key)) continue;
+              headerString += `${key}: ${Array.isArray(value) ? value.join(', ') : value}\r\n`;
+            }
+            headerString += '\r\n';
+            targetSocket.write(headerString);
+          });
+
+          let buffer = Buffer.alloc(0);
+          const onTargetData = (chunk: Buffer) => {
+            buffer = Buffer.concat([buffer, chunk]);
+            const headerEnd = buffer.indexOf('\r\n\r\n');
+            if (headerEnd === -1) return;
+
+            const responseString = buffer.slice(0, headerEnd).toString();
+            const remainingData = buffer.slice(headerEnd + 4);
+            targetSocket.off('data', onTargetData);
+
+            if (!responseString.startsWith('HTTP/1.1 101')) {
+              console.error('WebSocket proxy HTTP/1.1 handshake failed:', responseString);
+              stream.respond({ ':status': 502 });
+              stream.end();
+              cleanup();
+              return;
+            }
+
+            stream.respond({ ':status': 200 });
+            if (remainingData.length > 0) stream.write(remainingData);
+            targetSocket.pipe(stream);
+            stream.pipe(targetSocket);
+          };
+
+          targetSocket.on('data', onTargetData);
+          targetSocket.on('error', (error) => {
+            console.error('WebSocket HTTP/2 proxy target error:', error.message);
+            cleanup();
+          });
+          targetSocket.on('close', cleanup);
+          stream.on('error', cleanup);
+          stream.on('close', cleanup);
+          return;
+        }
+
+        stream.respond({ ':status': 404 });
+        stream.end();
+        return;
+      }
 
       /**
        * Handle Chrome DevTools Automatic Workspace Folders request
@@ -251,7 +336,6 @@ export class Server {
       /**
        * Handle proxy requests
        */
-      const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
       for (const [proxyPath, target] of Object.entries(proxy)) {
         if (requestPathString?.startsWith(proxyPath)) {
           const targetUrl = new URL(requestPathString, target);
@@ -265,7 +349,7 @@ export class Server {
             method: requestMethod,
             headers: {
               ...Object.fromEntries(
-                Object.entries(headers).filter(([key]) => key[0] !== ':' && key !== 'connection' && key !== 'keep-alive' && key !== 'transfer-encoding'),
+                Object.entries(headers).filter(([key]) => key[0] !== ':' && !HOP_BY_HOP_HEADERS.has(key)),
               ),
               'host': targetUrl.host,
               'x-forwarded-proto': (headers[':scheme'] as string) || 'https',
@@ -276,9 +360,8 @@ export class Server {
               ':status': proxyResponse.statusCode || 502,
             };
 
-            // Forward all response headers
             for (const [key, value] of Object.entries(proxyResponse.headers)) {
-              if (key === 'transfer-encoding' || key === 'connection' || key === 'keep-alive') continue;
+              if (HOP_BY_HOP_HEADERS.has(key)) continue;
               if (value !== undefined) responseHeaders[key] = value;
             }
 
@@ -328,6 +411,43 @@ export class Server {
 
       try {
         let filePath = `${rootPath}${String(requestPath).split('?')[0]}`;
+
+        /**
+         * Synthesize a package.json for subpath exports that don't have a real file on disk.
+         * e.g. `node_modules/foo/bar/package.json` → main resolved from foo's `exports['./bar']`.
+         */
+        const virtualPackageJsonMatch = filePath
+          .replace(/^\.?\//, '')
+          .match(/^node_modules\/(?<packageName>@[^/]+\/[^/]+|[^/]+)\/(?<subPath>.+)\/package\.json$/);
+        if (virtualPackageJsonMatch) {
+          const { packageName, subPath } = virtualPackageJsonMatch.groups!;
+          const physicalStats = await stat(filePath).catch(() => null);
+          const physicalExists = physicalStats !== null && !physicalStats.isDirectory();
+
+          if (!physicalExists) {
+            try {
+              const mainPackageJsonPath = join(rootPath, 'node_modules', packageName, 'package.json');
+              const mainPackageJson = JSON.parse(await readFile(mainPackageJsonPath, 'utf-8'));
+              let exportValue = mainPackageJson.exports?.[`./${subPath}`];
+              if (exportValue && typeof exportValue === 'object') {
+                exportValue = exportValue.import || exportValue.default || exportValue.require;
+              }
+              if (typeof exportValue === 'string') {
+                const depth = subPath.split('/').filter(Boolean).length;
+                const resolvedMain = '../'.repeat(depth) + exportValue.replace(/^\.\//, '');
+                stream.respond({
+                  ':status': constants.HTTP_STATUS_OK,
+                  'content-type': 'application/json',
+                });
+                stream.end(JSON.stringify({ main: resolvedMain }, null, 2));
+                return;
+              }
+            }
+            catch (error) {
+              console.log(`Virtual package.json resolution failed for ${filePath}:`, error);
+            }
+          }
+        }
 
         /**
          * Rewrite to root if url isn't a file and doesn't exist
