@@ -36,7 +36,7 @@
     "nx": "^22.6.4",
     "nx-cloud": "latest",
     "sort-package-json": "^3.6.1",
-    "syncpack": "^13.0.4",
+    "syncpack": "^14.3.0",
     "typescript": "^5.9.3"
   },
   "optionalDependencies": {
