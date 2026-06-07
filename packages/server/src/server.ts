@@ -12,6 +12,7 @@ import { networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
+import { pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
 import WebSocket, { WebSocketServer } from 'ws';
 
@@ -19,10 +20,10 @@ const HOP_BY_HOP_HEADERS = new Set(['connection', 'upgrade', 'keep-alive', 'tran
 const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-key', 'sec-websocket-version', 'host']);
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
-const importMetaResolveParent = new URL(`file:///${rootDirectory}`);
+const importMetaResolveParent = pathToFileURL(rootDirectory);
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
 
-const resolveImports = async (string: string, removeCSSImportAttribute = false) => {
+async function resolveImports(string: string, removeCSSImportAttribute = false): Promise<string> {
   const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
   ));
@@ -72,7 +73,7 @@ const resolveImports = async (string: string, removeCSSImportAttribute = false) 
   await Promise.all(promises);
 
   return string;
-};
+}
 
 type ProxyConfig = {
   [path: string]: string;
@@ -95,8 +96,8 @@ export class Server {
   http2SecureServer: Http2SecureServer;
   ready: Promise<void>;
 
-  #wss: WebSocketServer;
-  #watcher: FSWatcher;
+  #wss?: WebSocketServer;
+  #watcher?: FSWatcher;
 
   constructor(serverOptions: ServerOptions = {}) {
     this.ready = this.#setup(serverOptions);
@@ -113,7 +114,7 @@ export class Server {
     port = 3000,
     useExternalCertificate = false,
     proxy = {},
-  }: ServerOptions = {}) {
+  }: ServerOptions = {}): Promise<void> {
     /**
      * Get port
      */
@@ -128,7 +129,7 @@ export class Server {
     const addresses = ['localhost'];
     const networkInterfaces = getNetworkInterfaces();
     Object.values(networkInterfaces)
-      .flat()
+      .flatMap(networkInterface => networkInterface ?? [])
       .forEach((networkInterface) => {
         if (networkInterface.family === 'IPv4' && !networkInterface.internal) {
           addresses.push(networkInterface.address);
@@ -138,16 +139,16 @@ export class Server {
     /**
      * Create certificate for addresses
      */
-    const certificateAdresses = useExternalCertificate ? addresses : ['localhost'];
-    const adressesString = certificateAdresses.join('_');
+    const certificateAddresses = useExternalCertificate ? addresses : ['localhost'];
+    const addressesString = certificateAddresses.join('_');
 
     let [cert, key] = await Promise.all([
-      readFile(`${certificatesDirectory}/${adressesString}.crt`, { encoding: 'utf-8' }),
-      readFile(`${certificatesDirectory}/${adressesString}.key`, { encoding: 'utf-8' }),
+      readFile(`${certificatesDirectory}/${addressesString}.crt`, { encoding: 'utf-8' }),
+      readFile(`${certificatesDirectory}/${addressesString}.key`, { encoding: 'utf-8' }),
     ]).catch(() => [undefined, undefined]);
 
     if (!key || !cert) {
-      console.log('Creating certificate for', certificateAdresses);
+      console.log('Creating certificate for', certificateAddresses);
 
       const pems = await generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
         {
@@ -156,7 +157,7 @@ export class Server {
           extensions: [
             {
               name: 'subjectAltName',
-              altNames: certificateAdresses.map((address) => {
+              altNames: certificateAddresses.map((address) => {
                 const isIPAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(address);
 
                 if (isIPAddress) {
@@ -177,8 +178,8 @@ export class Server {
       await mkdir(`${certificatesDirectory}`, { recursive: true });
 
       await Promise.all([
-        writeFile(`${certificatesDirectory}/${adressesString}.crt`, cert),
-        writeFile(`${certificatesDirectory}/${adressesString}.key`, key),
+        writeFile(`${certificatesDirectory}/${addressesString}.crt`, cert),
+        writeFile(`${certificatesDirectory}/${addressesString}.key`, key),
       ]);
     }
 
@@ -193,7 +194,7 @@ export class Server {
       ALPNProtocols: ['h2', 'http/1.1'],
       settings: {
         enableConnectProtocol: true,
-      }
+      },
     });
 
     this.http2SecureServer.on('error', (error) => {
@@ -593,7 +594,8 @@ export default styles;`;
             for (const [key, value] of Object.entries(request.headers)) {
               if (key === 'host') {
                 headerString += `Host: ${targetUrl.host}\r\n`;
-              } else if (value !== undefined) {
+              }
+              else if (value !== undefined) {
                 headerString += `${key}: ${Array.isArray(value) ? value.join(', ') : value}\r\n`;
               }
             }
@@ -637,7 +639,7 @@ export default styles;`;
     }
   }
 
-  refresh() {
+  refresh(): void {
     if (!this.#wss) return;
     for (const client of this.#wss.clients) {
       if (client.readyState === WebSocket.OPEN) {

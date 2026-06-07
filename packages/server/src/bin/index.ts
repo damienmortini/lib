@@ -33,9 +33,16 @@ while (i < args.length) {
     case '--resolve-modules':
       resolveModules = true;
       break;
-    case '--port':
-      port = parseInt(args[++i]);
+    case '--port': {
+      const portArgument = args[++i];
+      if (portArgument) {
+        const parsedPort = Number(portArgument);
+        if (Number.isInteger(parsedPort)) {
+          port = parsedPort;
+        }
+      }
       break;
+    }
     case '--external-certificate':
       useExternalCertificate = true;
       break;
