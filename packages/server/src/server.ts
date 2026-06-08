@@ -285,13 +285,17 @@ export class Server {
 
             if (!responseString.startsWith('HTTP/1.1 101')) {
               console.error('WebSocket proxy HTTP/1.1 handshake failed:', responseString);
-              stream.respond({ ':status': 502 });
+              if (!stream.headersSent) {
+                stream.respond({ ':status': 502 });
+              }
               stream.end();
               cleanup();
               return;
             }
 
-            stream.respond({ ':status': 200 });
+            if (!stream.headersSent) {
+              stream.respond({ ':status': 200 });
+            }
             if (remainingData.length > 0) stream.write(remainingData);
             targetSocket.pipe(stream);
             stream.pipe(targetSocket);
