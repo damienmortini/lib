@@ -12,6 +12,7 @@ const watchPaths: Array<string> = [];
 let port: number | undefined;
 let useExternalCertificate = false;
 const proxy: { [path: string]: string } = {};
+let auth: string | undefined;
 
 let i = 0;
 while (i < args.length) {
@@ -61,6 +62,9 @@ while (i < args.length) {
       }
       break;
     }
+    case '--auth':
+      auth = args[++i];
+      break;
   }
 
   i++;
@@ -77,6 +81,7 @@ const server = new Server({
   port,
   useExternalCertificate,
   proxy,
+  auth,
 });
 
 await server.ready;

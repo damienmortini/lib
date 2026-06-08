@@ -90,7 +90,13 @@ type ServerOptions = {
   port?: number;
   useExternalCertificate?: boolean;
   proxy?: ProxyConfig;
+  auth?: string;
 };
+
+function checkBasicAuth(authorizationHeader: string | string[] | undefined, expectedHeader: string): boolean {
+  const header = Array.isArray(authorizationHeader) ? authorizationHeader[0] : authorizationHeader;
+  return header === expectedHeader;
+}
 
 export class Server {
   http2SecureServer: Http2SecureServer;
@@ -114,7 +120,10 @@ export class Server {
     port = 3000,
     useExternalCertificate = false,
     proxy = {},
+    auth,
   }: ServerOptions = {}): Promise<void> {
+    const expectedAuthHeader = auth ? `Basic ${Buffer.from(auth).toString('base64')}` : null;
+
     /**
      * Get port
      */
@@ -228,6 +237,12 @@ export class Server {
     });
 
     this.http2SecureServer.on('stream', async (stream: ServerHttp2Stream, headers) => {
+      if (expectedAuthHeader && !checkBasicAuth(headers['authorization'], expectedAuthHeader)) {
+        stream.respond({ ':status': 401, 'www-authenticate': 'Basic realm="Dev Server"' });
+        stream.end();
+        return;
+      }
+
       const requestMethod = headers[constants.HTTP2_HEADER_METHOD] as string;
       const requestAuthority = headers[constants.HTTP2_HEADER_AUTHORITY];
       const requestPath = headers[constants.HTTP2_HEADER_PATH];
@@ -571,6 +586,11 @@ export default styles;`;
     }));
 
     this.http2SecureServer.on('upgrade', (request, socket, head) => {
+      if (expectedAuthHeader && !checkBasicAuth(request.headers['authorization'], expectedAuthHeader)) {
+        socket.end('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="Dev Server"\r\n\r\n');
+        return;
+      }
+
       const requestPath = request.url || '';
 
       for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
