@@ -24,7 +24,7 @@ const generateCSSSourceMap = (css: string, sourceFile: string, destFile: string)
 };
 
 export const build = async ({
-  entryFiles = ['src/**'],
+  entryFiles,
   outputDirectory = 'dist',
   watch = false,
   bundle = false,
@@ -34,6 +34,7 @@ export const build = async ({
   declaration = false,
   copyAssets = false,
   platform = 'browser',
+  sourceDirectory = 'src',
 }: {
   entryFiles?: string[];
   outputDirectory?: string;
@@ -45,12 +46,14 @@ export const build = async ({
   declaration?: boolean;
   copyAssets?: boolean;
   platform?: 'node' | 'browser';
+  sourceDirectory?: string;
 } = {}) => {
   try {
-    const allFilePaths = await fastGlob(entryFiles, { ignore });
+    const resolvedEntryFiles = entryFiles ?? [`${sourceDirectory}/**/*`];
+    const allFilePaths = await fastGlob(resolvedEntryFiles, { ignore });
 
     if (allFilePaths.length === 0) {
-      throw new Error(`No entry files found for ${entryFiles}`);
+      throw new Error(`No entry files found for ${resolvedEntryFiles}`);
     }
 
     const dirs = allFilePaths.map(filePath => path.dirname(filePath));
@@ -127,6 +130,7 @@ export const build = async ({
                 catch (error) {
                   throw new Error(
                     `Symlink failed: if you are on Windows, you may need to enable Developer Mode in Windows settings.\n${error instanceof Error ? error.message : error}`,
+                    { cause: error },
                   );
                 }
               }
@@ -192,6 +196,7 @@ export const build = async ({
               catch (error) {
                 throw new Error(
                   `Symlink failed: if you are on Windows, you may need to enable Developer Mode in Windows settings.\n${error instanceof Error ? error.message : error}`,
+                  { cause: error },
                 );
               }
             }
@@ -271,6 +276,8 @@ export const build = async ({
                             '--incremental',
                             '--outDir',
                             outputDirectory,
+                            '--rootDir',
+                            sourceDirectory,
                             ...entryPoints,
                           ],
                           {

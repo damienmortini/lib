@@ -11,6 +11,7 @@ type TsConfigJson = {
   exclude?: string[];
   compilerOptions?: {
     outDir?: string;
+    rootDir?: string;
     declaration?: boolean;
   };
 };
@@ -33,7 +34,9 @@ const tsConfig = await findTsConfig(process.cwd());
 
 const args = process.argv.slice(2);
 
-let entryFiles = tsConfig?.include ?? ['**/*'];
+const sourceDirectory = tsConfig?.compilerOptions?.rootDir?.replace(/\/$/, '') ?? 'src';
+
+let entryFiles = tsConfig?.include;
 let outputDirectory = tsConfig?.compilerOptions?.outDir ?? 'dist';
 let watch = false;
 let ignore = tsConfig?.exclude ?? ['**/node_modules/**'];
@@ -51,7 +54,7 @@ for (const [index, value] of args.entries()) {
 
       Options:
         --help, -h        Show this help message
-        --input, -i       Entry file as a glob pattern, can be an array of glob patterns separated by comma (default: ${entryFiles.toString()})
+        --input, -i       Entry file as a glob pattern, can be an array of glob patterns separated by comma (default: ${(entryFiles ?? [`${sourceDirectory}/**/*`]).toString()})
         --output, -o      Output directory (default: ${outputDirectory})
         --watch, -w       Watch for changes
         --format -f       Output format 'iife' | 'cjs' | 'esm' (default: ${format})
@@ -107,4 +110,5 @@ await build({
   declaration,
   copyAssets,
   platform,
+  sourceDirectory,
 });

@@ -11,13 +11,11 @@
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
-  "main": "index.js",
   "types": "index.d.ts",
   "dependencies": {
     "@types/dom-navigation": "^1.0.7",
     "@types/dom-view-transitions": "^1.0.6",
-    "@types/node": "^25.9.3",
-    "@webgpu/types": "^0.1.70"
+    "@types/node": "^25.9.3"
   },
   "publishConfig": {
     "access": "public"
