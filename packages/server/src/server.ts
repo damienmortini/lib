@@ -7,6 +7,7 @@ import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2
 import { createServer, request as httpsRequest } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
+import { stripTypeScriptTypes } from 'module';
 import { connect as netConnect } from 'net';
 import { networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname, join } from 'path';
@@ -482,9 +483,22 @@ export class Server {
         }
 
         /**
+         * Serve TypeScript sources in place of their compiled counterparts to avoid needing a build step during development.
+         * e.g. `packages/foo/dist/index.js` → `packages/foo/src/index.ts` with types stripped.
+         */
+        let typeScriptSourceFilePath: string | undefined;
+        if (filePath.endsWith('.js') && filePath.includes('/dist/')) {
+          const candidateFilePath = filePath.replace(/\/dist\/(?!.*\/dist\/)/, '/src/').replace(/\.js$/, '.ts');
+          const candidateStats = await stat(candidateFilePath).catch(() => null);
+          if (candidateStats?.isFile()) {
+            typeScriptSourceFilePath = candidateFilePath;
+          }
+        }
+
+        /**
          * If path is a directory then set index.html file by default
          */
-        if ((await stat(filePath))?.isDirectory()) {
+        if (!typeScriptSourceFilePath && (await stat(filePath))?.isDirectory()) {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
         }
 
@@ -500,7 +514,7 @@ export class Server {
             : {}),
         };
 
-        this.#watcher?.add(filePath);
+        this.#watcher?.add(typeScriptSourceFilePath ?? filePath);
 
         const fileExtension = extname(filePath);
 
@@ -530,6 +544,17 @@ socket.addEventListener("message", function (event) {
 </script>
 </head>`,
           );
+          stream.end(fileContent);
+        }
+        else if (typeScriptSourceFilePath) {
+          stream.respond(responseHeaders);
+          let fileContent = await readFile(typeScriptSourceFilePath, {
+            encoding: 'utf-8',
+          });
+          fileContent = stripTypeScriptTypes(fileContent);
+          if (resolveModules) {
+            fileContent = await resolveImports(fileContent, convertCSSImport);
+          }
           stream.end(fileContent);
         }
         else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
