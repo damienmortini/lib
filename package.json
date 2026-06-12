@@ -19,21 +19,21 @@
     "start": "server --resolve-modules",
     "test": "eslint packages",
     "update": "npm i",
-    "upgrade": "syncpack update && syncpack fix-mismatches && npm i",
+    "upgrade": "syncpack update && syncpack fix && npm i",
     "version": "lerna version"
   },
   "dependencies": {
-    "es-module-shims": "^2.8.0"
+    "es-module-shims": "^2.8.1"
   },
   "devDependencies": {
-    "@damienmortini/eslint-config": "0.0.30",
-    "@damienmortini/server": "1.0.86",
+    "@damienmortini/eslint-config": "0.0.31",
+    "@damienmortini/server": "1.0.87",
     "@damienmortini/typescript-config": "0.0.16",
     "eslint": "10.5.0",
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
-    "lerna": "^9.0.3",
-    "nx": "^22.6.4",
+    "lerna": "^9.0.7",
+    "nx": "^22.7.5",
     "nx-cloud": "latest",
     "sort-package-json": "4.0.0",
     "syncpack": "15.3.1",

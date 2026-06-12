@@ -14,9 +14,9 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.161",
-    "@damienmortini/damdom-ticker": "^0.0.48",
-    "@damienmortini/three": "^0.1.201",
+    "@damienmortini/core": "0.2.161",
+    "@damienmortini/damdom-ticker": "0.0.48",
+    "@damienmortini/three": "0.1.201",
     "three": "0.184.0"
   },
   "publishConfig": {

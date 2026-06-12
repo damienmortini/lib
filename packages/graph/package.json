@@ -18,8 +18,8 @@
     "server": "node bin/index.js server"
   },
   "dependencies": {
-    "@damienmortini/server": "^1.0.87",
-    "ws": "^8.20.1"
+    "@damienmortini/server": "1.0.87",
+    "ws": "^8.21.0"
   },
   "publishConfig": {
     "access": "public"

@@ -26,13 +26,13 @@
   },
   "dependencies": {
     "chokidar": "^5.0.0",
-    "get-port": "^7.1.0",
+    "get-port": "^7.2.0",
     "import-meta-resolve": "^4.2.0",
     "mime-types": "^3.0.2",
     "qrcode": "^1.5.4",
     "selfsigned": "^5.5.0",
     "uuid": "14.0.0",
-    "ws": "^8.20.1"
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",

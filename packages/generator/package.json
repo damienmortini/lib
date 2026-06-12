@@ -27,7 +27,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "fs-extra": "^11.3.3",
+    "fs-extra": "^11.3.5",
     "jsdoc-to-markdown": "^9.1.3"
   },
   "devDependencies": {
