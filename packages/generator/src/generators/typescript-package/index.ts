@@ -27,6 +27,9 @@ export default async function ({ name, scope, path }) {
           type: 'module',
           main: 'dist/index.js',
           types: 'dist/index.d.ts',
+          files: [
+            'dist',
+          ],
           scripts: {
             build: 'tsc',
           },
@@ -45,8 +48,9 @@ export default async function ({ name, scope, path }) {
           extends: '../../tsconfig.json',
           compilerOptions: {
             outDir: './dist',
+            rootDir: './src',
+            tsBuildInfoFile: './dist/tsconfig.tsbuildinfo',
           },
-          include: ['./src/**/*'],
         },
         null,
         2,

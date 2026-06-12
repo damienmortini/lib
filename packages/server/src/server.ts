@@ -20,10 +20,45 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 const HOP_BY_HOP_HEADERS = new Set(['connection', 'upgrade', 'keep-alive', 'transfer-encoding']);
 const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-key', 'sec-websocket-version', 'host']);
+const PACKAGE_EXPORT_CONDITIONS = ['browser', 'import', 'default', 'module', 'require'];
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = pathToFileURL(rootDirectory);
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
+
+type PackageExportConditions = {
+  [condition: string]: PackageExportValue;
+};
+
+type PackageExportValue = PackageExportConditions | string | null;
+
+type PackageJson = {
+  exports?: PackageExportConditions;
+  type?: string;
+};
+
+function resolvePackageExportPath(
+  exportValue: PackageExportValue | undefined,
+  conditions = PACKAGE_EXPORT_CONDITIONS,
+  fallbackToNestedValues = true,
+): string | undefined {
+  if (typeof exportValue === 'string') return exportValue;
+  if (exportValue === null || exportValue === undefined) return undefined;
+
+  for (const condition of conditions) {
+    const resolvedPath = resolvePackageExportPath(exportValue[condition], conditions, fallbackToNestedValues);
+    if (resolvedPath) return resolvedPath;
+  }
+
+  if (!fallbackToNestedValues) return undefined;
+
+  for (const nestedExportValue of Object.values(exportValue)) {
+    const resolvedPath = resolvePackageExportPath(nestedExportValue, conditions);
+    if (resolvedPath) return resolvedPath;
+  }
+
+  return undefined;
+}
 
 async function getSourceFilePath(filePath: string): Promise<string | undefined> {
   if (!filePath.includes('/dist/')) return undefined;
@@ -469,19 +504,25 @@ export class Server {
           if (!physicalExists) {
             try {
               const mainPackageJsonPath = join(rootPath, 'node_modules', packageName, 'package.json');
-              const mainPackageJson = JSON.parse(await readFile(mainPackageJsonPath, 'utf-8'));
-              let exportValue = mainPackageJson.exports?.[`./${subPath}`];
-              if (exportValue && typeof exportValue === 'object') {
-                exportValue = exportValue.import || exportValue.default || exportValue.require;
-              }
-              if (typeof exportValue === 'string') {
+              const mainPackageJson = JSON.parse(await readFile(mainPackageJsonPath, 'utf-8')) as PackageJson;
+              const exportValue = mainPackageJson.exports?.[`./${subPath}`];
+              const exportPath = resolvePackageExportPath(exportValue);
+              if (exportPath) {
                 const depth = subPath.split('/').filter(Boolean).length;
-                const resolvedMain = '../'.repeat(depth) + exportValue.replace(/^\.\//, '');
+                const resolvePackageJsonPath = (packageJsonPath: string): string => {
+                  return '../'.repeat(depth) + packageJsonPath.replace(/^\.\//, '');
+                };
+                const typesPath = resolvePackageExportPath(exportValue, ['types'], false);
+                const packageJson = {
+                  main: resolvePackageJsonPath(exportPath),
+                  ...(mainPackageJson.type ? { type: mainPackageJson.type } : {}),
+                  ...(typesPath ? { types: resolvePackageJsonPath(typesPath) } : {}),
+                };
                 stream.respond({
                   ':status': constants.HTTP_STATUS_OK,
                   'content-type': 'application/json',
                 });
-                stream.end(JSON.stringify({ main: resolvedMain }, null, 2));
+                stream.end(JSON.stringify(packageJson, null, 2));
                 return;
               }
             }

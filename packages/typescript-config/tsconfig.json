@@ -12,7 +12,8 @@
     "sourceMap": true,
     "incremental": true,
     "preserveWatchOutput": true,
-    "types": ["node", "dom-navigation", "dom-view-transitions", "@webgpu/types", "@damienmortini/typescript-config"]
+    "strict": false,
+    "types": ["node", "dom-navigation", "dom-view-transitions", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
 }

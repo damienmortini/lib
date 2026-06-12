@@ -10,11 +10,14 @@ for (const result of fastGlob.sync(['**/package.json'], {
 })) {
   const filePath = `packages/${result.path}`;
   const directory = filePath.replace(`/${result.name}`, '');
+  const { main, ...packageDataWithoutMain } = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  const mainFilePath = main ?? 'index.js';
+  const mainField = main?.startsWith('dist/') || fs.existsSync(`${directory}/${mainFilePath}`)
+    ? { main: mainFilePath }
+    : {};
   const packageData = sortPackageJson({
-    ...{
-      main: 'index.js',
-    },
-    ...JSON.parse(fs.readFileSync(filePath, 'utf-8')),
+    ...packageDataWithoutMain,
+    ...mainField,
     author: 'Damien Mortini',
     type: 'module',
     publishConfig: {

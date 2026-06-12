@@ -7,7 +7,7 @@
     "packages/**/*"
   ],
   "scripts": {
-    "build": "npx nx run-many --target=build",
+    "build": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false npx nx run-many --target=build",
     "build:watch": "npx nx run-many --target=build --watch",
     "serve": "server",
     "bump": "lerna version patch",
