@@ -21,9 +21,9 @@
   },
   "dependencies": {
     "chokidar": "^5.0.0",
-    "esbuild": "^0.27.2",
+    "esbuild": "0.28.1",
     "fast-glob": "^3.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "6.0.3"
   },
   "devDependencies": {
     "@damienmortini/typescript-config": "0.0.16"

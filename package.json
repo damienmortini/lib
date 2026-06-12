@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/lib",
-  "version": "0.0.0",
+  "version": "0.2.13",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -26,18 +26,18 @@
     "es-module-shims": "^2.8.0"
   },
   "devDependencies": {
-    "@damienmortini/eslint-config": "^0.0.28",
-    "@damienmortini/server": "^1.0.82",
-    "@damienmortini/typescript-config": "^0.0.14",
-    "eslint": "^9.39.2",
+    "@damienmortini/eslint-config": "0.0.30",
+    "@damienmortini/server": "1.0.86",
+    "@damienmortini/typescript-config": "0.0.16",
+    "eslint": "10.5.0",
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
     "lerna": "^9.0.3",
     "nx": "^22.6.4",
     "nx-cloud": "latest",
-    "sort-package-json": "^3.6.1",
-    "syncpack": "^13.0.4",
-    "typescript": "^5.9.3"
+    "sort-package-json": "4.0.0",
+    "syncpack": "15.3.1",
+    "typescript": "6.0.3"
   },
   "optionalDependencies": {
     "@nx/nx-linux-x64-gnu": "22.4.4"
