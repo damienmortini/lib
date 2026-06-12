@@ -24,7 +24,7 @@
   "main": "index.js",
   "dependencies": {
     "@damienmortini/gesture-observer": "0.0.9",
-    "@damienmortini/math": "^0.0.27"
+    "@damienmortini/math": "0.0.27"
   },
   "publishConfig": {
     "access": "public"

@@ -14,10 +14,10 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.161",
-    "@damienmortini/damdom-ticker": "^0.0.48",
-    "@damienmortini/math": "^0.0.27",
-    "@damienmortini/webgl": "^0.0.40"
+    "@damienmortini/core": "0.2.161",
+    "@damienmortini/damdom-ticker": "0.0.48",
+    "@damienmortini/math": "0.0.27",
+    "@damienmortini/webgl": "0.0.40"
   },
   "publishConfig": {
     "access": "public"

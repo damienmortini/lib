@@ -17,7 +17,7 @@
     "generateTypes": "npx -p typescript tsc index.js --target esnext --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/ticker": "^0.0.16"
+    "@damienmortini/ticker": "0.0.16"
   },
   "publishConfig": {
     "access": "public"
