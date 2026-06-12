@@ -1,3 +1,5 @@
+import { stripTypeScriptTypes } from 'node:module';
+
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { randomBytes } from 'crypto';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
@@ -7,7 +9,6 @@ import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2
 import { createServer, request as httpsRequest } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
-import { stripTypeScriptTypes } from 'module';
 import { connect as netConnect } from 'net';
 import { networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname, join } from 'path';
@@ -23,6 +24,26 @@ const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-k
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = pathToFileURL(rootDirectory);
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
+
+async function getSourceFilePath(filePath: string): Promise<string | undefined> {
+  if (!filePath.includes('/dist/')) return undefined;
+
+  const sourceBaseFilePath = filePath.replace(/\/dist\/(?!.*\/dist\/)/, '/src/');
+  const sourceFilePathCandidates = [sourceBaseFilePath];
+
+  if (filePath.endsWith('.js')) {
+    sourceFilePathCandidates.unshift(sourceBaseFilePath.replace(/\.js$/, '.ts'));
+  }
+
+  for (const sourceFilePathCandidate of sourceFilePathCandidates) {
+    const sourceFileMetadata = await stat(sourceFilePathCandidate).catch(() => null);
+    if (sourceFileMetadata?.isFile()) {
+      return sourceFilePathCandidate;
+    }
+  }
+
+  return undefined;
+}
 
 async function resolveImports(string: string, removeCSSImportAttribute = false): Promise<string> {
   const matches = Array.from(string.matchAll(
@@ -482,23 +503,12 @@ export class Server {
           filePath = `${rootPath}/`;
         }
 
-        /**
-         * Serve TypeScript sources in place of their compiled counterparts to avoid needing a build step during development.
-         * e.g. `packages/foo/dist/index.js` → `packages/foo/src/index.ts` with types stripped.
-         */
-        let typeScriptSourceFilePath: string | undefined;
-        if (filePath.endsWith('.js') && filePath.includes('/dist/')) {
-          const candidateFilePath = filePath.replace(/\/dist\/(?!.*\/dist\/)/, '/src/').replace(/\.js$/, '.ts');
-          const candidateStats = await stat(candidateFilePath).catch(() => null);
-          if (candidateStats?.isFile()) {
-            typeScriptSourceFilePath = candidateFilePath;
-          }
-        }
+        const sourceFilePath = await getSourceFilePath(filePath);
 
         /**
          * If path is a directory then set index.html file by default
          */
-        if (!typeScriptSourceFilePath && (await stat(filePath))?.isDirectory()) {
+        if (!sourceFilePath && (await stat(filePath))?.isDirectory()) {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
         }
 
@@ -514,7 +524,9 @@ export class Server {
             : {}),
         };
 
-        this.#watcher?.add(typeScriptSourceFilePath ?? filePath);
+        const responseFilePath = sourceFilePath ?? filePath;
+
+        this.#watcher?.add(responseFilePath);
 
         const fileExtension = extname(filePath);
 
@@ -523,7 +535,7 @@ export class Server {
          */
         if (watch && fileExtension === '.html') {
           stream.respond(responseHeaders);
-          let fileContent = await readFile(filePath, {
+          let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
           if (resolveModules) {
@@ -546,9 +558,9 @@ socket.addEventListener("message", function (event) {
           );
           stream.end(fileContent);
         }
-        else if (typeScriptSourceFilePath) {
+        else if (sourceFilePath?.endsWith('.ts')) {
           stream.respond(responseHeaders);
-          let fileContent = await readFile(typeScriptSourceFilePath, {
+          let fileContent = await readFile(sourceFilePath, {
             encoding: 'utf-8',
           });
           fileContent = stripTypeScriptTypes(fileContent);
@@ -559,7 +571,7 @@ socket.addEventListener("message", function (event) {
         }
         else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
           stream.respond(responseHeaders);
-          let fileContent = await readFile(filePath, {
+          let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
           fileContent = await resolveImports(fileContent, convertCSSImport);
@@ -568,7 +580,7 @@ socket.addEventListener("message", function (event) {
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
           responseHeaders['content-type'] = 'application/javascript';
           stream.respond(responseHeaders);
-          let fileContent = await readFile(filePath, {
+          let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
           fileContent = `const styles = new CSSStyleSheet();
@@ -577,7 +589,7 @@ export default styles;`;
           stream.end(fileContent);
         }
         else {
-          stream.respondWithFile(decodeURIComponent(filePath), responseHeaders);
+          stream.respondWithFile(decodeURIComponent(responseFilePath), responseHeaders);
         }
       }
       catch (error) {
