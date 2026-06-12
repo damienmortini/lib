@@ -20,7 +20,7 @@
     "@gltf-transform/core": "^4.3.0"
   },
   "devDependencies": {
-    "esbuild": "^0.27.2"
+    "esbuild": "0.28.1"
   },
   "publishConfig": {
     "access": "public"
