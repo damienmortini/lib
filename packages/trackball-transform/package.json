@@ -21,8 +21,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@damienmortini/gesture-observer": "^0.0.10",
-    "@damienmortini/math": "^0.0.28"
+    "@damienmortini/gesture-observer": "0.0.10",
+    "@damienmortini/math": "0.0.28"
   },
   "devDependencies": {
     "typescript": "6.0.3"
