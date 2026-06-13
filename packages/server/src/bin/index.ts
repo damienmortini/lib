@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Server } from '../server.js';
+import { Server } from '../server.ts';
 
 const args = process.argv.slice(2);
 let verbose = false;
