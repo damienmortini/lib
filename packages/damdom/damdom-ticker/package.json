@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/damdom-ticker",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "description": "<damdom-ticker> custom element.",
   "keywords": [
     "custom elements",
@@ -22,7 +22,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly"
   },
   "dependencies": {
-    "@damienmortini/ticker": "0.0.17"
+    "@damienmortini/ticker": "^0.0.18"
   },
   "publishConfig": {
     "access": "public"
