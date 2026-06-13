@@ -18,8 +18,8 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/core": "^0.2.163",
-    "@damienmortini/damdom-ticker": "^0.0.50"
+    "@damienmortini/core": "0.2.163",
+    "@damienmortini/damdom-ticker": "0.0.50"
   },
   "publishConfig": {
     "access": "public"
