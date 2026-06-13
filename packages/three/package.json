@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/three",
-  "version": "0.1.201",
+  "version": "0.1.202",
   "description": "Three.js helpers",
   "keywords": [
     "three",
@@ -25,7 +25,7 @@
     "generateTypes": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
-    "@damienmortini/core": "0.2.161",
+    "@damienmortini/core": "^0.2.162",
     "fs-extra": "^11.3.5",
     "three": "0.184.0"
   },
