@@ -14,13 +14,14 @@ import { networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
-import { pathToFileURL } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const HOP_BY_HOP_HEADERS = new Set(['connection', 'upgrade', 'keep-alive', 'transfer-encoding']);
 const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-key', 'sec-websocket-version', 'host']);
 const PACKAGE_EXPORT_CONDITIONS = ['browser', 'import', 'default', 'module', 'require'];
+const MODULE_RESOLVE_CONDITIONS = new Set(['module', 'import', 'default']);
 
 const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
 const importMetaResolveParent = pathToFileURL(rootDirectory);
@@ -34,6 +35,7 @@ type PackageExportValue = PackageExportConditions | string | null;
 
 type PackageJson = {
   exports?: PackageExportConditions;
+  main?: string;
   type?: string;
 };
 
@@ -80,6 +82,36 @@ async function getSourceFilePath(filePath: string): Promise<string | undefined> 
   return undefined;
 }
 
+/**
+ * Resolve a bare specifier when its build output is missing on disk.
+ *
+ * Node resolution (and therefore moduleResolve) throws ERR_MODULE_NOT_FOUND when a package's
+ * `main`/`exports` target has not been built yet. The server transpiles `dist/*` from `src/*`
+ * on the fly, so the path is valid even though the file is absent. Locate the package through
+ * its always-present `package.json` and rebuild the served path without an existence check.
+ */
+async function resolveUnbuiltSpecifier(specifier: string): Promise<string | undefined> {
+  const segments = specifier.split('/');
+  const packageName = specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
+  const subPath = specifier.slice(packageName.length + 1);
+
+  let packageJsonUrl: URL;
+  try {
+    packageJsonUrl = moduleResolve(`${packageName}/package.json`, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true);
+  }
+  catch {
+    return undefined;
+  }
+
+  const packageJson = JSON.parse(await readFile(fileURLToPath(packageJsonUrl), 'utf-8')) as PackageJson;
+  const rootExport = typeof packageJson.exports === 'string' ? packageJson.exports : packageJson.exports?.['.'];
+  const relativePath = subPath
+    ? resolvePackageExportPath(packageJson.exports?.[`./${subPath}`]) ?? subPath
+    : resolvePackageExportPath(rootExport) ?? packageJson.main ?? 'index.js';
+
+  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, '/');
+}
+
 async function resolveImports(string: string, removeCSSImportAttribute = false): Promise<string> {
   const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
@@ -96,13 +128,19 @@ async function resolveImports(string: string, removeCSSImportAttribute = false):
           /**
            * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
            */
-          importPath = moduleResolve(importPath, importMetaResolveParent, new Set(['module', 'import', 'default']), true).href.replace(
+          importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
             importMetaResolveParent.href,
             '/',
           );
         }
         catch (error) {
-          console.log(importPath, error);
+          const unbuiltPath = await resolveUnbuiltSpecifier(importPath);
+          if (unbuiltPath) {
+            importPath = unbuiltPath;
+          }
+          else {
+            console.log(importPath, error);
+          }
         }
       }
 
