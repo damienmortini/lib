@@ -22,8 +22,8 @@
   "author": "Damien Mortini",
   "type": "module",
   "dependencies": {
-    "@damienmortini/gesture-observer": "^0.0.10",
-    "@damienmortini/math": "^0.0.28"
+    "@damienmortini/gesture-observer": "0.0.10",
+    "@damienmortini/math": "0.0.28"
   },
   "publishConfig": {
     "access": "public"
