@@ -2,10 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "moduleResolution": "NodeNext",
-    "target": "ESNext",
     "module": "NodeNext",
-    "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "declaration": true,
     "declarationMap": true,
