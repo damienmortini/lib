@@ -15,7 +15,7 @@
   "main": "index.js",
   "dependencies": {
     "@damienmortini/core": "0.2.163",
-    "@damienmortini/damdom-ticker": "^0.0.51",
+    "@damienmortini/damdom-ticker": "0.0.51",
     "@damienmortini/math": "0.0.28",
     "@damienmortini/webgl": "0.0.42"
   },

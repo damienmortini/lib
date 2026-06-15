@@ -19,7 +19,7 @@
   "main": "index.js",
   "dependencies": {
     "@damienmortini/core": "0.2.163",
-    "@damienmortini/damdom-ticker": "^0.0.51"
+    "@damienmortini/damdom-ticker": "0.0.51"
   },
   "publishConfig": {
     "access": "public"
