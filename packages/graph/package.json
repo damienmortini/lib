@@ -18,7 +18,7 @@
     "server": "node bin/index.js server"
   },
   "dependencies": {
-    "@damienmortini/server": "^1.0.89",
+    "@damienmortini/server": "1.0.89",
     "ws": "^8.21.0"
   },
   "publishConfig": {
