@@ -594,6 +594,10 @@ export class Server {
         const responseHeaders = {
           ':status': constants.HTTP_STATUS_OK,
           'content-type': String(mimeTypes.lookup(filePath)),
+          // Transpiled TypeScript and rewritten modules are generated from source on
+          // every request, so the browser must revalidate rather than reuse a cached
+          // copy — otherwise an edited source file is shadowed by a stale module.
+          'cache-control': 'no-cache',
           ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
           ...(fetchDest === 'script'
             ? {
