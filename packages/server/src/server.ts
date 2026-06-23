@@ -168,7 +168,9 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
 
       const removeImportAttribute = removeCSSImportAttribute && match[5] === 'css';
       const replacement = match[1] + importPath + match[3] + (match[4] && !removeImportAttribute ? match[4] : '');
-      string = string.replace(match[0], replacement);
+      // Function replacer so `$`-sequences in the rewritten path (a base value
+      // could carry $&, $', …) are inserted literally, not expanded.
+      string = string.replace(match[0], () => replacement);
     })());
   }
 
