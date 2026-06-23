@@ -13,6 +13,7 @@ let port: number | undefined;
 let useExternalCertificate = false;
 const proxy: { [path: string]: string } = {};
 let auth: string | undefined;
+let base: string | undefined;
 
 let i = 0;
 while (i < args.length) {
@@ -65,6 +66,9 @@ while (i < args.length) {
     case '--auth':
       auth = args[++i];
       break;
+    case '--base':
+      base = args[++i];
+      break;
   }
 
   i++;
@@ -82,6 +86,7 @@ const server = new Server({
   useExternalCertificate,
   proxy,
   auth,
+  base,
 });
 
 await server.ready;

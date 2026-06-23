@@ -90,7 +90,7 @@ async function getSourceFilePath(filePath: string): Promise<string | undefined> 
  * on the fly, so the path is valid even though the file is absent. Locate the package through
  * its always-present `package.json` and rebuild the served path without an existence check.
  */
-async function resolveUnbuiltSpecifier(specifier: string): Promise<string | undefined> {
+async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/'): Promise<string | undefined> {
   const segments = specifier.split('/');
   const packageName = specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
   const subPath = specifier.slice(packageName.length + 1);
@@ -109,10 +109,10 @@ async function resolveUnbuiltSpecifier(specifier: string): Promise<string | unde
     ? resolvePackageExportPath(packageJson.exports?.[`./${subPath}`]) ?? subPath
     : resolvePackageExportPath(rootExport) ?? packageJson.main ?? 'index.js';
 
-  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, '/');
+  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, servedRoot);
 }
 
-async function resolveImports(string: string, removeCSSImportAttribute = false): Promise<string> {
+async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/'): Promise<string> {
   const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
   ));
@@ -130,11 +130,11 @@ async function resolveImports(string: string, removeCSSImportAttribute = false):
            */
           importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
             importMetaResolveParent.href,
-            '/',
+            servedRoot,
           );
         }
         catch (error) {
-          const unbuiltPath = await resolveUnbuiltSpecifier(importPath);
+          const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot);
           if (unbuiltPath) {
             importPath = unbuiltPath;
           }
@@ -147,7 +147,12 @@ async function resolveImports(string: string, removeCSSImportAttribute = false):
       // Check if path has no extension and add .js if needed
       if (!/\.[^/]*$/.test(importPath)) {
         try {
-          const fullPath = join(rootDirectory, importPath);
+          // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
+          // back to an origin-relative path before probing the filesystem.
+          const diskPath = servedRoot !== '/' && importPath.startsWith(servedRoot)
+            ? `/${importPath.slice(servedRoot.length)}`
+            : importPath;
+          const fullPath = join(rootDirectory, diskPath);
           const stats = await stat(fullPath);
           if (!stats.isDirectory()) {
             importPath += '.js';
@@ -186,6 +191,7 @@ type ServerOptions = {
   useExternalCertificate?: boolean;
   proxy?: ProxyConfig;
   auth?: string;
+  base?: string;
 };
 
 function checkBasicAuth(authorizationHeader: string | string[] | undefined, expectedHeader: string): boolean {
@@ -216,8 +222,17 @@ export class Server {
     useExternalCertificate = false,
     proxy = {},
     auth,
+    base = '',
   }: ServerOptions = {}): Promise<void> {
     const expectedAuthHeader = auth ? `Basic ${Buffer.from(auth).toString('base64')}` : null;
+
+    // When set, the server is mounted under a sub-path (e.g. `damo`): incoming
+    // request paths are stripped of the `/damo` prefix before file lookup, and
+    // resolved bare-specifier imports are emitted as `/damo/...` so the browser
+    // requests them back under the same prefix instead of the origin root.
+    const normalizedBase = base.replace(/^\/+|\/+$/g, '');
+    const basePrefix = normalizedBase ? `/${normalizedBase}` : '';
+    const servedRoot = normalizedBase ? `/${normalizedBase}/` : '/';
 
     /**
      * Get port
@@ -345,6 +360,13 @@ export class Server {
       const userAgent = headers['user-agent'];
       const fetchDest = headers['sec-fetch-dest'];
       const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
+
+      // Strip the mount prefix (e.g. `/damo`) so file serving works off the origin
+      // root. `/damo` and `/damo/` both collapse to `/` → the directory index.
+      let servedPath = requestPathString ?? '/';
+      if (basePrefix && (servedPath === basePrefix || servedPath.startsWith(`${basePrefix}/`))) {
+        servedPath = servedPath.slice(basePrefix.length) || '/';
+      }
 
       /**
        * Handle HTTP/2 WebSocket proxy upgrades (RFC 8441)
@@ -525,7 +547,7 @@ export class Server {
       const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
 
       try {
-        let filePath = `${rootPath}${String(requestPath).split('?')[0]}`;
+        let filePath = `${rootPath}${String(servedPath).split('?')[0]}`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
@@ -622,7 +644,7 @@ export class Server {
             encoding: 'utf-8',
           });
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport);
+            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           }
           fileContent = fileContent.replace(
             '</head>',
@@ -648,7 +670,7 @@ socket.addEventListener("message", function (event) {
           });
           fileContent = stripTypeScriptTypes(fileContent);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport);
+            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           }
           stream.end(fileContent);
         }
@@ -657,7 +679,7 @@ socket.addEventListener("message", function (event) {
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
-          fileContent = await resolveImports(fileContent, convertCSSImport);
+          fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           stream.end(fileContent);
         }
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
