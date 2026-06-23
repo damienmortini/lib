@@ -175,6 +175,20 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
   return string;
 }
 
+// Strip a mount prefix (e.g. `/damo`) from a request path, preserving any query
+// string, so file serving and proxy rules work off the origin root. Returns the
+// path unchanged when it doesn't fall under the prefix (or no base is set).
+function stripBasePrefix(path: string, basePrefix: string): string {
+  if (!basePrefix) return path;
+  const queryIndex = path.indexOf('?');
+  const pathOnly = queryIndex === -1 ? path : path.slice(0, queryIndex);
+  const query = queryIndex === -1 ? '' : path.slice(queryIndex);
+  if (pathOnly === basePrefix || pathOnly.startsWith(`${basePrefix}/`)) {
+    return (pathOnly.slice(basePrefix.length) || '/') + query;
+  }
+  return path;
+}
+
 type ProxyConfig = {
   [path: string]: string;
 };
@@ -363,18 +377,8 @@ export class Server {
 
       // Strip the mount prefix (e.g. `/damo`) so file serving and proxy matching
       // work off the origin root. `/damo` and `/damo/` both collapse to `/` → the
-      // directory index. The `:path` header carries the query string, so split it
-      // off for the prefix test and re-attach it (a bare `/damo?x` would otherwise
-      // never match and serve a stray `damo` file instead of the index).
-      let servedPath = requestPathString ?? '/';
-      if (basePrefix) {
-        const queryIndex = servedPath.indexOf('?');
-        const pathOnly = queryIndex === -1 ? servedPath : servedPath.slice(0, queryIndex);
-        const query = queryIndex === -1 ? '' : servedPath.slice(queryIndex);
-        if (pathOnly === basePrefix || pathOnly.startsWith(`${basePrefix}/`)) {
-          servedPath = (pathOnly.slice(basePrefix.length) || '/') + query;
-        }
-      }
+      // directory index.
+      const servedPath = stripBasePrefix(requestPathString ?? '/', basePrefix);
 
       /**
        * Handle HTTP/2 WebSocket proxy upgrades (RFC 8441)
@@ -461,7 +465,7 @@ export class Server {
        * Handle Chrome DevTools Automatic Workspace Folders request
        * https://developer.chrome.com/docs/devtools/workspaces/
        */
-      if (requestPath === '/.well-known/appspecific/com.chrome.devtools.json') {
+      if (servedPath === '/.well-known/appspecific/com.chrome.devtools.json') {
         const workspaceConfig = {
           workspace: {
             root: rootDirectory.slice(0, -1),
@@ -742,9 +746,12 @@ export default styles;`;
       }
 
       const requestPath = request.url || '';
+      // Strip the mount prefix (mirrors the stream handler) so proxy rules match
+      // and the upstream target receives the un-prefixed path under a base.
+      const strippedPath = stripBasePrefix(requestPath, basePrefix);
 
       for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
-        if (requestPath.startsWith(proxyPath)) {
+        if (strippedPath.startsWith(proxyPath)) {
           // Disable Nagle's algorithm on client socket for lower latency
           socket.setNoDelay(true);
 
@@ -764,7 +771,7 @@ export default styles;`;
 
           targetSocket.on('connect', () => {
             // Forward the original upgrade request with all headers to target
-            let headerString = `GET ${requestPath} HTTP/1.1\r\n`;
+            let headerString = `GET ${strippedPath} HTTP/1.1\r\n`;
             for (const [key, value] of Object.entries(request.headers)) {
               if (key === 'host') {
                 headerString += `Host: ${targetUrl.host}\r\n`;
