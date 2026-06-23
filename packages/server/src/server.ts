@@ -90,7 +90,7 @@ async function getSourceFilePath(filePath: string): Promise<string | undefined> 
  * on the fly, so the path is valid even though the file is absent. Locate the package through
  * its always-present `package.json` and rebuild the served path without an existence check.
  */
-async function resolveUnbuiltSpecifier(specifier: string): Promise<string | undefined> {
+async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/'): Promise<string | undefined> {
   const segments = specifier.split('/');
   const packageName = specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
   const subPath = specifier.slice(packageName.length + 1);
@@ -109,10 +109,12 @@ async function resolveUnbuiltSpecifier(specifier: string): Promise<string | unde
     ? resolvePackageExportPath(packageJson.exports?.[`./${subPath}`]) ?? subPath
     : resolvePackageExportPath(rootExport) ?? packageJson.main ?? 'index.js';
 
-  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, '/');
+  // Arrow replacer so `$`-sequences in servedRoot are treated literally, not as
+  // String.replace special patterns ($&, $', …).
+  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, () => servedRoot);
 }
 
-async function resolveImports(string: string, removeCSSImportAttribute = false): Promise<string> {
+async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/'): Promise<string> {
   const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
   ));
@@ -130,11 +132,11 @@ async function resolveImports(string: string, removeCSSImportAttribute = false):
            */
           importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
             importMetaResolveParent.href,
-            '/',
+            () => servedRoot,
           );
         }
         catch (error) {
-          const unbuiltPath = await resolveUnbuiltSpecifier(importPath);
+          const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot);
           if (unbuiltPath) {
             importPath = unbuiltPath;
           }
@@ -147,7 +149,12 @@ async function resolveImports(string: string, removeCSSImportAttribute = false):
       // Check if path has no extension and add .js if needed
       if (!/\.[^/]*$/.test(importPath)) {
         try {
-          const fullPath = join(rootDirectory, importPath);
+          // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
+          // back to an origin-relative path before probing the filesystem.
+          const diskPath = servedRoot !== '/' && importPath.startsWith(servedRoot)
+            ? `/${importPath.slice(servedRoot.length)}`
+            : importPath;
+          const fullPath = join(rootDirectory, diskPath);
           const stats = await stat(fullPath);
           if (!stats.isDirectory()) {
             importPath += '.js';
@@ -161,13 +168,29 @@ async function resolveImports(string: string, removeCSSImportAttribute = false):
 
       const removeImportAttribute = removeCSSImportAttribute && match[5] === 'css';
       const replacement = match[1] + importPath + match[3] + (match[4] && !removeImportAttribute ? match[4] : '');
-      string = string.replace(match[0], replacement);
+      // Function replacer so `$`-sequences in the rewritten path (a base value
+      // could carry $&, $', …) are inserted literally, not expanded.
+      string = string.replace(match[0], () => replacement);
     })());
   }
 
   await Promise.all(promises);
 
   return string;
+}
+
+// Strip a mount prefix (e.g. `/damo`) from a request path, preserving any query
+// string, so file serving and proxy rules work off the origin root. Returns the
+// path unchanged when it doesn't fall under the prefix (or no base is set).
+function stripBasePrefix(path: string, basePrefix: string): string {
+  if (!basePrefix) return path;
+  const queryIndex = path.indexOf('?');
+  const pathOnly = queryIndex === -1 ? path : path.slice(0, queryIndex);
+  const query = queryIndex === -1 ? '' : path.slice(queryIndex);
+  if (pathOnly === basePrefix || pathOnly.startsWith(`${basePrefix}/`)) {
+    return (pathOnly.slice(basePrefix.length) || '/') + query;
+  }
+  return path;
 }
 
 type ProxyConfig = {
@@ -186,6 +209,13 @@ type ServerOptions = {
   useExternalCertificate?: boolean;
   proxy?: ProxyConfig;
   auth?: string;
+  /**
+   * Mount the server under a URL sub-path (e.g. `damo` → served at `/damo/`).
+   * Incoming paths are stripped of the prefix before file lookup and proxy
+   * matching, so `proxy` keys must be written WITHOUT the base (use `/api`, not
+   * `/damo/api`). Defaults to root.
+   */
+  base?: string;
 };
 
 function checkBasicAuth(authorizationHeader: string | string[] | undefined, expectedHeader: string): boolean {
@@ -216,8 +246,17 @@ export class Server {
     useExternalCertificate = false,
     proxy = {},
     auth,
+    base = '',
   }: ServerOptions = {}): Promise<void> {
     const expectedAuthHeader = auth ? `Basic ${Buffer.from(auth).toString('base64')}` : null;
+
+    // When set, the server is mounted under a sub-path (e.g. `damo`): incoming
+    // request paths are stripped of the `/damo` prefix before file lookup, and
+    // resolved bare-specifier imports are emitted as `/damo/...` so the browser
+    // requests them back under the same prefix instead of the origin root.
+    const normalizedBase = base.replace(/^\/+|\/+$/g, '');
+    const basePrefix = normalizedBase ? `/${normalizedBase}` : '';
+    const servedRoot = normalizedBase ? `/${normalizedBase}/` : '/';
 
     /**
      * Get port
@@ -346,12 +385,17 @@ export class Server {
       const fetchDest = headers['sec-fetch-dest'];
       const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
 
+      // Strip the mount prefix (e.g. `/damo`) so file serving and proxy matching
+      // work off the origin root. `/damo` and `/damo/` both collapse to `/` → the
+      // directory index.
+      const servedPath = stripBasePrefix(requestPathString ?? '/', basePrefix);
+
       /**
        * Handle HTTP/2 WebSocket proxy upgrades (RFC 8441)
        */
       if (requestMethod === 'CONNECT' && headers[':protocol'] === 'websocket') {
         for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
-          if (!requestPathString?.startsWith(proxyPath)) continue;
+          if (!servedPath.startsWith(proxyPath)) continue;
 
           const targetSocket = netConnect({
             host: targetUrl.hostname,
@@ -369,7 +413,7 @@ export class Server {
 
           targetSocket.on('connect', () => {
             const secWebSocketKey = randomBytes(16).toString('base64');
-            let headerString = `GET ${requestPathString} HTTP/1.1\r\n`
+            let headerString = `GET ${servedPath} HTTP/1.1\r\n`
               + `Host: ${targetUrl.host}\r\n`
               + `Upgrade: websocket\r\n`
               + `Connection: Upgrade\r\n`
@@ -431,7 +475,7 @@ export class Server {
        * Handle Chrome DevTools Automatic Workspace Folders request
        * https://developer.chrome.com/docs/devtools/workspaces/
        */
-      if (requestPath === '/.well-known/appspecific/com.chrome.devtools.json') {
+      if (servedPath === '/.well-known/appspecific/com.chrome.devtools.json') {
         const workspaceConfig = {
           workspace: {
             root: rootDirectory.slice(0, -1),
@@ -452,8 +496,8 @@ export class Server {
        * Handle proxy requests
        */
       for (const [proxyPath, target] of Object.entries(proxy)) {
-        if (requestPathString?.startsWith(proxyPath)) {
-          const targetUrl = new URL(requestPathString, target);
+        if (servedPath.startsWith(proxyPath)) {
+          const targetUrl = new URL(servedPath, target);
           const isHttps = targetUrl.protocol === 'https:';
           const requester = isHttps ? httpsRequest : httpRequest;
 
@@ -525,7 +569,7 @@ export class Server {
       const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
 
       try {
-        let filePath = `${rootPath}${String(requestPath).split('?')[0]}`;
+        let filePath = `${rootPath}${String(servedPath).split('?')[0]}`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
@@ -622,7 +666,7 @@ export class Server {
             encoding: 'utf-8',
           });
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport);
+            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           }
           fileContent = fileContent.replace(
             '</head>',
@@ -648,7 +692,7 @@ socket.addEventListener("message", function (event) {
           });
           fileContent = stripTypeScriptTypes(fileContent);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport);
+            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           }
           stream.end(fileContent);
         }
@@ -657,7 +701,7 @@ socket.addEventListener("message", function (event) {
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
-          fileContent = await resolveImports(fileContent, convertCSSImport);
+          fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           stream.end(fileContent);
         }
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
@@ -712,9 +756,12 @@ export default styles;`;
       }
 
       const requestPath = request.url || '';
+      // Strip the mount prefix (mirrors the stream handler) so proxy rules match
+      // and the upstream target receives the un-prefixed path under a base.
+      const strippedPath = stripBasePrefix(requestPath, basePrefix);
 
       for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
-        if (requestPath.startsWith(proxyPath)) {
+        if (strippedPath.startsWith(proxyPath)) {
           // Disable Nagle's algorithm on client socket for lower latency
           socket.setNoDelay(true);
 
@@ -734,7 +781,7 @@ export default styles;`;
 
           targetSocket.on('connect', () => {
             // Forward the original upgrade request with all headers to target
-            let headerString = `GET ${requestPath} HTTP/1.1\r\n`;
+            let headerString = `GET ${strippedPath} HTTP/1.1\r\n`;
             for (const [key, value] of Object.entries(request.headers)) {
               if (key === 'host') {
                 headerString += `Host: ${targetUrl.host}\r\n`;
@@ -775,7 +822,7 @@ export default styles;`;
     this.http2SecureServer.listen(serverPort);
 
     for (const [index, address] of addresses.entries()) {
-      const url = `https://${address}:${serverPort}/${path}`;
+      const url = `https://${address}:${serverPort}${basePrefix}/${path}`;
       console.log(url);
       if (index !== 0) {
         console.log(await QRCode.toString(url, { type: 'terminal', small: true }));
