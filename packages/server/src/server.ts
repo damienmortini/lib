@@ -109,7 +109,9 @@ async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/'): Pro
     ? resolvePackageExportPath(packageJson.exports?.[`./${subPath}`]) ?? subPath
     : resolvePackageExportPath(rootExport) ?? packageJson.main ?? 'index.js';
 
-  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, servedRoot);
+  // Arrow replacer so `$`-sequences in servedRoot are treated literally, not as
+  // String.replace special patterns ($&, $', …).
+  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, () => servedRoot);
 }
 
 async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/'): Promise<string> {
@@ -130,7 +132,7 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
            */
           importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
             importMetaResolveParent.href,
-            servedRoot,
+            () => servedRoot,
           );
         }
         catch (error) {
@@ -205,6 +207,12 @@ type ServerOptions = {
   useExternalCertificate?: boolean;
   proxy?: ProxyConfig;
   auth?: string;
+  /**
+   * Mount the server under a URL sub-path (e.g. `damo` → served at `/damo/`).
+   * Incoming paths are stripped of the prefix before file lookup and proxy
+   * matching, so `proxy` keys must be written WITHOUT the base (use `/api`, not
+   * `/damo/api`). Defaults to root.
+   */
   base?: string;
 };
 
@@ -812,7 +820,7 @@ export default styles;`;
     this.http2SecureServer.listen(serverPort);
 
     for (const [index, address] of addresses.entries()) {
-      const url = `https://${address}:${serverPort}/${path}`;
+      const url = `https://${address}:${serverPort}${basePrefix}/${path}`;
       console.log(url);
       if (index !== 0) {
         console.log(await QRCode.toString(url, { type: 'terminal', small: true }));
