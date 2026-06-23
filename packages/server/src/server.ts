@@ -361,11 +361,19 @@ export class Server {
       const fetchDest = headers['sec-fetch-dest'];
       const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
 
-      // Strip the mount prefix (e.g. `/damo`) so file serving works off the origin
-      // root. `/damo` and `/damo/` both collapse to `/` → the directory index.
+      // Strip the mount prefix (e.g. `/damo`) so file serving and proxy matching
+      // work off the origin root. `/damo` and `/damo/` both collapse to `/` → the
+      // directory index. The `:path` header carries the query string, so split it
+      // off for the prefix test and re-attach it (a bare `/damo?x` would otherwise
+      // never match and serve a stray `damo` file instead of the index).
       let servedPath = requestPathString ?? '/';
-      if (basePrefix && (servedPath === basePrefix || servedPath.startsWith(`${basePrefix}/`))) {
-        servedPath = servedPath.slice(basePrefix.length) || '/';
+      if (basePrefix) {
+        const queryIndex = servedPath.indexOf('?');
+        const pathOnly = queryIndex === -1 ? servedPath : servedPath.slice(0, queryIndex);
+        const query = queryIndex === -1 ? '' : servedPath.slice(queryIndex);
+        if (pathOnly === basePrefix || pathOnly.startsWith(`${basePrefix}/`)) {
+          servedPath = (pathOnly.slice(basePrefix.length) || '/') + query;
+        }
       }
 
       /**
@@ -373,7 +381,7 @@ export class Server {
        */
       if (requestMethod === 'CONNECT' && headers[':protocol'] === 'websocket') {
         for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
-          if (!requestPathString?.startsWith(proxyPath)) continue;
+          if (!servedPath.startsWith(proxyPath)) continue;
 
           const targetSocket = netConnect({
             host: targetUrl.hostname,
@@ -391,7 +399,7 @@ export class Server {
 
           targetSocket.on('connect', () => {
             const secWebSocketKey = randomBytes(16).toString('base64');
-            let headerString = `GET ${requestPathString} HTTP/1.1\r\n`
+            let headerString = `GET ${servedPath} HTTP/1.1\r\n`
               + `Host: ${targetUrl.host}\r\n`
               + `Upgrade: websocket\r\n`
               + `Connection: Upgrade\r\n`
@@ -474,8 +482,8 @@ export class Server {
        * Handle proxy requests
        */
       for (const [proxyPath, target] of Object.entries(proxy)) {
-        if (requestPathString?.startsWith(proxyPath)) {
-          const targetUrl = new URL(requestPathString, target);
+        if (servedPath.startsWith(proxyPath)) {
+          const targetUrl = new URL(servedPath, target);
           const isHttps = targetUrl.protocol === 'https:';
           const requester = isHttps ? httpsRequest : httpRequest;
 
