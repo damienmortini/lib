@@ -3,9 +3,7 @@
   "version": "0.2.13",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/**/*"
-  ],
+  "packageManager": "pnpm@11.8.0",
   "scripts": {
     "build": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false npx nx run-many --target=build",
     "build:watch": "npx nx run-many --target=build --watch",
@@ -14,12 +12,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "clean": "git clean -fdX",
-    "publish": "npm run build && lerna publish from-package --yes",
+    "publish": "pnpm run build && lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --resolve-modules",
     "test": "eslint packages",
-    "update": "npm i",
-    "upgrade": "syncpack update && syncpack fix && npm i",
+    "update": "pnpm i",
+    "upgrade": "syncpack update && syncpack fix && pnpm i",
     "version": "lerna version"
   },
   "dependencies": {

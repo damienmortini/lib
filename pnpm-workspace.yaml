@@ -1,0 +1,7 @@
+nodeLinker: hoisted
+linkWorkspacePackages: true
+packages:
+  - "packages/**"
+allowBuilds:
+  esbuild: true
+  nx: true
