@@ -9,21 +9,22 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v2
         with:
           registry-url: https://registry.npmjs.org/
       - uses: nrwl/nx-set-shas@v3
-      - run: npm install
+      - run: pnpm install
       # - run: npx nx format:check
       # - run: npx nx affected -t build --parallel=3
-      - run: npm run build
+      - run: pnpm run build
       - run: git stash
-      - run: npx lerna publish from-package --yes
+      - run: pnpm exec lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - uses: actions/setup-node@v2
         with:
           registry-url: https://npm.pkg.github.com/
-      - run: npx lerna publish from-package --yes --no-verify-access
+      - run: pnpm exec lerna publish from-package --yes --no-verify-access
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
