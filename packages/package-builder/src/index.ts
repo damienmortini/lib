@@ -31,7 +31,7 @@ export const build = async ({
   minify = false,
   format = 'esm' as Format,
   ignore = ['**/node_modules/**'],
-  declaration = false,
+  declaration = true,
   copyAssets = false,
   platform = 'browser',
   sourceDirectory = 'src',
@@ -223,8 +223,11 @@ export const build = async ({
           }))).reduce((a, b) => Math.max(a, b), 0);
 
           const outputFiles = await fastGlob(`${outputDirectory}/**/*.{js,mjs}`, { ignore });
-          if (outputFiles.length > 0) {
-            const oldestDestMtime = (await Promise.all(outputFiles.map(async (p) => {
+          const declarationFiles = declaration ? await fastGlob(`${outputDirectory}/**/*.d.ts`, { ignore }) : [];
+          // When declarations are expected but missing, never skip — otherwise a stale JS-only dist
+          // would suppress declaration emit forever. Also factor .d.ts mtimes into the staleness check.
+          if (outputFiles.length > 0 && (!declaration || declarationFiles.length > 0)) {
+            const oldestDestMtime = (await Promise.all([...outputFiles, ...declarationFiles].map(async (p) => {
               try {
                 return (await stat(p)).mtimeMs;
               }
@@ -265,30 +268,33 @@ export const build = async ({
                         const { fileURLToPath } = await import('url');
                         const { spawn } = await import('child_process');
                         const tscPath = fileURLToPath(import.meta.resolve('typescript/bin/tsc'));
-                        const child = spawn(
-                          process.execPath,
-                          [
-                            tscPath,
-                            '--declaration',
-                            '--declarationMap',
-                            '--emitDeclarationOnly',
-                            '--skipLibCheck',
-                            '--incremental',
-                            '--outDir',
-                            outputDirectory,
-                            '--rootDir',
-                            sourceDirectory,
-                            ...entryPoints,
-                          ],
-                          {
-                            detached: true,
-                            stdio: 'ignore',
-                          },
-                        );
-                        child.on('error', (error) => {
-                          console.error(error);
+                        // Compile via the package tsconfig (-p) so module/resolution settings are honoured
+                        // and --incremental stays valid. Await it and surface failures so missing or broken
+                        // declarations fail the build instead of being silently dropped.
+                        await new Promise<void>((resolve, reject) => {
+                          const child = spawn(
+                            process.execPath,
+                            [
+                              tscPath,
+                              '--project',
+                              'tsconfig.json',
+                              '--emitDeclarationOnly',
+                              '--declaration',
+                              '--declarationMap',
+                              '--skipLibCheck',
+                              '--outDir',
+                              outputDirectory,
+                              '--rootDir',
+                              sourceDirectory,
+                            ],
+                            { stdio: 'inherit' },
+                          );
+                          child.on('error', reject);
+                          child.on('close', (code) => {
+                            if (code === 0) resolve();
+                            else reject(new Error(`TypeScript declaration emit failed (exit code ${code})`));
+                          });
                         });
-                        // child.unref();
                       });
                     },
                   },
