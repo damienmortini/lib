@@ -27,7 +27,9 @@ export default class DamdomColorPickerElement extends HTMLElement {
       <input type="text">
     `;
 
+    /** @type {HTMLInputElement} */
     this._colorInput = this.shadowRoot.querySelector('input[type=color]');
+    /** @type {HTMLInputElement} */
     this._textInput = this.shadowRoot.querySelector('input[type=text]');
 
     this._valueAsHexadecimal = this._colorInput.value;
