@@ -4,4 +4,6 @@ packages:
   - "packages/**"
 allowBuilds:
   esbuild: true
+  # nx persists only as a transitive dependency of lerna (used internally for its
+  # project graph); we no longer use nx for build orchestration (build = pnpm -r).
   nx: true

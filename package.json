@@ -5,8 +5,8 @@
   "type": "module",
   "packageManager": "pnpm@11.8.0",
   "scripts": {
-    "build": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false npx nx run-many --target=build",
-    "build:watch": "npx nx run-many --target=build --watch",
+    "build": "pnpm -r run build",
+    "build:watch": "pnpm -r run build -- --watch",
     "serve": "server",
     "bump": "lerna version patch",
     "lint": "eslint .",
@@ -31,13 +31,8 @@
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
     "lerna": "^9.0.7",
-    "nx": "^22.7.5",
-    "nx-cloud": "^19.1.0",
     "sort-package-json": "4.0.0",
     "syncpack": "15.3.1",
     "typescript": "6.0.3"
-  },
-  "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "22.4.4"
   }
 }
