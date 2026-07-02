@@ -1,7 +1,7 @@
 import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
-import { randomBytes } from 'crypto';
+import { randomBytes, X509Certificate } from 'crypto';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
@@ -9,7 +9,7 @@ import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2
 import { createServer, request as httpsRequest } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
-import { connect as netConnect } from 'net';
+import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname, join } from 'path';
 import QRCode from 'qrcode';
@@ -119,64 +119,61 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
   ));
 
-  const promises = [];
+  const replacements = await Promise.all(matches.map(async (match) => {
+    let importPath = match[2];
 
-  for (const match of matches) {
-    promises.push((async () => {
-      let importPath = match[2];
-
-      if (!/^[./]/.test(importPath)) {
-        try {
-          /**
-           * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
-           */
-          importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
-            importMetaResolveParent.href,
-            () => servedRoot,
-          );
+    if (!/^[./]/.test(importPath)) {
+      try {
+        /**
+         * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
+         */
+        importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
+          importMetaResolveParent.href,
+          () => servedRoot,
+        );
+      }
+      catch (error) {
+        const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot);
+        if (unbuiltPath) {
+          importPath = unbuiltPath;
         }
-        catch (error) {
-          const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot);
-          if (unbuiltPath) {
-            importPath = unbuiltPath;
-          }
-          else {
-            console.log(importPath, error);
-          }
+        else {
+          console.log(importPath, error);
         }
       }
+    }
 
-      // Check if path has no extension and add .js if needed
-      if (!/\.[^/]*$/.test(importPath)) {
-        try {
-          // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
-          // back to an origin-relative path before probing the filesystem.
-          const diskPath = servedRoot !== '/' && importPath.startsWith(servedRoot)
-            ? `/${importPath.slice(servedRoot.length)}`
-            : importPath;
-          const fullPath = join(rootDirectory, diskPath);
-          const stats = await stat(fullPath);
-          if (!stats.isDirectory()) {
-            importPath += '.js';
-          }
-        }
-        catch (error) {
-          // If path doesn't exist, assume it's a file and add .js
+    // Check if path has no extension and add .js if needed
+    if (!/\.[^/]*$/.test(importPath)) {
+      try {
+        // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
+        // back to an origin-relative path before probing the filesystem.
+        const diskPath = stripBasePrefix(importPath, servedRoot.slice(0, -1));
+        const fullPath = join(rootDirectory, diskPath);
+        const stats = await stat(fullPath);
+        if (!stats.isDirectory()) {
           importPath += '.js';
         }
       }
+      catch {
+        // If path doesn't exist, assume it's a file and add .js
+        importPath += '.js';
+      }
+    }
 
-      const removeImportAttribute = removeCSSImportAttribute && match[5] === 'css';
-      const replacement = match[1] + importPath + match[3] + (match[4] && !removeImportAttribute ? match[4] : '');
-      // Function replacer so `$`-sequences in the rewritten path (a base value
-      // could carry $&, $', …) are inserted literally, not expanded.
-      string = string.replace(match[0], () => replacement);
-    })());
+    const removeImportAttribute = removeCSSImportAttribute && match[5] === 'css';
+    return match[1] + importPath + match[3] + (match[4] && !removeImportAttribute ? match[4] : '');
+  }));
+
+  // Rebuild in one pass from the match offsets — String.replace would rescan
+  // and reallocate the whole document once per import.
+  let result = '';
+  let lastIndex = 0;
+  for (const [matchIndex, match] of matches.entries()) {
+    result += string.slice(lastIndex, match.index) + replacements[matchIndex];
+    lastIndex = match.index + match[0].length;
   }
-
-  await Promise.all(promises);
-
-  return string;
+  return result + string.slice(lastIndex);
 }
 
 // Strip a mount prefix (e.g. `/damo`) from a request path, preserving any query
@@ -223,6 +220,95 @@ function checkBasicAuth(authorizationHeader: string | string[] | undefined, expe
   return header === expectedHeader;
 }
 
+async function loadOrCreateCertificate(certificateAddresses: string[]): Promise<{ cert: string; key: string }> {
+  const addressesString = certificateAddresses.join('_');
+
+  await mkdir(certificatesDirectory, { recursive: true });
+
+  let [certificateAuthorityCertificate, certificateAuthorityKey] = await Promise.all([
+    readFile(`${certificatesDirectory}/certificate-authority.crt`, { encoding: 'utf-8' }),
+    readFile(`${certificatesDirectory}/certificate-authority.key`, { encoding: 'utf-8' }),
+  ]).catch(() => [undefined, undefined]);
+
+  if (certificateAuthorityCertificate && new Date(new X509Certificate(certificateAuthorityCertificate).validTo) < new Date()) {
+    certificateAuthorityCertificate = undefined;
+  }
+
+  if (!certificateAuthorityCertificate || !certificateAuthorityKey) {
+    console.log('Creating certificate authority');
+
+    const certificateAuthorityExpirationDate = new Date();
+    certificateAuthorityExpirationDate.setFullYear(certificateAuthorityExpirationDate.getFullYear() + 10);
+
+    const certificateAuthorityPems = await generateSelfSignedCertificate([{ name: 'commonName', value: `Damo Development CA (${hostname()})` }],
+      {
+        keySize: 2048,
+        algorithm: 'sha256',
+        notAfterDate: certificateAuthorityExpirationDate,
+        extensions: [
+          { name: 'basicConstraints', cA: true, critical: true },
+          { name: 'keyUsage', keyCertSign: true, cRLSign: true, critical: true },
+        ],
+      },
+    );
+
+    certificateAuthorityCertificate = certificateAuthorityPems.cert;
+    certificateAuthorityKey = certificateAuthorityPems.private;
+
+    await Promise.all([
+      writeFile(`${certificatesDirectory}/certificate-authority.crt`, certificateAuthorityCertificate),
+      writeFile(`${certificatesDirectory}/certificate-authority.key`, certificateAuthorityKey),
+    ]);
+
+    console.log(`Trust ${certificatesDirectory}/certificate-authority.crt on your devices to browse without certificate warnings`);
+  }
+
+  let [cert, key] = await Promise.all([
+    readFile(`${certificatesDirectory}/${addressesString}.crt`, { encoding: 'utf-8' }),
+    readFile(`${certificatesDirectory}/${addressesString}.key`, { encoding: 'utf-8' }),
+  ]).catch(() => [undefined, undefined]);
+
+  if (cert) {
+    // Cached leaves can predate the certificate authority, chain to a rotated
+    // one, or have expired — regenerate instead of resurrecting them.
+    const leafCertificate = new X509Certificate(cert);
+    const certificateAuthorityPublicKey = new X509Certificate(certificateAuthorityCertificate).publicKey;
+    if (!leafCertificate.verify(certificateAuthorityPublicKey) || new Date(leafCertificate.validTo) < new Date()) {
+      cert = undefined;
+    }
+  }
+
+  if (!cert || !key) {
+    console.log('Creating certificate for', certificateAddresses);
+
+    const pems = await generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
+      {
+        keySize: 2048,
+        algorithm: 'sha256',
+        ca: { key: certificateAuthorityKey, cert: certificateAuthorityCertificate },
+        extensions: [
+          { name: 'extKeyUsage', serverAuth: true },
+          {
+            name: 'subjectAltName',
+            altNames: certificateAddresses.map(address => (isIP(address) ? { type: 7, ip: address } : { type: 2, value: address })),
+          },
+        ],
+      },
+    );
+
+    // Serve the full chain so clients that trust the certificate authority can verify the leaf.
+    cert = `${pems.cert.trimEnd()}\n${certificateAuthorityCertificate}`;
+    key = pems.private;
+
+    await Promise.all([
+      writeFile(`${certificatesDirectory}/${addressesString}.crt`, cert),
+      writeFile(`${certificatesDirectory}/${addressesString}.key`, key),
+    ]);
+  }
+
+  return { cert, key };
+}
+
 export class Server {
   http2SecureServer: Http2SecureServer;
   ready: Promise<void>;
@@ -239,7 +325,7 @@ export class Server {
     watch = false,
     rootPath = '.',
     resolveModules = false,
-    watchIgnore = undefined,
+    watchIgnore,
     watchPaths = [],
     verbose = false,
     port = 3000,
@@ -258,13 +344,17 @@ export class Server {
     const basePrefix = normalizedBase ? `/${normalizedBase}` : '';
     const servedRoot = normalizedBase ? `/${normalizedBase}/` : '/';
 
+    // Pre-parse proxy URLs once; used by the HTTP proxy and both WebSocket proxy paths.
+    const proxyEntries = Object.entries(proxy).map(([proxyPath, target]) => ({
+      path: proxyPath,
+      url: new URL(target),
+    }));
+
     /**
      * Get port
      */
-    const fromPort = port;
-    const toPort = port + 100;
-    const serverPort = await getPort({ port: portNumbers(fromPort, toPort) });
-    const webSocketServerPort = await getPort({ port: portNumbers(fromPort + 10, toPort + 10) });
+    const serverPort = await getPort({ port: portNumbers(port, port + 100) });
+    const webSocketServerPort = await getPort({ port: portNumbers(port + 10, port + 110) });
 
     /**
      * Get addresses
@@ -283,84 +373,7 @@ export class Server {
      * Create certificate for addresses
      */
     const certificateAddresses = useExternalCertificate ? addresses : ['localhost'];
-    const addressesString = certificateAddresses.join('_');
-
-    let [cert, key] = await Promise.all([
-      readFile(`${certificatesDirectory}/${addressesString}.crt`, { encoding: 'utf-8' }),
-      readFile(`${certificatesDirectory}/${addressesString}.key`, { encoding: 'utf-8' }),
-    ]).catch(() => [undefined, undefined]);
-
-    if (!key || !cert) {
-      let [certificateAuthorityCertificate, certificateAuthorityKey] = await Promise.all([
-        readFile(`${certificatesDirectory}/certificate-authority.crt`, { encoding: 'utf-8' }),
-        readFile(`${certificatesDirectory}/certificate-authority.key`, { encoding: 'utf-8' }),
-      ]).catch(() => [undefined, undefined]);
-
-      if (!certificateAuthorityCertificate || !certificateAuthorityKey) {
-        console.log('Creating certificate authority');
-
-        const certificateAuthorityPems = await generateSelfSignedCertificate([{ name: 'commonName', value: `Damo Development CA (${hostname()})` }],
-          {
-            keySize: 2048,
-            algorithm: 'sha256',
-            days: 3650,
-            extensions: [
-              { name: 'basicConstraints', cA: true, critical: true },
-              { name: 'keyUsage', keyCertSign: true, cRLSign: true, critical: true },
-            ],
-          },
-        );
-
-        certificateAuthorityCertificate = certificateAuthorityPems.cert;
-        certificateAuthorityKey = certificateAuthorityPems.private;
-
-        await mkdir(`${certificatesDirectory}`, { recursive: true });
-
-        await Promise.all([
-          writeFile(`${certificatesDirectory}/certificate-authority.crt`, certificateAuthorityCertificate),
-          writeFile(`${certificatesDirectory}/certificate-authority.key`, certificateAuthorityKey),
-        ]);
-
-        console.log(`Trust ${certificatesDirectory}/certificate-authority.crt on your devices to browse without certificate warnings`);
-      }
-
-      console.log('Creating certificate for', certificateAddresses);
-
-      const pems = await generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
-        {
-          keySize: 2048,
-          algorithm: 'sha256',
-          ca: { key: certificateAuthorityKey, cert: certificateAuthorityCertificate },
-          extensions: [
-            { name: 'extKeyUsage', serverAuth: true },
-            {
-              name: 'subjectAltName',
-              altNames: certificateAddresses.map((address) => {
-                const isIPAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(address);
-
-                if (isIPAddress) {
-                  return ({ type: 7, ip: address });
-                }
-                else {
-                  return ({ type: 2, value: address });
-                }
-              }),
-            },
-          ],
-        },
-      );
-
-      // Serve the full chain so clients that trust the certificate authority can verify the leaf.
-      cert = `${pems.cert.trimEnd()}\n${certificateAuthorityCertificate}`;
-      key = pems.private;
-
-      await mkdir(`${certificatesDirectory}`, { recursive: true });
-
-      await Promise.all([
-        writeFile(`${certificatesDirectory}/${addressesString}.crt`, cert),
-        writeFile(`${certificatesDirectory}/${addressesString}.key`, key),
-      ]);
-    }
+    const { cert, key } = await loadOrCreateCertificate(certificateAddresses);
 
     /**
      * Create HTTP2 Server
@@ -531,9 +544,9 @@ export class Server {
       /**
        * Handle proxy requests
        */
-      for (const [proxyPath, target] of Object.entries(proxy)) {
+      for (const { path: proxyPath, url } of proxyEntries) {
         if (servedPath.startsWith(proxyPath)) {
-          const targetUrl = new URL(servedPath, target);
+          const targetUrl = new URL(servedPath, url);
           const isHttps = targetUrl.protocol === 'https:';
           const requester = isHttps ? httpsRequest : httpRequest;
 
@@ -605,7 +618,7 @@ export class Server {
       const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
 
       try {
-        let filePath = `${rootPath}${String(servedPath).split('?')[0]}`;
+        let filePath = `${rootPath}${servedPath.split('?')[0]}`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
@@ -653,12 +666,7 @@ export class Server {
         /**
          * Rewrite to root if url isn't a file and doesn't exist
          */
-        try {
-          if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath))) {
-            throw new Error();
-          }
-        }
-        catch (error) {
+        if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath).catch(() => null))) {
           filePath = `${rootPath}/`;
         }
 
@@ -667,7 +675,7 @@ export class Server {
         /**
          * If path is a directory then set index.html file by default
          */
-        if (!sourceFilePath && (await stat(filePath))?.isDirectory()) {
+        if (!sourceFilePath && (await stat(filePath)).isDirectory()) {
           filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
         }
 
@@ -779,12 +787,6 @@ export default styles;`;
     /**
      * Handle WebSocket proxy upgrades
      */
-    // Pre-parse proxy URLs once at startup
-    const proxyEntries = Object.entries(proxy).map(([path, target]) => ({
-      path,
-      url: new URL(target),
-    }));
-
     this.http2SecureServer.on('upgrade', (request, socket, head) => {
       if (expectedAuthHeader && !checkBasicAuth(request.headers['authorization'], expectedAuthHeader)) {
         socket.end('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="Dev Server"\r\n\r\n');
