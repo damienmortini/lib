@@ -705,10 +705,10 @@ export class Server {
          * Add socket code on html pages for live reloading
          */
         if (watch && fileExtension === '.html') {
-          stream.respond(responseHeaders);
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
+          stream.respond(responseHeaders);
           if (resolveModules) {
             fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
           }
@@ -767,6 +767,13 @@ export default styles;`;
         console.log(error);
 
         if (stream.closed) return;
+
+        // Headers already sent: responding again throws synchronously and
+        // brings the whole server down, so terminate the stream instead.
+        if (stream.headersSent) {
+          stream.end();
+          return;
+        }
 
         if (error.code === 'ENOENT') {
           stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
