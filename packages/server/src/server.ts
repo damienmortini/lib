@@ -10,7 +10,7 @@ import { createServer, request as httpsRequest } from 'https';
 import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
 import { connect as netConnect } from 'net';
-import { networkInterfaces as getNetworkInterfaces } from 'os';
+import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
 import { extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
@@ -291,13 +291,48 @@ export class Server {
     ]).catch(() => [undefined, undefined]);
 
     if (!key || !cert) {
+      let [certificateAuthorityCertificate, certificateAuthorityKey] = await Promise.all([
+        readFile(`${certificatesDirectory}/certificate-authority.crt`, { encoding: 'utf-8' }),
+        readFile(`${certificatesDirectory}/certificate-authority.key`, { encoding: 'utf-8' }),
+      ]).catch(() => [undefined, undefined]);
+
+      if (!certificateAuthorityCertificate || !certificateAuthorityKey) {
+        console.log('Creating certificate authority');
+
+        const certificateAuthorityPems = await generateSelfSignedCertificate([{ name: 'commonName', value: `Damo Development CA (${hostname()})` }],
+          {
+            keySize: 2048,
+            algorithm: 'sha256',
+            days: 3650,
+            extensions: [
+              { name: 'basicConstraints', cA: true, critical: true },
+              { name: 'keyUsage', keyCertSign: true, cRLSign: true, critical: true },
+            ],
+          },
+        );
+
+        certificateAuthorityCertificate = certificateAuthorityPems.cert;
+        certificateAuthorityKey = certificateAuthorityPems.private;
+
+        await mkdir(`${certificatesDirectory}`, { recursive: true });
+
+        await Promise.all([
+          writeFile(`${certificatesDirectory}/certificate-authority.crt`, certificateAuthorityCertificate),
+          writeFile(`${certificatesDirectory}/certificate-authority.key`, certificateAuthorityKey),
+        ]);
+
+        console.log(`Trust ${certificatesDirectory}/certificate-authority.crt on your devices to browse without certificate warnings`);
+      }
+
       console.log('Creating certificate for', certificateAddresses);
 
       const pems = await generateSelfSignedCertificate([{ name: 'commonName', value: 'localhost' }],
         {
           keySize: 2048,
           algorithm: 'sha256',
+          ca: { key: certificateAuthorityKey, cert: certificateAuthorityCertificate },
           extensions: [
+            { name: 'extKeyUsage', serverAuth: true },
             {
               name: 'subjectAltName',
               altNames: certificateAddresses.map((address) => {
@@ -315,7 +350,8 @@ export class Server {
         },
       );
 
-      cert = pems.cert;
+      // Serve the full chain so clients that trust the certificate authority can verify the leaf.
+      cert = `${pems.cert.trimEnd()}\n${certificateAuthorityCertificate}`;
       key = pems.private;
 
       await mkdir(`${certificatesDirectory}`, { recursive: true });
