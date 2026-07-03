@@ -2,7 +2,7 @@ import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { randomBytes, X509Certificate } from 'crypto';
-import { mkdir, readFile, stat, writeFile } from 'fs/promises';
+import { mkdir, readFile, readlink, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
 import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2Stream } from 'http2';
@@ -11,7 +11,7 @@ import { moduleResolve } from 'import-meta-resolve';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
-import { extname, join } from 'path';
+import { dirname, extname, join, resolve } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -83,6 +83,37 @@ async function getSourceFilePath(filePath: string): Promise<string | undefined> 
 }
 
 /**
+ * Collapse a resolved module URL onto one canonical served URL.
+ *
+ * Browsers deduplicate ES modules by URL, so the same package reached through
+ * different node_modules symlinks (pnpm links dependencies per consuming
+ * package) would evaluate once per URL, and side effects like
+ * customElements.define() would throw on the second evaluation. Resolve
+ * symlinks component by component, like Node's --preserve-symlinks traversal,
+ * keeping a link as-is when its target leaves the served root (e.g. a
+ * submodule symlink to a sibling checkout) — a plain realpath would escape
+ * the root there.
+ */
+async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
+  if (!moduleUrl.href.startsWith(importMetaResolveParent.href)) return moduleUrl;
+
+  const modulePath = fileURLToPath(moduleUrl).replaceAll(/\\/g, '/');
+  let currentPath = rootDirectory.slice(0, -1);
+  for (const pathComponent of modulePath.slice(rootDirectory.length).split('/')) {
+    let candidatePath = `${currentPath}/${pathComponent}`;
+    for (let symlinkHopCount = 0; symlinkHopCount < 10; symlinkHopCount++) {
+      const symlinkTarget = await readlink(candidatePath).catch(() => null);
+      if (symlinkTarget === null) break;
+      const resolvedTargetPath = resolve(dirname(candidatePath), symlinkTarget).replaceAll(/\\/g, '/');
+      if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) break;
+      candidatePath = resolvedTargetPath;
+    }
+    currentPath = candidatePath;
+  }
+  return pathToFileURL(currentPath);
+}
+
+/**
  * Resolve a bare specifier when its build output is missing on disk.
  *
  * Node resolution (and therefore moduleResolve) throws ERR_MODULE_NOT_FOUND when a package's
@@ -119,9 +150,11 @@ async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/', pare
     ? resolvePackageExportPath(packageJson.exports?.[`./${subPath}`]) ?? subPath
     : resolvePackageExportPath(rootExport) ?? packageJson.main ?? 'index.js';
 
+  const moduleUrl = await canonicalizeModuleUrl(new URL(relativePath, packageJsonUrl));
+
   // Arrow replacer so `$`-sequences in servedRoot are treated literally, not as
   // String.replace special patterns ($&, $', …).
-  return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, () => servedRoot);
+  return moduleUrl.href.replace(importMetaResolveParent.href, () => servedRoot);
 }
 
 async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/', importingFilePath?: string): Promise<string> {
@@ -142,7 +175,8 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
         /**
          * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
          */
-        importPath = moduleResolve(importPath, parentUrl, MODULE_RESOLVE_CONDITIONS, true).href.replace(
+        const resolvedModuleUrl = await canonicalizeModuleUrl(moduleResolve(importPath, parentUrl, MODULE_RESOLVE_CONDITIONS, true));
+        importPath = resolvedModuleUrl.href.replace(
           importMetaResolveParent.href,
           () => servedRoot,
         );
