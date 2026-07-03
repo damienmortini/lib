@@ -152,72 +152,132 @@ async function resolveUnbuiltSpecifier(specifier: string, parentUrl: URL): Promi
   return new URL(relativePath, packageJsonUrl);
 }
 
-async function resolveImports(string: string, importingFilePath: string, removeCSSImportAttribute = false, servedRoot = '/'): Promise<string> {
-  // Resolve bare specifiers from the importing file like Node does, so a package's
-  // dependencies are found in its own workspace's node_modules — pnpm does not hoist
-  // transitive dependencies of linked packages into the served root's node_modules.
-  const parentUrl = pathToFileURL(importingFilePath);
+type ImportMap = {
+  imports: { [specifier: string]: string };
+  scopes?: { [scopePrefix: string]: { [specifier: string]: string } };
+};
 
-  const matches = Array.from(string.matchAll(
-    /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
-  ));
+const IMPORT_STATEMENT_REGEX = /(?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"](.*?)['"]/g;
+const MODULE_SCRIPT_REGEX = /(<script\b[^>]*\btype\s*=\s*["']module["'][^>]*>)([\s\S]*?)<\/script>/gi;
+const CRAWLABLE_EXTENSIONS = new Set(['.js', '.mjs', '.ts']);
 
-  const replacements = await Promise.all(matches.map(async (match) => {
-    let importPath = match[2];
+// Dummy origin for resolving relative specifiers against served paths.
+const SERVED_PATH_BASE = 'http://internal';
 
-    if (!/^[./]/.test(importPath)) {
+// Map a browser-visible path to the file that would be served for it (a
+// `dist/*` request is answered from `src/*` when that source exists).
+async function servedPathToSourcePath(servedPath: string, servedRoot: string): Promise<string> {
+  const diskPath = join(rootDirectory, stripBasePrefix(servedPath, servedRoot.slice(0, -1)));
+  return await getSourceFilePath(diskPath) ?? diskPath;
+}
+
+/**
+ * Build an import map for an HTML page by crawling its module graph.
+ *
+ * The browser resolves bare specifiers itself through the injected map, so
+ * served module bodies are never rewritten. Each module's bare imports are
+ * resolved from that module's own location like Node does — pnpm does not
+ * hoist transitive dependencies of linked packages into the served root's
+ * node_modules — and canonicalized so every package maps to exactly one URL
+ * (browsers deduplicate modules by URL). If the same specifier resolves to a
+ * different target from some importer, that resolution is scoped to the
+ * importer's directory.
+ */
+async function buildImportMap(htmlContent: string, pageServedPath: string, servedRoot: string): Promise<ImportMap> {
+  const importMap: ImportMap = { imports: {} };
+  const scopes: { [scopePrefix: string]: { [specifier: string]: string } } = {};
+  const visitedModulePaths = new Set<string>();
+  // Many modules import the same package; canonicalize each resolved URL once.
+  const canonicalServedPaths = new Map<string, Promise<string>>();
+  // Crawl tasks run concurrently and append newly discovered modules as the
+  // graph unfolds; the drain loop below picks the additions up, so total crawl
+  // time tracks the longest import chain rather than the module count.
+  const crawlTasks: Promise<void>[] = [];
+
+  function enqueue(servedModulePath: string): void {
+    if (!CRAWLABLE_EXTENSIONS.has(extname(servedModulePath))) return;
+    if (visitedModulePaths.has(servedModulePath)) return;
+    visitedModulePaths.add(servedModulePath);
+    crawlTasks.push(crawlModule(servedModulePath));
+  }
+
+  async function crawlModule(servedModulePath: string): Promise<void> {
+    const sourceFilePath = await servedPathToSourcePath(servedModulePath, servedRoot);
+    const content = await readFile(sourceFilePath, { encoding: 'utf-8' }).catch(() => null);
+    if (content === null) return;
+    await collectImports(content, sourceFilePath, servedModulePath);
+  }
+
+  async function collectImports(content: string, importerSourceFilePath: string, importerServedPath: string): Promise<void> {
+    const importerBaseUrl = new URL(importerServedPath, SERVED_PATH_BASE);
+    const parentUrl = pathToFileURL(importerSourceFilePath);
+    await Promise.all(Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
+      const specifier = match[1];
+      // Skip full URLs (node:, data:, https:, …) — nothing to map or crawl.
+      if (/^[a-z][a-z0-9+.-]*:/i.test(specifier)) return;
+      if (/^[./]/.test(specifier)) {
+        enqueue(new URL(specifier, importerBaseUrl).pathname);
+        return;
+      }
       let moduleUrl: URL | undefined;
       try {
-        /**
-         * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
-         */
-        moduleUrl = moduleResolve(importPath, parentUrl, MODULE_RESOLVE_CONDITIONS, true);
+        moduleUrl = moduleResolve(specifier, parentUrl, MODULE_RESOLVE_CONDITIONS, true);
       }
       catch (error) {
-        moduleUrl = await resolveUnbuiltSpecifier(importPath, parentUrl);
-        if (!moduleUrl) console.log(importPath, error);
-      }
-
-      // Leave an unresolvable specifier untouched so the browser error names
-      // the real specifier instead of a fabricated `.js` path.
-      if (!moduleUrl) return match[0];
-
-      // Arrow replacer so `$`-sequences in servedRoot are treated literally, not as
-      // String.replace special patterns ($&, $', …).
-      importPath = (await canonicalizeModuleUrl(moduleUrl)).href.replace(importMetaResolveParent.href, () => servedRoot);
-    }
-
-    // Check if path has no extension and add .js if needed
-    if (!/\.[^/]*$/.test(importPath)) {
-      try {
-        // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
-        // back to an origin-relative path before probing the filesystem.
-        const diskPath = stripBasePrefix(importPath, servedRoot.slice(0, -1));
-        const fullPath = join(rootDirectory, diskPath);
-        const stats = await stat(fullPath);
-        if (!stats.isDirectory()) {
-          importPath += '.js';
+        moduleUrl = await resolveUnbuiltSpecifier(specifier, parentUrl);
+        // Leave an unresolvable specifier out of the map so the browser error
+        // names the real specifier.
+        if (!moduleUrl) {
+          console.log(specifier, error);
+          return;
         }
       }
-      catch {
-        // If path doesn't exist, assume it's a file and add .js
-        importPath += '.js';
+      let servedPathPromise = canonicalServedPaths.get(moduleUrl.href);
+      if (!servedPathPromise) {
+        // Arrow replacer so `$`-sequences in servedRoot are treated literally,
+        // not as String.replace special patterns ($&, $', …).
+        servedPathPromise = canonicalizeModuleUrl(moduleUrl)
+          .then(canonicalUrl => canonicalUrl.href.replace(importMetaResolveParent.href, () => servedRoot));
+        canonicalServedPaths.set(moduleUrl.href, servedPathPromise);
       }
-    }
-
-    const removeImportAttribute = removeCSSImportAttribute && match[5] === 'css';
-    return match[1] + importPath + match[3] + (match[4] && !removeImportAttribute ? match[4] : '');
-  }));
-
-  // Rebuild in one pass from the match offsets — String.replace would rescan
-  // and reallocate the whole document once per import.
-  let result = '';
-  let lastIndex = 0;
-  for (const [matchIndex, match] of matches.entries()) {
-    result += string.slice(lastIndex, match.index) + replacements[matchIndex];
-    lastIndex = match.index + match[0].length;
+      const servedModulePath = await servedPathPromise;
+      const mappedPath = importMap.imports[specifier];
+      if (mappedPath === undefined) {
+        importMap.imports[specifier] = servedModulePath;
+      }
+      else if (mappedPath !== servedModulePath) {
+        // Each importer records its own resolution, so whichever target wins
+        // the top-level entry, the others stay correct through their scope.
+        const scopePrefix = new URL('.', importerBaseUrl).pathname;
+        (scopes[scopePrefix] ??= {})[specifier] = servedModulePath;
+      }
+      enqueue(servedModulePath);
+    }));
   }
-  return result + string.slice(lastIndex);
+
+  const pageBaseUrl = new URL(pageServedPath, SERVED_PATH_BASE);
+  let pageSourcePathPromise: Promise<string> | undefined;
+  for (const scriptMatch of htmlContent.matchAll(MODULE_SCRIPT_REGEX)) {
+    const sourceAttribute = scriptMatch[1].match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+    if (sourceAttribute) {
+      enqueue(new URL(sourceAttribute[1], pageBaseUrl).pathname);
+    }
+    else if (scriptMatch[2]) {
+      const inlineScriptBody = scriptMatch[2];
+      pageSourcePathPromise ??= servedPathToSourcePath(pageServedPath, servedRoot);
+      crawlTasks.push(pageSourcePathPromise
+        .then(pageSourceFilePath => collectImports(inlineScriptBody, pageSourceFilePath, pageServedPath)));
+    }
+  }
+
+  // Elements pushed while awaiting are still visited: the array iterator
+  // re-checks the length on every step.
+  for (const crawlTask of crawlTasks) {
+    await crawlTask;
+  }
+
+  if (Object.keys(scopes).length) importMap.scopes = scopes;
+  return importMap;
 }
 
 // Strip a mount prefix (e.g. `/damo`) from a request path, preserving any query
@@ -474,7 +534,6 @@ export class Server {
       const requestAuthority = headers[constants.HTTP2_HEADER_AUTHORITY];
       const requestPath = headers[constants.HTTP2_HEADER_PATH];
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
-      const userAgent = headers['user-agent'];
       const fetchDest = headers['sec-fetch-dest'];
       const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
 
@@ -656,17 +715,15 @@ export class Server {
         return;
       }
 
-      /**
-       * Detect Safari browser to convert CSS imports to JS imports
-       */
-      const convertCSSImport = userAgent?.includes('Safari') && !userAgent.includes('Chrome');
-
       try {
         let filePath = `${rootPath}${servedPath.split('?')[0]}`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
          * e.g. `node_modules/foo/bar/package.json` → main resolved from foo's `exports['./bar']`.
+         * Legacy path from the era when browsers resolved node_modules URLs themselves;
+         * with the injected import map nothing should request these anymore — kept until
+         * confirmed unused at runtime.
          */
         const virtualPackageJsonMatch = filePath
           .replace(/^\.?\//, '')
@@ -746,19 +803,30 @@ export class Server {
         const fileExtension = extname(filePath);
 
         /**
-         * Add socket code on html pages for live reloading
+         * HTML pages get the generated import map (resolveModules) and the
+         * live-reload socket (watch) — two independent transforms.
          */
-        if (watch && fileExtension === '.html') {
+        if ((watch || resolveModules) && fileExtension === '.html') {
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
           stream.respond(responseHeaders);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, responseFilePath, convertCSSImport, servedRoot);
+            const pageServedPath = `${servedRoot.slice(0, -1)}${filePath.slice(rootPath.length)}`;
+            const importMap = await buildImportMap(fileContent, pageServedPath, servedRoot);
+            if (Object.keys(importMap.imports).length) {
+              const importMapScript = `<script type="importmap">\n${JSON.stringify(importMap, null, 2)}\n</script>`;
+              // The map must precede every module script; fall back to
+              // prepending when the page has no <head>.
+              fileContent = /<head[^>]*>/.test(fileContent)
+                ? fileContent.replace(/<head[^>]*>/, headTag => `${headTag}\n${importMapScript}`)
+                : `${importMapScript}\n${fileContent}`;
+            }
           }
-          fileContent = fileContent.replace(
-            '</head>',
-            `<script>
+          if (watch) {
+            fileContent = fileContent.replace(
+              '</head>',
+              `<script>
 const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${webSocketServerPort}");
 let forceReload = false;
 window.navigation?.addEventListener('navigate', (event) => {
@@ -770,38 +838,16 @@ socket.addEventListener("message", function (event) {
 });
 </script>
 </head>`,
-          );
+            );
+          }
           stream.end(fileContent);
         }
         else if (sourceFilePath?.endsWith('.ts')) {
           stream.respond(responseHeaders);
-          let fileContent = await readFile(sourceFilePath, {
+          const fileContent = await readFile(sourceFilePath, {
             encoding: 'utf-8',
           });
-          fileContent = stripTypeScriptTypes(fileContent);
-          if (resolveModules) {
-            fileContent = await resolveImports(fileContent, sourceFilePath, convertCSSImport, servedRoot);
-          }
-          stream.end(fileContent);
-        }
-        else if (resolveModules && (fileExtension === '.js' || fileExtension === '.mjs')) {
-          stream.respond(responseHeaders);
-          let fileContent = await readFile(responseFilePath, {
-            encoding: 'utf-8',
-          });
-          fileContent = await resolveImports(fileContent, responseFilePath, convertCSSImport, servedRoot);
-          stream.end(fileContent);
-        }
-        else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
-          responseHeaders['content-type'] = 'application/javascript';
-          stream.respond(responseHeaders);
-          let fileContent = await readFile(responseFilePath, {
-            encoding: 'utf-8',
-          });
-          fileContent = `const styles = new CSSStyleSheet();
-styles.replaceSync(\`${fileContent.replaceAll(/[`$]/gm, '\\$&')}\`);
-export default styles;`;
-          stream.end(fileContent);
+          stream.end(stripTypeScriptTypes(fileContent));
         }
         else {
           stream.respondWithFile(decodeURIComponent(responseFilePath), responseHeaders);
