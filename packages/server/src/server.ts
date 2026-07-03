@@ -2,7 +2,7 @@ import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { randomBytes, X509Certificate } from 'crypto';
-import { mkdir, readFile, readlink, stat, writeFile } from 'fs/promises';
+import { mkdir, readdir, readFile, readlink, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
 import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2Stream } from 'http2';
@@ -171,6 +171,35 @@ async function servedPathToSourcePath(servedPath: string, servedRoot: string): P
   return await getSourceFilePath(diskPath) ?? diskPath;
 }
 
+// Resolve a bare specifier from a parent module to its canonical served path,
+// or undefined when it cannot be resolved. The optional memo collapses repeat
+// canonicalizations of the same resolved URL within one request.
+async function resolveSpecifierToServedPath(
+  specifier: string,
+  parentUrl: URL,
+  servedRoot: string,
+  canonicalServedPaths?: Map<string, Promise<string>>,
+): Promise<string | undefined> {
+  let moduleUrl: URL | undefined;
+  try {
+    moduleUrl = moduleResolve(specifier, parentUrl, MODULE_RESOLVE_CONDITIONS, true);
+  }
+  catch {
+    moduleUrl = await resolveUnbuiltSpecifier(specifier, parentUrl);
+  }
+  if (!moduleUrl) return undefined;
+
+  let servedPathPromise = canonicalServedPaths?.get(moduleUrl.href);
+  if (!servedPathPromise) {
+    // Arrow replacer so `$`-sequences in servedRoot are treated literally, not
+    // as String.replace special patterns ($&, $', …).
+    servedPathPromise = canonicalizeModuleUrl(moduleUrl)
+      .then(canonicalUrl => canonicalUrl.href.replace(importMetaResolveParent.href, () => servedRoot));
+    canonicalServedPaths?.set(moduleUrl.href, servedPathPromise);
+  }
+  return servedPathPromise;
+}
+
 /**
  * Build an import map for an HTML page by crawling its module graph.
  *
@@ -187,6 +216,7 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
   const importMap: ImportMap = { imports: {} };
   const scopes: { [scopePrefix: string]: { [specifier: string]: string } } = {};
   const visitedModulePaths = new Set<string>();
+  const visitedSourceDirectories = new Set<string>();
   // Many modules import the same package; canonicalize each resolved URL once.
   const canonicalServedPaths = new Map<string, Promise<string>>();
   // Crawl tasks run concurrently and append newly discovered modules as the
@@ -203,6 +233,7 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
 
   async function crawlModule(servedModulePath: string): Promise<void> {
     const sourceFilePath = await servedPathToSourcePath(servedModulePath, servedRoot);
+    visitedSourceDirectories.add(dirname(sourceFilePath).replaceAll(/\\/g, '/'));
     const content = await readFile(sourceFilePath, { encoding: 'utf-8' }).catch(() => null);
     if (content === null) return;
     await collectImports(content, sourceFilePath, servedModulePath);
@@ -219,28 +250,13 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
         enqueue(new URL(specifier, importerBaseUrl).pathname);
         return;
       }
-      let moduleUrl: URL | undefined;
-      try {
-        moduleUrl = moduleResolve(specifier, parentUrl, MODULE_RESOLVE_CONDITIONS, true);
+      const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
+      // Leave an unresolvable specifier out of the map so the browser error
+      // names the real specifier.
+      if (!servedModulePath) {
+        console.log(`Unresolvable specifier "${specifier}" imported from ${importerServedPath}`);
+        return;
       }
-      catch (error) {
-        moduleUrl = await resolveUnbuiltSpecifier(specifier, parentUrl);
-        // Leave an unresolvable specifier out of the map so the browser error
-        // names the real specifier.
-        if (!moduleUrl) {
-          console.log(specifier, error);
-          return;
-        }
-      }
-      let servedPathPromise = canonicalServedPaths.get(moduleUrl.href);
-      if (!servedPathPromise) {
-        // Arrow replacer so `$`-sequences in servedRoot are treated literally,
-        // not as String.replace special patterns ($&, $', …).
-        servedPathPromise = canonicalizeModuleUrl(moduleUrl)
-          .then(canonicalUrl => canonicalUrl.href.replace(importMetaResolveParent.href, () => servedRoot));
-        canonicalServedPaths.set(moduleUrl.href, servedPathPromise);
-      }
-      const servedModulePath = await servedPathPromise;
       const mappedPath = importMap.imports[specifier];
       if (mappedPath === undefined) {
         importMap.imports[specifier] = servedModulePath;
@@ -256,8 +272,10 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
   }
 
   const pageBaseUrl = new URL(pageServedPath, SERVED_PATH_BASE);
+  let hasModuleScripts = false;
   let pageSourcePathPromise: Promise<string> | undefined;
   for (const scriptMatch of htmlContent.matchAll(MODULE_SCRIPT_REGEX)) {
+    hasModuleScripts = true;
     const sourceAttribute = scriptMatch[1].match(/\bsrc\s*=\s*["']([^"']+)["']/i);
     if (sourceAttribute) {
       enqueue(new URL(sourceAttribute[1], pageBaseUrl).pathname);
@@ -269,11 +287,51 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
         .then(pageSourceFilePath => collectImports(inlineScriptBody, pageSourceFilePath, pageServedPath)));
     }
   }
+  if (!hasModuleScripts) return importMap;
 
   // Elements pushed while awaiting are still visited: the array iterator
   // re-checks the length on every step.
   for (const crawlTask of crawlTasks) {
     await crawlTask;
+  }
+
+  // Import maps have no fallback for unmapped bare specifiers — a dynamic
+  // import() of a computed name throws before any network request unless the
+  // name is a map key. So every package name installed along the crawled
+  // modules' node_modules chains gets an entry; names the crawl did not
+  // already map point at the /@resolve/ route, which resolves them
+  // server-side at import time. Intentional boundary: a module reached only
+  // through /@resolve/ was never crawled, so names visible solely from its
+  // own non-hoisted node_modules are not enumerated.
+  const pageSourceFilePath = await (pageSourcePathPromise ?? servedPathToSourcePath(pageServedPath, servedRoot));
+  visitedSourceDirectories.add(dirname(pageSourceFilePath).replaceAll(/\\/g, '/'));
+  const nodeModulesDirectories = new Set<string>();
+  for (const sourceDirectory of visitedSourceDirectories) {
+    let currentDirectory = sourceDirectory;
+    while (`${currentDirectory}/`.startsWith(rootDirectory)) {
+      nodeModulesDirectories.add(`${currentDirectory}/node_modules`);
+      currentDirectory = dirname(currentDirectory);
+    }
+  }
+  const installedPackageNames = new Set<string>();
+  await Promise.all(Array.from(nodeModulesDirectories, async (nodeModulesDirectory) => {
+    const entryNames = await readdir(nodeModulesDirectory).catch((): string[] => []);
+    await Promise.all(entryNames.map(async (entryName) => {
+      if (entryName.startsWith('.')) return;
+      if (entryName.startsWith('@')) {
+        for (const scopedName of await readdir(`${nodeModulesDirectory}/${entryName}`).catch((): string[] => [])) {
+          if (!scopedName.startsWith('.')) installedPackageNames.add(`${entryName}/${scopedName}`);
+        }
+      }
+      else {
+        installedPackageNames.add(entryName);
+      }
+    }));
+  }));
+  for (const packageName of installedPackageNames) {
+    importMap.imports[packageName] ??= `${servedRoot}@resolve/${packageName}`;
+    // Subpath imports (`package/sub`) route through the resolver too.
+    importMap.imports[`${packageName}/`] ??= `${servedRoot}@resolve/${packageName}/`;
   }
 
   if (Object.keys(scopes).length) importMap.scopes = scopes;
@@ -716,7 +774,44 @@ export class Server {
       }
 
       try {
-        let filePath = `${rootPath}${servedPath.split('?')[0]}`;
+        /**
+         * Resolve a bare specifier on demand. The import map lists every
+         * installed package name; names the page's crawl did not reach point
+         * here, so a dynamic import() of a computed name is resolved
+         * server-side at import time and answered with a re-export shim
+         * pointing at the canonical served module URL.
+         */
+        const requestFilePath = servedPath.split('?')[0];
+        const resolverMatch = requestFilePath.match(/^\/@resolve\/(?<specifier>.+)$/);
+        if (resolveModules && resolverMatch) {
+          const specifier = decodeURIComponent(resolverMatch.groups!.specifier);
+          const refererUrl = URL.parse(String(headers['referer'] ?? ''));
+          const parentUrl = refererUrl
+            ? pathToFileURL(await servedPathToSourcePath(refererUrl.pathname, servedRoot))
+            : importMetaResolveParent;
+          const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot);
+          if (!servedModulePath) {
+            stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
+            stream.end();
+            return;
+          }
+          // `export * from` does not forward a default export; add it only
+          // when the target module declares one.
+          let shim = `export * from '${servedModulePath}';\n`;
+          const targetSource = await readFile(await servedPathToSourcePath(servedModulePath, servedRoot), { encoding: 'utf-8' }).catch(() => '');
+          if (/\bexport\s+default\b|\bexport\s*\{[^}]*\bdefault\b/.test(targetSource)) {
+            shim += `export { default } from '${servedModulePath}';\n`;
+          }
+          stream.respond({
+            ':status': constants.HTTP_STATUS_OK,
+            'content-type': 'application/javascript',
+            'cache-control': 'no-cache',
+          });
+          stream.end(shim);
+          return;
+        }
+
+        let filePath = `${rootPath}${requestFilePath}`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
@@ -815,7 +910,7 @@ export class Server {
             const pageServedPath = `${servedRoot.slice(0, -1)}${filePath.slice(rootPath.length)}`;
             const importMap = await buildImportMap(fileContent, pageServedPath, servedRoot);
             if (Object.keys(importMap.imports).length) {
-              const importMapScript = `<script type="importmap">\n${JSON.stringify(importMap, null, 2)}\n</script>`;
+              const importMapScript = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
               // The map must precede every module script; fall back to
               // prepending when the page has no <head>.
               fileContent = /<head[^>]*>/.test(fileContent)

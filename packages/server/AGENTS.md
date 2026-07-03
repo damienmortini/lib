@@ -21,6 +21,12 @@ How it works (`src/server.ts`):
   URL — browsers deduplicate modules by URL. Bare specifiers whose build output
   is missing are resolved through the package's `package.json`, so an unbuilt
   dependency still maps and serves.
+- The map also lists every installed package name (import maps have no
+  fallback for unmapped bare specifiers); names the crawl did not reach point
+  at the reserved `/@resolve/<specifier>` route, which resolves the specifier
+  server-side **at import time** and answers with a re-export shim. That makes
+  computed dynamic imports work — `import('@damo/' + name)` or any installed
+  package name — while staying fully lazy.
 
 Practical consequences:
 
