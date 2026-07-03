@@ -89,19 +89,29 @@ async function getSourceFilePath(filePath: string): Promise<string | undefined> 
  * `main`/`exports` target has not been built yet. The server transpiles `dist/*` from `src/*`
  * on the fly, so the path is valid even though the file is absent. Locate the package through
  * its always-present `package.json` and rebuild the served path without an existence check.
+ * The `package.json` lookup walks the `node_modules` chain directly (like Node's package
+ * lookup) because resolving `<package>/package.json` through moduleResolve throws
+ * ERR_PACKAGE_PATH_NOT_EXPORTED for packages whose `exports` map does not expose it.
  */
-async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/'): Promise<string | undefined> {
+async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/', parentUrl = importMetaResolveParent): Promise<string | undefined> {
   const segments = specifier.split('/');
   const packageName = specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
   const subPath = specifier.slice(packageName.length + 1);
 
-  let packageJsonUrl: URL;
-  try {
-    packageJsonUrl = moduleResolve(`${packageName}/package.json`, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true);
+  let packageJsonUrl: URL | undefined;
+  let directoryUrl = new URL('.', parentUrl);
+  while (true) {
+    const candidateUrl = new URL(`node_modules/${packageName}/package.json`, directoryUrl);
+    const candidateStats = await stat(fileURLToPath(candidateUrl)).catch(() => null);
+    if (candidateStats?.isFile()) {
+      packageJsonUrl = candidateUrl;
+      break;
+    }
+    const parentDirectoryUrl = new URL('..', directoryUrl);
+    if (parentDirectoryUrl.href === directoryUrl.href) break;
+    directoryUrl = parentDirectoryUrl;
   }
-  catch {
-    return undefined;
-  }
+  if (!packageJsonUrl) return undefined;
 
   const packageJson = JSON.parse(await readFile(fileURLToPath(packageJsonUrl), 'utf-8')) as PackageJson;
   const rootExport = typeof packageJson.exports === 'string' ? packageJson.exports : packageJson.exports?.['.'];
@@ -114,7 +124,12 @@ async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/'): Pro
   return new URL(relativePath, packageJsonUrl).href.replace(importMetaResolveParent.href, () => servedRoot);
 }
 
-async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/'): Promise<string> {
+async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/', importingFilePath?: string): Promise<string> {
+  // Resolve bare specifiers from the importing file like Node does, so a package's
+  // dependencies are found in its own workspace's node_modules — pnpm does not hoist
+  // transitive dependencies of linked packages into the served root's node_modules.
+  const parentUrl = importingFilePath ? pathToFileURL(importingFilePath) : importMetaResolveParent;
+
   const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
   ));
@@ -127,13 +142,13 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
         /**
          * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
          */
-        importPath = moduleResolve(importPath, importMetaResolveParent, MODULE_RESOLVE_CONDITIONS, true).href.replace(
+        importPath = moduleResolve(importPath, parentUrl, MODULE_RESOLVE_CONDITIONS, true).href.replace(
           importMetaResolveParent.href,
           () => servedRoot,
         );
       }
       catch (error) {
-        const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot);
+        const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot, parentUrl);
         if (unbuiltPath) {
           importPath = unbuiltPath;
         }
@@ -143,8 +158,10 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
       }
     }
 
-    // Check if path has no extension and add .js if needed
-    if (!/\.[^/]*$/.test(importPath)) {
+    // Check if path has no extension and add .js if needed. A specifier that is
+    // still bare failed to resolve above — leave it untouched so the browser
+    // error names the real specifier instead of a fabricated `.js` path.
+    if (/^[./]/.test(importPath) && !/\.[^/]*$/.test(importPath)) {
       try {
         // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
         // back to an origin-relative path before probing the filesystem.
@@ -710,7 +727,7 @@ export class Server {
           });
           stream.respond(responseHeaders);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
+            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot, responseFilePath);
           }
           fileContent = fileContent.replace(
             '</head>',
@@ -736,7 +753,7 @@ socket.addEventListener("message", function (event) {
           });
           fileContent = stripTypeScriptTypes(fileContent);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
+            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot, sourceFilePath);
           }
           stream.end(fileContent);
         }
@@ -745,7 +762,7 @@ socket.addEventListener("message", function (event) {
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
-          fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot);
+          fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot, responseFilePath);
           stream.end(fileContent);
         }
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
