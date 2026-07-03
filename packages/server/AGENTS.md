@@ -11,10 +11,16 @@ How it works (`src/server.ts`):
   When that source file exists it is served instead of the built file — the
   source always wins, so a stale `dist/` on disk is never served.
 - The `.ts` source has its types stripped with `node:module`'s
-  `stripTypeScriptTypes`, then (with `--resolve-modules`) its import specifiers
-  are rewritten so the browser can resolve them.
-- Bare specifiers whose build output is missing are resolved through the
-  package's `package.json`, so an unbuilt dependency still serves.
+  `stripTypeScriptTypes` and served otherwise untouched — module bodies are
+  never rewritten.
+- With `--resolve-modules`, the server crawls each HTML page's module graph and
+  injects a generated `<script type="importmap">`, so the browser resolves bare
+  specifiers (`@scope/pkg`) itself. Each bare import is resolved from the
+  importing module's own location (Node semantics, so pnpm-style nested
+  node_modules work) and canonicalized so every package maps to exactly one
+  URL — browsers deduplicate modules by URL. Bare specifiers whose build output
+  is missing are resolved through the package's `package.json`, so an unbuilt
+  dependency still maps and serves.
 
 Practical consequences:
 
@@ -22,8 +28,9 @@ Practical consequences:
   path. That is intentional and works without ever running a build — the server
   serves the live `src/element/index.ts`.
 - Edit `src/*.ts` and reload; there is no build to run and no `dist/` to refresh.
-- Run the server with `--resolve-modules` so relative (`./x.js`) and bare
-  (`@scope/pkg`) imports are rewritten for the browser.
+- Run the server with `--resolve-modules` so bare (`@scope/pkg`) imports work in
+  the browser via the injected import map. Relative imports must carry real
+  extensions (`./x.js`) — they are standard browser ESM and pass through as-is.
 
 ## Run
 
