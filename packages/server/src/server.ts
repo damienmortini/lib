@@ -119,17 +119,17 @@ async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
  * Node resolution (and therefore moduleResolve) throws ERR_MODULE_NOT_FOUND when a package's
  * `main`/`exports` target has not been built yet. The server transpiles `dist/*` from `src/*`
  * on the fly, so the path is valid even though the file is absent. Locate the package through
- * its always-present `package.json` and rebuild the served path without an existence check.
+ * its always-present `package.json` and rebuild the module URL without an existence check.
  * The `package.json` lookup walks the `node_modules` chain directly (like Node's package
  * lookup) because resolving `<package>/package.json` through moduleResolve throws
  * ERR_PACKAGE_PATH_NOT_EXPORTED for packages whose `exports` map does not expose it.
  */
-async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/', parentUrl = importMetaResolveParent): Promise<string | undefined> {
+async function resolveUnbuiltSpecifier(specifier: string, parentUrl: URL): Promise<URL | undefined> {
   const segments = specifier.split('/');
   const packageName = specifier.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
   const subPath = specifier.slice(packageName.length + 1);
 
-  let packageJsonUrl: URL | undefined;
+  let packageJsonUrl: URL;
   let directoryUrl = new URL('.', parentUrl);
   while (true) {
     const candidateUrl = new URL(`node_modules/${packageName}/package.json`, directoryUrl);
@@ -139,10 +139,9 @@ async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/', pare
       break;
     }
     const parentDirectoryUrl = new URL('..', directoryUrl);
-    if (parentDirectoryUrl.href === directoryUrl.href) break;
+    if (parentDirectoryUrl.href === directoryUrl.href) return undefined;
     directoryUrl = parentDirectoryUrl;
   }
-  if (!packageJsonUrl) return undefined;
 
   const packageJson = JSON.parse(await readFile(fileURLToPath(packageJsonUrl), 'utf-8')) as PackageJson;
   const rootExport = typeof packageJson.exports === 'string' ? packageJson.exports : packageJson.exports?.['.'];
@@ -150,18 +149,14 @@ async function resolveUnbuiltSpecifier(specifier: string, servedRoot = '/', pare
     ? resolvePackageExportPath(packageJson.exports?.[`./${subPath}`]) ?? subPath
     : resolvePackageExportPath(rootExport) ?? packageJson.main ?? 'index.js';
 
-  const moduleUrl = await canonicalizeModuleUrl(new URL(relativePath, packageJsonUrl));
-
-  // Arrow replacer so `$`-sequences in servedRoot are treated literally, not as
-  // String.replace special patterns ($&, $', …).
-  return moduleUrl.href.replace(importMetaResolveParent.href, () => servedRoot);
+  return new URL(relativePath, packageJsonUrl);
 }
 
-async function resolveImports(string: string, removeCSSImportAttribute = false, servedRoot = '/', importingFilePath?: string): Promise<string> {
+async function resolveImports(string: string, importingFilePath: string, removeCSSImportAttribute = false, servedRoot = '/'): Promise<string> {
   // Resolve bare specifiers from the importing file like Node does, so a package's
   // dependencies are found in its own workspace's node_modules — pnpm does not hoist
   // transitive dependencies of linked packages into the served root's node_modules.
-  const parentUrl = importingFilePath ? pathToFileURL(importingFilePath) : importMetaResolveParent;
+  const parentUrl = pathToFileURL(importingFilePath);
 
   const matches = Array.from(string.matchAll(
     /((?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"])(.*?)(['"])([\s]+with[\s]+{[\s]+type[\s]*:[\s]+['"](.*?)['"][\s]+})?/g,
@@ -171,31 +166,29 @@ async function resolveImports(string: string, removeCSSImportAttribute = false, 
     let importPath = match[2];
 
     if (!/^[./]/.test(importPath)) {
+      let moduleUrl: URL | undefined;
       try {
         /**
          * Change to import.meta.resolve when we'll be able to choose to resolve only browser code.
          */
-        const resolvedModuleUrl = await canonicalizeModuleUrl(moduleResolve(importPath, parentUrl, MODULE_RESOLVE_CONDITIONS, true));
-        importPath = resolvedModuleUrl.href.replace(
-          importMetaResolveParent.href,
-          () => servedRoot,
-        );
+        moduleUrl = moduleResolve(importPath, parentUrl, MODULE_RESOLVE_CONDITIONS, true);
       }
       catch (error) {
-        const unbuiltPath = await resolveUnbuiltSpecifier(importPath, servedRoot, parentUrl);
-        if (unbuiltPath) {
-          importPath = unbuiltPath;
-        }
-        else {
-          console.log(importPath, error);
-        }
+        moduleUrl = await resolveUnbuiltSpecifier(importPath, parentUrl);
+        if (!moduleUrl) console.log(importPath, error);
       }
+
+      // Leave an unresolvable specifier untouched so the browser error names
+      // the real specifier instead of a fabricated `.js` path.
+      if (!moduleUrl) return match[0];
+
+      // Arrow replacer so `$`-sequences in servedRoot are treated literally, not as
+      // String.replace special patterns ($&, $', …).
+      importPath = (await canonicalizeModuleUrl(moduleUrl)).href.replace(importMetaResolveParent.href, () => servedRoot);
     }
 
-    // Check if path has no extension and add .js if needed. A specifier that is
-    // still bare failed to resolve above — leave it untouched so the browser
-    // error names the real specifier instead of a fabricated `.js` path.
-    if (/^[./]/.test(importPath) && !/\.[^/]*$/.test(importPath)) {
+    // Check if path has no extension and add .js if needed
+    if (!/\.[^/]*$/.test(importPath)) {
       try {
         // Resolved imports carry the served-root prefix (e.g. `/damo/`); strip it
         // back to an origin-relative path before probing the filesystem.
@@ -761,7 +754,7 @@ export class Server {
           });
           stream.respond(responseHeaders);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot, responseFilePath);
+            fileContent = await resolveImports(fileContent, responseFilePath, convertCSSImport, servedRoot);
           }
           fileContent = fileContent.replace(
             '</head>',
@@ -787,7 +780,7 @@ socket.addEventListener("message", function (event) {
           });
           fileContent = stripTypeScriptTypes(fileContent);
           if (resolveModules) {
-            fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot, sourceFilePath);
+            fileContent = await resolveImports(fileContent, sourceFilePath, convertCSSImport, servedRoot);
           }
           stream.end(fileContent);
         }
@@ -796,7 +789,7 @@ socket.addEventListener("message", function (event) {
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
-          fileContent = await resolveImports(fileContent, convertCSSImport, servedRoot, responseFilePath);
+          fileContent = await resolveImports(fileContent, responseFilePath, convertCSSImport, servedRoot);
           stream.end(fileContent);
         }
         else if (fileExtension === '.css' && convertCSSImport && fetchDest === 'script') {
