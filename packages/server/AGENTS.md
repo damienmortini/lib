@@ -5,7 +5,8 @@
 This dev server serves TypeScript source as browser-ready JavaScript at request
 time. **Do not run a build to see source changes in the browser.**
 
-How it works (`src/server.ts`):
+How it works (`src/server.ts` — request pipeline; `src/module-resolution.ts` —
+resolution, import-map generation, dist→src mapping):
 
 - A request for `<package>/dist/<path>.js` is resolved to `<package>/src/<path>.ts`.
   When that source file exists it is served instead of the built file — the
