@@ -23,7 +23,11 @@ const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-k
 const PACKAGE_EXPORT_CONDITIONS = ['browser', 'import', 'default', 'module', 'require'];
 const MODULE_RESOLVE_CONDITIONS = new Set(['module', 'import', 'default']);
 
-const rootDirectory = `${process.cwd()}/`.replaceAll(/\\/g, '/');
+function toPosixPath(path: string): string {
+  return path.replaceAll(/\\/g, '/');
+}
+
+const rootDirectory = toPosixPath(`${process.cwd()}/`);
 const importMetaResolveParent = pathToFileURL(rootDirectory);
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
 
@@ -97,14 +101,14 @@ async function getSourceFilePath(filePath: string): Promise<string | undefined> 
 async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
   if (!moduleUrl.href.startsWith(importMetaResolveParent.href)) return moduleUrl;
 
-  const modulePath = fileURLToPath(moduleUrl).replaceAll(/\\/g, '/');
+  const modulePath = toPosixPath(fileURLToPath(moduleUrl));
   let currentPath = rootDirectory.slice(0, -1);
   for (const pathComponent of modulePath.slice(rootDirectory.length).split('/')) {
     let candidatePath = `${currentPath}/${pathComponent}`;
     for (let symlinkHopCount = 0; symlinkHopCount < 10; symlinkHopCount++) {
       const symlinkTarget = await readlink(candidatePath).catch(() => null);
       if (symlinkTarget === null) break;
-      const resolvedTargetPath = resolve(dirname(candidatePath), symlinkTarget).replaceAll(/\\/g, '/');
+      const resolvedTargetPath = toPosixPath(resolve(dirname(candidatePath), symlinkTarget));
       if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) break;
       candidatePath = resolvedTargetPath;
     }
@@ -233,7 +237,7 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
 
   async function crawlModule(servedModulePath: string): Promise<void> {
     const sourceFilePath = await servedPathToSourcePath(servedModulePath, servedRoot);
-    visitedSourceDirectories.add(dirname(sourceFilePath).replaceAll(/\\/g, '/'));
+    visitedSourceDirectories.add(toPosixPath(dirname(sourceFilePath)));
     const content = await readFile(sourceFilePath, { encoding: 'utf-8' }).catch(() => null);
     if (content === null) return;
     await collectImports(content, sourceFilePath, servedModulePath);
@@ -304,7 +308,7 @@ async function buildImportMap(htmlContent: string, pageServedPath: string, serve
   // through /@resolve/ was never crawled, so names visible solely from its
   // own non-hoisted node_modules are not enumerated.
   const pageSourceFilePath = await (pageSourcePathPromise ?? servedPathToSourcePath(pageServedPath, servedRoot));
-  visitedSourceDirectories.add(dirname(pageSourceFilePath).replaceAll(/\\/g, '/'));
+  visitedSourceDirectories.add(toPosixPath(dirname(pageSourceFilePath)));
   const nodeModulesDirectories = new Set<string>();
   for (const sourceDirectory of visitedSourceDirectories) {
     let currentDirectory = sourceDirectory;
@@ -477,6 +481,7 @@ export class Server {
 
   #wss?: WebSocketServer;
   #watcher?: FSWatcher;
+  #watchedPaths = new Set<string>();
 
   constructor(serverOptions: ServerOptions = {}) {
     this.ready = this.#setup(serverOptions);
@@ -496,6 +501,14 @@ export class Server {
     auth,
     base = '',
   }: ServerOptions = {}): Promise<void> {
+    // The module-resolution subsystem (import map crawl, /@resolve/) anchors on
+    // the process working directory, while file serving anchors on rootPath —
+    // with a rootPath elsewhere the server would serve one tree and resolve
+    // modules against another.
+    if (resolveModules && `${toPosixPath(resolve(rootPath))}/` !== rootDirectory) {
+      console.warn(`resolveModules resolves modules from the working directory (${rootDirectory}), not from rootPath "${rootPath}" — run the server from the served root to keep them aligned.`);
+    }
+
     const expectedAuthHeader = auth ? `Basic ${Buffer.from(auth).toString('base64')}` : null;
 
     // When set, the server is mounted under a sub-path (e.g. `damo`): incoming
@@ -829,9 +842,9 @@ export class Server {
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
          * e.g. `node_modules/foo/bar/package.json` → main resolved from foo's `exports['./bar']`.
-         * Legacy path from the era when browsers resolved node_modules URLs themselves;
-         * with the injected import map nothing should request these anymore — kept until
-         * confirmed unused at runtime.
+         * Still required by pages that bypass the import map and resolve manually by
+         * fetching `<package>/<subpath>/package.json` and importing its `main` — damo's
+         * index.html lazy-loads subpath entries like `@damo/playground-element/demo` this way.
          */
         const virtualPackageJsonMatch = filePath
           .replace(/^\.?\//, '')
@@ -906,7 +919,12 @@ export class Server {
 
         const responseFilePath = sourceFilePath ?? filePath;
 
-        this.#watcher?.add(responseFilePath);
+        // chokidar's add() re-stats the path and rebuilds its ignore matcher
+        // even when the path is already watched, so gate repeat requests.
+        if (this.#watcher && !this.#watchedPaths.has(responseFilePath)) {
+          this.#watchedPaths.add(responseFilePath);
+          this.#watcher.add(responseFilePath);
+        }
 
         const fileExtension = extname(filePath);
 
