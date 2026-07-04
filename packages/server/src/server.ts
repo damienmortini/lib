@@ -657,8 +657,21 @@ export class Server {
               return;
             }
 
+            // Relay the negotiated extension and subprotocol back to the client.
+            // The client's offer (e.g. permessage-deflate) was forwarded to the
+            // target, so the target may send compressed frames (RSV1 set); a
+            // client that was never told the negotiation succeeded treats those
+            // frames as a protocol violation and drops the connection.
+            const responseHeaders: Record<string, string | number> = { ':status': 200 };
+            for (const line of responseString.split('\r\n').slice(1)) {
+              const separatorIndex = line.indexOf(':');
+              if (separatorIndex === -1) continue;
+              const name = line.slice(0, separatorIndex).trim().toLowerCase();
+              if (name !== 'sec-websocket-extensions' && name !== 'sec-websocket-protocol') continue;
+              responseHeaders[name] = line.slice(separatorIndex + 1).trim();
+            }
             if (!stream.headersSent) {
-              stream.respond({ ':status': 200 });
+              stream.respond(responseHeaders);
             }
             if (remainingData.length > 0) stream.write(remainingData);
             targetSocket.pipe(stream);
