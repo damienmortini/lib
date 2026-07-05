@@ -6,7 +6,7 @@ import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
 import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2Stream } from 'http2';
-import { createServer, request as httpsRequest } from 'https';
+import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
@@ -32,6 +32,8 @@ import {
 
 const HOP_BY_HOP_HEADERS = new Set(['connection', 'upgrade', 'keep-alive', 'transfer-encoding']);
 const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-key', 'sec-websocket-version', 'host']);
+// Path (under the mount prefix) the injected client opens for live reload.
+const LIVE_RELOAD_PATH = '/@livereload';
 
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
 
@@ -208,7 +210,6 @@ export class Server {
      * Get port
      */
     const serverPort = await getPort({ port: portNumbers(port, port + 100) });
-    const webSocketServerPort = await getPort({ port: portNumbers(port + 10, port + 110) });
 
     /**
      * Get addresses
@@ -249,19 +250,21 @@ export class Server {
 
     this.http2SecureServer.on('listening', () => {
       if (watch) {
-        /**
-         * Create WebSocket server to refresh page on file change
-         */
-        const webSocketServer = createServer({
-          key,
-          cert,
-        });
-        this.#wss = new WebSocketServer({ server: webSocketServer });
-        webSocketServer.listen(webSocketServerPort);
+        // Refresh the page on file change over a socket served on the main port;
+        // the upgrade handler routes `${basePrefix}${LIVE_RELOAD_PATH}` here, so
+        // it reaches the browser over the page's own origin (including through a
+        // path-routing proxy) rather than a separate port.
+        this.#wss = new WebSocketServer({ noServer: true });
 
         this.#watcher = chokidarWatch(watchPaths, {
           ignored: watchIgnore,
           ignoreInitial: true,
+          // Poll by path rather than inode: editors save atomically (write temp +
+          // rename), which swaps the inode and makes an inotify watch on the old
+          // one go stale. Polling also sidesteps unreliable inotify on mounted
+          // volumes. The cost is periodic stats of the handful of served files.
+          usePolling: true,
+          interval: 200,
         })
           .on('change', (changedPath) => {
             if (changedPath.endsWith('.css') || changedPath.endsWith('.css.map')) return;
@@ -281,7 +284,6 @@ export class Server {
       }
 
       const requestMethod = headers[constants.HTTP2_HEADER_METHOD] as string;
-      const requestAuthority = headers[constants.HTTP2_HEADER_AUTHORITY];
       const requestPath = headers[constants.HTTP2_HEADER_PATH];
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
       const fetchDest = headers['sec-fetch-dest'];
@@ -632,15 +634,31 @@ export class Server {
             fileContent = fileContent.replace(
               '</head>',
               `<script>
-const socket = new WebSocket("wss://${String(requestAuthority).split(':')[0]}:${webSocketServerPort}");
-let forceReload = false;
-window.navigation?.addEventListener('navigate', (event) => {
-  if(forceReload) event.stopImmediatePropagation();
-});
-socket.addEventListener("message", function (event) {
-  forceReload = true;
-  window.location.reload();
-});
+(function () {
+  let forceReload = false;
+  let hadConnection = false;
+  window.navigation?.addEventListener('navigate', (event) => {
+    if (forceReload) event.stopImmediatePropagation();
+  });
+  function reload() {
+    forceReload = true;
+    location.reload();
+  }
+  function connect() {
+    const socket = new WebSocket("wss://" + location.host + "${basePrefix}${LIVE_RELOAD_PATH}");
+    // Reconnected after the server (or connection) dropped — reload to pick up
+    // anything that changed while we were disconnected.
+    socket.addEventListener("open", function () {
+      if (hadConnection) reload();
+      hadConnection = true;
+    });
+    socket.addEventListener("message", reload);
+    socket.addEventListener("close", function () {
+      setTimeout(connect, 1000);
+    });
+  }
+  connect();
+})();
 </script>
 </head>`,
             );
@@ -690,15 +708,28 @@ socket.addEventListener("message", function (event) {
      * Handle WebSocket proxy upgrades
      */
     this.http2SecureServer.on('upgrade', (request, socket, head) => {
-      if (expectedAuthHeader && !checkBasicAuth(request.headers['authorization'], expectedAuthHeader)) {
-        socket.end('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="Dev Server"\r\n\r\n');
-        return;
-      }
-
       const requestPath = request.url || '';
       // Strip the mount prefix (mirrors the stream handler) so proxy rules match
       // and the upstream target receives the un-prefixed path under a base.
       const strippedPath = stripBasePrefix(requestPath, basePrefix);
+
+      // Live-reload socket, served on this same port (see the listening handler).
+      // Exempt from auth, like the previous side-channel server: browsers cannot
+      // attach Basic credentials to a WebSocket handshake, and it only ever emits
+      // a "refresh" signal.
+      const liveReloadServer = this.#wss;
+      if (liveReloadServer && strippedPath === LIVE_RELOAD_PATH) {
+        liveReloadServer.handleUpgrade(request, socket, head, (client) => {
+          if (verbose) console.log('live-reload client connected');
+          liveReloadServer.emit('connection', client, request);
+        });
+        return;
+      }
+
+      if (expectedAuthHeader && !checkBasicAuth(request.headers['authorization'], expectedAuthHeader)) {
+        socket.end('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="Dev Server"\r\n\r\n');
+        return;
+      }
 
       for (const { path: proxyPath, url: targetUrl } of proxyEntries) {
         if (strippedPath.startsWith(proxyPath)) {
