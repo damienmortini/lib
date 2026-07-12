@@ -95,17 +95,29 @@ async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
   if (!moduleUrl.href.startsWith(importMetaResolveParent.href)) return moduleUrl;
 
   const modulePath = toPosixPath(fileURLToPath(moduleUrl));
+  let remainingComponents = modulePath.slice(rootDirectory.length).split('/');
   let currentPath = rootDirectory.slice(0, -1);
-  for (const pathComponent of modulePath.slice(rootDirectory.length).split('/')) {
-    let candidatePath = `${currentPath}/${pathComponent}`;
-    for (let symlinkHopCount = 0; symlinkHopCount < 10; symlinkHopCount++) {
-      const symlinkTarget = await readlink(candidatePath).catch(() => null);
-      if (symlinkTarget === null) break;
-      const resolvedTargetPath = toPosixPath(resolve(dirname(candidatePath), symlinkTarget));
-      if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) break;
-      candidatePath = resolvedTargetPath;
+  // Bounds total symlink follows so link cycles cannot loop forever.
+  let symlinkHopBudget = 40;
+  while (remainingComponents.length > 0) {
+    const pathComponent = remainingComponents.shift()!;
+    const candidatePath = `${currentPath}/${pathComponent}`;
+    const symlinkTarget = symlinkHopBudget > 0 ? await readlink(candidatePath).catch(() => null) : null;
+    if (symlinkTarget === null) {
+      currentPath = candidatePath;
+      continue;
     }
-    currentPath = candidatePath;
+    symlinkHopBudget--;
+    const resolvedTargetPath = toPosixPath(resolve(dirname(candidatePath), symlinkTarget));
+    if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) {
+      currentPath = candidatePath;
+      continue;
+    }
+    // Re-walk the in-root target from the served root so symlinks inside the
+    // adopted portion collapse too (e.g. a package reached through a nested
+    // submodule chain must land on the same URL as the direct submodule path).
+    remainingComponents = [...resolvedTargetPath.slice(rootDirectory.length).split('/'), ...remainingComponents];
+    currentPath = rootDirectory.slice(0, -1);
   }
   return pathToFileURL(currentPath);
 }
