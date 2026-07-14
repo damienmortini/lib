@@ -24,6 +24,7 @@ import {
   type PackageJson,
   resolvePackageExportPath,
   resolveSpecifierToServedPath,
+  rewriteModuleSpecifiers,
   rootDirectory,
   servedPathToSourcePath,
   stripBasePrefix,
@@ -670,7 +671,20 @@ export class Server {
           const fileContent = await readFile(sourceFilePath, {
             encoding: 'utf-8',
           });
-          stream.end(stripTypeScriptTypes(fileContent));
+          const javaScript = stripTypeScriptTypes(fileContent);
+          // Rewrite bare imports to resolved URLs so module workers, which never
+          // receive the page's import map, can still resolve their dependencies.
+          stream.end(resolveModules ? await rewriteModuleSpecifiers(javaScript, sourceFilePath, servedRoot) : javaScript);
+        }
+        // Plain JS modules (no TypeScript source) carry the same bare imports a
+        // worker cannot resolve via the import map; rewrite them the same way.
+        // Range requests fall through to respondWithFile — rewriting a partial
+        // body would corrupt it, and module scripts are never range-requested.
+        else if (resolveModules && !requestRange && (fileExtension === '.js' || fileExtension === '.mjs')) {
+          stream.respond(responseHeaders);
+          const modulePath = decodeURIComponent(responseFilePath);
+          const fileContent = await readFile(modulePath, { encoding: 'utf-8' });
+          stream.end(await rewriteModuleSpecifiers(fileContent, modulePath, servedRoot));
         }
         else {
           stream.respondWithFile(decodeURIComponent(responseFilePath), responseHeaders);
