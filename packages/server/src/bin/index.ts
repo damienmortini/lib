@@ -86,12 +86,13 @@ while (i < args.length) {
  */
 try {
   await (await open('/dev/tty', 'r')).close();
-  setInterval(() => {
-    open('/dev/tty', 'r')
-      .then(terminal => terminal.close())
-      .catch((error) => {
-        if (error.code === 'ENXIO') process.exit(0);
-      });
+  setInterval(async () => {
+    try {
+      await (await open('/dev/tty', 'r')).close();
+    }
+    catch (error) {
+      if (error.code === 'ENXIO') process.exit(0);
+    }
   }, 2000);
 }
 catch {

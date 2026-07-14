@@ -166,9 +166,13 @@ export type ImportMap = {
   scopes?: { [scopePrefix: string]: { [specifier: string]: string } };
 };
 
-const IMPORT_STATEMENT_REGEX = /(?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"](.*?)['"]/g;
+const IMPORT_STATEMENT_REGEX = /(?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"](.*?)['"]/dg;
 const MODULE_SCRIPT_REGEX = /(<script\b[^>]*\btype\s*=\s*["']module["'][^>]*>)([\s\S]*?)<\/script>/gi;
 const CRAWLABLE_EXTENSIONS = new Set(['.js', '.mjs', '.ts']);
+// Shared specifier classification — the import-map crawl and the module-body
+// rewrite must agree on what counts as a bare specifier.
+const RELATIVE_SPECIFIER_REGEX = /^[./]/;
+const URL_SPECIFIER_REGEX = /^[a-z][a-z0-9+.-]*:/i;
 
 // Dummy origin for resolving relative specifiers against served paths.
 const SERVED_PATH_BASE = 'http://internal';
@@ -247,19 +251,17 @@ export async function rewriteModuleSpecifiers(
     Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
       const specifier = match[1];
       // Skip relative specifiers and full URLs (node:, data:, https:, …).
-      if (/^[./]/.test(specifier) || /^[a-z][a-z0-9+.-]*:/i.test(specifier)) return undefined;
+      if (RELATIVE_SPECIFIER_REGEX.test(specifier) || URL_SPECIFIER_REGEX.test(specifier)) return undefined;
       const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
       if (!servedModulePath) return undefined;
-      // The specifier is the quoted token at the end of the matched statement;
-      // splice only it, leaving the surrounding import/export syntax intact.
-      const quoted = match[0].includes(`'${specifier}'`) ? `'${specifier}'` : `"${specifier}"`;
-      const start = match.index + match[0].lastIndexOf(quoted) + 1;
-      return { start, end: start + specifier.length, text: servedModulePath };
+      // Splice only the specifier span, leaving the surrounding syntax intact.
+      const [start, end] = match.indices![1];
+      return { start, end, text: servedModulePath };
     }),
   );
+  // matchAll yields matches in source order, so the splices are already sorted.
   const splices = replacements.filter(replacement => replacement !== undefined);
   if (!splices.length) return content;
-  splices.sort((first, second) => first.start - second.start);
   let result = '';
   let cursor = 0;
   for (const { start, end, text } of splices) {
@@ -272,8 +274,11 @@ export async function rewriteModuleSpecifiers(
 /**
  * Build an import map for an HTML page by crawling its module graph.
  *
- * The browser resolves bare specifiers itself through the injected map, so
- * served module bodies are never rewritten. Each module's bare imports are
+ * The injected map is what resolves bare specifiers in inline module scripts
+ * and computed dynamic imports (via /@resolve/); static specifiers in served
+ * module bodies are rewritten server-side by rewriteModuleSpecifiers instead,
+ * which is the only mechanism that reaches workers — they never receive the
+ * page's map. Each module's bare imports are
  * resolved from that module's own location like Node does — pnpm does not
  * hoist transitive dependencies of linked packages into the served root's
  * node_modules — and canonicalized so every package maps to exactly one URL
@@ -314,8 +319,8 @@ export async function buildImportMap(htmlContent: string, pageServedPath: string
     await Promise.all(Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
       const specifier = match[1];
       // Skip full URLs (node:, data:, https:, …) — nothing to map or crawl.
-      if (/^[a-z][a-z0-9+.-]*:/i.test(specifier)) return;
-      if (/^[./]/.test(specifier)) {
+      if (URL_SPECIFIER_REGEX.test(specifier)) return;
+      if (RELATIVE_SPECIFIER_REGEX.test(specifier)) {
         enqueue(new URL(specifier, importerBaseUrl).pathname);
         return;
       }
