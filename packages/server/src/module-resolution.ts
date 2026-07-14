@@ -224,6 +224,52 @@ export async function resolveSpecifierToServedPath(
 }
 
 /**
+ * Rewrite the bare import specifiers in a served ES module to the canonical
+ * served URLs they resolve to, so module resolution no longer depends on the
+ * page's import map.
+ *
+ * Import maps are never applied to Web Workers, so a module worker's bare
+ * imports (e.g. `import { Signal } from '@damienmortini/signal'`) are
+ * unresolvable through the map the way a main-thread module's are. Resolving
+ * them in the module body — from the importer's own location, exactly like the
+ * import-map crawl does — makes the same module load in a worker too. Relative
+ * specifiers and full URLs (node:, data:, https:, …) are left untouched, and an
+ * unresolvable bare specifier is left as-is so the browser error still names it.
+ */
+export async function rewriteModuleSpecifiers(
+  content: string,
+  importerSourceFilePath: string,
+  servedRoot: string,
+): Promise<string> {
+  const parentUrl = pathToFileURL(importerSourceFilePath);
+  const canonicalServedPaths = new Map<string, Promise<string>>();
+  const replacements = await Promise.all(
+    Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
+      const specifier = match[1];
+      // Skip relative specifiers and full URLs (node:, data:, https:, …).
+      if (/^[./]/.test(specifier) || /^[a-z][a-z0-9+.-]*:/i.test(specifier)) return undefined;
+      const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
+      if (!servedModulePath) return undefined;
+      // The specifier is the quoted token at the end of the matched statement;
+      // splice only it, leaving the surrounding import/export syntax intact.
+      const quoted = match[0].includes(`'${specifier}'`) ? `'${specifier}'` : `"${specifier}"`;
+      const start = match.index + match[0].lastIndexOf(quoted) + 1;
+      return { start, end: start + specifier.length, text: servedModulePath };
+    }),
+  );
+  const splices = replacements.filter(replacement => replacement !== undefined);
+  if (!splices.length) return content;
+  splices.sort((first, second) => first.start - second.start);
+  let result = '';
+  let cursor = 0;
+  for (const { start, end, text } of splices) {
+    result += content.slice(cursor, start) + text;
+    cursor = end;
+  }
+  return result + content.slice(cursor);
+}
+
+/**
  * Build an import map for an HTML page by crawling its module graph.
  *
  * The browser resolves bare specifiers itself through the injected map, so
