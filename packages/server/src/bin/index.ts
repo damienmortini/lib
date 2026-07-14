@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { open } from 'fs/promises';
+
 import { Server } from '../server.ts';
 
 const args = process.argv.slice(2);
@@ -72,6 +74,28 @@ while (i < args.length) {
   }
 
   i++;
+}
+
+/**
+ * Exit when the controlling terminal goes away. Closing a terminal only
+ * signals the session leader, and script runners like pnpm swallow SIGHUP
+ * without exiting, so no signal may ever reach this process — leaving an
+ * orphaned server squatting the port. The lost terminal is still observable:
+ * opening /dev/tty fails with ENXIO once it is gone. Poll for that. A process
+ * with no controlling terminal at startup (daemonized) is left alone.
+ */
+try {
+  await (await open('/dev/tty', 'r')).close();
+  setInterval(() => {
+    open('/dev/tty', 'r')
+      .then(terminal => terminal.close())
+      .catch((error) => {
+        if (error.code === 'ENXIO') process.exit(0);
+      });
+  }, 2000);
+}
+catch {
+  // No controlling terminal to watch.
 }
 
 const server = new Server({
