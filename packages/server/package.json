@@ -31,12 +31,10 @@
     "mime-types": "^3.0.2",
     "qrcode": "^1.5.4",
     "selfsigned": "^5.5.0",
-    "uuid": "14.0.0",
-    "ws": "^8.21.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",
-    "@types/ws": "^8.18.1",
     "typescript": "6.0.3"
   },
   "publishConfig": {

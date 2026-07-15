@@ -15,7 +15,6 @@ import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
-import WebSocket, { WebSocketServer } from 'ws';
 
 import {
   buildImportMap,
@@ -161,7 +160,7 @@ export class Server {
   http2SecureServer: Http2SecureServer;
   ready: Promise<void>;
 
-  #wss?: WebSocketServer;
+  #liveReloadStreams = new Set<ServerHttp2Stream>();
   #watcher?: FSWatcher;
   #watchedPaths = new Set<string>();
 
@@ -251,12 +250,6 @@ export class Server {
 
     this.http2SecureServer.on('listening', () => {
       if (watch) {
-        // Refresh the page on file change over a socket served on the main port;
-        // the upgrade handler routes `${basePrefix}${LIVE_RELOAD_PATH}` here, so
-        // it reaches the browser over the page's own origin (including through a
-        // path-routing proxy) rather than a separate port.
-        this.#wss = new WebSocketServer({ noServer: true });
-
         this.#watcher = chokidarWatch(watchPaths, {
           ignored: watchIgnore,
           ignoreInitial: true,
@@ -278,12 +271,6 @@ export class Server {
     });
 
     this.http2SecureServer.on('stream', async (stream: ServerHttp2Stream, headers) => {
-      if (expectedAuthHeader && !checkBasicAuth(headers['authorization'], expectedAuthHeader)) {
-        stream.respond({ ':status': 401, 'www-authenticate': 'Basic realm="Dev Server"' });
-        stream.end();
-        return;
-      }
-
       const requestMethod = headers[constants.HTTP2_HEADER_METHOD] as string;
       const requestPath = headers[constants.HTTP2_HEADER_PATH];
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
@@ -294,6 +281,34 @@ export class Server {
       // work off the origin root. `/damo` and `/damo/` both collapse to `/` → the
       // directory index.
       const servedPath = stripBasePrefix(requestPathString ?? '/', basePrefix);
+
+      if (expectedAuthHeader && !checkBasicAuth(headers['authorization'], expectedAuthHeader)) {
+        stream.respond({ ':status': 401, 'www-authenticate': 'Basic realm="Dev Server"' });
+        stream.end();
+        return;
+      }
+
+      // Live-reload event stream (Server-Sent Events): a plain HTTP response on
+      // the page's own origin, so it rides the same connection with no WebSocket
+      // machinery, and EventSource reconnects on its own after a server restart.
+      if (watch && servedPath === LIVE_RELOAD_PATH) {
+        stream.respond({
+          ':status': constants.HTTP_STATUS_OK,
+          'content-type': 'text/event-stream',
+          'cache-control': 'no-cache',
+        });
+        // EventSource waits a few seconds before reconnecting by default; match
+        // the snappier 1s cadence the previous WebSocket client used.
+        stream.write('retry: 1000\n\n');
+        if (verbose) console.log('live-reload client connected');
+        this.#liveReloadStreams.add(stream);
+        const removeStream = (): void => {
+          this.#liveReloadStreams.delete(stream);
+        };
+        stream.on('close', removeStream);
+        stream.on('error', removeStream);
+        return;
+      }
 
       /**
        * Handle HTTP/2 WebSocket proxy upgrades (RFC 8441)
@@ -645,20 +660,14 @@ export class Server {
     forceReload = true;
     location.reload();
   }
-  function connect() {
-    const socket = new WebSocket("wss://" + location.host + "${basePrefix}${LIVE_RELOAD_PATH}");
-    // Reconnected after the server (or connection) dropped — reload to pick up
-    // anything that changed while we were disconnected.
-    socket.addEventListener("open", function () {
-      if (hadConnection) reload();
-      hadConnection = true;
-    });
-    socket.addEventListener("message", reload);
-    socket.addEventListener("close", function () {
-      setTimeout(connect, 1000);
-    });
-  }
-  connect();
+  const eventSource = new EventSource("${basePrefix}${LIVE_RELOAD_PATH}");
+  eventSource.addEventListener("message", reload);
+  // EventSource reconnects on its own; a reconnect after the server (or
+  // connection) dropped means we may have missed changes — reload.
+  eventSource.addEventListener("open", function () {
+    if (hadConnection) reload();
+    hadConnection = true;
+  });
 })();
 </script>
 </head>`,
@@ -726,19 +735,6 @@ export class Server {
       // Strip the mount prefix (mirrors the stream handler) so proxy rules match
       // and the upstream target receives the un-prefixed path under a base.
       const strippedPath = stripBasePrefix(requestPath, basePrefix);
-
-      // Live-reload socket, served on this same port (see the listening handler).
-      // Exempt from auth, like the previous side-channel server: browsers cannot
-      // attach Basic credentials to a WebSocket handshake, and it only ever emits
-      // a "refresh" signal.
-      const liveReloadServer = this.#wss;
-      if (liveReloadServer && strippedPath === LIVE_RELOAD_PATH) {
-        liveReloadServer.handleUpgrade(request, socket, head, (client) => {
-          if (verbose) console.log('live-reload client connected');
-          liveReloadServer.emit('connection', client, request);
-        });
-        return;
-      }
 
       if (expectedAuthHeader && !checkBasicAuth(request.headers['authorization'], expectedAuthHeader)) {
         socket.end('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="Dev Server"\r\n\r\n');
@@ -816,10 +812,9 @@ export class Server {
   }
 
   refresh(): void {
-    if (!this.#wss) return;
-    for (const client of this.#wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send('refresh');
+    for (const stream of this.#liveReloadStreams) {
+      if (!stream.destroyed) {
+        stream.write('data: refresh\n\n');
       }
     }
   }
