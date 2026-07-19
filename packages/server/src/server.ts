@@ -1,11 +1,11 @@
 import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
-import { randomBytes, X509Certificate } from 'crypto';
+import { createHash, randomBytes, X509Certificate } from 'crypto';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
-import { constants, createSecureServer, type Http2SecureServer, type ServerHttp2Stream } from 'http2';
+import { constants, createSecureServer, type Http2SecureServer, type IncomingHttpHeaders, type ServerHttp2Stream } from 'http2';
 import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
@@ -15,10 +15,12 @@ import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
+import { gzipSync } from 'zlib';
 
 import {
   buildImportMap,
   getSourceFilePath,
+  type ImportMap,
   importMetaResolveParent,
   type PackageJson,
   resolvePackageExportPath,
@@ -36,6 +38,77 @@ const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-k
 const LIVE_RELOAD_PATH = '/@livereload';
 
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
+
+// ── Response caching / compression ──────────────────────────────────────────
+// Every response keeps `cache-control: no-cache` (the browser must revalidate,
+// so an edited source is never shadowed), but carries an ETag validator so that
+// revalidation can answer 304 Not Modified instead of resending the full body,
+// and bodies are gzip-compressed for clients that accept it.
+
+// Bodies below this size gain nothing from compression (the frame overhead
+// outweighs the saving).
+const GZIP_MIN_BYTES = 1024;
+// Static files served whole (not transpiled/rewritten) are only read into
+// memory for compression up to this size; larger ones stream uncompressed.
+const MAX_COMPRESSED_FILE_BYTES = 8 * 1024 * 1024;
+// Text-like static payloads worth compressing; binary media (images, video,
+// woff2) is already compressed and is left alone.
+const COMPRESSIBLE_EXTENSIONS = new Set([
+  '.js', '.mjs', '.cjs', '.ts', '.css', '.html', '.htm', '.json', '.svg',
+  '.map', '.txt', '.md', '.xml', '.webmanifest', '.wasm',
+]);
+// Generated responses (transpiled TypeScript, rewritten modules, compressed
+// statics) cached by source path, invalidated by mtime+size; bounded so a big
+// tree can't grow the cache without limit (insertion order doubles as LRU).
+const RESPONSE_CACHE_MAX_ENTRIES = 500;
+
+type ResponseEntity = {
+  body: string | Buffer;
+  etag: string;
+  gzip?: Buffer;
+};
+
+type CachedResponse = ResponseEntity & {
+  mtimeMs: number;
+  size: number;
+};
+
+function contentEtag(body: string | Buffer): string {
+  return `"${createHash('sha1').update(body).digest('base64url')}"`;
+}
+
+function acceptsGzip(requestHeaders: IncomingHttpHeaders): boolean {
+  return String(requestHeaders['accept-encoding'] ?? '').includes('gzip');
+}
+
+function respondNotModified(stream: ServerHttp2Stream, etag: string): void {
+  stream.respond({ ':status': constants.HTTP_STATUS_NOT_MODIFIED, 'etag': etag, 'cache-control': 'no-cache' });
+  stream.end();
+}
+
+// Answer 304 when the client already holds this exact entity, otherwise send
+// the body — gzipped (compressed once, memoized on the entity) when accepted.
+function sendCachedBody(
+  stream: ServerHttp2Stream,
+  requestHeaders: IncomingHttpHeaders,
+  responseHeaders: OutgoingHttpHeaders,
+  entity: ResponseEntity,
+): void {
+  if (requestHeaders['if-none-match'] === entity.etag) {
+    respondNotModified(stream, entity.etag);
+    return;
+  }
+  const headersWithValidator: OutgoingHttpHeaders = { ...responseHeaders, 'etag': entity.etag, 'vary': 'accept-encoding' };
+  const bodyLength = typeof entity.body === 'string' ? Buffer.byteLength(entity.body) : entity.body.length;
+  if (bodyLength >= GZIP_MIN_BYTES && acceptsGzip(requestHeaders)) {
+    entity.gzip ??= gzipSync(entity.body);
+    stream.respond({ ...headersWithValidator, 'content-encoding': 'gzip' });
+    stream.end(entity.gzip);
+    return;
+  }
+  stream.respond(headersWithValidator);
+  stream.end(entity.body);
+}
 
 type ProxyConfig = {
   [path: string]: string;
@@ -205,6 +278,66 @@ export class Server {
       path: proxyPath,
       url: new URL(target),
     }));
+
+    // Generated responses memoized by source path, invalidated by mtime+size —
+    // so a request for an unchanged file skips the read/transpile/rewrite work.
+    // Known limit: a rewritten module's specifier targets also depend on the
+    // node_modules layout, which mtime of the source does not track; after an
+    // install that changes resolution without touching sources, a server
+    // restart (or touching the file) refreshes the entry.
+    const responseCache = new Map<string, CachedResponse>();
+
+    // Return the cached entry for an unchanged file, or produce, cache and
+    // return a fresh one. Re-insertion keeps insertion order tracking recency,
+    // so the eviction drops the least recently used entry.
+    async function cachedResponse(
+      cacheKey: string,
+      fileStats: { mtimeMs: number; size: number },
+      produceBody: () => Promise<string | Buffer>,
+      etag?: string,
+    ): Promise<CachedResponse> {
+      let entry = responseCache.get(cacheKey);
+      if (!entry || entry.mtimeMs !== fileStats.mtimeMs || entry.size !== fileStats.size) {
+        const body = await produceBody();
+        entry = { mtimeMs: fileStats.mtimeMs, size: fileStats.size, body, etag: etag ?? contentEtag(body) };
+      }
+      responseCache.delete(cacheKey);
+      responseCache.set(cacheKey, entry);
+      if (responseCache.size > RESPONSE_CACHE_MAX_ENTRIES) {
+        responseCache.delete(responseCache.keys().next().value!);
+      }
+      return entry;
+    }
+
+    // Import maps memoized per page. A map is only rebuilt when one of the
+    // files that shaped it (crawled module sources, the page itself, the
+    // enumerated node_modules directories) changes on disk — stat'ing those is
+    // orders of magnitude cheaper than re-crawling the module graph.
+    const importMapCache = new Map<string, { importMap: ImportMap; dependencyVersions: Map<string, number> }>();
+
+    async function fileVersion(dependencyPath: string): Promise<number> {
+      const stats = await stat(dependencyPath).catch(() => null);
+      return stats ? stats.mtimeMs : -1;
+    }
+
+    async function getImportMap(htmlContent: string, pageServedPath: string, pageFilePath: string): Promise<ImportMap> {
+      const cached = importMapCache.get(pageServedPath);
+      if (cached) {
+        const versionChecks = await Promise.all(
+          [...cached.dependencyVersions].map(async ([dependencyPath, version]) => await fileVersion(dependencyPath) === version),
+        );
+        if (versionChecks.every(Boolean)) return cached.importMap;
+      }
+      const { importMap, dependencyPaths } = await buildImportMap(htmlContent, pageServedPath, servedRoot);
+      // The page file itself is always a dependency: editing its module scripts
+      // must invalidate the map even when no crawled module changed.
+      const dependencyVersions = new Map(await Promise.all(
+        [...new Set([pageFilePath, ...dependencyPaths])].map(async (dependencyPath): Promise<[string, number]> =>
+          [dependencyPath, await fileVersion(dependencyPath)]),
+      ));
+      importMapCache.set(pageServedPath, { importMap, dependencyVersions });
+      return importMap;
+    }
 
     /**
      * Get port
@@ -633,10 +766,9 @@ export class Server {
           let fileContent = await readFile(responseFilePath, {
             encoding: 'utf-8',
           });
-          stream.respond(responseHeaders);
           if (resolveModules) {
             const pageServedPath = `${servedRoot.slice(0, -1)}${filePath.slice(rootPath.length)}`;
-            const importMap = await buildImportMap(fileContent, pageServedPath, servedRoot);
+            const importMap = await getImportMap(fileContent, pageServedPath, responseFilePath);
             if (Object.keys(importMap.imports).length) {
               const importMapScript = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
               // The map must precede every module script; fall back to
@@ -673,30 +805,55 @@ export class Server {
 </head>`,
             );
           }
-          stream.end(fileContent);
+          // The transformed page is small and cheap to assemble (the import map
+          // is cached above), so it is hashed per request rather than memoized.
+          sendCachedBody(stream, headers, responseHeaders, { body: fileContent, etag: contentEtag(fileContent) });
         }
         else if (sourceFilePath?.endsWith('.ts')) {
-          stream.respond(responseHeaders);
-          const fileContent = await readFile(sourceFilePath, {
-            encoding: 'utf-8',
+          const entry = await cachedResponse(sourceFilePath, await stat(sourceFilePath), async () => {
+            const fileContent = await readFile(sourceFilePath, {
+              encoding: 'utf-8',
+            });
+            const javaScript = stripTypeScriptTypes(fileContent);
+            // Rewrite bare imports to resolved URLs so module workers, which never
+            // receive the page's import map, can still resolve their dependencies.
+            return resolveModules ? await rewriteModuleSpecifiers(javaScript, sourceFilePath, servedRoot) : javaScript;
           });
-          const javaScript = stripTypeScriptTypes(fileContent);
-          // Rewrite bare imports to resolved URLs so module workers, which never
-          // receive the page's import map, can still resolve their dependencies.
-          stream.end(resolveModules ? await rewriteModuleSpecifiers(javaScript, sourceFilePath, servedRoot) : javaScript);
+          sendCachedBody(stream, headers, responseHeaders, entry);
         }
         // Plain JS modules (no TypeScript source) carry the same bare imports a
         // worker cannot resolve via the import map; rewrite them the same way.
         // Range requests fall through to respondWithFile — rewriting a partial
         // body would corrupt it, and module scripts are never range-requested.
         else if (resolveModules && !requestRange && (fileExtension === '.js' || fileExtension === '.mjs')) {
-          stream.respond(responseHeaders);
           const modulePath = decodeURIComponent(responseFilePath);
-          const fileContent = await readFile(modulePath, { encoding: 'utf-8' });
-          stream.end(await rewriteModuleSpecifiers(fileContent, modulePath, servedRoot));
+          const entry = await cachedResponse(modulePath, await stat(modulePath), async () => {
+            const fileContent = await readFile(modulePath, { encoding: 'utf-8' });
+            return rewriteModuleSpecifiers(fileContent, modulePath, servedRoot);
+          });
+          sendCachedBody(stream, headers, responseHeaders, entry);
         }
         else {
-          stream.respondWithFile(decodeURIComponent(responseFilePath), responseHeaders);
+          const staticFilePath = decodeURIComponent(responseFilePath);
+          const fileStats = await stat(staticFilePath);
+          // Static bodies come straight off disk, so mtime+size is a sufficient
+          // validator — no need to hash the content.
+          const etag = `"${fileStats.mtimeMs}-${fileStats.size}"`;
+          if (headers['if-none-match'] === etag) {
+            respondNotModified(stream, etag);
+          }
+          else if (
+            !requestRange
+            && fileStats.size <= MAX_COMPRESSED_FILE_BYTES
+            && COMPRESSIBLE_EXTENSIONS.has(fileExtension)
+            && acceptsGzip(headers)
+          ) {
+            const entry = await cachedResponse(staticFilePath, fileStats, () => readFile(staticFilePath), etag);
+            sendCachedBody(stream, headers, responseHeaders, entry);
+          }
+          else {
+            stream.respondWithFile(staticFilePath, { ...responseHeaders, etag });
+          }
         }
       }
       catch (error) {
