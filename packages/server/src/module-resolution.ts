@@ -166,6 +166,19 @@ export type ImportMap = {
   scopes?: { [scopePrefix: string]: { [specifier: string]: string } };
 };
 
+export type ImportMapBuildResult = {
+  importMap: ImportMap;
+  /**
+   * Every path whose content shaped the map: the crawled module sources, the
+   * page's own source file, and the node_modules directories enumerated for
+   * the installed-package fallback. Callers can cache the map and revalidate
+   * it by comparing these paths' mtimes instead of re-crawling the graph.
+   * (package.json files read during unbuilt-specifier fallback are not listed
+   * individually; the node_modules directory mtimes cover installs/removals.)
+   */
+  dependencyPaths: string[];
+};
+
 const IMPORT_STATEMENT_REGEX = /(?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"](.*?)['"]/dg;
 const MODULE_SCRIPT_REGEX = /(<script\b[^>]*\btype\s*=\s*["']module["'][^>]*>)([\s\S]*?)<\/script>/gi;
 const CRAWLABLE_EXTENSIONS = new Set(['.js', '.mjs', '.ts']);
@@ -286,11 +299,12 @@ export async function rewriteModuleSpecifiers(
  * different target from some importer, that resolution is scoped to the
  * importer's directory.
  */
-export async function buildImportMap(htmlContent: string, pageServedPath: string, servedRoot: string): Promise<ImportMap> {
+export async function buildImportMap(htmlContent: string, pageServedPath: string, servedRoot: string): Promise<ImportMapBuildResult> {
   const importMap: ImportMap = { imports: {} };
   const scopes: { [scopePrefix: string]: { [specifier: string]: string } } = {};
   const visitedModulePaths = new Set<string>();
   const visitedSourceDirectories = new Set<string>();
+  const dependencyPaths = new Set<string>();
   // Many modules import the same package; canonicalize each resolved URL once.
   const canonicalServedPaths = new Map<string, Promise<string>>();
   // Crawl tasks run concurrently and append newly discovered modules as the
@@ -307,6 +321,7 @@ export async function buildImportMap(htmlContent: string, pageServedPath: string
 
   async function crawlModule(servedModulePath: string): Promise<void> {
     const sourceFilePath = await servedPathToSourcePath(servedModulePath, servedRoot);
+    dependencyPaths.add(sourceFilePath);
     visitedSourceDirectories.add(toPosixPath(dirname(sourceFilePath)));
     const content = await readFile(sourceFilePath, { encoding: 'utf-8' }).catch(() => null);
     if (content === null) return;
@@ -361,7 +376,7 @@ export async function buildImportMap(htmlContent: string, pageServedPath: string
         .then(pageSourceFilePath => collectImports(inlineScriptBody, pageSourceFilePath, pageServedPath)));
     }
   }
-  if (!hasModuleScripts) return importMap;
+  if (!hasModuleScripts) return { importMap, dependencyPaths: [...dependencyPaths] };
 
   // Elements pushed while awaiting are still visited: the array iterator
   // re-checks the length on every step.
@@ -378,6 +393,7 @@ export async function buildImportMap(htmlContent: string, pageServedPath: string
   // through /@resolve/ was never crawled, so names visible solely from its
   // own non-hoisted node_modules are not enumerated.
   const pageSourceFilePath = await (pageSourcePathPromise ?? servedPathToSourcePath(pageServedPath, servedRoot));
+  dependencyPaths.add(pageSourceFilePath);
   visitedSourceDirectories.add(toPosixPath(dirname(pageSourceFilePath)));
   const nodeModulesDirectories = new Set<string>();
   for (const sourceDirectory of visitedSourceDirectories) {
@@ -407,7 +423,10 @@ export async function buildImportMap(htmlContent: string, pageServedPath: string
     // Subpath imports (`package/sub`) route through the resolver too.
     importMap.imports[`${packageName}/`] ??= `${servedRoot}@resolve/${packageName}/`;
   }
+  for (const nodeModulesDirectory of nodeModulesDirectories) {
+    dependencyPaths.add(nodeModulesDirectory);
+  }
 
   if (Object.keys(scopes).length) importMap.scopes = scopes;
-  return importMap;
+  return { importMap, dependencyPaths: [...dependencyPaths] };
 }
