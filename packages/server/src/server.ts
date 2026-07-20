@@ -792,12 +792,20 @@ export class Server {
     forceReload = true;
     location.reload();
   }
+  // Cancelable so a page can take over the reload (event.preventDefault()) and
+  // handle the update itself — e.g. surface a manual refresh control instead.
+  // A canceled event also skips reload()'s forceReload side effect, so the
+  // navigation suppression above only ever arms for an actual reload.
+  function announce(reason) {
+    const event = new CustomEvent("server:livereload", { cancelable: true, detail: { reason } });
+    if (window.dispatchEvent(event)) reload();
+  }
   const eventSource = new EventSource("${basePrefix}${LIVE_RELOAD_PATH}");
-  eventSource.addEventListener("message", reload);
+  eventSource.addEventListener("message", () => announce("change"));
   // EventSource reconnects on its own; a reconnect after the server (or
   // connection) dropped means we may have missed changes — reload.
   eventSource.addEventListener("open", function () {
-    if (hadConnection) reload();
+    if (hadConnection) announce("reconnect");
     hadConnection = true;
   });
 })();
@@ -974,5 +982,17 @@ export class Server {
         stream.write('data: refresh\n\n');
       }
     }
+  }
+
+  // Stop everything that keeps the process alive: the polling watcher, the
+  // held-open live-reload streams, and the listening socket.
+  async close(): Promise<void> {
+    await this.#watcher?.close();
+    for (const stream of this.#liveReloadStreams) {
+      stream.destroy();
+    }
+    await new Promise<void>((resolvePromise, rejectPromise) => {
+      this.http2SecureServer.close(error => (error ? rejectPromise(error) : resolvePromise()));
+    });
   }
 }
