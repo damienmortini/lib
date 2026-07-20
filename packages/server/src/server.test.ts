@@ -66,9 +66,11 @@ describe('live-reload client script', () => {
     await writeFile(join(rootPath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
     // The Server API has no ephemeral-port mode (get-port rejects ports below
     // 1024), so ask for high bases and let it scan upward from there when busy;
-    // the actually-bound port is read back from the socket either way.
+    // the actually-bound port is read back from the socket either way. The bases
+    // sit more than one scan range (100 ports) apart so the two can never
+    // collide on the same port.
     watchingServer = new Server({ rootPath, watch: true, port: 8801 });
-    plainServer = new Server({ rootPath, watch: false, port: 8901 });
+    plainServer = new Server({ rootPath, watch: false, port: 9001 });
     await Promise.all([watchingServer.ready, plainServer.ready]);
     watchingPage = await fetchBody(boundPort(watchingServer), '/index.html');
   });
