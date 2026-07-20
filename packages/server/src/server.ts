@@ -792,12 +792,18 @@ export class Server {
     forceReload = true;
     location.reload();
   }
+  // Cancelable so a page can take over the reload (event.preventDefault()) and
+  // handle the update itself — e.g. surface a manual refresh control instead.
+  function announce(reason) {
+    const event = new CustomEvent("server:livereload", { cancelable: true, detail: { reason } });
+    if (window.dispatchEvent(event)) reload();
+  }
   const eventSource = new EventSource("${basePrefix}${LIVE_RELOAD_PATH}");
-  eventSource.addEventListener("message", reload);
+  eventSource.addEventListener("message", () => announce("change"));
   // EventSource reconnects on its own; a reconnect after the server (or
   // connection) dropped means we may have missed changes — reload.
   eventSource.addEventListener("open", function () {
-    if (hadConnection) reload();
+    if (hadConnection) announce("reconnect");
     hadConnection = true;
   });
 })();
