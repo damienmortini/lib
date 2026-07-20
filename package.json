@@ -15,7 +15,7 @@
     "publish": "pnpm run build && lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --resolve-modules",
-    "test": "eslint packages",
+    "test": "eslint packages && pnpm -r run test",
     "update": "pnpm i",
     "upgrade": "syncpack update && syncpack fix && pnpm i",
     "version": "lerna version"
