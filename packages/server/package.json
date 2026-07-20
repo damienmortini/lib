@@ -23,7 +23,7 @@
   "bin": "dist/bin/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "node --test --test-force-exit src/*.test.ts"
+    "test": "node --test src/*.test.ts"
   },
   "dependencies": {
     "chokidar": "^5.0.0",

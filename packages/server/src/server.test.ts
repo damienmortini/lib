@@ -76,8 +76,7 @@ describe('live-reload client script', () => {
   });
 
   after(async () => {
-    watchingServer.http2SecureServer.close();
-    plainServer.http2SecureServer.close();
+    await Promise.all([watchingServer.close(), plainServer.close()]);
     await rm(rootPath, { recursive: true, force: true });
   });
 
