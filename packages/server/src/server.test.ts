@@ -1,4 +1,4 @@
-import { ok } from 'node:assert';
+import { ok, strictEqual } from 'node:assert';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
 import { tmpdir } from 'node:os';
@@ -33,17 +33,44 @@ function boundPort(server: Server): number {
   return address.port;
 }
 
+// Run the injected live-reload client against stubbed globals so the tests
+// exercise its actual cancel contract, not just its source text. Node's native
+// EventTarget/CustomEvent implement cancelable dispatch per spec, so no DOM
+// library is needed.
+function runInjectedClient(pageBody: string): { window: EventTarget; eventSource: EventTarget; reloadCount: () => number } {
+  const scriptMatch = pageBody.match(/<script>([\s\S]*?)<\/script>/);
+  ok(scriptMatch, 'expected an injected script in the served page');
+  const windowStub = new EventTarget();
+  let reloads = 0;
+  const locationStub = { reload: () => reloads++ };
+  const instances: EventTarget[] = [];
+  class EventSourceStub extends EventTarget {
+    constructor() {
+      super();
+      instances.push(this);
+    }
+  }
+  new Function('window', 'location', 'EventSource', scriptMatch[1])(windowStub, locationStub, EventSourceStub);
+  strictEqual(instances.length, 1, 'expected the client to open one EventSource');
+  return { window: windowStub, eventSource: instances[0], reloadCount: () => reloads };
+}
+
 describe('live-reload client script', () => {
   let rootPath: string;
   let watchingServer: Server;
   let plainServer: Server;
+  let watchingPage: string;
 
   before(async () => {
     rootPath = await mkdtemp(join(tmpdir(), 'server-test-'));
     await writeFile(join(rootPath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
+    // The Server API has no ephemeral-port mode (get-port rejects ports below
+    // 1024), so ask for high bases and let it scan upward from there when busy;
+    // the actually-bound port is read back from the socket either way.
     watchingServer = new Server({ rootPath, watch: true, port: 8801 });
     plainServer = new Server({ rootPath, watch: false, port: 8901 });
     await Promise.all([watchingServer.ready, plainServer.ready]);
+    watchingPage = await fetchBody(boundPort(watchingServer), '/index.html');
   });
 
   after(async () => {
@@ -52,11 +79,36 @@ describe('live-reload client script', () => {
     await rm(rootPath, { recursive: true, force: true });
   });
 
-  it('announces changes through a cancelable server:livereload event before reloading', async () => {
-    const body = await fetchBody(boundPort(watchingServer), '/index.html');
-    ok(body.includes('new EventSource'), 'expected the live-reload client to be injected');
-    ok(body.includes('new CustomEvent("server:livereload", { cancelable: true'), 'expected a cancelable server:livereload CustomEvent');
-    ok(body.includes('if (window.dispatchEvent(event)) reload()'), 'expected reload to be skipped when the event is prevented');
+  it('reloads on a change message when nothing cancels the announcement', () => {
+    const client = runInjectedClient(watchingPage);
+    client.eventSource.dispatchEvent(new Event('message'));
+    strictEqual(client.reloadCount(), 1);
+  });
+
+  it('skips the reload when a server:livereload listener prevents it', () => {
+    const client = runInjectedClient(watchingPage);
+    const reasons: unknown[] = [];
+    client.window.addEventListener('server:livereload', (event) => {
+      event.preventDefault();
+      reasons.push((event as CustomEvent).detail.reason);
+    });
+    client.eventSource.dispatchEvent(new Event('message'));
+    strictEqual(client.reloadCount(), 0, 'a prevented announcement must not reload');
+    strictEqual(reasons[0], 'change');
+  });
+
+  it('announces a reconnect, but not the first connection', () => {
+    const client = runInjectedClient(watchingPage);
+    const reasons: unknown[] = [];
+    client.window.addEventListener('server:livereload', (event) => {
+      event.preventDefault();
+      reasons.push((event as CustomEvent).detail.reason);
+    });
+    client.eventSource.dispatchEvent(new Event('open'));
+    strictEqual(reasons.length, 0, 'the first open is not a reconnect');
+    client.eventSource.dispatchEvent(new Event('open'));
+    strictEqual(reasons[0], 'reconnect');
+    strictEqual(client.reloadCount(), 0);
   });
 
   it('injects nothing when watch is off', async () => {
