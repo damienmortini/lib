@@ -21,7 +21,7 @@ Animates numeric properties of `target` towards the values described in
 | Parameter   | Type                       | Description                                                      |
 | ----------- | -------------------------- | ---------------------------------------------------------------- |
 | `target`    | `Record<string, number>`   | The object whose numeric properties are animated.                |
-| `keyframes` | `Keyframes<Target>`        | Map of property → destination value or `[from, to]` pair.        |
+| `keyframes` | `Keyframes<Target>`        | Property → destination value or list of values (Web Animations API object form). |
 | `options`   | `AnimateOptions`           | Optional timing/easing configuration (see below).                |
 
 ### Options
@@ -57,7 +57,9 @@ animate(object, { x: 100 }, { duration: 1000 });
 
 ### Explicit `[from, to]`
 
-Provide a start and end value instead of reading the current one:
+Provide values as a list instead of reading the current one — the same object
+form as the Web Animations API's `element.animate({ opacity: [0, 1] }, ...)`.
+Only the first and last entries are used (interpolation is linear between them):
 
 ```js
 animate(element.style, { opacity: [0, 1] }, { duration: 500 });
