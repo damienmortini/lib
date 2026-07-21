@@ -11,13 +11,19 @@
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "generateTypes": "npx -p typescript tsc index.js --target esnext --declaration --allowJs --emitDeclarationOnly"
+    "build": "tsc"
   },
   "dependencies": {
     "@damienmortini/ticker": "0.0.18"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
   },
   "publishConfig": {
     "access": "public"
