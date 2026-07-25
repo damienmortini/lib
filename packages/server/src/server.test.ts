@@ -27,6 +27,29 @@ async function fetchBody(port: number, path: string): Promise<string> {
   }
 }
 
+// Read the state token the live-reload stream sends on connect, then hang up —
+// the stream itself stays open forever, so it can never be read to its end.
+async function fetchLiveReloadState(port: number): Promise<string> {
+  const session = connect(`https://localhost:${port}`, { rejectUnauthorized: false });
+  try {
+    return await new Promise<string>((resolvePromise, rejectPromise) => {
+      session.on('error', rejectPromise);
+      const stream = session.request({ ':path': '/@livereload' });
+      let body = '';
+      stream.setEncoding('utf8');
+      stream.on('data', (chunk: string) => {
+        body += chunk;
+        const match = body.match(/event: state\ndata: (.*)\n/);
+        if (match) resolvePromise(match[1]);
+      });
+      stream.on('error', rejectPromise);
+    });
+  }
+  finally {
+    session.close();
+  }
+}
+
 function boundPort(server: Server): number {
   const address = server.http2SecureServer.address();
   if (address === null || typeof address === 'string') throw new Error('server has no bound port');
@@ -98,18 +121,38 @@ describe('live-reload client script', () => {
     strictEqual(reasons[0], 'change');
   });
 
-  it('announces a reconnect, but not the first connection', () => {
+  it('stays quiet when a reconnect reaches the same server with nothing missed', () => {
     const client = runInjectedClient(watchingPage);
     const reasons: unknown[] = [];
     client.window.addEventListener('server:livereload', (event) => {
       event.preventDefault();
       reasons.push((event as CustomEvent).detail.reason);
     });
-    client.eventSource.dispatchEvent(new Event('open'));
-    strictEqual(reasons.length, 0, 'the first open is not a reconnect');
-    client.eventSource.dispatchEvent(new Event('open'));
+    client.eventSource.dispatchEvent(new MessageEvent('state', { data: 'server-1-0' }));
+    client.eventSource.dispatchEvent(new MessageEvent('state', { data: 'server-1-0' }));
+    strictEqual(reasons.length, 0, 'a dropped connection alone is not an update');
+    strictEqual(client.reloadCount(), 0);
+  });
+
+  it('announces a reconnect when the state token moved on while it was away', () => {
+    const client = runInjectedClient(watchingPage);
+    const reasons: unknown[] = [];
+    client.window.addEventListener('server:livereload', (event) => {
+      event.preventDefault();
+      reasons.push((event as CustomEvent).detail.reason);
+    });
+    client.eventSource.dispatchEvent(new MessageEvent('state', { data: 'server-1-0' }));
+    strictEqual(reasons.length, 0, 'the first connection is not a reconnect');
+    client.eventSource.dispatchEvent(new MessageEvent('state', { data: 'server-2-0' }));
     strictEqual(reasons[0], 'reconnect');
     strictEqual(client.reloadCount(), 0);
+  });
+
+  it('changes its state token when it refreshes, but not between connections', async () => {
+    const state = await fetchLiveReloadState(boundPort(watchingServer));
+    strictEqual(await fetchLiveReloadState(boundPort(watchingServer)), state, 'reconnecting alone must not move the token');
+    watchingServer.refresh();
+    ok(await fetchLiveReloadState(boundPort(watchingServer)) !== state, 'a refresh must move the token');
   });
 
   it('injects nothing when watch is off', async () => {
