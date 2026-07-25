@@ -234,6 +234,13 @@ export class Server {
   ready: Promise<void>;
 
   #liveReloadStreams = new Set<ServerHttp2Stream>();
+  // Identity of this server process plus how many refreshes it has broadcast:
+  // together they form the state token announced to every live-reload client on
+  // connect. A client that merely lost its connection (a suspended tab, a flaky
+  // network) reads back the same token and knows it missed nothing; a restarted
+  // server or a refresh sent while it was away changes it.
+  #liveReloadInstance = randomBytes(8).toString('hex');
+  #refreshCount = 0;
   #watcher?: FSWatcher;
   #watchedPaths = new Set<string>();
 
@@ -433,6 +440,9 @@ export class Server {
         // EventSource waits a few seconds before reconnecting by default; match
         // the snappier 1s cadence the previous WebSocket client used.
         stream.write('retry: 1000\n\n');
+        // Named event, so the client's plain `message` handler (the refresh
+        // broadcast) never sees it.
+        stream.write(`event: state\ndata: ${this.#liveReloadInstance}-${this.#refreshCount}\n\n`);
         if (verbose) console.log('live-reload client connected');
         this.#liveReloadStreams.add(stream);
         const removeStream = (): void => {
@@ -784,7 +794,7 @@ export class Server {
               `<script>
 (function () {
   let forceReload = false;
-  let hadConnection = false;
+  let serverState = null;
   window.navigation?.addEventListener('navigate', (event) => {
     if (forceReload) event.stopImmediatePropagation();
   });
@@ -802,11 +812,14 @@ export class Server {
   }
   const eventSource = new EventSource("${basePrefix}${LIVE_RELOAD_PATH}");
   eventSource.addEventListener("message", () => announce("change"));
-  // EventSource reconnects on its own; a reconnect after the server (or
-  // connection) dropped means we may have missed changes — reload.
-  eventSource.addEventListener("open", function () {
-    if (hadConnection) announce("reconnect");
-    hadConnection = true;
+  // EventSource reconnects on its own, and a dropped connection is not by
+  // itself an update: a backgrounded tab or a sleeping device reconnects to the
+  // very same server with nothing missed. The server states an opaque token on
+  // every connect, so only a restart or a refresh broadcast while we were
+  // disconnected — either of which changes the token — is a missed update.
+  eventSource.addEventListener("state", function (event) {
+    if (serverState !== null && serverState !== event.data) announce("reconnect");
+    serverState = event.data;
   });
 })();
 </script>
@@ -977,6 +990,7 @@ export class Server {
   }
 
   refresh(): void {
+    this.#refreshCount++;
     for (const stream of this.#liveReloadStreams) {
       if (!stream.destroyed) {
         stream.write('data: refresh\n\n');
