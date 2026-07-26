@@ -76,6 +76,14 @@ while (i < args.length) {
   i++;
 }
 
+// A credential passed as `--auth` lands in the process's argv, which is
+// world-readable through /proc/<pid>/cmdline and surfaces in every `ps` listing,
+// crash dump and monitoring snapshot. SERVER_AUTH is read when the flag is
+// absent so callers can keep the credential out of argv: a process environment
+// is owner-only (/proc/<pid>/environ is mode 0400). The flag still wins when
+// both are set, so existing invocations are unaffected.
+auth ??= process.env.SERVER_AUTH;
+
 /**
  * Exit when the controlling terminal goes away. Closing a terminal only
  * signals the session leader, and script runners like pnpm swallow SIGHUP
