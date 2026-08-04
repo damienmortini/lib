@@ -168,6 +168,7 @@ describe('forwarded prefix', () => {
   // specifiers unresolvable and the rewrite untestable.
   let fixturePath: string;
   let server: Server;
+  let basedServer: Server;
 
   before(async () => {
     fixturePath = await mkdtemp('server-test-fixture-');
@@ -177,11 +178,12 @@ describe('forwarded prefix', () => {
     await writeFile(join(fixturePath, 'module.js'), 'import { demo } from \'demo-package\';\nconsole.log(demo);');
     await writeFile(join(fixturePath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
     server = new Server({ rootPath: fixturePath, watch: true, resolveModules: true, port: 9201 });
-    await server.ready;
+    basedServer = new Server({ rootPath: fixturePath, watch: true, base: 'mounted', port: 9401 });
+    await Promise.all([server.ready, basedServer.ready]);
   });
 
   after(async () => {
-    await server.close();
+    await Promise.all([server.close(), basedServer.close()]);
     await rm(fixturePath, { recursive: true, force: true });
   });
 
@@ -199,8 +201,10 @@ describe('forwarded prefix', () => {
   it('falls back to the configured base when the announced prefix is not a plain path', async () => {
     for (const malformedPrefix of ['../../etc', '/mounted/../app', '/spaced value', `/${'a'.repeat(300)}`]) {
       const body = await fetchBody(boundPort(server), '/index.html', { 'x-forwarded-prefix': malformedPrefix });
-      ok(body.includes('new EventSource("/@livereload")'), `expected the fallback to the configured base for ${JSON.stringify(malformedPrefix)}`);
+      ok(body.includes('new EventSource("/@livereload")'), `expected the fallback to the origin root for ${JSON.stringify(malformedPrefix)}`);
     }
+    const basedBody = await fetchBody(boundPort(basedServer), '/mounted/index.html', { 'x-forwarded-prefix': '../../etc' });
+    ok(basedBody.includes('new EventSource("/mounted/@livereload")'), 'expected the fallback to land on the configured base prefix, not the origin root');
   });
 
   it('rewrites module specifiers under the announced prefix without poisoning the unprefixed variant', async () => {

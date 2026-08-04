@@ -294,6 +294,9 @@ export class Server {
     // resolved bare-specifier imports are emitted as `/damo/...` so the browser
     // requests them back under the same prefix instead of the origin root.
     const configuredBasePrefix = normalizeBasePrefix(base) ?? '';
+    if (base && !configuredBasePrefix) {
+      console.warn(`base "${base}" is not a plain path — serving from the origin root instead`);
+    }
 
     // Pre-parse proxy URLs once; used by the HTTP proxy and both WebSocket proxy paths.
     const proxyEntries = Object.entries(proxy).map(([proxyPath, target]) => ({
