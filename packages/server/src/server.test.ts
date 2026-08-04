@@ -1,5 +1,5 @@
 import { ok, strictEqual } from 'node:assert';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,12 +7,12 @@ import { after, before, describe, it } from 'node:test';
 
 import { Server } from './server.ts';
 
-async function fetchBody(port: number, path: string): Promise<string> {
+async function fetchBody(port: number, path: string, requestHeaders: Record<string, string> = {}): Promise<string> {
   const session = connect(`https://localhost:${port}`, { rejectUnauthorized: false });
   try {
     return await new Promise<string>((resolvePromise, rejectPromise) => {
       session.on('error', rejectPromise);
-      const stream = session.request({ ':path': path });
+      const stream = session.request({ ':path': path, ...requestHeaders });
       let body = '';
       stream.setEncoding('utf8');
       stream.on('data', (chunk: string) => {
@@ -159,5 +159,60 @@ describe('live-reload client script', () => {
     const body = await fetchBody(boundPort(plainServer), '/index.html');
     ok(!body.includes('EventSource'), 'expected no live-reload client without watch');
     ok(!body.includes('server:livereload'), 'expected no livereload event wiring without watch');
+  });
+});
+
+describe('forwarded prefix', () => {
+  // Module resolution anchors on the process working directory, so the fixture
+  // with its own node_modules lives inside it — a tmpdir root would leave bare
+  // specifiers unresolvable and the rewrite untestable.
+  let fixturePath: string;
+  let server: Server;
+  let basedServer: Server;
+
+  before(async () => {
+    fixturePath = await mkdtemp('server-test-fixture-');
+    await mkdir(join(fixturePath, 'node_modules', 'demo-package'), { recursive: true });
+    await writeFile(join(fixturePath, 'node_modules', 'demo-package', 'package.json'), '{"name":"demo-package","main":"index.js"}');
+    await writeFile(join(fixturePath, 'node_modules', 'demo-package', 'index.js'), 'export const demo = true;');
+    await writeFile(join(fixturePath, 'module.js'), 'import { demo } from \'demo-package\';\nconsole.log(demo);');
+    await writeFile(join(fixturePath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
+    server = new Server({ rootPath: fixturePath, watch: true, resolveModules: true, port: 9201 });
+    basedServer = new Server({ rootPath: fixturePath, watch: true, base: 'mounted', port: 9401 });
+    await Promise.all([server.ready, basedServer.ready]);
+  });
+
+  after(async () => {
+    await Promise.all([server.close(), basedServer.close()]);
+    await rm(fixturePath, { recursive: true, force: true });
+  });
+
+  it('strips the announced prefix from the request path and emits it in the live-reload path', async () => {
+    const body = await fetchBody(boundPort(server), '/mounted/app/index.html', { 'x-forwarded-prefix': '/mounted/app' });
+    ok(body.includes('<title>test</title>'), 'expected the page behind the prefix to be served');
+    ok(body.includes('new EventSource("/mounted/app/@livereload")'), 'expected the live-reload path under the prefix');
+  });
+
+  it('serves unprefixed requests untouched when no prefix is announced', async () => {
+    const body = await fetchBody(boundPort(server), '/index.html');
+    ok(body.includes('new EventSource("/@livereload")'), 'expected the live-reload path at the origin root');
+  });
+
+  it('falls back to the configured base when the announced prefix is not a plain path', async () => {
+    for (const malformedPrefix of ['../../etc', '/mounted/../app', '/spaced value', `/${'a'.repeat(300)}`]) {
+      const body = await fetchBody(boundPort(server), '/index.html', { 'x-forwarded-prefix': malformedPrefix });
+      ok(body.includes('new EventSource("/@livereload")'), `expected the fallback to the origin root for ${JSON.stringify(malformedPrefix)}`);
+    }
+    const basedBody = await fetchBody(boundPort(basedServer), '/mounted/index.html', { 'x-forwarded-prefix': '../../etc' });
+    ok(basedBody.includes('new EventSource("/mounted/@livereload")'), 'expected the fallback to land on the configured base prefix, not the origin root');
+  });
+
+  it('rewrites module specifiers under the announced prefix without poisoning the unprefixed variant', async () => {
+    const unprefixed = await fetchBody(boundPort(server), '/module.js');
+    ok(unprefixed.includes(`'/${fixturePath}/node_modules/demo-package/index.js'`), `expected an unprefixed rewritten specifier, got: ${unprefixed}`);
+    const prefixed = await fetchBody(boundPort(server), '/mounted/app/module.js', { 'x-forwarded-prefix': '/mounted/app' });
+    ok(prefixed.includes(`'/mounted/app/${fixturePath}/node_modules/demo-package/index.js'`), `expected a rewritten specifier under the prefix, got: ${prefixed}`);
+    const unprefixedAgain = await fetchBody(boundPort(server), '/module.js');
+    strictEqual(unprefixedAgain, unprefixed, 'expected the prefixed variant to be cached separately');
   });
 });
