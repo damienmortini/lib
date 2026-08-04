@@ -196,6 +196,13 @@ describe('forwarded prefix', () => {
     ok(body.includes('new EventSource("/@livereload")'), 'expected the live-reload path at the origin root');
   });
 
+  it('falls back to the configured base when the announced prefix is not a plain path', async () => {
+    for (const malformedPrefix of ['../../etc', '/mounted/../app', '/spaced value', `/${'a'.repeat(300)}`]) {
+      const body = await fetchBody(boundPort(server), '/index.html', { 'x-forwarded-prefix': malformedPrefix });
+      ok(body.includes('new EventSource("/@livereload")'), `expected the fallback to the configured base for ${JSON.stringify(malformedPrefix)}`);
+    }
+  });
+
   it('rewrites module specifiers under the announced prefix without poisoning the unprefixed variant', async () => {
     const unprefixed = await fetchBody(boundPort(server), '/module.js');
     ok(unprefixed.includes(`'/${fixturePath}/node_modules/demo-package/index.js'`), `expected an unprefixed rewritten specifier, got: ${unprefixed}`);

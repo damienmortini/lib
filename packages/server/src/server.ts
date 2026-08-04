@@ -60,7 +60,7 @@ const COMPRESSIBLE_EXTENSIONS = new Set([
 // Generated responses (transpiled TypeScript, rewritten modules, compressed
 // statics) cached by source path, invalidated by mtime+size; bounded so a big
 // tree can't grow the cache without limit (insertion order doubles as LRU).
-const RESPONSE_CACHE_MAX_ENTRIES = 500;
+const CACHE_MAX_ENTRIES = 500;
 
 type ResponseEntity = {
   body: string | Buffer;
@@ -133,7 +133,9 @@ type ServerOptions = {
    * `/damo/api`). Defaults to root. A reverse proxy can instead announce the
    * prefix per request with the `X-Forwarded-Prefix` header, which overrides
    * this option for that request — so the same server works unprefixed on
-   * localhost and prefixed behind the proxy at the same time.
+   * localhost and prefixed behind the proxy at the same time. The header is
+   * honored from any connection, so a proxy exposed to untrusted networks must
+   * strip client-supplied values before forwarding.
    */
   base?: string;
 };
@@ -146,6 +148,7 @@ function normalizeBasePrefix(value: string | string[] | undefined): string | nul
   const singleValue = Array.isArray(value) ? value[0] : value;
   const normalized = singleValue?.replace(/^\/+|\/+$/g, '');
   if (!normalized || !/^[\w\-./]{1,200}$/.test(normalized)) return null;
+  if (normalized.split('/').some(segment => segment === '.' || segment === '..')) return null;
   return `/${normalized}`;
 }
 
@@ -322,7 +325,7 @@ export class Server {
       }
       responseCache.delete(cacheKey);
       responseCache.set(cacheKey, entry);
-      if (responseCache.size > RESPONSE_CACHE_MAX_ENTRIES) {
+      if (responseCache.size > CACHE_MAX_ENTRIES) {
         responseCache.delete(responseCache.keys().next().value!);
       }
       return entry;
@@ -345,7 +348,13 @@ export class Server {
         const versionChecks = await Promise.all(
           [...cached.dependencyVersions].map(async ([dependencyPath, version]) => await fileVersion(dependencyPath) === version),
         );
-        if (versionChecks.every(Boolean)) return cached.importMap;
+        if (versionChecks.every(Boolean)) {
+          // Re-insertion keeps insertion order tracking recency, like the
+          // response cache.
+          importMapCache.delete(pageServedPath);
+          importMapCache.set(pageServedPath, cached);
+          return cached.importMap;
+        }
       }
       const { importMap, dependencyPaths } = await buildImportMap(htmlContent, pageServedPath, servedRoot);
       // The page file itself is always a dependency: editing its module scripts
@@ -355,6 +364,11 @@ export class Server {
           [dependencyPath, await fileVersion(dependencyPath)]),
       ));
       importMapCache.set(pageServedPath, { importMap, dependencyVersions });
+      // Same cap as the response cache: the key embeds the per-request prefix,
+      // so unique header values must not grow the cache without bound.
+      if (importMapCache.size > CACHE_MAX_ENTRIES) {
+        importMapCache.delete(importMapCache.keys().next().value!);
+      }
       return importMap;
     }
 
