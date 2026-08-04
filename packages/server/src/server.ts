@@ -98,7 +98,7 @@ function sendCachedBody(
     respondNotModified(stream, entity.etag);
     return;
   }
-  const headersWithValidator: OutgoingHttpHeaders = { ...responseHeaders, 'etag': entity.etag, 'vary': 'accept-encoding' };
+  const headersWithValidator: OutgoingHttpHeaders = { ...responseHeaders, etag: entity.etag, vary: 'accept-encoding' };
   const bodyLength = typeof entity.body === 'string' ? Buffer.byteLength(entity.body) : entity.body.length;
   if (bodyLength >= GZIP_MIN_BYTES && acceptsGzip(requestHeaders)) {
     entity.gzip ??= gzipSync(entity.body);
@@ -130,10 +130,24 @@ type ServerOptions = {
    * Mount the server under a URL sub-path (e.g. `damo` → served at `/damo/`).
    * Incoming paths are stripped of the prefix before file lookup and proxy
    * matching, so `proxy` keys must be written WITHOUT the base (use `/api`, not
-   * `/damo/api`). Defaults to root.
+   * `/damo/api`). Defaults to root. A reverse proxy can instead announce the
+   * prefix per request with the `X-Forwarded-Prefix` header, which overrides
+   * this option for that request — so the same server works unprefixed on
+   * localhost and prefixed behind the proxy at the same time.
    */
   base?: string;
 };
+
+// A mount prefix normalized to `/prefix` shape — from the `base` option or from
+// a reverse proxy's per-request `X-Forwarded-Prefix` header. Null when the value
+// is absent, empty, or not a plain path (guards emitted URLs and cache keys
+// against garbage header values).
+function normalizeBasePrefix(value: string | string[] | undefined): string | null {
+  const singleValue = Array.isArray(value) ? value[0] : value;
+  const normalized = singleValue?.replace(/^\/+|\/+$/g, '');
+  if (!normalized || !/^[\w\-./]{1,200}$/.test(normalized)) return null;
+  return `/${normalized}`;
+}
 
 function checkBasicAuth(authorizationHeader: string | string[] | undefined, expectedHeader: string): boolean {
   const header = Array.isArray(authorizationHeader) ? authorizationHeader[0] : authorizationHeader;
@@ -276,9 +290,7 @@ export class Server {
     // request paths are stripped of the `/damo` prefix before file lookup, and
     // resolved bare-specifier imports are emitted as `/damo/...` so the browser
     // requests them back under the same prefix instead of the origin root.
-    const normalizedBase = base.replace(/^\/+|\/+$/g, '');
-    const basePrefix = normalizedBase ? `/${normalizedBase}` : '';
-    const servedRoot = normalizedBase ? `/${normalizedBase}/` : '/';
+    const configuredBasePrefix = normalizeBasePrefix(base) ?? '';
 
     // Pre-parse proxy URLs once; used by the HTTP proxy and both WebSocket proxy paths.
     const proxyEntries = Object.entries(proxy).map(([proxyPath, target]) => ({
@@ -327,7 +339,7 @@ export class Server {
       return stats ? stats.mtimeMs : -1;
     }
 
-    async function getImportMap(htmlContent: string, pageServedPath: string, pageFilePath: string): Promise<ImportMap> {
+    async function getImportMap(htmlContent: string, pageServedPath: string, pageFilePath: string, servedRoot: string): Promise<ImportMap> {
       const cached = importMapCache.get(pageServedPath);
       if (cached) {
         const versionChecks = await Promise.all(
@@ -416,6 +428,12 @@ export class Server {
       const requestRange = headers[constants.HTTP2_HEADER_RANGE];
       const fetchDest = headers['sec-fetch-dest'];
       const requestPathString = typeof requestPath === 'string' ? requestPath : requestPath?.[0];
+
+      // The effective mount prefix for THIS request: what the reverse proxy in
+      // front announced, or the configured base. Everything the response embeds
+      // (import map, live-reload path, rewritten specifiers) derives from it.
+      const basePrefix = normalizeBasePrefix(headers['x-forwarded-prefix']) ?? configuredBasePrefix;
+      const servedRoot = basePrefix ? `${basePrefix}/` : '/';
 
       // Strip the mount prefix (e.g. `/damo`) so file serving and proxy matching
       // work off the origin root. `/damo` and `/damo/` both collapse to `/` → the
@@ -778,7 +796,7 @@ export class Server {
           });
           if (resolveModules) {
             const pageServedPath = `${servedRoot.slice(0, -1)}${filePath.slice(rootPath.length)}`;
-            const importMap = await getImportMap(fileContent, pageServedPath, responseFilePath);
+            const importMap = await getImportMap(fileContent, pageServedPath, responseFilePath, servedRoot);
             if (Object.keys(importMap.imports).length) {
               const importMapScript = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
               // The map must precede every module script; fall back to
@@ -831,7 +849,10 @@ export class Server {
           sendCachedBody(stream, headers, responseHeaders, { body: fileContent, etag: contentEtag(fileContent) });
         }
         else if (sourceFilePath?.endsWith('.ts')) {
-          const entry = await cachedResponse(sourceFilePath, await stat(sourceFilePath), async () => {
+          // Rewritten bodies embed servedRoot, so the cache key carries it too —
+          // otherwise a prefixed and an unprefixed request for the same file
+          // would serve each other's variant.
+          const entry = await cachedResponse(`${servedRoot}\0${sourceFilePath}`, await stat(sourceFilePath), async () => {
             const fileContent = await readFile(sourceFilePath, {
               encoding: 'utf-8',
             });
@@ -848,7 +869,7 @@ export class Server {
         // body would corrupt it, and module scripts are never range-requested.
         else if (resolveModules && !requestRange && (fileExtension === '.js' || fileExtension === '.mjs')) {
           const modulePath = decodeURIComponent(responseFilePath);
-          const entry = await cachedResponse(modulePath, await stat(modulePath), async () => {
+          const entry = await cachedResponse(`${servedRoot}\0${modulePath}`, await stat(modulePath), async () => {
             const fileContent = await readFile(modulePath, { encoding: 'utf-8' });
             return rewriteModuleSpecifiers(fileContent, modulePath, servedRoot);
           });
@@ -910,8 +931,10 @@ export class Server {
      */
     this.http2SecureServer.on('upgrade', (request, socket, head) => {
       const requestPath = request.url || '';
-      // Strip the mount prefix (mirrors the stream handler) so proxy rules match
-      // and the upstream target receives the un-prefixed path under a base.
+      // Strip the mount prefix (mirrors the stream handler, forwarded prefix
+      // included) so proxy rules match and the upstream target receives the
+      // un-prefixed path under a base.
+      const basePrefix = normalizeBasePrefix(request.headers['x-forwarded-prefix']) ?? configuredBasePrefix;
       const strippedPath = stripBasePrefix(requestPath, basePrefix);
 
       if (expectedAuthHeader && !checkBasicAuth(request.headers['authorization'], expectedAuthHeader)) {
@@ -981,7 +1004,7 @@ export class Server {
     this.http2SecureServer.listen(serverPort);
 
     for (const [index, address] of addresses.entries()) {
-      const url = `https://${address}:${serverPort}${basePrefix}/${path}`;
+      const url = `https://${address}:${serverPort}${configuredBasePrefix}/${path}`;
       console.log(url);
       if (index !== 0) {
         console.log(await QRCode.toString(url, { type: 'terminal', small: true }));
