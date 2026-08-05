@@ -14,7 +14,7 @@ need to fetch a `package.json` and compute a path by hand:
 ```js
 import { Signal } from '@damienmortini/signal';
 
-const element = await import('@damo/number-input-element/demo'); // computed paths work too
+const module = await import(`@damo/${name}-element/demo`); // computed names and subpaths too
 ```
 
 ### What gets an entry
@@ -72,6 +72,10 @@ without an existence check, and the request is then answered from `src/`.
   not enumerated.
 - A specifier that cannot be resolved is left out of the map on purpose, so the
   browser's error names the real specifier. The server logs it too.
+- The generated map is injected first, and a document's import maps merge in
+  order with the earlier map winning on a conflicting key, so a page's own
+  hand-authored `<script type="importmap">` cannot override a generated entry.
+  Prefer deleting it and relying on the generated one.
 
 ## Opting out of automatic reloads
 
