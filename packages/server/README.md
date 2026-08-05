@@ -26,7 +26,10 @@ and their imports, transitively — and adds:
   served URL of that module. Each specifier is resolved from the importing
   module's own location (Node semantics, so pnpm-style nested `node_modules`
   work), and symlinks are collapsed so a package reached through different
-  links still maps to a single URL — browsers deduplicate modules by URL. When
+  links still maps to a single URL — browsers deduplicate modules by URL. A
+  link pointing *outside* the served root (a submodule linked to a sibling
+  checkout) is left as-is, since there is no in-root path to collapse it onto,
+  so two such links to the same package do stay distinct URLs. When
   the same specifier resolves differently depending on the importer, the odd
   ones out get a `scopes` entry keyed on the importer's directory.
 - **One entry per installed package name**, for every package found along the
