@@ -2,7 +2,7 @@
 
 Simple live reloading HTTP2 server for development
 
-`npx run server [--path=.] [--watchpath=.] [--resolve-modules] [--verbose]`
+`npx server [--path <path>] [--watch <path>] [--resolve-modules] [--verbose]`
 
 ## Bare specifiers in the browser (`--resolve-modules`)
 
