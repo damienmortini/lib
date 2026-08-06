@@ -1,48 +1,30 @@
 # @damienmortini/server — agent notes
 
-## No build step needed — the server transpiles TypeScript on the fly
+What the server does — [TypeScript served from `src/` behind the `dist/` URL][source]
+and the [injected import map][import-map] that lets browser code import installed
+packages by bare name — is documented in [README.md](./README.md), along with every
+CLI flag. Read it there; do not restate it here. The implementation lives in
+`src/server.ts` (request pipeline) and `src/module-resolution.ts` (resolution,
+import-map generation, dist→src mapping).
 
-This dev server serves TypeScript source as browser-ready JavaScript at request
-time. **Do not run a build to see source changes in the browser.**
+## Working on code this server serves
 
-How it works (`src/server.ts` — request pipeline; `src/module-resolution.ts` —
-resolution, import-map generation, dist→src mapping):
-
-- A request for `<package>/dist/<path>.js` is resolved to `<package>/src/<path>.ts`.
-  When that source file exists it is served instead of the built file — the
-  source always wins, so a stale `dist/` on disk is never served.
-- The `.ts` source has its types stripped with `node:module`'s
-  `stripTypeScriptTypes` and served otherwise untouched — module bodies are
-  never rewritten.
-- With `--resolve-modules`, the server crawls each HTML page's module graph and
-  injects a generated `<script type="importmap">`, so the browser resolves bare
-  specifiers (`@scope/pkg`) itself. Each bare import is resolved from the
-  importing module's own location (Node semantics, so pnpm-style nested
-  node_modules work) and canonicalized so every package maps to exactly one
-  URL — browsers deduplicate modules by URL. Bare specifiers whose build output
-  is missing are resolved through the package's `package.json`, so an unbuilt
-  dependency still maps and serves.
-- The map also lists every installed package name (import maps have no
-  fallback for unmapped bare specifiers); names the crawl did not reach point
-  at the reserved `/@resolve/<specifier>` route, which resolves the specifier
-  server-side **at import time** and answers with a re-export shim. That makes
-  computed dynamic imports work — `import('@damo/' + name)` or any installed
-  package name — while staying fully lazy.
-
-Practical consequences:
-
-- HTML can keep pointing `<script src=".../dist/element/index.js">` at the built
-  path. That is intentional and works without ever running a build — the server
-  serves the live `src/element/index.ts`.
-- Edit `src/*.ts` and reload; there is no build to run and no `dist/` to refresh.
-- Run the server with `--resolve-modules` so bare (`@scope/pkg`) imports work in
-  the browser via the injected import map. Relative imports must carry real
-  extensions (`./x.js`) — they are standard browser ESM and pass through as-is.
+- **Never run a build to see a source change in the browser.** Edit the `.ts`
+  source and reload the page.
+- **Leave HTML pointing at the built `dist/` path.** That is deliberate, not a
+  bug to fix — the rewrite is keyed on it.
+- Run the server with `--resolve-modules`, or bare (`@scope/pkg`) imports will
+  not resolve in the browser.
 
 ## Run
 
 ```
-node packages/server/src/bin/index.ts --resolve-modules --port <port> [--proxy /path http://target] [--auth user:pass]
+node packages/server/src/bin/index.ts --resolve-modules --port <port>
 ```
 
-The server is HTTP/2 with live reload (`watch` is always on).
+Run the bin's TypeScript entry point directly like this rather than `npx server`:
+the published bin points at `dist/bin/index.js`, which is not built in this
+checkout.
+
+[source]: ./README.md#typescript-served-from-source-no-build-step
+[import-map]: ./README.md#bare-specifiers-in-the-browser---resolve-modules
