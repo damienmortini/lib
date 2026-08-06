@@ -9,7 +9,10 @@ npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>]
            [--verbose]
 ```
 
-`--watch` and `--proxy` may be repeated. Live reload is always on.
+`--watch` and `--proxy` may be repeated. Live reload is always on. The `--auth`
+credential can also be passed as `SERVER_AUTH` in the environment, which keeps it
+out of argv — and so out of `ps` and `/proc/<pid>/cmdline`; the flag wins when
+both are set.
 
 ## TypeScript served from source (no build step)
 
