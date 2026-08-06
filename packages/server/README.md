@@ -2,7 +2,28 @@
 
 Simple live reloading HTTP2 server for development
 
-`npx server [--path <path>] [--watch <path>] [--resolve-modules] [--verbose]`
+```
+npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>]
+           [--watch <path>] [--watch-ignore <a,b>] [--proxy <path> <target>]
+           [--auth <user:pass>] [--external-certificate] [--resolve-modules]
+           [--verbose]
+```
+
+`--watch` and `--proxy` may be repeated. Live reload is always on.
+
+## TypeScript served from source (no build step)
+
+A request for `<package>/dist/<path>.js` is served from the sibling
+`<package>/src/<path>.ts` whenever that source exists — the source always wins,
+so a stale `dist/` on disk is never served. Types are stripped with
+`node:module`'s `stripTypeScriptTypes`; the module body is otherwise unchanged,
+apart from the bare-specifier rewrite described below.
+
+HTML can therefore keep pointing `<script src=".../dist/element/index.js">` at
+the published path: edit the `.ts` source and reload, with no build to run and
+no `dist/` to refresh. Keep pointing at that `dist/` URL rather than at `src/` —
+the mapping is keyed on `/dist/`, so a direct `.ts` request is served raw and
+the browser rejects it on MIME grounds.
 
 ## Bare specifiers in the browser (`--resolve-modules`)
 
@@ -16,6 +37,9 @@ import { Signal } from '@damienmortini/signal';
 
 const module = await import(`@damo/${name}-element/demo`); // computed names and subpaths too
 ```
+
+Only bare specifiers go through the map. Relative imports must carry real
+extensions (`./x.js`) — they are standard browser ESM and pass through as-is.
 
 ### What gets an entry
 
@@ -55,13 +79,13 @@ receive the page's import map — resolve their dependencies too.
 ### Interaction with the `dist/` → `src/` rewrite
 
 Map entries point at each package's **published** entry point (typically
-`dist/….js`), which is also what the browser requests. A request under `/dist/`
-is served from the sibling `/src/` file (`.js` → `.ts`), transpiled on the fly,
-whenever that source exists — so the URLs in the map stay stable while the code
-behind them is always the live source. A package whose `dist/` has never been
-built still gets a map entry: when Node resolution fails because the target
-file is absent, the specifier is resolved through the package's `package.json`
-without an existence check, and the request is then answered from `src/`.
+`dist/….js`), which is also what the browser requests, so the URLs in the map
+stay stable while the code behind them is always
+[the live source](#typescript-served-from-source-no-build-step). A package whose
+`dist/` has never been built still gets a map entry: when Node resolution fails
+because the target file is absent, the specifier is resolved through the
+package's `package.json` without an existence check, and the request is then
+answered from `src/`.
 
 ### Limits
 
