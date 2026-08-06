@@ -55,10 +55,13 @@ and their imports, transitively — and adds:
   work), and symlinks are collapsed so a package reached through different
   links still maps to a single URL — browsers deduplicate modules by URL. A
   link pointing *outside* the served root (a submodule linked to a sibling
-  checkout) is left as-is, since there is no in-root path to collapse it onto,
-  so two such links to the same package do stay distinct URLs. When
-  the same specifier resolves differently depending on the importer, the odd
-  ones out get a `scopes` entry keyed on the importer's directory.
+  checkout) is kept at the path it sits at, since there is no in-root path to
+  collapse it onto; that path then *mounts* the checkout, so links deeper into
+  the same one — pnpm gives every workspace dependency a link inside its
+  consumer's own `node_modules` — collapse back onto it rather than staying
+  distinct URLs. When the same specifier resolves differently depending on the
+  importer, the odd ones out get a `scopes` entry keyed on the importer's
+  directory.
 - **One entry per installed package name**, for every package found along the
   `node_modules` chains of the crawled modules. Import maps have no fallback
   for unmapped bare specifiers, so a name the crawl never reached would throw
