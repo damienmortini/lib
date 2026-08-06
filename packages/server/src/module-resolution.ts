@@ -9,7 +9,7 @@
  * Everything anchors on the process working directory (rootDirectory).
  */
 
-import { readdir, readFile, readlink, stat } from 'fs/promises';
+import { readdir, readFile, readlink, realpath, stat } from 'fs/promises';
 import { moduleResolve } from 'import-meta-resolve';
 import { dirname, extname, join, resolve } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -108,7 +108,13 @@ async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
       continue;
     }
     symlinkHopBudget--;
-    const resolvedTargetPath = toPosixPath(resolve(dirname(candidatePath), symlinkTarget));
+    // Resolve the target against the directory that physically holds the link,
+    // not the walked-to path: an ancestor component may itself be a symlink
+    // leaving the served root (a scratch directory whose node_modules links
+    // into a repository), and a relative target rebased on that path would
+    // land back inside the root on a file that does not exist.
+    const realCurrentPath = await realpath(currentPath).catch(() => currentPath);
+    const resolvedTargetPath = toPosixPath(resolve(realCurrentPath, symlinkTarget));
     if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) {
       currentPath = candidatePath;
       continue;
