@@ -97,6 +97,15 @@ async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
   const modulePath = toPosixPath(fileURLToPath(moduleUrl));
   let remainingComponents = modulePath.slice(rootDirectory.length).split('/');
   let currentPath = rootDirectory.slice(0, -1);
+  // The path a kept link sits at becomes the served location of everything
+  // under its target: `submodules/<name>` mounts a whole sibling checkout.
+  // Recording that pairing lets a deeper link into the same checkout — pnpm
+  // links every workspace dependency into its consumer's own node_modules, so
+  // one package is reachable through several such chains — collapse back onto
+  // the mounted path instead of staying a distinct URL and evaluating a second
+  // time. Without it only the outermost link is kept and nothing below it
+  // collapses, because every target down there leaves the root as well.
+  const adoptedMounts: Array<{ targetPath: string; servedPath: string }> = [];
   // Bounds total symlink follows so link cycles cannot loop forever.
   let symlinkHopBudget = 40;
   while (remainingComponents.length > 0) {
@@ -115,17 +124,40 @@ async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
     // land back inside the root on a file that does not exist.
     const realCurrentPath = await realpath(currentPath).catch(() => currentPath);
     const resolvedTargetPath = toPosixPath(resolve(realCurrentPath, symlinkTarget));
+    let servedTargetPath = resolvedTargetPath;
     if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) {
-      currentPath = candidatePath;
-      continue;
+      const mountedPath = servedPathWithinAdoptedMount(adoptedMounts, resolvedTargetPath);
+      if (mountedPath === undefined) adoptedMounts.push({ targetPath: resolvedTargetPath, servedPath: candidatePath });
+      // No mount covers the target, or this link is the mount itself — the walk
+      // has nowhere in-root to collapse onto, so keep the link as the URL.
+      if (mountedPath === undefined || mountedPath === candidatePath) {
+        currentPath = candidatePath;
+        continue;
+      }
+      servedTargetPath = mountedPath;
     }
     // Re-walk the in-root target from the served root so symlinks inside the
     // adopted portion collapse too (e.g. a package reached through a nested
     // submodule chain must land on the same URL as the direct submodule path).
-    remainingComponents = [...resolvedTargetPath.slice(rootDirectory.length).split('/'), ...remainingComponents];
+    remainingComponents = [...servedTargetPath.slice(rootDirectory.length).split('/'), ...remainingComponents];
     currentPath = rootDirectory.slice(0, -1);
   }
   return pathToFileURL(currentPath);
+}
+
+/**
+ * Map a link target that left the served root back onto the path an earlier
+ * kept link already mounts it at, or undefined when no mount contains it. The
+ * longest matching mount wins, so a checkout mounted inside another one
+ * resolves to the most specific served path.
+ */
+function servedPathWithinAdoptedMount(adoptedMounts: Array<{ targetPath: string; servedPath: string }>, targetPath: string): string | undefined {
+  let bestMount: { targetPath: string; servedPath: string } | undefined;
+  for (const mount of adoptedMounts) {
+    if (targetPath !== mount.targetPath && !targetPath.startsWith(`${mount.targetPath}/`)) continue;
+    if (bestMount === undefined || mount.targetPath.length > bestMount.targetPath.length) bestMount = mount;
+  }
+  return bestMount === undefined ? undefined : `${bestMount.servedPath}${targetPath.slice(bestMount.targetPath.length)}`;
 }
 
 /**

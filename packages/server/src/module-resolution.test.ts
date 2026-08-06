@@ -45,3 +45,55 @@ describe('packages reached through a symlinked node_modules', () => {
     strictEqual(resolveExampleFrom(join(temporaryRoot, 'repository')), '/packages/example/dist/index.js');
   });
 });
+
+describe('packages reached through a submodule mounted outside the served root', () => {
+  // A playground-style root whose `submodules/repository` links to a sibling
+  // checkout: the same package is reachable directly and through a consumer's
+  // own node_modules, and both must land on one URL or the module evaluates
+  // twice and customElements.define() throws on the second run.
+  const probeSource = `
+    import { pathToFileURL } from 'node:url';
+    import { resolveSpecifierToServedPath } from ${JSON.stringify(join(import.meta.dirname, 'module-resolution.ts'))};
+    const [specifier, importerPath] = process.argv.slice(-2);
+    console.log(await resolveSpecifierToServedPath(specifier, pathToFileURL(importerPath), '/'));
+  `;
+  let temporaryRoot: string;
+  let servedRootPath: string;
+
+  before(async () => {
+    temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-mount-test-'));
+    const repositoryPath = join(temporaryRoot, 'repository');
+    servedRootPath = join(temporaryRoot, 'playground');
+    for (const packageName of ['example', 'consumer']) {
+      await mkdir(join(repositoryPath, 'packages', packageName, 'dist'), { recursive: true });
+      await writeFile(join(repositoryPath, 'packages', packageName, 'package.json'), `{"name":"@test/${packageName}","exports":"./dist/index.js"}`);
+      await writeFile(join(repositoryPath, 'packages', packageName, 'dist', 'index.js'), 'export const value = 1;');
+    }
+    // pnpm links a workspace dependency into its consumer's own node_modules.
+    await mkdir(join(repositoryPath, 'packages', 'consumer', 'node_modules', '@test'), { recursive: true });
+    await symlink('../../../example', join(repositoryPath, 'packages', 'consumer', 'node_modules', '@test', 'example'));
+    await mkdir(join(servedRootPath, 'submodules'), { recursive: true });
+    await symlink('../../repository', join(servedRootPath, 'submodules', 'repository'));
+  });
+
+  after(async () => {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+
+  function resolveFrom(specifier: string, importerPath: string): string {
+    return execFileSync(process.execPath, ['--input-type=module', '--eval', probeSource, '--', specifier, importerPath], {
+      cwd: servedRootPath,
+      encoding: 'utf8',
+    }).trim();
+  }
+
+  it('serves a mounted checkout package under its submodule path', () => {
+    const importerPath = join(servedRootPath, 'submodules', 'repository', 'packages', 'consumer', 'dist', 'index.js');
+    strictEqual(resolveFrom('@test/consumer', importerPath), '/submodules/repository/packages/consumer/dist/index.js');
+  });
+
+  it('collapses a dependency linked into a consumer onto that same mounted path', () => {
+    const importerPath = join(servedRootPath, 'submodules', 'repository', 'packages', 'consumer', 'dist', 'index.js');
+    strictEqual(resolveFrom('@test/example', importerPath), '/submodules/repository/packages/example/dist/index.js');
+  });
+});
