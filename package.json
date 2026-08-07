@@ -18,7 +18,8 @@
     "test": "eslint packages && pnpm -r run test",
     "update": "pnpm i",
     "upgrade": "syncpack update && syncpack fix && pnpm i",
-    "version": "lerna version"
+    "version": "lerna version",
+    "worktree:setup": "node script/worktree-setup.ts"
   },
   "dependencies": {
     "es-module-shims": "^2.8.1"
