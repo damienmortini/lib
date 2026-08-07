@@ -1,19 +1,13 @@
 import { strictEqual } from 'node:assert';
-import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, describe, it } from 'node:test';
+import { pathToFileURL } from 'node:url';
+
+import { ModuleResolver } from './module-resolution.ts';
 
 describe('packages reached through a symlinked node_modules', () => {
-  // rootDirectory snapshots process.cwd() when this module loads, so each
-  // served root is probed in a process of its own. Under `--input-type=module`
-  // the probe's own import.meta.url is anchored in that working directory,
-  // which is exactly the importer a page served from there would have.
-  const probeSource = `
-    import { resolveSpecifierToServedPath } from ${JSON.stringify(join(import.meta.dirname, 'module-resolution.ts'))};
-    console.log(await resolveSpecifierToServedPath('@test/example', new URL(import.meta.url), '/'));
-  `;
   let temporaryRoot: string;
 
   before(async () => {
@@ -33,16 +27,17 @@ describe('packages reached through a symlinked node_modules', () => {
     await rm(temporaryRoot, { recursive: true, force: true });
   });
 
-  function resolveExampleFrom(servedRootPath: string): string {
-    return execFileSync(process.execPath, ['--input-type=module', '--eval', probeSource], { cwd: servedRootPath, encoding: 'utf8' }).trim();
+  // No importer: resolved from the served root, like a page sitting at it.
+  async function resolveExampleFrom(servedRootPath: string): Promise<string | undefined> {
+    return await new ModuleResolver(servedRootPath).resolveSpecifierToServedPath('@test/example', undefined, '/');
   }
 
-  it('keeps a package whose link target leaves the served root on its node_modules path', () => {
-    strictEqual(resolveExampleFrom(join(temporaryRoot, 'scratch')), '/node_modules/@test/example/dist/index.js');
+  it('keeps a package whose link target leaves the served root on its node_modules path', async () => {
+    strictEqual(await resolveExampleFrom(join(temporaryRoot, 'scratch')), '/node_modules/@test/example/dist/index.js');
   });
 
-  it('still collapses a link target that stays inside the served root', () => {
-    strictEqual(resolveExampleFrom(join(temporaryRoot, 'repository')), '/packages/example/dist/index.js');
+  it('still collapses a link target that stays inside the served root', async () => {
+    strictEqual(await resolveExampleFrom(join(temporaryRoot, 'repository')), '/packages/example/dist/index.js');
   });
 });
 
@@ -51,19 +46,14 @@ describe('packages reached through a submodule mounted outside the served root',
   // checkout: the same package is reachable directly and through a consumer's
   // own node_modules, and both must land on one URL or the module evaluates
   // twice and customElements.define() throws on the second run.
-  const probeSource = `
-    import { pathToFileURL } from 'node:url';
-    import { resolveSpecifierToServedPath } from ${JSON.stringify(join(import.meta.dirname, 'module-resolution.ts'))};
-    const [specifier, importerPath] = process.argv.slice(-2);
-    console.log(await resolveSpecifierToServedPath(specifier, pathToFileURL(importerPath), '/'));
-  `;
   let temporaryRoot: string;
-  let servedRootPath: string;
+  let resolver: ModuleResolver;
+  let consumerImporterPath: string;
 
   before(async () => {
     temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-mount-test-'));
     const repositoryPath = join(temporaryRoot, 'repository');
-    servedRootPath = join(temporaryRoot, 'playground');
+    const servedRootPath = join(temporaryRoot, 'playground');
     for (const packageName of ['example', 'consumer']) {
       await mkdir(join(repositoryPath, 'packages', packageName, 'dist'), { recursive: true });
       await writeFile(join(repositoryPath, 'packages', packageName, 'package.json'), `{"name":"@test/${packageName}","exports":"./dist/index.js"}`);
@@ -74,26 +64,47 @@ describe('packages reached through a submodule mounted outside the served root',
     await symlink('../../../example', join(repositoryPath, 'packages', 'consumer', 'node_modules', '@test', 'example'));
     await mkdir(join(servedRootPath, 'submodules'), { recursive: true });
     await symlink('../../repository', join(servedRootPath, 'submodules', 'repository'));
+    resolver = new ModuleResolver(servedRootPath);
+    consumerImporterPath = join(servedRootPath, 'submodules', 'repository', 'packages', 'consumer', 'dist', 'index.js');
   });
 
   after(async () => {
     await rm(temporaryRoot, { recursive: true, force: true });
   });
 
-  function resolveFrom(specifier: string, importerPath: string): string {
-    return execFileSync(process.execPath, ['--input-type=module', '--eval', probeSource, '--', specifier, importerPath], {
-      cwd: servedRootPath,
-      encoding: 'utf8',
-    }).trim();
-  }
-
-  it('serves a mounted checkout package under its submodule path', () => {
-    const importerPath = join(servedRootPath, 'submodules', 'repository', 'packages', 'consumer', 'dist', 'index.js');
-    strictEqual(resolveFrom('@test/consumer', importerPath), '/submodules/repository/packages/consumer/dist/index.js');
+  it('serves a mounted checkout package under its submodule path', async () => {
+    const servedPath = await resolver.resolveSpecifierToServedPath('@test/consumer', pathToFileURL(consumerImporterPath), '/');
+    strictEqual(servedPath, '/submodules/repository/packages/consumer/dist/index.js');
   });
 
-  it('collapses a dependency linked into a consumer onto that same mounted path', () => {
-    const importerPath = join(servedRootPath, 'submodules', 'repository', 'packages', 'consumer', 'dist', 'index.js');
-    strictEqual(resolveFrom('@test/example', importerPath), '/submodules/repository/packages/example/dist/index.js');
+  it('collapses a dependency linked into a consumer onto that same mounted path', async () => {
+    const servedPath = await resolver.resolveSpecifierToServedPath('@test/example', pathToFileURL(consumerImporterPath), '/');
+    strictEqual(servedPath, '/submodules/repository/packages/example/dist/index.js');
+  });
+});
+
+describe('a resolver anchored somewhere other than the process working directory', () => {
+  let temporaryRoot: string;
+  let resolver: ModuleResolver;
+
+  before(async () => {
+    temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-root-test-'));
+    await mkdir(join(temporaryRoot, 'node_modules', 'demo-package'), { recursive: true });
+    await writeFile(join(temporaryRoot, 'node_modules', 'demo-package', 'package.json'), '{"name":"demo-package","main":"index.js"}');
+    await writeFile(join(temporaryRoot, 'node_modules', 'demo-package', 'index.js'), 'export const demo = true;');
+    await writeFile(join(temporaryRoot, 'module.js'), 'import { demo } from \'demo-package\';\n');
+    resolver = new ModuleResolver(temporaryRoot);
+  });
+
+  after(async () => {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+
+  // The crawl reaches the page's module, maps its bare import and enumerates the
+  // installed packages — all of it against the fixture root rather than the cwd.
+  it('crawls a page into an import map rooted there', async () => {
+    const pageContent = '<html><head><script type="module" src="/module.js"></script></head></html>';
+    const { importMap } = await resolver.buildImportMap(pageContent, '/index.html', '/');
+    strictEqual(importMap.imports['demo-package'], '/node_modules/demo-package/index.js');
   });
 });

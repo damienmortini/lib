@@ -163,18 +163,22 @@ describe('live-reload client script', () => {
 });
 
 describe('forwarded prefix', () => {
-  // Module resolution anchors on the process working directory, so the fixture
-  // with its own node_modules lives inside it — a tmpdir root would leave bare
-  // specifiers unresolvable and the rewrite untestable.
   let fixturePath: string;
   let server: Server;
   let basedServer: Server;
 
   before(async () => {
-    fixturePath = await mkdtemp('server-test-fixture-');
+    fixturePath = await mkdtemp(join(tmpdir(), 'server-test-fixture-'));
     await mkdir(join(fixturePath, 'node_modules', 'demo-package'), { recursive: true });
     await writeFile(join(fixturePath, 'node_modules', 'demo-package', 'package.json'), '{"name":"demo-package","main":"index.js"}');
     await writeFile(join(fixturePath, 'node_modules', 'demo-package', 'index.js'), 'export const demo = true;');
+    // A package whose `./sub` entry has no directory on disk, so requesting its
+    // package.json exercises the synthesized one.
+    await mkdir(join(fixturePath, 'node_modules', 'subpath-package'), { recursive: true });
+    await writeFile(
+      join(fixturePath, 'node_modules', 'subpath-package', 'package.json'),
+      '{"name":"subpath-package","type":"module","exports":{"./sub":"./dist/sub.js"}}',
+    );
     await writeFile(join(fixturePath, 'module.js'), 'import { demo } from \'demo-package\';\nconsole.log(demo);');
     await writeFile(join(fixturePath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
     server = new Server({ rootPath: fixturePath, watch: true, resolveModules: true, port: 9201 });
@@ -208,11 +212,18 @@ describe('forwarded prefix', () => {
   });
 
   it('rewrites module specifiers under the announced prefix without poisoning the unprefixed variant', async () => {
+    // The paths are rooted at the served root, not at the working directory the
+    // test process happens to run from.
     const unprefixed = await fetchBody(boundPort(server), '/module.js');
-    ok(unprefixed.includes(`'/${fixturePath}/node_modules/demo-package/index.js'`), `expected an unprefixed rewritten specifier, got: ${unprefixed}`);
+    ok(unprefixed.includes('\'/node_modules/demo-package/index.js\''), `expected an unprefixed rewritten specifier, got: ${unprefixed}`);
     const prefixed = await fetchBody(boundPort(server), '/mounted/app/module.js', { 'x-forwarded-prefix': '/mounted/app' });
-    ok(prefixed.includes(`'/mounted/app/${fixturePath}/node_modules/demo-package/index.js'`), `expected a rewritten specifier under the prefix, got: ${prefixed}`);
+    ok(prefixed.includes('\'/mounted/app/node_modules/demo-package/index.js\''), `expected a rewritten specifier under the prefix, got: ${prefixed}`);
     const unprefixedAgain = await fetchBody(boundPort(server), '/module.js');
     strictEqual(unprefixedAgain, unprefixed, 'expected the prefixed variant to be cached separately');
+  });
+
+  it('synthesizes a package.json for a subpath export under a root outside the working directory', async () => {
+    const body = await fetchBody(boundPort(server), '/node_modules/subpath-package/sub/package.json');
+    strictEqual(JSON.parse(body).main, '../dist/sub.js');
   });
 });
