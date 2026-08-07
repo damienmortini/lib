@@ -18,11 +18,17 @@ import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const worktreeRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+// Both roots are resolved before anything compares them: `git rev-parse` resolves symlinks
+// while `git worktree list` echoes each path as it was registered, and one directory
+// spelled two ways would clear the guard below as "this is a linked worktree" — pointing
+// the mirroring at the primary's own node_modules, which materialize deletes before it
+// reads. That directory is shared with every other worktree and costs a full install.
+const worktreeRoot = await fs.realpath(execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim());
 // git lists the main worktree — the one holding the installed node_modules — first.
-const primaryRoot = execFileSync('git', ['worktree', 'list', '--porcelain'], { encoding: 'utf8' })
+const primaryRoot = await fs.realpath(execFileSync('git', ['worktree', 'list', '--porcelain'], { encoding: 'utf8' })
   .split('\n')[0]
-  .replace(/^worktree /, '');
+  .replace(/^worktree /, '')
+  .trim());
 
 if (worktreeRoot === primaryRoot) {
   console.error(`${worktreeRoot} is the primary checkout — run this from inside a linked worktree (its node_modules comes from \`pnpm install\`).`);
