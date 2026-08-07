@@ -44,6 +44,10 @@ const module = await import(`@damo/${name}-element/demo`); // computed names and
 Only bare specifiers go through the map. Relative imports must carry real
 extensions (`./x.js`) — they are standard browser ESM and pass through as-is.
 
+Resolution anchors on the served root (`--root`, defaulting to the working
+directory), so the tree the server serves is the tree it resolves against
+wherever the process itself was started from.
+
 ### What gets an entry
 
 The server crawls the page's module graph — the `<script type="module">` tags
@@ -95,8 +99,6 @@ answered from `src/`.
 
 ### Limits
 
-- Resolution anchors on the server's working directory, so run the server from
-  the root it serves (it warns when `--root` points elsewhere).
 - A module reached *only* through `/@resolve/` was never crawled, so package
   names visible solely from that module's own non-hoisted `node_modules` are
   not enumerated.

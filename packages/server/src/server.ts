@@ -10,7 +10,7 @@ import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
-import { extname, join, resolve } from 'path';
+import { extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
@@ -18,18 +18,12 @@ import { v5 as uuidv5 } from 'uuid';
 import { gzipSync } from 'zlib';
 
 import {
-  buildImportMap,
   getSourceFilePath,
   type ImportMap,
-  importMetaResolveParent,
+  ModuleResolver,
   type PackageJson,
   resolvePackageExportPath,
-  resolveSpecifierToServedPath,
-  rewriteModuleSpecifiers,
-  rootDirectory,
-  servedPathToSourcePath,
   stripBasePrefix,
-  toPosixPath,
 } from './module-resolution.ts';
 
 const HOP_BY_HOP_HEADERS = new Set(['connection', 'upgrade', 'keep-alive', 'transfer-encoding']);
@@ -279,13 +273,11 @@ export class Server {
     auth,
     base = '',
   }: ServerOptions = {}): Promise<void> {
-    // The module-resolution subsystem (import map crawl, /@resolve/) anchors on
-    // the process working directory, while file serving anchors on rootPath —
-    // with a rootPath elsewhere the server would serve one tree and resolve
-    // modules against another.
-    if (resolveModules && `${toPosixPath(resolve(rootPath))}/` !== rootDirectory) {
-      console.warn(`resolveModules resolves modules from the working directory (${rootDirectory}), not from rootPath "${rootPath}" — run the server from the served root to keep them aligned.`);
-    }
+    // File serving and the module-resolution subsystem (import map crawl,
+    // /@resolve/) share one absolute root, so they always agree on which tree is
+    // being served, wherever the process itself happens to be running from.
+    const moduleResolver = new ModuleResolver(rootPath);
+    const { rootDirectory } = moduleResolver;
 
     const expectedAuthHeader = auth ? `Basic ${Buffer.from(auth).toString('base64')}` : null;
 
@@ -359,7 +351,7 @@ export class Server {
           return cached.importMap;
         }
       }
-      const { importMap, dependencyPaths } = await buildImportMap(htmlContent, pageServedPath, servedRoot);
+      const { importMap, dependencyPaths } = await moduleResolver.buildImportMap(htmlContent, pageServedPath, servedRoot);
       // The page file itself is always a dependency: editing its module scripts
       // must invalidate the map even when no crawled module changed.
       const dependencyVersions = new Map(await Promise.all(
@@ -589,7 +581,7 @@ export class Server {
       if (servedPath === '/.well-known/appspecific/com.chrome.devtools.json') {
         const workspaceConfig = {
           workspace: {
-            root: rootDirectory.slice(0, -1),
+            root: rootDirectory,
             uuid: uuidv5(rootDirectory, uuidv5.URL),
           },
         };
@@ -687,10 +679,12 @@ export class Server {
         if (resolveModules && resolverMatch) {
           const specifier = decodeURIComponent(resolverMatch.groups!.specifier);
           const refererUrl = URL.parse(String(headers['referer'] ?? ''));
+          // No referer means no page to resolve from; the resolver falls back
+          // to the served root.
           const parentUrl = refererUrl
-            ? pathToFileURL(await servedPathToSourcePath(refererUrl.pathname, servedRoot))
-            : importMetaResolveParent;
-          const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot);
+            ? pathToFileURL(await moduleResolver.servedPathToSourcePath(refererUrl.pathname, servedRoot))
+            : undefined;
+          const servedModulePath = await moduleResolver.resolveSpecifierToServedPath(specifier, parentUrl, servedRoot);
           if (!servedModulePath) {
             stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
             stream.end();
@@ -699,7 +693,7 @@ export class Server {
           // `export * from` does not forward a default export; add it only
           // when the target module declares one.
           let shim = `export * from '${servedModulePath}';\n`;
-          const targetSource = await readFile(await servedPathToSourcePath(servedModulePath, servedRoot), { encoding: 'utf-8' }).catch(() => '');
+          const targetSource = await readFile(await moduleResolver.servedPathToSourcePath(servedModulePath, servedRoot), { encoding: 'utf-8' }).catch(() => '');
           if (/\bexport\s+default\b|\bexport\s*\{[^}]*\bdefault\b/.test(targetSource)) {
             shim += `export { default } from '${servedModulePath}';\n`;
           }
@@ -712,7 +706,7 @@ export class Server {
           return;
         }
 
-        let filePath = `${rootPath}${requestFilePath}`;
+        let filePath = `${rootDirectory}${requestFilePath}`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
@@ -721,9 +715,10 @@ export class Server {
          * fetching `<package>/<subpath>/package.json` and importing its `main` — damo's
          * index.html lazy-loads subpath entries like `@damo/playground-element/demo` this way.
          */
-        const virtualPackageJsonMatch = filePath
-          .replace(/^\.?\//, '')
-          .match(/^node_modules\/(?<packageName>@[^/]+\/[^/]+|[^/]+)\/(?<subPath>.+)\/package\.json$/);
+        // Matched on the request path: it always starts at the served root,
+        // whereas the disk path is prefixed with the root's own directory names.
+        const virtualPackageJsonMatch = requestFilePath
+          .match(/^\/node_modules\/(?<packageName>@[^/]+\/[^/]+|[^/]+)\/(?<subPath>.+)\/package\.json$/);
         if (virtualPackageJsonMatch) {
           const { packageName, subPath } = virtualPackageJsonMatch.groups!;
           const physicalStats = await stat(filePath).catch(() => null);
@@ -731,7 +726,7 @@ export class Server {
 
           if (!physicalExists) {
             try {
-              const mainPackageJsonPath = join(rootPath, 'node_modules', packageName, 'package.json');
+              const mainPackageJsonPath = join(rootDirectory, 'node_modules', packageName, 'package.json');
               const mainPackageJson = JSON.parse(await readFile(mainPackageJsonPath, 'utf-8')) as PackageJson;
               const exportValue = mainPackageJson.exports?.[`./${subPath}`];
               const exportPath = resolvePackageExportPath(exportValue);
@@ -764,7 +759,7 @@ export class Server {
          * Rewrite to root if url isn't a file and doesn't exist
          */
         if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath).catch(() => null))) {
-          filePath = `${rootPath}/`;
+          filePath = `${rootDirectory}/`;
         }
 
         const sourceFilePath = await getSourceFilePath(filePath);
@@ -812,7 +807,7 @@ export class Server {
             encoding: 'utf-8',
           });
           if (resolveModules) {
-            const pageServedPath = `${servedRoot.slice(0, -1)}${filePath.slice(rootPath.length)}`;
+            const pageServedPath = `${servedRoot.slice(0, -1)}${filePath.slice(rootDirectory.length)}`;
             const importMap = await getImportMap(fileContent, pageServedPath, responseFilePath, servedRoot);
             if (Object.keys(importMap.imports).length) {
               const importMapScript = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
@@ -876,7 +871,7 @@ export class Server {
             const javaScript = stripTypeScriptTypes(fileContent);
             // Rewrite bare imports to resolved URLs so module workers, which never
             // receive the page's import map, can still resolve their dependencies.
-            return resolveModules ? await rewriteModuleSpecifiers(javaScript, sourceFilePath, servedRoot) : javaScript;
+            return resolveModules ? await moduleResolver.rewriteModuleSpecifiers(javaScript, sourceFilePath, servedRoot) : javaScript;
           });
           sendCachedBody(stream, headers, responseHeaders, entry);
         }
@@ -888,7 +883,7 @@ export class Server {
           const modulePath = decodeURIComponent(responseFilePath);
           const entry = await cachedResponse(`${servedRoot}\0${modulePath}`, await stat(modulePath), async () => {
             const fileContent = await readFile(modulePath, { encoding: 'utf-8' });
-            return rewriteModuleSpecifiers(fileContent, modulePath, servedRoot);
+            return moduleResolver.rewriteModuleSpecifiers(fileContent, modulePath, servedRoot);
           });
           sendCachedBody(stream, headers, responseHeaders, entry);
         }

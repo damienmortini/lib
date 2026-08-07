@@ -6,7 +6,7 @@
  * unbuilt dist targets), canonicalization of symlinked paths onto one served
  * URL, the dist→src source mapping, and per-page import-map generation with
  * an installed-package enumeration backing the /@resolve/ on-demand route.
- * Everything anchors on the process working directory (rootDirectory).
+ * Everything anchors on the served root a ModuleResolver is constructed with.
  */
 
 import { readdir, readFile, readlink, realpath, stat } from 'fs/promises';
@@ -17,12 +17,9 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const PACKAGE_EXPORT_CONDITIONS = ['browser', 'import', 'default', 'module', 'require'];
 const MODULE_RESOLVE_CONDITIONS = new Set(['module', 'import', 'default']);
 
-export function toPosixPath(path: string): string {
+function toPosixPath(path: string): string {
   return path.replaceAll(/\\/g, '/');
 }
-
-export const rootDirectory = toPosixPath(`${process.cwd()}/`);
-export const importMetaResolveParent = pathToFileURL(rootDirectory);
 
 export type PackageExportConditions = {
   [condition: string]: PackageExportValue;
@@ -77,72 +74,6 @@ export async function getSourceFilePath(filePath: string): Promise<string | unde
   }
 
   return undefined;
-}
-
-/**
- * Collapse a resolved module URL onto one canonical served URL.
- *
- * Browsers deduplicate ES modules by URL, so the same package reached through
- * different node_modules symlinks (pnpm links dependencies per consuming
- * package) would evaluate once per URL, and side effects like
- * customElements.define() would throw on the second evaluation. Resolve
- * symlinks component by component, like Node's --preserve-symlinks traversal,
- * keeping a link as-is when its target leaves the served root (e.g. a
- * submodule symlink to a sibling checkout) — a plain realpath would escape
- * the root there.
- */
-async function canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
-  if (!moduleUrl.href.startsWith(importMetaResolveParent.href)) return moduleUrl;
-
-  const modulePath = toPosixPath(fileURLToPath(moduleUrl));
-  let remainingComponents = modulePath.slice(rootDirectory.length).split('/');
-  let currentPath = rootDirectory.slice(0, -1);
-  // The path a kept link sits at becomes the served location of everything
-  // under its target: `submodules/<name>` mounts a whole sibling checkout.
-  // Recording that pairing lets a deeper link into the same checkout — pnpm
-  // links every workspace dependency into its consumer's own node_modules, so
-  // one package is reachable through several such chains — collapse back onto
-  // the mounted path instead of staying a distinct URL and evaluating a second
-  // time. Without it only the outermost link is kept and nothing below it
-  // collapses, because every target down there leaves the root as well.
-  const adoptedMounts: Array<{ targetPath: string; servedPath: string }> = [];
-  // Bounds total symlink follows so link cycles cannot loop forever.
-  let symlinkHopBudget = 40;
-  while (remainingComponents.length > 0) {
-    const pathComponent = remainingComponents.shift()!;
-    const candidatePath = `${currentPath}/${pathComponent}`;
-    const symlinkTarget = symlinkHopBudget > 0 ? await readlink(candidatePath).catch(() => null) : null;
-    if (symlinkTarget === null) {
-      currentPath = candidatePath;
-      continue;
-    }
-    symlinkHopBudget--;
-    // Resolve the target against the directory that physically holds the link,
-    // not the walked-to path: an ancestor component may itself be a symlink
-    // leaving the served root (a scratch directory whose node_modules links
-    // into a repository), and a relative target rebased on that path would
-    // land back inside the root on a file that does not exist.
-    const realCurrentPath = await realpath(currentPath).catch(() => currentPath);
-    const resolvedTargetPath = toPosixPath(resolve(realCurrentPath, symlinkTarget));
-    let servedTargetPath = resolvedTargetPath;
-    if (!`${resolvedTargetPath}/`.startsWith(rootDirectory)) {
-      const mountedPath = servedPathWithinAdoptedMount(adoptedMounts, resolvedTargetPath);
-      if (mountedPath === undefined) adoptedMounts.push({ targetPath: resolvedTargetPath, servedPath: candidatePath });
-      // No mount covers the target, or this link is the mount itself — the walk
-      // has nowhere in-root to collapse onto, so keep the link as the URL.
-      if (mountedPath === undefined || mountedPath === candidatePath) {
-        currentPath = candidatePath;
-        continue;
-      }
-      servedTargetPath = mountedPath;
-    }
-    // Re-walk the in-root target from the served root so symlinks inside the
-    // adopted portion collapse too (e.g. a package reached through a nested
-    // submodule chain must land on the same URL as the direct submodule path).
-    remainingComponents = [...servedTargetPath.slice(rootDirectory.length).split('/'), ...remainingComponents];
-    currentPath = rootDirectory.slice(0, -1);
-  }
-  return pathToFileURL(currentPath);
 }
 
 /**
@@ -242,229 +173,321 @@ export function stripBasePrefix(path: string, basePrefix: string): string {
   return path;
 }
 
-// Map a browser-visible path to the file that would be served for it (a
-// `dist/*` request is answered from `src/*` when that source exists).
-export async function servedPathToSourcePath(servedPath: string, servedRoot: string): Promise<string> {
-  const diskPath = join(rootDirectory, stripBasePrefix(servedPath, servedRoot.slice(0, -1)));
-  return await getSourceFilePath(diskPath) ?? diskPath;
-}
-
-// Resolve a bare specifier from a parent module to its canonical served path,
-// or undefined when it cannot be resolved. The optional memo collapses repeat
-// canonicalizations of the same resolved URL within one request.
-export async function resolveSpecifierToServedPath(
-  specifier: string,
-  parentUrl: URL,
-  servedRoot: string,
-  canonicalServedPaths?: Map<string, Promise<string>>,
-): Promise<string | undefined> {
-  let moduleUrl: URL | undefined;
-  try {
-    moduleUrl = moduleResolve(specifier, parentUrl, MODULE_RESOLVE_CONDITIONS, true);
-  }
-  catch {
-    moduleUrl = await resolveUnbuiltSpecifier(specifier, parentUrl);
-  }
-  if (!moduleUrl) return undefined;
-
-  let servedPathPromise = canonicalServedPaths?.get(moduleUrl.href);
-  if (!servedPathPromise) {
-    // Arrow replacer so `$`-sequences in servedRoot are treated literally, not
-    // as String.replace special patterns ($&, $', …).
-    servedPathPromise = canonicalizeModuleUrl(moduleUrl)
-      .then(canonicalUrl => canonicalUrl.href.replace(importMetaResolveParent.href, () => servedRoot));
-    canonicalServedPaths?.set(moduleUrl.href, servedPathPromise);
-  }
-  return servedPathPromise;
-}
-
 /**
- * Rewrite the bare import specifiers in a served ES module to the canonical
- * served URLs they resolve to, so module resolution no longer depends on the
- * page's import map.
+ * Resolves modules against one served root.
  *
- * Import maps are never applied to Web Workers, so a module worker's bare
- * imports (e.g. `import { Signal } from '@damienmortini/signal'`) are
- * unresolvable through the map the way a main-thread module's are. Resolving
- * them in the module body — from the importer's own location, exactly like the
- * import-map crawl does — makes the same module load in a worker too. Relative
- * specifiers and full URLs (node:, data:, https:, …) are left untouched, and an
- * unresolvable bare specifier is left as-is so the browser error still names it.
+ * Every method anchors on the directory handed to the constructor, so a server
+ * started with a `rootPath` elsewhere resolves against the tree it actually
+ * serves. The per-call `servedRoot` argument is a different thing: the URL
+ * prefix that same tree is mounted under (`/` or `/mounted/app/`).
  */
-export async function rewriteModuleSpecifiers(
-  content: string,
-  importerSourceFilePath: string,
-  servedRoot: string,
-): Promise<string> {
-  const parentUrl = pathToFileURL(importerSourceFilePath);
-  const canonicalServedPaths = new Map<string, Promise<string>>();
-  const replacements = await Promise.all(
-    Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
-      const specifier = match[1];
-      // Skip relative specifiers and full URLs (node:, data:, https:, …).
-      if (RELATIVE_SPECIFIER_REGEX.test(specifier) || URL_SPECIFIER_REGEX.test(specifier)) return undefined;
-      const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
-      if (!servedModulePath) return undefined;
-      // Splice only the specifier span, leaving the surrounding syntax intact.
-      const [start, end] = match.indices![1];
-      return { start, end, text: servedModulePath };
-    }),
-  );
-  // matchAll yields matches in source order, so the splices are already sorted.
-  const splices = replacements.filter(replacement => replacement !== undefined);
-  if (!splices.length) return content;
-  let result = '';
-  let cursor = 0;
-  for (const { start, end, text } of splices) {
-    result += content.slice(cursor, start) + text;
-    cursor = end;
-  }
-  return result + content.slice(cursor);
-}
+export class ModuleResolver {
+  /** The served root as an absolute posix path, without a trailing slash. */
+  readonly rootDirectory: string;
+  // The same root shaped for prefix tests and slices: as a path with a
+  // trailing slash, and as the directory URL every module URL inside it shares.
+  readonly #rootPrefix: string;
+  readonly #rootUrl: URL;
 
-/**
- * Build an import map for an HTML page by crawling its module graph.
- *
- * The injected map is what resolves bare specifiers in inline module scripts
- * and computed dynamic imports (via /@resolve/); static specifiers in served
- * module bodies are rewritten server-side by rewriteModuleSpecifiers instead,
- * which is the only mechanism that reaches workers — they never receive the
- * page's map. Each module's bare imports are
- * resolved from that module's own location like Node does — pnpm does not
- * hoist transitive dependencies of linked packages into the served root's
- * node_modules — and canonicalized so every package maps to exactly one URL
- * (browsers deduplicate modules by URL). If the same specifier resolves to a
- * different target from some importer, that resolution is scoped to the
- * importer's directory.
- */
-export async function buildImportMap(htmlContent: string, pageServedPath: string, servedRoot: string): Promise<ImportMapBuildResult> {
-  const importMap: ImportMap = { imports: {} };
-  const scopes: { [scopePrefix: string]: { [specifier: string]: string } } = {};
-  const visitedModulePaths = new Set<string>();
-  const visitedSourceDirectories = new Set<string>();
-  const dependencyPaths = new Set<string>();
-  // Many modules import the same package; canonicalize each resolved URL once.
-  const canonicalServedPaths = new Map<string, Promise<string>>();
-  // Crawl tasks run concurrently and append newly discovered modules as the
-  // graph unfolds; the drain loop below picks the additions up, so total crawl
-  // time tracks the longest import chain rather than the module count.
-  const crawlTasks: Promise<void>[] = [];
-
-  function enqueue(servedModulePath: string): void {
-    if (!CRAWLABLE_EXTENSIONS.has(extname(servedModulePath))) return;
-    if (visitedModulePaths.has(servedModulePath)) return;
-    visitedModulePaths.add(servedModulePath);
-    crawlTasks.push(crawlModule(servedModulePath));
+  constructor(rootPath: string) {
+    this.rootDirectory = toPosixPath(resolve(rootPath));
+    this.#rootPrefix = `${this.rootDirectory}/`;
+    this.#rootUrl = pathToFileURL(this.#rootPrefix);
   }
 
-  async function crawlModule(servedModulePath: string): Promise<void> {
-    const sourceFilePath = await servedPathToSourcePath(servedModulePath, servedRoot);
-    dependencyPaths.add(sourceFilePath);
-    visitedSourceDirectories.add(toPosixPath(dirname(sourceFilePath)));
-    const content = await readFile(sourceFilePath, { encoding: 'utf-8' }).catch(() => null);
-    if (content === null) return;
-    await collectImports(content, sourceFilePath, servedModulePath);
-  }
+  /**
+   * Collapse a resolved module URL onto one canonical served URL.
+   *
+   * Browsers deduplicate ES modules by URL, so the same package reached through
+   * different node_modules symlinks (pnpm links dependencies per consuming
+   * package) would evaluate once per URL, and side effects like
+   * customElements.define() would throw on the second evaluation. Resolve
+   * symlinks component by component, like Node's --preserve-symlinks traversal,
+   * keeping a link as-is when its target leaves the served root (e.g. a
+   * submodule symlink to a sibling checkout) — a plain realpath would escape
+   * the root there.
+   */
+  async #canonicalizeModuleUrl(moduleUrl: URL): Promise<URL> {
+    if (!moduleUrl.href.startsWith(this.#rootUrl.href)) return moduleUrl;
 
-  async function collectImports(content: string, importerSourceFilePath: string, importerServedPath: string): Promise<void> {
-    const importerBaseUrl = new URL(importerServedPath, SERVED_PATH_BASE);
-    const parentUrl = pathToFileURL(importerSourceFilePath);
-    await Promise.all(Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
-      const specifier = match[1];
-      // Skip full URLs (node:, data:, https:, …) — nothing to map or crawl.
-      if (URL_SPECIFIER_REGEX.test(specifier)) return;
-      if (RELATIVE_SPECIFIER_REGEX.test(specifier)) {
-        enqueue(new URL(specifier, importerBaseUrl).pathname);
-        return;
+    const modulePath = toPosixPath(fileURLToPath(moduleUrl));
+    let remainingComponents = modulePath.slice(this.#rootPrefix.length).split('/');
+    let currentPath = this.rootDirectory;
+    // The path a kept link sits at becomes the served location of everything
+    // under its target: `submodules/<name>` mounts a whole sibling checkout.
+    // Recording that pairing lets a deeper link into the same checkout — pnpm
+    // links every workspace dependency into its consumer's own node_modules, so
+    // one package is reachable through several such chains — collapse back onto
+    // the mounted path instead of staying a distinct URL and evaluating a second
+    // time. Without it only the outermost link is kept and nothing below it
+    // collapses, because every target down there leaves the root as well.
+    const adoptedMounts: Array<{ targetPath: string; servedPath: string }> = [];
+    // Bounds total symlink follows so link cycles cannot loop forever.
+    let symlinkHopBudget = 40;
+    while (remainingComponents.length > 0) {
+      const pathComponent = remainingComponents.shift()!;
+      const candidatePath = `${currentPath}/${pathComponent}`;
+      const symlinkTarget = symlinkHopBudget > 0 ? await readlink(candidatePath).catch(() => null) : null;
+      if (symlinkTarget === null) {
+        currentPath = candidatePath;
+        continue;
       }
-      const servedModulePath = await resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
-      // Leave an unresolvable specifier out of the map so the browser error
-      // names the real specifier.
-      if (!servedModulePath) {
-        console.log(`Unresolvable specifier "${specifier}" imported from ${importerServedPath}`);
-        return;
-      }
-      const mappedPath = importMap.imports[specifier];
-      if (mappedPath === undefined) {
-        importMap.imports[specifier] = servedModulePath;
-      }
-      else if (mappedPath !== servedModulePath) {
-        // Each importer records its own resolution, so whichever target wins
-        // the top-level entry, the others stay correct through their scope.
-        const scopePrefix = new URL('.', importerBaseUrl).pathname;
-        (scopes[scopePrefix] ??= {})[specifier] = servedModulePath;
-      }
-      enqueue(servedModulePath);
-    }));
-  }
-
-  const pageBaseUrl = new URL(pageServedPath, SERVED_PATH_BASE);
-  let hasModuleScripts = false;
-  let pageSourcePathPromise: Promise<string> | undefined;
-  for (const scriptMatch of htmlContent.matchAll(MODULE_SCRIPT_REGEX)) {
-    hasModuleScripts = true;
-    const sourceAttribute = scriptMatch[1].match(/\bsrc\s*=\s*["']([^"']+)["']/i);
-    if (sourceAttribute) {
-      enqueue(new URL(sourceAttribute[1], pageBaseUrl).pathname);
-    }
-    else if (scriptMatch[2]) {
-      const inlineScriptBody = scriptMatch[2];
-      pageSourcePathPromise ??= servedPathToSourcePath(pageServedPath, servedRoot);
-      crawlTasks.push(pageSourcePathPromise
-        .then(pageSourceFilePath => collectImports(inlineScriptBody, pageSourceFilePath, pageServedPath)));
-    }
-  }
-  if (!hasModuleScripts) return { importMap, dependencyPaths: [...dependencyPaths] };
-
-  // Elements pushed while awaiting are still visited: the array iterator
-  // re-checks the length on every step.
-  for (const crawlTask of crawlTasks) {
-    await crawlTask;
-  }
-
-  // Import maps have no fallback for unmapped bare specifiers — a dynamic
-  // import() of a computed name throws before any network request unless the
-  // name is a map key. So every package name installed along the crawled
-  // modules' node_modules chains gets an entry; names the crawl did not
-  // already map point at the /@resolve/ route, which resolves them
-  // server-side at import time. Intentional boundary: a module reached only
-  // through /@resolve/ was never crawled, so names visible solely from its
-  // own non-hoisted node_modules are not enumerated.
-  const pageSourceFilePath = await (pageSourcePathPromise ?? servedPathToSourcePath(pageServedPath, servedRoot));
-  dependencyPaths.add(pageSourceFilePath);
-  visitedSourceDirectories.add(toPosixPath(dirname(pageSourceFilePath)));
-  const nodeModulesDirectories = new Set<string>();
-  for (const sourceDirectory of visitedSourceDirectories) {
-    let currentDirectory = sourceDirectory;
-    while (`${currentDirectory}/`.startsWith(rootDirectory)) {
-      nodeModulesDirectories.add(`${currentDirectory}/node_modules`);
-      currentDirectory = dirname(currentDirectory);
-    }
-  }
-  const installedPackageNames = new Set<string>();
-  await Promise.all(Array.from(nodeModulesDirectories, async (nodeModulesDirectory) => {
-    const entryNames = await readdir(nodeModulesDirectory).catch((): string[] => []);
-    await Promise.all(entryNames.map(async (entryName) => {
-      if (entryName.startsWith('.')) return;
-      if (entryName.startsWith('@')) {
-        for (const scopedName of await readdir(`${nodeModulesDirectory}/${entryName}`).catch((): string[] => [])) {
-          if (!scopedName.startsWith('.')) installedPackageNames.add(`${entryName}/${scopedName}`);
+      symlinkHopBudget--;
+      // Resolve the target against the directory that physically holds the link,
+      // not the walked-to path: an ancestor component may itself be a symlink
+      // leaving the served root (a scratch directory whose node_modules links
+      // into a repository), and a relative target rebased on that path would
+      // land back inside the root on a file that does not exist.
+      const realCurrentPath = await realpath(currentPath).catch(() => currentPath);
+      const resolvedTargetPath = toPosixPath(resolve(realCurrentPath, symlinkTarget));
+      let servedTargetPath = resolvedTargetPath;
+      if (!`${resolvedTargetPath}/`.startsWith(this.#rootPrefix)) {
+        const mountedPath = servedPathWithinAdoptedMount(adoptedMounts, resolvedTargetPath);
+        if (mountedPath === undefined) adoptedMounts.push({ targetPath: resolvedTargetPath, servedPath: candidatePath });
+        // No mount covers the target, or this link is the mount itself — the walk
+        // has nowhere in-root to collapse onto, so keep the link as the URL.
+        if (mountedPath === undefined || mountedPath === candidatePath) {
+          currentPath = candidatePath;
+          continue;
         }
+        servedTargetPath = mountedPath;
       }
-      else {
-        installedPackageNames.add(entryName);
-      }
-    }));
-  }));
-  for (const packageName of installedPackageNames) {
-    importMap.imports[packageName] ??= `${servedRoot}@resolve/${packageName}`;
-    // Subpath imports (`package/sub`) route through the resolver too.
-    importMap.imports[`${packageName}/`] ??= `${servedRoot}@resolve/${packageName}/`;
-  }
-  for (const nodeModulesDirectory of nodeModulesDirectories) {
-    dependencyPaths.add(nodeModulesDirectory);
+      // Re-walk the in-root target from the served root so symlinks inside the
+      // adopted portion collapse too (e.g. a package reached through a nested
+      // submodule chain must land on the same URL as the direct submodule path).
+      remainingComponents = [...servedTargetPath.slice(this.#rootPrefix.length).split('/'), ...remainingComponents];
+      currentPath = this.rootDirectory;
+    }
+    return pathToFileURL(currentPath);
   }
 
-  if (Object.keys(scopes).length) importMap.scopes = scopes;
-  return { importMap, dependencyPaths: [...dependencyPaths] };
+  // Map a browser-visible path to the file that would be served for it (a
+  // `dist/*` request is answered from `src/*` when that source exists).
+  async servedPathToSourcePath(servedPath: string, servedRoot: string): Promise<string> {
+    const diskPath = join(this.rootDirectory, stripBasePrefix(servedPath, servedRoot.slice(0, -1)));
+    return await getSourceFilePath(diskPath) ?? diskPath;
+  }
+
+  // Resolve a bare specifier from a parent module to its canonical served path,
+  // or undefined when it cannot be resolved. A specifier with no page of its own
+  // to resolve from (the /@resolve/ route reached without a referer) passes no
+  // parent and is resolved from the served root. The optional memo collapses
+  // repeat canonicalizations of the same resolved URL within one request.
+  async resolveSpecifierToServedPath(
+    specifier: string,
+    parentUrl: URL | undefined,
+    servedRoot: string,
+    canonicalServedPaths?: Map<string, Promise<string>>,
+  ): Promise<string | undefined> {
+    const importerUrl = parentUrl ?? this.#rootUrl;
+    let moduleUrl: URL | undefined;
+    try {
+      moduleUrl = moduleResolve(specifier, importerUrl, MODULE_RESOLVE_CONDITIONS, true);
+    }
+    catch {
+      moduleUrl = await resolveUnbuiltSpecifier(specifier, importerUrl);
+    }
+    if (!moduleUrl) return undefined;
+
+    let servedPathPromise = canonicalServedPaths?.get(moduleUrl.href);
+    if (!servedPathPromise) {
+      // Arrow replacer so `$`-sequences in servedRoot are treated literally, not
+      // as String.replace special patterns ($&, $', …).
+      servedPathPromise = this.#canonicalizeModuleUrl(moduleUrl)
+        .then(canonicalUrl => canonicalUrl.href.replace(this.#rootUrl.href, () => servedRoot));
+      canonicalServedPaths?.set(moduleUrl.href, servedPathPromise);
+    }
+    return servedPathPromise;
+  }
+
+  /**
+   * Rewrite the bare import specifiers in a served ES module to the canonical
+   * served URLs they resolve to, so module resolution no longer depends on the
+   * page's import map.
+   *
+   * Import maps are never applied to Web Workers, so a module worker's bare
+   * imports (e.g. `import { Signal } from '@damienmortini/signal'`) are
+   * unresolvable through the map the way a main-thread module's are. Resolving
+   * them in the module body — from the importer's own location, exactly like the
+   * import-map crawl does — makes the same module load in a worker too. Relative
+   * specifiers and full URLs (node:, data:, https:, …) are left untouched, and an
+   * unresolvable bare specifier is left as-is so the browser error still names it.
+   */
+  async rewriteModuleSpecifiers(
+    content: string,
+    importerSourceFilePath: string,
+    servedRoot: string,
+  ): Promise<string> {
+    const parentUrl = pathToFileURL(importerSourceFilePath);
+    const canonicalServedPaths = new Map<string, Promise<string>>();
+    const replacements = await Promise.all(
+      Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
+        const specifier = match[1];
+        // Skip relative specifiers and full URLs (node:, data:, https:, …).
+        if (RELATIVE_SPECIFIER_REGEX.test(specifier) || URL_SPECIFIER_REGEX.test(specifier)) return undefined;
+        const servedModulePath = await this.resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
+        if (!servedModulePath) return undefined;
+        // Splice only the specifier span, leaving the surrounding syntax intact.
+        const [start, end] = match.indices![1];
+        return { start, end, text: servedModulePath };
+      }),
+    );
+    // matchAll yields matches in source order, so the splices are already sorted.
+    const splices = replacements.filter(replacement => replacement !== undefined);
+    if (!splices.length) return content;
+    let result = '';
+    let cursor = 0;
+    for (const { start, end, text } of splices) {
+      result += content.slice(cursor, start) + text;
+      cursor = end;
+    }
+    return result + content.slice(cursor);
+  }
+
+  /**
+   * Build an import map for an HTML page by crawling its module graph.
+   *
+   * The injected map is what resolves bare specifiers in inline module scripts
+   * and computed dynamic imports (via /@resolve/); static specifiers in served
+   * module bodies are rewritten server-side by rewriteModuleSpecifiers instead,
+   * which is the only mechanism that reaches workers — they never receive the
+   * page's map. Each module's bare imports are
+   * resolved from that module's own location like Node does — pnpm does not
+   * hoist transitive dependencies of linked packages into the served root's
+   * node_modules — and canonicalized so every package maps to exactly one URL
+   * (browsers deduplicate modules by URL). If the same specifier resolves to a
+   * different target from some importer, that resolution is scoped to the
+   * importer's directory.
+   */
+  async buildImportMap(htmlContent: string, pageServedPath: string, servedRoot: string): Promise<ImportMapBuildResult> {
+    const importMap: ImportMap = { imports: {} };
+    const scopes: { [scopePrefix: string]: { [specifier: string]: string } } = {};
+    const visitedModulePaths = new Set<string>();
+    const visitedSourceDirectories = new Set<string>();
+    const dependencyPaths = new Set<string>();
+    // Many modules import the same package; canonicalize each resolved URL once.
+    const canonicalServedPaths = new Map<string, Promise<string>>();
+    // Crawl tasks run concurrently and append newly discovered modules as the
+    // graph unfolds; the drain loop below picks the additions up, so total crawl
+    // time tracks the longest import chain rather than the module count.
+    const crawlTasks: Promise<void>[] = [];
+
+    const enqueue = (servedModulePath: string): void => {
+      if (!CRAWLABLE_EXTENSIONS.has(extname(servedModulePath))) return;
+      if (visitedModulePaths.has(servedModulePath)) return;
+      visitedModulePaths.add(servedModulePath);
+      crawlTasks.push(crawlModule(servedModulePath));
+    };
+
+    const crawlModule = async (servedModulePath: string): Promise<void> => {
+      const sourceFilePath = await this.servedPathToSourcePath(servedModulePath, servedRoot);
+      dependencyPaths.add(sourceFilePath);
+      visitedSourceDirectories.add(toPosixPath(dirname(sourceFilePath)));
+      const content = await readFile(sourceFilePath, { encoding: 'utf-8' }).catch(() => null);
+      if (content === null) return;
+      await collectImports(content, sourceFilePath, servedModulePath);
+    };
+
+    const collectImports = async (content: string, importerSourceFilePath: string, importerServedPath: string): Promise<void> => {
+      const importerBaseUrl = new URL(importerServedPath, SERVED_PATH_BASE);
+      const parentUrl = pathToFileURL(importerSourceFilePath);
+      await Promise.all(Array.from(content.matchAll(IMPORT_STATEMENT_REGEX), async (match) => {
+        const specifier = match[1];
+        // Skip full URLs (node:, data:, https:, …) — nothing to map or crawl.
+        if (URL_SPECIFIER_REGEX.test(specifier)) return;
+        if (RELATIVE_SPECIFIER_REGEX.test(specifier)) {
+          enqueue(new URL(specifier, importerBaseUrl).pathname);
+          return;
+        }
+        const servedModulePath = await this.resolveSpecifierToServedPath(specifier, parentUrl, servedRoot, canonicalServedPaths);
+        // Leave an unresolvable specifier out of the map so the browser error
+        // names the real specifier.
+        if (!servedModulePath) {
+          console.log(`Unresolvable specifier "${specifier}" imported from ${importerServedPath}`);
+          return;
+        }
+        const mappedPath = importMap.imports[specifier];
+        if (mappedPath === undefined) {
+          importMap.imports[specifier] = servedModulePath;
+        }
+        else if (mappedPath !== servedModulePath) {
+          // Each importer records its own resolution, so whichever target wins
+          // the top-level entry, the others stay correct through their scope.
+          const scopePrefix = new URL('.', importerBaseUrl).pathname;
+          (scopes[scopePrefix] ??= {})[specifier] = servedModulePath;
+        }
+        enqueue(servedModulePath);
+      }));
+    };
+
+    const pageBaseUrl = new URL(pageServedPath, SERVED_PATH_BASE);
+    let hasModuleScripts = false;
+    let pageSourcePathPromise: Promise<string> | undefined;
+    for (const scriptMatch of htmlContent.matchAll(MODULE_SCRIPT_REGEX)) {
+      hasModuleScripts = true;
+      const sourceAttribute = scriptMatch[1].match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+      if (sourceAttribute) {
+        enqueue(new URL(sourceAttribute[1], pageBaseUrl).pathname);
+      }
+      else if (scriptMatch[2]) {
+        const inlineScriptBody = scriptMatch[2];
+        pageSourcePathPromise ??= this.servedPathToSourcePath(pageServedPath, servedRoot);
+        crawlTasks.push(pageSourcePathPromise
+          .then(pageSourceFilePath => collectImports(inlineScriptBody, pageSourceFilePath, pageServedPath)));
+      }
+    }
+    if (!hasModuleScripts) return { importMap, dependencyPaths: [...dependencyPaths] };
+
+    // Elements pushed while awaiting are still visited: the array iterator
+    // re-checks the length on every step.
+    for (const crawlTask of crawlTasks) {
+      await crawlTask;
+    }
+
+    // Import maps have no fallback for unmapped bare specifiers — a dynamic
+    // import() of a computed name throws before any network request unless the
+    // name is a map key. So every package name installed along the crawled
+    // modules' node_modules chains gets an entry; names the crawl did not
+    // already map point at the /@resolve/ route, which resolves them
+    // server-side at import time. Intentional boundary: a module reached only
+    // through /@resolve/ was never crawled, so names visible solely from its
+    // own non-hoisted node_modules are not enumerated.
+    const pageSourceFilePath = await (pageSourcePathPromise ?? this.servedPathToSourcePath(pageServedPath, servedRoot));
+    dependencyPaths.add(pageSourceFilePath);
+    visitedSourceDirectories.add(toPosixPath(dirname(pageSourceFilePath)));
+    const nodeModulesDirectories = new Set<string>();
+    for (const sourceDirectory of visitedSourceDirectories) {
+      let currentDirectory = sourceDirectory;
+      while (`${currentDirectory}/`.startsWith(this.#rootPrefix)) {
+        nodeModulesDirectories.add(`${currentDirectory}/node_modules`);
+        currentDirectory = dirname(currentDirectory);
+      }
+    }
+    const installedPackageNames = new Set<string>();
+    await Promise.all(Array.from(nodeModulesDirectories, async (nodeModulesDirectory) => {
+      const entryNames = await readdir(nodeModulesDirectory).catch((): string[] => []);
+      await Promise.all(entryNames.map(async (entryName) => {
+        if (entryName.startsWith('.')) return;
+        if (entryName.startsWith('@')) {
+          for (const scopedName of await readdir(`${nodeModulesDirectory}/${entryName}`).catch((): string[] => [])) {
+            if (!scopedName.startsWith('.')) installedPackageNames.add(`${entryName}/${scopedName}`);
+          }
+        }
+        else {
+          installedPackageNames.add(entryName);
+        }
+      }));
+    }));
+    for (const packageName of installedPackageNames) {
+      importMap.imports[packageName] ??= `${servedRoot}@resolve/${packageName}`;
+      // Subpath imports (`package/sub`) route through the resolver too.
+      importMap.imports[`${packageName}/`] ??= `${servedRoot}@resolve/${packageName}/`;
+    }
+    for (const nodeModulesDirectory of nodeModulesDirectories) {
+      dependencyPaths.add(nodeModulesDirectory);
+    }
+
+    if (Object.keys(scopes).length) importMap.scopes = scopes;
+    return { importMap, dependencyPaths: [...dependencyPaths] };
+  }
 }
