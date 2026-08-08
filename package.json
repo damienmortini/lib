@@ -3,7 +3,7 @@
   "version": "0.2.13",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.8.0",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "build": "pnpm -r run build",
     "build:watch": "pnpm -r run build -- --watch",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@damienmortini/eslint-config": "0.0.32",
-    "@damienmortini/server": "1.0.89",
+    "@damienmortini/server": "1.0.90",
     "@damienmortini/typescript-config": "0.0.18",
     "eslint": "10.5.0",
     "fast-glob": "^3.3.3",
