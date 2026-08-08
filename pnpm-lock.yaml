@@ -22,7 +22,7 @@ importers:
         specifier: 0.0.32
         version: link:packages/eslint-config
       '@damienmortini/server':
-        specifier: ^1.0.90
+        specifier: workspace:^
         version: link:packages/server
       '@damienmortini/typescript-config':
         specifier: 0.0.18
