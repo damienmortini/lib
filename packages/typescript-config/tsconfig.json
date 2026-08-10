@@ -2,15 +2,19 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
     "module": "NodeNext",
+    "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "incremental": true,
     "preserveWatchOutput": true,
     "strict": false,
-    "types": ["node", "dom-navigation", "dom-view-transitions", "@damienmortini/typescript-config"]
+    "types": ["node", "dom-navigation", "dom-view-transitions", "@webgpu/types", "@damienmortini/typescript-config"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/typescript-config",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/typescript-config",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -15,7 +15,8 @@
   "dependencies": {
     "@types/dom-navigation": "^1.0.7",
     "@types/dom-view-transitions": "^1.0.6",
-    "@types/node": "^25.9.3"
+    "@types/node": "^25.9.3",
+    "@webgpu/types": "^0.1.71"
   },
   "publishConfig": {
     "access": "public"
