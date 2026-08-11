@@ -92,8 +92,36 @@ export class Matrix4 extends Float32Array {
     return this;
   }
 
+  // GL/[-1,1] NDC depth range, via gl-matrix. Never feed this to WebGPU — use
+  // fromOffAxisFrustum (with a symmetric rect if you want a plain perspective) instead.
   fromPerspective(fov, aspectRatio, near, far) {
     mat4.perspective(this, fov, aspectRatio, near, far);
+    return this;
+  }
+
+  // gl-matrix's mat4.frustum() targets the GL/[-1,1] NDC depth range; WebGPU
+  // (and D3D) expect [0,1], so this reimplements the asymmetric frustum with
+  // that depth range instead of composing with gl-matrix's frustum/perspective.
+  fromOffAxisFrustum(left, right, bottom, top, near, far) {
+    const rl = 1 / (right - left);
+    const tb = 1 / (top - bottom);
+    const nf = 1 / (near - far);
+    this[0] = 2 * near * rl;
+    this[1] = 0;
+    this[2] = 0;
+    this[3] = 0;
+    this[4] = 0;
+    this[5] = 2 * near * tb;
+    this[6] = 0;
+    this[7] = 0;
+    this[8] = (right + left) * rl;
+    this[9] = (top + bottom) * tb;
+    this[10] = far * nf;
+    this[11] = -1;
+    this[12] = 0;
+    this[13] = 0;
+    this[14] = far * near * nf;
+    this[15] = 0;
     return this;
   }
 
