@@ -15,7 +15,6 @@
   "main": "index.js",
   "types": "index.d.ts",
   "dependencies": {
-    "@eslint/compat": "^2.1.0",
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "eslint": "10.5.0",
