@@ -1,0 +1,15 @@
+# Every day-to-day command here installs non-frozen, silently repairing a lockfile that
+# has fallen out of step with a package.json; only deploy installs frozen, and by then the
+# commit is on main. This runs the full install a consumer runs, on the pull request.
+name: Lockfile
+
+on:
+  pull_request:
+
+jobs:
+  frozen-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
