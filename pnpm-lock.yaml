@@ -25,7 +25,7 @@ importers:
         specifier: workspace:^
         version: link:packages/server
       '@damienmortini/typescript-config':
-        specifier: 0.0.18
+        specifier: workspace:^
         version: link:packages/typescript-config
       eslint:
         specifier: 10.5.0
@@ -373,10 +373,6 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-    devDependencies:
-      '@damienmortini/typescript-config':
-        specifier: 0.0.18
-        version: link:../typescript-config
 
   packages/router:
     devDependencies:
@@ -463,6 +459,9 @@ importers:
       '@types/node':
         specifier: ^25.9.3
         version: 25.9.4
+      '@webgpu/types':
+        specifier: ^0.1.71
+        version: 0.1.71
 
   packages/webgl:
     dependencies:
@@ -1342,6 +1341,9 @@ packages:
 
   '@vue/shared@3.5.38':
     resolution: {integrity: sha512-FTW0AFZNaK5/mOqvGBwVfUlNLU38TiQn4+DQgIFUnrBBJQ1crMJ82yeGQLV5jyKFsO8yRukpbuP7x+nRbH6aug==}
+
+  '@webgpu/types@0.1.71':
+    resolution: {integrity: sha512-mMy8/ODcKhab808co15eW+yN+HgXoQxRQHTiBV9Mrvl1r0ufnid7YOcI+gi4eUWSWl9ezD6TW2KXccrL8HCh2A==}
 
   '@yarnpkg/lockfile@1.1.0':
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
@@ -4753,6 +4755,8 @@ snapshots:
       '@vue/shared': 3.5.38
 
   '@vue/shared@3.5.38': {}
+
+  '@webgpu/types@0.1.71': {}
 
   '@yarnpkg/lockfile@1.1.0': {}
 
