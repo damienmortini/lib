@@ -26,7 +26,7 @@ importers:
         version: link:packages/server
       '@damienmortini/typescript-config':
         specifier: 0.0.18
-        version: link:packages/typescript-config
+        version: 0.0.18
       eslint:
         specifier: 10.5.0
         version: 10.5.0(supports-color@7.2.0)
@@ -376,7 +376,7 @@ importers:
     devDependencies:
       '@damienmortini/typescript-config':
         specifier: 0.0.18
-        version: link:../typescript-config
+        version: 0.0.18
 
   packages/router:
     devDependencies:
@@ -463,6 +463,9 @@ importers:
       '@types/node':
         specifier: ^25.9.3
         version: 25.9.4
+      '@webgpu/types':
+        specifier: ^0.1.71
+        version: 0.1.71
 
   packages/webgl:
     dependencies:
@@ -508,6 +511,9 @@ packages:
   '@babel/types@7.29.7':
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
+
+  '@damienmortini/typescript-config@0.0.18':
+    resolution: {integrity: sha512-P3ZhFHDs9eU1TfhnD5lBSaKtLr44/VV1Aa2C2jDAxCdauah4MPZDEg9ARHPerbKZmBmpb3i9IdST9dlEA1hMVA==}
 
   '@emnapi/core@1.4.5':
     resolution: {integrity: sha512-XsLw1dEOpkSX/WucdqUhPWP7hDxSvZiY+fsUC14h+FtQ2Ifni4znbBt8punRX+Uj2JG/uDb8nEHVKvrVlvdZ5Q==}
@@ -1342,6 +1348,9 @@ packages:
 
   '@vue/shared@3.5.38':
     resolution: {integrity: sha512-FTW0AFZNaK5/mOqvGBwVfUlNLU38TiQn4+DQgIFUnrBBJQ1crMJ82yeGQLV5jyKFsO8yRukpbuP7x+nRbH6aug==}
+
+  '@webgpu/types@0.1.71':
+    resolution: {integrity: sha512-mMy8/ODcKhab808co15eW+yN+HgXoQxRQHTiBV9Mrvl1r0ufnid7YOcI+gi4eUWSWl9ezD6TW2KXccrL8HCh2A==}
 
   '@yarnpkg/lockfile@1.1.0':
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
@@ -3863,6 +3872,12 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
+  '@damienmortini/typescript-config@0.0.18':
+    dependencies:
+      '@types/dom-navigation': 1.0.7
+      '@types/dom-view-transitions': 1.0.6
+      '@types/node': 25.9.4
+
   '@emnapi/core@1.4.5':
     dependencies:
       '@emnapi/wasi-threads': 1.0.4
@@ -4753,6 +4768,8 @@ snapshots:
       '@vue/shared': 3.5.38
 
   '@vue/shared@3.5.38': {}
+
+  '@webgpu/types@0.1.71': {}
 
   '@yarnpkg/lockfile@1.1.0': {}
 
