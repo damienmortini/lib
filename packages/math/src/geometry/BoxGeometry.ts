@@ -1,9 +1,12 @@
 // From https://github.com/mrdoob/three.js/blob/master/src/geometries/BoxGeometry.js
 
 export class BoxGeometry {
-  positions: Float32Array;
-  normals: Float32Array;
-  uvs: Float32Array;
+  // Pinned to the ArrayBuffer-backed generic (matches how `new Float32Array()`
+  // actually constructs it) — a bare `Float32Array` annotation defaults to the
+  // wider `ArrayBufferLike` param, which WebGPU's `writeBuffer` rejects.
+  positions: Float32Array<ArrayBuffer>;
+  normals: Float32Array<ArrayBuffer>;
+  uvs: Float32Array<ArrayBuffer>;
   indices: Uint32Array | Uint16Array;
 
   constructor({
