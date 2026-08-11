@@ -1,7 +1,7 @@
 export class PlaneGeometry {
-  positions: Float32Array;
-  normals: Float32Array;
-  uvs: Float32Array;
+  positions: Float32Array<ArrayBuffer>;
+  normals: Float32Array<ArrayBuffer>;
+  uvs: Float32Array<ArrayBuffer>;
   indices: Uint8Array | Uint16Array | Uint32Array;
 
   constructor({
