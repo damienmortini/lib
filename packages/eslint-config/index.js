@@ -1,17 +1,16 @@
-import { includeIgnoreFile } from '@eslint/compat';
 import pluginJs from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import { includeIgnoreFile } from 'eslint/config';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
-import { join } from 'path';
 import tseslint from 'typescript-eslint';
 
-const gitignorePath = join(process.cwd(), '.gitignore');
+import { findIgnoreFiles } from './find-ignore-files.js';
 
 export default [
-  {
-    ignores: includeIgnoreFile(gitignorePath).ignores, // Has to be done like this while https://github.com/eslint/eslint/issues/18723 is fixed.
-  },
+  // `gitignoreResolution` anchors each file's patterns to its own directory, so they keep
+  // meaning what git means by them however deep ESLint was invoked.
+  ...includeIgnoreFile(findIgnoreFiles(process.cwd()), { gitignoreResolution: true }),
   stylistic.configs.customize({
     semi: true,
   }),
