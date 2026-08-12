@@ -137,6 +137,22 @@ test('leaves a link dangling when the branch is what deleted the package it name
   assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/.bin/gone')), false);
 });
 
+test('repairs a link into the primary store, which is nothing a branch adds or deletes', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // What a non-hoisted `nodeLinker` writes: every dependency is a link into `.pnpm`, which
+  // `materialize` leaves out on purpose, so the copied link dangles here like any other.
+  const store = 'node_modules/.pnpm/dependency@1.0.0/node_modules/dependency';
+  await write(path.join(primaryRoot, store, 'index.js'), '');
+  await fs.symlink(path.join('.pnpm/dependency@1.0.0/node_modules/dependency'), path.join(primaryRoot, 'node_modules/dependency'));
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  // Inside the primary checkout, but the installed tree rather than the branch's own, so the
+  // worktree has nothing of its own to prefer and the primary answers for it.
+  assert.equal(await fs.realpath(path.join(worktreeRoot, 'node_modules/dependency')), path.join(primaryRoot, store));
+});
+
 test('reports a required package it cannot resolve, without blaming a link that did resolve', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
   await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
