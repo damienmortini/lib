@@ -115,6 +115,19 @@ async function materialize(source: string, target: string, copiedLinks: string[]
  * at a sibling package that may not have been linked yet, so a check made on the way past
  * would read it as dangling and repoint it at the primary — undoing exactly what copying
  * relative links verbatim is for.
+ *
+ * A branch that deletes a workspace package dangles its hoisted link exactly the same way,
+ * and must not be repaired: the primary still has the package, so pointing there would
+ * resolve an import the branch removed against code the branch does not have — the mirror
+ * image of a package the branch adds, and wrong for the same reason. The link cannot say
+ * which happened, since `submodules/lib/packages/x` and `packages/x` alike sit under the
+ * worktree root; where the primary resolves it can. Content the checkout itself holds is the
+ * branch's to delete, so the worktree's own copy is the only answer; content outside it is
+ * the same real directory either checkout would reach, which is what makes the primary a
+ * stand-in at all. A node_modules on the way is neither — installed contents, which no branch
+ * adds to or deletes from. Any of them, not just the checkout's own: `materialize` mirrors
+ * the nested trees pnpm writes under `packages/<name>/node_modules` too, and a non-hoisted
+ * layout puts a store in each one.
  */
 async function repairDanglingLinks(copiedLinks: string[], worktreeRoot: string, primaryRoot: string): Promise<string[]> {
   const unrepaired: string[] = [];
@@ -127,8 +140,13 @@ async function repairDanglingLinks(copiedLinks: string[], worktreeRoot: string, 
       unrepaired.push(link);
       continue;
     }
+    const primaryTarget = realpathSync(primaryPath);
+    const fromPrimaryRoot = path.relative(primaryRoot, primaryTarget).split(path.sep);
+    // Inside the checkout and outside any node_modules: content of the branch's own, which
+    // only the worktree's copy can answer for.
+    if (fromPrimaryRoot[0] !== '..' && !fromPrimaryRoot.includes('node_modules')) continue;
     await fs.rm(link, { force: true });
-    await fs.symlink(realpathSync(primaryPath), link);
+    await fs.symlink(primaryTarget, link);
   }
 
   return unrepaired;
