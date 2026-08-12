@@ -21,16 +21,18 @@ import { parseArgs } from 'node:util';
 
 import { currentCheckoutPath, setupWorktree, type WorktreeSetupOptions } from './index.ts';
 
-// Everything a repository declares — which is every option except `directory`, the path this
-// command is handed. Taken from the interface rather than spelled out a second time, and the
-// names below are checked against it, so renaming or dropping one there stops this from
-// compiling instead of leaving the error text promising something the package no longer takes.
+// Everything a repository declares — every option except `directory`, the path this command is
+// handed. A record keyed by the interface rather than a list beside it, because `Record` has to
+// be exhaustive in both directions: dropping or renaming an option in `WorktreeSetupOptions`
+// leaves a key here that no longer belongs, and *adding* one leaves a key missing. Either way
+// this stops compiling, which is the point — a list would accept the addition happily and leave
+// the CLI rejecting a legitimate option at runtime as one it has never heard of.
 type OptionName = keyof Omit<WorktreeSetupOptions, 'directory'>;
 
-const OPTION_NAMES = ['packageDirectories', 'requiredPackages', 'resolvedLinkDirectories'] as const satisfies readonly OptionName[];
+const DECLARED_OPTIONS = { packageDirectories: true, requiredPackages: true, resolvedLinkDirectories: true } satisfies Record<OptionName, true>;
 
 function isOptionName(name: string): name is OptionName {
-  return (OPTION_NAMES as readonly string[]).includes(name);
+  return name in DECLARED_OPTIONS;
 }
 
 function isStringArray(value: unknown): value is string[] {
@@ -47,7 +49,17 @@ function isStringArray(value: unknown): value is string[] {
  */
 function readOptions(worktreeRoot: string): WorktreeSetupOptions {
   const manifestPath = path.join(worktreeRoot, 'package.json');
-  const declared: unknown = JSON.parse(readFileSync(manifestPath, 'utf8')).worktreeSetup;
+
+  let declared: unknown;
+  try {
+    declared = JSON.parse(readFileSync(manifestPath, 'utf8')).worktreeSetup;
+  }
+  catch (error) {
+    // Named, because the raw message does not name it: a syntax error reports a position in a
+    // file it never mentions, which reads as this command being broken rather than the
+    // manifest it was pointed at.
+    throw new Error(`Cannot read ${manifestPath}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+  }
 
   if (declared === undefined) return {};
   if (typeof declared !== 'object' || declared === null || Array.isArray(declared)) {
@@ -58,7 +70,7 @@ function readOptions(worktreeRoot: string): WorktreeSetupOptions {
 
   for (const [name, value] of Object.entries(declared as Record<string, unknown>)) {
     if (!isOptionName(name)) {
-      throw new Error(`\`worktreeSetup.${name}\` in ${manifestPath} is not an option — expected ${OPTION_NAMES.join(', ')}.`);
+      throw new Error(`\`worktreeSetup.${name}\` in ${manifestPath} is not an option — expected ${Object.keys(DECLARED_OPTIONS).join(', ')}.`);
     }
     if (!isStringArray(value)) {
       throw new Error(`\`worktreeSetup.${name}\` in ${manifestPath} must be an array of strings.`);
