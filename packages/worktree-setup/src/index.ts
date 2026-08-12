@@ -213,7 +213,17 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
       }
 
       const { name } = JSON.parse(await fs.readFile(path.join(worktreeRoot, packageDirectory, 'package.json'), 'utf8'));
-      const scopedLink = path.join(worktreeRoot, 'node_modules', name);
+      const modulesRoot = path.join(worktreeRoot, 'node_modules');
+      const scopedLink = typeof name === 'string' ? path.join(modulesRoot, name) : '';
+      // `name` is whatever the branch being set up wrote in a package.json, and two lines
+      // below it drives a recursive forced delete. `path.join` collapses `..`, so a name
+      // spelled to climb out of the tree would aim that delete anywhere the user can write —
+      // and a worktree is often somebody else's branch, checked out to review it. Contained
+      // here rather than trusted, and the same check catches a package.json with no name at
+      // all, which a stray fixture under `packageDirectories` can perfectly well be.
+      if (!scopedLink.startsWith(modulesRoot + path.sep)) {
+        throw new Error(`${packageDirectory}/package.json declares an unusable name (${JSON.stringify(name)}): the workspace link it asks for would land outside ${modulesRoot}.`);
+      }
       await fs.mkdir(path.dirname(scopedLink), { recursive: true });
       await fs.rm(scopedLink, { recursive: true, force: true });
       await fs.symlink(path.relative(path.dirname(scopedLink), path.join(worktreeRoot, packageDirectory)), scopedLink);
@@ -223,6 +233,16 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
   const unrepaired = await repairDanglingLinks(copiedLinks, worktreeRoot, primaryRoot);
 
   console.log(`Linked ${linked} node_modules ${linked === 1 ? 'directory' : 'directories'} from ${primaryRoot}.`);
+
+  // Said out loud rather than left to the failure below, which only mentions these when
+  // something else went wrong at the same time. Not a failure on its own: a link reaches
+  // this list by dangling in the primary checkout too — a stale `.bin` entry pnpm left
+  // behind, most of the time — so the worktree is no worse off than the tree it mirrors,
+  // and failing over it would blame the branch for the state of the checkout beside it.
+  // Worth a line all the same, because it is the answer when something later will not run.
+  if (unrepaired.length > 0) {
+    console.log(`${unrepaired.length} copied link(s) dangle here and in ${primaryRoot} too, so they were left alone.`);
+  }
 
   const missingPackages = requiredPackages.filter(name => !existsSync(path.join(worktreeRoot, 'node_modules', name)));
   const danglingLinks = (await Promise.all(resolvedLinkDirectories.map(directory => danglingLinksIn(worktreeRoot, directory)))).flat();

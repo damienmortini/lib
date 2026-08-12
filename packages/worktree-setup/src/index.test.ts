@@ -148,6 +148,39 @@ test('reports committed links that dangle, which repairing node_modules does not
   );
 });
 
+test('reports a copied link it could not repair, alongside what actually failed', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // Dangles in the primary checkout as well — a stale `.bin` entry, the shape this list is
+  // made of in practice — so there is nothing to point it at.
+  await fs.mkdir(path.join(primaryRoot, 'node_modules/.bin'), { recursive: true });
+  await fs.symlink('../removed/bin/removed.js', path.join(primaryRoot, 'node_modules/.bin/removed'));
+
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot, requiredPackages: ['@scope/absent'] }),
+    /1 copied link\(s\) could not be pointed at the primary checkout either/,
+  );
+});
+
+test('refuses a package name that would point the delete outside node_modules', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+  await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
+
+  const escapee = path.join(path.dirname(primaryRoot), 'do-not-delete-me');
+  await write(path.join(escapee, 'kept.txt'), 'still here');
+  await write(
+    path.join(worktreeRoot, 'packages/malicious/package.json'),
+    JSON.stringify({ name: `../../${path.basename(escapee)}` }),
+  );
+
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] }),
+    /declares an unusable name/,
+  );
+  // The point of the guard: `fs.rm` never ran against it.
+  assert.equal(existsSync(path.join(escapee, 'kept.txt')), true);
+});
+
 test('refuses to run in the primary checkout, whose node_modules it would delete', async () => {
   const { primaryRoot } = await checkouts();
   await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
