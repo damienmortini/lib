@@ -112,3 +112,14 @@ test('names a path that is not there, rather than failing inside git', async () 
   assert.equal(status, 1);
   assert.match(stderr, new RegExp(`${absent} does not exist`));
 });
+
+test('says a path is not a directory, which git would report as a bare ENOTDIR', async () => {
+  const { primaryRoot } = await checkouts();
+  const file = path.join(primaryRoot, 'package.json');
+
+  const { status, stderr } = run([file], primaryRoot);
+
+  assert.equal(status, 1);
+  assert.match(stderr, new RegExp(`${file} is not a directory`));
+  assert.doesNotMatch(stderr, /ENOTDIR/);
+});

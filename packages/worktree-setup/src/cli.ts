@@ -15,7 +15,7 @@
 // means a branch changing its own options is read from the branch, which is where a package
 // it adds is declared.
 
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -93,7 +93,13 @@ try {
   // Defaults to the working directory, so the command still works run from inside a worktree
   // by a repository that keeps its own copy of this package, as lib does.
   const directory = positionals[0] ?? process.cwd();
-  if (!existsSync(directory)) throw new Error(`${path.resolve(directory)} does not exist.`);
+  // Both answered here rather than left to git, which is handed this as a `cwd` and reports a
+  // bare ENOENT or ENOTDIR naming neither the path nor what was expected of it.
+  const directoryStatus = statSync(directory, { throwIfNoEntry: false });
+  if (!directoryStatus) throw new Error(`${path.resolve(directory)} does not exist.`);
+  if (!directoryStatus.isDirectory()) {
+    throw new Error(`${path.resolve(directory)} is not a directory — this takes the worktree to set up, or a directory inside it.`);
+  }
 
   const worktreeRoot = currentCheckoutPath(directory);
   await setupWorktree({ ...readOptions(worktreeRoot), directory: worktreeRoot });
