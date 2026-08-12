@@ -19,7 +19,7 @@
     "update": "pnpm i",
     "upgrade": "syncpack update && syncpack fix && pnpm i",
     "version": "lerna version",
-    "worktree:setup": "node script/worktree-setup.ts"
+    "worktree:setup": "node packages/worktree-setup/src/cli.ts"
   },
   "dependencies": {
     "es-module-shims": "^2.8.1"
@@ -36,5 +36,14 @@
     "sort-package-json": "4.0.0",
     "syncpack": "15.3.1",
     "typescript": "6.0.3"
+  },
+  "worktreeSetup": {
+    "packageDirectories": [
+      "packages"
+    ],
+    "requiredPackages": [
+      "@damienmortini/eslint-config",
+      "@damienmortini/typescript-config"
+    ]
   }
 }
