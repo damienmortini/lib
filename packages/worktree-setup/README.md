@@ -67,6 +67,7 @@ worktree already carries.
 ```json
 {
   "devDependencies": { "@damienmortini/worktree-setup": "workspace:*" },
+  "scripts": { "worktree:setup": "worktree-setup" },
   "worktreeSetup": {
     "packageDirectories": ["packages"],
     "requiredPackages": ["@damienmortini/typescript-config", "@damienmortini/eslint-config"]
@@ -74,12 +75,30 @@ worktree already carries.
 }
 ```
 
-That is the whole adoption — the options this repository needs, and nothing else. A name the
-`worktreeSetup` key does not know is refused rather than ignored, because a repository states
-what it needs here and nowhere else now: a mistyped `packageDirectory` that silently asked for
-nothing would report a worktree ready that cannot run its own gates. JSON carries no comments,
-so a repository whose choice needs explaining — including the choice *not* to set an option —
-records that wherever it documents itself.
+Three entries and a prose section: that is the whole adoption, and none of the four is
+optional. `~/graph` is the worked example: its `package.json` carries those three as written
+above, and its `README.md` opens with the section described below.
+
+The `worktree:setup` script is the entry point the repository is asked for by name. Whoever
+sets up a worktree — an agent following the repository's own instructions — reads `scripts`
+and runs `pnpm run worktree:setup <worktree-path>`; the bin under `node_modules/.bin` is what
+that resolves to, not something a caller should have to know is installed. The alias is also
+where a repository that runs this differently puts the difference, so the entry point stays
+one name across all of them.
+
+A name the `worktreeSetup` key does not know is refused rather than ignored, because a
+repository states what it needs here and nowhere else now: a mistyped `packageDirectory` that
+silently asked for nothing would report a worktree ready that cannot run its own gates.
+
+JSON carries no comments, so the choices are recorded in prose, in the file the repository
+addresses its own readers from — `README.md` in `~/graph` and `~/damo`, `AGENTS.md` in
+`~/playground`. A section there says why each option is set *and why an unset one is unset*:
+`~/graph` records that it sets no `resolvedLinkDirectories` because none of its gates resolves
+through a submodule, and `~/playground` that it sets no `packageDirectories` because it owns no
+packages of its own. Without it the next reader finds an absence, which reads the same whether it was
+decided or forgotten, and re-derives the answer or changes it. The same section is where
+anything the repository does *on top of* the link tree belongs — `~/damo`'s build, in `~/damo`
+— because that step is the repository's, not this package's and not its caller's.
 
 `workspace:*` rather than a pinned version. This package is `private`, so it is never
 published; a pinned `0.0.0` would stop matching the first time `lerna version` bumps it and
@@ -95,6 +114,10 @@ source by path instead, which needs nothing installed anywhere:
 ```sh
 node ~/lib-todo-42-something/packages/worktree-setup/src/cli.ts ~/lib-todo-42-something
 ```
+
+That is what its `worktree:setup` alias runs — `node packages/worktree-setup/src/cli.ts`, from
+the worktree rather than from the primary, since the source to run is the branch's. The
+exception lives in the alias, which is why the entry point is still the same name here.
 
 ## Verifying a change against an adopter
 
