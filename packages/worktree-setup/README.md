@@ -95,8 +95,8 @@ addresses its own readers from — `README.md` in `~/graph` and `~/damo`, `AGENT
 `~/playground`. A section there says why each option is set *and why an unset one is unset*:
 `~/graph` records that it sets no `resolvedLinkDirectories` because none of its gates resolves
 through a submodule, and `~/playground` that it sets no `packageDirectories` because it owns no
-packages of its own. Without it the next reader finds an absence, which reads the same whether it was
-decided or forgotten, and re-derives the answer or changes it. The same section is where
+packages of its own. Without it the next reader finds an absence, which reads the same whether
+it was decided or forgotten, and re-derives the answer or changes it. The same section is where
 anything the repository does *on top of* the link tree belongs — `~/damo`'s build, in `~/damo`
 — because that step is the repository's, not this package's and not its caller's.
 
