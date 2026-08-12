@@ -124,8 +124,10 @@ async function materialize(source: string, target: string, copiedLinks: string[]
  * worktree root; where the primary resolves it can. Content the checkout itself holds is the
  * branch's to delete, so the worktree's own copy is the only answer; content outside it is
  * the same real directory either checkout would reach, which is what makes the primary a
- * stand-in at all. Its node_modules is neither — that is the installed store, which no branch
- * adds to or deletes from.
+ * stand-in at all. A node_modules on the way is neither — installed contents, which no branch
+ * adds to or deletes from. Any of them, not just the checkout's own: `materialize` mirrors
+ * the nested trees pnpm writes under `packages/<name>/node_modules` too, and a non-hoisted
+ * layout puts a store in each one.
  */
 async function repairDanglingLinks(copiedLinks: string[], worktreeRoot: string, primaryRoot: string): Promise<string[]> {
   const unrepaired: string[] = [];
