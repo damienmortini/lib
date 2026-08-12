@@ -4,50 +4,13 @@
 // prove nothing about the tree these repositories actually get.
 
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
-import { after, test } from 'node:test';
+import { test } from 'node:test';
 
 import { setupWorktree } from './index.ts';
-
-const temporaryRoots: string[] = [];
-
-after(async () => {
-  for (const root of temporaryRoots) await fs.rm(root, { recursive: true, force: true });
-});
-
-function git(gitArguments: string[], directory: string): void {
-  execFileSync('git', gitArguments, { cwd: directory, stdio: 'ignore' });
-}
-
-async function write(filePath: string, contents: string): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, contents);
-}
-
-/**
- * A primary checkout with one commit and a linked worktree beside it, both under a
- * directory that is removed afterwards. Resolved, so the paths match what the setup reads
- * back from git on a platform where the temporary directory is itself a symlink.
- */
-async function checkouts(): Promise<{ primaryRoot: string; worktreeRoot: string }> {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'worktree-setup-')));
-  temporaryRoots.push(root);
-
-  const primaryRoot = path.join(root, 'repository');
-  await write(path.join(primaryRoot, 'package.json'), '{"name":"repository"}');
-  git(['init', '--initial-branch=main'], primaryRoot);
-  git(['add', '.'], primaryRoot);
-  git(['-c', 'user.email=test@example.com', '-c', 'user.name=Test', 'commit', '-m', 'initial'], primaryRoot);
-
-  const worktreeRoot = path.join(root, 'repository-worktree');
-  git(['worktree', 'add', '-b', 'branch', worktreeRoot], primaryRoot);
-
-  return { primaryRoot, worktreeRoot };
-}
+import { checkouts, write } from './test-checkouts.ts';
 
 test('mirrors the primary checkout, copying relative links and skipping pnpm bookkeeping', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
@@ -80,7 +43,6 @@ test('mirrors the primary checkout, copying relative links and skipping pnpm boo
 test('links a package the branch adds, which the primary checkout knows nothing about', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
 
-  await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
   await write(path.join(worktreeRoot, 'packages/added/package.json'), '{"name":"@scope/added"}');
   // Nested where pnpm nests what it cannot hoist, and only in the primary.
   await write(path.join(primaryRoot, 'packages/added/node_modules/dependency/index.js'), '');
@@ -115,8 +77,7 @@ test('points a copied link that dangles here at the primary checkout', async () 
 });
 
 test('reports a required package it cannot resolve, without blaming a link that did resolve', async () => {
-  const { primaryRoot, worktreeRoot } = await checkouts();
-  await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
+  const { worktreeRoot } = await checkouts();
 
   await assert.rejects(
     setupWorktree({ directory: worktreeRoot, requiredPackages: ['@scope/absent'] }),
@@ -133,7 +94,6 @@ test('reports a required package it cannot resolve, without blaming a link that 
 
 test('reports committed links that dangle, which repairing node_modules does not fix', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
-  await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
   await fs.mkdir(path.join(worktreeRoot, 'submodules'), { recursive: true });
   await fs.symlink('../../sibling', path.join(worktreeRoot, 'submodules/sibling'));
 
@@ -164,7 +124,6 @@ test('reports a copied link it could not repair, alongside what actually failed'
 
 test('refuses a package name that would point the delete outside node_modules', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
-  await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
 
   const escapee = path.join(path.dirname(primaryRoot), 'do-not-delete-me');
   await write(path.join(escapee, 'kept.txt'), 'still here');
@@ -183,7 +142,6 @@ test('refuses a package name that would point the delete outside node_modules', 
 
 test('refuses to run in the primary checkout, whose node_modules it would delete', async () => {
   const { primaryRoot } = await checkouts();
-  await fs.mkdir(path.join(primaryRoot, 'node_modules'), { recursive: true });
 
   await assert.rejects(setupWorktree({ directory: primaryRoot }), /is the primary checkout/);
   assert.equal(existsSync(path.join(primaryRoot, 'node_modules')), true);
