@@ -134,7 +134,14 @@ async function repairDanglingLinks(copiedLinks: string[], worktreeRoot: string, 
   return unrepaired;
 }
 
-/** Directories holding a package.json under `directory`, relative to the worktree root. */
+/**
+ * Directories holding a package.json under `directory`, relative to the worktree root.
+ *
+ * The walk carries on past a package it finds rather than stopping there, because pnpm's
+ * `packages/**` glob matches a package nested inside another one. None of the repositories
+ * using this has such a package today, which is exactly why a shallow scan would look
+ * correct here — and would then quietly stop linking the first nested package somebody adds.
+ */
 async function findPackageDirectories(worktreeRoot: string, directory: string): Promise<string[]> {
   const directories: string[] = [];
 
