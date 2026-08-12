@@ -108,10 +108,10 @@ the adopter:
 node ~/lib-todo-42-something/packages/worktree-setup/src/cli.ts ~/damo-todo-7-other
 ```
 
-That bypasses nothing. The installed `.bin/worktree-setup` is a symlink to this same `src/cli.ts`,
-and an adopter contributes no code — only the `worktreeSetup` data read out of the worktree being
-set up — so the two runs differ in nothing but which file `node` was handed. Repeat it against a
-worktree of each adopter and the branch has been tried against all four real repositories.
+That bypasses nothing. The installed `.bin/worktree-setup` runs this same `src/cli.ts`, and an
+adopter contributes no code — only the `worktreeSetup` data read out of the worktree being set
+up — so the two runs differ in nothing but which file `node` was handed. Repeat it against a
+worktree of each adopter and the branch has been tried against every repository that uses it.
 
 ## Options
 
