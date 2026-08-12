@@ -96,6 +96,23 @@ source by path instead, which needs nothing installed anywhere:
 node ~/lib-todo-42-something/packages/worktree-setup/src/cli.ts ~/lib-todo-42-something
 ```
 
+## Verifying a change against an adopter
+
+The same form points an *adopter's* setup at an unmerged copy, which is the only way to try a
+change where a wrong verdict about submodules or link trees actually bites. `~/damo`'s
+`node_modules/.bin/worktree-setup` resolves through `submodules/lib` to the primary checkout, so
+it always runs `main`; hand `node` the branch's `cli.ts` instead and point it at a worktree of
+the adopter:
+
+```sh
+node ~/lib-todo-42-something/packages/worktree-setup/src/cli.ts ~/damo-todo-7-other
+```
+
+That bypasses nothing. The installed `.bin/worktree-setup` is a symlink to this same `src/cli.ts`,
+and an adopter contributes no code — only the `worktreeSetup` data read out of the worktree being
+set up — so the two runs differ in nothing but which file `node` was handed. Repeat it against a
+worktree of each adopter and the branch has been tried against all four real repositories.
+
 ## Options
 
 `directory` is the path the command is handed, defaulting to the working directory. The rest
