@@ -38,7 +38,7 @@ need to fetch a `package.json` and compute a path by hand:
 ```js
 import { Signal } from '@damienmortini/signal';
 
-const module = await import(`@damo/${name}-element/demo`); // computed names and subpaths too
+const module = await import(`@app/${name}-element/demo`); // computed names and subpaths too
 ```
 
 Only bare specifiers go through the map. Relative imports must carry real
@@ -72,14 +72,14 @@ and their imports, transitively — and adds:
   before any network request. Those names map to the reserved
   `/@resolve/<name>` route instead of a file, which keeps them lazy.
 - **One trailing-slash prefix entry per installed package** (`<name>/` →
-  `/@resolve/<name>/`), so subpath imports (`@damo/number-input-element/demo`)
+  `/@resolve/<name>/`), so subpath imports (`@app/number-input-element/demo`)
   resolve as well.
 
 `/@resolve/<specifier>` resolves the specifier server-side **at import time**
 — relative to the importing page, taken from the `Referer` — and answers with a
 small re-export shim pointing at the canonical served URL (re-exporting the
 default too when the target declares one). That is what makes a *computed*
-`import('@damo/' + name)` work: the browser only needs the name to be a map
+`import('@app/' + name)` work: the browser only needs the name to be a map
 key, and the actual resolution happens on the request.
 
 Static bare imports inside served module bodies are rewritten to resolved URLs

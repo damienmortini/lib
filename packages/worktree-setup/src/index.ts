@@ -1,16 +1,17 @@
 // A fresh git worktree has no node_modules at all, so nothing resolves in it — not a
 // workspace package, not a third-party dependency, not a local binary. Installing into the
-// worktree is not an option either: these repositories reach their siblings through
-// `submodules/*` symlinks, so an install there writes outside the worktree and into the
-// checkouts other agents are working in. This mirrors the primary checkout's node_modules
+// worktree is not an option either: a workspace that reaches sibling checkouts through
+// committed `submodules/*` symlinks writes outside the worktree when it installs, and into
+// the checkouts other people are working in. This mirrors the primary checkout's node_modules
 // instead: every installed package is symlinked across, while scope directories (`@scope`,
 // `@types`, …) and `.bin` are recreated with their original relative links, so workspace
 // specifiers resolve to the worktree's own packages rather than the primary checkout's —
 // including packages the branch adds, which the primary checkout knows nothing about.
 //
-// One copy, four repositories. Everything below is the same everywhere; what differs
-// between them is passed in as options, so a fix lands once rather than being re-derived
-// per repository — which is how the copies drifted apart in the first place.
+// One copy, every repository that uses it. Everything below is the same everywhere; what
+// differs between them is passed in as options, so a fix lands once rather than being
+// re-derived per repository — which is how the per-repository copies drifted apart in the
+// first place.
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
@@ -109,7 +110,7 @@ async function materialize(source: string, target: string, copiedLinks: string[]
  * The primary resolves them, so its own path is what these are pointed at — the same real
  * directory it reads. Repointing rather than rewriting `submodules/*`: those are tracked
  * files, and editing them would leave every worktree permanently dirty with a modification
- * an agent could commit.
+ * somebody could commit.
  *
  * Run once the whole tree is built rather than as each link is made: a `.bin` entry points
  * at a sibling package that may not have been linked yet, so a check made on the way past
@@ -120,7 +121,7 @@ async function materialize(source: string, target: string, copiedLinks: string[]
  * and must not be repaired: the primary still has the package, so pointing there would
  * resolve an import the branch removed against code the branch does not have — the mirror
  * image of a package the branch adds, and wrong for the same reason. The link cannot say
- * which happened, since `submodules/lib/packages/x` and `packages/x` alike sit under the
+ * which happened, since `submodules/<name>/packages/x` and `packages/x` alike sit under the
  * worktree root; where the primary resolves it can. Content the checkout itself holds is the
  * branch's to delete, so the worktree's own copy is the only answer; content outside it is
  * the same real directory either checkout would reach, which is what makes the primary a
@@ -214,7 +215,7 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
 
   // The worktree's own packages drive this, not the primary checkout's: a package added on
   // the branch exists in neither the primary's tree nor its hoisted scope, and used to be
-  // the one thing agents still had to link by hand. Resolving to the primary instead is
+  // the one thing still linked by hand. Resolving to the primary instead is
   // also what silently breaks a dev server that serves the worktree — a package reached
   // through a path outside that root renders as a blank element.
   for (const packageRoot of packageDirectories) {

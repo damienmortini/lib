@@ -121,10 +121,10 @@ type ServerOptions = {
   proxy?: ProxyConfig;
   auth?: string;
   /**
-   * Mount the server under a URL sub-path (e.g. `damo` → served at `/damo/`).
+   * Mount the server under a URL sub-path (e.g. `app` → served at `/app/`).
    * Incoming paths are stripped of the prefix before file lookup and proxy
    * matching, so `proxy` keys must be written WITHOUT the base (use `/api`, not
-   * `/damo/api`). Defaults to root. A reverse proxy can instead announce the
+   * `/app/api`). Defaults to root. A reverse proxy can instead announce the
    * prefix per request with the `X-Forwarded-Prefix` header, which overrides
    * this option for that request — so the same server works unprefixed on
    * localhost and prefixed behind the proxy at the same time. The header is
@@ -171,7 +171,7 @@ async function loadOrCreateCertificate(certificateAddresses: string[]): Promise<
     const certificateAuthorityExpirationDate = new Date();
     certificateAuthorityExpirationDate.setFullYear(certificateAuthorityExpirationDate.getFullYear() + 10);
 
-    const certificateAuthorityPems = await generateSelfSignedCertificate([{ name: 'commonName', value: `Damo Development CA (${hostname()})` }],
+    const certificateAuthorityPems = await generateSelfSignedCertificate([{ name: 'commonName', value: `Development CA (${hostname()})` }],
       {
         keySize: 2048,
         algorithm: 'sha256',
@@ -281,9 +281,9 @@ export class Server {
 
     const expectedAuthHeader = auth ? `Basic ${Buffer.from(auth).toString('base64')}` : null;
 
-    // When set, the server is mounted under a sub-path (e.g. `damo`): incoming
-    // request paths are stripped of the `/damo` prefix before file lookup, and
-    // resolved bare-specifier imports are emitted as `/damo/...` so the browser
+    // When set, the server is mounted under a sub-path (e.g. `app`): incoming
+    // request paths are stripped of the `/app` prefix before file lookup, and
+    // resolved bare-specifier imports are emitted as `/app/...` so the browser
     // requests them back under the same prefix instead of the origin root.
     const configuredBasePrefix = normalizeBasePrefix(base) ?? '';
     if (base && !configuredBasePrefix) {
@@ -444,8 +444,8 @@ export class Server {
       const basePrefix = normalizeBasePrefix(headers['x-forwarded-prefix']) ?? configuredBasePrefix;
       const servedRoot = basePrefix ? `${basePrefix}/` : '/';
 
-      // Strip the mount prefix (e.g. `/damo`) so file serving and proxy matching
-      // work off the origin root. `/damo` and `/damo/` both collapse to `/` → the
+      // Strip the mount prefix (e.g. `/app`) so file serving and proxy matching
+      // work off the origin root. `/app` and `/app/` both collapse to `/` → the
       // directory index.
       const servedPath = stripBasePrefix(requestPathString ?? '/', basePrefix);
 
@@ -712,8 +712,8 @@ export class Server {
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
          * e.g. `node_modules/foo/bar/package.json` → main resolved from foo's `exports['./bar']`.
          * Still required by pages that bypass the import map and resolve manually by
-         * fetching `<package>/<subpath>/package.json` and importing its `main` — damo's
-         * index.html lazy-loads subpath entries like `@damo/playground-element/demo` this way.
+         * fetching `<package>/<subpath>/package.json` and importing its `main` — an application's
+         * index.html lazy-loads subpath entries like `@app/example-element/demo` this way.
          */
         // Matched on the request path: it always starts at the served root,
         // whereas the disk path is prefixed with the root's own directory names.
