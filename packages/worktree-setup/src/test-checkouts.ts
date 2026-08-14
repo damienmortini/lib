@@ -1,6 +1,6 @@
 // The fixture both test files build on: a real primary checkout with a real linked worktree
 // beside it. Shared rather than copied, because that is what this package is about — and a
-// second copy of it would drift the same way the four repositories' copies did.
+// second copy of it would drift the same way the per-repository copies did.
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
