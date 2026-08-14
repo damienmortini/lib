@@ -159,7 +159,7 @@ const URL_SPECIFIER_REGEX = /^[a-z][a-z0-9+.-]*:/i;
 // Dummy origin for resolving relative specifiers against served paths.
 const SERVED_PATH_BASE = 'http://internal';
 
-// Strip a mount prefix (e.g. `/damo`) from a request path, preserving any query
+// Strip a mount prefix (e.g. `/app`) from a request path, preserving any query
 // string, so file serving and proxy rules work off the origin root. Returns the
 // path unchanged when it doesn't fall under the prefix (or no base is set).
 export function stripBasePrefix(path: string, basePrefix: string): string {

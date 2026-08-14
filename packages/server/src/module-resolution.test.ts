@@ -42,7 +42,7 @@ describe('packages reached through a symlinked node_modules', () => {
 });
 
 describe('packages reached through a submodule mounted outside the served root', () => {
-  // A playground-style root whose `submodules/repository` links to a sibling
+  // An application root whose `submodules/repository` links to a sibling
   // checkout: the same package is reachable directly and through a consumer's
   // own node_modules, and both must land on one URL or the module evaluates
   // twice and customElements.define() throws on the second run.
@@ -53,7 +53,7 @@ describe('packages reached through a submodule mounted outside the served root',
   before(async () => {
     temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-mount-test-'));
     const repositoryPath = join(temporaryRoot, 'repository');
-    const servedRootPath = join(temporaryRoot, 'playground');
+    const servedRootPath = join(temporaryRoot, 'application');
     for (const packageName of ['example', 'consumer']) {
       await mkdir(join(repositoryPath, 'packages', packageName, 'dist'), { recursive: true });
       await writeFile(join(repositoryPath, 'packages', packageName, 'package.json'), `{"name":"@test/${packageName}","exports":"./dist/index.js"}`);
