@@ -34,7 +34,7 @@ test('reads the options the worktree declares, from the primary checkout', async
   const { status, stdout } = run([worktreeRoot], primaryRoot);
 
   assert.equal(status, 0);
-  assert.match(stdout, /Linked 1 node_modules directory/);
+  assert.match(stdout, /1 workspace package, 0 declared dependencies verified/);
   assert.equal(
     await fs.realpath(path.join(worktreeRoot, 'node_modules/@scope/added')),
     path.join(worktreeRoot, 'packages/added'),
@@ -45,10 +45,12 @@ test('mirrors the tree with no options at all, which a repository may legitimate
   const { primaryRoot, worktreeRoot } = await checkouts();
   await write(path.join(primaryRoot, 'node_modules/installed/index.js'), '');
 
-  const { status } = run([worktreeRoot], primaryRoot);
+  const { status, stdout } = run([worktreeRoot], primaryRoot);
 
   assert.equal(status, 0);
   assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/installed')), true);
+  // Even at zero members the line confirms the mirror ran, rather than reading as nothing done.
+  assert.match(stdout, /Linked the worktree against .*: 0 workspace packages/);
 });
 
 test('takes the working directory when handed no path, for a repository running its own copy', async () => {
