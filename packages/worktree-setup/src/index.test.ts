@@ -101,6 +101,25 @@ test('refuses a pnpm-workspace.yaml shape it cannot read, rather than linking le
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /exclusion glob/);
 });
 
+test('refuses a glob that walks out of the worktree, wherever it is declared', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // A readable manifest right where the traversal would land, so a missed refusal would
+  // really link it.
+  await write(path.join(path.dirname(primaryRoot), 'outside/package.json'), '{"name":"@scope/outside"}');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'../../outside\'\n');
+
+  await assert.rejects(setupWorktree({ directory: worktreeRoot }), /glob leaving the worktree/);
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/outside')), false);
+
+  // The `packageDirectories` option comes from the same branch and walks the same way.
+  await fs.rm(path.join(worktreeRoot, 'pnpm-workspace.yaml'));
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot, packageDirectories: ['..'] }),
+    /glob leaving the worktree/,
+  );
+});
+
 test('refuses a glob it cannot expand, rather than matching it against nothing', async () => {
   const { worktreeRoot } = await checkouts();
   await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/web-*\'\n');

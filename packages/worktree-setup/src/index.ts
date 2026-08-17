@@ -245,6 +245,15 @@ async function expandWorkspaceGlob(worktreeRoot: string, glob: string): Promise<
   // Checked before expanding anything, so the refusal cannot be skipped by an earlier
   // segment matching no directory at all.
   for (const segment of glob.split('/')) {
+    // A glob comes from the worktree being set up — often somebody else's branch, checked
+    // out to review it — and its literal segments feed `path.join`, which collapses `..`.
+    // Contained the same way a manifest's name is: a walk that leaves the worktree would
+    // link members from anywhere the user can read. A committed symlink pointing outside is
+    // still followed — reaching outside is what it is for, and it is content the repository
+    // itself holds.
+    if (segment === '' || segment === '.' || segment === '..') {
+      throw new Error(`pnpm-workspace.yaml declares a glob leaving the worktree (${glob}), which this setup does not support.`);
+    }
     if (segment !== '*' && segment !== '**' && /[*?[\]{}]/.test(segment)) {
       throw new Error(`pnpm-workspace.yaml declares a glob this setup cannot expand (${glob}) — only literal path segments, \`*\`, and \`**\` are supported.`);
     }
