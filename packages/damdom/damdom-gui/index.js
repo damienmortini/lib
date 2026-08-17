@@ -15,13 +15,13 @@ const tagNameResolvers = new Map([
     (attributes) => {
       return (
         (typeof attributes.value === 'string'
-        && ((attributes.value.length === 7 && attributes.value.startsWith('#'))
-        || attributes.value.startsWith('rgb')
-        || attributes.value.startsWith('hsl')))
-        || (typeof attributes.value === 'object'
-        && attributes.value.r !== undefined
-        && attributes.value.g !== undefined
-        && attributes.value.b !== undefined)
+          && ((attributes.value.length === 7 && attributes.value.startsWith('#'))
+            || attributes.value.startsWith('rgb')
+            || attributes.value.startsWith('hsl')))
+          || (typeof attributes.value === 'object'
+            && attributes.value.r !== undefined
+            && attributes.value.g !== undefined
+            && attributes.value.b !== undefined)
       );
     },
   ],

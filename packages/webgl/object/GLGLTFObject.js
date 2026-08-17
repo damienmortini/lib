@@ -113,11 +113,11 @@ export default class GLGLTFObject extends GLTFNode {
             attributes: vertexAttributes,
             indices: primitive.indices
               ? new GLVertexAttribute({
-                gl: this.gl,
-                ...primitive.indices,
-                data: bufferViewBufferMap.get(primitive.indices.bufferView),
-                target: this.gl.ELEMENT_ARRAY_BUFFER,
-              })
+                  gl: this.gl,
+                  ...primitive.indices,
+                  data: bufferViewBufferMap.get(primitive.indices.bufferView),
+                  target: this.gl.ELEMENT_ARRAY_BUFFER,
+                })
               : null,
           }),
           program: this.program,

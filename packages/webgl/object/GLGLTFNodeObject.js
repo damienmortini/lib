@@ -69,14 +69,14 @@ export default class GLGLTFNodeObject extends GLTFNode {
           attributes: vertexAttributes,
           indices: primitive.indices
             ? new GLVertexAttribute({
-              gl: this.gl,
-              ...primitive.indices,
-              buffer: new GLBuffer({
                 gl: this.gl,
-                data: primitive.indices.buffer,
-                target: this.gl.ELEMENT_ARRAY_BUFFER,
-              }),
-            })
+                ...primitive.indices,
+                buffer: new GLBuffer({
+                  gl: this.gl,
+                  data: primitive.indices.buffer,
+                  target: this.gl.ELEMENT_ARRAY_BUFFER,
+                }),
+              })
             : null,
         }),
         program: this.program,
