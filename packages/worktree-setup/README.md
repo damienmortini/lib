@@ -10,6 +10,18 @@ instead — every installed package symlinked across, scope directories and `.bi
 their original relative links, so workspace specifiers resolve to the worktree's own packages
 rather than the primary's, including packages the branch adds.
 
+The branch's tree is what the result is measured against, not the primary's. Workspace members
+come from the `packages` globs the worktree's own `pnpm-workspace.yaml` declares — including
+ones reached through submodule symlinks — as well as from `packageDirectories`, and every
+dependency declared by a manifest the worktree itself holds is verified to resolve from the
+package declaring it: linked from the primary's install where the mirror alone did not carry
+it, and refused loudly, naming the manifest and the name, where nothing can. (A member reached
+through a submodule symlink is a sibling checkout's shared directory: it gets its scope link,
+but its own dependencies are that repository's install to answer for, and nothing is ever
+written inside it.) A dependency the primary checkout has never installed anywhere cannot be
+linked from it, and reporting the tree ready anyway would be the wrong success — the failure
+says so instead.
+
 ## Driven from the primary checkout
 
 ```sh
@@ -134,7 +146,7 @@ repository states what it needs, and the package assumes nothing about who is ca
 
 | Option | |
 | --- | --- |
-| `packageDirectories` | Where this repository's own workspace packages live, e.g. `['packages']`. |
+| `packageDirectories` | Where this repository's own workspace packages live, e.g. `['packages']` — on top of the `packages` globs its `pnpm-workspace.yaml` declares, which are always read. |
 | `requiredPackages` | Names that must resolve once the tree is linked. |
 | `resolvedLinkDirectories` | Directories, e.g. `['submodules']`, whose committed symlinks must resolve. |
 
