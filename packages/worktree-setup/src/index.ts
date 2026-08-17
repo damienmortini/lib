@@ -488,7 +488,7 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
     // installed off to move a worktree that was never in the wrong place — a confident wrong
     // diagnosis, which is worse than none at all and is exactly what this package exists to
     // stop repeating.
-    if ((missingPackages.length > 0 || danglingLinks.length > 0) && (unrepaired.length > 0 || danglingLinks.length > 0)) {
+    if (danglingLinks.length > 0 || (missingPackages.length > 0 && unrepaired.length > 0)) {
       reasons.push(`Links committed as \`../../<name>\` resolve only for a checkout sitting directly under ${path.dirname(primaryRoot)} — and this worktree is at ${worktreeRoot}. Create it there instead: \`git worktree add ${path.join(path.dirname(primaryRoot), '<name>')}\`.`);
     }
     throw new Error(reasons.join('\n'));

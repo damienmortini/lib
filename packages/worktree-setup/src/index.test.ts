@@ -322,6 +322,20 @@ test('reports a copied link it could not repair, alongside what actually failed'
   );
 });
 
+test('refuses a dependency name that would point its link outside node_modules', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  await write(
+    path.join(worktreeRoot, 'packages/app/package.json'),
+    '{"name":"@scope/app","dependencies":{"../../escapee":"1.0.0"}}',
+  );
+
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] }),
+    /declares an unusable dependency name/,
+  );
+});
+
 test('refuses a package name that would point the delete outside node_modules', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
 
