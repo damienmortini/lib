@@ -250,12 +250,17 @@ async function expandWorkspaceGlob(worktreeRoot: string, glob: string): Promise<
     }
   }
 
+  const segments = glob.split('/');
   let matches = [''];
-  for (const segment of glob.split('/')) {
+  for (const [segmentIndex, segment] of segments.entries()) {
     const next = new Set<string>();
     for (const directory of matches) {
       if (segment === '**') {
-        next.add(directory);
+        // `**` matches zero or more segments in the middle of a glob (`a/**/b` matches
+        // `a/b`), but a trailing `**` matches only what is inside the directory, never the
+        // directory itself — `packages/**` must not read `packages` as a member, which is
+        // also what pnpm's own expansion does.
+        if (segmentIndex < segments.length - 1) next.add(directory);
         const seen = new Set([realpathSync(path.join(worktreeRoot, directory))]);
         for (const descendant of await descendantDirectories(worktreeRoot, directory, seen)) next.add(descendant);
       }
@@ -459,7 +464,7 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
         continue;
       }
       await fs.mkdir(path.dirname(dependencyLink), { recursive: true });
-      await fs.rm(dependencyLink, { force: true });
+      await fs.rm(dependencyLink, { recursive: true, force: true });
       await fs.symlink(target, dependencyLink);
     }
   }

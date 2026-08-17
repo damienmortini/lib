@@ -148,6 +148,46 @@ test('skips a nameless fixture manifest a glob sweeps up, which pnpm links past 
   assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/real')), true);
 });
 
+test('does not read a configured root itself as a member, matching pnpm\'s trailing-`**`', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  await write(path.join(worktreeRoot, 'packages/package.json'), '{"name":"@scope/root-manifest"}');
+  await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app"}');
+
+  await setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] });
+
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/app')), true);
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/root-manifest')), false);
+});
+
+test('fails on a dependency the root manifest declares and nothing installs', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  await write(path.join(worktreeRoot, 'package.json'), '{"name":"repository","dependencies":{"absent-everywhere":"1.0.0"}}');
+
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot }),
+    (error: Error) => {
+      assert.match(error.message, new RegExp(`package.json declares absent-everywhere, which ${primaryRoot} has not installed`));
+      return true;
+    },
+  );
+});
+
+test('links a scoped declared dependency from a primary location the mirror does not cover', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  await write(path.join(primaryRoot, 'packages/node_modules/@scope/nested/index.js'), '');
+  await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"@scope/nested":"^1.0.0"}}');
+
+  await setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] });
+
+  assert.equal(
+    await fs.realpath(path.join(worktreeRoot, 'packages/app/node_modules/@scope/nested')),
+    path.join(primaryRoot, 'packages/node_modules/@scope/nested'),
+  );
+});
+
 test('works without a root package.json, which a repository of pure submodules may not have', async () => {
   const { worktreeRoot } = await checkouts();
   await fs.rm(path.join(worktreeRoot, 'package.json'));
