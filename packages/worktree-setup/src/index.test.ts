@@ -56,6 +56,167 @@ test('links a package the branch adds, which the primary checkout knows nothing 
   assert.equal(existsSync(path.join(worktreeRoot, 'packages/added/node_modules/dependency')), true);
 });
 
+test('links the workspace members the worktree\'s own pnpm-workspace.yaml declares', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  // Declared only in the yaml — no `packageDirectories` option names this root.
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'modules/*\'\n');
+  await write(path.join(worktreeRoot, 'modules/thing/package.json'), '{"name":"@scope/thing"}');
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  assert.equal(
+    await fs.realpath(path.join(worktreeRoot, 'node_modules/@scope/thing')),
+    path.join(worktreeRoot, 'modules/thing'),
+  );
+});
+
+test('links a workspace member behind a submodule symlink, without writing into the sibling', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // A sibling checkout both trees reach through a committed-shaped `submodules/<name>` link,
+  // holding a workspace member with an installed node_modules of its own.
+  const sibling = path.join(path.dirname(primaryRoot), 'sibling');
+  await write(path.join(sibling, 'packages/tool/package.json'), '{"name":"@scope/tool"}');
+  await write(path.join(sibling, 'packages/tool/node_modules/dependency/index.js'), '');
+  await fs.mkdir(path.join(worktreeRoot, 'submodules'), { recursive: true });
+  await fs.symlink('../../sibling', path.join(worktreeRoot, 'submodules/sibling'));
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - "submodules/*/packages/**"\n');
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  // The scope link exists and follows the worktree's own submodule path to the sibling.
+  assert.equal(
+    await fs.realpath(path.join(worktreeRoot, 'node_modules/@scope/tool')),
+    path.join(sibling, 'packages/tool'),
+  );
+  // The sibling's installed tree is shared and was not mirrored over.
+  assert.equal(existsSync(path.join(sibling, 'packages/tool/node_modules/dependency/index.js')), true);
+});
+
+test('refuses a pnpm-workspace.yaml shape it cannot read, rather than linking less than declared', async () => {
+  const { worktreeRoot } = await checkouts();
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n  - \'!packages/fixtures/**\'\n');
+
+  await assert.rejects(setupWorktree({ directory: worktreeRoot }), /exclusion glob/);
+});
+
+test('refuses a glob it cannot expand, rather than matching it against nothing', async () => {
+  const { worktreeRoot } = await checkouts();
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/web-*\'\n');
+
+  await assert.rejects(setupWorktree({ directory: worktreeRoot }), /cannot expand/);
+});
+
+test('reads past comments inside the packages block, instead of ending it there', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n# a flush-left note\n  - "modules/*"\n');
+  await write(path.join(worktreeRoot, 'modules/thing/package.json'), '{"name":"@scope/thing"}');
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/thing')), true);
+});
+
+test('follows a symlink inside a `**` glob, the way pnpm expands it', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  const sibling = path.join(path.dirname(primaryRoot), 'starred-sibling');
+  await write(path.join(sibling, 'packages/tool/package.json'), '{"name":"@scope/starred-tool"}');
+  await fs.mkdir(path.join(worktreeRoot, 'submodules'), { recursive: true });
+  await fs.symlink('../../starred-sibling', path.join(worktreeRoot, 'submodules/sibling'));
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'submodules/**\'\n');
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  assert.equal(
+    await fs.realpath(path.join(worktreeRoot, 'node_modules/@scope/starred-tool')),
+    path.join(sibling, 'packages/tool'),
+  );
+});
+
+test('skips a nameless fixture manifest a glob sweeps up, which pnpm links past too', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'packages/real/package.json'), '{"name":"@scope/real"}');
+  await write(path.join(worktreeRoot, 'packages/real/test/fixtures/package.json'), '{}');
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/real')), true);
+});
+
+test('works without a root package.json, which a repository of pure submodules may not have', async () => {
+  const { worktreeRoot } = await checkouts();
+  await fs.rm(path.join(worktreeRoot, 'package.json'));
+
+  await setupWorktree({ directory: worktreeRoot });
+
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules')), true);
+});
+
+test('resolves a declared dependency through the mirrored tree', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  await write(path.join(primaryRoot, 'node_modules/installed/index.js'), '');
+  await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"installed":"^1.0.0"}}');
+
+  await setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] });
+});
+
+test('fails naming a declared dependency the primary checkout has never installed', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // The branch adds a devDependency; the primary has no such edge anywhere. Mirroring alone
+  // used to report this tree linked, and the suite failed later in module resolution.
+  await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","devDependencies":{"jsdom":"^24.0.0"}}');
+
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] }),
+    (error: Error) => {
+      assert.match(error.message, new RegExp(`packages/app/package.json declares jsdom, which ${primaryRoot} has not installed`));
+      return true;
+    },
+  );
+});
+
+test('fails when a declared workspace member is one the branch deleted, instead of resolving the primary\'s copy', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // The primary still holds and links `@scope/gone`; the branch deleted the package but a
+  // manifest still declares it. Pointing at the primary would resolve code the branch removed.
+  await write(path.join(primaryRoot, 'packages/gone/package.json'), '{"name":"@scope/gone"}');
+  await fs.mkdir(path.join(primaryRoot, 'node_modules/@scope'), { recursive: true });
+  await fs.symlink('../../packages/gone', path.join(primaryRoot, 'node_modules/@scope/gone'));
+  await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"@scope/gone":"workspace:*"}}');
+
+  await assert.rejects(
+    setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] }),
+    (error: Error) => {
+      assert.match(error.message, /packages\/app\/package.json declares @scope\/gone, which only .* own sources resolve/);
+      return true;
+    },
+  );
+});
+
+test('links a declared dependency from a primary location the mirror does not cover', async () => {
+  const { primaryRoot, worktreeRoot } = await checkouts();
+
+  // The package is the branch's own, so its primary-side directory does not exist and nothing
+  // nested was mirrored — but the name resolves in the primary partway up the walk.
+  await write(path.join(primaryRoot, 'packages/node_modules/dependency/index.js'), '');
+  await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"dependency":"^1.0.0"}}');
+
+  await setupWorktree({ directory: worktreeRoot, packageDirectories: ['packages'] });
+
+  assert.equal(
+    await fs.realpath(path.join(worktreeRoot, 'packages/app/node_modules/dependency')),
+    path.join(primaryRoot, 'packages/node_modules/dependency'),
+  );
+});
+
 test('points a copied link that dangles here at the primary checkout', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
 
