@@ -1,0 +1,18 @@
+#!/bin/sh
+# Strip agent attribution trailers from the message before the commit is written.
+#
+# Not a lint that asks nicely: the `git` on PATH in this environment is a wrapper that
+# appends `Assisted-By: <tool>/<uuid>` to every commit *after* the author's message is
+# composed. No git config, template, or global hook shows it, and no agent can decline
+# it. Whatever writes the message, this is where it comes back off.
+#
+# This repository is public, which is what makes the line worth a hook rather than a
+# convention: six commits reached main carrying one of these, one of them a squashed pull
+# request whose body held a `Claude-Session` URL three times over. A trailer is private
+# until it is pushed and permanent afterwards — rewriting history changes the hashes and
+# leaves the originals reachable by SHA, and a pull request keeps its own copy forever.
+#
+# Enabled by the `prepare` script, which points core.hooksPath here on every install.
+
+grep -viE '^(Assisted-By|Co-Authored-By|Claude-Session|Generated-With|Generated-By):' "$1" > "$1.stripped" \
+  && mv "$1.stripped" "$1"
