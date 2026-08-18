@@ -70,7 +70,7 @@ export class Loader {
           xhr.onload = () => {
             resolve(new Response(xhr.responseText, { status: xhr.status }));
           };
-          xhr.onerror = reject;
+          xhr.onerror = () => reject(new Error(`Failed to load "${src}"`));
           xhr.open('GET', `${this.baseURI}${src}`);
           xhr.send(null);
         });
