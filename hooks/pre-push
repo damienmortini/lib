@@ -1,0 +1,41 @@
+#!/bin/sh
+# Hold what is about to be published to this machine's prose checker, if it has one.
+#
+# This repository is public and its neighbours are not, so a passage that only makes sense
+# to somebody who can see the other checkouts — a personal path, an internal tool name — is
+# a leak, and a commit message is permanent once pushed. A checker for that has to name the
+# private repositories it looks for, which is exactly what a public repository must not
+# carry, so the command is named in local git config instead of here:
+#
+#   git config hooks.proseCheck <command>
+#
+# It is called as `<command> <repository> --commits <range>` and its exit status decides
+# the push. Unset, or not on PATH, and this does nothing: a clone without the private side
+# is the normal case, not a misconfiguration.
+
+check=$(git config --get hooks.proseCheck) || exit 0
+[ -n "$check" ] || exit 0
+command -v "$check" >/dev/null 2>&1 || exit 0
+
+repository=$(git rev-parse --show-toplevel)
+status=0
+zero=0000000000000000000000000000000000000000
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  # Deleting a remote branch publishes no prose.
+  [ "$local_sha" = "$zero" ] && continue
+
+  if [ "$remote_sha" = "$zero" ]; then
+    # A new branch has no remote counterpart, so hold it to what the remote already has
+    # rather than to the whole history.
+    range=$(git rev-list "$local_sha" --not --remotes | tail -1)
+    [ -n "$range" ] || continue
+    range="$range~..$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  "$check" "$repository" --commits "$range" || status=1
+done
+
+exit "$status"
