@@ -129,12 +129,12 @@ export class DamdomGUIElement extends DamdomGUIFolderElement {
     delete options.saveToURL;
     delete options.watch;
 
-    let folderElement = this;
+    let folderElement = this; // eslint-disable-line @typescript-eslint/no-this-alias -- reassigned per folder below, not a plain alias
 
     if (folder) {
       const folderNames = folder.split('/');
       let path = '';
-      let parentFolderElement = this;
+      let parentFolderElement = this; // eslint-disable-line @typescript-eslint/no-this-alias -- reassigned per folder below, not a plain alias
       for (const folderName of folderNames) {
         if (path) {
           path += '/';
@@ -228,7 +228,7 @@ export class DamdomGUIElement extends DamdomGUIFolderElement {
 
     // Watch value change
     if (watch) {
-      const updateInputValue = (time) => {
+      const updateInputValue = () => {
         if (!element.parentElement) {
           return;
         }

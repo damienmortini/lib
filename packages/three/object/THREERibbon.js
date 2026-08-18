@@ -1,8 +1,5 @@
 import FrenetSerretFrame from '@damienmortini/math/FrenetSerretFrame.js';
 
-import {
-  Vector3,
-} from '../../../three/src/Three.js';
 import THREELine from './THREELine.js';
 
 export default class THREERibbon extends THREELine {

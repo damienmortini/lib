@@ -44,7 +44,7 @@ export default class DamdomFileInputElement extends HTMLElement {
     this.addEventListener('dragover', this.#onDragOver);
   }
 
-  async #onClick(event) {
+  async #onClick() {
     const [fileHandle] = await window.showOpenFilePicker();
     this.#updateFile(await fileHandle.getFile());
   }

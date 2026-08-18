@@ -54,7 +54,7 @@ export class GLTFLoader extends Loader {
     return json;
   }
 
-  async parse(data) {
+  async parse(data, src) {
     if (data instanceof ArrayBuffer) {
       data = GLTFLoader.unpackGLB(data);
     }
@@ -138,8 +138,8 @@ export class GLTFLoader extends Loader {
     return data;
   }
 
-  async build({ data }) {
-    data = await this.parse(data);
+  async build({ data, src }) {
+    data = await this.parse(data, src);
 
     // Accessors
     const accessorsDataMap = new Map();
@@ -253,6 +253,6 @@ export class GLTFLoader extends Loader {
 
   async _loadFile(options) {
     const data = await super._loadFile(options);
-    return options.parseOnly ? await this.parse(data) : await this.build({ data });
+    return options.parseOnly ? await this.parse(data, options.src) : await this.build({ data, src: options.src });
   }
 }

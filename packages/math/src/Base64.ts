@@ -86,7 +86,7 @@ function toByteArray(b64) {
         | (revLookup[b64.charCodeAt(i + 1)] << 4)
         | (revLookup[b64.charCodeAt(i + 2)] >> 2);
     arr[curByte++] = (tmp >> 8) & 0xFF;
-    arr[curByte++] = tmp & 0xFF;
+    arr[curByte++] = tmp & 0xFF; // eslint-disable-line no-useless-assignment -- keep the symmetric post-increment write pattern from base64-js
   }
 
   return arr;

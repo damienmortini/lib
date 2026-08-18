@@ -59,7 +59,7 @@ class THREELoader extends Loader {
 
   async _loadFile({ src, type, scale = 1, offset = new Vector3(), meshOptimizer = false }) {
     if (type.startsWith('model')) {
-      const [, path, file] = /(.*[\/\\])(.*$)/.exec(src);
+      const [, path, file] = /(.*[/\\])(.*$)/.exec(src);
 
       if (!gltfLoader) {
         gltfLoader = new GLTFLoader(undefined);
@@ -75,7 +75,7 @@ class THREELoader extends Loader {
         await import('./meshoptimizerdecoder/meshopt_decoder.js');
         const { EXT_meshopt_compression } = await import('./meshoptimizerdecoder/THREE.EXT_meshopt_compression.js');
         gltfLoader.register(function (parser) {
-          const res = new EXT_meshopt_compression(parser, MeshoptDecoder);
+          const res = new EXT_meshopt_compression(parser, MeshoptDecoder); // eslint-disable-line no-undef -- global assigned on self by the meshopt_decoder.js import above
           res.name = 'MESHOPT_compression';
           return res;
         });

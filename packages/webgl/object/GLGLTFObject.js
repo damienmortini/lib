@@ -85,7 +85,7 @@ export default class GLGLTFObject extends GLTFNode {
       }
     }
 
-    for (const [index, mesh] of this._gltf.meshes?.entries()) {
+    for (const [index, mesh] of this._gltf.meshes?.entries() ?? []) {
       const meshObject = { name: mesh.name, primitives: [] };
       for (const primitive of mesh.primitives) {
         const vertexAttributes = new Map();

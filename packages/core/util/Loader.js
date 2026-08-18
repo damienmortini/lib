@@ -65,7 +65,7 @@ export class Loader {
       }
     })
       .catch(() => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           const xhr = new XMLHttpRequest();
           xhr.onload = () => {
             resolve(new Response(xhr.responseText, { status: xhr.status }));
@@ -122,8 +122,8 @@ export class Loader {
           });
         }
         else if (type.startsWith('font')) {
-          return new Promise((resolve) => {
-            const fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(src)[1], `url("${src}")`);
+          return new Promise(() => {
+            const fontFace = new FontFace(/([^/]*)\.(woff|woff2|ttf)$/.exec(src)[1], `url("${src}")`);
             document.fonts.add(fontFace);
             return fontFace.load();
           });

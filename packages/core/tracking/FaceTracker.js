@@ -1,3 +1,4 @@
+/* global pModel */
 import 'auduno/clmtrackr/js/clm.js';
 import 'auduno/clmtrackr/js/svmfilter_webgl.js';
 import 'auduno/clmtrackr/js/svmfilter_fft.js';

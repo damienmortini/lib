@@ -16,7 +16,7 @@ server.http2SecureServer.on('stream', (stream, headers) => {
   stream.on('data', (chunk) => {
     buffers.push(chunk);
   });
-  stream.on('end', async (chunk) => {
+  stream.on('end', async () => {
     const glb = Buffer.concat(buffers);
     // io.readBinary(glb)
     const document = io.readJSON({
