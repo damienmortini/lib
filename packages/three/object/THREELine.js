@@ -1,6 +1,6 @@
 import FrenetSerretFrame from '@damienmortini/core/math/FrenetSerretFrame.js';
 
-import { BufferAttribute, CylinderBufferGeometry, Mesh, Vector3 } from '../../../three/src/Three.js';
+import { BufferAttribute, CylinderGeometry, Mesh, Vector3 } from '../../../three/src/Three.js';
 import THREEShaderMaterial from './THREEShaderMaterial.js';
 
 export default class THREELine extends Mesh {
@@ -9,7 +9,7 @@ export default class THREELine extends Mesh {
     material = new THREEShaderMaterial(),
     detail = 3,
     thickness = 0.1,
-    geometry = new CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1),
+    geometry = new CylinderGeometry(1, 1, points.length - 1, detail, points.length - 1),
   } = {}) {
     super(geometry, material);
 

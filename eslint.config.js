@@ -4,7 +4,9 @@ export default [
   {
     ignores: [
       // Generated declaration emit (`generateTypes` scripts), not hand-written.
-      '**/*.d.ts',
+      'packages/*/types/**',
+      'packages/ticker/index.d.ts',
+      'packages/damdom/damdom-ticker/index.d.ts',
       // Vendored third-party code (see packages/three/copyExamples.js and
       // packages/three/loader/meshoptimizerdecoder/ headers).
       'packages/three/examples/**',

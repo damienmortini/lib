@@ -69,7 +69,7 @@ export class GLTFLoader extends Loader {
         data.buffers[index] = toByteArray(buffer.uri.split(',')[1]).buffer;
       }
       else {
-        data.buffers[index] = await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)[1]}${buffer.uri}`);
+        data.buffers[index] = await SingletonLoader.load(`${/([\\/]?.*[\\/])/.exec(src)?.[1] ?? ''}${buffer.uri}`);
       }
     }
 
