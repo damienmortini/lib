@@ -42,12 +42,12 @@ const targetComputedKeyframesMap = new Map<object, Set<Map<string, [number, numb
 export const animate = <Target extends Record<string, number>>(
   target: Target,
   keyframes: Keyframes<Target>,
-  { duration = 0, delay = 0, easing = (x) => x, onupdate = () => {}, fill = 'none' }: AnimateOptions = {},
+  { duration = 0, delay = 0, easing = x => x, onupdate = () => {}, fill = 'none' }: AnimateOptions = {},
 ): Animation => {
   let time = 0;
 
   let finishedResolve!: () => void;
-  const finished = new Promise<void>((resolve) => (finishedResolve = resolve));
+  const finished = new Promise<void>(resolve => (finishedResolve = resolve));
 
   // Get target computed keyframes Set
   let targetComputedKeyframes = targetComputedKeyframesMap.get(target);
@@ -87,9 +87,11 @@ export const animate = <Target extends Record<string, number>>(
     if (time <= delay) {
       progress = 0;
       needsUpdate = fill === 'both' || fill === 'backwards';
-    } else if (time >= delay + duration) {
+    }
+    else if (time >= delay + duration) {
       progress = 1;
-    } else {
+    }
+    else {
       progress = Math.max(time - delay, 0) / duration;
       progress = easing(progress);
     }

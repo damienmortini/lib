@@ -220,7 +220,7 @@ export default class HandTracker {
 
     this._webSocket = new WebSocket(`wss://${host}:6437/v6.json`);
 
-    this._webSocket.addEventListener('open', (e) => {
+    this._webSocket.addEventListener('open', () => {
       this._webSocket.send(JSON.stringify({ enableGestures: false }));
       this.hmd = hmd;
       this.background = background;

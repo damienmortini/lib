@@ -83,7 +83,7 @@ export default class Entity {
   }
 
   toggleComponent(ComponentClass, force, ...args) {
-    if (force || force === undefined && !this.getComponent(ComponentClass)) {
+    if (force || (force === undefined && !this.getComponent(ComponentClass))) {
       this.addComponent(ComponentClass, ...args);
     }
     else {

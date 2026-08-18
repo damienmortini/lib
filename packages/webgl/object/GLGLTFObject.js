@@ -85,7 +85,7 @@ export default class GLGLTFObject extends GLTFNode {
       }
     }
 
-    for (const [index, mesh] of this._gltf.meshes?.entries()) {
+    for (const [index, mesh] of this._gltf.meshes?.entries() ?? []) {
       const meshObject = { name: mesh.name, primitives: [] };
       for (const primitive of mesh.primitives) {
         const vertexAttributes = new Map();
@@ -113,11 +113,11 @@ export default class GLGLTFObject extends GLTFNode {
             attributes: vertexAttributes,
             indices: primitive.indices
               ? new GLVertexAttribute({
-                gl: this.gl,
-                ...primitive.indices,
-                data: bufferViewBufferMap.get(primitive.indices.bufferView),
-                target: this.gl.ELEMENT_ARRAY_BUFFER,
-              })
+                  gl: this.gl,
+                  ...primitive.indices,
+                  data: bufferViewBufferMap.get(primitive.indices.bufferView),
+                  target: this.gl.ELEMENT_ARRAY_BUFFER,
+                })
               : null,
           }),
           program: this.program,

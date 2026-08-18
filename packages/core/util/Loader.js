@@ -70,6 +70,7 @@ export class Loader {
           xhr.onload = () => {
             resolve(new Response(xhr.responseText, { status: xhr.status }));
           };
+          xhr.onerror = () => reject(new Error(`Failed to load "${src}"`));
           xhr.open('GET', `${this.baseURI}${src}`);
           xhr.send(null);
         });
@@ -122,11 +123,9 @@ export class Loader {
           });
         }
         else if (type.startsWith('font')) {
-          return new Promise((resolve) => {
-            const fontFace = new FontFace(/([^\/]*)\.(woff|woff2|ttf)$/.exec(src)[1], `url("${src}")`);
-            document.fonts.add(fontFace);
-            return fontFace.load();
-          });
+          const fontFace = new FontFace(/([^/]*)\.(woff|woff2|ttf)$/.exec(src)[1], `url("${src}")`);
+          document.fonts.add(fontFace);
+          return fontFace.load();
         }
         else if (type === 'application/octet-stream') {
           return response.arrayBuffer();

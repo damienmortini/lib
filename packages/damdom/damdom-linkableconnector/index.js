@@ -61,7 +61,7 @@ class DamdomLinkableConnector extends DamdomConnectorElement {
       return;
     }
     event.stopPropagation();
-    activeConnector = this;
+    activeConnector = this; // eslint-disable-line @typescript-eslint/no-this-alias -- module-level active-connector state, not an alias
 
     window.addEventListener('pointerup', this._onWindowPointerUpBound, { passive: false });
 

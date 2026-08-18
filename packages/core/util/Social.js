@@ -1,3 +1,4 @@
+/* global FB */
 const readyPromise = new Promise((resolve) => {
   window.fbAsyncInit = () => {
     resolve();
@@ -9,7 +10,8 @@ const readyPromise = new Promise((resolve) => {
   if (d.getElementById(id)) {
     return;
   }
-  const js = d.createElement(s); js.id = id;
+  const js = d.createElement(s);
+  js.id = id;
   js.src = '//connect.facebook.net/en_US/sdk.js';
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));

@@ -3,3 +3,4 @@ dist
 lerna-debug.log
 .nx
 .claude/settings.local.json
+*.tsbuildinfo

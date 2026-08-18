@@ -56,13 +56,13 @@ export default class SelectLassoElement extends HTMLElement {
       }
     });
 
-    window.addEventListener('pointerup', (event) => {
+    window.addEventListener('pointerup', () => {
       cancelAnimationFrame(animationFrameID);
       points.length = 0;
       context.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(() => {
       canvas.width = this.offsetWidth * window.devicePixelRatio;
       canvas.height = this.offsetHeight * window.devicePixelRatio;
     });

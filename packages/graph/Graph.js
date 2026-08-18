@@ -1,7 +1,7 @@
 import Signal from '@damienmortini/core/util/Signal.js';
 
 export default class Graph {
-  #name;
+  #name; // eslint-disable-line no-unused-private-class-members -- referenced by the commented-out connect() implementation below
   #content = '';
   onChange = new Signal();
   #data = new Proxy({}, {

@@ -1,8 +1,5 @@
 import Ticker from '@damienmortini/core/util/Ticker.js';
 
-const SIDE_MOVEMENT_SPEED = 0.02;
-const PADDING_RATIO = 0.1;
-
 export default class RulerInputElement extends HTMLElement {
   static get observedAttributes() {
     return ['step', 'min', 'max', 'zoom', 'noscroll'];
@@ -80,8 +77,6 @@ export default class RulerInputElement extends HTMLElement {
     let pointerOffsetX = 0;
     const updateValueFromInput = () => {
       let positionRatio = (pointerOffsetX + this.scrollLeft) / this.scrollWidth;
-      const padding = this._width * PADDING_RATIO;
-      const right = this._width - padding;
       const speed = 0;
       // if (pointerOffsetX > right && (this.scrollLeft + this._width < this.scrollWidth)) {
       //   speed = (pointerOffsetX - right) / padding * SIDE_MOVEMENT_SPEED;
@@ -162,10 +157,6 @@ export default class RulerInputElement extends HTMLElement {
       return;
     }
     const positionRatio = (this.value - this.min) / (this.max - this.min);
-    const edgeX = positionRatio * this.scrollWidth - this.scrollLeft;
-
-    const padding = this._width * PADDING_RATIO;
-    const right = this._width - padding;
     // if (edgeX > right) {
     //   this.scrollLeft += (edgeX - right);
     // } else if (edgeX < padding) {

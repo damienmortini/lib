@@ -54,7 +54,7 @@ export class GLProgram {
       vertexAttribDivisor = this.gl.vertexAttribDivisor.bind(this.gl);
     }
 
-    const self = this;
+    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias -- used inside nested class methods that have their own `this`
 
     class Attributes extends Map {
       set(

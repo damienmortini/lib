@@ -18,7 +18,7 @@ export default class THREESpriteAnimation extends THREESprite {
     if (!animations) {
       animations = new Map();
       for (const key in data.frames) {
-        const match = /(.*?)([0-9]+)[$\.]/.exec(key);
+        const match = /(.*?)([0-9]+)[$.]/.exec(key);
         const animationName = match[1];
         let frames = animations.get(animationName);
         if (!frames) {
@@ -85,7 +85,7 @@ export default class THREESpriteAnimation extends THREESprite {
     }
     else {
       this._progress = Math.min(Math.max(this._progress, 0), 1);
-      if (previousProgress !== this._progress && (this._progress === 1 && !this.reverse || this._progress === 0 && this.reverse)) {
+      if (previousProgress !== this._progress && ((this._progress === 1 && !this.reverse) || (this._progress === 0 && this.reverse))) {
         this.onAnimationEnd.dispatch();
       }
     }

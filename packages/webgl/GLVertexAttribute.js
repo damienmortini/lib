@@ -50,10 +50,10 @@ export class GLVertexAttribute {
       = data instanceof GLBuffer
         ? data
         : new GLBuffer({
-          gl,
-          data,
-          target,
-        });
+            gl,
+            data,
+            target,
+          });
   }
 
   get buffer() {

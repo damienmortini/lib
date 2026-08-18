@@ -41,7 +41,7 @@ export default class SpriteAnimation {
     if (!this._animations) {
       this._animations = new Map();
       for (const key of Object.keys(this._data.frames)) {
-        const match = /(.*?)([0-9]+)[$\.]/.exec(key);
+        const match = /(.*?)([0-9]+)[$.]/.exec(key);
         const animationName = match[1];
         let frames = this._animations.get(animationName);
         if (!frames) {
@@ -135,7 +135,7 @@ export default class SpriteAnimation {
     }
     else {
       value = Math.min(Math.max(value, 0), 1);
-      if (this._currentTime !== value && (value === 1 && this.playbackRate >= 0 || value === 0 && this.playbackRate < 0)) {
+      if (this._currentTime !== value && ((value === 1 && this.playbackRate >= 0) || (value === 0 && this.playbackRate < 0))) {
         this.onEnd.dispatch();
       }
     }

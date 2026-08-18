@@ -62,7 +62,7 @@ export default class SubstrateSystem {
     return polygon;
   }
 
-  polygonAddedCallback(polygon) {}
+  polygonAddedCallback() {}
 
   update() {
     for (let i = 0; i < this.speed; i++) {
