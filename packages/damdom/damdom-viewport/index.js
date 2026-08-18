@@ -77,7 +77,7 @@ export default class DamdomViewportElement extends HTMLElement {
       if (
         target.isContentEditable
         || (target instanceof HTMLInputElement
-        && ['text', 'number', 'password', 'search', 'number', 'range', 'email', 'url', 'tel'].includes(target.type))
+          && ['text', 'number', 'password', 'search', 'number', 'range', 'email', 'url', 'tel'].includes(target.type))
         || target instanceof HTMLTextAreaElement
         || getComputedStyle(target)['touch-action'] === 'none'
       )

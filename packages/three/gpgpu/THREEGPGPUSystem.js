@@ -1,4 +1,3 @@
-import Float16 from '@damienmortini/core/math/Float16.js';
 import DatatextureShader from '@damienmortini/core/shader/DataTextureShader.js';
 
 import { DataTexture, FloatType, HalfFloatType, MathUtils, Mesh, NearestFilter, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, RGBFormat, Scene, WebGLRenderer, WebGLRenderTarget } from '../../../three/src/Three.js';
@@ -29,9 +28,8 @@ export default class THREEGPGPUSystem {
 
     const finalData = new Float32Array(this._dataTextureWidth * this._dataTextureHeight * channels);
     finalData.set(data);
-    let dataTexture;
     // if (renderer.capabilities.isWebGL2) {
-    dataTexture = new DataTexture(finalData, this._dataTextureWidth, this._dataTextureHeight, format, FloatType);
+    const dataTexture = new DataTexture(finalData, this._dataTextureWidth, this._dataTextureHeight, format, FloatType);
     // } else {
     // dataTexture = new DataTexture(Float16.fromFloat32Array(finalData), this._dataTextureWidth, this._dataTextureHeight, format, HalfFloatType);
     // }

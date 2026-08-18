@@ -96,7 +96,7 @@ export class GLTexture {
 
   set width(value) {
     this.#width = value;
-    this.data = this.data;
+    this.data = this.data; // eslint-disable-line no-self-assign -- retriggers the data setter to re-upload the texture with the new width
   }
 
   get width() {
@@ -105,7 +105,7 @@ export class GLTexture {
 
   set height(value) {
     this.#height = value;
-    this.data = this.data;
+    this.data = this.data; // eslint-disable-line no-self-assign -- retriggers the data setter to re-upload the texture with the new height
   }
 
   get height() {

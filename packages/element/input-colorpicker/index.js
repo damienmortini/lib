@@ -1,3 +1,4 @@
+/* global AColorPicker */
 import '../../a-color-picker/dist/acolorpicker.js';
 
 const COLOR_PICKER_CSS = document.head.querySelector('style[data-source=a-color-picker]').innerHTML;
@@ -83,7 +84,7 @@ export default class InputColorPickerElement extends HTMLElement {
       event.stopPropagation();
     });
 
-    this._colorPicker.on('change', (target, color) => {
+    this._colorPicker.on('change', (target) => {
       this.value = target.color;
       this.dispatchEvent(new Event('input'));
       this.dispatchEvent(new Event('change'));
@@ -95,7 +96,7 @@ export default class InputColorPickerElement extends HTMLElement {
       }
     });
 
-    container.addEventListener('focus', (event) => {
+    container.addEventListener('focus', () => {
       colorPicker.style.setProperty('--offset-top', '');
       colorPicker.style.setProperty('--offset-left', '');
       const boundingClientRect = colorPicker.getBoundingClientRect();

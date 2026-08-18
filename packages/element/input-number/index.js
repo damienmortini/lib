@@ -28,6 +28,7 @@ export default class NumberInputElement extends HTMLElement {
     switch (name) {
       case 'value':
         this.value = Number(newValue);
+        // falls through
       case 'min':
       case 'max':
       case 'step':

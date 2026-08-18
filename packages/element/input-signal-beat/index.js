@@ -77,7 +77,7 @@ export default class BeatSignalInputElement extends HTMLElement {
 
     this._beatElements = new Map();
 
-    const self = this;
+    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias -- referenced from Beats class methods where this is the Set instance
     class Beats extends Set {
       _add(value) {
         value = self._roundValueOnStep(value);
@@ -220,13 +220,14 @@ export default class BeatSignalInputElement extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-      case 'beats':
+      case 'beats': {
         const newBeats = new Function(`return ${newValue}`)();
         this.beats.clear();
         for (const beat of newBeats) {
           this.beats.add(beat);
         }
         break;
+      }
       case 'looplength':
         this.loopLength = Number(newValue);
         break;

@@ -44,7 +44,7 @@ float hash1(uvec2 x) {
 
 float hash1(uvec3 i) {
   i*=uvec3(0x456789ab,0x1b74a659,0x46d5c422);
-	i.x^=i.y^i.z;
+  i.x^=i.y^i.z;
   return float(i.x*0x666aa045u)/4294967295.;
 }
 `);

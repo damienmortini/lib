@@ -2,7 +2,6 @@ import '@damienmortini/damdom-linkableconnector/index.js';
 
 export class GraphPropertyNodeElement extends HTMLElement {
   #value;
-  #valueElement;
   #idElement;
 
   static get observedAttributes() {

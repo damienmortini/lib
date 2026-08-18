@@ -49,9 +49,9 @@ export default class ViewAnimationElement extends HTMLElement {
   }
 
   _getParentViewAnimationElement() {
-    let element = this;
+    let element = this; // eslint-disable-line @typescript-eslint/no-this-alias -- tree-walk cursor starting at this element, reassigned in the loop
     let parentNode;
-    while (parentNode = element instanceof ShadowRoot ? element.host : element.parentNode) {
+    while ((parentNode = element instanceof ShadowRoot ? element.host : element.parentNode)) {
       if (parentNode instanceof ViewAnimationElement) {
         return parentNode;
       }

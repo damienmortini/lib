@@ -1,14 +1,15 @@
 import FrenetSerretFrame from '@damienmortini/core/math/FrenetSerretFrame.js';
 
+import { BufferAttribute, CylinderGeometry, Mesh, Vector3 } from '../../../three/src/Three.js';
 import THREEShaderMaterial from './THREEShaderMaterial.js';
 
-export default class THREELine extends THREE.Mesh {
+export default class THREELine extends Mesh {
   constructor({
-    points = [new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 1, 0)],
+    points = [new Vector3(0, -1, 0), new Vector3(0, 1, 0)],
     material = new THREEShaderMaterial(),
     detail = 3,
     thickness = 0.1,
-    geometry = new THREE.CylinderBufferGeometry(1, 1, points.length - 1, detail, points.length - 1),
+    geometry = new CylinderGeometry(1, 1, points.length - 1, detail, points.length - 1),
   } = {}) {
     super(geometry, material);
 
@@ -28,7 +29,7 @@ export default class THREELine extends THREE.Mesh {
       ids[i] = positions[i * 3 + 1] + offsetY;
     }
 
-    this.geometry.addAttribute('linePointId', new THREE.BufferAttribute(ids, 1));
+    this.geometry.addAttribute('linePointId', new BufferAttribute(ids, 1));
 
     if (!material.linePositions) {
       material.add({
@@ -65,7 +66,7 @@ export default class THREELine extends THREE.Mesh {
     this.update();
   }
 
-  onBeforeRender(renderer, scene, camera, geometry, material, group) {
+  onBeforeRender(renderer, scene, camera, geometry, material) {
     this.material.lineThickness = this.userData._thickness;
     this.material.lineNormals = this.userData._lineNormals;
     this.material.linePositions = this.userData._linePositions;

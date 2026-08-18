@@ -55,7 +55,7 @@ export default class Sprite extends Object3D {
 
   set material(value) {
     this.mesh.material = value;
-    this.frame = this.frame;
+    this.frame = this.frame; // eslint-disable-line no-self-assign -- retriggers the frame setter to reapply offsets on the new material
   }
 
   get material() {
