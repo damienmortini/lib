@@ -92,7 +92,10 @@ export default class DamdomColorPickerElement extends HTMLElement {
   set value(value) {
     const hexadecimalValue = this._valueToHexadecimal(value);
 
-    if (hexadecimalValue === this._valueAsHexadecimal) return;
+    // _valueAsHexadecimal starts as the colour input's own default, so an element
+    // whose first value is that colour would otherwise skip the whole setter:
+    // no text field, and no _value to read back.
+    if (hexadecimalValue === this._valueAsHexadecimal && this._value !== undefined) return;
 
     this._valueAsHexadecimal = hexadecimalValue;
 
