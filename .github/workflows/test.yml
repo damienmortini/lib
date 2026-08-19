@@ -1,0 +1,43 @@
+# `npm test` is this repository's gate: eslint over `packages`, a typecheck of every
+# package tsconfig, and each package's own suite. Nothing ran it on a pull request before
+# this job, so a lint or type error was caught only by whoever next ran the gate on their
+# own machine — the accumulation path that once left 532 eslint errors to clear in one go.
+name: Tests
+
+# No `push: branches: [main]` — every merge squashes a branch this job already passed on.
+# No `paths-ignore` either: a skipped workflow reports no check at all rather than a
+# neutral success, so filtering docs-only pull requests would leave nothing for a required
+# status check to wait on. The concurrency cancel below is where the real spend is saved.
+on: pull_request
+
+# A review round pushes while the previous push's run is still going; only the newest head
+# can merge, so the superseded run is pure spend.
+concurrency:
+  group: tests-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      # Pinned rather than left to the runner default: packages import TypeScript source
+      # directly and are typechecked against the syntax the current Node runs natively.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Before the gate, not part of it: packages point `types` at `dist/index.d.ts`, so
+      # the typecheck resolves a sibling workspace package's types from its built output.
+      - run: pnpm run build
+
+      - run: npm test
