@@ -1,4 +1,4 @@
-import { modulo } from '@damienmortini/core/math/Math.js';
+import { modulo } from '@damienmortini/math';
 
 export default class KnobInputElement extends HTMLElement {
   static get observedAttributes() {
@@ -72,6 +72,7 @@ export default class KnobInputElement extends HTMLElement {
 
     let boundingClientRect;
     let previousAngle = 0;
+    let startValue = 0;
     const getAngleFromPointerEvent = (event) => {
       const x = event.clientX - boundingClientRect.x - boundingClientRect.width * 0.5;
       const y = event.clientY - boundingClientRect.y - boundingClientRect.height * 0.5;
@@ -84,6 +85,7 @@ export default class KnobInputElement extends HTMLElement {
       this.addEventListener('pointerup', pointerUp);
       this.addEventListener('pointerout', pointerUp);
       previousAngle = this.value;
+      startValue = this.value;
     };
     const pointerMove = (event) => {
       const angle = getAngleFromPointerEvent(event);
@@ -94,7 +96,11 @@ export default class KnobInputElement extends HTMLElement {
       if (angleDifference < -Math.PI) {
         angleDifference += Math.PI * 2;
       }
+      const value = this.value;
       this.value += angleDifference;
+      if (this.value !== value) {
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+      }
       previousAngle = angle;
     };
     const pointerUp = (event) => {
@@ -102,6 +108,9 @@ export default class KnobInputElement extends HTMLElement {
       this.removeEventListener('pointermove', pointerMove);
       this.removeEventListener('pointerup', pointerUp);
       this.removeEventListener('pointerout', pointerUp);
+      if (this.value !== startValue) {
+        this.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     };
     this.addEventListener('pointerdown', pointerDown);
 
@@ -184,9 +193,6 @@ export default class KnobInputElement extends HTMLElement {
     }
     this._value = value;
     this._update();
-    this.dispatchEvent(new Event('change', {
-      bubbles: true,
-    }));
   }
 }
 

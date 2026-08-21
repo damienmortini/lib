@@ -19,5 +19,12 @@
   "main": "index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "test": "node --test --import ./test/setup.ts"
+  },
+  "devDependencies": {
+    "@damienmortini/test-support": "0.0.1",
+    "jsdom": "^29.1.1"
   }
 }

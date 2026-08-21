@@ -21,7 +21,7 @@ export default class NumberInputElement extends HTMLElement {
 
     this._input = this.shadowRoot.querySelector('input');
 
-    this._input.addEventListener('change', event => this.dispatchEvent(new Event('change', event)));
+    this._input.addEventListener('change', () => this.dispatchEvent(new Event('change', { bubbles: true })));
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -86,7 +86,6 @@ export default class NumberInputElement extends HTMLElement {
       return;
     }
     this._input.valueAsNumber = value;
-    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 }
 

@@ -1,4 +1,4 @@
-import Ticker from '@damienmortini/core/util/Ticker.js';
+import Ticker from '@damienmortini/ticker';
 
 export default class RulerInputElement extends HTMLElement {
   static get observedAttributes() {
@@ -91,10 +91,12 @@ export default class RulerInputElement extends HTMLElement {
         this.dispatchEvent(new Event('input', { bubbles: true }));
       }
     };
+    let startValue = 0;
     const pointerDown = (event) => {
       if (!(event.buttons & 1)) {
         return;
       }
+      startValue = this.value;
       this.setPointerCapture(event.pointerId);
       this.addEventListener('pointermove', pointerMove);
       this.addEventListener('pointerup', pointerUp);
@@ -111,6 +113,9 @@ export default class RulerInputElement extends HTMLElement {
       this.removeEventListener('pointermove', pointerMove);
       this.removeEventListener('pointerup', pointerUp);
       this.removeEventListener('pointerout', pointerUp);
+      if (this.value !== startValue) {
+        this.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     };
     this.addEventListener('pointerdown', pointerDown);
 
@@ -180,7 +185,6 @@ export default class RulerInputElement extends HTMLElement {
     this._value = value;
     this._tick.textContent = `${this._value.toFixed(this._decimals)}`;
     this._update();
-    this.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   get zoom() {
