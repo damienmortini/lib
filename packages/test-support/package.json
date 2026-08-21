@@ -1,0 +1,15 @@
+{
+  "name": "@damienmortini/test-support",
+  "version": "0.0.1",
+  "description": "Shared jsdom setup and browser API shims for `node --test` element suites.",
+  "private": true,
+  "license": "ISC",
+  "author": "Damien Mortini",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
