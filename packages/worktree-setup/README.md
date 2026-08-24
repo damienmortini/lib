@@ -120,6 +120,13 @@ That is what its `worktree:setup` alias runs — `node packages/worktree-setup/s
 the worktree rather than from the primary, since the source to run is the branch's. The
 exception lives in the alias, which is why the entry point is still the same name here.
 
+## Checking an adoption
+
+Run `worktree-setup --check` from a repository's root as part of its lint or test command. It
+fails with the missing manifest entry when the repository has no `worktree:setup` script, no
+`worktreeSetup` key, an unknown option, or no `@damienmortini/worktree-setup` devDependency.
+The prose section remains a human-readable record of why the repository chose each option.
+
 ## Verifying a change against a consumer
 
 The same form points a *consumer's* setup at an unmerged copy, which is the only way to try a

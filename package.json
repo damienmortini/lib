@@ -10,7 +10,7 @@
     "prepare": "git config core.hooksPath hooks",
     "serve": "server",
     "bump": "lerna version patch",
-    "lint": "eslint .",
+    "lint": "eslint . && node packages/worktree-setup/src/cli.ts --check",
     "lint:fix": "eslint . --fix",
     "clean": "git clean -fdX",
     "publish": "pnpm run build && lerna publish from-package --yes",
