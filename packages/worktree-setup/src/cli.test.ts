@@ -66,6 +66,15 @@ for (const [name, overrides, diagnosis] of [
   });
 }
 
+test('check refuses a worktree path', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  const { status, stderr } = run(['--check', worktreeRoot], worktreeRoot);
+
+  assert.equal(status, 1);
+  assert.match(stderr, /`--check` reads the repository it is run in and takes no worktree path/);
+});
+
 test('reads the options the worktree declares, from the primary checkout', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
   // Only the branch has this package — the case the options exist for — and only the branch's
