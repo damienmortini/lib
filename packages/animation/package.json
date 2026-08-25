@@ -20,7 +20,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@damienmortini/ticker": "0.0.18"
+    "@damienmortini/ticker": "workspace:*"
   },
   "devDependencies": {
     "typescript": "6.0.3"

@@ -19,7 +19,7 @@ importers:
         version: 2.8.1
     devDependencies:
       '@damienmortini/eslint-config':
-        specifier: 0.0.32
+        specifier: workspace:*
         version: link:packages/eslint-config
       '@damienmortini/server':
         specifier: workspace:^
@@ -55,7 +55,7 @@ importers:
   packages/animation:
     dependencies:
       '@damienmortini/ticker':
-        specifier: 0.0.18
+        specifier: workspace:*
         version: link:../ticker
     devDependencies:
       typescript:
@@ -71,10 +71,10 @@ importers:
   packages/core:
     dependencies:
       '@damienmortini/gesture-observer':
-        specifier: 0.0.10
+        specifier: workspace:*
         version: link:../gesture-observer
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../math
 
   packages/damdom/damdom-checkbox: {}
@@ -82,7 +82,7 @@ importers:
   packages/damdom/damdom-colorpicker:
     dependencies:
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../../math
 
   packages/damdom/damdom-connector: {}
@@ -94,7 +94,7 @@ importers:
   packages/damdom/damdom-glslcanvas:
     dependencies:
       '@damienmortini/webgl':
-        specifier: 0.0.42
+        specifier: workspace:*
         version: link:../../webgl
 
   packages/damdom/damdom-gltfoptimizer:
@@ -112,19 +112,19 @@ importers:
   packages/damdom/damdom-gui:
     dependencies:
       '@damienmortini/damdom-checkbox':
-        specifier: 0.0.7
+        specifier: workspace:*
         version: link:../damdom-checkbox
       '@damienmortini/damdom-colorpicker':
-        specifier: 0.0.42
+        specifier: workspace:*
         version: link:../damdom-colorpicker
       '@damienmortini/damdom-select':
-        specifier: 0.0.7
+        specifier: workspace:*
         version: link:../damdom-select
       '@damienmortini/damdom-slider':
-        specifier: 0.0.7
+        specifier: workspace:*
         version: link:../damdom-slider
       '@damienmortini/damdom-textfield':
-        specifier: 0.0.7
+        specifier: workspace:*
         version: link:../damdom-textfield
 
   packages/damdom/damdom-linkableconnector: {}
@@ -148,13 +148,13 @@ importers:
   packages/damdom/damdom-ticker:
     dependencies:
       '@damienmortini/ticker':
-        specifier: 0.0.18
+        specifier: workspace:*
         version: link:../../ticker
 
   packages/damdom/damdom-viewport:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
 
   packages/demo/demo-connector: {}
@@ -170,16 +170,16 @@ importers:
   packages/demo/demo-webgl:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
       '@damienmortini/damdom-ticker':
-        specifier: 0.0.51
+        specifier: workspace:*
         version: link:../../damdom/damdom-ticker
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../../math
       '@damienmortini/webgl':
-        specifier: 0.0.42
+        specifier: workspace:*
         version: link:../../webgl
 
   packages/dependency-cleaner:
@@ -191,16 +191,16 @@ importers:
   packages/element/animation-sprite:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
       '@damienmortini/damdom-ticker':
-        specifier: 0.0.51
+        specifier: workspace:*
         version: link:../../damdom/damdom-ticker
 
   packages/element/animation-view:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
 
   packages/element/input-colorpicker:
@@ -212,17 +212,17 @@ importers:
   packages/element/input-joystick:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
 
   packages/element/input-knob:
     dependencies:
       '@damienmortini/math':
-        specifier: ^0.0.28
+        specifier: workspace:^
         version: link:../../math
     devDependencies:
       '@damienmortini/test-support':
-        specifier: 0.0.1
+        specifier: workspace:*
         version: link:../../test-support
       jsdom:
         specifier: ^29.1.1
@@ -231,7 +231,7 @@ importers:
   packages/element/input-number:
     devDependencies:
       '@damienmortini/test-support':
-        specifier: 0.0.1
+        specifier: workspace:*
         version: link:../../test-support
       jsdom:
         specifier: ^29.1.1
@@ -240,11 +240,11 @@ importers:
   packages/element/input-ruler:
     dependencies:
       '@damienmortini/ticker':
-        specifier: ^0.0.18
+        specifier: workspace:^
         version: link:../../ticker
     devDependencies:
       '@damienmortini/test-support':
-        specifier: 0.0.1
+        specifier: workspace:*
         version: link:../../test-support
       jsdom:
         specifier: ^29.1.1
@@ -253,7 +253,7 @@ importers:
   packages/element/input-signal-array:
     dependencies:
       '@damienmortini/element-viewer-array':
-        specifier: 0.0.19
+        specifier: workspace:*
         version: link:../viewer-array
 
   packages/element/input-signal-beat: {}
@@ -273,22 +273,22 @@ importers:
   packages/element/starter-gl:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
       '@damienmortini/damdom-ticker':
-        specifier: 0.0.51
+        specifier: workspace:*
         version: link:../../damdom/damdom-ticker
 
   packages/element/starter-three:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../../core
       '@damienmortini/damdom-ticker':
-        specifier: 0.0.51
+        specifier: workspace:*
         version: link:../../damdom/damdom-ticker
       '@damienmortini/three':
-        specifier: 0.1.204
+        specifier: workspace:*
         version: link:../../three
       three:
         specifier: 0.184.0
@@ -350,7 +350,7 @@ importers:
   packages/gltf:
     dependencies:
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../math
 
   packages/gltf-optimizer:
@@ -362,7 +362,7 @@ importers:
   packages/graph:
     dependencies:
       '@damienmortini/server':
-        specifier: ^1.0.90
+        specifier: workspace:^
         version: link:../server
       ws:
         specifier: ^8.21.0
@@ -381,10 +381,10 @@ importers:
   packages/orbit-transform:
     dependencies:
       '@damienmortini/gesture-observer':
-        specifier: 0.0.10
+        specifier: workspace:*
         version: link:../gesture-observer
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../math
     devDependencies:
       typescript:
@@ -458,7 +458,7 @@ importers:
   packages/three:
     dependencies:
       '@damienmortini/core':
-        specifier: 0.2.163
+        specifier: workspace:*
         version: link:../core
       fs-extra:
         specifier: ^11.3.5
@@ -470,16 +470,16 @@ importers:
   packages/ticker:
     dependencies:
       '@damienmortini/signal':
-        specifier: 0.0.14
+        specifier: workspace:*
         version: link:../signal
 
   packages/trackball-transform:
     dependencies:
       '@damienmortini/gesture-observer':
-        specifier: 0.0.10
+        specifier: workspace:*
         version: link:../gesture-observer
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../math
     devDependencies:
       typescript:
@@ -504,7 +504,7 @@ importers:
   packages/webgl:
     dependencies:
       '@damienmortini/math':
-        specifier: 0.0.28
+        specifier: workspace:*
         version: link:../math
 
   packages/worktree-setup: {}

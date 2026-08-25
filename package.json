@@ -27,7 +27,7 @@
     "es-module-shims": "^2.8.1"
   },
   "devDependencies": {
-    "@damienmortini/eslint-config": "0.0.32",
+    "@damienmortini/eslint-config": "workspace:*",
     "@damienmortini/server": "workspace:^",
     "@damienmortini/typescript-config": "workspace:^",
     "@damienmortini/worktree-setup": "workspace:*",

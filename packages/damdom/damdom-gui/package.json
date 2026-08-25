@@ -20,11 +20,11 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@damienmortini/damdom-checkbox": "0.0.7",
-    "@damienmortini/damdom-colorpicker": "0.0.42",
-    "@damienmortini/damdom-select": "0.0.7",
-    "@damienmortini/damdom-slider": "0.0.7",
-    "@damienmortini/damdom-textfield": "0.0.7"
+    "@damienmortini/damdom-checkbox": "workspace:*",
+    "@damienmortini/damdom-colorpicker": "workspace:*",
+    "@damienmortini/damdom-select": "workspace:*",
+    "@damienmortini/damdom-slider": "workspace:*",
+    "@damienmortini/damdom-textfield": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

@@ -24,10 +24,10 @@
     "test": "node --test --import ./test/setup.ts"
   },
   "devDependencies": {
-    "@damienmortini/test-support": "0.0.1",
+    "@damienmortini/test-support": "workspace:*",
     "jsdom": "^29.1.1"
   },
   "dependencies": {
-    "@damienmortini/ticker": "^0.0.18"
+    "@damienmortini/ticker": "workspace:^"
   }
 }
