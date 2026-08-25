@@ -22,6 +22,59 @@ async function declareOptions(worktreeRoot: string, worktreeSetup: unknown): Pro
   await write(path.join(worktreeRoot, 'package.json'), JSON.stringify({ name: 'repository', worktreeSetup }));
 }
 
+async function declareAdoption(worktreeRoot: string, overrides: Record<string, unknown> = {}): Promise<void> {
+  await write(path.join(worktreeRoot, 'package.json'), JSON.stringify({
+    name: 'repository',
+    devDependencies: { '@damienmortini/worktree-setup': 'workspace:*' },
+    scripts: { 'worktree:setup': 'worktree-setup' },
+    worktreeSetup: {},
+    ...overrides,
+  }));
+}
+
+test('checks a complete repository adoption', async () => {
+  const { worktreeRoot } = await checkouts();
+  await declareAdoption(worktreeRoot);
+
+  const { status } = run(['--check'], worktreeRoot);
+
+  assert.equal(status, 0);
+});
+
+for (const [name, overrides, diagnosis] of [
+  ['names a missing worktree setup script', { scripts: {} }, /`scripts\.worktree:setup` is missing/],
+  ['names a missing worktree setup key', { worktreeSetup: undefined }, /`worktreeSetup` is missing/],
+  [
+    'refuses a worktree setup option it does not know',
+    { worktreeSetup: { packageDirectory: ['packages'] } },
+    /`worktreeSetup\.packageDirectory`.*is not an option/,
+  ],
+  [
+    'requires the package to be a development dependency',
+    { dependencies: { '@damienmortini/worktree-setup': 'workspace:*' }, devDependencies: {} },
+    /`devDependencies\.@damienmortini\/worktree-setup` is missing/,
+  ],
+] as const) {
+  test(`check ${name}`, async () => {
+    const { worktreeRoot } = await checkouts();
+    await declareAdoption(worktreeRoot, overrides);
+
+    const { status, stderr } = run(['--check'], worktreeRoot);
+
+    assert.equal(status, 1);
+    assert.match(stderr, diagnosis);
+  });
+}
+
+test('check refuses a worktree path', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  const { status, stderr } = run(['--check', worktreeRoot], worktreeRoot);
+
+  assert.equal(status, 1);
+  assert.match(stderr, /`--check` reads the repository it is run in and takes no worktree path/);
+});
+
 test('reads the options the worktree declares, from the primary checkout', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
   // Only the branch has this package — the case the options exist for — and only the branch's

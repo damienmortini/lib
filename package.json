@@ -16,7 +16,7 @@
     "publish": "pnpm run build && lerna publish from-package --yes",
     "rewritepackagefiles": "node rewritepackagefiles.js",
     "start": "server --resolve-modules",
-    "test": "eslint packages && pnpm run typecheck && pnpm -r run test",
+    "test": "node packages/worktree-setup/src/cli.ts --check && eslint packages && pnpm run typecheck && pnpm -r run test",
     "typecheck": "for project in packages/*/tsconfig.json; do tsc --noEmit --incremental false --project \"$project\" || exit 1; done",
     "update": "pnpm i",
     "upgrade": "syncpack update && syncpack fix && pnpm i",

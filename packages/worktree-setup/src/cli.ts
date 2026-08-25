@@ -21,6 +21,12 @@ import { parseArgs } from 'node:util';
 
 import { currentCheckoutPath, setupWorktree, type WorktreeSetupOptions } from './index.ts';
 
+interface PackageManifest {
+  devDependencies?: Record<string, unknown>;
+  scripts?: Record<string, unknown>;
+  worktreeSetup?: unknown;
+}
+
 // Everything a repository declares — every option except `directory`, the path this command is
 // handed. A record keyed by the interface rather than a list beside it, because `Record` has to
 // be exhaustive in both directions: dropping or renaming an option in `WorktreeSetupOptions`
@@ -39,6 +45,18 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(entry => typeof entry === 'string');
 }
 
+function readManifest(manifestPath: string): PackageManifest {
+  try {
+    return JSON.parse(readFileSync(manifestPath, 'utf8')) as PackageManifest;
+  }
+  catch (error) {
+    // Named, because the raw message does not name it: a syntax error reports a position in a
+    // file it never mentions, which reads as this command being broken rather than the
+    // manifest it was pointed at.
+    throw new Error(`Cannot read ${manifestPath}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+  }
+}
+
 /**
  * The `worktreeSetup` key of the worktree's own package.json, checked rather than trusted.
  *
@@ -47,20 +65,7 @@ function isStringArray(value: unknown): value is string[] {
  * and report a worktree ready that cannot run its own gates — the confident wrong success
  * this package exists to stop repeating.
  */
-function readOptions(worktreeRoot: string): WorktreeSetupOptions {
-  const manifestPath = path.join(worktreeRoot, 'package.json');
-
-  let declared: unknown;
-  try {
-    declared = JSON.parse(readFileSync(manifestPath, 'utf8')).worktreeSetup;
-  }
-  catch (error) {
-    // Named, because the raw message does not name it: a syntax error reports a position in a
-    // file it never mentions, which reads as this command being broken rather than the
-    // manifest it was pointed at.
-    throw new Error(`Cannot read ${manifestPath}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
-  }
-
+function readOptions(declared: unknown, manifestPath: string): WorktreeSetupOptions {
   if (declared === undefined) return {};
   if (typeof declared !== 'object' || declared === null || Array.isArray(declared)) {
     throw new Error(`\`worktreeSetup\` in ${manifestPath} must be an object naming this repository's options.`);
@@ -81,11 +86,31 @@ function readOptions(worktreeRoot: string): WorktreeSetupOptions {
   return options;
 }
 
+function checkAdoption(repositoryRoot: string): void {
+  const manifestPath = path.join(repositoryRoot, 'package.json');
+  const manifest = readManifest(manifestPath);
+  if (manifest.worktreeSetup === undefined) throw new Error(`\`worktreeSetup\` is missing from ${manifestPath}.`);
+  readOptions(manifest.worktreeSetup, manifestPath);
+
+  if (typeof manifest.devDependencies?.['@damienmortini/worktree-setup'] !== 'string') {
+    throw new Error(`\`devDependencies.@damienmortini/worktree-setup\` is missing from ${manifestPath}.`);
+  }
+  if (typeof manifest.scripts?.['worktree:setup'] !== 'string') {
+    throw new Error(`\`scripts.worktree:setup\` is missing from ${manifestPath}.`);
+  }
+}
+
 try {
-  // No options of its own: everything this takes is either the worktree it is pointed at or
-  // something that worktree declares. An unknown `--flag` is refused here rather than read as
-  // a path.
-  const { positionals } = parseArgs({ allowPositionals: true });
+  const { positionals, values } = parseArgs({
+    allowPositionals: true,
+    options: { check: { type: 'boolean' } },
+  });
+  if (values.check) {
+    if (positionals.length > 0) throw new Error('`--check` reads the repository it is run in and takes no worktree path.');
+    checkAdoption(currentCheckoutPath(process.cwd()));
+    process.exit(0);
+  }
+
   if (positionals.length > 1) {
     throw new Error(`Expected one worktree path, got ${positionals.length}: ${positionals.join(' ')}.`);
   }
@@ -102,7 +127,8 @@ try {
   }
 
   const worktreeRoot = currentCheckoutPath(directory);
-  await setupWorktree({ ...readOptions(worktreeRoot), directory: worktreeRoot });
+  const manifestPath = path.join(worktreeRoot, 'package.json');
+  await setupWorktree({ ...readOptions(readManifest(manifestPath).worktreeSetup, manifestPath), directory: worktreeRoot });
 
   // No `Worktree ready.` here. Announcing itself done is the caller's, the same way building
   // is: a repository whose packages resolve through a `dist` is not ready when this returns,
