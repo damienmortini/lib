@@ -25,6 +25,6 @@
   },
   "devDependencies": {
     "@damienmortini/test-support": "workspace:*",
-    "jsdom": "^29.1.1"
+    "jsdom": "^30.0.1"
   }
 }

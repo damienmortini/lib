@@ -32,7 +32,7 @@
     "mime-types": "^3.0.2",
     "qrcode": "^1.5.4",
     "selfsigned": "^5.5.0",
-    "uuid": "14.0.0"
+    "uuid": "14.0.2"
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",

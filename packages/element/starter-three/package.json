@@ -17,7 +17,7 @@
     "@damienmortini/core": "workspace:*",
     "@damienmortini/damdom-ticker": "workspace:*",
     "@damienmortini/three": "workspace:*",
-    "three": "0.184.0"
+    "three": "0.185.1"
   },
   "publishConfig": {
     "access": "public"
