@@ -267,7 +267,10 @@ export const build = async ({
                       build.onEnd(async () => {
                         const { fileURLToPath } = await import('url');
                         const { spawn } = await import('child_process');
-                        const tscPath = fileURLToPath(import.meta.resolve('typescript/bin/tsc'));
+                        // `tsc6` rather than `tsc`: the package named `typescript` is the TypeScript 6
+                        // compatibility shim, which names its binary `tsc6` so it cannot collide with
+                        // TypeScript 7's. See the TypeScript section of CONTRIBUTING.md.
+                        const tscPath = fileURLToPath(import.meta.resolve('typescript/bin/tsc6'));
                         // Compile via the package tsconfig (-p) so module/resolution settings are honoured
                         // and --incremental stays valid. Await it and surface failures so missing or broken
                         // declarations fail the build instead of being silently dropped.

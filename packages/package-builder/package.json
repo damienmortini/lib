@@ -23,7 +23,10 @@
     "chokidar": "^5.0.0",
     "esbuild": "0.28.1",
     "fast-glob": "^3.3.3",
-    "typescript": "6.0.3"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
+  },
+  "devDependencies": {
+    "@typescript/native": "npm:typescript@^7.0.2"
   },
   "publishConfig": {
     "access": "public"
