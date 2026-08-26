@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@damienmortini/core": "workspace:*",
-    "fs-extra": "^11.3.5",
-    "three": "0.184.0"
+    "fs-extra": "^11.4.0",
+    "three": "0.185.1"
   },
   "publishConfig": {
     "access": "public"

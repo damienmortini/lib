@@ -24,7 +24,7 @@
     "worktree:setup": "node packages/worktree-setup/src/cli.ts"
   },
   "dependencies": {
-    "es-module-shims": "^2.8.1"
+    "es-module-shims": "^2.8.4"
   },
   "devDependencies": {
     "@damienmortini/eslint-config": "workspace:*",
@@ -32,12 +32,12 @@
     "@damienmortini/typescript-config": "workspace:^",
     "@damienmortini/worktree-setup": "workspace:*",
     "@typescript/native": "npm:typescript@7.0.2",
-    "eslint": "10.5.0",
+    "eslint": "10.9.1",
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
-    "lerna": "^9.0.7",
+    "lerna": "^10.0.1",
     "sort-package-json": "4.0.0",
-    "syncpack": "15.3.1",
+    "syncpack": "15.3.3",
     "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "worktreeSetup": {
