@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",
-    "@typescript/native": "npm:typescript@^7.0.2"
+    "@typescript/native": "npm:typescript@7.0.2"
   },
   "publishConfig": {
     "access": "public"

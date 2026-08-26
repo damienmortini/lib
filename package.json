@@ -31,14 +31,14 @@
     "@damienmortini/server": "workspace:^",
     "@damienmortini/typescript-config": "workspace:^",
     "@damienmortini/worktree-setup": "workspace:*",
-    "@typescript/native": "npm:typescript@^7.0.2",
+    "@typescript/native": "npm:typescript@7.0.2",
     "eslint": "10.5.0",
     "fast-glob": "^3.3.3",
     "jsdoc": "^4.0.5",
     "lerna": "^9.0.7",
     "sort-package-json": "4.0.0",
     "syncpack": "15.3.1",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "worktreeSetup": {
     "packageDirectories": [

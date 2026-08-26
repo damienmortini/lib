@@ -31,7 +31,7 @@ importers:
         specifier: workspace:*
         version: link:packages/worktree-setup
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
       eslint:
         specifier: 10.5.0
@@ -52,7 +52,7 @@ importers:
         specifier: 15.3.1
         version: 15.3.1
       typescript:
-        specifier: npm:@typescript/typescript6@^6.0.2
+        specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
 
   packages/animation:
@@ -62,7 +62,7 @@ importers:
         version: link:../ticker
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/blend2gltf:
@@ -317,7 +317,7 @@ importers:
         specifier: ^17.6.0
         version: 17.7.0
       typescript:
-        specifier: npm:@typescript/typescript6@^6.0.2
+        specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
       typescript-eslint:
         specifier: ^8.64.0
@@ -333,7 +333,7 @@ importers:
         version: 9.1.3
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/gesture-observer: {}
@@ -378,7 +378,7 @@ importers:
         version: 3.4.4
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/orbit-transform:
@@ -391,7 +391,7 @@ importers:
         version: link:../math
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/package-builder:
@@ -406,17 +406,17 @@ importers:
         specifier: ^3.3.3
         version: 3.3.3
       typescript:
-        specifier: npm:@typescript/typescript6@^6.0.2
+        specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/router:
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/server:
@@ -447,13 +447,13 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/signal:
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/test-support:
@@ -490,7 +490,7 @@ importers:
         version: link:../math
     devDependencies:
       '@typescript/native':
-        specifier: npm:typescript@^7.0.2
+        specifier: npm:typescript@7.0.2
         version: typescript@7.0.2
 
   packages/typescript-config:

@@ -31,7 +31,7 @@
     "jsdoc-to-markdown": "^9.1.3"
   },
   "devDependencies": {
-    "@typescript/native": "npm:typescript@^7.0.2"
+    "@typescript/native": "npm:typescript@7.0.2"
   },
   "publishConfig": {
     "access": "public"

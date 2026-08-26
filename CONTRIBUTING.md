@@ -34,8 +34,8 @@ Two compilers are installed side by side, which is why no `package.json` here na
 `typescript` at a plain version:
 
 ```json
-"@typescript/native": "npm:typescript@^7.0.2",
-"typescript": "npm:@typescript/typescript6@^6.0.2"
+"@typescript/native": "npm:typescript@7.0.2",
+"typescript": "npm:@typescript/typescript6@6.0.2"
 ```
 
 `@typescript/native` is TypeScript 7 and owns the `tsc` that every `build` script and
@@ -46,6 +46,8 @@ fails before linting a line. The shim's binary is `tsc6`, so the two never colli
 
 `syncpack` reads both aliases and reconciles the semver inside them, but `syncpack update`
 skips aliased specifiers — `pnpm run upgrade` will never bump either one; move them by hand.
+Both are pinned exactly for that reason: a range no tool here reviews is one an install could
+drift silently.
 
 Delete both aliases and go back to a plain `typescript` at TypeScript 7.1, when the real
 compiler API lands.
