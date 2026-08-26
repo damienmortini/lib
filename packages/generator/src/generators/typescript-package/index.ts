@@ -34,7 +34,7 @@ export default async function ({ name, scope, path }) {
             build: 'tsc',
           },
           devDependencies: {
-            typescript: devDependencies.typescript,
+            '@typescript/native': devDependencies['@typescript/native'],
           },
         },
         null,

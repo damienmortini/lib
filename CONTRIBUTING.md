@@ -27,3 +27,27 @@ others link *to*. `packageDirectories: ["packages"]` is where its own workspace 
 and `requiredPackages` names the two configs every gate resolves through
 (`@damienmortini/eslint-config` and `@damienmortini/typescript-config`), so a worktree that
 cannot resolve them fails setup instead of failing `lint` later with a foreign error.
+
+## TypeScript
+
+Two compilers are installed side by side, which is why no `package.json` here names
+`typescript` at a plain version:
+
+```json
+"@typescript/native": "npm:typescript@7.0.2",
+"typescript": "npm:@typescript/typescript6@6.0.2"
+```
+
+`@typescript/native` is TypeScript 7 and owns the `tsc` that every `build` script and
+`pnpm run typecheck` runs. The package *named* `typescript` is the TypeScript 6 compatibility
+shim, kept only so that anything importing the compiler API has an API to import — TypeScript 7
+ships none until 7.1, and without the shim `typescript-eslint` refuses to load and `eslint`
+fails before linting a line. The shim's binary is `tsc6`, so the two never collide.
+
+`syncpack` reads both aliases and reconciles the semver inside them, but `syncpack update`
+skips aliased specifiers — `pnpm run upgrade` will never bump either one; move them by hand.
+Both are pinned exactly for that reason: a range no tool here reviews is one an install could
+drift silently.
+
+Delete both aliases and go back to a plain `typescript` at TypeScript 7.1, when the real
+compiler API lands.
