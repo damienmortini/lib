@@ -27,7 +27,7 @@
     "gl-matrix": "^3.4.4"
   },
   "devDependencies": {
-    "typescript": "6.0.3"
+    "@typescript/native": "npm:typescript@7.0.2"
   },
   "publishConfig": {
     "access": "public"
