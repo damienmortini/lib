@@ -2,7 +2,7 @@ import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { createHash, randomBytes, X509Certificate } from 'crypto';
-import { mkdir, readFile, stat, writeFile } from 'fs/promises';
+import { mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
 import { constants, createSecureServer, type Http2SecureServer, type IncomingHttpHeaders, type ServerHttp2Stream } from 'http2';
@@ -32,6 +32,41 @@ const WS_PROXY_SKIP_HEADERS = new Set(['connection', 'upgrade', 'sec-websocket-k
 const LIVE_RELOAD_PATH = '/@livereload';
 
 const certificatesDirectory = join(import.meta.dirname, '../certificates');
+
+const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
+
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"]/g, character => HTML_ESCAPES[character]);
+}
+
+/**
+ * A browsable listing for a directory with no index.html.
+ *
+ * Without it such a request resolves to a missing index.html and fails, which
+ * makes a directory of plain files (downloads, build output, media) unreachable
+ * even though every file in it is served fine.
+ *
+ * Entries link with absolute hrefs under `servedDirectoryPath` rather than
+ * relative ones, so the listing works whether or not the request carried a
+ * trailing slash, and under a mount prefix.
+ */
+async function renderDirectoryListing(directoryPath: string, servedDirectoryPath: string): Promise<string> {
+  const entries = await readdir(directoryPath, { withFileTypes: true });
+  entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
+  const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
+  const items = entries.map((entry) => {
+    const name = entry.isDirectory() ? `${entry.name}/` : entry.name;
+    return `<li><a href="${escapeHtml(base)}${encodeURIComponent(entry.name)}${entry.isDirectory() ? '/' : ''}">${escapeHtml(name)}</a></li>`;
+  });
+  return `<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(base)}</title>
+<style>body{font:16px/1.6 system-ui,sans-serif;margin:2rem auto;max-width:40rem;padding:0 1rem}li{margin:.25rem 0}</style>
+<h1>${escapeHtml(base)}</h1>
+<ul>${items.join('')}</ul>
+`;
+}
 
 // ── Response caching / compression ──────────────────────────────────────────
 // Every response keeps `cache-control: no-cache` (the browser must revalidate,
@@ -674,7 +709,19 @@ export class Server {
          * server-side at import time and answered with a re-export shim
          * pointing at the canonical served module URL.
          */
-        const requestFilePath = servedPath.split('?')[0];
+        // Decoded once here, so every branch below (stat, source lookup, readFile)
+        // sees the real on-disk name: a file whose name needs percent-encoding
+        // used to fail the directory stat and 404 before the late decodes that
+        // only the plain-static branches performed. A malformed escape is not
+        // decodable, so it falls back to the raw path and 404s as a missing file.
+        const rawRequestFilePath = servedPath.split('?')[0];
+        let requestFilePath: string;
+        try {
+          requestFilePath = decodeURIComponent(rawRequestFilePath);
+        }
+        catch {
+          requestFilePath = rawRequestFilePath;
+        }
         const resolverMatch = requestFilePath.match(/^\/@resolve\/(?<specifier>.+)$/);
         if (resolveModules && resolverMatch) {
           const specifier = decodeURIComponent(resolverMatch.groups!.specifier);
@@ -765,10 +812,25 @@ export class Server {
         const sourceFilePath = await getSourceFilePath(filePath);
 
         /**
-         * If path is a directory then set index.html file by default
+         * A directory serves its index.html, or a listing when it has none.
          */
         if (!sourceFilePath && (await stat(filePath)).isDirectory()) {
-          filePath += filePath.endsWith('/') ? 'index.html' : '/index.html';
+          const directoryPath = filePath.replace(/\/$/, '');
+          const indexPath = `${directoryPath}/index.html`;
+          if (await stat(indexPath).catch(() => null)) {
+            filePath = indexPath;
+          }
+          else {
+            const listing = await renderDirectoryListing(
+              directoryPath,
+              `${servedRoot.slice(0, -1)}${directoryPath.slice(rootDirectory.length)}`,
+            );
+            sendCachedBody(stream, headers, { ':status': constants.HTTP_STATUS_OK, 'content-type': 'text/html', 'cache-control': 'no-cache' }, {
+              body: listing,
+              etag: contentEtag(listing),
+            });
+            return;
+          }
         }
 
         const responseHeaders = {
@@ -880,7 +942,7 @@ export class Server {
         // Range requests fall through to respondWithFile — rewriting a partial
         // body would corrupt it, and module scripts are never range-requested.
         else if (resolveModules && !requestRange && (fileExtension === '.js' || fileExtension === '.mjs')) {
-          const modulePath = decodeURIComponent(responseFilePath);
+          const modulePath = responseFilePath;
           const entry = await cachedResponse(`${servedRoot}\0${modulePath}`, await stat(modulePath), async () => {
             const fileContent = await readFile(modulePath, { encoding: 'utf-8' });
             return moduleResolver.rewriteModuleSpecifiers(fileContent, modulePath, servedRoot);
@@ -888,7 +950,7 @@ export class Server {
           sendCachedBody(stream, headers, responseHeaders, entry);
         }
         else {
-          const staticFilePath = decodeURIComponent(responseFilePath);
+          const staticFilePath = responseFilePath;
           const fileStats = await stat(staticFilePath);
           // Static bodies come straight off disk, so mtime+size is a sufficient
           // validator — no need to hash the content.
@@ -922,13 +984,18 @@ export class Server {
           return;
         }
 
-        if (error.code === 'ENOENT') {
-          stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
-        }
-        else {
+        // respondWithFile marks the response initiated before `headersSent`
+        // reports it, so the guard above can miss and this respond() throws.
+        // An escaping throw here reaches no caller — the stream handler is
+        // async — and takes the whole server down, so it ends the stream
+        // instead: one failed request must never be fatal.
+        try {
           stream.respond({
-            ':status': constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            ':status': error.code === 'ENOENT' ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
           });
+        }
+        catch (respondError) {
+          console.log(respondError);
         }
         stream.end();
       }
