@@ -167,6 +167,13 @@ type ServerOptions = {
    * strip client-supplied values before forwarding.
    */
   base?: string;
+  /**
+   * Serve a browsable listing for a directory that has no index.html, instead
+   * of 404. Off by default: a listing exposes every file name under the served
+   * root, so it is opt-in per server rather than something a root gains by
+   * accident.
+   */
+  directoryListing?: boolean;
 };
 
 // A mount prefix normalized to `/prefix` shape — from the `base` option or from
@@ -307,6 +314,7 @@ export class Server {
     proxy = {},
     auth,
     base = '',
+    directoryListing = false,
   }: ServerOptions = {}): Promise<void> {
     // File serving and the module-resolution subsystem (import map crawl,
     // /@resolve/) share one absolute root, so they always agree on which tree is
@@ -812,12 +820,15 @@ export class Server {
         const sourceFilePath = await getSourceFilePath(filePath);
 
         /**
-         * A directory serves its index.html, or a listing when it has none.
+         * A directory serves its index.html — or a listing when it has none and
+         * `directoryListing` is on. Off by default: a directory without an
+         * index.html stays a 404, so turning the option on is the only way to
+         * make a tree's file names readable to whoever can reach the server.
          */
         if (!sourceFilePath && (await stat(filePath)).isDirectory()) {
           const directoryPath = filePath.replace(/\/$/, '');
           const indexPath = `${directoryPath}/index.html`;
-          if (await stat(indexPath).catch(() => null)) {
+          if (!directoryListing || await stat(indexPath).catch(() => null)) {
             filePath = indexPath;
           }
           else {

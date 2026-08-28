@@ -257,13 +257,24 @@ describe('directory listing', () => {
     await writeFile(join(rootPath, 'video & clip.mp4'), 'binary');
     await mkdir(join(rootPath, 'nested'));
     await writeFile(join(rootPath, 'nested', 'index.html'), '<html><body>nested index</body></html>');
-    server = new Server({ rootPath, watch: false, port: 9301 });
+    server = new Server({ rootPath, watch: false, port: 9301, directoryListing: true });
     await server.ready;
   });
 
   after(async () => {
     await server.close();
     await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('404s a directory with no index.html when listing is not enabled', async () => {
+    const plainServer = new Server({ rootPath, watch: false, port: 9302 });
+    await plainServer.ready;
+    try {
+      strictEqual(await fetchStatus(boundPort(plainServer), '/'), 404);
+    }
+    finally {
+      await plainServer.close();
+    }
   });
 
   it('lists a directory that has no index.html instead of failing on the missing file', async () => {
