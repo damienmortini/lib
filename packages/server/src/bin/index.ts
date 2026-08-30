@@ -16,6 +16,7 @@ let useExternalCertificate = false;
 const proxy: { [path: string]: string } = {};
 let auth: string | undefined;
 let base: string | undefined;
+let directoryListing = false;
 
 let i = 0;
 while (i < args.length) {
@@ -71,6 +72,9 @@ while (i < args.length) {
     case '--base':
       base = args[++i];
       break;
+    case '--directory-listing':
+      directoryListing = true;
+      break;
   }
 
   i++;
@@ -120,6 +124,7 @@ const server = new Server({
   proxy,
   auth,
   base,
+  directoryListing,
 });
 
 await server.ready;

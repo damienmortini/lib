@@ -6,10 +6,13 @@ Simple live reloading HTTP2 server for development
 npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>]
            [--watch <path>] [--watch-ignore <a,b>] [--proxy <path> <target>]
            [--auth <user:pass>] [--external-certificate] [--resolve-modules]
-           [--verbose]
+           [--directory-listing] [--verbose]
 ```
 
-`--watch` and `--proxy` may be repeated. Live reload is always on. The `--auth`
+`--watch` and `--proxy` may be repeated. `--directory-listing` serves a
+browsable listing for a directory that has no `index.html`, which otherwise
+404s; it is off by default because a listing exposes every file name under the
+served root. Live reload is always on. The `--auth`
 credential can also be passed as `SERVER_AUTH` in the environment, which keeps it
 out of argv — and so out of `ps` and `/proc/<pid>/cmdline`; the flag wins when
 both are set.
