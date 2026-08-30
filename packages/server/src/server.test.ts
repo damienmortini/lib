@@ -255,6 +255,8 @@ describe('directory listing', () => {
   before(async () => {
     rootPath = await mkdtemp(join(tmpdir(), 'server-listing-'));
     await writeFile(join(rootPath, 'video & clip.mp4'), 'binary');
+    await mkdir(join(rootPath, '50% done'));
+    await writeFile(join(rootPath, '50% done', 'report.txt'), 'report');
     await mkdir(join(rootPath, 'nested'));
     await writeFile(join(rootPath, 'nested', 'index.html'), '<html><body>nested index</body></html>');
     server = new Server({ rootPath, watch: false, port: 9301, directoryListing: true });
@@ -284,6 +286,11 @@ describe('directory listing', () => {
     ok(body.includes('href="/nested/"'), 'expected subdirectories to link with a trailing slash');
   });
 
+  it('encodes every path segment of an entry link, not just the entry name', async () => {
+    const body = await fetchBody(boundPort(server), '/50%25%20done/');
+    ok(body.includes('href="/50%25%20done/report.txt"'), `expected the ancestor directory name encoded too, got: ${body}`);
+  });
+
   it('still serves index.html when the directory has one', async () => {
     const body = await fetchBody(boundPort(server), '/nested/');
     ok(body.includes('nested index'), `expected the directory's own index.html, got: ${body}`);
@@ -294,7 +301,7 @@ describe('directory listing', () => {
     ok(body.includes('href="/mounted/app/video%20%26%20clip.mp4"'), `expected prefixed entry links, got: ${body}`);
   });
 
-  it('survives a request for a file that vanished after the directory was read', async () => {
+  it('keeps serving after a 404 for a missing file', async () => {
     const missing = await fetchStatus(boundPort(server), '/gone.mp4');
     strictEqual(missing, 404);
     const stillUp = await fetchStatus(boundPort(server), '/video%20%26%20clip.mp4');

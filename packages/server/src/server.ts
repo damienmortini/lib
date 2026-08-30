@@ -54,9 +54,12 @@ async function renderDirectoryListing(directoryPath: string, servedDirectoryPath
   const entries = await readdir(directoryPath, { withFileTypes: true });
   entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
   const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
+  // `base` is a decoded on-disk path: every segment needs encoding, not just the
+  // entry's own name, or a directory called `50%20done` links to `50 done`.
+  const linkBase = base.split('/').map(encodeURIComponent).join('/');
   const items = entries.map((entry) => {
     const name = entry.isDirectory() ? `${entry.name}/` : entry.name;
-    return `<li><a href="${escapeHtml(base)}${encodeURIComponent(entry.name)}${entry.isDirectory() ? '/' : ''}">${escapeHtml(name)}</a></li>`;
+    return `<li><a href="${linkBase}${encodeURIComponent(entry.name)}${entry.isDirectory() ? '/' : ''}">${escapeHtml(name)}</a></li>`;
   });
   return `<!doctype html>
 <meta charset="utf-8">
@@ -732,7 +735,8 @@ export class Server {
         }
         const resolverMatch = requestFilePath.match(/^\/@resolve\/(?<specifier>.+)$/);
         if (resolveModules && resolverMatch) {
-          const specifier = decodeURIComponent(resolverMatch.groups!.specifier);
+          // Already decoded with the rest of the request path above.
+          const specifier = resolverMatch.groups!.specifier;
           const refererUrl = URL.parse(String(headers['referer'] ?? ''));
           // No referer means no page to resolve from; the resolver falls back
           // to the served root.
