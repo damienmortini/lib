@@ -50,6 +50,26 @@ async function fetchLiveReloadState(port: number): Promise<string> {
   }
 }
 
+async function fetchStatus(port: number, path: string): Promise<number> {
+  const session = connect(`https://localhost:${port}`, { rejectUnauthorized: false });
+  try {
+    return await new Promise<number>((resolvePromise, rejectPromise) => {
+      session.on('error', rejectPromise);
+      const stream = session.request({ ':path': path });
+      let status = 0;
+      stream.on('response', (responseHeaders) => {
+        status = Number(responseHeaders[':status']);
+      });
+      stream.on('data', () => {});
+      stream.on('end', () => resolvePromise(status));
+      stream.on('error', rejectPromise);
+    });
+  }
+  finally {
+    session.close();
+  }
+}
+
 function boundPort(server: Server): number {
   const address = server.http2SecureServer.address();
   if (address === null || typeof address === 'string') throw new Error('server has no bound port');
@@ -225,5 +245,66 @@ describe('forwarded prefix', () => {
   it('synthesizes a package.json for a subpath export under a root outside the working directory', async () => {
     const body = await fetchBody(boundPort(server), '/node_modules/subpath-package/sub/package.json');
     strictEqual(JSON.parse(body).main, '../dist/sub.js');
+  });
+});
+
+describe('directory listing', () => {
+  let rootPath: string;
+  let server: Server;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-listing-'));
+    await writeFile(join(rootPath, 'video & clip.mp4'), 'binary');
+    await mkdir(join(rootPath, '50% done'));
+    await writeFile(join(rootPath, '50% done', 'report.txt'), 'report');
+    await mkdir(join(rootPath, 'nested'));
+    await writeFile(join(rootPath, 'nested', 'index.html'), '<html><body>nested index</body></html>');
+    server = new Server({ rootPath, watch: false, port: 9301, directoryListing: true });
+    await server.ready;
+  });
+
+  after(async () => {
+    await server.close();
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('404s a directory with no index.html when listing is not enabled', async () => {
+    const plainServer = new Server({ rootPath, watch: false, port: 9302 });
+    await plainServer.ready;
+    try {
+      strictEqual(await fetchStatus(boundPort(plainServer), '/'), 404);
+    }
+    finally {
+      await plainServer.close();
+    }
+  });
+
+  it('lists a directory that has no index.html instead of failing on the missing file', async () => {
+    const body = await fetchBody(boundPort(server), '/');
+    ok(body.includes('href="/video%20%26%20clip.mp4"'), `expected an encoded entry link, got: ${body}`);
+    ok(body.includes('video &amp; clip.mp4'), 'expected the entry name escaped for HTML');
+    ok(body.includes('href="/nested/"'), 'expected subdirectories to link with a trailing slash');
+  });
+
+  it('encodes every path segment of an entry link, not just the entry name', async () => {
+    const body = await fetchBody(boundPort(server), '/50%25%20done/');
+    ok(body.includes('href="/50%25%20done/report.txt"'), `expected the ancestor directory name encoded too, got: ${body}`);
+  });
+
+  it('still serves index.html when the directory has one', async () => {
+    const body = await fetchBody(boundPort(server), '/nested/');
+    ok(body.includes('nested index'), `expected the directory's own index.html, got: ${body}`);
+  });
+
+  it('links entries under the announced mount prefix', async () => {
+    const body = await fetchBody(boundPort(server), '/mounted/app/', { 'x-forwarded-prefix': '/mounted/app' });
+    ok(body.includes('href="/mounted/app/video%20%26%20clip.mp4"'), `expected prefixed entry links, got: ${body}`);
+  });
+
+  it('keeps serving after a 404 for a missing file', async () => {
+    const missing = await fetchStatus(boundPort(server), '/gone.mp4');
+    strictEqual(missing, 404);
+    const stillUp = await fetchStatus(boundPort(server), '/video%20%26%20clip.mp4');
+    strictEqual(stillUp, 200, 'expected the server to keep serving after a 404');
   });
 });
