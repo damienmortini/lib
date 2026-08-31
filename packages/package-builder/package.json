@@ -17,7 +17,8 @@
     "package-builder": "dist/bin/index.js"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node --test src/*.test.ts"
   },
   "dependencies": {
     "chokidar": "^5.0.0",
