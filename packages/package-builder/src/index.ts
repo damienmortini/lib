@@ -329,8 +329,9 @@ export default styles;`;
           await ctx.watch();
         }
         else {
-          const result = await ctx.rebuild();
-          await ctx.dispose();
+          // Dispose even when the build throws: esbuild keeps a child process alive for the
+          // context, so a failed declaration emit hangs the build instead of reporting.
+          const result = await ctx.rebuild().finally(() => ctx.dispose());
           if (result.outputFiles) {
             await Promise.all(result.outputFiles.map(async (outputFile) => {
               try {
