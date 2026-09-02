@@ -175,6 +175,25 @@ describe('live-reload client script', () => {
     ok(await fetchLiveReloadState(boundPort(watchingServer)) !== state, 'a refresh must move the token');
   });
 
+  // Stylesheets used to be skipped here, on the assumption that a page swaps them
+  // in without a reload. Nothing does that for CSS imported as a module script into
+  // `adoptedStyleSheets`: the sheet is cached in the module map and carries no href,
+  // so the edit is simply invisible. A page that can swap its own stylesheets cancels
+  // the announcement instead — that hatch is tested above.
+  it('refreshes when a served stylesheet changes', async () => {
+    const stylesheet = join(rootPath, 'style.css');
+    await writeFile(stylesheet, 'body { color: red; }');
+    // Only files that have been served are watched, so the fetch is what arms this.
+    await fetchBody(boundPort(watchingServer), '/style.css');
+    const state = await fetchLiveReloadState(boundPort(watchingServer));
+    await writeFile(stylesheet, 'body { color: blue; }');
+    // The watcher polls, so the refresh lands a moment after the write.
+    const deadline = Date.now() + 10_000;
+    while (await fetchLiveReloadState(boundPort(watchingServer)) === state) {
+      ok(Date.now() < deadline, 'a stylesheet change must move the state token');
+    }
+  });
+
   it('injects nothing when watch is off', async () => {
     const body = await fetchBody(boundPort(plainServer), '/index.html');
     ok(!body.includes('EventSource'), 'expected no live-reload client without watch');
