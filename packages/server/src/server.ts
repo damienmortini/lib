@@ -468,7 +468,6 @@ export class Server {
           interval: 200,
         })
           .on('change', (changedPath) => {
-            if (changedPath.endsWith('.css') || changedPath.endsWith('.css.map')) return;
             if (verbose) {
               console.log(`${changedPath} just changed, refresh.`);
             }
