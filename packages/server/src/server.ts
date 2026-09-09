@@ -10,7 +10,7 @@ import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
-import { extname, join } from 'path';
+import { dirname, extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
@@ -814,10 +814,17 @@ export class Server {
         }
 
         /**
-         * Rewrite to root if url isn't a file and doesn't exist
+         * A path with no extension and nothing on disk is a client-side route, and
+         * is answered with the page that owns it: the nearest ancestor directory
+         * with an index.html, root last. Rewriting straight to root handed a route
+         * living under a subdirectory — `/deck/slide-3` — to the wrong page.
          */
         if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath).catch(() => null))) {
-          filePath = `${rootDirectory}/`;
+          let routeDirectory = dirname(filePath);
+          while (routeDirectory.length > rootDirectory.length && !(await stat(`${routeDirectory}/index.html`).catch(() => null))) {
+            routeDirectory = dirname(routeDirectory);
+          }
+          filePath = `${routeDirectory}/`;
         }
 
         const sourceFilePath = await getSourceFilePath(filePath);

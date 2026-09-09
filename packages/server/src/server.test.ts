@@ -315,6 +315,11 @@ describe('directory listing', () => {
     ok(body.includes('nested index'), `expected the directory's own index.html, got: ${body}`);
   });
 
+  it('serves a client-side route from the index.html of the directory it lives under', async () => {
+    const body = await fetchBody(boundPort(server), '/nested/route-3');
+    ok(body.includes('nested index'), `expected the route's own directory index, got: ${body}`);
+  });
+
   it('links entries under the announced mount prefix', async () => {
     const body = await fetchBody(boundPort(server), '/mounted/app/', { 'x-forwarded-prefix': '/mounted/app' });
     ok(body.includes('href="/mounted/app/video%20%26%20clip.mp4"'), `expected prefixed entry links, got: ${body}`);
