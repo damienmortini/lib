@@ -188,6 +188,12 @@ export class ModuleResolver {
   // trailing slash, and as the directory URL every module URL inside it shares.
   readonly #rootPrefix: string;
   readonly #rootUrl: URL;
+  // Mounts survive the walk that discovered them: a target is reached through a
+  // different link chain on every walk, so adopting it afresh each time gives one
+  // package several served URLs. See #canonicalizeModuleUrl.
+  // Known limitation: unlike responseCache, this is never invalidated, so a link
+  // repointed while the server runs keeps its first served path until a restart.
+  readonly #adoptedMounts: Array<{ targetPath: string; servedPath: string }> = [];
 
   constructor(rootPath: string) {
     this.rootDirectory = toPosixPath(resolve(rootPath));
@@ -221,7 +227,10 @@ export class ModuleResolver {
     // the mounted path instead of staying a distinct URL and evaluating a second
     // time. Without it only the outermost link is kept and nothing below it
     // collapses, because every target down there leaves the root as well.
-    const adoptedMounts: Array<{ targetPath: string; servedPath: string }> = [];
+    // The registry is kept on the instance rather than per walk: a checkout that
+    // carries its own copy of a shared package mounts that package under itself,
+    // and a walk that started elsewhere would otherwise mount the same target a
+    // second time under a different served path.
     // Bounds total symlink follows so link cycles cannot loop forever.
     let symlinkHopBudget = 40;
     while (remainingComponents.length > 0) {
@@ -242,8 +251,11 @@ export class ModuleResolver {
       const resolvedTargetPath = toPosixPath(resolve(realCurrentPath, symlinkTarget));
       let servedTargetPath = resolvedTargetPath;
       if (!`${resolvedTargetPath}/`.startsWith(this.#rootPrefix)) {
-        const mountedPath = servedPathWithinAdoptedMount(adoptedMounts, resolvedTargetPath);
-        if (mountedPath === undefined) adoptedMounts.push({ targetPath: resolvedTargetPath, servedPath: candidatePath });
+        // Walks run concurrently, so this lookup and its push must stay one
+        // synchronous span: an await between them lets two walks both find the
+        // registry empty and adopt the same target under two served paths.
+        const mountedPath = servedPathWithinAdoptedMount(this.#adoptedMounts, resolvedTargetPath);
+        if (mountedPath === undefined) this.#adoptedMounts.push({ targetPath: resolvedTargetPath, servedPath: candidatePath });
         // No mount covers the target, or this link is the mount itself — the walk
         // has nowhere in-root to collapse onto, so keep the link as the URL.
         if (mountedPath === undefined || mountedPath === candidatePath) {

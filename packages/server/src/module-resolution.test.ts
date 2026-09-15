@@ -83,6 +83,82 @@ describe('packages reached through a submodule mounted outside the served root',
   });
 });
 
+describe('a shared package reachable through two mounted checkouts', () => {
+  // One checkout carries its own link to a second one, so the same package is
+  // reachable as `submodules/shared/...` and as `submodules/tools/submodules/shared/...`.
+  // Each walk mounts what it meets, so the pairing has to outlive a single walk
+  // or the package evaluates once per URL and customElements.define() throws.
+  let temporaryRoot: string;
+  let resolver: ModuleResolver;
+  let applicationImporterPath: string;
+  let toolsImporterPath: string;
+  let servedRootPath: string;
+
+  before(async () => {
+    temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-shared-test-'));
+    const sharedPath = join(temporaryRoot, 'shared');
+    const toolsPath = join(temporaryRoot, 'tools');
+    servedRootPath = join(temporaryRoot, 'application');
+
+    await mkdir(join(sharedPath, 'packages', 'widget', 'dist'), { recursive: true });
+    await writeFile(join(sharedPath, 'packages', 'widget', 'package.json'), '{"name":"@test/widget","exports":"./dist/index.js"}');
+    await writeFile(join(sharedPath, 'packages', 'widget', 'dist', 'index.js'), 'export const widget = 1;');
+
+    await mkdir(join(toolsPath, 'submodules'), { recursive: true });
+    await symlink('../../shared', join(toolsPath, 'submodules', 'shared'));
+    await mkdir(join(toolsPath, 'packages', 'consumer', 'dist'), { recursive: true });
+    await writeFile(join(toolsPath, 'packages', 'consumer', 'package.json'), '{"name":"@test/consumer","exports":"./dist/index.js"}');
+    await writeFile(join(toolsPath, 'packages', 'consumer', 'dist', 'index.js'), 'export const consumer = 1;');
+    await mkdir(join(toolsPath, 'packages', 'consumer', 'node_modules', '@test'), { recursive: true });
+    // The link a workspace install writes here points through the checkout's own
+    // copy of the shared one, not through the application's.
+    await symlink('../../../../submodules/shared/packages/widget', join(toolsPath, 'packages', 'consumer', 'node_modules', '@test', 'widget'));
+
+    await mkdir(join(servedRootPath, 'submodules'), { recursive: true });
+    await symlink('../../shared', join(servedRootPath, 'submodules', 'shared'));
+    await symlink('../../tools', join(servedRootPath, 'submodules', 'tools'));
+    await mkdir(join(servedRootPath, 'node_modules', '@test'), { recursive: true });
+    await symlink('../../submodules/shared/packages/widget', join(servedRootPath, 'node_modules', '@test', 'widget'));
+    await writeFile(join(servedRootPath, 'app.js'), 'export const app = 1;');
+
+    resolver = new ModuleResolver(servedRootPath);
+    applicationImporterPath = join(servedRootPath, 'app.js');
+    toolsImporterPath = join(servedRootPath, 'submodules', 'tools', 'packages', 'consumer', 'dist', 'index.js');
+  });
+
+  after(async () => {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+
+  it('gives both importers the one URL', async () => {
+    const fromApplication = await resolver.resolveSpecifierToServedPath('@test/widget', pathToFileURL(applicationImporterPath), '/');
+    const fromTools = await resolver.resolveSpecifierToServedPath('@test/widget', pathToFileURL(toolsImporterPath), '/');
+    strictEqual(fromApplication, '/submodules/shared/packages/widget/dist/index.js');
+    strictEqual(fromTools, fromApplication);
+  });
+
+  // Which chain is walked first decides which path the package is adopted under,
+  // so a fresh resolver meeting them the other way round must still settle on one.
+  it('gives both importers the one URL whichever walk arrives first', async () => {
+    const reversed = new ModuleResolver(servedRootPath);
+    const fromTools = await reversed.resolveSpecifierToServedPath('@test/widget', pathToFileURL(toolsImporterPath), '/');
+    const fromApplication = await reversed.resolveSpecifierToServedPath('@test/widget', pathToFileURL(applicationImporterPath), '/');
+    strictEqual(fromApplication, fromTools);
+  });
+
+  // Crawl tasks run concurrently, so the two walks race for the adoption rather
+  // than taking turns — a yield point between the registry lookup and its push
+  // would let both adopt the target and hand back two URLs.
+  it('gives both importers the one URL when the walks race', async () => {
+    const concurrent = new ModuleResolver(servedRootPath);
+    const [fromApplication, fromTools] = await Promise.all([
+      concurrent.resolveSpecifierToServedPath('@test/widget', pathToFileURL(applicationImporterPath), '/'),
+      concurrent.resolveSpecifierToServedPath('@test/widget', pathToFileURL(toolsImporterPath), '/'),
+    ]);
+    strictEqual(fromTools, fromApplication);
+  });
+});
+
 describe('a resolver anchored somewhere other than the process working directory', () => {
   let temporaryRoot: string;
   let resolver: ModuleResolver;
