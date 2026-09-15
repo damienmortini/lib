@@ -10,7 +10,10 @@ import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
+// `rootDirectory` is posix-normalized and a request path is always posix, so the disk path
+// built from them is resolved with posix semantics rather than the platform's.
 import { extname, join } from 'path';
+import { dirname as posixDirname, join as posixJoin } from 'path/posix';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
@@ -764,7 +767,20 @@ export class Server {
           return;
         }
 
-        let filePath = `${rootDirectory}${requestFilePath}`;
+        /**
+         * `..` segments are resolved before the path reaches the disk. The request path is
+         * decoded above, so `%2e%2e%2f` arrives here as a real `../` and plain concatenation
+         * would read outside the served root. `join` also drops the trailing slash a directory
+         * request needs, so it is put back.
+         */
+        const rootPrefix = rootDirectory.endsWith('/') ? rootDirectory : `${rootDirectory}/`;
+        let filePath = posixJoin(rootDirectory, requestFilePath);
+        if (filePath !== rootDirectory && !filePath.startsWith(rootPrefix)) {
+          stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
+          stream.end();
+          return;
+        }
+        if (requestFilePath.endsWith('/') && !filePath.endsWith('/')) filePath = `${filePath}/`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
@@ -814,10 +830,20 @@ export class Server {
         }
 
         /**
-         * Rewrite to root if url isn't a file and doesn't exist
+         * A path with no extension that is not there is a client-side route: it is answered
+         * with the page whose router owns it, which is the nearest index.html above it rather
+         * than the one at the root. A deck at `/slides/` that puts `/slides/slide-3` in the
+         * address bar reloads onto itself; falling back to the root served whatever lives
+         * there — a different page, under a URL that says otherwise.
          */
         if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath).catch(() => null))) {
-          filePath = `${rootDirectory}/`;
+          let directory = posixDirname(filePath);
+          // Terminates on the root itself: `dirname('/')` is `/`, so a root without an
+          // index.html anywhere above it would otherwise spin here forever.
+          while (directory !== rootDirectory && directory.startsWith(rootPrefix) && !(await stat(`${directory}/index.html`).catch(() => null))) {
+            directory = posixDirname(directory);
+          }
+          filePath = directory.endsWith('/') ? directory : `${directory}/`;
         }
 
         const sourceFilePath = await getSourceFilePath(filePath);

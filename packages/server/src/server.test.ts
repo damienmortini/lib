@@ -320,6 +320,19 @@ describe('directory listing', () => {
     ok(body.includes('href="/mounted/app/video%20%26%20clip.mp4"'), `expected prefixed entry links, got: ${body}`);
   });
 
+  it('answers a sub-app client-side route with that sub-app index.html', async () => {
+    // `/nested/slide-3` is a route owned by the router in `/nested/`, not by whatever
+    // page happens to sit at the served root.
+    const body = await fetchBody(boundPort(server), '/nested/slide-3');
+    ok(body.includes('nested index'), `expected the nested index.html, got: ${body}`);
+  });
+
+  it('refuses a percent-encoded path that climbs out of the served root', async () => {
+    // Decoded before it is joined, so `%2e%2e%2f` is a real `../` by the time it hits the disk.
+    strictEqual(await fetchStatus(boundPort(server), '/%2e%2e%2f%2e%2e%2fetc/hosts'), 404);
+    strictEqual(await fetchStatus(boundPort(server), '/nested/../../../etc/hosts'), 404);
+  });
+
   it('keeps serving after a 404 for a missing file', async () => {
     const missing = await fetchStatus(boundPort(server), '/gone.mp4');
     strictEqual(missing, 404);
