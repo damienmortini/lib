@@ -92,12 +92,13 @@ describe('a shared package reachable through two mounted checkouts', () => {
   let resolver: ModuleResolver;
   let applicationImporterPath: string;
   let toolsImporterPath: string;
+  let servedRootPath: string;
 
   before(async () => {
     temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-shared-test-'));
     const sharedPath = join(temporaryRoot, 'shared');
     const toolsPath = join(temporaryRoot, 'tools');
-    const servedRootPath = join(temporaryRoot, 'application');
+    servedRootPath = join(temporaryRoot, 'application');
 
     await mkdir(join(sharedPath, 'packages', 'widget', 'dist'), { recursive: true });
     await writeFile(join(sharedPath, 'packages', 'widget', 'package.json'), '{"name":"@test/widget","exports":"./dist/index.js"}');
@@ -133,6 +134,27 @@ describe('a shared package reachable through two mounted checkouts', () => {
     const fromApplication = await resolver.resolveSpecifierToServedPath('@test/widget', pathToFileURL(applicationImporterPath), '/');
     const fromTools = await resolver.resolveSpecifierToServedPath('@test/widget', pathToFileURL(toolsImporterPath), '/');
     strictEqual(fromApplication, '/submodules/shared/packages/widget/dist/index.js');
+    strictEqual(fromTools, fromApplication);
+  });
+
+  // Which chain is walked first decides which path the package is adopted under,
+  // so a fresh resolver meeting them the other way round must still settle on one.
+  it('gives both importers the one URL whichever walk arrives first', async () => {
+    const reversed = new ModuleResolver(servedRootPath);
+    const fromTools = await reversed.resolveSpecifierToServedPath('@test/widget', pathToFileURL(toolsImporterPath), '/');
+    const fromApplication = await reversed.resolveSpecifierToServedPath('@test/widget', pathToFileURL(applicationImporterPath), '/');
+    strictEqual(fromApplication, fromTools);
+  });
+
+  // Crawl tasks run concurrently, so the two walks race for the adoption rather
+  // than taking turns — a yield point between the registry lookup and its push
+  // would let both adopt the target and hand back two URLs.
+  it('gives both importers the one URL when the walks race', async () => {
+    const concurrent = new ModuleResolver(servedRootPath);
+    const [fromApplication, fromTools] = await Promise.all([
+      concurrent.resolveSpecifierToServedPath('@test/widget', pathToFileURL(applicationImporterPath), '/'),
+      concurrent.resolveSpecifierToServedPath('@test/widget', pathToFileURL(toolsImporterPath), '/'),
+    ]);
     strictEqual(fromTools, fromApplication);
   });
 });

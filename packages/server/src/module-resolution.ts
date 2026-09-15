@@ -191,6 +191,8 @@ export class ModuleResolver {
   // Mounts survive the walk that discovered them: a target is reached through a
   // different link chain on every walk, so adopting it afresh each time gives one
   // package several served URLs. See #canonicalizeModuleUrl.
+  // Known limitation: unlike responseCache, this is never invalidated, so a link
+  // repointed while the server runs keeps its first served path until a restart.
   readonly #adoptedMounts: Array<{ targetPath: string; servedPath: string }> = [];
 
   constructor(rootPath: string) {
@@ -249,6 +251,9 @@ export class ModuleResolver {
       const resolvedTargetPath = toPosixPath(resolve(realCurrentPath, symlinkTarget));
       let servedTargetPath = resolvedTargetPath;
       if (!`${resolvedTargetPath}/`.startsWith(this.#rootPrefix)) {
+        // Walks run concurrently, so this lookup and its push must stay one
+        // synchronous span: an await between them lets two walks both find the
+        // registry empty and adopt the same target under two served paths.
         const mountedPath = servedPathWithinAdoptedMount(this.#adoptedMounts, resolvedTargetPath);
         if (mountedPath === undefined) this.#adoptedMounts.push({ targetPath: resolvedTargetPath, servedPath: candidatePath });
         // No mount covers the target, or this link is the mount itself — the walk
