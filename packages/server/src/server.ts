@@ -764,7 +764,19 @@ export class Server {
           return;
         }
 
-        let filePath = `${rootDirectory}${requestFilePath}`;
+        /**
+         * `..` segments are resolved before the path reaches the disk. The request path is
+         * decoded above, so `%2e%2e%2f` arrives here as a real `../` and plain concatenation
+         * would read outside the served root. `join` also drops the trailing slash a directory
+         * request needs, so it is put back.
+         */
+        let filePath = join(rootDirectory, requestFilePath);
+        if (filePath !== rootDirectory && !filePath.startsWith(`${rootDirectory}/`)) {
+          stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
+          stream.end();
+          return;
+        }
+        if (requestFilePath.endsWith('/') && !filePath.endsWith('/')) filePath = `${filePath}/`;
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.

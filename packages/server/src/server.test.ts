@@ -320,6 +320,12 @@ describe('directory listing', () => {
     ok(body.includes('href="/mounted/app/video%20%26%20clip.mp4"'), `expected prefixed entry links, got: ${body}`);
   });
 
+  it('refuses a percent-encoded path that climbs out of the served root', async () => {
+    // Decoded before it is joined, so `%2e%2e%2f` is a real `../` by the time it hits the disk.
+    strictEqual(await fetchStatus(boundPort(server), '/%2e%2e%2f%2e%2e%2fetc/hosts'), 404);
+    strictEqual(await fetchStatus(boundPort(server), '/nested/../../../etc/hosts'), 404);
+  });
+
   it('keeps serving after a 404 for a missing file', async () => {
     const missing = await fetchStatus(boundPort(server), '/gone.mp4');
     strictEqual(missing, 404);
