@@ -2,6 +2,7 @@ import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { createHash, randomBytes, X509Certificate } from 'crypto';
+import { createReadStream } from 'fs';
 import { mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
 import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
@@ -880,7 +881,6 @@ export class Server {
           // every request, so the browser must revalidate rather than reuse a cached
           // copy — otherwise an edited source file is shadowed by a stale module.
           'cache-control': 'no-cache',
-          ...(requestRange ? { 'Accept-Ranges': 'bytes' } : {}),
           ...(fetchDest === 'script'
             ? {
                 'Cross-Origin-Opener-Policy': 'same-origin',
@@ -1008,7 +1008,33 @@ export class Server {
             sendCachedBody(stream, headers, responseHeaders, entry);
           }
           else {
-            stream.respondWithFile(staticFilePath, { ...responseHeaders, etag });
+            // Not `respondWithFile`: that pipes the file natively, and Node brings the
+            // whole process down when the client cancels that pipe mid-file — which a
+            // <video> does on every seek and unload. A JS stream is torn down like any
+            // other. Ranges are honoured while at it: a video element asks for them, and
+            // Safari will not play one from a server that answers with the whole file.
+            const range = requestRange ? /^bytes=(\d*)-(\d*)$/.exec(String(requestRange)) : null;
+            const size = fileStats.size;
+            const start = range ? (range[1] ? Number(range[1]) : Math.max(size - Number(range[2]), 0)) : 0;
+            const end = range && range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+            if (range && start > end) {
+              stream.respond({ ':status': constants.HTTP_STATUS_RANGE_NOT_SATISFIABLE, 'content-range': `bytes */${size}` });
+              stream.end();
+              return;
+            }
+            stream.respond({
+              ...responseHeaders,
+              etag,
+              'accept-ranges': 'bytes',
+              'content-length': end - start + 1,
+              ...(range ? { ':status': constants.HTTP_STATUS_PARTIAL_CONTENT, 'content-range': `bytes ${start}-${end}/${size}` } : {}),
+            });
+            // `pipe` rather than `pipeline`: a client going away mid-file is routine, not an
+            // error to raise on the stream and log. The read is stopped by hand instead.
+            const file = createReadStream(staticFilePath, range ? { start, end } : {});
+            file.on('error', () => stream.destroy());
+            stream.on('close', () => file.destroy());
+            file.pipe(stream);
           }
         }
       }

@@ -70,6 +70,32 @@ async function fetchStatus(port: number, path: string): Promise<number> {
   }
 }
 
+async function fetchResponse(port: number, path: string, requestHeaders: Record<string, string> = {}): Promise<{ status: number; headers: Record<string, string>; body: string }> {
+  const session = connect(`https://localhost:${port}`, { rejectUnauthorized: false });
+  try {
+    return await new Promise((resolvePromise, rejectPromise) => {
+      session.on('error', rejectPromise);
+      const stream = session.request({ ':path': path, ...requestHeaders });
+      let status = 0;
+      let headers: Record<string, string> = {};
+      let body = '';
+      stream.setEncoding('utf8');
+      stream.on('response', (responseHeaders) => {
+        status = Number(responseHeaders[':status']);
+        headers = responseHeaders as Record<string, string>;
+      });
+      stream.on('data', (chunk: string) => {
+        body += chunk;
+      });
+      stream.on('end', () => resolvePromise({ status, headers, body }));
+      stream.on('error', rejectPromise);
+    });
+  }
+  finally {
+    session.close();
+  }
+}
+
 function boundPort(server: Server): number {
   const address = server.http2SecureServer.address();
   if (address === null || typeof address === 'string') throw new Error('server has no bound port');
@@ -338,5 +364,57 @@ describe('directory listing', () => {
     strictEqual(missing, 404);
     const stillUp = await fetchStatus(boundPort(server), '/video%20%26%20clip.mp4');
     strictEqual(stillUp, 200, 'expected the server to keep serving after a 404');
+  });
+});
+
+// A <video> asks for ranges, and Safari will not play a file from a server that
+// answers one with the whole thing.
+describe('range requests', () => {
+  const content = '0123456789';
+  let rootPath: string;
+  let server: Server;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-range-'));
+    await writeFile(join(rootPath, 'clip.mp4'), content);
+    server = new Server({ rootPath, watch: false, port: 9501 });
+    await server.ready;
+  });
+
+  after(async () => {
+    await server.close();
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('answers a whole-file request with the file and advertises ranges', async () => {
+    const { status, headers, body } = await fetchResponse(boundPort(server), '/clip.mp4');
+    strictEqual(status, 200);
+    strictEqual(body, content);
+    strictEqual(headers['accept-ranges'], 'bytes');
+  });
+
+  it('answers a range with that range, not the whole file', async () => {
+    const { status, headers, body } = await fetchResponse(boundPort(server), '/clip.mp4', { range: 'bytes=2-5' });
+    strictEqual(status, 206);
+    strictEqual(body, '2345');
+    strictEqual(headers['content-range'], `bytes 2-5/${content.length}`);
+    strictEqual(Number(headers['content-length']), 4);
+  });
+
+  it('reads an open range to the end, and a suffix range back from it', async () => {
+    const open = await fetchResponse(boundPort(server), '/clip.mp4', { range: 'bytes=7-' });
+    strictEqual(open.status, 206);
+    strictEqual(open.body, '789');
+    strictEqual(open.headers['content-range'], `bytes 7-9/${content.length}`);
+
+    const suffix = await fetchResponse(boundPort(server), '/clip.mp4', { range: 'bytes=-3' });
+    strictEqual(suffix.status, 206);
+    strictEqual(suffix.body, '789');
+  });
+
+  it('refuses a range that starts past the end', async () => {
+    const { status, headers } = await fetchResponse(boundPort(server), '/clip.mp4', { range: 'bytes=99-' });
+    strictEqual(status, 416);
+    strictEqual(headers['content-range'], `bytes */${content.length}`);
   });
 });
