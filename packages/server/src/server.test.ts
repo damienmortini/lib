@@ -7,26 +7,6 @@ import { after, before, describe, it } from 'node:test';
 
 import { Server } from './server.ts';
 
-async function fetchBody(port: number, path: string, requestHeaders: Record<string, string> = {}): Promise<string> {
-  const session = connect(`https://localhost:${port}`, { rejectUnauthorized: false });
-  try {
-    return await new Promise<string>((resolvePromise, rejectPromise) => {
-      session.on('error', rejectPromise);
-      const stream = session.request({ ':path': path, ...requestHeaders });
-      let body = '';
-      stream.setEncoding('utf8');
-      stream.on('data', (chunk: string) => {
-        body += chunk;
-      });
-      stream.on('end', () => resolvePromise(body));
-      stream.on('error', rejectPromise);
-    });
-  }
-  finally {
-    session.close();
-  }
-}
-
 // Read the state token the live-reload stream sends on connect, then hang up —
 // the stream itself stays open forever, so it can never be read to its end.
 async function fetchLiveReloadState(port: number): Promise<string> {
@@ -94,6 +74,10 @@ async function fetchResponse(port: number, path: string, requestHeaders: Record<
   finally {
     session.close();
   }
+}
+
+async function fetchBody(port: number, path: string, requestHeaders: Record<string, string> = {}): Promise<string> {
+  return (await fetchResponse(port, path, requestHeaders)).body;
 }
 
 function boundPort(server: Server): number {
@@ -377,6 +361,8 @@ describe('range requests', () => {
   before(async () => {
     rootPath = await mkdtemp(join(tmpdir(), 'server-range-'));
     await writeFile(join(rootPath, 'clip.mp4'), content);
+    // Big enough that the read stream is still mid-pipe when the client hangs up.
+    await writeFile(join(rootPath, 'long.mp4'), 'x'.repeat(4 * 1024 * 1024));
     server = new Server({ rootPath, watch: false, port: 9501 });
     await server.ready;
   });
@@ -416,5 +402,22 @@ describe('range requests', () => {
     const { status, headers } = await fetchResponse(boundPort(server), '/clip.mp4', { range: 'bytes=99-' });
     strictEqual(status, 416);
     strictEqual(headers['content-range'], `bytes */${content.length}`);
+  });
+
+  it('survives a client cancelling mid-file', async () => {
+    // A guard rather than a reproduction: the respondWithFile crash this streaming
+    // replaced does not fire on current Node, so this holds the new path to the same
+    // contract instead — a client hanging up mid-file leaves the server serving.
+    const session = connect(`https://localhost:${boundPort(server)}`, { rejectUnauthorized: false });
+    await new Promise<void>((resolvePromise, rejectPromise) => {
+      session.on('error', rejectPromise);
+      const stream = session.request({ ':path': '/long.mp4' });
+      stream.on('data', () => stream.destroy());
+      stream.on('close', () => resolvePromise());
+    });
+    session.close();
+
+    const { status } = await fetchResponse(boundPort(server), '/clip.mp4');
+    strictEqual(status, 200, 'expected the server to keep serving after a cancelled stream');
   });
 });

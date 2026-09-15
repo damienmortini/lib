@@ -1013,12 +1013,18 @@ export class Server {
             // <video> does on every seek and unload. A JS stream is torn down like any
             // other. Ranges are honoured while at it: a video element asks for them, and
             // Safari will not play one from a server that answers with the whole file.
-            const range = requestRange ? /^bytes=(\d*)-(\d*)$/.exec(String(requestRange)) : null;
+            // One `bytes=start-end` only. A multi-range request matches nothing and falls
+            // through to the whole file at 200, which RFC 7233 allows a server that does
+            // not support them to do. `bytes=-` names no range at all and is ignored too.
+            const parsedRange = requestRange ? /^bytes=(\d*)-(\d*)$/.exec(String(requestRange)) : null;
+            const range = parsedRange && (parsedRange[1] || parsedRange[2]) ? parsedRange : null;
             const size = fileStats.size;
             const start = range ? (range[1] ? Number(range[1]) : Math.max(size - Number(range[2]), 0)) : 0;
             const end = range && range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
             if (range && start > end) {
-              stream.respond({ ':status': constants.HTTP_STATUS_RANGE_NOT_SATISFIABLE, 'content-range': `bytes */${size}` });
+              // Accept-Ranges on a 416 too, so a client that asked for a bad range does not
+              // conclude the server has no range support at all.
+              stream.respond({ ':status': constants.HTTP_STATUS_RANGE_NOT_SATISFIABLE, 'accept-ranges': 'bytes', 'content-range': `bytes */${size}` });
               stream.end();
               return;
             }
@@ -1032,7 +1038,12 @@ export class Server {
             // `pipe` rather than `pipeline`: a client going away mid-file is routine, not an
             // error to raise on the stream and log. The read is stopped by hand instead.
             const file = createReadStream(staticFilePath, range ? { start, end } : {});
-            file.on('error', () => stream.destroy());
+            // The file was stat-ed a few lines up, so an error here means it changed under
+            // us — logged like every other failure in this handler rather than swallowed.
+            file.on('error', (readError) => {
+              console.log(readError);
+              stream.destroy();
+            });
             stream.on('close', () => file.destroy());
             file.pipe(stream);
           }
