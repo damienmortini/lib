@@ -10,7 +10,7 @@ import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
 import { connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
-import { extname, join } from 'path';
+import { dirname, extname, join } from 'path';
 import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
@@ -826,10 +826,18 @@ export class Server {
         }
 
         /**
-         * Rewrite to root if url isn't a file and doesn't exist
+         * A path with no extension that is not there is a client-side route: it is answered
+         * with the page whose router owns it, which is the nearest index.html above it rather
+         * than the one at the root. A deck at `/slides/` that puts `/slides/slide-3` in the
+         * address bar reloads onto itself; falling back to the root served whatever lives
+         * there — a different page, under a URL that says otherwise.
          */
         if (!/\.[^/]*$/.test(filePath) && !(await stat(filePath).catch(() => null))) {
-          filePath = `${rootDirectory}/`;
+          let directory = dirname(filePath);
+          while (directory.startsWith(rootDirectory) && !(await stat(`${directory}/index.html`).catch(() => null))) {
+            directory = dirname(directory);
+          }
+          filePath = directory.startsWith(rootDirectory) ? `${directory}/` : `${rootDirectory}/`;
         }
 
         const sourceFilePath = await getSourceFilePath(filePath);
