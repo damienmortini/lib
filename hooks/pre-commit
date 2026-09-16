@@ -25,8 +25,16 @@ eslint="$root/node_modules/.bin/eslint"
 # R as well as ACM: a rename carrying an edit is a staged change like any other, and
 # --name-only reports it at the path it now has. The trailing -- keeps a file whose name
 # begins with a dash from being read as a flag.
-git diff --cached --name-only --diff-filter=ACMR -z -- '*.js' '*.mjs' '*.cjs' '*.ts' '*.mts' '*.cts' \
-  | xargs -0 -r "$eslint" --no-warn-ignored --config "$root/eslint.config.js" -- \
+set -- '*.js' '*.mjs' '*.cjs' '*.ts' '*.mts' '*.cts'
+
+# Asked separately rather than through xargs -r, which is a GNU extension: where it is not
+# understood xargs fails whatever it was given, and every commit would be rejected as if
+# the linter had spoken. --quiet answers with its exit status alone, so nothing here has to
+# read a list to find out whether there is one.
+git diff --cached --quiet --diff-filter=ACMR -- "$@" && exit 0
+
+git diff --cached --name-only --diff-filter=ACMR -z -- "$@" \
+  | xargs -0 "$eslint" --no-warn-ignored --config "$root/eslint.config.js" -- \
   || {
     echo 'pre-commit: eslint rejected the staged files above — fix them, or run: npx eslint --fix <file>...' >&2
     exit 1
