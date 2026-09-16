@@ -18,6 +18,13 @@
   "license": "ISC",
   "author": "Damien Mortini",
   "type": "module",
+  "files": [
+    "dist",
+    "src",
+    "!dist/**/*.test.*",
+    "!dist/*.tsbuildinfo",
+    "!src/**/*.test.ts"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": "dist/bin/index.js",
