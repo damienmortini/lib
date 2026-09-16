@@ -20,8 +20,10 @@
   "type": "module",
   "files": [
     "dist",
+    "src",
     "!dist/**/*.test.*",
-    "!dist/*.tsbuildinfo"
+    "!dist/*.tsbuildinfo",
+    "!src/**/*.test.ts"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
