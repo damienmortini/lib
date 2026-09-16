@@ -6,9 +6,11 @@
 # they then have to unpick from it.
 #
 # Only the staged paths, never the whole tree: work in progress elsewhere in the tree is
-# not this commit's business. It is the working copy of those paths that is read, the way
-# every lint-staged does it, so a file staged in one state and edited in another reports
-# against the edit. `git commit --no-verify` goes past all of it.
+# not this commit's business. It is the working copy of those paths that eslint reads and
+# not the staged blob, so a partly staged file is judged by what is on disk rather than by
+# what is about to be committed. Closing that gap means stashing the rest of the tree for
+# the length of the hook, which is far more dangerous than the mismatch it fixes.
+# `git commit --no-verify` goes past all of it.
 #
 # The linter and the config it loads both come from the checkout the working tree belongs
 # to, never from the tree being committed: a linked worktree carries a checkout of the
@@ -20,8 +22,11 @@ root=$(dirname "$(git rev-parse --git-common-dir)")
 eslint="$root/node_modules/.bin/eslint"
 [ -x "$eslint" ] || exit 0
 
-git diff --cached --name-only --diff-filter=ACM -z -- '*.js' '*.mjs' '*.cjs' '*.ts' '*.mts' '*.cts' \
-  | xargs -0 -r "$eslint" --no-warn-ignored --config "$root/eslint.config.js" \
+# R as well as ACM: a rename carrying an edit is a staged change like any other, and
+# --name-only reports it at the path it now has. The trailing -- keeps a file whose name
+# begins with a dash from being read as a flag.
+git diff --cached --name-only --diff-filter=ACMR -z -- '*.js' '*.mjs' '*.cjs' '*.ts' '*.mts' '*.cts' \
+  | xargs -0 -r "$eslint" --no-warn-ignored --config "$root/eslint.config.js" -- \
   || {
     echo 'pre-commit: eslint rejected the staged files above — fix them, or run: npx eslint --fix <file>...' >&2
     exit 1
