@@ -1,5 +1,10 @@
 import style from './index.css' with { type: 'css' };
 
+// A gallery holds several items, so every control has to say which item it acts on:
+// repeating one name across them leaves a screen reader announcing the same button
+// over and over. The item itself is the only thing that knows what it is.
+const itemName = node => node.getAttribute('aria-label') ?? node.getAttribute('title') ?? node.localName;
+
 class DamdomGalleryElement extends HTMLElement {
   #highlightContainer;
   #gridContainer;
@@ -12,7 +17,7 @@ class DamdomGalleryElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <div id="highlight" class="hide">
         <slot name="highlight"></slot>
-        <button id="backbutton" type="button" aria-label="Collapse demo" title="Collapse demo"></button>
+        <button id="backbutton" type="button"></button>
       </div>
       <div id="grid" part="grid"></div>
     `;
@@ -26,6 +31,9 @@ class DamdomGalleryElement extends HTMLElement {
       for (const [element, id] of this.#elementSlotMap) {
         if (id === event.target.parentElement.id) {
           this.highlighted = element;
+          const label = `Collapse ${itemName(element)}`;
+          backButton.setAttribute('aria-label', label);
+          backButton.title = label;
           backButton.focus({ preventScroll: true });
         }
       }
@@ -51,9 +59,15 @@ class DamdomGalleryElement extends HTMLElement {
           container.id = slotName;
           container.innerHTML = `
             <slot name="${slotName}"></slot>
-            <button class="highlightbutton" type="button" aria-label="Expand demo" title="Expand demo"></button>
+            <button class="highlightbutton" type="button"></button>
           `;
-          container.querySelector('.highlightbutton').addEventListener('click', highlightButtonClick);
+          const highlightButton = container.querySelector('.highlightbutton');
+          // Set rather than interpolated: a name taken off the item is its content,
+          // and markup built from it would run whatever that content happens to be.
+          const label = `Expand ${itemName(node)}`;
+          highlightButton.setAttribute('aria-label', label);
+          highlightButton.title = label;
+          highlightButton.addEventListener('click', highlightButtonClick);
           node.slot = this.#highlighted === node ? 'highlight' : slotName;
           this.#elementSlotMap.set(node, slotName);
           this.#gridContainer.appendChild(container);
