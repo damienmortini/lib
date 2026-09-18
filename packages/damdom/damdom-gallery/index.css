@@ -41,7 +41,8 @@
   display: grid;
   position: relative;
   contain: content;
-  background: white;
+  background: Canvas;
+  overflow: hidden;
   width: 100%;
   height: 100%;
   justify-items: center;
@@ -57,12 +58,9 @@
   bottom: 15px;
   width: 30px;
   height: 30px;
-  border-radius: 5px;
-  box-shadow: 0px 0px 5px 0px rgb(0 0 0 / 10%);
-  background-color: white;
-  background-size: 55%;
-  background-repeat: no-repeat;
-  background-position: center;
+  box-sizing: border-box;
+  padding: 0;
+  font: inherit;
   cursor: pointer;
   will-change: transform;
   transition: transform 0.4s cubic-bezier(0.6, 2, 0.5, 1);
@@ -73,10 +71,59 @@
   transform: scale(1.1);
 }
 
-.highlightbutton {
-  background-image: url(./icon-expand.svg);
+.highlightbutton:focus-visible,
+#backbutton:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
-#backbutton {
-  background-image: url(./icon-compress.svg);
+.highlightbutton::before,
+#backbutton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  mask-position: center;
+  mask-size: 55%;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.highlightbutton::before {
+  mask-image: url(./icon-expand.svg);
+}
+
+#backbutton::before {
+  mask-image: url(./icon-compress.svg);
+}
+
+@container not style(--damo-appearance: base) {
+  #grid,
+  #highlight {
+    background: var(--damo-gallery-background, light-dark(Canvas, #000));
+    color: var(--damo-gallery-color, CanvasText);
+  }
+
+  .elementcontainer {
+    background: var(--damo-gallery-item-background, Canvas);
+    border-radius: var(--damo-gallery-item-radius, 10px);
+    outline: var(--damo-gallery-item-outline, 1px solid light-dark(rgb(0 0 0 / 6%), rgb(255 255 255 / 10%)));
+    box-shadow: var(--damo-gallery-item-shadow, 0 0 40px rgb(0 0 0 / 10%));
+  }
+
+  .highlightbutton,
+  #backbutton {
+    border: var(--damo-gallery-control-border, 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 14%)));
+    border-radius: var(--damo-gallery-control-radius, 5px);
+    background: var(--damo-gallery-control-background, light-dark(#fff, #24272e));
+    color: var(--damo-gallery-control-color, light-dark(#24262c, #eceef3));
+    box-shadow: var(--damo-gallery-control-shadow, 0 0 5px rgb(0 0 0 / 10%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlightbutton,
+  #backbutton {
+    transition: none;
+  }
 }

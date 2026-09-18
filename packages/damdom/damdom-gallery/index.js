@@ -12,7 +12,7 @@ class DamdomGalleryElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <div id="highlight" class="hide">
         <slot name="highlight"></slot>
-        <div id="backbutton"></div>
+        <button id="backbutton" type="button" aria-label="Collapse demo" title="Collapse demo"></button>
       </div>
       <div id="grid" part="grid"></div>
     `;
@@ -20,18 +20,21 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#highlightContainer = this.shadowRoot.querySelector('#highlight');
     this.#gridContainer = this.shadowRoot.querySelector('#grid');
-    const backButton = this.shadowRoot.querySelector('#backbutton');
+    const backButton = this.#highlightContainer.querySelector('button');
 
     const highlightButtonClick = (event) => {
       for (const [element, id] of this.#elementSlotMap) {
         if (id === event.target.parentElement.id) {
           this.highlighted = element;
+          backButton.focus({ preventScroll: true });
         }
       }
     };
 
     const backButtonClick = () => {
+      const slotName = this.#elementSlotMap.get(this.#highlighted);
       this.highlighted = null;
+      this.#gridContainer.querySelector(`#${slotName}`)?.querySelector('button')?.focus();
     };
 
     backButton.addEventListener('click', backButtonClick);
@@ -48,7 +51,7 @@ class DamdomGalleryElement extends HTMLElement {
           container.id = slotName;
           container.innerHTML = `
             <slot name="${slotName}"></slot>
-            <div class="highlightbutton"></div>
+            <button class="highlightbutton" type="button" aria-label="Expand demo" title="Expand demo"></button>
           `;
           container.querySelector('.highlightbutton').addEventListener('click', highlightButtonClick);
           node.slot = this.#highlighted === node ? 'highlight' : slotName;
