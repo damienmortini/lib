@@ -20,7 +20,7 @@ class DamdomGalleryElement extends HTMLElement {
     this.attachShadow({ mode: 'open' }).innerHTML = `
       <div id="highlight" class="hide">
         <slot name="highlight"></slot>
-        <button id="backbutton" type="button"></button>
+        <button id="backbutton" type="button" part="control"></button>
       </div>
       <div id="grid" part="grid"></div>
     `;
@@ -62,7 +62,7 @@ class DamdomGalleryElement extends HTMLElement {
           container.id = slotName;
           container.innerHTML = `
             <slot name="${slotName}"></slot>
-            <button class="highlightbutton" type="button"></button>
+            <button class="highlightbutton" type="button" part="control"></button>
           `;
           const highlightButton = container.querySelector('.highlightbutton');
           // Set rather than interpolated: a name taken off the item is its content,
