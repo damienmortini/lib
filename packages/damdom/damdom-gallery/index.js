@@ -3,13 +3,16 @@ import style from './index.css' with { type: 'css' };
 // A gallery holds several items, so every control has to say which item it acts on:
 // repeating one name across them leaves a screen reader announcing the same button
 // over and over. The item itself is the only thing that knows what it is.
-const itemName = node => node.getAttribute('aria-label') ?? node.getAttribute('title') ?? node.localName;
+// `||` rather than `??`: an item carrying an empty label names nothing, so the
+// tag name is a better answer than a control announced as "Expand".
+const itemName = node => node.getAttribute('aria-label') || node.getAttribute('title') || node.localName;
 
 class DamdomGalleryElement extends HTMLElement {
   #highlightContainer;
   #gridContainer;
   #highlighted = null;
   #elementSlotMap;
+  #backButton;
 
   constructor() {
     super();
@@ -25,16 +28,16 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#highlightContainer = this.shadowRoot.querySelector('#highlight');
     this.#gridContainer = this.shadowRoot.querySelector('#grid');
-    const backButton = this.shadowRoot.querySelector('#backbutton');
+    this.#backButton = this.shadowRoot.querySelector('#backbutton');
 
     const highlightButtonClick = (event) => {
       for (const [element, id] of this.#elementSlotMap) {
         if (id === event.target.parentElement.id) {
           this.highlighted = element;
-          const label = `Collapse ${itemName(element)}`;
-          backButton.setAttribute('aria-label', label);
-          backButton.title = label;
-          backButton.focus({ preventScroll: true });
+          // Only a click moves focus: a page highlighting an item itself — from a
+          // route or a hash — must not take focus away from wherever the user is.
+          this.#backButton.focus({ preventScroll: true });
+          break;
         }
       }
     };
@@ -45,7 +48,7 @@ class DamdomGalleryElement extends HTMLElement {
       this.#gridContainer.querySelector(`#${slotName}`)?.querySelector('button')?.focus();
     };
 
-    backButton.addEventListener('click', backButtonClick);
+    this.#backButton.addEventListener('click', backButtonClick);
 
     let slotUID = 0;
     this.#elementSlotMap = new Map();
@@ -105,6 +108,11 @@ class DamdomGalleryElement extends HTMLElement {
     if (this.#highlighted) {
       this.#highlighted.slot = 'highlight';
       this.#highlighted.toggleAttribute('highlighted', true);
+      // Named here rather than beside the click that usually causes it: the property
+      // is public, so a page highlighting an item itself gets the same named control.
+      const label = `Collapse ${itemName(this.#highlighted)}`;
+      this.#backButton.setAttribute('aria-label', label);
+      this.#backButton.title = label;
       this.#highlightContainer.classList.remove('hide');
       this.#gridContainer.classList.add('hide');
     }
