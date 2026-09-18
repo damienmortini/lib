@@ -116,6 +116,10 @@
 
   .highlightbutton,
   #backbutton {
+    /* Only where this look paints its own border and background: WebKit does not
+       apply a radius or shadow to a button still wearing the platform's chrome.
+       Without this look that chrome is what keeps the controls visible. */
+    appearance: none;
     border: var(--damo-gallery-control-border, 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 14%)));
     border-radius: var(--damo-gallery-control-radius, 5px);
     background: var(--damo-gallery-control-background, light-dark(#fff, #24272e));
