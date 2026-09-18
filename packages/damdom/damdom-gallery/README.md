@@ -57,9 +57,10 @@ Retune the look through custom properties:
 
 Reach the internals with `::part(grid)`, `::part(item)`, and `::part(control)`.
 
-Switch the whole look off with `--damo-appearance: base`, the opt-out these
-elements share, which leaves layout, controls and behaviour and takes away only
-the appearance:
+Switch the whole look off with `--damo-appearance: base`. It takes away only the
+appearance, leaving layout, controls and behaviour, so the gallery still works
+while the page dresses it. The property is inherited, so setting it on an
+ancestor covers anything else that reads it:
 
 ```css
 damdom-gallery {
