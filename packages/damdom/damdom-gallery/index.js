@@ -20,7 +20,7 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#highlightContainer = this.shadowRoot.querySelector('#highlight');
     this.#gridContainer = this.shadowRoot.querySelector('#grid');
-    const backButton = this.#highlightContainer.querySelector('button');
+    const backButton = this.shadowRoot.querySelector('#backbutton');
 
     const highlightButtonClick = (event) => {
       for (const [element, id] of this.#elementSlotMap) {

@@ -97,6 +97,9 @@
   mask-image: url(./icon-compress.svg);
 }
 
+/* The dark values resolve against the page's `color-scheme`, which this element
+   deliberately only inherits: declaring one here would override the scheme a page
+   has chosen, and a page offering a light/dark control sets it explicitly. */
 @container not style(--damo-appearance: base) {
   #grid,
   #highlight {
