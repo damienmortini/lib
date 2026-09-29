@@ -127,18 +127,28 @@ class DamdomGalleryElement extends HTMLElement {
     // On the window: after a press on an item's canvas nothing inside the gallery holds
     // focus, so a listener on the element would never hear the key.
     window.addEventListener('keydown', this.#keydown);
+    window.addEventListener('pointerdown', this.#pressOutside, { capture: true });
     window.addEventListener('click', this.#clickOutside);
   }
 
   disconnectedCallback() {
     window.removeEventListener('keydown', this.#keydown);
+    window.removeEventListener('pointerdown', this.#pressOutside, { capture: true });
     window.removeEventListener('click', this.#clickOutside);
   }
 
   // A click, not a press: a finger pressing to scroll the page makes no click, so
-  // scrolling never deselects. A click on another item has already selected it.
+  // scrolling never deselects. A click on another item has already selected it. And
+  // only a click that also began outside: a drag started inside the item and released
+  // past its edge (orbiting a camera) clicks on a common ancestor.
+  #pressStartedOutside = false;
+
+  #pressOutside = (event) => {
+    this.#pressStartedOutside = !this.#selected || !event.composedPath().includes(this.#containerOf(this.#selected));
+  };
+
   #clickOutside = (event) => {
-    if (!this.#selected || this.#highlighted) return;
+    if (!this.#selected || this.#highlighted || !this.#pressStartedOutside) return;
     if (!event.composedPath().includes(this.#containerOf(this.#selected))) this.selected = null;
   };
 

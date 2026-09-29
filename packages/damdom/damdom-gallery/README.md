@@ -40,8 +40,8 @@ listener, as with `highlighted`.
 A selected item keeps touch gestures and the mouse wheel for itself, so dragging
 or zooming inside it no longer scrolls the page. Any other item lets the page
 pan and scroll as usual, and its content never sees wheel events: the gallery
-stops them on the way in, so a wheel listener on the page does not see them
-either. That makes selection the natural switch for items that
+stops them on the way in, so the page's own bubbling wheel listeners do not see
+them either. That makes selection the natural switch for items that
 are interactive or expensive to run:
 
 ```js
@@ -71,6 +71,8 @@ Retune the look through custom properties:
 | `--damo-gallery-item-radius` | its corners |
 | `--damo-gallery-item-outline` | its edge |
 | `--damo-gallery-item-shadow` | its shadow |
+| `--damo-gallery-item-hover-scale` | how far a hovered item lifts |
+| `--damo-gallery-item-hover-shadow` | its shadow |
 | `--damo-gallery-item-selected-scale` | how far the selected item lifts |
 | `--damo-gallery-item-selected-shadow` | its shadow |
 | `--damo-gallery-control-background` | the expand and collapse controls |
@@ -78,6 +80,7 @@ Retune the look through custom properties:
 | `--damo-gallery-control-border` | their edge |
 | `--damo-gallery-control-radius` | their corners |
 | `--damo-gallery-control-shadow` | their shadow |
+| `--damo-gallery-control-inset` | their distance from the item's corner |
 
 Reach the internals with `::part(grid)`, `::part(item)`, and `::part(control)`.
 
