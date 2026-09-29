@@ -143,8 +143,16 @@
     box-shadow: var(--damo-gallery-item-shadow, 0 0 40px rgb(0 0 0 / 10%));
   }
 
+  .elementcontainer {
+    transition: scale 0.3s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.3s ease;
+  }
+
+  /* Lifted off the grid rather than outlined: an outline fights whatever the item
+     draws at its edge, a lift reads the same on any content. */
   .elementcontainer.selected {
-    outline: var(--damo-gallery-item-selected-outline, 2px solid light-dark(#000, #fff));
+    z-index: 1;
+    scale: var(--damo-gallery-item-selected-scale, 1.02);
+    box-shadow: var(--damo-gallery-item-selected-shadow, 0 16px 48px rgb(0 0 0 / 25%));
   }
 
   .highlightbutton,
@@ -165,7 +173,8 @@
 @media (prefers-reduced-motion: reduce) {
   .highlightbutton,
   .deselectbutton,
-  #backbutton {
+  #backbutton,
+  .elementcontainer {
     transition: none;
   }
 }
