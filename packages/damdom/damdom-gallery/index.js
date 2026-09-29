@@ -11,6 +11,7 @@ class DamdomGalleryElement extends HTMLElement {
   #highlightContainer;
   #gridContainer;
   #highlighted = null;
+  #selected = null;
   #elementSlotMap;
   #backButton;
 
@@ -50,6 +51,14 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#backButton.addEventListener('click', backButtonClick);
 
+    // The selected item takes the wheel for itself, the way it takes touch gestures
+    // through `touch-action` (see index.css): without this, one wheel turn over an item
+    // that zooms both zooms it and scrolls the page. Not passive, or it could not
+    // cancel the scroll; cancelling does not stop the event reaching the item.
+    this.#gridContainer.addEventListener('wheel', (event) => {
+      if (this.#selected?.contains(event.target)) event.preventDefault();
+    }, { passive: false });
+
     let slotUID = 0;
     this.#elementSlotMap = new Map();
     const mutationCallback = (mutationsList) => {
@@ -62,8 +71,18 @@ class DamdomGalleryElement extends HTMLElement {
           container.id = slotName;
           container.innerHTML = `
             <slot name="${slotName}"></slot>
+            <button class="deselectbutton" type="button" part="control"></button>
             <button class="highlightbutton" type="button" part="control"></button>
           `;
+          // On press rather than click, so the first drag on an item both selects it
+          // and reaches it.
+          container.addEventListener('pointerdown', () => this.selected = node);
+          const deselectButton = container.querySelector('.deselectbutton');
+          deselectButton.setAttribute('aria-label', `Deselect ${itemName(node)}`);
+          deselectButton.title = `Deselect ${itemName(node)}`;
+          deselectButton.addEventListener('click', () => this.selected = null);
+          // Its own press must not select the item again on the way to the click.
+          deselectButton.addEventListener('pointerdown', event => event.stopPropagation());
           const highlightButton = container.querySelector('.highlightbutton');
           // Set rather than interpolated: a name taken off the item is its content,
           // and markup built from it would run whatever that content happens to be.
@@ -76,6 +95,7 @@ class DamdomGalleryElement extends HTMLElement {
           this.#gridContainer.appendChild(container);
         }
         for (const node of mutation.removedNodes) {
+          if (this.#selected === node) this.selected = null;
           node.slot = '';
           const container = this.#gridContainer.querySelector(`#${this.#elementSlotMap.get(node)}`);
           container.querySelector('.highlightbutton').removeEventListener('click', highlightButtonClick);
@@ -94,6 +114,47 @@ class DamdomGalleryElement extends HTMLElement {
     observer.observe(this, { childList: true });
   }
 
+  connectedCallback() {
+    // On the window: after a press on an item's canvas nothing inside the gallery holds
+    // focus, so a listener on the element would never hear the key.
+    window.addEventListener('keydown', this.#keydown);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('keydown', this.#keydown);
+  }
+
+  #keydown = (event) => {
+    if (event.key === 'Escape' && this.#selected && !this.#highlighted) this.selected = null;
+  };
+
+  /**
+   * The item the user is working with: pressed last, or expanded. Unlike `highlighted`
+   * it changes nothing about the layout; it marks the item, gives it a control that
+   * deselects it, and lets it keep touch gestures and the wheel to itself.
+   */
+  get selected() {
+    return this.#selected;
+  }
+
+  set selected(value) {
+    if (this.#selected === value) return;
+    if (this.#selected) {
+      this.#selected.toggleAttribute('selected', false);
+      this.#containerOf(this.#selected)?.classList.remove('selected');
+    }
+    this.#selected = value;
+    if (this.#selected) {
+      this.#selected.toggleAttribute('selected', true);
+      this.#containerOf(this.#selected)?.classList.add('selected');
+    }
+    this.dispatchEvent(new Event('selectchange'));
+  }
+
+  #containerOf(node) {
+    return this.#gridContainer.querySelector(`#${this.#elementSlotMap.get(node)}`);
+  }
+
   get highlighted() {
     return this.#highlighted;
   }
@@ -106,6 +167,8 @@ class DamdomGalleryElement extends HTMLElement {
     }
     this.#highlighted = value;
     if (this.#highlighted) {
+      // Expanding an item is the strongest way to pick it.
+      this.selected = this.#highlighted;
       this.#highlighted.slot = 'highlight';
       this.#highlighted.toggleAttribute('highlighted', true);
       // Named here rather than beside the click that usually causes it: the property
