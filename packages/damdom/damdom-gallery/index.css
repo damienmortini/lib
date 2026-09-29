@@ -7,6 +7,7 @@
 }
 
 #grid {
+  position: relative;
   width: 100%;
   height: 100%;
   display: grid;
@@ -67,32 +68,61 @@
   transition: transform 0.4s cubic-bezier(0.6, 2, 0.5, 1);
 }
 
-.deselectbutton {
-  top: var(--damo-gallery-control-inset, 10px);
-  bottom: auto;
+/* One toolbar for the selection, outside the item so the item's clipping cannot cut
+   it: anchored above its top-right corner, clear of the lift, or inside that corner
+   when there is no room above (the first row, a narrow padding). */
+.elementcontainer.selected {
+  anchor-name: --selected-item;
 }
 
-.elementcontainer:not(.selected) .deselectbutton,
-.elementcontainer:not(.selected.capturesscroll) .scrollindicator {
+#selectiontoolbar {
+  position: absolute;
+  z-index: 3;
+  position-anchor: --selected-item;
+  position-try-fallbacks: --inside-corner;
+  bottom: anchor(top);
+  right: anchor(right);
+  margin-bottom: 8px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+@position-try --inside-corner {
+  bottom: auto;
+  top: calc(anchor(top) + var(--damo-gallery-control-inset, 10px));
+  right: calc(anchor(right) + var(--damo-gallery-control-inset, 10px));
+  margin: 0;
+}
+
+#selectiontoolbar[hidden],
+#selectiontoolbar:not(.capturesscroll) .scrolllock {
   display: none;
 }
 
-/* Beside the deselect control, sized like it but not one: nothing to press. */
-.scrollindicator {
-  position: absolute;
-  top: var(--damo-gallery-control-inset, 10px);
-  right: calc(var(--damo-gallery-control-inset, 10px) + 36px);
-  width: 30px;
-  height: 30px;
-  box-sizing: border-box;
+#selectiontoolbar .deselectbutton {
+  position: relative;
+  inset: auto;
 }
 
-.scrollindicator::before {
+.scrolllock {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 0 10px 0 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.scrolllock::before {
   content: '';
-  position: absolute;
-  inset: 0;
+  width: 13px;
+  height: 13px;
   background: currentColor;
-  mask: url(./icon-scroll-captured.svg) center / 55% no-repeat;
+  mask: url(./icon-scroll-captured.svg) center / contain no-repeat;
 }
 
 /* An item lets the page pan and zoom until it is selected; then its own
@@ -185,7 +215,6 @@
 
   .highlightbutton,
   .deselectbutton,
-  .scrollindicator,
   #backbutton {
     /* Only where this look paints its own border and background: WebKit does not
        apply a radius or shadow to a button still wearing the platform's chrome.
@@ -193,6 +222,14 @@
     appearance: none;
     border: var(--damo-gallery-control-border, 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 14%)));
     border-radius: var(--damo-gallery-control-radius, 5px);
+    background: var(--damo-gallery-control-background, light-dark(#fff, #24272e));
+    color: var(--damo-gallery-control-color, light-dark(#24262c, #eceef3));
+    box-shadow: var(--damo-gallery-control-shadow, 0 0 5px rgb(0 0 0 / 10%));
+  }
+
+  .scrolllock {
+    border: var(--damo-gallery-control-border, 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 14%)));
+    border-radius: 999px;
     background: var(--damo-gallery-control-background, light-dark(#fff, #24272e));
     color: var(--damo-gallery-control-color, light-dark(#24262c, #eceef3));
     box-shadow: var(--damo-gallery-control-shadow, 0 0 5px rgb(0 0 0 / 10%));

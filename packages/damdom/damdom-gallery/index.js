@@ -20,6 +20,8 @@ class DamdomGalleryElement extends HTMLElement {
   #selected = null;
   #elementSlotMap;
   #backButton;
+  #selectionToolbar;
+  #deselectButton;
 
   constructor() {
     super();
@@ -29,13 +31,21 @@ class DamdomGalleryElement extends HTMLElement {
         <slot name="highlight"></slot>
         <button id="backbutton" type="button" part="control"></button>
       </div>
-      <div id="grid" part="grid"></div>
+      <div id="grid" part="grid">
+        <div id="selectiontoolbar" part="selection" hidden>
+          <span class="scrolllock" part="indicator" title="Scrolling moves this item, not the page">Scroll locked</span>
+          <button class="deselectbutton" type="button" part="control"></button>
+        </div>
+      </div>
     `;
     this.shadowRoot.adoptedStyleSheets = [style];
 
     this.#highlightContainer = this.shadowRoot.querySelector('#highlight');
     this.#gridContainer = this.shadowRoot.querySelector('#grid');
     this.#backButton = this.shadowRoot.querySelector('#backbutton');
+    this.#selectionToolbar = this.shadowRoot.querySelector('#selectiontoolbar');
+    this.#deselectButton = this.shadowRoot.querySelector('.deselectbutton');
+    this.#deselectButton.addEventListener('click', () => this.selected = null);
 
     const highlightButtonClick = (event) => {
       for (const [element, id] of this.#elementSlotMap) {
@@ -68,7 +78,7 @@ class DamdomGalleryElement extends HTMLElement {
         if (capturesScroll) event.preventDefault();
         // Kept in step with what the wheel just did: at selection the item may not
         // have its styles yet, and a part inside it may capture where it does not.
-        this.#containerOf(this.#selected)?.classList.toggle('capturesscroll', capturesScroll);
+        this.#selectionToolbar.classList.toggle('capturesscroll', capturesScroll);
       }
       else if (this.#elementSlotMap.has(this.#itemOf(event.target))) event.stopPropagation();
     }, { capture: true, passive: false });
@@ -85,8 +95,6 @@ class DamdomGalleryElement extends HTMLElement {
           container.id = slotName;
           container.innerHTML = `
             <slot name="${slotName}"></slot>
-            <span class="scrollindicator" part="indicator" role="img" aria-label="Scrolling moves this item, not the page" title="Scrolling moves this item, not the page"></span>
-            <button class="deselectbutton" type="button" part="control"></button>
             <button class="highlightbutton" type="button" part="control"></button>
           `;
           // A mouse or pen selects on press, so the first drag on an item both selects
@@ -96,16 +104,6 @@ class DamdomGalleryElement extends HTMLElement {
             if (event.pointerType !== 'touch') this.selected = node;
           });
           container.addEventListener('click', () => this.selected = node);
-          const deselectButton = container.querySelector('.deselectbutton');
-          deselectButton.setAttribute('aria-label', `Deselect ${itemName(node)}`);
-          deselectButton.title = `Deselect ${itemName(node)}`;
-          // Neither its press nor its click may reach the item's own listeners, which
-          // would select the item again straight after.
-          deselectButton.addEventListener('click', (event) => {
-            event.stopPropagation();
-            this.selected = null;
-          });
-          deselectButton.addEventListener('pointerdown', event => event.stopPropagation());
           const highlightButton = container.querySelector('.highlightbutton');
           // Set rather than interpolated: a name taken off the item is its content,
           // and markup built from it would run whatever that content happens to be.
@@ -167,7 +165,9 @@ class DamdomGalleryElement extends HTMLElement {
     // counts as outside.
     this.#pressStartedOutside = true;
     if (!this.#selected || this.#highlighted || !pressStartedOutside) return;
-    if (!event.composedPath().includes(this.#containerOf(this.#selected))) this.selected = null;
+    const path = event.composedPath();
+    // The selection's own toolbar sits outside the item but belongs to it.
+    if (!path.includes(this.#containerOf(this.#selected)) && !path.includes(this.#selectionToolbar)) this.selected = null;
   };
 
   #keydown = (event) => {
@@ -201,12 +201,16 @@ class DamdomGalleryElement extends HTMLElement {
     this.#selected = value;
     if (this.#selected) {
       this.#selected.toggleAttribute('selected', true);
-      const container = this.#containerOf(this.#selected);
-      container?.classList.add('selected');
-      // Shown when the item keeps vertical scrolling for itself, so the page not
-      // scrolling under the wheel reads as intended rather than broken.
-      container?.classList.toggle('capturesscroll', !allowsVerticalPan(this.#selected));
+      this.#containerOf(this.#selected)?.classList.add('selected');
+      // Set rather than interpolated, like the expand controls' names.
+      const label = `Deselect ${itemName(this.#selected)}`;
+      this.#deselectButton.setAttribute('aria-label', label);
+      this.#deselectButton.title = label;
+      // The pill shows when the item keeps vertical scrolling for itself, so the page
+      // not scrolling under the wheel reads as intended rather than broken.
+      this.#selectionToolbar.classList.toggle('capturesscroll', !allowsVerticalPan(this.#selected));
     }
+    this.#selectionToolbar.hidden = !this.#selected;
     this.dispatchEvent(new Event('selectchange'));
   }
 

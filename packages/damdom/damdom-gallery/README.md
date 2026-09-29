@@ -32,21 +32,19 @@ A control is named after the item it acts on, read from that item's
 
 Pressing an item selects it, and expanding one selects it too. `selected` is
 that child, settable from script, it carries a `selected` attribute, and the
-element fires `selectchange` when it moves. The selected item lifts off the grid
-and gets a control in its top-right corner that deselects it, as do Escape and a
-click anywhere outside it while it sits in the grid. Read the new value from
-`selected` in a `selectchange` listener, as with `highlighted`.
+element fires `selectchange` when it moves. The selected item lifts off the
+grid, and a control anchored just above its top-right corner deselects it, as do
+Escape and a click anywhere outside it while it sits in the grid. Read the new
+value from `selected` in a `selectchange` listener, as with `highlighted`.
 
 A selected item gets touch gestures and the mouse wheel, and its own
-`touch-action` says which of them the page keeps: an item with
-`touch-action: none` keeps dragging and the wheel for itself, while one that
-allows vertical panning still lets the page scroll. An item that keeps
-scrolling shows a small icon beside its deselect control, so the page standing
-still under the wheel reads as intended. Any other item lets the page
-pan and scroll as usual, and its content never sees wheel events: the gallery
-stops them on the way in, so the page's own bubbling wheel listeners do not see
-them either. That makes selection the natural switch for items that are
-interactive or expensive to run:
+`touch-action` says which of them the page keeps: an item with `touch-action:
+none` keeps dragging and the wheel for itself, and a "Scroll locked" pill beside
+the deselect control says so; one that allows vertical panning still lets the
+page scroll. Any other item lets the page pan and scroll as usual, and its
+content never sees wheel events: the gallery stops them on the way in, so the
+page's own bubbling wheel listeners do not see them either. That makes selection
+the natural switch for items that are interactive or expensive to run:
 
 ```js
 gallery.addEventListener('selectchange', () => {
@@ -86,8 +84,9 @@ Retune the look through custom properties:
 | `--damo-gallery-control-shadow` | their shadow |
 | `--damo-gallery-control-inset` | their distance from the item's corner |
 
-Reach the internals with `::part(grid)`, `::part(item)`, `::part(control)`, and
-`::part(indicator)`.
+Reach the internals with `::part(grid)`, `::part(item)`, `::part(control)`,
+`::part(selection)` for the selected item's toolbar, and `::part(indicator)` for
+its "Scroll locked" pill.
 
 Switch the whole look off with `--damo-appearance: base`. It takes away only the
 appearance, leaving layout, controls and behaviour, so the gallery still works
