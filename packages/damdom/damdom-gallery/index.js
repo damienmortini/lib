@@ -51,12 +51,15 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#backButton.addEventListener('click', backButtonClick);
 
-    // The wheel follows the same rule as touch gestures (see index.css): the selected
-    // item takes it for itself, cancelling the page scroll, and any other item never
-    // sees it, so scrolling the page past an item cannot zoom it in the background.
-    // Captured, to stop it before it reaches the item; not passive, to cancel it.
+    // The wheel follows the item's own touch rule. The selected item gets it, and the
+    // page scroll is cancelled where the item forbids vertical panning, as its
+    // `touch-action` does for a finger. Any other item never sees it, so scrolling the
+    // page past an item cannot zoom it in the background. Captured, to stop it before
+    // it reaches the item; not passive, to cancel it.
     this.addEventListener('wheel', (event) => {
-      if (this.#selected?.contains(event.target)) event.preventDefault();
+      if (this.#selected?.contains(event.target)) {
+        if (!this.#pansVertically(event)) event.preventDefault();
+      }
       else if (this.#elementSlotMap.has(this.#itemOf(event.target))) event.stopPropagation();
     }, { capture: true, passive: false });
 
@@ -190,6 +193,17 @@ class DamdomGalleryElement extends HTMLElement {
       this.#containerOf(this.#selected)?.classList.add('selected');
     }
     this.dispatchEvent(new Event('selectchange'));
+  }
+
+  /** Whether every element from the wheel's target up to the item lets a finger pan vertically. */
+  #pansVertically(event) {
+    for (const node of event.composedPath()) {
+      if (!(node instanceof Element)) continue;
+      const touchAction = getComputedStyle(node).touchAction;
+      if (touchAction !== 'auto' && touchAction !== 'manipulation' && !/pan-(y|up|down)/.test(touchAction)) return false;
+      if (node === this.#selected) break;
+    }
+    return true;
   }
 
   /** The child of the gallery that holds `node`, if any. */

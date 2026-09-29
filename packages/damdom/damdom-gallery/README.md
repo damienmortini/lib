@@ -37,8 +37,10 @@ and gets a control in its top-right corner that deselects it, as do Escape and a
 click anywhere outside it while it sits in the grid. Read the new value from
 `selected` in a `selectchange` listener, as with `highlighted`.
 
-A selected item keeps touch gestures and the mouse wheel for itself, so dragging
-or zooming inside it no longer scrolls the page. Any other item lets the page
+A selected item gets touch gestures and the mouse wheel, and its own
+`touch-action` says which of them the page keeps: an item with
+`touch-action: none` keeps dragging and the wheel for itself, while one that
+allows vertical panning still lets the page scroll. Any other item lets the page
 pan and scroll as usual, and its content never sees wheel events: the gallery
 stops them on the way in, so the page's own bubbling wheel listeners do not see
 them either. That makes selection the natural switch for items that are
