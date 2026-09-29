@@ -55,8 +55,8 @@
 .deselectbutton,
 #backbutton {
   position: absolute;
-  right: 15px;
-  bottom: 15px;
+  right: var(--damo-gallery-control-inset, 10px);
+  bottom: var(--damo-gallery-control-inset, 10px);
   width: 30px;
   height: 30px;
   box-sizing: border-box;
@@ -68,7 +68,7 @@
 }
 
 .deselectbutton {
-  top: 15px;
+  top: var(--damo-gallery-control-inset, 10px);
   bottom: auto;
 }
 
@@ -143,8 +143,26 @@
     box-shadow: var(--damo-gallery-item-shadow, 0 0 40px rgb(0 0 0 / 10%));
   }
 
+  .elementcontainer {
+    transition: scale 0.3s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.3s ease;
+  }
+
+  /* Only where a pointer really hovers: on a touch screen the hover would stick to
+     whatever was tapped last. */
+  @media (hover: hover) {
+    .elementcontainer:hover {
+      z-index: 1;
+      scale: var(--damo-gallery-item-hover-scale, 1.01);
+      box-shadow: var(--damo-gallery-item-hover-shadow, 0 10px 30px rgb(0 0 0 / 18%));
+    }
+  }
+
+  /* Lifted off the grid rather than outlined: an outline fights whatever the item
+     draws at its edge, a lift reads the same on any content. */
   .elementcontainer.selected {
-    outline: var(--damo-gallery-item-selected-outline, 2px solid light-dark(#2563eb, #60a5fa));
+    z-index: 2;
+    scale: var(--damo-gallery-item-selected-scale, 1.035);
+    box-shadow: var(--damo-gallery-item-selected-shadow, 0 24px 64px rgb(0 0 0 / 35%));
   }
 
   .highlightbutton,
@@ -165,7 +183,8 @@
 @media (prefers-reduced-motion: reduce) {
   .highlightbutton,
   .deselectbutton,
-  #backbutton {
+  #backbutton,
+  .elementcontainer {
     transition: none;
   }
 }

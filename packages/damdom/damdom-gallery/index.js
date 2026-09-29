@@ -51,13 +51,14 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#backButton.addEventListener('click', backButtonClick);
 
-    // The selected item takes the wheel for itself, the way it takes touch gestures
-    // through `touch-action` (see index.css): without this, one wheel turn over an item
-    // that zooms both zooms it and scrolls the page. Not passive, or it could not
-    // cancel the scroll; cancelling does not stop the event reaching the item.
+    // The wheel follows the same rule as touch gestures (see index.css): the selected
+    // item takes it for itself, cancelling the page scroll, and any other item never
+    // sees it, so scrolling the page past an item cannot zoom it in the background.
+    // Captured, to stop it before it reaches the item; not passive, to cancel it.
     this.addEventListener('wheel', (event) => {
       if (this.#selected?.contains(event.target)) event.preventDefault();
-    }, { passive: false });
+      else if (this.#elementSlotMap.has(this.#itemOf(event.target))) event.stopPropagation();
+    }, { capture: true, passive: false });
 
     let slotUID = 0;
     this.#elementSlotMap = new Map();
@@ -126,11 +127,34 @@ class DamdomGalleryElement extends HTMLElement {
     // On the window: after a press on an item's canvas nothing inside the gallery holds
     // focus, so a listener on the element would never hear the key.
     window.addEventListener('keydown', this.#keydown);
+    window.addEventListener('pointerdown', this.#pressOutside, { capture: true });
+    window.addEventListener('click', this.#clickOutside);
   }
 
   disconnectedCallback() {
     window.removeEventListener('keydown', this.#keydown);
+    window.removeEventListener('pointerdown', this.#pressOutside, { capture: true });
+    window.removeEventListener('click', this.#clickOutside);
   }
+
+  // A click, not a press: a finger pressing to scroll the page makes no click, so
+  // scrolling never deselects. A click on another item has already selected it. And
+  // only a click that also began outside: a drag started inside the item and released
+  // past its edge (orbiting a camera) clicks on a common ancestor.
+  #pressStartedOutside = true;
+
+  #pressOutside = (event) => {
+    this.#pressStartedOutside = !this.#selected || !event.composedPath().includes(this.#containerOf(this.#selected));
+  };
+
+  #clickOutside = (event) => {
+    const pressStartedOutside = this.#pressStartedOutside;
+    // Spent on this click: one with no press before it (a key on a focused control)
+    // counts as outside.
+    this.#pressStartedOutside = true;
+    if (!this.#selected || this.#highlighted || !pressStartedOutside) return;
+    if (!event.composedPath().includes(this.#containerOf(this.#selected))) this.selected = null;
+  };
 
   #keydown = (event) => {
     // An item that handled the key itself keeps it, and so does one typing into a
@@ -166,6 +190,12 @@ class DamdomGalleryElement extends HTMLElement {
       this.#containerOf(this.#selected)?.classList.add('selected');
     }
     this.dispatchEvent(new Event('selectchange'));
+  }
+
+  /** The child of the gallery that holds `node`, if any. */
+  #itemOf(node) {
+    while (node && node.parentElement !== this) node = node.parentElement;
+    return node;
   }
 
   #containerOf(node) {
