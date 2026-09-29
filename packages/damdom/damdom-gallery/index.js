@@ -141,14 +141,18 @@ class DamdomGalleryElement extends HTMLElement {
   // scrolling never deselects. A click on another item has already selected it. And
   // only a click that also began outside: a drag started inside the item and released
   // past its edge (orbiting a camera) clicks on a common ancestor.
-  #pressStartedOutside = false;
+  #pressStartedOutside = true;
 
   #pressOutside = (event) => {
     this.#pressStartedOutside = !this.#selected || !event.composedPath().includes(this.#containerOf(this.#selected));
   };
 
   #clickOutside = (event) => {
-    if (!this.#selected || this.#highlighted || !this.#pressStartedOutside) return;
+    const pressStartedOutside = this.#pressStartedOutside;
+    // Spent on this click: one with no press before it (a key on a focused control)
+    // counts as outside.
+    this.#pressStartedOutside = true;
+    if (!this.#selected || this.#highlighted || !pressStartedOutside) return;
     if (!event.composedPath().includes(this.#containerOf(this.#selected))) this.selected = null;
   };
 
