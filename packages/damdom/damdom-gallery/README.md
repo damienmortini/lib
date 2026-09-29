@@ -38,8 +38,10 @@ it sits in the grid. Read the new value from `selected` in a `selectchange`
 listener, as with `highlighted`.
 
 A selected item keeps touch gestures and the mouse wheel for itself, so dragging
-or zooming inside it no longer scrolls the page; any other item lets the page
-pan and scroll as usual, and never receives the wheel itself. That makes selection the natural switch for items that
+or zooming inside it no longer scrolls the page. Any other item lets the page
+pan and scroll as usual, and its content never sees wheel events: the gallery
+stops them on the way in, so a wheel listener on the page does not see them
+either. That makes selection the natural switch for items that
 are interactive or expensive to run:
 
 ```js
