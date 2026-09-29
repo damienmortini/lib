@@ -148,6 +148,7 @@ class DamdomGalleryElement extends HTMLElement {
   }
 
   set selected(value) {
+    value ??= null;
     if (this.#selected === value) return;
     if (value && !this.#elementSlotMap.has(value)) throw new Error('damdom-gallery can only select one of its children');
     if (this.#selected) {
