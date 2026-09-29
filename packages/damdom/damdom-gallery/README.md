@@ -39,7 +39,7 @@ listener, as with `highlighted`.
 
 A selected item keeps touch gestures and the mouse wheel for itself, so dragging
 or zooming inside it no longer scrolls the page; any other item lets the page
-pan and scroll as usual. That makes selection the natural switch for items that
+pan and scroll as usual, and never receives the wheel itself. That makes selection the natural switch for items that
 are interactive or expensive to run:
 
 ```js

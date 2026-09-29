@@ -51,13 +51,14 @@ class DamdomGalleryElement extends HTMLElement {
 
     this.#backButton.addEventListener('click', backButtonClick);
 
-    // The selected item takes the wheel for itself, the way it takes touch gestures
-    // through `touch-action` (see index.css): without this, one wheel turn over an item
-    // that zooms both zooms it and scrolls the page. Not passive, or it could not
-    // cancel the scroll; cancelling does not stop the event reaching the item.
+    // The wheel follows the same rule as touch gestures (see index.css): the selected
+    // item takes it for itself, cancelling the page scroll, and any other item never
+    // sees it, so scrolling the page past an item cannot zoom it in the background.
+    // Captured, to stop it before it reaches the item; not passive, to cancel it.
     this.addEventListener('wheel', (event) => {
       if (this.#selected?.contains(event.target)) event.preventDefault();
-    }, { passive: false });
+      else if (this.#elementSlotMap.has(this.#itemOf(event.target))) event.stopPropagation();
+    }, { capture: true, passive: false });
 
     let slotUID = 0;
     this.#elementSlotMap = new Map();
@@ -166,6 +167,12 @@ class DamdomGalleryElement extends HTMLElement {
       this.#containerOf(this.#selected)?.classList.add('selected');
     }
     this.dispatchEvent(new Event('selectchange'));
+  }
+
+  /** The child of the gallery that holds `node`, if any. */
+  #itemOf(node) {
+    while (node && node.parentElement !== this) node = node.parentElement;
+    return node;
   }
 
   #containerOf(node) {

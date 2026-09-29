@@ -144,7 +144,7 @@
   }
 
   .elementcontainer.selected {
-    outline: var(--damo-gallery-item-selected-outline, 2px solid light-dark(#2563eb, #60a5fa));
+    outline: var(--damo-gallery-item-selected-outline, 2px solid light-dark(#000, #fff));
   }
 
   .highlightbutton,
