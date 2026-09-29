@@ -40,7 +40,9 @@ click anywhere outside it while it sits in the grid. Read the new value from
 A selected item gets touch gestures and the mouse wheel, and its own
 `touch-action` says which of them the page keeps: an item with
 `touch-action: none` keeps dragging and the wheel for itself, while one that
-allows vertical panning still lets the page scroll. Any other item lets the page
+allows vertical panning still lets the page scroll. An item that keeps
+scrolling shows a small icon beside its deselect control, so the page standing
+still under the wheel reads as intended. Any other item lets the page
 pan and scroll as usual, and its content never sees wheel events: the gallery
 stops them on the way in, so the page's own bubbling wheel listeners do not see
 them either. That makes selection the natural switch for items that are
@@ -84,7 +86,8 @@ Retune the look through custom properties:
 | `--damo-gallery-control-shadow` | their shadow |
 | `--damo-gallery-control-inset` | their distance from the item's corner |
 
-Reach the internals with `::part(grid)`, `::part(item)`, and `::part(control)`.
+Reach the internals with `::part(grid)`, `::part(item)`, `::part(control)`, and
+`::part(indicator)`.
 
 Switch the whole look off with `--damo-appearance: base`. It takes away only the
 appearance, leaving layout, controls and behaviour, so the gallery still works

@@ -7,6 +7,12 @@ import style from './index.css' with { type: 'css' };
 // tag name is a better answer than a control announced as "Expand".
 const itemName = node => node.getAttribute('aria-label') || node.getAttribute('title') || node.localName;
 
+// Whether an element's own `touch-action` lets a finger pan the page vertically.
+function allowsVerticalPan(element) {
+  const touchAction = getComputedStyle(element).touchAction;
+  return touchAction === 'auto' || touchAction === 'manipulation' || /pan-(y|up|down)/.test(touchAction);
+}
+
 class DamdomGalleryElement extends HTMLElement {
   #highlightContainer;
   #gridContainer;
@@ -75,6 +81,7 @@ class DamdomGalleryElement extends HTMLElement {
           container.id = slotName;
           container.innerHTML = `
             <slot name="${slotName}"></slot>
+            <span class="scrollindicator" part="indicator" role="img" aria-label="Scrolling moves this item, not the page" title="Scrolling moves this item, not the page"></span>
             <button class="deselectbutton" type="button" part="control"></button>
             <button class="highlightbutton" type="button" part="control"></button>
           `;
@@ -190,7 +197,11 @@ class DamdomGalleryElement extends HTMLElement {
     this.#selected = value;
     if (this.#selected) {
       this.#selected.toggleAttribute('selected', true);
-      this.#containerOf(this.#selected)?.classList.add('selected');
+      const container = this.#containerOf(this.#selected);
+      container?.classList.add('selected');
+      // Shown when the item keeps vertical scrolling for itself, so the page not
+      // scrolling under the wheel reads as intended rather than broken.
+      container?.classList.toggle('capturesscroll', !allowsVerticalPan(this.#selected));
     }
     this.dispatchEvent(new Event('selectchange'));
   }
@@ -199,8 +210,7 @@ class DamdomGalleryElement extends HTMLElement {
   #pansVertically(event) {
     for (const node of event.composedPath()) {
       if (!(node instanceof Element)) continue;
-      const touchAction = getComputedStyle(node).touchAction;
-      if (touchAction !== 'auto' && touchAction !== 'manipulation' && !/pan-(y|up|down)/.test(touchAction)) return false;
+      if (!allowsVerticalPan(node)) return false;
       if (node === this.#selected) break;
     }
     return true;
