@@ -64,7 +64,11 @@ class DamdomGalleryElement extends HTMLElement {
     // it reaches the item; not passive, to cancel it.
     this.addEventListener('wheel', (event) => {
       if (this.#selected?.contains(event.target)) {
-        if (!this.#pansVertically(event)) event.preventDefault();
+        const capturesScroll = !this.#pansVertically(event);
+        if (capturesScroll) event.preventDefault();
+        // Kept in step with what the wheel just did: at selection the item may not
+        // have its styles yet, and a part inside it may capture where it does not.
+        this.#containerOf(this.#selected)?.classList.toggle('capturesscroll', capturesScroll);
       }
       else if (this.#elementSlotMap.has(this.#itemOf(event.target))) event.stopPropagation();
     }, { capture: true, passive: false });
