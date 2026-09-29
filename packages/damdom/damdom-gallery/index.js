@@ -55,7 +55,7 @@ class DamdomGalleryElement extends HTMLElement {
     // through `touch-action` (see index.css): without this, one wheel turn over an item
     // that zooms both zooms it and scrolls the page. Not passive, or it could not
     // cancel the scroll; cancelling does not stop the event reaching the item.
-    this.#gridContainer.addEventListener('wheel', (event) => {
+    this.addEventListener('wheel', (event) => {
       if (this.#selected?.contains(event.target)) event.preventDefault();
     }, { passive: false });
 
@@ -74,9 +74,13 @@ class DamdomGalleryElement extends HTMLElement {
             <button class="deselectbutton" type="button" part="control"></button>
             <button class="highlightbutton" type="button" part="control"></button>
           `;
-          // On press rather than click, so the first drag on an item both selects it
-          // and reaches it.
-          container.addEventListener('pointerdown', () => this.selected = node);
+          // A mouse or pen selects on press, so the first drag on an item both selects
+          // it and reaches it. A finger selects on tap: its press may be the start of a
+          // page scroll, which the browser cancels into no click at all.
+          container.addEventListener('pointerdown', (event) => {
+            if (event.pointerType !== 'touch') this.selected = node;
+          });
+          container.addEventListener('click', () => this.selected = node);
           const deselectButton = container.querySelector('.deselectbutton');
           deselectButton.setAttribute('aria-label', `Deselect ${itemName(node)}`);
           deselectButton.title = `Deselect ${itemName(node)}`;
@@ -125,6 +129,8 @@ class DamdomGalleryElement extends HTMLElement {
   }
 
   #keydown = (event) => {
+    // An item that handled the key itself — a text field, a dialog — keeps it.
+    if (event.defaultPrevented) return;
     if (event.key === 'Escape' && this.#selected && !this.#highlighted) this.selected = null;
   };
 
@@ -139,6 +145,7 @@ class DamdomGalleryElement extends HTMLElement {
 
   set selected(value) {
     if (this.#selected === value) return;
+    if (value && !this.#elementSlotMap.has(value)) throw new Error('damdom-gallery can only select one of its children');
     if (this.#selected) {
       this.#selected.toggleAttribute('selected', false);
       this.#containerOf(this.#selected)?.classList.remove('selected');

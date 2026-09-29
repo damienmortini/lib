@@ -77,12 +77,14 @@
 }
 
 /* An item lets the page pan and zoom until it is selected; then every gesture is its
-   own. The wheel follows the same rule from script. */
+   own, as it is for the expanded item, which is always the selected one. The wheel
+   follows the same rule from script. */
 .elementcontainer {
   touch-action: manipulation;
 }
 
-.elementcontainer.selected {
+.elementcontainer.selected,
+#highlight {
   touch-action: none;
 }
 
