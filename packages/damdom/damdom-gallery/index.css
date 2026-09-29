@@ -72,8 +72,27 @@
   bottom: auto;
 }
 
-.elementcontainer:not(.selected) .deselectbutton {
+.elementcontainer:not(.selected) .deselectbutton,
+.elementcontainer:not(.selected.capturesscroll) .scrollindicator {
   display: none;
+}
+
+/* Beside the deselect control, sized like it but not one: nothing to press. */
+.scrollindicator {
+  position: absolute;
+  top: var(--damo-gallery-control-inset, 10px);
+  right: calc(var(--damo-gallery-control-inset, 10px) + 36px);
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+}
+
+.scrollindicator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  mask: url(./icon-scroll-captured.svg) center / 55% no-repeat;
 }
 
 /* An item lets the page pan and zoom until it is selected; then its own
@@ -166,6 +185,7 @@
 
   .highlightbutton,
   .deselectbutton,
+  .scrollindicator,
   #backbutton {
     /* Only where this look paints its own border and background: WebKit does not
        apply a radius or shadow to a button still wearing the platform's chrome.
