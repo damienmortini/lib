@@ -33,7 +33,9 @@ A control is named after the item it acts on, read from that item's
 Pressing an item selects it, and expanding one selects it too. `selected` is
 that child, settable from script, it carries a `selected` attribute, and the
 element fires `selectchange` when it moves. The selected item gets an outline
-and a control in its top-right corner that deselects it, as does Escape.
+and a control in its top-right corner that deselects it, as does Escape while
+it sits in the grid. Read the new value from `selected` in a `selectchange`
+listener, as with `highlighted`.
 
 A selected item keeps touch gestures and the mouse wheel for itself, so dragging
 or zooming inside it no longer scrolls the page; any other item lets the page

@@ -84,8 +84,12 @@ class DamdomGalleryElement extends HTMLElement {
           const deselectButton = container.querySelector('.deselectbutton');
           deselectButton.setAttribute('aria-label', `Deselect ${itemName(node)}`);
           deselectButton.title = `Deselect ${itemName(node)}`;
-          deselectButton.addEventListener('click', () => this.selected = null);
-          // Its own press must not select the item again on the way to the click.
+          // Neither its press nor its click may reach the item's own listeners, which
+          // would select the item again straight after.
+          deselectButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.selected = null;
+          });
           deselectButton.addEventListener('pointerdown', event => event.stopPropagation());
           const highlightButton = container.querySelector('.highlightbutton');
           // Set rather than interpolated: a name taken off the item is its content,
