@@ -133,8 +133,13 @@ class DamdomGalleryElement extends HTMLElement {
   }
 
   #keydown = (event) => {
-    // An item that handled the key itself — a text field, a dialog — keeps it.
+    // An item that handled the key itself keeps it, and so does one typing into a
+    // field: Escape there dismisses the field's own business. The path's first node,
+    // because by the time the event reaches the window its target is retargeted to
+    // the outermost shadow host.
     if (event.defaultPrevented) return;
+    const origin = event.composedPath()[0];
+    if (origin instanceof Element && origin.closest('input, textarea, select, [contenteditable]')) return;
     if (event.key === 'Escape' && this.#selected && !this.#highlighted) this.selected = null;
   };
 
@@ -179,8 +184,6 @@ class DamdomGalleryElement extends HTMLElement {
     }
     this.#highlighted = value;
     if (this.#highlighted) {
-      // Expanding an item is the strongest way to pick it.
-      this.selected = this.#highlighted;
       this.#highlighted.slot = 'highlight';
       this.#highlighted.toggleAttribute('highlighted', true);
       // Named here rather than beside the click that usually causes it: the property
@@ -195,6 +198,9 @@ class DamdomGalleryElement extends HTMLElement {
       this.#highlightContainer.classList.add('hide');
       this.#gridContainer.classList.remove('hide');
     }
+    // Expanding an item is the strongest way to pick it. Only now, so a `selectchange`
+    // listener finds the highlight already in place.
+    if (this.#highlighted) this.selected = this.#highlighted;
     this.dispatchEvent(new Event('highlightchange'));
   }
 }
