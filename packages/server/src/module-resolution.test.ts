@@ -169,6 +169,7 @@ describe('a resolver anchored somewhere other than the process working directory
     await writeFile(join(temporaryRoot, 'node_modules', 'demo-package', 'package.json'), '{"name":"demo-package","main":"index.js"}');
     await writeFile(join(temporaryRoot, 'node_modules', 'demo-package', 'index.js'), 'export const demo = true;');
     await writeFile(join(temporaryRoot, 'module.js'), 'import { demo } from \'demo-package\';\n');
+    await writeFile(join(temporaryRoot, 'resolving.js'), 'export const url = import.meta.resolve(\'demo-package\');\n');
     resolver = new ModuleResolver(temporaryRoot);
   });
 
@@ -182,5 +183,16 @@ describe('a resolver anchored somewhere other than the process working directory
     const pageContent = '<html><head><script type="module" src="/module.js"></script></head></html>';
     const { importMap } = await resolver.buildImportMap(pageContent, '/index.html', '/');
     strictEqual(importMap.imports['demo-package'], '/node_modules/demo-package/index.js');
+  });
+
+  // A literal `import.meta.resolve` names a module without importing it; the page
+  // that reads the URL may hand it to a document with another import map (or none),
+  // so the specifier is mapped and rewritten exactly like a static import.
+  it('resolves a literal import.meta.resolve like an import', async () => {
+    const pageContent = '<html><head><script type="module" src="/resolving.js"></script></head></html>';
+    const { importMap } = await resolver.buildImportMap(pageContent, '/index.html', '/');
+    strictEqual(importMap.imports['demo-package'], '/node_modules/demo-package/index.js');
+    const rewritten = await resolver.rewriteModuleSpecifiers('export const url = import.meta.resolve(\'demo-package\');\n', join(temporaryRoot, 'resolving.js'), '/');
+    strictEqual(rewritten, 'export const url = import.meta.resolve(\'/node_modules/demo-package/index.js\');\n');
   });
 });

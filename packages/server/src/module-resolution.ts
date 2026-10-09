@@ -148,7 +148,10 @@ export type ImportMapBuildResult = {
   dependencyPaths: string[];
 };
 
-const IMPORT_STATEMENT_REGEX = /(?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+['"](.*?)['"]/dg;
+// Static imports, re-exports, literal dynamic imports and `import.meta.resolve('…')`
+// with a literal: the last names a module a page hands to another document (an
+// injected script, a worker), so it needs a map entry and a rewrite like an import.
+const IMPORT_STATEMENT_REGEX = /(?:\bimport\.meta\.resolve\s*\(\s*|(?:\bimport\b|\bexport\b)(?:[{\s\w,*$}]*?from)?[\s(]+)['"](.*?)['"]/dg;
 const MODULE_SCRIPT_REGEX = /(<script\b[^>]*\btype\s*=\s*["']module["'][^>]*>)([\s\S]*?)<\/script>/gi;
 const CRAWLABLE_EXTENSIONS = new Set(['.js', '.mjs', '.ts']);
 // Shared specifier classification — the import-map crawl and the module-body
