@@ -25,3 +25,11 @@ npm install @damienmortini/damdom-lottie
 
 <my-element-name></my-element-name>
 ```
+
+## Usage with imported animation data
+```js
+import '@damienmortini/damdom-lottie';
+import data from './animation.json' with { type: 'json' };
+
+document.querySelector('damdom-lottie').animationData = data;
+```
