@@ -302,7 +302,10 @@ export class ModuleResolver {
     catch {
       moduleUrl = await resolveUnbuiltSpecifier(specifier, importerUrl);
     }
-    if (!moduleUrl) return undefined;
+    // A module outside the root (a dependency hoisted above it) has no served
+    // URL; its file:// href would only fail in the browser as an opaque
+    // "Failed to fetch dynamically imported module".
+    if (!moduleUrl?.href.startsWith(this.#rootUrl.href)) return undefined;
 
     let servedPathPromise = canonicalServedPaths?.get(moduleUrl.href);
     if (!servedPathPromise) {
@@ -418,7 +421,7 @@ export class ModuleResolver {
         // Leave an unresolvable specifier out of the map so the browser error
         // names the real specifier.
         if (!servedModulePath) {
-          console.log(`Unresolvable specifier "${specifier}" imported from ${importerServedPath}`);
+          console.log(`Unresolvable specifier "${specifier}" imported from ${importerServedPath} within the served root ${this.rootDirectory}`);
           return;
         }
         const mappedPath = importMap.imports[specifier];
