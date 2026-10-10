@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { open } from 'fs/promises';
+import QRCode from 'qrcode';
 
 import { Server } from '../server.ts';
 
@@ -128,3 +129,10 @@ const server = new Server({
 });
 
 await server.ready;
+
+for (const [index, url] of server.urls.entries()) {
+  console.log(url);
+  if (index !== 0) {
+    console.log(await QRCode.toString(url, { type: 'terminal', small: true }));
+  }
+}
