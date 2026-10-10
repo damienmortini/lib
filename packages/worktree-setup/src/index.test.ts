@@ -111,6 +111,10 @@ test('refuses a glob that walks out of the worktree', async () => {
 
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /glob leaving the worktree/);
   assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/outside')), false);
+
+  // An absolute glob leaves it just the same.
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), `packages:\n  - '${path.dirname(primaryRoot)}/outside'\n`);
+  await assert.rejects(setupWorktree({ directory: worktreeRoot }), /glob leaving the worktree/);
 });
 
 test('refuses a glob it cannot expand, rather than matching it against nothing', async () => {
