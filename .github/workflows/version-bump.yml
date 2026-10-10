@@ -1,0 +1,38 @@
+# Publishing runs `lerna publish from-package`, which publishes only versions the registry
+# does not have yet. A change merged without a version bump is therefore never released,
+# and the repository's version then names a build the registry does not carry: a consumer
+# pinning it gets either one depending on whether it installs or links. This makes the bump
+# part of the change that needs it, instead of something found by unpacking a tarball.
+name: Version bump
+
+on: pull_request
+
+jobs:
+  require-bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The pull request's merge commit and its first parent, main: exactly this change.
+          fetch-depth: 2
+
+      # Every changed file belongs to the nearest package.json above it. A published
+      # package (not `private`) with a changed file must also change its own `version`.
+      # Tests are left out: they move nothing a consumer installs.
+      # `--no-renames` keeps a file moved between packages counted in both.
+      - run: |
+          status=0
+          packages=$(git diff --name-only --no-renames HEAD^1 HEAD -- packages | grep -vE '\.test\.|/test/' | while read -r file; do
+            directory=$(dirname "$file")
+            until [ -f "$directory/package.json" ] || [ "$directory" = packages ]; do directory=$(dirname "$directory"); done
+            [ -f "$directory/package.json" ] && echo "$directory"
+          done | sort -u)
+          for package in $packages; do
+            [ "$(node -p "require('./$package/package.json').private")" = true ] && continue
+            git diff HEAD^1 HEAD -- "$package/package.json" | grep -qE '^\+\s*"version":' && continue
+            echo "::error file=$package/package.json::$package changed without bumping its version"
+            status=1
+          done
+          exit $status
