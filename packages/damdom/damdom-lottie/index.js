@@ -109,7 +109,9 @@ class DamdomLottieElement extends HTMLElement {
     switch (name) {
       case 'src':
         this.#animationData = undefined;
-        this.#load({ path: newValue });
+        if (newValue !== null) {
+          this.#load({ path: newValue });
+        }
         break;
       case 'loop':
         if (this.animation) {
@@ -172,6 +174,7 @@ class DamdomLottieElement extends HTMLElement {
   }
 
   set animationData(value) {
+    this.removeAttribute('src');
     this.#animationData = value;
     this.#load({ animationData: value });
   }
