@@ -93,11 +93,11 @@ silently asked for nothing would report a worktree ready that cannot run its own
 JSON carries no comments, so record the choices in prose, in the file the repository addresses
 its own readers from — its `README.md`, or whatever that file is called. A section there says
 why each option is set *and why an unset one is unset*: that a repository sets no
-`resolvedLinkDirectories` because none of its gates resolves through a submodule. Without it the next reader finds an
-absence, which reads the same whether it was decided or forgotten, and re-derives the answer or
-changes it. The same section is where anything the repository does *on top of* the link tree
-belongs — a build, say — because that step is the repository's, not this package's and not its
-caller's.
+`resolvedLinkDirectories` because none of its gates resolves through a submodule. Without it
+the next reader finds an absence, which reads the same whether it was decided or forgotten,
+and re-derives the answer or changes it. The same section is where anything the repository
+does *on top of* the link tree belongs — a build, say — because that step is the repository's,
+not this package's and not its caller's.
 
 `workspace:*` rather than a pinned version, for a repository that reaches this package through
 a checkout rather than the registry. This package is `private`, so it is never published; a
