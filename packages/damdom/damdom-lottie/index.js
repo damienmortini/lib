@@ -1,4 +1,4 @@
-import '../../Lottie-web/build/player/lottie.min.js';
+import lottie from 'lottie-web/build/player/esm/lottie.min.js';
 
 /**
  * Element to plays Lottie animation
@@ -7,6 +7,7 @@ import '../../Lottie-web/build/player/lottie.min.js';
  * <damdom-lottie src="data.json" autoplay loop></damdom-lottie>
  */
 class DamdomLottieElement extends HTMLElement {
+  #animationData;
   #container;
   #currentTime;
 
@@ -54,16 +55,16 @@ class DamdomLottieElement extends HTMLElement {
     }).observe(this.#container, { childList: true, subtree: true });
   }
 
-  async #load(src) {
+  async #load(source) {
     if (this.animation) {
       this.animation.destroy();
     }
-    this.animation = window.lottie.loadAnimation({
+    this.animation = lottie.loadAnimation({
       container: this.#container,
       renderer: this.renderer,
       autoplay: this.autoplay,
       loop: this.loop,
-      path: src,
+      ...source,
     });
     this.animation.addEventListener('DOMLoaded', () => {
       if (this.segments) {
@@ -107,7 +108,10 @@ class DamdomLottieElement extends HTMLElement {
     }
     switch (name) {
       case 'src':
-        this.#load(newValue);
+        this.#animationData = undefined;
+        if (newValue !== null) {
+          this.#load({ path: newValue });
+        }
         break;
       case 'loop':
         if (this.animation) {
@@ -159,6 +163,20 @@ class DamdomLottieElement extends HTMLElement {
 
   set src(value) {
     this.setAttribute('src', value);
+  }
+
+  /**
+   * Animation JSON data, as an alternative to `src`
+   * @type {Object}
+   */
+  get animationData() {
+    return this.#animationData;
+  }
+
+  set animationData(value) {
+    this.removeAttribute('src');
+    this.#animationData = value;
+    this.#load({ animationData: value });
   }
 
   /**
