@@ -1,7 +1,8 @@
 # `npm test` is this repository's gate: `syncpack lint` over every package.json, eslint
 # over `packages`, a typecheck of every package tsconfig, and each package's own suite.
 # Nothing ran it on a pull request before this job, so a lint or type error was caught
-# only by whoever next ran the gate on their own machine — the accumulation path that once left 532 eslint errors to clear in one go.
+# only by whoever next ran the gate on their own machine — the accumulation path that
+# once left 532 eslint errors to clear in one go.
 name: Tests
 
 # No `push: branches: [main]` — every merge squashes a branch this job already passed on.
