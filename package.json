@@ -41,9 +41,6 @@
     "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "worktreeSetup": {
-    "packageDirectories": [
-      "packages"
-    ],
     "requiredPackages": [
       "@damienmortini/eslint-config",
       "@damienmortini/typescript-config"

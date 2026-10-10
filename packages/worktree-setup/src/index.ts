@@ -9,12 +9,12 @@
 // including packages the branch adds, which the primary checkout knows nothing about.
 //
 // The branch's own tree is the measure of the result, not the primary's. Workspace members
-// come from the globs the worktree's pnpm-workspace.yaml declares as well as the
-// `packageDirectories` option, and every dependency declared by a manifest the worktree
-// itself holds — the root and the members not reached through submodule links, whose own
-// dependencies are their sibling checkout's install to answer for — is then verified to
-// resolve: linked from the primary's install where the mirror alone did not carry it, and
-// refused loudly, naming the manifest and the name, where nothing can.
+// come from the globs the worktree's pnpm-workspace.yaml declares, and every dependency
+// declared by a manifest the worktree itself holds — the root and the members not reached
+// through submodule links, whose own dependencies are their sibling checkout's install to
+// answer for — is then verified to resolve: linked from the primary's install where the
+// mirror alone did not carry it, and refused loudly, naming the manifest and the name, where
+// nothing can.
 //
 // One copy, every repository that uses it. Everything below is the same everywhere; what
 // differs between them is passed in as options, so a fix lands once rather than being
@@ -29,14 +29,6 @@ import path from 'node:path';
 export interface WorktreeSetupOptions {
   /** A directory inside the worktree to set up. Defaults to the current working directory. */
   directory?: string;
-  /**
-   * Directories holding workspace packages, relative to the worktree root — `packages` for
-   * a repository that has its own, nothing for one whose packages all come from submodules.
-   * Missing directories are skipped, so a branch may add or drop one. The `packages` globs
-   * of the worktree's own `pnpm-workspace.yaml` are always walked as well, so this option
-   * is only for roots that file does not declare.
-   */
-  packageDirectories?: string[];
   /**
    * Package names that must resolve from the worktree once the tree is linked. Name the
    * ones whose absence a repository's gates report as something else entirely: tsc reports
@@ -344,7 +336,6 @@ async function danglingLinksIn(worktreeRoot: string, directory: string): Promise
 export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise<void> {
   const {
     directory = process.cwd(),
-    packageDirectories = [],
     requiredPackages = [],
     resolvedLinkDirectories = [],
   } = options;
@@ -363,18 +354,10 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
   // the branch exists in neither the primary's tree nor its hoisted scope, and used to be
   // the one thing still linked by hand. Resolving to the primary instead is
   // also what silently breaks a dev server that serves the worktree — a package reached
-  // through a path outside that root renders as a blank element. Membership is the union of
-  // the `packageDirectories` walk and the globs the worktree's own pnpm-workspace.yaml
-  // declares, because the yaml is where a workspace states its roots — a member under a
-  // `submodules/*` glob is one the hand-kept option never named.
+  // through a path outside that root renders as a blank element. Membership is what the
+  // globs of the worktree's own pnpm-workspace.yaml declare, because the yaml is where a
+  // workspace states its roots.
   const workspacePackageDirectories = new Set<string>();
-  for (const packageRoot of packageDirectories) {
-    // The option names a root to scan whole, which is the `**` expansion of it — one walker
-    // for both sources, so which one declared a root cannot change which members it finds.
-    for (const packageDirectory of await expandWorkspaceGlob(worktreeRoot, `${packageRoot}/**`)) {
-      workspacePackageDirectories.add(packageDirectory);
-    }
-  }
   for (const glob of await workspacePackageGlobs(worktreeRoot)) {
     for (const packageDirectory of await expandWorkspaceGlob(worktreeRoot, glob)) {
       workspacePackageDirectories.add(packageDirectory);

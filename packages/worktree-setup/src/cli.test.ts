@@ -5,7 +5,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { test } from 'node:test';
 
@@ -46,8 +45,8 @@ for (const [name, overrides, diagnosis] of [
   ['names a missing worktree setup key', { worktreeSetup: undefined }, /`worktreeSetup` is missing/],
   [
     'refuses a worktree setup option it does not know',
-    { worktreeSetup: { packageDirectory: ['packages'] } },
-    /`worktreeSetup\.packageDirectory`.*is not an option/,
+    { worktreeSetup: { requiredPackage: ['@scope/config'] } },
+    /`worktreeSetup\.requiredPackage`.*is not an option/,
   ],
   [
     'requires the package to be a development dependency',
@@ -77,21 +76,15 @@ test('check refuses a worktree path', async () => {
 
 test('reads the options the worktree declares, from the primary checkout', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
-  // Only the branch has this package — the case the options exist for — and only the branch's
-  // package.json asks for `packages` to be linked. The primary's says nothing about either.
-  await write(path.join(worktreeRoot, 'packages/added/package.json'), '{"name":"@scope/added"}');
-  await declareOptions(worktreeRoot, { packageDirectories: ['packages'] });
+  // Only the branch's package.json asks for this package. The primary's says nothing.
+  await declareOptions(worktreeRoot, { requiredPackages: ['@scope/absent'] });
 
   // Run from the primary checkout, which is the whole point: nothing had to resolve out of
   // the worktree for this to work.
-  const { status, stdout } = run([worktreeRoot], primaryRoot);
+  const { status, stderr } = run([worktreeRoot], primaryRoot);
 
-  assert.equal(status, 0);
-  assert.match(stdout, /1 workspace package, 0 declared dependencies verified/);
-  assert.equal(
-    await fs.realpath(path.join(worktreeRoot, 'node_modules/@scope/added')),
-    path.join(worktreeRoot, 'packages/added'),
-  );
+  assert.equal(status, 1);
+  assert.match(stderr, /Cannot resolve @scope\/absent/);
 });
 
 test('mirrors the tree with no options at all, which a repository may legitimately want', async () => {
@@ -126,25 +119,25 @@ test('refuses a second path rather than silently setting up only the first', asy
 
 test('refuses an option name it does not know rather than silently asking for nothing', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
-  await declareOptions(worktreeRoot, { packageDirectory: ['packages'] });
+  await declareOptions(worktreeRoot, { requiredPackage: ['@scope/config'] });
 
   const { status, stderr } = run([worktreeRoot], primaryRoot);
 
   assert.equal(status, 1);
-  assert.match(stderr, /`worktreeSetup.packageDirectory`.*is not an option/);
-  assert.match(stderr, /packageDirectories/);
+  assert.match(stderr, /`worktreeSetup.requiredPackage`.*is not an option/);
+  assert.match(stderr, /requiredPackages/);
   // A diagnosis to read, not a crash to decipher.
   assert.doesNotMatch(stderr, /at .*cli\.ts/);
 });
 
 test('refuses an option that is not an array of strings', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
-  await declareOptions(worktreeRoot, { packageDirectories: 'packages' });
+  await declareOptions(worktreeRoot, { requiredPackages: '@scope/config' });
 
   const { status, stderr } = run([worktreeRoot], primaryRoot);
 
   assert.equal(status, 1);
-  assert.match(stderr, /`worktreeSetup.packageDirectories`.*must be an array of strings/);
+  assert.match(stderr, /`worktreeSetup.requiredPackages`.*must be an array of strings/);
 });
 
 test('passes the setup its own diagnosis through, without a stack', async () => {

@@ -35,7 +35,7 @@ interface PackageManifest {
 // the CLI rejecting a legitimate option at runtime as one it has never heard of.
 type OptionName = keyof Omit<WorktreeSetupOptions, 'directory'>;
 
-const DECLARED_OPTIONS = { packageDirectories: true, requiredPackages: true, resolvedLinkDirectories: true } satisfies Record<OptionName, true>;
+const DECLARED_OPTIONS = { requiredPackages: true, resolvedLinkDirectories: true } satisfies Record<OptionName, true>;
 
 function isOptionName(name: string): name is OptionName {
   return name in DECLARED_OPTIONS;
@@ -61,7 +61,7 @@ function readManifest(manifestPath: string): PackageManifest {
  * The `worktreeSetup` key of the worktree's own package.json, checked rather than trusted.
  *
  * A name this does not know is refused instead of ignored: a repository states what it needs
- * here and nowhere else now, so a mistyped `packageDirectory` would silently ask for nothing
+ * here and nowhere else now, so a mistyped `requiredPackage` would silently ask for nothing
  * and report a worktree ready that cannot run its own gates — the confident wrong success
  * this package exists to stop repeating.
  */
