@@ -23,8 +23,7 @@ to their source, so a change reaching across into one of those needs `pnpm run b
 worktree on top; a change staying inside one package, whose own tests run its `src`, does not.
 
 No `resolvedLinkDirectories`: this repository has no `submodules/` at all — it is the one the
-others link *to*. `packageDirectories: ["packages"]` is where its own workspace packages live,
-and `requiredPackages` names the two configs every gate resolves through
+others link *to*. `requiredPackages` names the two configs every gate resolves through
 (`@damienmortini/eslint-config` and `@damienmortini/typescript-config`), so a worktree that
 cannot resolve them fails setup instead of failing `lint` later with a foreign error.
 

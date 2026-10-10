@@ -12,7 +12,7 @@ rather than the primary's, including packages the branch adds.
 
 The branch's tree is what the result is measured against, not the primary's. Workspace members
 come from the `packages` globs the worktree's own `pnpm-workspace.yaml` declares — including
-ones reached through submodule symlinks — as well as from `packageDirectories`, and every
+ones reached through submodule symlinks — and every
 dependency declared by a manifest the worktree itself holds is verified to resolve from the
 package declaring it: linked from the primary's install where the mirror alone did not carry
 it, and refused loudly, naming the manifest and the name, where nothing can. (A member reached
@@ -72,7 +72,6 @@ already carries.
   "devDependencies": { "@damienmortini/worktree-setup": "workspace:*" },
   "scripts": { "worktree:setup": "worktree-setup" },
   "worktreeSetup": {
-    "packageDirectories": ["packages"],
     "requiredPackages": ["@my-scope/typescript-config", "@my-scope/eslint-config"]
   }
 }
@@ -88,18 +87,17 @@ is installed. The alias is also where a repository that runs this differently pu
 difference, so the entry point stays one name across all of them.
 
 A name the `worktreeSetup` key does not know is refused rather than ignored, because a
-repository states what it needs here and nowhere else: a mistyped `packageDirectory` that
+repository states what it needs here and nowhere else: a mistyped `requiredPackage` that
 silently asked for nothing would report a worktree ready that cannot run its own gates.
 
 JSON carries no comments, so record the choices in prose, in the file the repository addresses
 its own readers from — its `README.md`, or whatever that file is called. A section there says
 why each option is set *and why an unset one is unset*: that a repository sets no
-`resolvedLinkDirectories` because none of its gates resolves through a submodule, or no
-`packageDirectories` because it owns no packages of its own. Without it the next reader finds an
-absence, which reads the same whether it was decided or forgotten, and re-derives the answer or
-changes it. The same section is where anything the repository does *on top of* the link tree
-belongs — a build, say — because that step is the repository's, not this package's and not its
-caller's.
+`resolvedLinkDirectories` because none of its gates resolves through a submodule. Without it
+the next reader finds an absence, which reads the same whether it was decided or forgotten,
+and re-derives the answer or changes it. The same section is where anything the repository
+does *on top of* the link tree belongs — a build, say — because that step is the repository's,
+not this package's and not its caller's.
 
 `workspace:*` rather than a pinned version, for a repository that reaches this package through
 a checkout rather than the registry. This package is `private`, so it is never published; a
@@ -153,7 +151,6 @@ repository states what it needs, and the package assumes nothing about who is ca
 
 | Option | |
 | --- | --- |
-| `packageDirectories` | Where this repository's own workspace packages live, e.g. `['packages']` — on top of the `packages` globs its `pnpm-workspace.yaml` declares, which are always read. |
 | `requiredPackages` | Names that must resolve once the tree is linked. |
 | `resolvedLinkDirectories` | Directories, e.g. `['submodules']`, whose committed symlinks must resolve. |
 
