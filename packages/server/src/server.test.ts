@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { after, before, describe, it } from 'node:test';
+import { after, before, describe, it, mock } from 'node:test';
 
 import { Server } from './server.ts';
 
@@ -419,5 +419,30 @@ describe('range requests', () => {
 
     const { status } = await fetchResponse(boundPort(server), '/clip.mp4');
     strictEqual(status, 200, 'expected the server to keep serving after a cancelled stream');
+  });
+});
+
+// The startup banner belongs to the CLI: an in-process server must not print its
+// URLs into the middle of a caller's output, yet still tell the caller where it is.
+describe('startup', () => {
+  it('reports its URLs without printing them', async () => {
+    const rootPath = await mkdtemp(join(tmpdir(), 'server-startup-'));
+    const log = mock.method(console, 'log', () => {});
+    const server = new Server({ rootPath, watch: false, port: 9601, base: 'mounted', path: 'page.html' });
+    try {
+      await server.ready;
+    }
+    finally {
+      log.mock.restore();
+    }
+    try {
+      strictEqual(server.urls[0], `https://localhost:${boundPort(server)}/mounted/page.html`);
+      const printed = log.mock.calls.flatMap(call => call.arguments).join('\n');
+      ok(server.urls.every(url => !printed.includes(url)), `expected no URL printed, got: ${printed}`);
+    }
+    finally {
+      await server.close();
+      await rm(rootPath, { recursive: true, force: true });
+    }
   });
 });

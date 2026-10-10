@@ -2,6 +2,7 @@ import { stripTypeScriptTypes } from 'node:module';
 
 import { FSWatcher, watch as chokidarWatch } from 'chokidar';
 import { createHash, randomBytes, X509Certificate } from 'crypto';
+import { once } from 'events';
 import { createReadStream } from 'fs';
 import { mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
 import getPort, { portNumbers } from 'get-port';
@@ -15,7 +16,6 @@ import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
 // built from them is resolved with posix semantics rather than the platform's.
 import { extname, join } from 'path';
 import { dirname as posixDirname, join as posixJoin } from 'path/posix';
-import QRCode from 'qrcode';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
@@ -292,6 +292,10 @@ async function loadOrCreateCertificate(certificateAddresses: string[]): Promise<
 export class Server {
   http2SecureServer: Http2SecureServer;
   ready: Promise<void>;
+  // The page URL on localhost, then on each external IPv4 interface, set once
+  // `ready` resolves. Printing them is the caller's business, so in-process
+  // users (tests, tools) start the server silently.
+  urls: string[] = [];
 
   #liveReloadStreams = new Set<ServerHttp2Stream>();
   // Identity of this server process plus how many refreshes it has broadcast:
@@ -1157,15 +1161,12 @@ export class Server {
       socket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     });
 
+    // Wait for the bind so `ready` and `urls` never vouch for a port another
+    // process took after getPort checked it — that rejects `ready` instead.
     this.http2SecureServer.listen(serverPort);
+    await once(this.http2SecureServer, 'listening');
 
-    for (const [index, address] of addresses.entries()) {
-      const url = `https://${address}:${serverPort}${configuredBasePrefix}/${path}`;
-      console.log(url);
-      if (index !== 0) {
-        console.log(await QRCode.toString(url, { type: 'terminal', small: true }));
-      }
-    }
+    this.urls = addresses.map(address => `https://${address}:${serverPort}${configuredBasePrefix}/${path}`);
   }
 
   refresh(): void {
