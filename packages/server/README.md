@@ -107,6 +107,10 @@ answered from `src/`.
   not enumerated.
 - A specifier that cannot be resolved is left out of the map on purpose, so the
   browser's error names the real specifier. The server logs it too.
+- A specifier that resolves outside the served root — a dependency hoisted to a
+  workspace's `node_modules` above a package the server was started from — has
+  no served URL, so it counts as unresolvable; the log names the served root. Serve
+  from the directory that holds the `node_modules` instead.
 - The generated map is injected first, and a document's import maps merge in
   order with the earlier map winning on a conflicting key, so a page's own
   hand-authored `<script type="importmap">` cannot override a generated entry.

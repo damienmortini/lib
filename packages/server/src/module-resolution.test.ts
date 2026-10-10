@@ -196,3 +196,34 @@ describe('a resolver anchored somewhere other than the process working directory
     strictEqual(rewritten, 'export const url = import.meta.resolve(\'/node_modules/demo-package/index.js\');\n');
   });
 });
+
+describe('a dependency hoisted above the served root', () => {
+  // A server started from a workspace package: the dependency sits in the
+  // workspace's node_modules, above the root, so it has no served URL at all.
+  let temporaryRoot: string;
+  let servedRootPath: string;
+
+  before(async () => {
+    temporaryRoot = await mkdtemp(join(tmpdir(), 'module-resolution-hoisted-test-'));
+    servedRootPath = join(temporaryRoot, 'packages', 'application');
+    await mkdir(join(temporaryRoot, 'node_modules', 'hoisted-package'), { recursive: true });
+    await writeFile(join(temporaryRoot, 'node_modules', 'hoisted-package', 'package.json'), '{"name":"hoisted-package","main":"index.js"}');
+    await writeFile(join(temporaryRoot, 'node_modules', 'hoisted-package', 'index.js'), 'export const hoisted = true;');
+    await mkdir(servedRootPath, { recursive: true });
+    await writeFile(join(servedRootPath, 'module.js'), 'import { hoisted } from \'hoisted-package\';\n');
+  });
+
+  after(async () => {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  });
+
+  it('leaves the bare specifier rather than emitting a file:// URL', async () => {
+    const resolver = new ModuleResolver(servedRootPath);
+    const importerPath = join(servedRootPath, 'module.js');
+    strictEqual(await resolver.resolveSpecifierToServedPath('hoisted-package', pathToFileURL(importerPath), '/'), undefined);
+    const rewritten = await resolver.rewriteModuleSpecifiers('import { hoisted } from \'hoisted-package\';\n', importerPath, '/');
+    strictEqual(rewritten, 'import { hoisted } from \'hoisted-package\';\n');
+    const { importMap } = await resolver.buildImportMap('<script type="module" src="/module.js"></script>', '/index.html', '/');
+    strictEqual(importMap.imports['hoisted-package'], undefined);
+  });
+});
