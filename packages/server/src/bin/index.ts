@@ -18,6 +18,7 @@ const proxy: { [path: string]: string } = {};
 let auth: string | undefined;
 let base: string | undefined;
 let directoryListing = false;
+let liveReload = true;
 
 let i = 0;
 while (i < args.length) {
@@ -76,6 +77,9 @@ while (i < args.length) {
     case '--directory-listing':
       directoryListing = true;
       break;
+    case '--no-live-reload':
+      liveReload = false;
+      break;
   }
 
   i++;
@@ -115,7 +119,7 @@ catch {
 const server = new Server({
   path,
   rootPath,
-  watch: true,
+  watch: liveReload,
   watchIgnore,
   watchPaths,
   verbose,
