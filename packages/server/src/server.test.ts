@@ -1,8 +1,10 @@
 import { ok, strictEqual } from 'node:assert';
+import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createInterface } from 'node:readline';
 import { after, before, describe, it, mock } from 'node:test';
 
 import { Server } from './server.ts';
@@ -442,6 +444,35 @@ describe('startup', () => {
     }
     finally {
       await server.close();
+      await rm(rootPath, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('command line', () => {
+  it('serves pages without the live-reload client under --no-live-reload', { timeout: 30_000 }, async () => {
+    const rootPath = await mkdtemp(join(tmpdir(), 'server-cli-'));
+    await writeFile(join(rootPath, 'index.html'), '<html><head></head><body></body></html>');
+    const child = spawn(process.execPath, [join(import.meta.dirname, 'bin/index.ts'), '--root', rootPath, '--port', '9701', '--no-live-reload'], { stdio: ['ignore', 'pipe', 'inherit'] });
+    try {
+      // The first URL printed is the local one, once the server is ready —
+      // after any certificate setup lines.
+      let url = '';
+      for await (const line of createInterface({ input: child.stdout })) {
+        if (line.startsWith('https://')) {
+          url = line;
+          break;
+        }
+      }
+      // Keep draining, so the rest of the banner never fills the pipe and blocks the child.
+      child.stdout.resume();
+      ok(url, 'expected the server to print its URL');
+      const body = await fetchBody(Number(new URL(url).port), '/');
+      ok(body.includes('<body>'), 'expected the page to be served');
+      ok(!body.includes('EventSource'), 'expected no live-reload client under --no-live-reload');
+    }
+    finally {
+      child.kill();
       await rm(rootPath, { recursive: true, force: true });
     }
   });
