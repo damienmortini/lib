@@ -4,8 +4,8 @@
 
 Nothing publishes from CI. A release is run by hand, on request, while the maintainer is
 there to approve it with their npm two-factor authentication. **Never store an npm token**:
-not as a repository secret, not in an environment variable, and not in the user `.npmrc`.
-The login below lives in a throwaway config file for the length of the release.
+not as a repository secret, not in an environment variable, and not in the user `.npmrc`
+beyond the one command below that logs in, publishes and logs out.
 
 Every pull request that changes a published package bumps its version (the `Version bump`
 workflow enforces it), so a release is whatever on `main` is ahead of npm.
@@ -13,7 +13,8 @@ workflow enforces it), so a release is whatever on `main` is ahead of npm.
 yet, rewrites `workspace:*` dependencies to real versions (`npm publish` would ship them
 literally), and answers the registry's two-factor challenge with an approval URL instead of
 a typed one-time password. Like `lerna publish`, it refuses that challenge without a
-terminal, so an agent runs it under `script`, which gives it a pseudo-terminal.
+terminal, so an agent runs it under `script`, which gives it a pseudo-terminal — and runs
+`npm login` the same way, so the maintainer only opens links.
 
 1. Build exactly what is on `main`, in a fresh detached worktree:
 
@@ -39,40 +40,26 @@ terminal, so an agent runs it under `script`, which gives it a pseudo-terminal.
 
    `--no-git-checks` because a detached worktree is on no branch; step 1 checked it clean.
 
-3. Make a throwaway directory with `mktemp -d`, `<directory>` below. Every npm and pnpm
-   command from here to the logout carries `NPM_CONFIG_USERCONFIG=<directory>/npmrc`, so
-   the login never touches the user `.npmrc`. The maintainer logs in with it:
+3. Log in, publish and log out in one invocation, in the background so its output can be
+   read while it waits — the logout runs whether the publish succeeded or not:
 
    ```sh
-   NPM_CONFIG_USERCONFIG=<directory>/npmrc npm login
+   script -qec 'npm login' /dev/null < /dev/null
+   script -qec 'pnpm -r publish --no-git-checks' /dev/null < /dev/null
+   npm logout
    ```
 
-   `npm login` opens a web login and writes a two-hour session token to that file, out of
-   reach of anything not given the variable.
+   It prints two URLs, each waiting up to five minutes: the login, then one two-factor
+   approval for the first package, which covers the rest of the batch. Pass each to the
+   maintainer the moment it appears, saying it needs no reply; it opens on a phone. If the
+   run stops partway, run this step again: it skips what already reached the registry.
 
-4. Publish under a pseudo-terminal, then log out in the same shell invocation, so the logout runs
-   whether the publish succeeded or not. Run it in the background so its output can be read
-   while it waits:
+4. Check the token is gone, even when step 3 was interrupted (then run `npm logout` first):
 
    ```sh
-   NPM_CONFIG_USERCONFIG=<directory>/npmrc \
-     script -qec 'pnpm -r publish --no-git-checks' /dev/null < /dev/null
-   NPM_CONFIG_USERCONFIG=<directory>/npmrc npm logout
+   npm whoami                                       # must fail
+   grep _authToken "$(npm config get userconfig)"   # must print nothing
    ```
 
-   Each two-factor challenge prints an approval URL and waits up to five minutes. Pass each
-   URL to the maintainer as it appears; it opens on a phone. If the run stops partway, the
-   maintainer logs in again (step 3) and this step reruns: it skips what already reached
-   the registry.
-
-5. Check the token is gone, even when step 4 was interrupted (then run its `npm logout`
-   first):
-
-   ```sh
-   NPM_CONFIG_USERCONFIG=<directory>/npmrc npm whoami   # must fail
-   rm -r <directory>
-   grep _authToken "$(npm config get userconfig)"       # must print nothing
-   ```
-
-6. Confirm the release: the dry run from step 2 now lists nothing. Then remove the worktree
-   with `git worktree remove ../lib-release`.
+5. Confirm the release: the dry run from step 2 lists nothing once the registry catches up,
+   which takes a few minutes. Then remove the worktree with `git worktree remove ../lib-release`.
