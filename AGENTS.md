@@ -50,23 +50,25 @@ terminal, so an agent runs it under `script`, which gives it a pseudo-terminal.
    `npm login` opens a web login and writes a two-hour session token to that file, out of
    reach of anything not given the variable.
 
-4. Publish under a pseudo-terminal, in the background so its output can be read while it
-   waits:
+4. Publish under a pseudo-terminal, then log out in the same shell invocation, so the logout runs
+   whether the publish succeeded or not. Run it in the background so its output can be read
+   while it waits:
 
    ```sh
    NPM_CONFIG_USERCONFIG=<directory>/npmrc \
      script -qec 'pnpm -r publish --no-git-checks' /dev/null < /dev/null
+   NPM_CONFIG_USERCONFIG=<directory>/npmrc npm logout
    ```
 
    Each two-factor challenge prints an approval URL and waits up to five minutes. Pass each
-   URL to the maintainer as it appears; it opens on a phone. If the run stops partway,
-   rerun this step: it skips what already reached the registry.
+   URL to the maintainer as it appears; it opens on a phone. If the run stops partway, the
+   maintainer logs in again (step 3) and this step reruns: it skips what already reached
+   the registry.
 
-5. Log out **immediately**, whether the publish succeeded or not, and check the token is
-   gone:
+5. Check the token is gone, even when step 4 was interrupted (then run its `npm logout`
+   first):
 
    ```sh
-   NPM_CONFIG_USERCONFIG=<directory>/npmrc npm logout
    NPM_CONFIG_USERCONFIG=<directory>/npmrc npm whoami   # must fail
    rm -r <directory>
    grep _authToken "$(npm config get userconfig)"       # must print nothing
