@@ -1,4 +1,4 @@
-# Publishing runs `lerna publish from-package`, which publishes only versions the registry
+# Publishing (`pnpm -r publish`, see AGENTS.md) publishes only versions the registry
 # does not have yet. A change merged without a version bump is therefore never released,
 # and the repository's version then names a build the registry does not carry: a consumer
 # pinning it gets either one depending on whether it installs or links. This makes the bump
