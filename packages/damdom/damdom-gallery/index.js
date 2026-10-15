@@ -19,6 +19,7 @@ class DamdomGalleryElement extends HTMLElement {
   #highlighted = null;
   #selected = null;
   #elementSlotMap;
+  #takeChildRecords;
   #backButton;
   #selectionToolbar;
   #deselectButton;
@@ -133,6 +134,8 @@ class DamdomGalleryElement extends HTMLElement {
     ]);
     const observer = new MutationObserver(mutationCallback);
     observer.observe(this, { childList: true });
+    // A child appended in the same task as it is selected has not reached the observer yet.
+    this.#takeChildRecords = () => mutationCallback(observer.takeRecords());
   }
 
   connectedCallback() {
@@ -193,6 +196,7 @@ class DamdomGalleryElement extends HTMLElement {
   set selected(value) {
     value ??= null;
     if (this.#selected === value) return;
+    this.#takeChildRecords();
     if (value && !this.#elementSlotMap.has(value)) throw new Error('damdom-gallery can only select one of its children');
     if (this.#selected) {
       this.#selected.toggleAttribute('selected', false);
