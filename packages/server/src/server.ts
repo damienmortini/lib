@@ -1096,7 +1096,7 @@ export class Server {
           stream.end();
           return;
         }
-        stream.end(details ? `${servedPath.split('?')[0]}: ${(error instanceof Error ? error.message : String(error)).replaceAll(rootDirectory, '')}\n` : undefined);
+        stream.end(details ? `${servedPath.split('?')[0]}: ${(error instanceof Error ? error.message : String(error)).replaceAll(rootDirectory === '/' ? '' : rootDirectory, '')}\n` : undefined);
       }
 
       stream.on('error', (error) => {
