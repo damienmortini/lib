@@ -353,6 +353,38 @@ describe('directory listing', () => {
   });
 });
 
+describe('server errors', () => {
+  let rootPath: string;
+  let server: Server;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-errors-'));
+    await mkdir(join(rootPath, 'src'));
+    // Type stripping cannot erase an enum, so building `dist/broken.js` from it throws.
+    await writeFile(join(rootPath, 'src', 'broken.ts'), 'export enum Broken { A }\n');
+    server = new Server({ rootPath, watch: false, port: 9311 });
+    await server.ready;
+  });
+
+  after(async () => {
+    await server.close();
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('says in the body of a 500 which file failed and why', async () => {
+    const response = await fetchResponse(boundPort(server), '/dist/broken.js');
+    strictEqual(response.status, 500);
+    ok(response.body.startsWith('/dist/broken.js: '), `expected the path first, got: ${response.body}`);
+    ok(/enum/i.test(response.body), `expected the error message, got: ${response.body}`);
+  });
+
+  it('keeps a 404 bodyless', async () => {
+    const response = await fetchResponse(boundPort(server), '/dist/missing.js');
+    strictEqual(response.status, 404);
+    strictEqual(response.body, '');
+  });
+});
+
 // A <video> asks for ranges, and Safari will not play a file from a server that
 // answers one with the whole thing.
 describe('range requests', () => {

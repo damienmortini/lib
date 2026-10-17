@@ -1070,15 +1070,21 @@ export class Server {
         // An escaping throw here reaches no caller — the stream handler is
         // async — and takes the whole server down, so it ends the stream
         // instead: one failed request must never be fatal.
+        // A 500 says why in its body: an empty one shows up in the browser as a bare
+        // status, and the reason is then only in a log on another machine.
+        const notFound = error.code === 'ENOENT';
         try {
           stream.respond({
-            ':status': error.code === 'ENOENT' ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            ':status': notFound ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            ...(notFound ? {} : { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }),
           });
         }
         catch (respondError) {
           console.log(respondError);
+          stream.end();
+          return;
         }
-        stream.end();
+        stream.end(notFound ? undefined : `${servedPath}: ${error instanceof Error ? error.message : String(error)}\n`);
       }
 
       stream.on('error', (error) => {
