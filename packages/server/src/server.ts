@@ -1074,7 +1074,7 @@ export class Server {
         // status, and the reason is then only in a log on another machine. The served
         // root is cut out of the message, so a filesystem error names served paths
         // rather than where the tree sits on disk.
-        const notFound = error.code === 'ENOENT';
+        const notFound = error?.code === 'ENOENT';
         try {
           stream.respond({
             ':status': notFound ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
