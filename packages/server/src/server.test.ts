@@ -363,6 +363,7 @@ describe('server errors', () => {
     await mkdir(join(rootPath, 'src'));
     // Type stripping cannot erase an enum, so building `dist/broken.js` from it throws.
     await writeFile(join(rootPath, 'src', 'broken.ts'), 'export enum Broken { A }\n');
+    await writeFile(join(rootPath, 'file.txt'), 'not a directory');
     server = new Server({ rootPath, watch: false, port: 9311 });
     detailedServer = new Server({ rootPath, watch: false, port: 9321, errorDetails: true });
     await Promise.all([server.ready, detailedServer.ready]);
@@ -385,6 +386,14 @@ describe('server errors', () => {
     ok(response.body.startsWith('/dist/broken.js: '), `expected the path first, got: ${response.body}`);
     ok(/enum/i.test(response.body), `expected the error message, got: ${response.body}`);
     strictEqual(response.headers['x-content-type-options'], 'nosniff');
+  });
+
+  it('cuts the served root out of a filesystem error with errorDetails', async () => {
+    // A path through a file fails its stat with ENOTDIR, whose message names the full path.
+    const response = await fetchResponse(boundPort(detailedServer), '/file.txt/inner.js');
+    strictEqual(response.status, 500);
+    ok(response.body.includes('\'/file.txt/inner.js\''), `expected the served path in the message, got: ${response.body}`);
+    ok(!response.body.includes(rootPath), `expected the served root cut out, got: ${response.body}`);
   });
 
   it('keeps a 404 bodyless with errorDetails', async () => {
