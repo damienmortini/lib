@@ -1072,8 +1072,9 @@ export class Server {
         // instead: one failed request must never be fatal.
         // A 500 says why in its body: an empty one shows up in the browser as a bare
         // status, and the reason is then only in a log on another machine. The served
-        // root is cut out of the message, so a filesystem error names served paths
-        // rather than where the tree sits on disk.
+        // root is cut out of the message, best effort: a filesystem error under it
+        // names served paths, while one about a file reached through a symlink out of
+        // the root can still name where that file sits.
         const notFound = error?.code === 'ENOENT';
         try {
           stream.respond({
