@@ -1071,12 +1071,14 @@ export class Server {
         // async — and takes the whole server down, so it ends the stream
         // instead: one failed request must never be fatal.
         // A 500 says why in its body: an empty one shows up in the browser as a bare
-        // status, and the reason is then only in a log on another machine.
+        // status, and the reason is then only in a log on another machine. The served
+        // root is cut out of the message, so a filesystem error names served paths
+        // rather than where the tree sits on disk.
         const notFound = error.code === 'ENOENT';
         try {
           stream.respond({
             ':status': notFound ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
-            ...(notFound ? {} : { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }),
+            ...(notFound ? {} : { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }),
           });
         }
         catch (respondError) {
@@ -1084,7 +1086,7 @@ export class Server {
           stream.end();
           return;
         }
-        stream.end(notFound ? undefined : `${servedPath}: ${error instanceof Error ? error.message : String(error)}\n`);
+        stream.end(notFound ? undefined : `${servedPath}: ${(error instanceof Error ? error.message : String(error)).replaceAll(rootDirectory, '')}\n`);
       }
 
       stream.on('error', (error) => {

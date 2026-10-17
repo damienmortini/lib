@@ -376,6 +376,7 @@ describe('server errors', () => {
     strictEqual(response.status, 500);
     ok(response.body.startsWith('/dist/broken.js: '), `expected the path first, got: ${response.body}`);
     ok(/enum/i.test(response.body), `expected the error message, got: ${response.body}`);
+    strictEqual(response.headers['x-content-type-options'], 'nosniff');
   });
 
   it('keeps a 404 bodyless', async () => {
