@@ -353,6 +353,56 @@ describe('directory listing', () => {
   });
 });
 
+describe('server errors', () => {
+  let rootPath: string;
+  let server: Server;
+  let detailedServer: Server;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-errors-'));
+    await mkdir(join(rootPath, 'src'));
+    // Type stripping cannot erase an enum, so building `dist/broken.js` from it throws.
+    await writeFile(join(rootPath, 'src', 'broken.ts'), 'export enum Broken { A }\n');
+    await writeFile(join(rootPath, 'file.txt'), 'not a directory');
+    server = new Server({ rootPath, watch: false, port: 9311 });
+    detailedServer = new Server({ rootPath, watch: false, port: 9321, errorDetails: true });
+    await Promise.all([server.ready, detailedServer.ready]);
+  });
+
+  after(async () => {
+    await Promise.all([server.close(), detailedServer.close()]);
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('keeps a 500 bodyless by default', async () => {
+    const response = await fetchResponse(boundPort(server), '/dist/broken.js');
+    strictEqual(response.status, 500);
+    strictEqual(response.body, '');
+  });
+
+  it('says in the body of a 500 which file failed and why with errorDetails', async () => {
+    const response = await fetchResponse(boundPort(detailedServer), '/dist/broken.js');
+    strictEqual(response.status, 500);
+    ok(response.body.startsWith('/dist/broken.js: '), `expected the path first, got: ${response.body}`);
+    ok(/enum/i.test(response.body), `expected the error message, got: ${response.body}`);
+    strictEqual(response.headers['x-content-type-options'], 'nosniff');
+  });
+
+  it('cuts the served root out of a filesystem error with errorDetails', async () => {
+    // A path through a file fails its stat with ENOTDIR, whose message names the full path.
+    const response = await fetchResponse(boundPort(detailedServer), '/file.txt/inner.js');
+    strictEqual(response.status, 500);
+    ok(response.body.includes('\'/file.txt/inner.js\''), `expected the served path in the message, got: ${response.body}`);
+    ok(!response.body.includes(rootPath), `expected the served root cut out, got: ${response.body}`);
+  });
+
+  it('keeps a 404 bodyless with errorDetails', async () => {
+    const response = await fetchResponse(boundPort(detailedServer), '/dist/missing.js');
+    strictEqual(response.status, 404);
+    strictEqual(response.body, '');
+  });
+});
+
 // A <video> asks for ranges, and Safari will not play a file from a server that
 // answers one with the whole thing.
 describe('range requests', () => {

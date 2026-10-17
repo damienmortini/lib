@@ -181,6 +181,13 @@ type ServerOptions = {
    * accident.
    */
   directoryListing?: boolean;
+  /**
+   * Say in a 500's body which file failed and why. Off by default: the message is
+   * whatever the failure was (a transform error, a filesystem error naming a path), so
+   * it is opt-in per server rather than shown to every client a server is reachable by.
+   * A failure is logged either way.
+   */
+  errorDetails?: boolean;
 };
 
 // A mount prefix normalized to `/prefix` shape — from the `base` option or from
@@ -326,6 +333,7 @@ export class Server {
     auth,
     base = '',
     directoryListing = false,
+    errorDetails = false,
   }: ServerOptions = {}): Promise<void> {
     // File serving and the module-resolution subsystem (import map crawl,
     // /@resolve/) share one absolute root, so they always agree on which tree is
@@ -1070,15 +1078,25 @@ export class Server {
         // An escaping throw here reaches no caller — the stream handler is
         // async — and takes the whole server down, so it ends the stream
         // instead: one failed request must never be fatal.
+        // With `errorDetails`, a 500 says why in its body: an empty one shows up in the
+        // browser as a bare status, and the reason is then only in a log on another
+        // machine. The served root is cut out of the message, best effort (posix paths):
+        // a filesystem error under it names served paths, while one about a file reached
+        // through a symlink out of the root can still name where that file sits.
+        const notFound = error?.code === 'ENOENT';
+        const details = !notFound && errorDetails;
         try {
           stream.respond({
-            ':status': error.code === 'ENOENT' ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            ':status': notFound ? constants.HTTP_STATUS_NOT_FOUND : constants.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            ...(details ? { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } : {}),
           });
         }
         catch (respondError) {
           console.log(respondError);
+          stream.end();
+          return;
         }
-        stream.end();
+        stream.end(details ? `${servedPath.split('?')[0]}: ${(error instanceof Error ? error.message : String(error)).replaceAll(`${rootDirectory}/`, '/')}\n` : undefined);
       }
 
       stream.on('error', (error) => {

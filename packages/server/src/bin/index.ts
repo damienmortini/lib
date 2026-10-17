@@ -19,6 +19,7 @@ let auth: string | undefined;
 let base: string | undefined;
 let directoryListing = false;
 let liveReload = true;
+let errorDetails = false;
 
 let i = 0;
 while (i < args.length) {
@@ -80,6 +81,9 @@ while (i < args.length) {
     case '--no-live-reload':
       liveReload = false;
       break;
+    case '--error-details':
+      errorDetails = true;
+      break;
   }
 
   i++;
@@ -130,6 +134,7 @@ const server = new Server({
   auth,
   base,
   directoryListing,
+  errorDetails,
 });
 
 await server.ready;
