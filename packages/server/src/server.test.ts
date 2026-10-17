@@ -356,6 +356,7 @@ describe('directory listing', () => {
 describe('server errors', () => {
   let rootPath: string;
   let server: Server;
+  let detailedServer: Server;
 
   before(async () => {
     rootPath = await mkdtemp(join(tmpdir(), 'server-errors-'));
@@ -363,24 +364,31 @@ describe('server errors', () => {
     // Type stripping cannot erase an enum, so building `dist/broken.js` from it throws.
     await writeFile(join(rootPath, 'src', 'broken.ts'), 'export enum Broken { A }\n');
     server = new Server({ rootPath, watch: false, port: 9311 });
-    await server.ready;
+    detailedServer = new Server({ rootPath, watch: false, port: 9321, errorDetails: true });
+    await Promise.all([server.ready, detailedServer.ready]);
   });
 
   after(async () => {
-    await server.close();
+    await Promise.all([server.close(), detailedServer.close()]);
     await rm(rootPath, { recursive: true, force: true });
   });
 
-  it('says in the body of a 500 which file failed and why', async () => {
+  it('keeps a 500 bodyless by default', async () => {
     const response = await fetchResponse(boundPort(server), '/dist/broken.js');
+    strictEqual(response.status, 500);
+    strictEqual(response.body, '');
+  });
+
+  it('says in the body of a 500 which file failed and why with errorDetails', async () => {
+    const response = await fetchResponse(boundPort(detailedServer), '/dist/broken.js');
     strictEqual(response.status, 500);
     ok(response.body.startsWith('/dist/broken.js: '), `expected the path first, got: ${response.body}`);
     ok(/enum/i.test(response.body), `expected the error message, got: ${response.body}`);
     strictEqual(response.headers['x-content-type-options'], 'nosniff');
   });
 
-  it('keeps a 404 bodyless', async () => {
-    const response = await fetchResponse(boundPort(server), '/dist/missing.js');
+  it('keeps a 404 bodyless with errorDetails', async () => {
+    const response = await fetchResponse(boundPort(detailedServer), '/dist/missing.js');
     strictEqual(response.status, 404);
     strictEqual(response.body, '');
   });
