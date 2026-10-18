@@ -53,7 +53,8 @@ while (i < args.length) {
       break;
     }
     case '--host':
-      host = args[++i];
+      // An empty host would make `listen` bind every interface.
+      host = args[++i] || undefined;
       break;
     case '--external-certificate':
       useExternalCertificate = true;

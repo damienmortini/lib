@@ -161,8 +161,8 @@ type ServerOptions = {
   port?: number;
   /**
    * Address to listen on. Defaults to loopback, so nothing else on the network
-   * can reach the server; `0.0.0.0` (IPv4) or `::` (IPv6 and IPv4) exposes it on
-   * every interface, for testing from another device.
+   * can reach the server; `0.0.0.0` exposes it on every interface, for testing
+   * from another device.
    */
   host?: string;
   useExternalCertificate?: boolean;
@@ -454,6 +454,8 @@ export class Server {
           addresses.push(networkInterface.address);
         }
       });
+    // Bound to one external interface, the server does not answer on localhost.
+    if (addresses.includes(host)) addresses.shift();
 
     /**
      * Create certificate for addresses

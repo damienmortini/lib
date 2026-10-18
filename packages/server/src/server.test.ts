@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
 import type { AddressInfo } from 'node:net';
-import { tmpdir } from 'node:os';
+import { networkInterfaces, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { after, before, describe, it, mock } from 'node:test';
@@ -511,6 +511,8 @@ describe('listening address', () => {
       strictEqual((loopbackServer.http2SecureServer.address() as AddressInfo).address, '127.0.0.1');
       strictEqual(loopbackServer.urls.length, 1, 'a loopback server must not advertise external URLs');
       strictEqual((exposedServer.http2SecureServer.address() as AddressInfo).address, '0.0.0.0');
+      const externalAddresses = Object.values(networkInterfaces()).flat().filter(networkInterface => networkInterface?.family === 'IPv4' && !networkInterface.internal);
+      strictEqual(exposedServer.urls.length, 1 + externalAddresses.length, 'an exposed server must advertise each external interface');
       strictEqual(await fetchStatus(boundPort(loopbackServer), '/missing'), 404);
     }
     finally {

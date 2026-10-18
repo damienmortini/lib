@@ -10,9 +10,9 @@ npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>] [--ho
 ```
 
 The server listens on loopback (`127.0.0.1`) only, so nothing else on the
-network can reach it; `--host 0.0.0.0` (or `--host ::` for IPv6 too) exposes it
-on every interface, to open the page from another device — the startup banner
-then prints each external URL with a QR code.
+network can reach it; `--host 0.0.0.0` exposes it on every interface, to open
+the page from another device — the startup banner then prints each external URL
+with a QR code.
 
 `--watch` and `--proxy` may be repeated. `--directory-listing` serves a
 browsable listing for a directory that has no `index.html`, which otherwise
