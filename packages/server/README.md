@@ -3,11 +3,16 @@
 Simple live reloading HTTP2 server for development
 
 ```
-npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>]
+npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>] [--host <address>]
            [--watch <path>] [--watch-ignore <a,b>] [--proxy <path> <target>]
            [--auth <user:pass>] [--external-certificate] [--resolve-modules]
            [--directory-listing] [--no-live-reload] [--error-details] [--verbose]
 ```
+
+The server listens on loopback (`127.0.0.1`) only, so nothing else on the
+network can reach it; `--host 0.0.0.0` exposes it on every interface, to open
+the page from another device — the startup banner then prints each external URL
+with a QR code.
 
 `--watch` and `--proxy` may be repeated. `--directory-listing` serves a
 browsable listing for a directory that has no `index.html`, which otherwise

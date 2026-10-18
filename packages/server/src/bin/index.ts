@@ -13,6 +13,7 @@ let rootPath: string | undefined;
 let watchIgnore: Array<string | RegExp> | undefined;
 const watchPaths: Array<string> = [];
 let port: number | undefined;
+let host: string | undefined;
 let useExternalCertificate = false;
 const proxy: { [path: string]: string } = {};
 let auth: string | undefined;
@@ -51,6 +52,10 @@ while (i < args.length) {
       }
       break;
     }
+    case '--host':
+      // An empty host would make `listen` bind every interface.
+      host = args[++i] || undefined;
+      break;
     case '--external-certificate':
       useExternalCertificate = true;
       break;
@@ -129,6 +134,7 @@ const server = new Server({
   verbose,
   resolveModules,
   port,
+  host,
   useExternalCertificate,
   proxy,
   auth,
