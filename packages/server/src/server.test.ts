@@ -2,6 +2,7 @@ import { ok, strictEqual } from 'node:assert';
 import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -494,6 +495,26 @@ describe('startup', () => {
     }
     finally {
       await server.close();
+      await rm(rootPath, { recursive: true, force: true });
+    }
+  });
+});
+
+// A development server is reachable from the network only when asked to be.
+describe('listening address', () => {
+  it('listens on loopback by default, and on every interface when asked', async () => {
+    const rootPath = await mkdtemp(join(tmpdir(), 'server-host-'));
+    const loopbackServer = new Server({ rootPath, watch: false, port: 9611 });
+    const exposedServer = new Server({ rootPath, watch: false, port: 9621, host: '0.0.0.0' });
+    try {
+      await Promise.all([loopbackServer.ready, exposedServer.ready]);
+      strictEqual((loopbackServer.http2SecureServer.address() as AddressInfo).address, '127.0.0.1');
+      strictEqual(loopbackServer.urls.length, 1, 'a loopback server must not advertise external URLs');
+      strictEqual((exposedServer.http2SecureServer.address() as AddressInfo).address, '0.0.0.0');
+      strictEqual(await fetchStatus(boundPort(loopbackServer), '/missing'), 404);
+    }
+    finally {
+      await Promise.all([loopbackServer.close(), exposedServer.close()]);
       await rm(rootPath, { recursive: true, force: true });
     }
   });

@@ -159,6 +159,12 @@ type ServerOptions = {
   watchPaths?: Array<string>;
   verbose?: boolean;
   port?: number;
+  /**
+   * Address to listen on. Defaults to loopback, so nothing else on the network
+   * can reach the server; `0.0.0.0` (IPv4) or `::` (IPv6 and IPv4) exposes it on
+   * every interface, for testing from another device.
+   */
+  host?: string;
   useExternalCertificate?: boolean;
   proxy?: ProxyConfig;
   auth?: string;
@@ -299,9 +305,9 @@ async function loadOrCreateCertificate(certificateAddresses: string[]): Promise<
 export class Server {
   http2SecureServer: Http2SecureServer;
   ready: Promise<void>;
-  // The page URL on localhost, then on each external IPv4 interface, set once
-  // `ready` resolves. Printing them is the caller's business, so in-process
-  // users (tests, tools) start the server silently.
+  // The page URL on localhost, then on each external IPv4 interface `host`
+  // exposes, set once `ready` resolves. Printing them is the caller's business,
+  // so in-process users (tests, tools) start the server silently.
   urls: string[] = [];
 
   #liveReloadStreams = new Set<ServerHttp2Stream>();
@@ -328,6 +334,7 @@ export class Server {
     watchPaths = [],
     verbose = false,
     port = 3000,
+    host = '127.0.0.1',
     useExternalCertificate = false,
     proxy = {},
     auth,
@@ -442,7 +449,8 @@ export class Server {
     Object.values(networkInterfaces)
       .flatMap(networkInterface => networkInterface ?? [])
       .forEach((networkInterface) => {
-        if (networkInterface.family === 'IPv4' && !networkInterface.internal) {
+        if (networkInterface.family === 'IPv4' && !networkInterface.internal
+          && (host === '0.0.0.0' || host === '::' || host === networkInterface.address)) {
           addresses.push(networkInterface.address);
         }
       });
@@ -1181,7 +1189,7 @@ export class Server {
 
     // Wait for the bind so `ready` and `urls` never vouch for a port another
     // process took after getPort checked it — that rejects `ready` instead.
-    this.http2SecureServer.listen(serverPort);
+    this.http2SecureServer.listen(serverPort, host);
     await once(this.http2SecureServer, 'listening');
 
     this.urls = addresses.map(address => `https://${address}:${serverPort}${configuredBasePrefix}/${path}`);
