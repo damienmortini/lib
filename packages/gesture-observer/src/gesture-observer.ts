@@ -2,23 +2,45 @@ import type { Gesture } from './gesture.js';
 
 type GestureObserverCallback = (gesture: Gesture) => void;
 
+// Pointer lock and capture are an element's: a window observed takes neither.
+export interface GestureObserverOptions {
+  pointerLock?: boolean;
+  pointerCapture?: boolean;
+  /** Which presses start or join a gesture, asked before any capture or lock: the others stay with the page. */
+  filter?: (event: PointerEvent) => boolean;
+}
+
 type ElementData = {
+  options: GestureObserverOptions;
   pointers: Map<number, PointerEvent>;
-  target: EventTarget | null;
-  gestureVectorX: number;
-  gestureVectorY: number;
-  previousSize: number;
-  previousX: number;
-  previousY: number;
+  target: EventTarget;
+  // Where the pointers were at the last event, the next one measured from it.
+  x: number;
+  y: number;
+  size: number;
+  rotation: number;
   offsetX: number;
   offsetY: number;
-  previousMovementX: number;
-  previousMovementY: number;
-  previousRotation: number;
   startTimeStamp: number;
-  pointerLock: boolean;
-  pointerCapture: boolean;
 };
+
+type Movement = Partial<Pick<Gesture, 'movementX' | 'movementY' | 'movementScale' | 'movementRotation'>>;
+
+const END_EVENTS = ['pointerup', 'pointercancel', 'lostpointercapture', 'pointerleave'] as const;
+
+// The pointers' centroid, and the vector from the second pointer to the first.
+function measure(pointers: Map<number, PointerEvent>): Pick<ElementData, 'x' | 'y' | 'size' | 'rotation'> {
+  let x = 0;
+  let y = 0;
+  for (const pointer of pointers.values()) {
+    x += pointer.clientX;
+    y += pointer.clientY;
+  }
+  const [first, second] = pointers.values();
+  const vectorX = second ? first.clientX - second.clientX : 0;
+  const vectorY = second ? first.clientY - second.clientY : 0;
+  return { x: x / pointers.size, y: y / pointers.size, size: Math.hypot(vectorX, vectorY), rotation: Math.atan2(vectorY, vectorX) };
+}
 
 export class GestureObserver {
   #elementsData: Map<HTMLElement | Window, ElementData> = new Map();
@@ -28,43 +50,20 @@ export class GestureObserver {
     this.#callback = callback;
   }
 
-  observe(
-    element: HTMLElement | Window,
-    options: { pointerLock?: boolean; pointerCapture?: boolean } = {},
-  ): void {
-    let elementData = this.#elementsData.get(element);
-    if (!elementData) {
-      elementData = {
-        pointers: new Map(),
-        target: null,
-        gestureVectorX: 0,
-        gestureVectorY: 0,
-        previousSize: 0,
-        previousX: 0,
-        previousY: 0,
-        offsetX: 0,
-        offsetY: 0,
-        previousMovementX: 0,
-        previousMovementY: 0,
-        previousRotation: 0,
-        startTimeStamp: 0,
-        pointerLock: false,
-        pointerCapture: false,
-      };
-      this.#elementsData.set(element, elementData);
+  observe(element: HTMLElement | Window, options: GestureObserverOptions = {}): void {
+    const data = this.#elementsData.get(element);
+    if (data) {
+      data.options = options;
+      return;
     }
-    elementData.pointerLock = options.pointerLock ?? false;
-    elementData.pointerCapture = options.pointerCapture ?? false;
+    this.#elementsData.set(element, { options, pointers: new Map(), target: element, x: 0, y: 0, size: 0, rotation: 0, offsetX: 0, offsetY: 0, startTimeStamp: 0 });
     element.addEventListener('pointerdown', this.#onPointerDown);
   }
 
   unobserve(element: HTMLElement | Window): void {
-    if (!this.#elementsData.has(element)) return;
+    if (!this.#elementsData.delete(element)) return;
     element.removeEventListener('pointerdown', this.#onPointerDown);
-    element.removeEventListener('pointermove', this.#onPointerMove);
-    element.removeEventListener('pointerup', this.#onPointerUp);
-    element.removeEventListener('pointerleave', this.#onPointerUp);
-    this.#elementsData.delete(element);
+    this.#listen(element, false);
   }
 
   disconnect(): void {
@@ -73,167 +72,87 @@ export class GestureObserver {
     }
   }
 
-  #resetElementPreviousData(element: HTMLElement | Window): void {
-    const data = this.#elementsData.get(element);
-    if (data) {
-      data.gestureVectorX = 0;
-      data.gestureVectorY = 0;
-      data.previousSize = 0;
-      data.previousX = 0;
-      data.previousY = 0;
-      data.previousRotation = 0;
-    }
+  #listen(element: HTMLElement | Window, listen: boolean): void {
+    const method = listen ? 'addEventListener' : 'removeEventListener';
+    element[method]('pointermove', this.#onPointerMove as EventListener);
+    for (const type of END_EVENTS) element[method](type, this.#onPointerEnd as EventListener);
   }
 
-  #onPointerDown = (event: PointerEvent): void => {
-    const element = event.currentTarget as HTMLElement | Window;
-    const data = this.#elementsData.get(element);
-
-    if (!data) return;
-
-    if (data.pointerLock && element instanceof HTMLElement) {
-      element.requestPointerLock();
-    }
-    else if (data.pointerCapture && element instanceof HTMLElement) {
-      element.setPointerCapture(event.pointerId);
-    }
-
-    this.#resetElementPreviousData(element);
-    data.pointers.set(event.pointerId, event);
-    if (data.pointers.size === 1) {
-      element.addEventListener('pointermove', this.#onPointerMove);
-      element.addEventListener('pointerup', this.#onPointerUp);
-      element.addEventListener('pointerleave', this.#onPointerUp);
-      data.startTimeStamp = Date.now();
-      data.offsetX = 0;
-      data.offsetY = 0;
-      data.target = event.target;
-      this.#callback({
-        event,
-        pointers: new Map(data.pointers),
-        target: event.target,
-        currentTarget: element,
-        movementX: 0,
-        movementY: 0,
-        x: event.clientX,
-        y: event.clientY,
-        offsetX: 0,
-        offsetY: 0,
-        movementScale: 1,
-        movementRotation: 0,
-        duration: 0,
-        state: 'starting',
-      });
-    }
-  };
-
-  #onPointerMove = (event: PointerEvent): void => {
-    const element = event.currentTarget as HTMLElement | Window;
-    const data = this.#elementsData.get(element);
-
-    if (!data) return;
-
-    data.pointers.set(event.pointerId, event);
-    let x = 0;
-    let y = 0;
-    let index = 0;
-    for (const pointer of data.pointers.values()) {
-      if (index === 1) {
-        data.gestureVectorX = x - pointer.clientX;
-        data.gestureVectorY = y - pointer.clientY;
-      }
-      x += pointer.clientX;
-      y += pointer.clientY;
-      index++;
-    }
-    x /= data.pointers.size;
-    y /= data.pointers.size;
-
-    if (data.previousX === 0 && data.previousY === 0) {
-      data.previousX = x;
-      data.previousY = y;
-      return;
-    }
-
-    const movementX = x - data.previousX;
-    const movementY = y - data.previousY;
-    data.previousX = x;
-    data.previousY = y;
-    data.previousMovementX = movementX;
-    data.previousMovementY = movementY;
-
-    const size = Math.hypot(data.gestureVectorX, data.gestureVectorY);
-    const movementScale = data.previousSize ? size / data.previousSize : 1;
-    data.previousSize = size;
-
-    const rotation = Math.atan2(data.gestureVectorY, data.gestureVectorX);
-    let movementRotation = data.previousRotation ? rotation - data.previousRotation : 0;
-    if (movementRotation > Math.PI) {
-      movementRotation -= Math.PI * 2;
-    }
-    else if (movementRotation < -Math.PI) {
-      movementRotation += Math.PI * 2;
-    }
-    data.previousRotation = rotation;
-
-    data.offsetX += movementX;
-    data.offsetY += movementY;
-
+  #notify(data: ElementData, element: HTMLElement | Window, event: PointerEvent, state: Gesture['state'], movement: Movement = {}): void {
     this.#callback({
       event,
       pointers: new Map(data.pointers),
       target: data.target,
       currentTarget: element,
-      movementX: data.pointerLock && event instanceof PointerEvent && 'movementX' in event
-        ? event.movementX / devicePixelRatio
-        : movementX,
-      movementY: data.pointerLock && event instanceof PointerEvent && 'movementY' in event
-        ? event.movementY / devicePixelRatio
-        : movementY,
-      x,
-      y,
+      x: data.x,
+      y: data.y,
+      movementX: 0,
+      movementY: 0,
+      movementScale: 1,
+      movementRotation: 0,
+      ...movement,
       offsetX: data.offsetX,
       offsetY: data.offsetY,
+      duration: event.timeStamp - data.startTimeStamp,
+      state,
+    });
+  }
+
+  #onPointerDown = (event: PointerEvent): void => {
+    const element = event.currentTarget as HTMLElement | Window;
+    const data = this.#elementsData.get(element);
+    if (!data || (data.options.filter && !data.options.filter(event))) return;
+
+    if (data.options.pointerCapture && !data.options.pointerLock && 'setPointerCapture' in element) element.setPointerCapture(event.pointerId);
+
+    data.pointers.set(event.pointerId, event);
+    // A pointer joining moves the centroid without moving anything: measured from here.
+    Object.assign(data, measure(data.pointers));
+    if (data.pointers.size > 1) return;
+    if (data.options.pointerLock && 'requestPointerLock' in element) element.requestPointerLock();
+    this.#listen(element, true);
+    Object.assign(data, { target: event.target ?? element, offsetX: 0, offsetY: 0, startTimeStamp: event.timeStamp });
+    this.#notify(data, element, event, 'starting');
+  };
+
+  #onPointerMove = (event: PointerEvent): void => {
+    const element = event.currentTarget as HTMLElement | Window;
+    const data = this.#elementsData.get(element);
+    if (!data?.pointers.has(event.pointerId)) return;
+
+    data.pointers.set(event.pointerId, event);
+    const { x, y, size, rotation } = measure(data.pointers);
+    const movementX = x - data.x;
+    const movementY = y - data.y;
+    // Turned into (-π, π], so crossing the axis is a small turn, not a whole one.
+    const turn = rotation - data.rotation;
+    const movementRotation = data.size ? Math.atan2(Math.sin(turn), Math.cos(turn)) : 0;
+    const movementScale = data.size ? size / data.size : 1;
+    Object.assign(data, { x, y, size, rotation, offsetX: data.offsetX + movementX, offsetY: data.offsetY + movementY });
+
+    const locked = data.options.pointerLock;
+    this.#notify(data, element, event, 'moving', {
+      movementX: locked ? event.movementX / devicePixelRatio : movementX,
+      movementY: locked ? event.movementY / devicePixelRatio : movementY,
       movementScale,
       movementRotation,
-      duration: Date.now() - data.startTimeStamp,
-      state: 'moving',
     });
   };
 
-  #onPointerUp = (event: PointerEvent): void => {
+  // A pointer ends once, the capture lost or the element left after its pointerup finding it gone. A capture
+  // lost by a child, as a touch's implicit one is to this element's own, is no end.
+  #onPointerEnd = (event: PointerEvent): void => {
     const element = event.currentTarget as HTMLElement | Window;
     const data = this.#elementsData.get(element);
-    if (!data) return;
+    if (event.type === 'lostpointercapture' && event.target !== element) return;
+    if (!data?.pointers.delete(event.pointerId)) return;
 
-    data.pointers.delete(event.pointerId);
-    if (element instanceof HTMLElement) {
-      element.releasePointerCapture(event.pointerId);
+    if (data.pointers.size) {
+      Object.assign(data, measure(data.pointers));
+      return;
     }
-    if (document.exitPointerLock) {
-      document.exitPointerLock();
-    }
-    if (data.pointers.size === 0) {
-      this.#callback({
-        event,
-        pointers: new Map(),
-        target: data.target,
-        currentTarget: element,
-        movementX: 0,
-        movementY: 0,
-        movementScale: 1,
-        movementRotation: 0,
-        x: data.previousX,
-        y: data.previousY,
-        offsetX: data.offsetX,
-        offsetY: data.offsetY,
-        duration: Date.now() - data.startTimeStamp,
-        state: 'finishing',
-      });
-      element.removeEventListener('pointermove', this.#onPointerMove);
-      element.removeEventListener('pointerup', this.#onPointerUp);
-      element.removeEventListener('pointerleave', this.#onPointerUp);
-    }
-    this.#resetElementPreviousData(element);
+    this.#listen(element, false);
+    if (data.options.pointerLock && document.pointerLockElement === element) document.exitPointerLock();
+    this.#notify(data, element, event, 'finishing');
   };
 }
