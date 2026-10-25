@@ -2,6 +2,7 @@ import type { Gesture } from './gesture.js';
 
 type GestureObserverCallback = (gesture: Gesture) => void;
 
+// Pointer lock and capture are an element's: a window observed takes neither.
 export interface GestureObserverOptions {
   pointerLock?: boolean;
   pointerCapture?: boolean;
@@ -102,13 +103,13 @@ export class GestureObserver {
     const data = this.#elementsData.get(element);
     if (!data || (data.options.filter && !data.options.filter(event))) return;
 
-    if (data.options.pointerLock && 'requestPointerLock' in element) element.requestPointerLock();
-    else if (data.options.pointerCapture && 'setPointerCapture' in element) element.setPointerCapture(event.pointerId);
+    if (data.options.pointerCapture && !data.options.pointerLock && 'setPointerCapture' in element) element.setPointerCapture(event.pointerId);
 
     data.pointers.set(event.pointerId, event);
     // A pointer joining moves the centroid without moving anything: measured from here.
     Object.assign(data, measure(data.pointers));
     if (data.pointers.size > 1) return;
+    if (data.options.pointerLock && 'requestPointerLock' in element) element.requestPointerLock();
     this.#listen(element, true);
     Object.assign(data, { target: event.target ?? element, offsetX: 0, offsetY: 0, startTimeStamp: event.timeStamp });
     this.#notify(data, element, event, 'starting');

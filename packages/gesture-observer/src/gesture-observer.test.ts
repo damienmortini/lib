@@ -16,8 +16,11 @@ function fakeElement(): FakeElement {
   return element;
 }
 
-function pointer(target: EventTarget, type: string, pointerId: number, clientX: number, clientY = 0, isPrimary = true): void {
-  target.dispatchEvent(Object.assign(new Event(type), { pointerId, clientX, clientY, isPrimary }));
+function pointer(target: EventTarget, type: string, pointerId: number, clientX: number, clientY = 0, isPrimary = true, from = target): void {
+  const event = Object.assign(new Event(type), { pointerId, clientX, clientY, isPrimary });
+  // What bubbled up from a child: no DOM here to bubble it, so the child is named as its target.
+  if (from !== target) Object.defineProperty(event, 'target', { value: from });
+  target.dispatchEvent(event);
 }
 
 function observe(element: FakeElement, filter?: (event: PointerEvent) => boolean): Gesture[] {
@@ -55,10 +58,10 @@ describe('GestureObserver', () => {
     pointer(element, 'pointercancel', 1, 0);
     // A cancelled touch leaves nothing behind: the next press is a gesture of its own.
     pointer(element, 'pointerdown', 2, 0);
-    const child = new EventTarget();
-    pointer(child, 'lostpointercapture', 2, 0);
-    element.dispatchEvent(Object.assign(new Event('lostpointercapture'), { pointerId: 2 }));
-    deepStrictEqual(gestures.map(gesture => [gesture.state, gesture.pointers.size]), [['starting', 1], ['finishing', 0], ['starting', 1], ['finishing', 0]]);
+    pointer(element, 'lostpointercapture', 2, 0, 0, true, new EventTarget());
+    pointer(element, 'pointermove', 2, 5);
+    pointer(element, 'lostpointercapture', 2, 5);
+    deepStrictEqual(gestures.map(gesture => [gesture.state, gesture.pointers.size]), [['starting', 1], ['finishing', 0], ['starting', 1], ['moving', 1], ['finishing', 0]]);
   });
 
   it('leaves the presses its filter turns down to the page, uncaptured', () => {
@@ -87,5 +90,14 @@ describe('GestureObserver', () => {
     pointer(element, 'pointerup', 2, 200);
     pointer(element, 'pointermove', 1, 10);
     strictEqual(gestures.at(-1)!.movementX, 10);
+  });
+
+  it('turns by the short way across the ±π axis', () => {
+    const element = fakeElement();
+    const gestures = observe(element);
+    pointer(element, 'pointerdown', 1, 0, 0);
+    pointer(element, 'pointerdown', 2, 10, 0.1);
+    pointer(element, 'pointermove', 2, 10, -0.1);
+    strictEqual(Math.abs(gestures.at(-1)!.movementRotation) < 0.1, true);
   });
 });
