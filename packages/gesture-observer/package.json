@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gesture-observer",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gesture-observer",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -14,10 +14,13 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/*.tsbuildinfo"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node --test src/*.test.ts"
   },
   "publishConfig": {
     "access": "public"
