@@ -44,6 +44,19 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * A dot segment — `.env`, `.git/`, `.npmrc` — is not served: a served root is usually a
+ * checkout, and those hold credentials and repository internals. `.well-known` is public by
+ * convention, and a dot entry directly under `node_modules` is a package manager's store
+ * (pnpm's `.pnpm/`) that bare imports resolve into. A backslash splits too, as it does on Windows.
+ */
+function hasHiddenSegment(path: string): boolean {
+  const segments = path.split(/[/\\]/);
+  return segments.some((segment, index) => segment.startsWith('.')
+    && segment !== '.well-known'
+    && segments[index - 1] !== 'node_modules');
+}
+
+/**
  * A browsable listing for a directory with no index.html.
  *
  * Without it such a request resolves to a missing index.html and fails, which
@@ -55,9 +68,9 @@ function escapeHtml(text: string): string {
  * trailing slash, and under a mount prefix.
  */
 async function renderDirectoryListing(directoryPath: string, servedDirectoryPath: string): Promise<string> {
-  const entries = await readdir(directoryPath, { withFileTypes: true });
-  entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
   const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
+  const entries = (await readdir(directoryPath, { withFileTypes: true })).filter(entry => !hasHiddenSegment(`${base}${entry.name}`));
+  entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
   // `base` is a decoded on-disk path: every segment needs encoding, not just the
   // entry's own name, or a directory called `50%20done` links to `50 done`.
   const linkBase = base.split('/').map(encodeURIComponent).join('/');
@@ -769,7 +782,7 @@ export class Server {
             ? pathToFileURL(await moduleResolver.servedPathToSourcePath(refererUrl.pathname, servedRoot))
             : undefined;
           const servedModulePath = await moduleResolver.resolveSpecifierToServedPath(specifier, parentUrl, servedRoot);
-          if (!servedModulePath) {
+          if (!servedModulePath || hasHiddenSegment(servedModulePath)) {
             stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
             stream.end();
             return;
@@ -805,16 +818,8 @@ export class Server {
         }
         if (requestFilePath.endsWith('/') && !filePath.endsWith('/')) filePath = `${filePath}/`;
 
-        /**
-         * A dot segment — `.env`, `.git/`, `.npmrc` — answers 404 like a missing file: a served
-         * root is usually a checkout, and those hold credentials and repository internals.
-         * `.well-known` at the root is the conventional public exception, and `.pnpm` under
-         * `node_modules` is where pnpm's default layout keeps the modules bare imports resolve to.
-         */
-        const servedSegments = filePath.slice(rootDirectory.length).split('/').filter(Boolean);
-        if (servedSegments.some((segment, index) => segment.startsWith('.')
-          && !(segment === '.well-known' && index === 0)
-          && !(segment === '.pnpm' && servedSegments[index - 1] === 'node_modules'))) {
+        // Before anything reads the disk, so a hidden file answers exactly like a missing one.
+        if (hasHiddenSegment(filePath.slice(rootDirectory.length))) {
           stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
           stream.end();
           return;

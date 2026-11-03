@@ -18,9 +18,10 @@ with a QR code.
 browsable listing for a directory that has no `index.html`, which otherwise
 404s; it is off by default because a listing exposes every file name under the
 served root. A path with any segment starting with `.` — `.env`, `.git/`,
-`.npmrc` — 404s like a missing file, except `/.well-known/` and the
-`node_modules/.pnpm/` store bare imports resolve into. Live reload is on by default; `--no-live-reload` turns it off, and
-with it all file watching (`--watch` is then ignored), so served pages hold no
+`.npmrc` — 404s like a missing file and is left out of listings, except
+`.well-known` and a package manager's store directly under `node_modules`
+(`node_modules/.pnpm/`). Live reload is on by default; `--no-live-reload` turns
+it off, and with it all file watching (`--watch` is then ignored), so served pages hold no
 open connection and a one-shot headless load (`chrome --headless --dump-dom`)
 can finish. `--error-details` puts the failing path and the error message in the
 body of a 500, which is otherwise empty; it is off by default because the message

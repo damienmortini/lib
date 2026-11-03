@@ -291,6 +291,7 @@ describe('directory listing', () => {
     await writeFile(join(rootPath, '50% done', 'report.txt'), 'report');
     await mkdir(join(rootPath, 'nested'));
     await writeFile(join(rootPath, 'nested', 'index.html'), '<html><body>nested index</body></html>');
+    await writeFile(join(rootPath, '.env'), 'SECRET=value');
     server = new Server({ rootPath, watch: false, port: 9301, directoryListing: true });
     await server.ready;
   });
@@ -316,6 +317,7 @@ describe('directory listing', () => {
     ok(body.includes('href="/video%20%26%20clip.mp4"'), `expected an encoded entry link, got: ${body}`);
     ok(body.includes('video &amp; clip.mp4'), 'expected the entry name escaped for HTML');
     ok(body.includes('href="/nested/"'), 'expected subdirectories to link with a trailing slash');
+    ok(!body.includes('.env'), `expected dot entries left out of the listing, got: ${body}`);
   });
 
   it('encodes every path segment of an entry link, not just the entry name', async () => {
@@ -368,6 +370,8 @@ describe('dot segments', () => {
     await writeFile(join(rootPath, 'sub', '.git', 'HEAD'), 'ref: refs/heads/main');
     await mkdir(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0'), { recursive: true });
     await writeFile(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0', 'index.js'), 'export {};');
+    await mkdir(join(rootPath, '.well-known'));
+    await writeFile(join(rootPath, '.well-known', 'security.txt'), 'Contact: mailto:security@example.com');
     server = new Server({ rootPath, watch: false, port: 9331 });
     await server.ready;
   });
@@ -384,7 +388,8 @@ describe('dot segments', () => {
     strictEqual(await fetchStatus(boundPort(server), '/index.html'), 200);
   });
 
-  it('still serves the package store bare imports resolve into', async () => {
+  it('still serves .well-known and the package store bare imports resolve into', async () => {
+    strictEqual(await fetchStatus(boundPort(server), '/.well-known/security.txt'), 200);
     strictEqual(await fetchStatus(boundPort(server), '/node_modules/.pnpm/package@1.0.0/index.js'), 200);
   });
 });
