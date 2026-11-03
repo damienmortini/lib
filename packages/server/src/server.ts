@@ -46,14 +46,14 @@ function escapeHtml(text: string): string {
 /**
  * A dot segment — `.env`, `.git/`, `.npmrc` — is not served: a served root is usually a
  * checkout, and those hold credentials and repository internals. `.well-known` is public by
- * convention, and a dot entry directly under `node_modules` is a package manager's store
- * (pnpm's `.pnpm/`) that bare imports resolve into. A backslash splits too, as it does on Windows.
+ * convention, and `node_modules/.pnpm/` is the store pnpm's default layout resolves bare
+ * imports into. A backslash splits too, as it does on Windows.
  */
 function hasHiddenSegment(path: string): boolean {
   const segments = path.split(/[/\\]/);
   return segments.some((segment, index) => segment.startsWith('.')
     && segment !== '.well-known'
-    && segments[index - 1] !== 'node_modules');
+    && !(segment === '.pnpm' && segments[index - 1] === 'node_modules'));
 }
 
 /**
@@ -68,10 +68,12 @@ function hasHiddenSegment(path: string): boolean {
  * trailing slash, and under a mount prefix.
  */
 async function renderDirectoryListing(directoryPath: string, servedDirectoryPath: string): Promise<string> {
-  // Keyed on the directory's own name on disk: the served path carries a mount prefix the
-  // client announces, which could otherwise make any directory look like `node_modules`.
+  // The directory itself already passed the rule, so only its entries are checked, with its
+  // name on disk standing in only as `node_modules`: the served path carries a mount prefix
+  // the client announces, which could otherwise make any directory look like one.
+  const parentName = posixBasename(directoryPath) === 'node_modules' ? 'node_modules' : '';
   const entries = (await readdir(directoryPath, { withFileTypes: true }))
-    .filter(entry => !hasHiddenSegment(`${posixBasename(directoryPath)}/${entry.name}`));
+    .filter(entry => !hasHiddenSegment(`${parentName}/${entry.name}`));
   entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
   const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
   // `base` is a decoded on-disk path: every segment needs encoding, not just the

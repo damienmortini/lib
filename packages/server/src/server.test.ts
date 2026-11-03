@@ -370,9 +370,11 @@ describe('dot segments', () => {
     await writeFile(join(rootPath, 'sub', '.git', 'HEAD'), 'ref: refs/heads/main');
     await mkdir(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0'), { recursive: true });
     await writeFile(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0', 'index.js'), 'export {};');
+    await writeFile(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0', '.env'), 'SECRET=value');
+    await writeFile(join(rootPath, 'node_modules', '.env'), 'SECRET=value');
     await mkdir(join(rootPath, '.well-known'));
     await writeFile(join(rootPath, '.well-known', 'security.txt'), 'Contact: mailto:security@example.com');
-    server = new Server({ rootPath, watch: false, port: 9331 });
+    server = new Server({ rootPath, watch: false, port: 9331, directoryListing: true });
     await server.ready;
   });
 
@@ -382,7 +384,7 @@ describe('dot segments', () => {
   });
 
   it('answers a path with a dot segment like a missing file', async () => {
-    for (const path of ['/.env', '/.git/HEAD', '/sub/.git/HEAD', '/%2eenv']) {
+    for (const path of ['/.env', '/.git/HEAD', '/sub/.git/HEAD', '/%2eenv', '/node_modules/.env', '/node_modules/.pnpm/package@1.0.0/.env']) {
       strictEqual(await fetchStatus(boundPort(server), path), 404, path);
     }
     strictEqual(await fetchStatus(boundPort(server), '/index.html'), 200);
@@ -391,6 +393,11 @@ describe('dot segments', () => {
   it('still serves .well-known and the package store bare imports resolve into', async () => {
     strictEqual(await fetchStatus(boundPort(server), '/.well-known/security.txt'), 200);
     strictEqual(await fetchStatus(boundPort(server), '/node_modules/.pnpm/package@1.0.0/index.js'), 200);
+  });
+
+  it('lists the package store, whose own name starts with a dot', async () => {
+    const body = await fetchBody(boundPort(server), '/node_modules/.pnpm/');
+    ok(body.includes('package@1.0.0'), `expected the store's entries listed, got: ${body}`);
   });
 });
 
