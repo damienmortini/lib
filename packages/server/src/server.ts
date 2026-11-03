@@ -806,6 +806,21 @@ export class Server {
         if (requestFilePath.endsWith('/') && !filePath.endsWith('/')) filePath = `${filePath}/`;
 
         /**
+         * A dot segment — `.env`, `.git/`, `.npmrc` — answers 404 like a missing file: a served
+         * root is usually a checkout, and those hold credentials and repository internals.
+         * `.well-known` at the root is the conventional public exception, and `.pnpm` under
+         * `node_modules` is where pnpm's default layout keeps the modules bare imports resolve to.
+         */
+        const servedSegments = filePath.slice(rootDirectory.length).split('/').filter(Boolean);
+        if (servedSegments.some((segment, index) => segment.startsWith('.')
+          && !(segment === '.well-known' && index === 0)
+          && !(segment === '.pnpm' && servedSegments[index - 1] === 'node_modules'))) {
+          stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
+          stream.end();
+          return;
+        }
+
+        /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.
          * e.g. `node_modules/foo/bar/package.json` → main resolved from foo's `exports['./bar']`.
          * Still required by pages that bypass the import map and resolve manually by

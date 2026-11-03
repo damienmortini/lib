@@ -354,6 +354,41 @@ describe('directory listing', () => {
   });
 });
 
+describe('dot segments', () => {
+  let rootPath: string;
+  let server: Server;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-dot-'));
+    await writeFile(join(rootPath, 'index.html'), '<html><body>index</body></html>');
+    await writeFile(join(rootPath, '.env'), 'SECRET=value');
+    await mkdir(join(rootPath, '.git'));
+    await writeFile(join(rootPath, '.git', 'HEAD'), 'ref: refs/heads/main');
+    await mkdir(join(rootPath, 'sub', '.git'), { recursive: true });
+    await writeFile(join(rootPath, 'sub', '.git', 'HEAD'), 'ref: refs/heads/main');
+    await mkdir(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0'), { recursive: true });
+    await writeFile(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0', 'index.js'), 'export {};');
+    server = new Server({ rootPath, watch: false, port: 9331 });
+    await server.ready;
+  });
+
+  after(async () => {
+    await server.close();
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('answers a path with a dot segment like a missing file', async () => {
+    for (const path of ['/.env', '/.git/HEAD', '/sub/.git/HEAD', '/%2eenv']) {
+      strictEqual(await fetchStatus(boundPort(server), path), 404, path);
+    }
+    strictEqual(await fetchStatus(boundPort(server), '/index.html'), 200);
+  });
+
+  it('still serves the package store bare imports resolve into', async () => {
+    strictEqual(await fetchStatus(boundPort(server), '/node_modules/.pnpm/package@1.0.0/index.js'), 200);
+  });
+});
+
 describe('server errors', () => {
   let rootPath: string;
   let server: Server;
