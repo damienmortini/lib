@@ -15,7 +15,7 @@ import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
 // `rootDirectory` is posix-normalized and a request path is always posix, so the disk path
 // built from them is resolved with posix semantics rather than the platform's.
 import { extname, join } from 'path';
-import { dirname as posixDirname, join as posixJoin } from 'path/posix';
+import { basename as posixBasename, dirname as posixDirname, join as posixJoin } from 'path/posix';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
@@ -44,6 +44,19 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * A dot segment — `.env`, `.git/`, `.npmrc` — is not served: a served root is usually a
+ * checkout, and those hold credentials and repository internals. `.well-known` is public by
+ * convention, and `node_modules/.pnpm/` is the store pnpm's default layout resolves bare
+ * imports into. A backslash splits too, as it does on Windows.
+ */
+function hasHiddenSegment(path: string): boolean {
+  const segments = path.split(/[/\\]/);
+  return segments.some((segment, index) => segment.startsWith('.')
+    && segment !== '.well-known'
+    && !(segment === '.pnpm' && segments[index - 1] === 'node_modules'));
+}
+
+/**
  * A browsable listing for a directory with no index.html.
  *
  * Without it such a request resolves to a missing index.html and fails, which
@@ -55,7 +68,12 @@ function escapeHtml(text: string): string {
  * trailing slash, and under a mount prefix.
  */
 async function renderDirectoryListing(directoryPath: string, servedDirectoryPath: string): Promise<string> {
-  const entries = await readdir(directoryPath, { withFileTypes: true });
+  // The directory itself already passed the rule, so only its entries are checked, with its
+  // name on disk standing in only as `node_modules`: the served path carries a mount prefix
+  // the client announces, which could otherwise make any directory look like one.
+  const parentName = posixBasename(directoryPath) === 'node_modules' ? 'node_modules' : '';
+  const entries = (await readdir(directoryPath, { withFileTypes: true }))
+    .filter(entry => !hasHiddenSegment(`${parentName}/${entry.name}`));
   entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
   const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
   // `base` is a decoded on-disk path: every segment needs encoding, not just the
@@ -769,7 +787,7 @@ export class Server {
             ? pathToFileURL(await moduleResolver.servedPathToSourcePath(refererUrl.pathname, servedRoot))
             : undefined;
           const servedModulePath = await moduleResolver.resolveSpecifierToServedPath(specifier, parentUrl, servedRoot);
-          if (!servedModulePath) {
+          if (!servedModulePath || hasHiddenSegment(stripBasePrefix(servedModulePath, servedRoot.slice(0, -1)))) {
             stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
             stream.end();
             return;
@@ -804,6 +822,13 @@ export class Server {
           return;
         }
         if (requestFilePath.endsWith('/') && !filePath.endsWith('/')) filePath = `${filePath}/`;
+
+        // Before anything reads the disk, so a hidden file answers exactly like a missing one.
+        if (hasHiddenSegment(filePath.slice(rootDirectory.length))) {
+          stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
+          stream.end();
+          return;
+        }
 
         /**
          * Synthesize a package.json for subpath exports that don't have a real file on disk.

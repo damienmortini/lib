@@ -291,6 +291,7 @@ describe('directory listing', () => {
     await writeFile(join(rootPath, '50% done', 'report.txt'), 'report');
     await mkdir(join(rootPath, 'nested'));
     await writeFile(join(rootPath, 'nested', 'index.html'), '<html><body>nested index</body></html>');
+    await writeFile(join(rootPath, '.env'), 'SECRET=value');
     server = new Server({ rootPath, watch: false, port: 9301, directoryListing: true });
     await server.ready;
   });
@@ -316,6 +317,7 @@ describe('directory listing', () => {
     ok(body.includes('href="/video%20%26%20clip.mp4"'), `expected an encoded entry link, got: ${body}`);
     ok(body.includes('video &amp; clip.mp4'), 'expected the entry name escaped for HTML');
     ok(body.includes('href="/nested/"'), 'expected subdirectories to link with a trailing slash');
+    ok(!body.includes('.env'), `expected dot entries left out of the listing, got: ${body}`);
   });
 
   it('encodes every path segment of an entry link, not just the entry name', async () => {
@@ -351,6 +353,51 @@ describe('directory listing', () => {
     strictEqual(missing, 404);
     const stillUp = await fetchStatus(boundPort(server), '/video%20%26%20clip.mp4');
     strictEqual(stillUp, 200, 'expected the server to keep serving after a 404');
+  });
+});
+
+describe('dot segments', () => {
+  let rootPath: string;
+  let server: Server;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-dot-'));
+    await writeFile(join(rootPath, 'index.html'), '<html><body>index</body></html>');
+    await writeFile(join(rootPath, '.env'), 'SECRET=value');
+    await mkdir(join(rootPath, '.git'));
+    await writeFile(join(rootPath, '.git', 'HEAD'), 'ref: refs/heads/main');
+    await mkdir(join(rootPath, 'sub', '.git'), { recursive: true });
+    await writeFile(join(rootPath, 'sub', '.git', 'HEAD'), 'ref: refs/heads/main');
+    await mkdir(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0'), { recursive: true });
+    await writeFile(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0', 'index.js'), 'export {};');
+    await writeFile(join(rootPath, 'node_modules', '.pnpm', 'package@1.0.0', '.env'), 'SECRET=value');
+    await writeFile(join(rootPath, 'node_modules', '.env'), 'SECRET=value');
+    await mkdir(join(rootPath, '.well-known'));
+    await writeFile(join(rootPath, '.well-known', 'security.txt'), 'Contact: mailto:security@example.com');
+    server = new Server({ rootPath, watch: false, port: 9331, directoryListing: true });
+    await server.ready;
+  });
+
+  after(async () => {
+    await server.close();
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('answers a path with a dot segment like a missing file', async () => {
+    for (const path of ['/.env', '/.git/HEAD', '/sub/.git/HEAD', '/%2eenv', '/node_modules/.env', '/node_modules/.pnpm/package@1.0.0/.env']) {
+      strictEqual(await fetchStatus(boundPort(server), path), 404, path);
+    }
+    strictEqual(await fetchStatus(boundPort(server), '/index.html'), 200);
+  });
+
+  it('still serves .well-known and the package store bare imports resolve into', async () => {
+    strictEqual(await fetchStatus(boundPort(server), '/.well-known/security.txt'), 200);
+    strictEqual(await fetchStatus(boundPort(server), '/node_modules/.pnpm/package@1.0.0/index.js'), 200);
+  });
+
+  it('lists the package store, whose own name starts with a dot', async () => {
+    const body = await fetchBody(boundPort(server), '/node_modules/.pnpm/');
+    ok(body.includes('package@1.0.0'), `expected the store's entries listed, got: ${body}`);
   });
 });
 
