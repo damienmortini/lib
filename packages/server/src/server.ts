@@ -15,7 +15,7 @@ import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
 // `rootDirectory` is posix-normalized and a request path is always posix, so the disk path
 // built from them is resolved with posix semantics rather than the platform's.
 import { extname, join } from 'path';
-import { dirname as posixDirname, join as posixJoin } from 'path/posix';
+import { basename as posixBasename, dirname as posixDirname, join as posixJoin } from 'path/posix';
 import { generate as generateSelfSignedCertificate } from 'selfsigned';
 import { pathToFileURL } from 'url';
 import { v5 as uuidv5 } from 'uuid';
@@ -68,9 +68,12 @@ function hasHiddenSegment(path: string): boolean {
  * trailing slash, and under a mount prefix.
  */
 async function renderDirectoryListing(directoryPath: string, servedDirectoryPath: string): Promise<string> {
-  const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
-  const entries = (await readdir(directoryPath, { withFileTypes: true })).filter(entry => !hasHiddenSegment(`${base}${entry.name}`));
+  // Keyed on the directory's own name on disk: the served path carries a mount prefix the
+  // client announces, which could otherwise make any directory look like `node_modules`.
+  const entries = (await readdir(directoryPath, { withFileTypes: true }))
+    .filter(entry => !hasHiddenSegment(`${posixBasename(directoryPath)}/${entry.name}`));
   entries.sort((first, second) => Number(second.isDirectory()) - Number(first.isDirectory()) || first.name.localeCompare(second.name));
+  const base = servedDirectoryPath.endsWith('/') ? servedDirectoryPath : `${servedDirectoryPath}/`;
   // `base` is a decoded on-disk path: every segment needs encoding, not just the
   // entry's own name, or a directory called `50%20done` links to `50 done`.
   const linkBase = base.split('/').map(encodeURIComponent).join('/');
@@ -782,7 +785,7 @@ export class Server {
             ? pathToFileURL(await moduleResolver.servedPathToSourcePath(refererUrl.pathname, servedRoot))
             : undefined;
           const servedModulePath = await moduleResolver.resolveSpecifierToServedPath(specifier, parentUrl, servedRoot);
-          if (!servedModulePath || hasHiddenSegment(servedModulePath)) {
+          if (!servedModulePath || hasHiddenSegment(stripBasePrefix(servedModulePath, servedRoot.slice(0, -1)))) {
             stream.respond({ ':status': constants.HTTP_STATUS_NOT_FOUND });
             stream.end();
             return;
