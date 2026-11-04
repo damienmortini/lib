@@ -44,6 +44,13 @@ no `dist/` to refresh. Keep pointing at that `dist/` URL rather than at `src/` â
 the mapping is keyed on `/dist/`, so a direct `.ts` request is served raw and
 the browser rejects it on MIME grounds.
 
+## Importing the server from source
+
+A program importing `Server` gets `dist/` by default. Under `node --conditions=source` a checkout
+linked into another repository loads `src/` instead, so its last build going stale does not matter.
+Node refuses to strip types under `node_modules`, so an installed copy throws under that flag, and
+the `server` command always runs `dist/`.
+
 ## Bare specifiers in the browser (`--resolve-modules`)
 
 With `--resolve-modules`, every served HTML page gets a generated

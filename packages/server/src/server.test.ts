@@ -1,5 +1,5 @@
 import { ok, strictEqual } from 'node:assert';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { connect } from 'node:http2';
 import type { AddressInfo } from 'node:net';
@@ -596,4 +596,11 @@ describe('command line', () => {
       await rm(rootPath, { recursive: true, force: true });
     }
   });
+});
+
+it('the source condition loads the server from its TypeScript', () => {
+  const output = execFileSync(process.execPath, ['--conditions=source', '--input-type=module', '-e', 'const { Server } = await import(\'@damienmortini/server\'); console.log(import.meta.resolve(\'@damienmortini/server\'), typeof Server);'], { cwd: new URL('..', import.meta.url), encoding: 'utf8' });
+  ok(/\/src\/index\.ts function\n$/.test(output), output);
+  const built = execFileSync(process.execPath, ['--input-type=module', '-e', 'console.log(import.meta.resolve(\'@damienmortini/server\'), import.meta.resolve(\'@damienmortini/server/package.json\'));'], { cwd: new URL('..', import.meta.url), encoding: 'utf8' });
+  ok(/\/dist\/index\.js \S+\/package\.json\n$/.test(built), built);
 });
