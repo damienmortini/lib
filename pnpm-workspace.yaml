@@ -1,5 +1,10 @@
 nodeLinker: hoisted
 linkWorkspacePackages: true
+# A worktree's node_modules links into the primary checkout's (packages/worktree-setup), and
+# pnpm reads that mirror as uninstalled: the default (`install`) would install before the first
+# `pnpm run` or `pnpm exec` there, writing through the links into the primary's packages.
+# Install explicitly instead.
+verifyDepsBeforeRun: false
 packages:
   - "packages/**"
 allowBuilds:

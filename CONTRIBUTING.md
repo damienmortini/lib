@@ -22,6 +22,11 @@ The link tree is where the setup stops. Some packages here still resolve to `dis
 to their source, so a change reaching across into one of those needs `pnpm run build` in the
 worktree on top; a change staying inside one package, whose own tests run its `src`, does not.
 
+`pnpm-workspace.yaml` sets `verifyDepsBeforeRun: false`, which the setup refuses to run
+without: the mirror looks uninstalled to pnpm, so the default would install before the first
+`pnpm run` or `pnpm exec` in a worktree and write through the links into this checkout's
+packages. Never run `pnpm install` in a worktree either, for the same reason.
+
 No `resolvedLinkDirectories`: this repository has no `submodules/` at all — it is the one the
 others link *to*. `requiredPackages` names the two configs every gate resolves through
 (`@damienmortini/eslint-config` and `@damienmortini/typescript-config`), so a worktree that
