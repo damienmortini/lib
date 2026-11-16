@@ -179,8 +179,8 @@ async function readManifest(worktreeRoot: string, manifestPath: string): Promise
 }
 
 /**
- * The `packages` globs of the worktree's own `pnpm-workspace.yaml`, or nothing when the
- * repository has none. Parsed by hand and only this one block of it, because this package
+ * The `packages` globs of the worktree's own `pnpm-workspace.yaml`, which
+ * `refuseInstallBeforeRun` has already found. Parsed by hand and only this one block of it, because this package
  * must resolve nothing to run — the bootstrap path executes it with nothing installed in any
  * checkout, so a YAML dependency is not an option. Shapes the narrow parser cannot read are
  * refused rather than skipped: a glob dropped silently would link a tree the workspace never
@@ -188,8 +188,6 @@ async function readManifest(worktreeRoot: string, manifestPath: string): Promise
  */
 async function workspacePackageGlobs(worktreeRoot: string): Promise<string[]> {
   const filePath = path.join(worktreeRoot, 'pnpm-workspace.yaml');
-  if (!existsSync(filePath)) return [];
-
   const globs: string[] = [];
   let inPackagesBlock = false;
   for (const line of (await fs.readFile(filePath, 'utf8')).split('\n')) {
