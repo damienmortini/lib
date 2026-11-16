@@ -41,8 +41,7 @@ test('mirrors the primary checkout, copying relative links and skipping pnpm boo
 });
 
 test('refuses a worktree whose pnpm would install through the mirror before a script', async () => {
-  const { primaryRoot, worktreeRoot } = await checkouts();
-  await write(path.join(primaryRoot, 'node_modules/installed/index.js'), '');
+  const { worktreeRoot } = await checkouts();
 
   await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /must set `verifyDepsBeforeRun: false`/);
@@ -50,6 +49,7 @@ test('refuses a worktree whose pnpm would install through the mirror before a sc
 
   await fs.rm(path.join(worktreeRoot, 'pnpm-workspace.yaml'));
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /must set `verifyDepsBeforeRun: false`/);
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules')), false);
 });
 
 test('links a package the branch adds, which the primary checkout knows nothing about', async () => {
