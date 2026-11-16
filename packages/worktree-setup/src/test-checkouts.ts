@@ -38,6 +38,7 @@ export async function checkouts(): Promise<{ primaryRoot: string; worktreeRoot: 
 
   const primaryRoot = path.join(root, 'repository');
   await write(path.join(primaryRoot, 'package.json'), '{"name":"repository"}');
+  await write(path.join(primaryRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\n');
   git(['init', '--initial-branch=main'], primaryRoot);
   git(['add', '.'], primaryRoot);
   git(['-c', 'user.email=test@example.com', '-c', 'user.name=Test', 'commit', '-m', 'initial'], primaryRoot);

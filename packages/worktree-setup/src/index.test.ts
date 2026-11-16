@@ -40,6 +40,18 @@ test('mirrors the primary checkout, copying relative links and skipping pnpm boo
   assert.equal(existsSync(path.join(worktreeModules, '.pnpm')), false);
 });
 
+test('refuses a worktree whose pnpm would install through the mirror before a script', async () => {
+  const { worktreeRoot } = await checkouts();
+
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await assert.rejects(setupWorktree({ directory: worktreeRoot }), /must set `verifyDepsBeforeRun: false`/);
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules')), false);
+
+  await fs.rm(path.join(worktreeRoot, 'pnpm-workspace.yaml'));
+  await assert.rejects(setupWorktree({ directory: worktreeRoot }), /must set `verifyDepsBeforeRun: false`/);
+  assert.equal(existsSync(path.join(worktreeRoot, 'node_modules')), false);
+});
+
 test('links a package the branch adds, which the primary checkout knows nothing about', async () => {
   const { primaryRoot, worktreeRoot } = await checkouts();
 
@@ -47,7 +59,7 @@ test('links a package the branch adds, which the primary checkout knows nothing 
   // Nested where pnpm nests what it cannot hoist, and only in the primary.
   await write(path.join(primaryRoot, 'packages/added/node_modules/dependency/index.js'), '');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await setupWorktree({ directory: worktreeRoot });
 
   assert.equal(
@@ -60,7 +72,7 @@ test('links a package the branch adds, which the primary checkout knows nothing 
 test('links the workspace members the worktree\'s own pnpm-workspace.yaml declares', async () => {
   const { worktreeRoot } = await checkouts();
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'modules/*\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'modules/*\'\n');
   await write(path.join(worktreeRoot, 'modules/thing/package.json'), '{"name":"@scope/thing"}');
 
   await setupWorktree({ directory: worktreeRoot });
@@ -81,7 +93,7 @@ test('links a workspace member behind a submodule symlink, without writing into 
   await write(path.join(sibling, 'packages/tool/node_modules/dependency/index.js'), '');
   await fs.mkdir(path.join(worktreeRoot, 'submodules'), { recursive: true });
   await fs.symlink('../../sibling', path.join(worktreeRoot, 'submodules/sibling'));
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - "submodules/*/packages/**"\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - "submodules/*/packages/**"\n');
 
   await setupWorktree({ directory: worktreeRoot });
 
@@ -96,7 +108,7 @@ test('links a workspace member behind a submodule symlink, without writing into 
 
 test('refuses a pnpm-workspace.yaml shape it cannot read, rather than linking less than declared', async () => {
   const { worktreeRoot } = await checkouts();
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n  - \'!packages/fixtures/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n  - \'!packages/fixtures/**\'\n');
 
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /exclusion glob/);
 });
@@ -107,19 +119,19 @@ test('refuses a glob that walks out of the worktree', async () => {
   // A readable manifest right where the traversal would land, so a missed refusal would
   // really link it.
   await write(path.join(path.dirname(primaryRoot), 'outside/package.json'), '{"name":"@scope/outside"}');
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'../../outside\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'../../outside\'\n');
 
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /glob leaving the worktree/);
   assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/outside')), false);
 
   // An absolute glob leaves it just the same.
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), `packages:\n  - '${path.dirname(primaryRoot)}/outside'\n`);
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), `verifyDepsBeforeRun: false\npackages:\n  - '${path.dirname(primaryRoot)}/outside'\n`);
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /glob leaving the worktree/);
 });
 
 test('refuses a glob it cannot expand, rather than matching it against nothing', async () => {
   const { worktreeRoot } = await checkouts();
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/web-*\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/web-*\'\n');
 
   await assert.rejects(setupWorktree({ directory: worktreeRoot }), /cannot expand/);
 });
@@ -127,7 +139,7 @@ test('refuses a glob it cannot expand, rather than matching it against nothing',
 test('reads past comments inside the packages block, instead of ending it there', async () => {
   const { worktreeRoot } = await checkouts();
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n# a flush-left note\n  - "modules/*"\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n# a flush-left note\n  - "modules/*"\n');
   await write(path.join(worktreeRoot, 'modules/thing/package.json'), '{"name":"@scope/thing"}');
 
   await setupWorktree({ directory: worktreeRoot });
@@ -142,7 +154,7 @@ test('follows a symlink inside a `**` glob, the way pnpm expands it', async () =
   await write(path.join(sibling, 'packages/tool/package.json'), '{"name":"@scope/starred-tool"}');
   await fs.mkdir(path.join(worktreeRoot, 'submodules'), { recursive: true });
   await fs.symlink('../../starred-sibling', path.join(worktreeRoot, 'submodules/sibling'));
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'submodules/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'submodules/**\'\n');
 
   await setupWorktree({ directory: worktreeRoot });
 
@@ -155,7 +167,7 @@ test('follows a symlink inside a `**` glob, the way pnpm expands it', async () =
 test('skips a nameless fixture manifest a glob sweeps up, which pnpm links past too', async () => {
   const { worktreeRoot } = await checkouts();
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await write(path.join(worktreeRoot, 'packages/real/package.json'), '{"name":"@scope/real"}');
   await write(path.join(worktreeRoot, 'packages/real/test/fixtures/package.json'), '{}');
 
@@ -170,7 +182,7 @@ test('does not read a configured root itself as a member, matching pnpm\'s trail
   await write(path.join(worktreeRoot, 'packages/package.json'), '{"name":"@scope/root-manifest"}');
   await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app"}');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await setupWorktree({ directory: worktreeRoot });
 
   assert.equal(existsSync(path.join(worktreeRoot, 'node_modules/@scope/app')), true);
@@ -197,7 +209,7 @@ test('links a scoped declared dependency from a primary location the mirror does
   await write(path.join(primaryRoot, 'packages/node_modules/@scope/nested/index.js'), '');
   await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"@scope/nested":"^1.0.0"}}');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await setupWorktree({ directory: worktreeRoot });
 
   assert.equal(
@@ -221,7 +233,7 @@ test('resolves a declared dependency through the mirrored tree', async () => {
   await write(path.join(primaryRoot, 'node_modules/installed/index.js'), '');
   await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"installed":"^1.0.0"}}');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await setupWorktree({ directory: worktreeRoot });
 });
 
@@ -232,7 +244,7 @@ test('fails naming a declared dependency the primary checkout has never installe
   // used to report this tree linked, and the suite failed later in module resolution.
   await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","devDependencies":{"jsdom":"^24.0.0"}}');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await assert.rejects(
     setupWorktree({ directory: worktreeRoot }),
     (error: Error) => {
@@ -252,7 +264,7 @@ test('fails when a declared workspace member is one the branch deleted, instead 
   await fs.symlink('../../packages/gone', path.join(primaryRoot, 'node_modules/@scope/gone'));
   await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"@scope/gone":"workspace:*"}}');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await assert.rejects(
     setupWorktree({ directory: worktreeRoot }),
     (error: Error) => {
@@ -270,7 +282,7 @@ test('links a declared dependency from a primary location the mirror does not co
   await write(path.join(primaryRoot, 'packages/node_modules/dependency/index.js'), '');
   await write(path.join(worktreeRoot, 'packages/app/package.json'), '{"name":"@scope/app","dependencies":{"dependency":"^1.0.0"}}');
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await setupWorktree({ directory: worktreeRoot });
 
   assert.equal(
@@ -392,7 +404,7 @@ test('refuses a dependency name that would point its link outside node_modules',
     '{"name":"@scope/app","dependencies":{"../../escapee":"1.0.0"}}',
   );
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await assert.rejects(
     setupWorktree({ directory: worktreeRoot }),
     /declares an unusable dependency name/,
@@ -409,7 +421,7 @@ test('refuses a package name that would point the delete outside node_modules', 
     JSON.stringify({ name: `../../${path.basename(escapee)}` }),
   );
 
-  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'packages:\n  - \'packages/**\'\n');
+  await write(path.join(worktreeRoot, 'pnpm-workspace.yaml'), 'verifyDepsBeforeRun: false\npackages:\n  - \'packages/**\'\n');
   await assert.rejects(
     setupWorktree({ directory: worktreeRoot }),
     /declares an unusable name/,

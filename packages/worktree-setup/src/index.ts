@@ -81,7 +81,8 @@ async function materialize(source: string, target: string, copiedLinks: string[]
   for (const entry of await fs.readdir(source, { withFileTypes: true })) {
     // pnpm's own bookkeeping (`.modules.yaml`, `.pnpm`, …) describes the primary checkout.
     // Linking it would let an install run here write back into the shared checkout, so
-    // leave it out and let pnpm treat this worktree as the uninstalled tree it is.
+    // leave it out. pnpm then reads this worktree as the uninstalled tree it is — which is
+    // why `refuseInstallBeforeRun` has to stop pnpm acting on that reading.
     if (entry.name.startsWith('.') && entry.name !== '.bin') continue;
 
     const sourcePath = path.join(source, entry.name);
@@ -178,8 +179,8 @@ async function readManifest(worktreeRoot: string, manifestPath: string): Promise
 }
 
 /**
- * The `packages` globs of the worktree's own `pnpm-workspace.yaml`, or nothing when the
- * repository has none. Parsed by hand and only this one block of it, because this package
+ * The `packages` globs of the worktree's own `pnpm-workspace.yaml`, which
+ * `refuseInstallBeforeRun` has already found. Parsed by hand and only this one block of it, because this package
  * must resolve nothing to run — the bootstrap path executes it with nothing installed in any
  * checkout, so a YAML dependency is not an option. Shapes the narrow parser cannot read are
  * refused rather than skipped: a glob dropped silently would link a tree the workspace never
@@ -187,8 +188,6 @@ async function readManifest(worktreeRoot: string, manifestPath: string): Promise
  */
 async function workspacePackageGlobs(worktreeRoot: string): Promise<string[]> {
   const filePath = path.join(worktreeRoot, 'pnpm-workspace.yaml');
-  if (!existsSync(filePath)) return [];
-
   const globs: string[] = [];
   let inPackagesBlock = false;
   for (const line of (await fs.readFile(filePath, 'utf8')).split('\n')) {
@@ -217,6 +216,24 @@ async function workspacePackageGlobs(worktreeRoot: string): Promise<string[]> {
     }
   }
   return globs;
+}
+
+/**
+ * Refuse a worktree whose pnpm would install before running a script. pnpm checks the
+ * dependencies before every `pnpm run` and `pnpm exec`, and by default installs when they
+ * look out of date — which a mirror with no `.modules.yaml` always does. That install writes
+ * through the mirror's links into the primary checkout's real package directories, deleting
+ * nested `node_modules` there while the primary's own bookkeeping still reports it up to date,
+ * so a later `pnpm install` in the primary repairs nothing. `verifyDepsBeforeRun: false`
+ * turns the check off, and the worktree's own pnpm-workspace.yaml is the copy pnpm reads.
+ * Checked before anything is linked: a tree pnpm will write through is not one to build.
+ */
+async function refuseInstallBeforeRun(worktreeRoot: string, primaryRoot: string): Promise<void> {
+  const filePath = path.join(worktreeRoot, 'pnpm-workspace.yaml');
+  const contents = existsSync(filePath) ? await fs.readFile(filePath, 'utf8') : '';
+  if (!/^verifyDepsBeforeRun\s*:\s*false\s*(?:#.*)?$/m.test(contents)) {
+    throw new Error(`${filePath} must set \`verifyDepsBeforeRun: false\`: otherwise the first \`pnpm run\` or \`pnpm exec\` in this worktree installs through its links into ${primaryRoot}'s node_modules.`);
+  }
 }
 
 /** Installed, built, and hidden trees, which no walk here descends — one list for every walker, so which source declared a root cannot change which members it finds. */
@@ -346,6 +363,8 @@ export async function setupWorktree(options: WorktreeSetupOptions = {}): Promise
   if (worktreeRoot === primaryRoot) {
     throw new Error(`${worktreeRoot} is the primary checkout — run this from inside a linked worktree (its node_modules comes from \`pnpm install\`).`);
   }
+
+  await refuseInstallBeforeRun(worktreeRoot, primaryRoot);
 
   const copiedLinks: string[] = [];
   await materialize(path.join(primaryRoot, 'node_modules'), path.join(worktreeRoot, 'node_modules'), copiedLinks);
