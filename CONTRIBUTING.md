@@ -25,7 +25,10 @@ worktree on top; a change staying inside one package, whose own tests run its `s
 `pnpm-workspace.yaml` sets `verifyDepsBeforeRun: false`, which the setup refuses to run
 without: the mirror looks uninstalled to pnpm, so the default would install before the first
 `pnpm run` or `pnpm exec` in a worktree and write through the links into this checkout's
-packages. Never run `pnpm install` in a worktree either, for the same reason.
+packages. Never run `pnpm install` in a worktree either, for the same reason. If one ran
+anyway, `pnpm install --frozen-lockfile` in this checkout puts back what it moved out:
+`optimisticRepeatInstall: false` is set so that a repeat install checks the installed tree
+instead of answering "Already up to date".
 
 No `resolvedLinkDirectories`: this repository has no `submodules/` at all — it is the one the
 others link *to*. `requiredPackages` names the two configs every gate resolves through
