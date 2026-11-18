@@ -27,8 +27,8 @@ without: the mirror looks uninstalled to pnpm, so the default would install befo
 `pnpm run` or `pnpm exec` in a worktree and write through the links into this checkout's
 packages. Never run `pnpm install` in a worktree either, for the same reason. If one ran
 anyway, `pnpm install --frozen-lockfile` in this checkout puts back what it moved out:
-`optimisticRepeatInstall: false` is set so that a repeat install checks the installed tree
-instead of answering "Already up to date".
+`optimisticRepeatInstall: false` is set so that a repeat install restores the package
+directories that are missing instead of stopping at its own record of the last install.
 
 No `resolvedLinkDirectories`: this repository has no `submodules/` at all — it is the one the
 others link *to*. `requiredPackages` names the two configs every gate resolves through
