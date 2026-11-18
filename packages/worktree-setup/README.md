@@ -91,8 +91,10 @@ optional.
 bookkeeping, on purpose. With the default, the first script run in a worktree installs, and
 that install writes through the mirror's links into the primary checkout's package
 directories, deleting what pnpm nested inside them. The primary's own bookkeeping still says
-it is up to date, so `pnpm install` there repairs nothing. `setupWorktree` refuses a worktree
-whose `pnpm-workspace.yaml` does not set it, before it links anything — the worktree's copy,
+it is up to date, so `pnpm install` there repairs nothing — unless the repository also sets
+`optimisticRepeatInstall: false`, which makes a repeat install put back the package
+directories that are missing. `setupWorktree` refuses a worktree whose `pnpm-workspace.yaml`
+does not set `verifyDepsBeforeRun: false`, before it links anything — the worktree's copy,
 since that is the one pnpm reads there.
 
 The `worktree:setup` script is the entry point the repository is asked for by name. Whoever
