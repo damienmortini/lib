@@ -5,6 +5,11 @@ linkWorkspacePackages: true
 # `pnpm run` or `pnpm exec` there, writing through the links into the primary's packages.
 # Install explicitly instead.
 verifyDepsBeforeRun: false
+# The repeat-install shortcut trusts pnpm's own record of the last install, so a checkout
+# whose installed tree changed behind its back — an install run in a worktree moves nested
+# node_modules out through the links — reports "Already up to date" and stays broken. Every
+# repeat install runs the full link step instead, which puts them back.
+optimisticRepeatInstall: false
 packages:
   - "packages/**"
 allowBuilds:
