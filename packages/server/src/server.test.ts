@@ -233,6 +233,10 @@ describe('forwarded prefix', () => {
     );
     await writeFile(join(fixturePath, 'module.js'), 'import { demo } from \'demo-package\';\nconsole.log(demo);');
     await writeFile(join(fixturePath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
+    await writeFile(
+      join(fixturePath, 'charset.html'),
+      '<html><head>\n  <meta charset="UTF-8">\n  <script type="module" src="/module.js"></script>\n</head><body>Café — 東京</body></html>',
+    );
     server = new Server({ rootPath: fixturePath, watch: true, resolveModules: true, port: 9201 });
     basedServer = new Server({ rootPath: fixturePath, watch: true, base: 'mounted', port: 9401 });
     await Promise.all([server.ready, basedServer.ready]);
@@ -272,6 +276,16 @@ describe('forwarded prefix', () => {
     ok(prefixed.includes('\'/mounted/app/node_modules/demo-package/index.js\''), `expected a rewritten specifier under the prefix, got: ${prefixed}`);
     const unprefixedAgain = await fetchBody(boundPort(server), '/module.js');
     strictEqual(unprefixedAgain, unprefixed, 'expected the prefixed variant to be cached separately');
+  });
+
+  it('serves pages as UTF-8 and keeps a leading <meta charset> ahead of the import map', async () => {
+    const response = await fetchResponse(boundPort(server), '/charset.html');
+    strictEqual(response.headers['content-type'], 'text/html; charset=utf-8');
+    ok(response.body.includes('Café — 東京'), 'expected the non-ASCII text intact');
+    const importMapIndex = response.body.indexOf('<script type="importmap">');
+    ok(importMapIndex !== -1, 'expected an injected import map');
+    const charsetIndex = response.body.indexOf('<meta charset="UTF-8">');
+    ok(charsetIndex !== -1 && charsetIndex < importMapIndex, 'expected the charset declaration before the import map');
   });
 
   it('synthesizes a package.json for a subpath export under a root outside the working directory', async () => {
