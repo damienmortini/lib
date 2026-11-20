@@ -284,7 +284,8 @@ describe('forwarded prefix', () => {
     ok(response.body.includes('Café — 東京'), 'expected the non-ASCII text intact');
     const importMapIndex = response.body.indexOf('<script type="importmap">');
     ok(importMapIndex !== -1, 'expected an injected import map');
-    ok(response.body.indexOf('<meta charset="UTF-8">') < importMapIndex, 'expected the charset declaration before the import map');
+    const charsetIndex = response.body.indexOf('<meta charset="UTF-8">');
+    ok(charsetIndex !== -1 && charsetIndex < importMapIndex, 'expected the charset declaration before the import map');
   });
 
   it('synthesizes a package.json for a subpath export under a root outside the working directory', async () => {
