@@ -913,7 +913,7 @@ export class Server {
               directoryPath,
               `${servedRoot.slice(0, -1)}${directoryPath.slice(rootDirectory.length)}`,
             );
-            sendCachedBody(stream, headers, { ':status': constants.HTTP_STATUS_OK, 'content-type': 'text/html', 'cache-control': 'no-cache' }, {
+            sendCachedBody(stream, headers, { ':status': constants.HTTP_STATUS_OK, 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' }, {
               body: listing,
               etag: contentEtag(listing),
             });
@@ -923,7 +923,9 @@ export class Server {
 
         const responseHeaders = {
           ':status': constants.HTTP_STATUS_OK,
-          'content-type': String(mimeTypes.lookup(filePath)),
+          // Text types carry `charset=utf-8`: the parser only looks for a page's own
+          // <meta charset> in its first 1024 bytes, which an injected import map can push it past.
+          'content-type': String(mimeTypes.contentType(extname(filePath))),
           // Transpiled TypeScript and rewritten modules are generated from source on
           // every request, so the browser must revalidate rather than reuse a cached
           // copy — otherwise an edited source file is shadowed by a stale module.
@@ -960,10 +962,11 @@ export class Server {
             const importMap = await getImportMap(fileContent, pageServedPath, responseFilePath, servedRoot);
             if (Object.keys(importMap.imports).length) {
               const importMapScript = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
-              // The map must precede every module script; fall back to
-              // prepending when the page has no <head>.
-              fileContent = /<head[^>]*>/.test(fileContent)
-                ? fileContent.replace(/<head[^>]*>/, headTag => `${headTag}\n${importMapScript}`)
+              // The map must precede every module script, but follows a leading
+              // <meta charset>; fall back to prepending when the page has no <head>.
+              const headStart = /<head[^>]*>(\s*<meta\s+charset[^>]*>)?/i;
+              fileContent = headStart.test(fileContent)
+                ? fileContent.replace(headStart, match => `${match}\n${importMapScript}`)
                 : `${importMapScript}\n${fileContent}`;
             }
           }

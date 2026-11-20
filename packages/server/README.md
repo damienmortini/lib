@@ -54,7 +54,8 @@ the `server` command always runs `dist/`.
 ## Bare specifiers in the browser (`--resolve-modules`)
 
 With `--resolve-modules`, every served HTML page gets a generated
-`<script type="importmap">` injected at the top of its `<head>`. **Browser code
+`<script type="importmap">` injected at the top of its `<head>`, after a leading
+`<meta charset>`. **Browser code
 can import installed packages by bare name, exactly like Node** — there is no
 need to fetch a `package.json` and compute a path by hand:
 
