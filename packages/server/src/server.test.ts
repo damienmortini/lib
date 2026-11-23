@@ -1,14 +1,19 @@
 import { ok, strictEqual } from 'node:assert';
 import { execFileSync, spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { createServer } from 'node:http';
 import { connect } from 'node:http2';
 import type { AddressInfo } from 'node:net';
 import { networkInterfaces, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
+import { text } from 'node:stream/consumers';
 import { after, before, describe, it, mock } from 'node:test';
 
 import { Server } from './server.ts';
+
+const commandLinePath = join(import.meta.dirname, 'bin/index.ts');
 
 // Read the state token the live-reload stream sends on connect, then hang up —
 // the stream itself stays open forever, so it can never be read to its end.
@@ -583,32 +588,112 @@ describe('listening address', () => {
   });
 });
 
-describe('command line', () => {
-  it('serves pages without the live-reload client under --no-live-reload', { timeout: 30_000 }, async () => {
-    const rootPath = await mkdtemp(join(tmpdir(), 'server-cli-'));
-    await writeFile(join(rootPath, 'index.html'), '<html><head></head><body></body></html>');
-    const child = spawn(process.execPath, [join(import.meta.dirname, 'bin/index.ts'), '--root', rootPath, '--port', '9701', '--no-live-reload'], { stdio: ['ignore', 'pipe', 'inherit'] });
-    try {
-      // The first URL printed is the local one, once the server is ready —
-      // after any certificate setup lines.
-      let url = '';
-      for await (const line of createInterface({ input: child.stdout })) {
-        if (line.startsWith('https://')) {
-          url = line;
-          break;
-        }
+// Run the command line to its exit; one that starts serving instead is killed, with a null code.
+async function runCommandLine(args: string[]): Promise<{ code: number | null; stdout: string; stderr: string }> {
+  const child = spawn(process.execPath, [commandLinePath, ...args], { stdio: ['ignore', 'pipe', 'pipe'], timeout: 25_000 });
+  const [stdout, stderr, [code]] = await Promise.all([text(child.stdout), text(child.stderr), once(child, 'close')]);
+  return { code, stdout, stderr };
+}
+
+// Run the command line until it has printed its local URL, and hand that URL to `use`.
+async function withCommandLine(args: string[], use: (url: URL) => Promise<void>): Promise<void> {
+  const child = spawn(process.execPath, [commandLinePath, ...args], { stdio: ['ignore', 'pipe', 'inherit'] });
+  try {
+    // The first URL printed is the local one, once the server is ready —
+    // after any certificate setup lines.
+    let url = '';
+    for await (const line of createInterface({ input: child.stdout })) {
+      if (line.startsWith('https://')) {
+        url = line;
+        break;
       }
-      // Keep draining, so the rest of the banner never fills the pipe and blocks the child.
-      child.stdout.resume();
-      ok(url, 'expected the server to print its URL');
-      const body = await fetchBody(Number(new URL(url).port), '/');
+    }
+    // Keep draining, so the rest of the banner never fills the pipe and blocks the child.
+    child.stdout.resume();
+    ok(url, 'expected the server to print its URL');
+    await use(new URL(url));
+  }
+  finally {
+    child.kill();
+  }
+}
+
+describe('command line', () => {
+  let rootPath: string;
+
+  before(async () => {
+    rootPath = await mkdtemp(join(tmpdir(), 'server-cli-'));
+    await writeFile(join(rootPath, 'index.html'), '<html><head></head><body></body></html>');
+    await mkdir(join(rootPath, 'pages'));
+    await writeFile(join(rootPath, 'pages/index.html'), '<html><head></head><body>pages</body></html>');
+  });
+
+  after(async () => {
+    await rm(rootPath, { recursive: true, force: true });
+  });
+
+  it('serves pages without the live-reload client under --no-live-reload', { timeout: 30_000 }, async () => {
+    await withCommandLine(['--root', rootPath, '--port', '9701', '--no-live-reload'], async (url) => {
+      const body = await fetchBody(Number(url.port), '/');
       ok(body.includes('<body>'), 'expected the page to be served');
       ok(!body.includes('EventSource'), 'expected no live-reload client under --no-live-reload');
+    });
+  });
+
+  it('takes a value written --option=value', { timeout: 30_000 }, async () => {
+    await withCommandLine([`--root=${rootPath}`, '--path=pages', '--port=9711', '--no-live-reload'], async (url) => {
+      strictEqual(url.pathname, '/pages');
+      ok((await fetchBody(Number(url.port), '/pages/')).includes('<body>pages'), 'expected the directory to be served');
+    });
+  });
+
+  it('takes the options after the `--` pnpm forwards', { timeout: 30_000 }, async () => {
+    await withCommandLine(['--root', rootPath, '--no-live-reload', '--', '--port', '9731', '--path', 'pages'], async (url) => {
+      strictEqual(url.pathname, '/pages');
+    });
+  });
+
+  it('proxies each --proxy path to the target after it', { timeout: 30_000 }, async () => {
+    const targets = ['first', 'second'].map(name => createServer((_request, response) => response.end(name)).listen(0, '127.0.0.1'));
+    try {
+      await Promise.all(targets.map(target => target.listening || once(target, 'listening')));
+      const [first, second] = targets.map(target => `http://127.0.0.1:${(target.address() as AddressInfo).port}`);
+      await withCommandLine(['--root', rootPath, '--proxy', '/first', first, '--port', '9721', '--proxy=/second', second, '--no-live-reload'], async (url) => {
+        strictEqual(await fetchBody(Number(url.port), '/first/'), 'first');
+        strictEqual(await fetchBody(Number(url.port), '/second/'), 'second');
+      });
     }
     finally {
-      child.kill();
-      await rm(rootPath, { recursive: true, force: true });
+      for (const target of targets) target.close();
     }
+  });
+
+  it('prints its usage under --help', { timeout: 30_000 }, async () => {
+    const { code, stdout, stderr } = await runCommandLine(['--help']);
+    strictEqual(code, 0, stderr);
+    ok(stdout.startsWith('Usage: server '), stdout);
+  });
+
+  it('refuses arguments it does not know, without starting', { timeout: 60_000 }, async () => {
+    await Promise.all([
+      ['--unknown'],
+      ['--unknown=value'],
+      ['stray'],
+      ['--path'],
+      ['--port', 'abc'],
+      ['--port', ''],
+      ['--port=-1'],
+      ['--proxy', '/api'],
+      ['--proxy', '/api', '--verbose', 'http://127.0.0.1:1'],
+      ['--proxy', '', 'http://127.0.0.1:1'],
+      ['--proxy', '/api', 'http://127.0.0.1:1', 'stray'],
+    ].map(async (args) => {
+      const { code, stdout, stderr } = await runCommandLine(args);
+      const label = JSON.stringify(args);
+      strictEqual(code, 1, `${label}: ${stderr}`);
+      strictEqual(stdout, '', `${label}: expected no URL printed`);
+      ok(stderr.includes('Usage: server '), `${label}: ${stderr}`);
+    }));
   });
 });
 
