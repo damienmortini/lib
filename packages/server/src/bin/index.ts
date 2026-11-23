@@ -2,96 +2,94 @@
 
 import { open } from 'fs/promises';
 import QRCode from 'qrcode';
+import { parseArgs } from 'util';
 
 import { Server } from '../server.ts';
 
-const args = process.argv.slice(2);
-let verbose = false;
-let resolveModules = false;
-let path: string | undefined;
-let rootPath: string | undefined;
-let watchIgnore: Array<string | RegExp> | undefined;
-const watchPaths: Array<string> = [];
-let port: number | undefined;
-let host: string | undefined;
-let useExternalCertificate = false;
-const proxy: { [path: string]: string } = {};
-let auth: string | undefined;
-let base: string | undefined;
-let directoryListing = false;
-let liveReload = true;
-let errorDetails = false;
+const usage = `Usage: server [--path <path>] [--root <path>] [--base <base>] [--port <port>] [--host <address>]
+              [--watch <path>] [--watch-ignore <a,b>] [--proxy <path> <target>]
+              [--auth <user:pass>] [--external-certificate] [--resolve-modules]
+              [--directory-listing] [--no-live-reload] [--error-details] [--verbose] [--help]`;
 
-let i = 0;
-while (i < args.length) {
-  const arg = args[i];
+function parseCommandLine(): ConstructorParameters<typeof Server>[0] {
+  const { values, tokens } = parseArgs({
+    // pnpm hands a script the `--` its own command line had, and the options are after it.
+    args: process.argv.slice(2).filter(argument => argument !== '--'),
+    allowPositionals: true,
+    tokens: true,
+    options: {
+      'path': { type: 'string' },
+      'root': { type: 'string' },
+      'base': { type: 'string' },
+      'port': { type: 'string' },
+      'host': { type: 'string' },
+      'watch': { type: 'string', multiple: true },
+      'watch-ignore': { type: 'string' },
+      'proxy': { type: 'string', multiple: true },
+      'auth': { type: 'string' },
+      'external-certificate': { type: 'boolean' },
+      'resolve-modules': { type: 'boolean' },
+      'directory-listing': { type: 'boolean' },
+      'no-live-reload': { type: 'boolean' },
+      'error-details': { type: 'boolean' },
+      'verbose': { type: 'boolean' },
+      'help': { type: 'boolean' },
+    },
+  });
 
-  switch (arg) {
-    case '--path':
-      path = args[++i];
-      break;
-    case '--root':
-      rootPath = args[++i];
-      break;
-    case '--watch-ignore':
-      watchIgnore = args[++i]?.split(',');
-      break;
-    case '--verbose':
-      verbose = true;
-      break;
-    case '--resolve-modules':
-      resolveModules = true;
-      break;
-    case '--port': {
-      const portArgument = args[++i];
-      if (portArgument) {
-        const parsedPort = Number(portArgument);
-        if (Number.isInteger(parsedPort)) {
-          port = parsedPort;
-        }
-      }
-      break;
-    }
-    case '--host':
-      // An empty host would make `listen` bind every interface.
-      host = args[++i] || undefined;
-      break;
-    case '--external-certificate':
-      useExternalCertificate = true;
-      break;
-    case '--proxy': {
-      const proxyPath = args[++i];
-      const proxyTarget = args[++i];
-      if (proxyPath && proxyTarget) {
-        proxy[proxyPath] = proxyTarget;
-      }
-      break;
-    }
-    case '--watch': {
-      const watchPath = args[++i];
-      if (watchPath) {
-        watchPaths.push(watchPath);
-      }
-      break;
-    }
-    case '--auth':
-      auth = args[++i];
-      break;
-    case '--base':
-      base = args[++i];
-      break;
-    case '--directory-listing':
-      directoryListing = true;
-      break;
-    case '--no-live-reload':
-      liveReload = false;
-      break;
-    case '--error-details':
-      errorDetails = true;
-      break;
+  if (values.help) {
+    console.log(usage);
+    process.exit(0);
   }
 
-  i++;
+  // `--proxy` takes two values and `parseArgs` gives an option one, so the target is the
+  // positional right after it. Any other positional belongs to nothing.
+  const proxy: { [path: string]: string } = {};
+  for (const [index, token] of tokens.entries()) {
+    const previous = tokens[index - 1];
+    if (token.kind === 'option' && token.name === 'proxy') {
+      const target = tokens[index + 1];
+      if (!token.value || target?.kind !== 'positional' || !target.value) {
+        throw new Error('Option \'--proxy <path> <target>\' needs both a path and a target');
+      }
+      proxy[token.value] = target.value;
+    }
+    else if (token.kind === 'positional' && !(previous?.kind === 'option' && previous.name === 'proxy')) {
+      throw new Error(`Unexpected argument '${token.value}'`);
+    }
+  }
+
+  if (values.port !== undefined && !/^\d+$/.test(values.port)) {
+    throw new Error(`Option '--port <port>' needs an integer, got '${values.port}'`);
+  }
+
+  return {
+    path: values.path,
+    rootPath: values.root,
+    watch: !values['no-live-reload'],
+    watchIgnore: values['watch-ignore']?.split(','),
+    watchPaths: values.watch?.filter(Boolean),
+    verbose: values.verbose,
+    resolveModules: values['resolve-modules'],
+    port: values.port === undefined ? undefined : Number(values.port),
+    // An empty host would make `listen` bind every interface.
+    host: values.host || undefined,
+    useExternalCertificate: values['external-certificate'],
+    proxy,
+    auth: values.auth,
+    base: values.base,
+    directoryListing: values['directory-listing'],
+    errorDetails: values['error-details'],
+  };
+}
+
+let options: ReturnType<typeof parseCommandLine>;
+try {
+  options = parseCommandLine();
+}
+catch (error) {
+  console.error(`${error.message}\n\n${usage}`);
+  process.exit(1);
 }
 
 // A credential passed as `--auth` lands in the process's argv, which is
@@ -100,7 +98,7 @@ while (i < args.length) {
 // absent so callers can keep the credential out of argv: a process environment
 // is owner-only (/proc/<pid>/environ is mode 0400). The flag still wins when
 // both are set, so existing invocations are unaffected.
-auth ??= process.env.SERVER_AUTH;
+const auth = options.auth ?? process.env.SERVER_AUTH;
 
 /**
  * Exit when the controlling terminal goes away. Closing a terminal only
@@ -125,23 +123,7 @@ catch {
   // No controlling terminal to watch.
 }
 
-const server = new Server({
-  path,
-  rootPath,
-  watch: liveReload,
-  watchIgnore,
-  watchPaths,
-  verbose,
-  resolveModules,
-  port,
-  host,
-  useExternalCertificate,
-  proxy,
-  auth,
-  base,
-  directoryListing,
-  errorDetails,
-});
+const server = new Server({ ...options, auth });
 
 await server.ready;
 

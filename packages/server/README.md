@@ -6,8 +6,12 @@ Simple live reloading HTTP2 server for development
 npx server [--path <path>] [--root <path>] [--base <base>] [--port <port>] [--host <address>]
            [--watch <path>] [--watch-ignore <a,b>] [--proxy <path> <target>]
            [--auth <user:pass>] [--external-certificate] [--resolve-modules]
-           [--directory-listing] [--no-live-reload] [--error-details] [--verbose]
+           [--directory-listing] [--no-live-reload] [--error-details] [--verbose] [--help]
 ```
+
+An option's value may also be written `--option=value`, and must be when it
+starts with a `-`. An unknown option, or an argument no option takes, prints the
+usage and exits with an error.
 
 The server listens on loopback (`127.0.0.1`) only, so nothing else on the
 network can reach it; `--host 0.0.0.0` exposes it on every interface, to open
