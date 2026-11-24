@@ -37,8 +37,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Before the gate, not part of it: packages point `types` at `dist/index.d.ts`, so
-      # the typecheck resolves a sibling workspace package's types from its built output.
+      # Before the build: after it, an import that still resolves to `dist` would pass too.
+      - run: pnpm run typecheck
+
+      # Before the gate, not part of it: the typecheck reads a sibling workspace package's
+      # source, but a suite importing one at runtime still loads its `dist/index.js`.
       - run: pnpm run build
 
       - run: npm test
