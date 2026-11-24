@@ -19,9 +19,10 @@ and its own module, so running it by path needs nothing installed anywhere — w
 it is run from the worktree here, not from the primary as everywhere else.
 
 The link tree is where the setup stops. `pnpm run typecheck` needs no build: the root
-`tsconfig.json` maps a workspace package to its `src`. At runtime some packages here still
-resolve to `dist`, so a suite that imports one of those needs `pnpm run build` in the worktree
-on top; a change staying inside one package, whose own tests run its `src`, does not.
+`tsconfig.json` maps a package's direct workspace dependencies to their `src`. At runtime some
+packages here still resolve to `dist`, so a suite that imports one of those needs
+`pnpm run build` in the worktree on top; a change staying inside one package, whose own tests
+run its `src`, does not.
 
 `pnpm-workspace.yaml` sets `verifyDepsBeforeRun: false`, which the setup refuses to run
 without: the mirror looks uninstalled to pnpm, so the default would install before the first

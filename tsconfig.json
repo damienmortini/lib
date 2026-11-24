@@ -1,9 +1,10 @@
 {
   "extends": "@damienmortini/typescript-config",
   "compilerOptions": {
-    // A sibling package's types come from its source, so a typecheck needs no build. Through
-    // node_modules, not packages/: a file reached directly would count as the importing package's
-    // own source, outside its rootDir. A package without src/index.ts resolves as usual.
+    // A direct workspace dependency's types come from its source, so a typecheck, or a package's
+    // own build, needs no other build first. Through node_modules, not packages/: a file reached
+    // directly would count as the importing package's own source, outside its rootDir. A package
+    // without src/index.ts resolves as usual.
     "paths": {
       "@damienmortini/*": ["${configDir}/node_modules/@damienmortini/*/src/index.ts"]
     }
