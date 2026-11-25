@@ -41,6 +41,7 @@ new RuleTester().run('no-relative-packages', noRelativePackages, {
     // A manifest with no name, or one that cannot be read, is no package boundary.
     { filename: join(root, 'packages/one/source/commonjs/index.js'), code: `import { own } from '../own.js';` },
     { filename: inOne, code: `import { own } from './commonjs/index.js';` },
+    // A file of the package whose name starts with two dots.
     { filename: inOne, code: `import { own } from '../..own.js';` },
     { filename: join(root, 'packages/one/source/unreadable/index.js'), code: `import { own } from '../own.js';` },
   ],
