@@ -28,7 +28,8 @@ function findPackageDirectory(directory) {
  * where its files are kept, and on how the two happen to be installed beside each other.
  *
  * Only the path is read, never the file it names, so a `.js` specifier for a `.ts` source
- * counts like any other.
+ * counts like any other. `import` and `export … from` are checked; `require()` and a path
+ * given to `new URL()` are not, nor is a path into a package nested inside this one.
  * @type {import('eslint').Rule.RuleModule}
  */
 export default {
@@ -49,7 +50,8 @@ export default {
     function check(node) {
       const source = node.source;
       if (source?.type !== 'Literal' || typeof source.value !== 'string' || !/^\.{1,2}(\/|$)/.test(source.value)) return;
-      if (relative(packageDirectory, resolve(directory, source.value)).startsWith('..')) {
+      const fromPackage = relative(packageDirectory, resolve(directory, source.value));
+      if (fromPackage === '..' || fromPackage.startsWith('../')) {
         context.report({ node: source, messageId: 'leavesPackage', data: { specifier: source.value } });
       }
     }

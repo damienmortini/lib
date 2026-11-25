@@ -10,17 +10,19 @@ import noRelativePackages from './no-relative-packages.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Two packages side by side in a workspace, one holding a folder that only sets its module type.
+// Two packages side by side in a workspace. The first holds a folder that only sets its module
+// type, and one whose manifest cannot be read.
 const root = mkdtempSync(join(tmpdir(), 'no-relative-packages-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 for (const [directory, manifest] of [
   ['', { name: 'workspace' }],
   ['packages/one', { name: 'one' }],
   ['packages/one/source/commonjs', { type: 'commonjs' }],
+  ['packages/one/source/unreadable', '{'],
   ['packages/two', { name: 'two' }],
 ]) {
   mkdirSync(join(root, directory), { recursive: true });
-  writeFileSync(join(root, directory, 'package.json'), JSON.stringify(manifest));
+  writeFileSync(join(root, directory, 'package.json'), typeof manifest === 'string' ? manifest : JSON.stringify(manifest));
 }
 
 const inOne = join(root, 'packages/one/source/index.js');
@@ -34,10 +36,13 @@ new RuleTester().run('no-relative-packages', noRelativePackages, {
     { filename: inOne, code: `import { two } from 'two/source/index.js';` },
     { filename: inOne, code: `const path = '../../two/source/index.js';` },
     { filename: inOne, code: `await import(path);` },
-    // A manifest with no name is no package boundary.
+    { filename: inOne, code: `export const own = 1;` },
+    { filename: inOne, code: `const own = 1; export { own };` },
+    // A manifest with no name, or one that cannot be read, is no package boundary.
     { filename: join(root, 'packages/one/source/commonjs/index.js'), code: `import { own } from '../own.js';` },
-    // Outside every package, nothing is left.
-    { filename: join(tmpdir(), 'no-relative-packages-outside.js'), code: `import { other } from '../other.js';` },
+    { filename: inOne, code: `import { own } from './commonjs/index.js';` },
+    { filename: inOne, code: `import { own } from '../..own.js';` },
+    { filename: join(root, 'packages/one/source/unreadable/index.js'), code: `import { own } from '../own.js';` },
   ],
   invalid: [
     { filename: inOne, code: `import { two } from '../../two/source/index.js';`, errors: leavesPackage('../../two/source/index.js') },
