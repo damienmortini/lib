@@ -130,7 +130,11 @@ importers:
         specifier: workspace:*
         version: link:../damdom-textfield
 
-  packages/damdom/damdom-linkableconnector: {}
+  packages/damdom/damdom-linkableconnector:
+    dependencies:
+      '@damienmortini/damdom-connector':
+        specifier: workspace:*
+        version: link:../damdom-connector
 
   packages/damdom/damdom-lottie:
     dependencies:
@@ -261,7 +265,14 @@ importers:
 
   packages/element/input-signal-beat: {}
 
-  packages/element/input-soundmatrix: {}
+  packages/element/input-soundmatrix:
+    dependencies:
+      '@damienmortini/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@damienmortini/damdom-ticker':
+        specifier: workspace:*
+        version: link:../../damdom/damdom-ticker
 
   packages/element/link: {}
 
@@ -358,6 +369,9 @@ importers:
 
   packages/gltf-optimizer:
     dependencies:
+      '@damienmortini/server':
+        specifier: workspace:*
+        version: link:../server
       fbx2gltf:
         specifier: ^0.9.7-p1
         version: 0.9.7-p1

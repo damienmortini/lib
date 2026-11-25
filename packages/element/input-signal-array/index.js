@@ -1,6 +1,5 @@
 import Ticker from '@damienmortini/core/util/Ticker.js';
-
-import ArrayViewerElement from '../element-viewer-array/index.js';
+import ArrayViewerElement from '@damienmortini/element-viewer-array/index.js';
 
 export default class ArraySignalInputElement extends ArrayViewerElement {
   static get observedAttributes() {

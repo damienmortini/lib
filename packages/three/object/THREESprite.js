@@ -1,4 +1,5 @@
-import { Color, DoubleSide, LinearFilter, Mesh, Object3D, PlaneGeometry, Texture } from '../../../three/src/Three.js';
+import { Color, DoubleSide, LinearFilter, Mesh, Object3D, PlaneGeometry, Texture } from 'three/src/Three.js';
+
 import THREEShaderMaterial from './THREEShaderMaterial.js';
 
 const CACHED_IMAGES = new Map();

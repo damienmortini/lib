@@ -1,8 +1,8 @@
 // Work with https://github.com/soimy/msdf-bmfont-xml
 
-import BasicShader from '../../shader/BasicShader.js';
 import GLProgram from '../GLProgram.js';
 import GLTexture from '../GLTexture.js';
+import { BasicShader } from '../shader/BasicShader.js';
 import GLPlaneObject from './GLPlaneObject.js';
 
 export default class GLMSDFTextObject extends GLPlaneObject {

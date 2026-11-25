@@ -1,8 +1,8 @@
-import '../damdom-checkbox/index.js';
-import '../damdom-colorpicker/index.js';
-import '../damdom-slider/index.js';
-import '../damdom-select/index.js';
-import '../damdom-textfield/index.js';
+import '@damienmortini/damdom-checkbox/index.js';
+import '@damienmortini/damdom-colorpicker/index.js';
+import '@damienmortini/damdom-slider/index.js';
+import '@damienmortini/damdom-select/index.js';
+import '@damienmortini/damdom-textfield/index.js';
 
 import { DamdomGUIFolderElement } from './DamdomGUIFolderElement.js';
 

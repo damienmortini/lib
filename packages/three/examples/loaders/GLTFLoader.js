@@ -60,7 +60,7 @@ import {
   TriangleStripDrawMode,
   Vector2,
   Vector3,
-  VectorKeyframeTrack } from '../../../../three/src/Three.js';
+  VectorKeyframeTrack } from 'three/src/Three.js';
 import { toTrianglesDrawMode } from '../utils/BufferGeometryUtils.js';
 
 class GLTFLoader extends Loader {

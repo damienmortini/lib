@@ -18,6 +18,10 @@
   "author": "Damien Mortini",
   "type": "module",
   "main": "index.js",
+  "dependencies": {
+    "@damienmortini/core": "workspace:*",
+    "@damienmortini/damdom-ticker": "workspace:*"
+  },
   "publishConfig": {
     "access": "public"
   }

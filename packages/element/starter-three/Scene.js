@@ -1,6 +1,5 @@
 import TrackballController from '@damienmortini/core/input/TrackballController.js';
-
-import { BoxGeometry, Mesh, MeshNormalMaterial, PerspectiveCamera, Scene as THREEScene } from '../../three/src/Three.js';
+import { BoxGeometry, Mesh, MeshNormalMaterial, PerspectiveCamera, Scene as THREEScene } from 'three/src/Three.js';
 
 export default class Scene extends THREEScene {
   constructor({ canvas }) {

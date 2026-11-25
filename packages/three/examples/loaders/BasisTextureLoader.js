@@ -15,7 +15,7 @@ import {
   RGBA_S3TC_DXT5_Format,
   RGBAFormat,
   UnsignedByteType,
-} from '../../../../three/src/Three.js';
+} from 'three/src/Three.js';
 
 /**
  * Loader for Basis Universal GPU Texture Codec.

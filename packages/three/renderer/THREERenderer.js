@@ -9,7 +9,7 @@ import {
   UnsignedShortType,
   WebGLRenderer,
   WebGLRenderTarget,
-} from '../../../three/src/Three.js';
+} from 'three/src/Three.js';
 
 export default class THREERenderer extends WebGLRenderer {
   constructor(options) {

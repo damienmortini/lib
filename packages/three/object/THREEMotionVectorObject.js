@@ -1,6 +1,6 @@
 import { quaternionFromMatrix } from '@damienmortini/core/shader/TransformShader.js';
+import { AnimationMixer, BufferAttribute, BufferGeometry, Color, DataTexture, FloatType, Matrix4, Object3D, Points, RGBAFormat, RGBFormat } from 'three/src/Three.js';
 
-import { AnimationMixer, BufferAttribute, BufferGeometry, Color, DataTexture, FloatType, Matrix4, Object3D, Points, RGBAFormat, RGBFormat } from '../../../three/src/Three.js';
 import THREEGPGPUSystem from '../../three/gpgpu/THREEGPGPUSystem.js';
 import THREEShaderMaterial from '../../three/material/THREEShaderMaterial.js';
 

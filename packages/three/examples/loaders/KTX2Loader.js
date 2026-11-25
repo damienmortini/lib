@@ -37,7 +37,7 @@ import {
   RGFormat,
   sRGBEncoding,
   UnsignedByteType,
-} from '../../../../three/src/Three.js';
+} from 'three/src/Three.js';
 import {
   KHR_DF_FLAG_ALPHA_PREMULTIPLIED,
   KHR_DF_TRANSFER_SRGB,

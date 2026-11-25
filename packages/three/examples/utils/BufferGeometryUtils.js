@@ -9,7 +9,7 @@ import {
   TrianglesDrawMode,
   TriangleStripDrawMode,
   Vector3,
-} from '../../../../three/src/Three.js';
+} from 'three/src/Three.js';
 
 function computeTangents() {
   throw new Error('BufferGeometryUtils: computeTangents renamed to computeMikkTSpaceTangents.');

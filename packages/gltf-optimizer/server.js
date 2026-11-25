@@ -5,7 +5,7 @@ import http2 from 'http2';
 
 const io = new NodeIO();
 
-import { Server } from '../server/index.js';
+import { Server } from '@damienmortini/server';
 const server = new Server({
   watch: true,
 });
