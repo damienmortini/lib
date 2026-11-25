@@ -1,4 +1,4 @@
-import { StereoCamera, WebGLRenderer } from '../../../three/src/Three.js';
+import { StereoCamera, WebGLRenderer } from 'three/src/Three.js';
 
 export default class THREEStereoRenderer {
   constructor(renderer = new WebGLRenderer()) {

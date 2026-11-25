@@ -1,12 +1,11 @@
 import Shader from '@damienmortini/core/3d/Shader.js';
-
-import DEFAULT_FRAGMENT from '../../../three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js';
-import DEFAULT_VERTEX from '../../../three/src/renderers/shaders/ShaderChunk/default_vertex.glsl.js';
+import DEFAULT_FRAGMENT from 'three/src/renderers/shaders/ShaderChunk/default_fragment.glsl.js';
+import DEFAULT_VERTEX from 'three/src/renderers/shaders/ShaderChunk/default_vertex.glsl.js';
 import {
   ShaderLib,
   ShaderMaterial,
   UniformsUtils,
-} from '../../../three/src/Three.js';
+} from 'three/src/Three.js';
 
 const toWebGL1 = (source, type) => {
   source = source.replace(/#version.*?\n/g, '');

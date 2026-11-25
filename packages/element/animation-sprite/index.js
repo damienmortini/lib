@@ -1,7 +1,6 @@
 import SpriteAnimation from '@damienmortini/core/abstract/SpriteAnimation.js';
 import Loader from '@damienmortini/core/util/Loader.js';
-
-import TickerAnimationElement from '../element-animation-ticker/index.js';
+import { DamdomTickerElement } from '@damienmortini/damdom-ticker';
 
 const LOAD_PROMISES = new Map();
 
@@ -24,7 +23,7 @@ const load = async (src) => {
   return promise;
 };
 
-class SpriteAnimationElement extends TickerAnimationElement {
+class SpriteAnimationElement extends DamdomTickerElement {
   static get observedAttributes() {
     return ['src', 'loop', 'playbackrate', 'framerate'];
   }
@@ -64,6 +63,8 @@ class SpriteAnimationElement extends TickerAnimationElement {
       this._resize();
     });
     resizeObserver.observe(this);
+
+    this.callback = () => this.update();
   }
 
   get ready() {

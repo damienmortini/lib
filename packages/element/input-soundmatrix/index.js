@@ -1,8 +1,7 @@
 import SoundMatrix from '@damienmortini/core/audio/SoundMatrix.js';
+import { DamdomTickerElement } from '@damienmortini/damdom-ticker';
 
-import AnimationTickerElement from '../element-animation-ticker/index.js';
-
-export default class SoundMatrixElement extends AnimationTickerElement {
+export default class SoundMatrixElement extends DamdomTickerElement {
   constructor({ soundMatrix = new SoundMatrix() } = {}) {
     super();
 
@@ -17,6 +16,8 @@ export default class SoundMatrixElement extends AnimationTickerElement {
     this.soundMatrix = soundMatrix;
 
     this._padsMatrix = new Map();
+
+    this.callback = () => this.update();
   }
 
   set soundMatrix(value) {
@@ -45,8 +46,6 @@ export default class SoundMatrixElement extends AnimationTickerElement {
   }
 
   update() {
-    super.update();
-
     for (const [sound, array] of this.soundMatrix) {
       let pads = this._padsMatrix.get(sound);
 

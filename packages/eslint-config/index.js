@@ -6,6 +6,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 import { findIgnoreFiles } from './find-ignore-files.js';
+import noRelativePackages from './no-relative-packages.js';
 
 export default [
   // `gitignoreResolution` anchors each file's patterns to its own directory, so they keep
@@ -29,6 +30,7 @@ export default [
     plugins: {
       'simple-import-sort': simpleImportSort,
       '@stylistic': stylistic,
+      'package-boundaries': { rules: { 'no-relative-packages': noRelativePackages } },
     },
     rules: {
       'n/no-callback-literal': 'off',
@@ -37,6 +39,7 @@ export default [
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
+      'package-boundaries/no-relative-packages': 'error',
     },
   },
 ];

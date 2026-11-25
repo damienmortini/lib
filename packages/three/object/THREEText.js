@@ -3,7 +3,8 @@ import {
   Object3D,
   PlaneGeometry,
   Texture,
-} from '../../../three/src/Three.js';
+} from 'three/src/Three.js';
+
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 
 export default class THREEText extends Object3D {

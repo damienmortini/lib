@@ -1,6 +1,6 @@
 import { Loader } from '@damienmortini/core/util/Loader.js';
+import { Line, LineSegments, Mesh, TextureLoader, Vector3, WebGLRenderer } from 'three/src/Three.js';
 
-import { Line, LineSegments, Mesh, TextureLoader, Vector3, WebGLRenderer } from '../../../three/src/Three.js';
 import { BasisTextureLoader } from '../examples/loaders/BasisTextureLoader.js';
 import { DRACOLoader } from '../examples/loaders/DRACOLoader.js';
 import { GLTFLoader } from '../examples/loaders/GLTFLoader.js';

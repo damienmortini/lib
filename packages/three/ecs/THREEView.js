@@ -1,4 +1,5 @@
-import { Object3D } from '../../../three/src/Three.js';
+import { Object3D } from 'three/src/Three.js';
+
 import View from '../ecs/components/View.js';
 
 export default class THREEView extends View {

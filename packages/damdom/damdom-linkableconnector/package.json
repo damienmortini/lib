@@ -18,6 +18,9 @@
   "author": "Damien Mortini",
   "type": "module",
   "main": "index.js",
+  "dependencies": {
+    "@damienmortini/damdom-connector": "workspace:*"
+  },
   "publishConfig": {
     "access": "public"
   }

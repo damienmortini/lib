@@ -1,5 +1,5 @@
 /* global AColorPicker */
-import '../../a-color-picker/dist/acolorpicker.js';
+import 'a-color-picker/dist/acolorpicker.js';
 
 const COLOR_PICKER_CSS = document.head.querySelector('style[data-source=a-color-picker]').innerHTML;
 

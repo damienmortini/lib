@@ -1,6 +1,6 @@
 import DatatextureShader from '@damienmortini/core/shader/DataTextureShader.js';
+import { DataTexture, FloatType, HalfFloatType, MathUtils, Mesh, NearestFilter, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, RGBFormat, Scene, WebGLRenderer, WebGLRenderTarget } from 'three/src/Three.js';
 
-import { DataTexture, FloatType, HalfFloatType, MathUtils, Mesh, NearestFilter, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, RGBFormat, Scene, WebGLRenderer, WebGLRenderTarget } from '../../../three/src/Three.js';
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 
 let DEBUG_RENDERER;

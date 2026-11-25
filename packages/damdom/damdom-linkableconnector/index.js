@@ -1,4 +1,4 @@
-import { DamdomConnectorElement } from '../damdom-connector/index.js';
+import { DamdomConnectorElement } from '@damienmortini/damdom-connector/index.js';
 
 const CONNECTORS = new Set();
 

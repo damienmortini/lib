@@ -1,12 +1,12 @@
 import GradientNoiseShader from '@damienmortini/core/shader/noise/GradientNoiseShader.js';
 import SkyShader from '@damienmortini/core/shader/SkyShader.js';
-
 import {
   BackSide,
   IcosahedronBufferGeometry,
   Mesh,
   Vector3,
-} from '../../../three/src/Three.js';
+} from 'three/src/Three.js';
+
 import THREEShaderMaterial from '../material/THREEShaderMaterial.js';
 
 const skyShader = {

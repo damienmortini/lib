@@ -1,4 +1,3 @@
-import GLTFShader from '../../shader/GLTFShader.js';
 import GLBuffer from '../GLBuffer.js';
 import GLGeometry from '../GLGeometry.js';
 import GLObject from '../GLObject.js';
@@ -6,6 +5,7 @@ import GLProgram from '../GLProgram.js';
 import GLTexture from '../GLTexture.js';
 import GLTFNode from '../GLTFNode.js';
 import GLVertexAttribute from '../GLVertexAttribute.js';
+import { GLTFShader } from '../shader/GLTFShader.js';
 
 export default class GLGLTFNodeObject extends GLTFNode {
   constructor({

@@ -1,6 +1,6 @@
 {
   "name": "@damienmortini/gltf-optimizer",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "homepage": "https://github.com/damienmortini/lib/tree/main/packages/gltf-optimizer",
   "bugs": "https://github.com/damienmortini/lib/issues",
   "repository": {
@@ -23,6 +23,9 @@
   },
   "dependencies": {
     "fbx2gltf": "^0.9.7-p1"
+  },
+  "devDependencies": {
+    "@damienmortini/server": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

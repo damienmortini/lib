@@ -1,4 +1,5 @@
-import { ShaderChunk } from '../../../three/src/Three.js';
+import { ShaderChunk } from 'three/src/Three.js';
+
 import THREEShaderMaterial from './THREEShaderMaterial.js';
 
 export default class THREEBaseMaterial extends THREEShaderMaterial {
