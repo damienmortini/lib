@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 /**
  * Find the package a directory belongs to: the nearest directory, itself included, whose
@@ -51,7 +51,8 @@ export default {
       const source = node.source;
       if (source?.type !== 'Literal' || typeof source.value !== 'string' || !/^\.{1,2}(\/|$)/.test(source.value)) return;
       const fromPackage = relative(packageDirectory, resolve(directory, source.value));
-      if (fromPackage === '..' || fromPackage.startsWith('../')) {
+      // The path is the system's own: its separator, and absolute when it is on another drive.
+      if (fromPackage === '..' || fromPackage.startsWith(`..${sep}`) || isAbsolute(fromPackage)) {
         context.report({ node: source, messageId: 'leavesPackage', data: { specifier: source.value } });
       }
     }
