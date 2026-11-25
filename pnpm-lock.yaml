@@ -369,12 +369,13 @@ importers:
 
   packages/gltf-optimizer:
     dependencies:
-      '@damienmortini/server':
-        specifier: workspace:*
-        version: link:../server
       fbx2gltf:
         specifier: ^0.9.7-p1
         version: 0.9.7-p1
+    devDependencies:
+      '@damienmortini/server':
+        specifier: workspace:*
+        version: link:../server
 
   packages/graph:
     dependencies:
