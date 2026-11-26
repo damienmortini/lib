@@ -18,6 +18,10 @@ network can reach it; `--host 0.0.0.0` exposes it on every interface, to open
 the page from another device — the startup banner then prints each external URL
 with a QR code.
 
+The server takes `--port` (3000 by default), or the next free port above it when that one is
+taken. `--port 0` leaves the choice to the system, at the moment the server binds, so two
+servers started together never land on the same port; the URL it prints says which it got.
+
 `--watch` and `--proxy` may be repeated. `--directory-listing` serves a
 browsable listing for a directory that has no `index.html`, which otherwise
 404s; it is off by default because a listing exposes every file name under the

@@ -10,7 +10,7 @@ import { type OutgoingHttpHeaders, request as httpRequest } from 'http';
 import { constants, createSecureServer, type Http2SecureServer, type IncomingHttpHeaders, type ServerHttp2Stream } from 'http2';
 import { request as httpsRequest } from 'https';
 import mimeTypes from 'mime-types';
-import { connect as netConnect, isIP } from 'net';
+import { type AddressInfo, connect as netConnect, isIP } from 'net';
 import { hostname, networkInterfaces as getNetworkInterfaces } from 'os';
 // `rootDirectory` is posix-normalized and a request path is always posix, so the disk path
 // built from them is resolved with posix semantics rather than the platform's.
@@ -457,7 +457,9 @@ export class Server {
     /**
      * Get port
      */
-    const serverPort = await getPort({ port: portNumbers(port, port + 100) });
+    // Port 0 is left to the system, which picks a free one at the bind itself: no other process
+    // can take it in between, as one can a port getPort found free.
+    const requestedPort = port === 0 ? 0 : await getPort({ port: portNumbers(port, port + 100) });
 
     /**
      * Get addresses
@@ -1218,9 +1220,10 @@ export class Server {
 
     // Wait for the bind so `ready` and `urls` never vouch for a port another
     // process took after getPort checked it — that rejects `ready` instead.
-    this.http2SecureServer.listen(serverPort, host);
+    this.http2SecureServer.listen(requestedPort, host);
     await once(this.http2SecureServer, 'listening');
 
+    const { port: serverPort } = this.http2SecureServer.address() as AddressInfo;
     this.urls = addresses.map(address => `https://${address}:${serverPort}${configuredBasePrefix}/${path}`);
   }
 

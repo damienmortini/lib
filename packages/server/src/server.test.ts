@@ -125,13 +125,8 @@ describe('live-reload client script', () => {
   before(async () => {
     rootPath = await mkdtemp(join(tmpdir(), 'server-test-'));
     await writeFile(join(rootPath, 'index.html'), '<html><head><title>test</title></head><body></body></html>');
-    // The Server API has no ephemeral-port mode (get-port rejects ports below
-    // 1024), so ask for high bases and let it scan upward from there when busy;
-    // the actually-bound port is read back from the socket either way. The bases
-    // sit more than one scan range (100 ports) apart so the two can never
-    // collide on the same port.
-    watchingServer = new Server({ rootPath, watch: true, port: 8801 });
-    plainServer = new Server({ rootPath, watch: false, port: 9001 });
+    watchingServer = new Server({ rootPath, watch: true, port: 0 });
+    plainServer = new Server({ rootPath, watch: false, port: 0 });
     await Promise.all([watchingServer.ready, plainServer.ready]);
     watchingPage = await fetchBody(boundPort(watchingServer), '/index.html');
   });
@@ -242,8 +237,8 @@ describe('forwarded prefix', () => {
       join(fixturePath, 'charset.html'),
       '<html><head>\n  <meta charset="UTF-8">\n  <script type="module" src="/module.js"></script>\n</head><body>Café — 東京</body></html>',
     );
-    server = new Server({ rootPath: fixturePath, watch: true, resolveModules: true, port: 9201 });
-    basedServer = new Server({ rootPath: fixturePath, watch: true, base: 'mounted', port: 9401 });
+    server = new Server({ rootPath: fixturePath, watch: true, resolveModules: true, port: 0 });
+    basedServer = new Server({ rootPath: fixturePath, watch: true, base: 'mounted', port: 0 });
     await Promise.all([server.ready, basedServer.ready]);
   });
 
@@ -311,7 +306,7 @@ describe('directory listing', () => {
     await mkdir(join(rootPath, 'nested'));
     await writeFile(join(rootPath, 'nested', 'index.html'), '<html><body>nested index</body></html>');
     await writeFile(join(rootPath, '.env'), 'SECRET=value');
-    server = new Server({ rootPath, watch: false, port: 9301, directoryListing: true });
+    server = new Server({ rootPath, watch: false, port: 0, directoryListing: true });
     await server.ready;
   });
 
@@ -321,7 +316,7 @@ describe('directory listing', () => {
   });
 
   it('404s a directory with no index.html when listing is not enabled', async () => {
-    const plainServer = new Server({ rootPath, watch: false, port: 9302 });
+    const plainServer = new Server({ rootPath, watch: false, port: 0 });
     await plainServer.ready;
     try {
       strictEqual(await fetchStatus(boundPort(plainServer), '/'), 404);
@@ -393,7 +388,7 @@ describe('dot segments', () => {
     await writeFile(join(rootPath, 'node_modules', '.env'), 'SECRET=value');
     await mkdir(join(rootPath, '.well-known'));
     await writeFile(join(rootPath, '.well-known', 'security.txt'), 'Contact: mailto:security@example.com');
-    server = new Server({ rootPath, watch: false, port: 9331, directoryListing: true });
+    server = new Server({ rootPath, watch: false, port: 0, directoryListing: true });
     await server.ready;
   });
 
@@ -431,8 +426,8 @@ describe('server errors', () => {
     // Type stripping cannot erase an enum, so building `dist/broken.js` from it throws.
     await writeFile(join(rootPath, 'src', 'broken.ts'), 'export enum Broken { A }\n');
     await writeFile(join(rootPath, 'file.txt'), 'not a directory');
-    server = new Server({ rootPath, watch: false, port: 9311 });
-    detailedServer = new Server({ rootPath, watch: false, port: 9321, errorDetails: true });
+    server = new Server({ rootPath, watch: false, port: 0 });
+    detailedServer = new Server({ rootPath, watch: false, port: 0, errorDetails: true });
     await Promise.all([server.ready, detailedServer.ready]);
   });
 
@@ -482,7 +477,7 @@ describe('range requests', () => {
     await writeFile(join(rootPath, 'clip.mp4'), content);
     // Big enough that the read stream is still mid-pipe when the client hangs up.
     await writeFile(join(rootPath, 'long.mp4'), 'x'.repeat(4 * 1024 * 1024));
-    server = new Server({ rootPath, watch: false, port: 9501 });
+    server = new Server({ rootPath, watch: false, port: 0 });
     await server.ready;
   });
 
@@ -547,7 +542,7 @@ describe('startup', () => {
   it('reports its URLs without printing them', async () => {
     const rootPath = await mkdtemp(join(tmpdir(), 'server-startup-'));
     const log = mock.method(console, 'log', () => {});
-    const server = new Server({ rootPath, watch: false, port: 9601, base: 'mounted', path: 'page.html' });
+    const server = new Server({ rootPath, watch: false, port: 0, base: 'mounted', path: 'page.html' });
     try {
       await server.ready;
     }
@@ -570,8 +565,8 @@ describe('startup', () => {
 describe('listening address', () => {
   it('listens on loopback by default, and on every interface when asked', async () => {
     const rootPath = await mkdtemp(join(tmpdir(), 'server-host-'));
-    const loopbackServer = new Server({ rootPath, watch: false, port: 9611 });
-    const exposedServer = new Server({ rootPath, watch: false, port: 9621, host: '0.0.0.0' });
+    const loopbackServer = new Server({ rootPath, watch: false, port: 0 });
+    const exposedServer = new Server({ rootPath, watch: false, port: 0, host: '0.0.0.0' });
     try {
       await Promise.all([loopbackServer.ready, exposedServer.ready]);
       strictEqual((loopbackServer.http2SecureServer.address() as AddressInfo).address, '127.0.0.1');
@@ -633,7 +628,7 @@ describe('command line', () => {
   });
 
   it('serves pages without the live-reload client under --no-live-reload', { timeout: 30_000 }, async () => {
-    await withCommandLine(['--root', rootPath, '--port', '9701', '--no-live-reload'], async (url) => {
+    await withCommandLine(['--root', rootPath, '--port', '0', '--no-live-reload'], async (url) => {
       const body = await fetchBody(Number(url.port), '/');
       ok(body.includes('<body>'), 'expected the page to be served');
       ok(!body.includes('EventSource'), 'expected no live-reload client under --no-live-reload');
@@ -641,14 +636,14 @@ describe('command line', () => {
   });
 
   it('takes a value written --option=value', { timeout: 30_000 }, async () => {
-    await withCommandLine([`--root=${rootPath}`, '--path=pages', '--port=9711', '--no-live-reload'], async (url) => {
+    await withCommandLine([`--root=${rootPath}`, '--path=pages', '--port=0', '--no-live-reload'], async (url) => {
       strictEqual(url.pathname, '/pages');
       ok((await fetchBody(Number(url.port), '/pages/')).includes('<body>pages'), 'expected the directory to be served');
     });
   });
 
   it('takes the options after the `--` pnpm forwards', { timeout: 30_000 }, async () => {
-    await withCommandLine(['--root', rootPath, '--no-live-reload', '--', '--port', '9731', '--path', 'pages'], async (url) => {
+    await withCommandLine(['--root', rootPath, '--no-live-reload', '--', '--port', '0', '--path', 'pages'], async (url) => {
       strictEqual(url.pathname, '/pages');
     });
   });
@@ -658,7 +653,7 @@ describe('command line', () => {
     try {
       await Promise.all(targets.map(target => target.listening || once(target, 'listening')));
       const [first, second] = targets.map(target => `http://127.0.0.1:${(target.address() as AddressInfo).port}`);
-      await withCommandLine(['--root', rootPath, '--proxy', '/first', first, '--port', '9721', '--proxy=/second', second, '--no-live-reload'], async (url) => {
+      await withCommandLine(['--root', rootPath, '--proxy', '/first', first, '--port', '0', '--proxy=/second', second, '--no-live-reload'], async (url) => {
         strictEqual(await fetchBody(Number(url.port), '/first/'), 'first');
         strictEqual(await fetchBody(Number(url.port), '/second/'), 'second');
       });
