@@ -459,7 +459,7 @@ export class Server {
      */
     // Port 0 is left to the system, which picks a free one at the bind itself: no other process
     // can take it in between, as one can a port getPort found free.
-    const requestedPort = port === 0 ? 0 : await getPort({ port: portNumbers(port, port + 100) });
+    const requestedPort = port === 0 ? 0 : await getPort({ port: portNumbers(port, Math.min(port + 100, 65535)) });
 
     /**
      * Get addresses
