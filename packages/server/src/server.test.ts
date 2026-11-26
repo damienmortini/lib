@@ -561,6 +561,26 @@ describe('startup', () => {
   });
 });
 
+describe('port', () => {
+  it('moves up from a port that is taken', async () => {
+    const rootPath = await mkdtemp(join(tmpdir(), 'server-port-'));
+    const taken = createServer().listen(0, '127.0.0.1');
+    await once(taken, 'listening');
+    const takenPort = (taken.address() as AddressInfo).port;
+    const server = new Server({ rootPath, watch: false, port: takenPort });
+    try {
+      await server.ready;
+      ok(boundPort(server) > takenPort, `expected a port above ${takenPort}, got ${boundPort(server)}`);
+      strictEqual(server.urls[0], `https://localhost:${boundPort(server)}/`);
+    }
+    finally {
+      await server.close();
+      taken.close();
+      await rm(rootPath, { recursive: true, force: true });
+    }
+  });
+});
+
 // A development server is reachable from the network only when asked to be.
 describe('listening address', () => {
   it('listens on loopback by default, and on every interface when asked', async () => {
