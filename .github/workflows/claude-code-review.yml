@@ -24,7 +24,10 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # See claude.yml: this repository is public, and the action does not read the
           # user-scope settings file that suppresses attribution on a developer machine.
-          settings: '{"attribution":{"commit":"","pr":"","sessionUrl":false}}'
+          # The default permission mode denies what `--allowed-tools` leaves out; the auto
+          # mode the action otherwise picks would leave it to a classifier, while the bot
+          # reads pull-request text anyone can write.
+          settings: '{"attribution":{"commit":"","pr":"","sessionUrl":false},"permissions":{"defaultMode":"default"}}'
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -40,4 +43,4 @@ jobs:
             - Test coverage
 
             Use the `mcp__github_inline_comment__create_inline_comment` tool to leave inline review comments on specific lines where appropriate, and post a summary comment on the PR.
-          claude_args: '--allowed-tools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
+          claude_args: '--allowed-tools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
