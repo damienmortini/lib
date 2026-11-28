@@ -51,8 +51,12 @@ terminal, so an agent runs it under `script`, which gives it a pseudo-terminal �
 
    It prints two URLs, each waiting up to five minutes: the login, then one two-factor
    approval for the first package, which covers the rest of the batch. Pass each to the
-   maintainer the moment it appears, saying it needs no reply; it opens on a phone. If the
-   run stops partway, run this step again: it skips what already reached the registry.
+   maintainer the moment it appears, saying it needs no reply; it opens on a phone. When
+   the agent's instructions say its chat renders a `waiting` fence — a fenced block tagged
+   `waiting`, drawn as a card whose Markdown links stay tappable — put each link in one,
+   so the chat shows it is waiting on the maintainer while the run goes on; otherwise send
+   the link as plain text. If the run stops partway, run this step again: it skips what
+   already reached the registry.
 
 4. Check the token is gone, even when step 3 was interrupted (then run `npm logout` first):
 
