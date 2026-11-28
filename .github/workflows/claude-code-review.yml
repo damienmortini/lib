@@ -29,6 +29,9 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
+            Read the change with `gh pr diff ${{ github.event.pull_request.number }}`. The checkout is
+            the merge commit, so its files are the whole repository, not this pull request.
+
             Please review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
